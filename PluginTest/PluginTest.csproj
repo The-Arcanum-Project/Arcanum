@@ -10,8 +10,6 @@
     <ProjectReference Include="..\Arcanum.API\Arcanum.API.csproj" />
   </ItemGroup>
 
-   <Target Name="CopyToPluginsFolder" AfterTargets="Build">
-      <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="C:\Users\david\source\repos\ArcanumAPITest\Arcanum.UI\bin\Debug\net8.0-windows\Plugins\" />
-   </Target>
+   
 
 </Project>

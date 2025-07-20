@@ -36,7 +36,6 @@
                 <Setter.Value>
                     <WindowChrome CaptionHeight = "0"
                                   ResizeBorderThickness = "3"
-                                  NonClientFrameEdges = "Bottom"
                                   GlassFrameThickness = "0"
                                   CornerRadius = "0" />
                 </Setter.Value>
