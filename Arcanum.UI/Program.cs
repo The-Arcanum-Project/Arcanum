@@ -46,9 +46,6 @@ internal static class Program
 
       var mw = new MainMenuScreen();
       mw.Closing += (_, _) => { LifecycleManager.Instance.RunShutdownSequence(); };
-
-      Console.WriteLine("Eu4 location: " + VdfParser.GetEu5Path());
-
       app.MainWindow = mw;
 
       mw.Show();
