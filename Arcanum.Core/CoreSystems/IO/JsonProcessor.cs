@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;
+using Arcanum.Core.CoreSystems.IO.JsonConverters;
 
 // For the interface
 
@@ -19,17 +20,13 @@ internal static class JsonProcessor
 
    static JsonProcessor()
    {
-      var defaultRules = new JsonSerializationRules
-      {
-         WriteIndented = true,
-      };
-      
+      var defaultRules = new JsonSerializationRules { WriteIndented = true, };
+
       var defaultDeserializationRules = new JsonDeserializationRules
       {
-         PropertyNameCaseInsensitive = true,
-         AllowTrailingCommas = true,
+         PropertyNameCaseInsensitive = true, AllowTrailingCommas = true,
       };
-      
+
       // Initialize default serializer options
       DefaultSerializerOptions = CreateSerializerOptions(defaultRules);
 
@@ -51,6 +48,7 @@ internal static class JsonProcessor
          DefaultBufferSize = rules.DefaultBufferSize,
          IgnoreReadOnlyProperties = rules.IgnoreReadOnlyProperties,
          IncludeFields = rules.IncludeFields,
+         Converters = { new KeyGestureJsonConverter() },
       };
 
       if (rules.IgnoreNullValues)
@@ -104,6 +102,7 @@ internal static class JsonProcessor
          PropertyNameCaseInsensitive = rules.PropertyNameCaseInsensitive,
          AllowTrailingCommas = rules.AllowTrailingCommas,
          DefaultBufferSize = rules.DefaultBufferSize,
+         Converters = { new KeyGestureJsonConverter() },
       };
 
       var stringEnumConverterAdded = false;
@@ -130,6 +129,17 @@ internal static class JsonProcessor
       return options;
    }
 
+   public static void Serialize<T>(string path,
+                                   T value,
+                                   Encoding? encoding = null,
+                                   JsonSerializationRules? rules = null)
+   {
+      if (string.IsNullOrEmpty(path))
+         throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+
+      File.WriteAllText(path, Serialize(value, rules), encoding ?? Encoding.UTF8);
+   }
+
    public static string Serialize<T>(T value, JsonSerializationRules? rules = null)
    {
       var options = rules == null
@@ -147,6 +157,14 @@ internal static class JsonProcessor
       {
          throw new JsonSerializationException($"Serialization not supported for type {typeof(T).FullName}.", ex);
       }
+   }
+
+   public static T? DefaultDeserialize<T>(string path, Encoding? encoding = null, JsonDeserializationRules? rules = null)
+   {
+      if (string.IsNullOrEmpty(path) || !File.Exists(path))
+         return default;
+
+      return Deserialize<T>(File.ReadAllText(path, encoding ?? Encoding.UTF8), rules);
    }
 
    public static T? Deserialize<T>(string json, JsonDeserializationRules? rules = null)

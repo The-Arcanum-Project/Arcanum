@@ -7,5 +7,7 @@ namespace Arcanum.Core.Globals;
 /// </summary>
 public static class Config
 {
+   internal const string CONFIG_FILE_PATH = "config.json";
+   
    public static UserKeyBinds UserKeyBinds { get; set; } = new ();
 }

@@ -1,10 +1,13 @@
-﻿using Arcanum.API;
+﻿using System.IO;
+using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
+using Arcanum.Core.Globals;
+using Arcanum.Core.Globals.BackingClasses;
 using Arcanum.Core.PluginServices;
 
 namespace Arcanum.Core.FlowControlServices;
@@ -30,12 +33,12 @@ public class LifecycleManager
 
    private PluginManager _pluginManager = null!;
    private static readonly LifecycleManager LfmInstance = new();
-   
 
    public void RunStartUpSequence(IPluginHost host)
    {
       InitializeApplicationCore();
       // Step 1: Initialize core services
+      LoadConfig();
       InitializeCoreServices(host);
 
       // Step 2: Initialize plugin host services
@@ -50,6 +53,14 @@ public class LifecycleManager
 
       // Step 5: Show the main menu or UI
       //host.ShowMainMenu();
+   }
+
+   private void LoadConfig()
+   {
+      Config.UserKeyBinds =
+         JsonProcessor.DefaultDeserialize<UserKeyBinds>(Path.Combine(IO.GetArcanumDataPath,
+                                                                     Config.CONFIG_FILE_PATH)) ??
+         new UserKeyBinds();
    }
 
 #if DEBUG
@@ -77,6 +88,9 @@ public class LifecycleManager
       ArcanumDataHandler.SaveAllGitData(new());
 
       MainMenuScreenDescriptor.SaveData();
+      
+      // Save configs
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.UserKeyBinds);
    }
 
    private static void InitializeApplicationCore()

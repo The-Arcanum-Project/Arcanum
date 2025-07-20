@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.Globals;
 using Arcanum.UI.Components.MVVM.Views.MainWindow;
 using Application = System.Windows.Application;
 
@@ -13,7 +14,7 @@ public partial class MainWindow
 {
    public const int DEFAULT_WIDTH = 1920;
    public const int DEFAULT_HEIGHT = 1080;
-   
+
    private readonly MainWindowView _view;
 
    public MainWindow()
@@ -28,11 +29,13 @@ public partial class MainWindow
    {
       Close();
    }
+
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
       var menuWindow = Application.Current.Windows.OfType<MainMenuScreen>().FirstOrDefault();
       if (menuWindow == null)
          throw new InvalidOperationException("MainMenuScreen window not found.");
+
       menuWindow.MainViewModel.TargetedView = MainMenuScreen.MainMenuScreenView.Arcanum;
       Close();
    }

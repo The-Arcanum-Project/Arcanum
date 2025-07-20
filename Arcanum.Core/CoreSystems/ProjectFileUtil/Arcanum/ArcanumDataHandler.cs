@@ -29,7 +29,7 @@ public static class ArcanumDataHandler
          AppData.GitDataDescriptor.LatestVersion = GitDataService.GetLatestVersion();
       else
       {
-         var gitDataObject = JsonProcessor.Deserialize<GitReleaseObject>(latestReleaseJson) ??
+         var gitDataObject = JsonProcessor.Deserialize<GitReleaseObject>(latestReleaseJson, null) ??
                              GitDataService.GetLatestVersion();
          AppData.GitDataDescriptor.LatestVersion = gitDataObject;
       }
