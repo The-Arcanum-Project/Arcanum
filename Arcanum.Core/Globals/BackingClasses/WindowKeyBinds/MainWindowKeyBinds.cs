@@ -9,6 +9,8 @@ public class MainWindowKeyBinds : KeyBindProvider
    public MainWindowKeyBinds()
    {
    }
-   
-   public KeyGesture CloseProject { get; set; } = new (Key.O, ModifierKeys.Control);
+
+   public KeyGesture CloseProject { get; set; } = new(Key.Escape, ModifierKeys.Control);
+   public KeyGesture OpenProject { get; set; } = new(Key.O, ModifierKeys.Control);
+   public KeyGesture NewProject { get; set; } = new(Key.N, ModifierKeys.Control | ModifierKeys.Shift);
 }

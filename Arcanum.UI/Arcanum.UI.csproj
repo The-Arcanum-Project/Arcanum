@@ -35,7 +35,7 @@
     <ItemGroup>
         <Folder Include="Components\MVVM\Helpers\" />
         <Folder Include="Components\MVVM\Models\MainWindowModels\" />
-        <Folder Include="Components\Specific\Converters\"/>
+        <Folder Include="Components\Specific\Converters\" />
         <Folder Include="FeatureSpotlight\" />
         <Folder Include="HostUIServices\" />
     </ItemGroup>
@@ -112,6 +112,15 @@
         <Resource Include="Assets\Icons\Discord-Symbol-White.png" />
         <None Remove="Assets\Icons\ArcanumSimplified.png" />
         <Resource Include="Assets\Icons\ArcanumSimplified.png" />
+        <None Remove="Assets\Icons\20x20\Add20x20.png" />
+        <Resource Include="Assets\Icons\20x20\Add20x20.png" />
+        <None Remove="Assets\Icons\16x16\FolderOpen16x16.png" />
+        <Resource Include="Assets\Icons\16x16\OpenFolder16x16.png" />
+        <None Remove="Assets\Icons\16x16\Close16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Close16x16.png" />
+        <None Remove="Assets\Icons\16x16\Add16x16.png" />
+        <None Remove="Assets\Icons\16x16\Plus16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Plus16x16.png" />
     </ItemGroup>
 
     <ItemGroup>

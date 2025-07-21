@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arcanum.UI.Helpers;
 
 namespace Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
 
@@ -19,24 +20,9 @@ public static class CommandGestureUpdater
 
       var gestureText = gesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
 
-      foreach (var menuItem in FindVisualChildren<MenuItem>(window))
+      foreach (var menuItem in TreeTraversal.FindVisualChildren<MenuItem>(window))
          if (menuItem.Command == command)
             menuItem.InputGestureText = gestureText;
    }
 
-   private static IEnumerable<T> FindVisualChildren<T>(DependencyObject? depObj) where T : DependencyObject
-   {
-      if (depObj == null)
-         yield break;
-
-      for (var i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-      {
-         var child = VisualTreeHelper.GetChild(depObj, i);
-         if (child is T t)
-            yield return t;
-
-         foreach (var descendant in FindVisualChildren<T>(child))
-            yield return descendant;
-      }
-   }
 }

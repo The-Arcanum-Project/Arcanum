@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
+using Arcanum.UI.Helpers;
 
 namespace UnitTests.CoreSystems.Common.KeyBinds;
 
@@ -102,7 +103,7 @@ public class CommandGestureUpdaterTests
       parent.Children.Add(new Grid { Children = { child1 } });
       parent.Children.Add(child2);
 
-      var results = CommandGestureUpdaterTestAccessor.FindVisualChildren<MenuItem>(parent).ToList();
+      var results = TreeTraversal.FindVisualChildren<MenuItem>(parent).ToList();
 
       Assert.That(results, Has.Count.EqualTo(2));
       Assert.That(results, Does.Contain(child1));
@@ -113,17 +114,7 @@ public class CommandGestureUpdaterTests
    [Test]
    public void FindVisualChildren_NullInput_YieldsNothing()
    {
-      var results = CommandGestureUpdaterTestAccessor.FindVisualChildren<MenuItem>(null!);
+      var results = TreeTraversal.FindVisualChildren<MenuItem>(null!);
       Assert.That(results, Is.Empty);
    }
-}
-
-internal static class CommandGestureUpdaterTestAccessor
-{
-   public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-      => (typeof(CommandGestureUpdater)
-         .GetMethod("FindVisualChildren",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-         .MakeGenericMethod(typeof(T))
-         .Invoke(null, [depObj]) as IEnumerable<T>)!;
 }

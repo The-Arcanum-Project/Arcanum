@@ -9,7 +9,13 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.CloseProject },
    };
-   public static readonly RoutedCommand OpenProjectFileCommand = new("OpenProjectFileCommand", typeof(MainWindowView));
-   public static readonly RoutedCommand NewProjectFileCommand = new("NewProjectFileCommand", typeof(MainWindowView));
+   public static readonly RoutedCommand OpenProjectFileCommand = new("OpenProjectFileCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenProject },
+   };
+   public static readonly RoutedCommand NewProjectFileCommand = new("NewProjectFileCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.NewProject },
+   };
    public static readonly RoutedCommand ExitArcanumCommand = new("ExitArcanumCommand", typeof(MainWindowView));
 }

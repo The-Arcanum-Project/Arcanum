@@ -8,26 +8,26 @@
                  Width = "1920"
                  FooterHeight = "30"
                  HeaderHeight = "30"
-                 Loaded="MainWindow_OnLoaded"
+                 Loaded = "MainWindow_OnLoaded"
                  WindowStartupLocation = "CenterScreen">
 
     <base:BaseWindow.DataContext>
         <mainWindow:MainWindowView />
     </base:BaseWindow.DataContext>
-    
+
     <Window.CommandBindings>
-        <CommandBinding Command="mainWindow:MwCommands.CloseProjectFileCommand"
-                        Executed="CloseCommand_Executed"
-                        CanExecute="CommandCanAlwaysExecute" />
-        <CommandBinding Command="mainWindow:MwCommands.OpenProjectFileCommand"
-                        Executed="GoToArcanumMenuScreenCommand_Executed"
-                        CanExecute="CommandCanAlwaysExecute" />
-        <CommandBinding Command="mainWindow:MwCommands.NewProjectFileCommand"
-                        Executed="GoToArcanumMenuScreenCommand_Executed"
-                        CanExecute="CommandCanAlwaysExecute" />
-        <CommandBinding Command="mainWindow:MwCommands.ExitArcanumCommand"
-                        Executed="ExitArcanum_OnExecuted"
-                        CanExecute="CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.CloseProjectFileCommand"
+                        Executed = "CloseCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenProjectFileCommand"
+                        Executed = "GoToArcanumMenuScreenCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.NewProjectFileCommand"
+                        Executed = "GoToArcanumMenuScreenCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.ExitArcanumCommand"
+                        Executed = "ExitArcanum_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
     </Window.CommandBindings>
 
     <base:BaseWindow.HeaderContent>
@@ -35,11 +35,23 @@
             <MenuItem Header = "File">
 
                 <MenuItem Header = "Create new Project"
-                          Command = "mainWindow:MwCommands.NewProjectFileCommand" />
+                          Command = "mainWindow:MwCommands.NewProjectFileCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header = "Open Project"
-                          Command = "mainWindow:MwCommands.OpenProjectFileCommand" />
+                          Command = "mainWindow:MwCommands.OpenProjectFileCommand" >
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header = "Close current Project"
-                          Command = "mainWindow:MwCommands.CloseProjectFileCommand" />
+                          Command = "mainWindow:MwCommands.CloseProjectFileCommand" >
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Close16x16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <Separator />
                 <MenuItem Header = "Exit"
                           Command = "mainWindow:MwCommands.ExitArcanumCommand" />

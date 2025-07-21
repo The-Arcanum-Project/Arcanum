@@ -4,7 +4,7 @@
     <MenuScrollingVisibilityConverter x:Key = "MenuScrollingVisibilityConverter" />
     <Geometry x:Key = "DownArrow"> M 0,0 L 3.5,4 L 7,0 Z </Geometry>
     <Geometry x:Key = "UpArrow"> M 0,4 L 3.5,0 L 7,4 Z </Geometry>
-    <Geometry x:Key="RightArrow"> M 0,0 L 5,5 L 0,10</Geometry>
+    <Geometry x:Key = "RightArrow"> M 0,0 L 5,5 L 0,10 </Geometry>
     <Geometry x:Key = "Checkmark"> F1 M 10.0,1.2 L 4.7,9.1 L 4.5,9.1 L 0,5.2 L 1.3,3.5 L 4.3,6.1L 8.3,0 L 10.0,1.2 Z </Geometry>
 
     <Style x:Key = "MenuScrollButton"
@@ -37,7 +37,7 @@
                 Background = "{TemplateBinding Background}"
                 BorderBrush = "{TemplateBinding BorderBrush}"
                 BorderThickness = "{TemplateBinding BorderThickness}"
-                CornerRadius="3"
+                CornerRadius = "3"
                 SnapsToDevicePixels = "true"
                 Height = "24">
             <Grid VerticalAlignment = "Center">
@@ -129,7 +129,7 @@
                 SnapsToDevicePixels = "true"
                 Height = "24"
                 CornerRadius = "3,3,3,0"
-                HorizontalAlignment="Left">
+                HorizontalAlignment = "Left">
             <Grid VerticalAlignment = "Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "Auto" />
@@ -155,7 +155,7 @@
                                   Margin = "{TemplateBinding Padding}"
                                   RecognizesAccessKey = "True"
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
-                                  HorizontalAlignment="Left"/>
+                                  HorizontalAlignment = "Left" />
                 <Popup x:Name = "PART_Popup"
                        AllowsTransparency = "true"
                        Focusable = "false"
@@ -259,29 +259,29 @@
                 BorderThickness = "{TemplateBinding BorderThickness}"
                 Height = "22"
                 CornerRadius = "3"
-                SnapsToDevicePixels = "true">
+                SnapsToDevicePixels = "true"
+                Margin="0,0,0,1">
             <Grid Margin = "-1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition MinWidth = "22"
+                    <ColumnDefinition MinWidth = "24"
                                       SharedSizeGroup = "MenuItemIconColumnGroup"
                                       Width = "Auto" />
-                    <ColumnDefinition Width = "13" />
+                    <ColumnDefinition Width = "0" /> <!-- Was 13 -->
                     <ColumnDefinition Width = "*" />
                     <ColumnDefinition Width = "30" />
                     <ColumnDefinition SharedSizeGroup = "MenuItemIGTColumnGroup"
                                       Width = "Auto" />
-                    <ColumnDefinition Width = "20" />
+                    <ColumnDefinition Width = "0" /> <!-- Was 20 -->
                 </Grid.ColumnDefinitions>
                 <ContentPresenter x:Name = "Icon"
                                   ContentSource = "Icon"
-                                  HorizontalAlignment = "Center"
                                   Height = "16"
+                                  Width = "16"
                                   Margin = "3"
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
-                                  VerticalAlignment = "Center"
-                                  Width = "16" />
+                                  HorizontalAlignment = "Left"
+                                  VerticalAlignment = "Center" />
                 <Border x:Name = "GlyphPanel"
-                        Background = "{StaticResource DefaultBackColorBrush}"
                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                         BorderThickness = "1"
                         ClipToBounds = "False"
@@ -308,7 +308,7 @@
                                   VerticalAlignment = "Center" />
                 <TextBlock x:Name = "menuGestureText"
                            Grid.Column = "4"
-                           Margin = "{TemplateBinding Padding}"
+                           Margin = "3, 0, 2, 0"
                            Opacity = "0.7"
                            Text = "{TemplateBinding InputGestureText}"
                            VerticalAlignment = "Center" />
@@ -427,11 +427,11 @@
                 <Path x:Name = "RightArrow"
                       Grid.Column = "5"
                       Data = "{StaticResource RightArrow}"
-                      Fill="Transparent"
+                      Fill = "Transparent"
                       Stroke = "{StaticResource DefaultForeColorBrush}"
                       HorizontalAlignment = "Left"
                       Margin = "10,0,0,0"
-                      VerticalAlignment = "Center" /> 
+                      VerticalAlignment = "Center" />
                 <Popup x:Name = "PART_Popup"
                        AllowsTransparency = "true"
                        Focusable = "false"
@@ -473,6 +473,7 @@
                 </Popup>
             </Grid>
         </Border>
+
         <ControlTemplate.Triggers>
             <Trigger Property = "IsSuspendingPopupAnimation"
                      Value = "true">
