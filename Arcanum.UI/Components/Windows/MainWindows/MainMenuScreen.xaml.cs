@@ -25,7 +25,6 @@ public partial class MainMenuScreen
 
    public readonly MainViewModel MainViewModel;
 
-   
    public MainMenuScreen()
    {
       InitializeComponent();
@@ -41,6 +40,15 @@ public partial class MainMenuScreen
       };
 
       Debug.Assert(MainViewModel != null, "MainViewModel should not be null");
+
+#if DEBUG
+      Loaded += (_, _) =>
+      {
+
+         if (DebugConfig.Settings.SkipMainMenu)
+            LoadLastConfigButton_Click(null!, null!);
+      };
+#endif
    }
 
    private void OnClosed(object? sender, EventArgs? e)

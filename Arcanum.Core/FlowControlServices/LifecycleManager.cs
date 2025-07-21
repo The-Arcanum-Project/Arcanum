@@ -36,6 +36,11 @@ public class LifecycleManager
 
    public void RunStartUpSequence(IPluginHost host)
    {
+#if DEBUG
+      // Step 0: Initialize debug elements
+      LoadDebugElements();
+#endif
+
       InitializeApplicationCore();
       // Step 1: Initialize core services
       LoadConfig();
@@ -55,21 +60,20 @@ public class LifecycleManager
       //host.ShowMainMenu();
    }
 
-   private void LoadConfig()
+#if DEBUG
+
+   private void LoadDebugElements()
    {
-      Config.UserKeyBinds =
-         JsonProcessor.DefaultDeserialize<UserKeyBinds>(Path.Combine(IO.GetArcanumDataPath,
-                                                                     Config.CONFIG_FILE_PATH)) ??
-         new UserKeyBinds();
+      DebugConfig.Settings =
+         JsonProcessor.DefaultDeserialize<DebugConfigSettings>(Path.Combine(IO.GetArcanumDataPath,
+                                                                            DebugConfig.DEBUG_CONFIG_FILE_PATH)) ??
+         new DebugConfigSettings();
    }
 
-#if DEBUG
-   public void InsertPluginForTesting(IPlugin plugin)
+   private void SaveDebugElements()
    {
-      if (_pluginManager == null)
-         throw new InvalidOperationException("PluginManager is not initialized. Call RunStartUpSequence first.");
-
-      _pluginManager.InjectPluginForTesting(plugin);
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, DebugConfig.DEBUG_CONFIG_FILE_PATH),
+                              DebugConfig.Settings);
    }
 #endif
 
@@ -88,10 +92,32 @@ public class LifecycleManager
       ArcanumDataHandler.SaveAllGitData(new());
 
       MainMenuScreenDescriptor.SaveData();
-      
+
       // Save configs
       JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.UserKeyBinds);
+
+#if DEBUG
+      SaveDebugElements();
+#endif
    }
+
+   private void LoadConfig()
+   {
+      Config.UserKeyBinds =
+         JsonProcessor.DefaultDeserialize<UserKeyBinds>(Path.Combine(IO.GetArcanumDataPath,
+                                                                     Config.CONFIG_FILE_PATH)) ??
+         new UserKeyBinds();
+   }
+
+#if DEBUG
+   public void InsertPluginForTesting(IPlugin plugin)
+   {
+      if (_pluginManager == null)
+         throw new InvalidOperationException("PluginManager is not initialized. Call RunStartUpSequence first.");
+
+      _pluginManager.InjectPluginForTesting(plugin);
+   }
+#endif
 
    private static void InitializeApplicationCore()
    {
