@@ -144,10 +144,11 @@
                             <Image Source = "/Assets/Icons/30x30/AddBordered30x30.png" />
 
                         </styleClasses:BaseButton>
-                        <TextBlock VerticalAlignment = "Center"
+                        <TextBlock
+                                    Text="{Binding LaunchButtonText}"
+                                   VerticalAlignment = "Center"
                                    Margin = "10, 4, 4,4"
                                    FontSize = "14">
-                            Last Project:
                         </TextBlock>
 
                         <styleClasses:BaseButton x:Name = "LoadLastConfigButton"

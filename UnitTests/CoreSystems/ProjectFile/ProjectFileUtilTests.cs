@@ -141,7 +141,7 @@ public class ProjectFileUtilTests
    [Test]
    public void GatherFilesForProjectFile_CreatesProjectFile()
    {
-      var descriptor = new ProjectFileDescriptor("TestMod", "Path/To/TestMod");
+      var descriptor = new ProjectFileDescriptor("TestMod", "Path/To/TestMod", "Path/To/Vanilla");
       ProjectFileUtil.GatherFilesForProjectFile(descriptor);
 
       var zipPath = Path.Combine(Arcanum.Core.CoreSystems.IO.IO.GetArcanumDataPath,

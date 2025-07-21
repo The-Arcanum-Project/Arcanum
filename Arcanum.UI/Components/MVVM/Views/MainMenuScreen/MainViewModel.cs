@@ -36,6 +36,12 @@ public class MainViewModel : ObservableObject
    private object _currentView = null!;
    private Visibility _isWindowVisible = Visibility.Visible;
 
+   public string LaunchButtonText => CurrentView switch
+   {
+      ArcanumViewModel => "Current Config:",
+      _ => "Last Project:"
+   };
+   
    public Visibility IsWindowVisible
    {
       get => _isWindowVisible;
@@ -56,6 +62,7 @@ public class MainViewModel : ObservableObject
       {
          _currentView = value;
          OnPropertyChanged();
+         OnPropertyChanged(nameof(LaunchButtonText));
       }
    }
 
@@ -73,7 +80,12 @@ public class MainViewModel : ObservableObject
       HomeVc = new(() => { SetCurrentView(MainMenuScreenView.Home); });
       FeatureVc = new(() => { SetCurrentView(MainMenuScreenView.Feature); });
       ModforgeVc = new(() => { SetCurrentView(MainMenuScreenView.Modforge); });
-      ArcanumVc = new(() => { SetCurrentView(MainMenuScreenView.Arcanum); });
+      ArcanumVc = new(() =>
+      {
+         SetCurrentView(MainMenuScreenView.Arcanum);
+         if (string.IsNullOrEmpty(ArcanumVm.ModFolderTextBox.Text))
+            ArcanumVm.VanillaFolderTextBox.Text = AppData.MainMenuScreenDescriptor.LastVanillaPath ?? string.Empty;
+      });
       AboutUsVc = new(() => { SetCurrentView(MainMenuScreenView.AboutUs); });
       AttributionsVc = new(() => { SetCurrentView(MainMenuScreenView.Attributions); });
    }
@@ -118,9 +130,9 @@ public class MainViewModel : ObservableObject
 
    internal bool GetDescriptorFromInput(out ProjectFileDescriptor descriptor)
    {
-      descriptor = new(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
+      descriptor = new ProjectFileDescriptor(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
                        ArcanumVm.ModFolderTextBox.Text,
-                       ArcanumVm.BaseMods.Select(mod => mod.Path).ToList());
+                       ArcanumVm.BaseMods.Select(mod => mod.Path).ToList(), ArcanumVm.VanillaFolderTextBox.Text);
 
       return descriptor.IsValid();
    }
@@ -131,7 +143,7 @@ public class MainViewModel : ObservableObject
    // if all requirements are met.
    internal async Task LaunchArcanum(ProjectFileDescriptor descriptor)
    {
-      if (!descriptor.IsValid() || !Directory.Exists(ArcanumVm.VanillaFolderTextBox.Text))
+      if (!descriptor.IsValid())
       {
          MessageBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
                          "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
@@ -143,8 +155,7 @@ public class MainViewModel : ObservableObject
       }
 
       // Save the paths to the MainMenuScreenDescriptor
-      AppData.MainMenuScreenDescriptor.LastVanillaPath =
-         ArcanumVm.VanillaFolderTextBox.Text;
+      AppData.MainMenuScreenDescriptor.LastVanillaPath = descriptor.VanillaPath;
       AppData.MainMenuScreenDescriptor.LastProjectFile = descriptor.ModName;
 
       if (AppData.MainMenuScreenDescriptor.ProjectFiles

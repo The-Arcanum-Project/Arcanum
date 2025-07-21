@@ -76,7 +76,8 @@
                 Value = "0, 0" />
         <Setter Property = "Background"
                 Value = "{StaticResource LightBackColorBrush}" />
-
+        <Setter Property = "BorderThickness"
+                Value = "2" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "ListBoxItem">
@@ -97,9 +98,6 @@
                             <Setter TargetName = "Bd"
                                     Property = "BorderBrush"
                                     Value = "{StaticResource BlueSelectionBackColorBrush}" />
-                            <Setter TargetName = "Bd"
-                                    Property = "BorderThickness"
-                                    Value = "2" />
                         </Trigger>
                         <!-- <Trigger Property = "IsSelected" -->
                         <!--          Value = "true"> -->

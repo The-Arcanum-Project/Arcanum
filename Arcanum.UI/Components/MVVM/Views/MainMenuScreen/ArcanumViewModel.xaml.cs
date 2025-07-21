@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.Globals;
 using Arcanum.Core.Utils.vdfParser;
 using Arcanum.UI.Components.Specific.StyleClasses;
 using Arcanum.UI.Components.UserControls.MainMenuScreen;
@@ -50,7 +51,7 @@ public partial class ArcanumViewModel
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
       VanillaFolderTextBox.Text = path ?? string.Empty;
    }
-
+   
    private void ModFolderButton_Click(object sender, RoutedEventArgs e)
    {
       var modPath = IO.SelectFolder(IO.GetUserModFolderPath, "Select mod folder");
@@ -72,44 +73,29 @@ public partial class ArcanumViewModel
    }
 
    private BaseModItem? _draggedItem;
-
-   private void ListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+   
+   public void ClearUi()
    {
-      _draggedItem = GetListBoxItemUnderMouse(BaseModsListBox, e.GetPosition(BaseModsListBox));
+      ModFolderTextBox.Text = string.Empty;
+      VanillaFolderTextBox.Text = AppData.MainMenuScreenDescriptor.LastVanillaPath ?? string.Empty;
+
+      BaseMods.Clear();
+      BaseModsListBox.ItemsSource = BaseMods;
    }
-
-   private void ListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+   
+   public void DescriptorToUi(ProjectFileDescriptor descriptor)
    {
-      if (_draggedItem != null && e.LeftButton == MouseButtonState.Pressed)
-         DragDrop.DoDragDrop(BaseModsListBox, _draggedItem, DragDropEffects.Move);
-   }
+      ModFolderTextBox.Text = descriptor.ModPath;
+      VanillaFolderTextBox.Text = descriptor.VanillaPath;
 
-   private void ListBox_Drop(object sender, DragEventArgs e)
-   {
-      if (e.Data.GetDataPresent(typeof(BaseModItem)))
+      BaseMods.Clear();
+      foreach (var baseMod in descriptor.RequiredMods)
       {
-         var droppedData = e.Data.GetData(typeof(BaseModItem));
-         var target = GetListBoxItemUnderMouse(BaseModsListBox, e.GetPosition(BaseModsListBox));
-         if (droppedData != null && !ReferenceEquals(droppedData, target))
-            if (BaseModsListBox.ItemsSource is IList list)
-            {
-               var newIndex = list.IndexOf(target);
-
-               list.Remove(droppedData);
-               list.Insert(newIndex, droppedData);
-            }
+         var item = new BaseModItem(RemoveBaseMod) { Path = baseMod };
+         AddBaseMod(item);
       }
-
-      _draggedItem = null;
    }
-
-   private BaseModItem GetListBoxItemUnderMouse(ListBox listBox, Point position)
-   {
-      var element = listBox.InputHitTest(position) as DependencyObject;
-      while (element != null && element is not ListBoxItem)
-         element = VisualTreeHelper.GetParent(element);
-      return (BaseModItem)(element as ListBoxItem)?.DataContext!;
-   }
+   
 }
 
 public class ZeroToVisibilityConverter : IValueConverter

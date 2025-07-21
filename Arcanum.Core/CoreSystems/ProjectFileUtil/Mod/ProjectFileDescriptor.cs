@@ -8,6 +8,8 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
 {
    public string ModName { get; set; }
    public string ModPath { get;  set;}
+   
+   public string VanillaPath { get;  set;}
    public bool IsSubMod { get;  set;}
    public List<string> RequiredMods { get;  set;} = [];
    public DateTime LastModified { get; set; }
@@ -19,19 +21,21 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    {
    }
 
-   public ProjectFileDescriptor(string modName, string modPath)
+   public ProjectFileDescriptor(string modName, string modPath, string vanillaPath)
    {
       ModName = modName;
       ModPath = modPath;
+      VanillaPath = vanillaPath;
       LastModified = DateTime.Now;
    }
 
-   public ProjectFileDescriptor(string modName, string modPath, List<string> requiredMods)
+   public ProjectFileDescriptor(string modName, string modPath, List<string> requiredMods, string vanillaPath)
    {
       ModName = modName;
       ModPath = modPath;
       IsSubMod = requiredMods.Count > 0;
       RequiredMods = requiredMods;
+      VanillaPath = vanillaPath;
       LastModified = DateTime.Now;
    }
 
@@ -66,6 +70,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    {
       var hash = new HashCode();
       hash.Add(ModName);
+      hash.Add(VanillaPath);
       hash.Add(IsSubMod);
       hash.Add(ModPath);
       foreach (var mod in RequiredMods)
@@ -79,7 +84,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       // This method should gather the necessary data from the current state of the application
       // and return a new ProjectFileDescriptor instance.
       // For now, we will return a placeholder instance.
-      return new("DefaultMod", "DefaultPath", ["RequiredMod1", "RequiredMod2"]);
+      return new("DefaultMod", "DefaultPath",["RequiredMod1", "RequiredMod2"], "VanillaPath");
    }
 
    public static bool operator <(ProjectFileDescriptor left, ProjectFileDescriptor right)
@@ -93,6 +98,8 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       return !string.IsNullOrEmpty(ModName) &&
              !string.IsNullOrEmpty(ModPath) &&
              Directory.Exists(ModPath) &&
+             !string.IsNullOrEmpty(VanillaPath) &&
+             Directory.Exists(VanillaPath) &&
              RequiredMods.All(Directory.Exists);
    }
 

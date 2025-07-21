@@ -25,6 +25,7 @@ public partial class MainMenuScreen
 
    public readonly MainViewModel MainViewModel;
 
+   
    public MainMenuScreen()
    {
       InitializeComponent();
@@ -56,6 +57,7 @@ public partial class MainMenuScreen
    {
       ArcanumTabButton.IsChecked = true;
       MainViewModel.ArcanumVc.Execute(null);
+      MainViewModel.ArcanumVm.ClearUi();
    }
 
    private async void LoadLastConfigButton_Click(object sender, RoutedEventArgs e)

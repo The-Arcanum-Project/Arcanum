@@ -6,6 +6,8 @@
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.Base.StyleClasses"
              xmlns:mainMenuScreen1 = "clr-namespace:Arcanum.UI.Components.MVVM.Views.MainMenuScreen"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:Arcanum.UI.Components.Behaviors"
              mc:Ignorable = "d"
              Background = "Transparent"
              d:DesignHeight = "450"
@@ -185,11 +187,13 @@
                              ItemsSource = "{Binding BaseMods, RelativeSource={RelativeSource AncestorType=UserControl}}"
                              ItemTemplate = "{StaticResource BaseModDataTemplate}"
                              ItemContainerStyle = "{StaticResource BaseModItemStyle}"
-                             BorderThickness = "0"
-                             AllowDrop = "True"
-                             PreviewMouseLeftButtonDown = "ListBox_PreviewMouseLeftButtonDown"
-                             PreviewMouseMove = "ListBox_PreviewMouseMove"
-                             Drop = "ListBox_Drop">
+                             BorderThickness = "0">
+                            <b:Interaction.Behaviors>
+                                <behaviors:ListBoxDragDropBehavior 
+                                    DragHandleExclusionType="{x:Type styleClasses:BaseButton}"
+                                    ScrollAreaHeight="10"
+                                    />
+                            </b:Interaction.Behaviors>
 
                     </ListBox>
 
