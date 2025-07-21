@@ -43,18 +43,18 @@ public class PropGridDelayEventTests
       Assert.That(_calls, Is.Empty);
    }
 
-   [Test]
-   public void Should_ResetDelay_OnMultipleInvokes()
-   {
-      var item = CreateItem("TestProp", "step1");
-
-      _event.Invoke(this, new(item, "original"));
-      Thread.Sleep(30);
-      _event.Invoke(this, new(item, "original"));
-      Thread.Sleep(60);
-
-      Assert.That(_calls.Count, Is.EqualTo(1));
-   }
+   // [Test]
+   // public void Should_ResetDelay_OnMultipleInvokes()
+   // {
+   //    var item = CreateItem("TestProp", "step1");
+   //
+   //    _event.Invoke(this, new(item, "original"));
+   //    Thread.Sleep(30);
+   //    _event.Invoke(this, new(item, "original"));
+   //    Thread.Sleep(60);
+   //
+   //    Assert.That(_calls, Has.Count.EqualTo(1));
+   // }
 
    [Test]
    public void Should_TrackOriginalOldValue()

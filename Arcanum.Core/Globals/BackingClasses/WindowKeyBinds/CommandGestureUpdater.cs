@@ -10,6 +10,9 @@ public static class CommandGestureUpdater
 {
    public static void UpdateGestureTextInMenuItems(Window? window, RoutedCommand command)
    {
+      if (window == null || command == null!)
+         return;
+      
       var gesture = command.InputGestures.OfType<KeyGesture>().FirstOrDefault();
       if (gesture == null)
          return;

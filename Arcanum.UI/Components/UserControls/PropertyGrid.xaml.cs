@@ -15,7 +15,7 @@ namespace Arcanum.UI.Components.UserControls;
 public partial class PropertyGrid
 {
    // We only trigger this event after a delay to avoid flooding the UI with events
-   public readonly PropGridDelayEvent PropertyValueChanged = new(500);
+   public readonly PropGridDelayEvent PropertyValueChanged = new(250);
    public event EventHandler<SelectionChangedEventArgs>? PropertySelected = delegate { };
 
    public PropertyGrid()
