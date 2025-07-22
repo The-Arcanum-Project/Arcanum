@@ -128,7 +128,7 @@
                 BorderThickness = "{TemplateBinding BorderThickness}"
                 SnapsToDevicePixels = "true"
                 Height = "24"
-                CornerRadius = "3,3,3,0"
+                CornerRadius = "3"
                 HorizontalAlignment = "Left">
             <Grid VerticalAlignment = "Center">
                 <Grid.ColumnDefinitions>
@@ -155,7 +155,7 @@
                                   Margin = "{TemplateBinding Padding}"
                                   RecognizesAccessKey = "True"
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
-                                  HorizontalAlignment = "Left" />
+                                  HorizontalAlignment = "Left"/>
                 <Popup x:Name = "PART_Popup"
                        AllowsTransparency = "true"
                        Focusable = "false"

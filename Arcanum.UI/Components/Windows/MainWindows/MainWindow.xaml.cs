@@ -4,8 +4,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.Core.Globals;
 using Arcanum.UI.Components.MVVM.Views.MainWindow;
+using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
@@ -58,5 +58,35 @@ public partial class MainWindow
          Width = screen.WorkingArea.Width * 0.8;
          WindowState = WindowState.Maximized;
       }
+   }
+
+   private void OpenPluginSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var settingsWindow = new PluginSettingsWindow();
+      settingsWindow.ShowDialog();
+   }
+   private void OpenSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      // TODO @Minnator create a settings window
+   }
+
+   private void SaveAllModified_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      // TODO @MelCo link this to the actual save logic
+   }
+
+   private void OpenSaveSelector_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      // TODO @MelCo link this to the actual save selector logic
+   }
+
+   private void OpenReloadFileWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      // TODO @MelCo link this to the actual reload file logic
+   }
+
+   private void OpenReloadFolderWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      // TODO @MelCo link this to the actual reload folder logic
    }
 }

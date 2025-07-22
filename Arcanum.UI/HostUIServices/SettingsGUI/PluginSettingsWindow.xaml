@@ -1,4 +1,4 @@
-﻿<base:BaseWindow x:Class = "Arcanum.UI.HostUIServices.SettingsGUI.SettingsWindow"
+﻿<base:BaseWindow x:Class = "Arcanum.UI.HostUIServices.SettingsGUI.PluginSettingsWindow"
                  xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -6,7 +6,7 @@
                  xmlns:base = "clr-namespace:Arcanum.UI.Components.Base"
                  xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.Base.StyleClasses"
                  mc:Ignorable = "d"
-                 Title = "SettingsWindow"
+                 Title = "PluginSettingsWindow"
                  Height = "450"
                  Width = "800">
     <Grid Margin = "0,0,0,0"

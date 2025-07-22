@@ -17,5 +17,36 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.NewProject },
    };
-   public static readonly RoutedCommand ExitArcanumCommand = new("ExitArcanumCommand", typeof(MainWindowView));
+   public static readonly RoutedCommand ExitArcanumCommand = new("ExitArcanumCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.ExitArcanum },
+   };
+   public static readonly RoutedCommand SaveAllModifiedObjectsCommand = new("SaveAllModifiedObjectsCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.SaveAllModifiedObjects },
+   };   
+   public static readonly RoutedCommand OpenSaveSelectorCommand = new("OpenSaveSelectorCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenSaveSelector },
+   };
+   
+   public static readonly RoutedCommand OpenSettingsCommand = new("OpenSettingsCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenSettings },
+   };
+   
+   public static readonly RoutedCommand OpenPluginSettingsCommand = new("OpenPluginSettingsCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenPluginSettings },
+   };
+   // File Reloading
+   public static readonly RoutedCommand OpenReloadFolderWindowCommand = new("OpenReloadFolderWindowCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenReloadFolderWindow },
+   };
+   public static readonly RoutedCommand OpenReloadFileWindowCommand = new("OpenReloadFileWindowCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenReloadFileWindow },
+   };
+
 }

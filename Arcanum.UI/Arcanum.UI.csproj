@@ -121,6 +121,24 @@
         <None Remove="Assets\Icons\16x16\Add16x16.png" />
         <None Remove="Assets\Icons\16x16\Plus16x16.png" />
         <Resource Include="Assets\Icons\16x16\Plus16x16.png" />
+        <None Remove="Assets\Icons\16x16\Save16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Save16x16.png" />
+        <None Remove="Assets\Icons\16x16\SaveSelector16x16.png" />
+        <Resource Include="Assets\Icons\16x16\SaveSelector16x16.png" />
+        <None Remove="Assets\Icons\16x16\Settings16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Settings16x16.png" />
+        <None Remove="Assets\Icons\16x16\PluginSettings16x16.png" />
+        <Resource Include="Assets\Icons\16x16\PluginSettings16x16.png" />
+        <None Remove="Assets\Icons\16x16\ReloadFile16x16.png" />
+        <Resource Include="Assets\Icons\16x16\ReloadFile16x16.png" />
+        <None Remove="Assets\Icons\16x16\ReloadFolder16x16.png" />
+        <Resource Include="Assets\Icons\16x16\ReloadFolder16x16.png" />
+        <None Remove="Assets\Icons\16x16\UndoLeftRound16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Undo16x16.png" />
+        <None Remove="Assets\Icons\16x16\UndoRightRound16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Redo16x16.png" />
+        <None Remove="Assets\Icons\16x16\Magnifer16x16.png" />
+        <Resource Include="Assets\Icons\16x16\Magnifer16x16.png" />
     </ItemGroup>
 
     <ItemGroup>

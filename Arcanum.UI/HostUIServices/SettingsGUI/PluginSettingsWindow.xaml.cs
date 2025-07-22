@@ -12,11 +12,11 @@ using Arcanum.UI.Util;
 
 namespace Arcanum.UI.HostUIServices.SettingsGUI;
 
-public partial class SettingsWindow
+public partial class PluginSettingsWindow
 {
    private readonly List<PropertyGrid> _propertyGrids = [];
 
-   public SettingsWindow()
+   public PluginSettingsWindow()
    {
       InitializeComponent();
 
@@ -33,7 +33,7 @@ public partial class SettingsWindow
 
    public static void ShowSettingsWindow(Dictionary<Guid, IPluginSetting> settings, Guid focusOnGuid, IPluginHost host)
    {
-      var psw = new SettingsWindow();
+      var psw = new PluginSettingsWindow();
       psw.SetSettings(settings, host);
       psw.FocusOnTab(focusOnGuid);
       psw.ShowDialog();

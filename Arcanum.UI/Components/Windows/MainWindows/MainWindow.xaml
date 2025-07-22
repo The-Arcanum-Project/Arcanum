@@ -16,6 +16,7 @@
     </base:BaseWindow.DataContext>
 
     <Window.CommandBindings>
+        <!-- Command Bindings for File MenuItem -->
         <CommandBinding Command = "mainWindow:MwCommands.CloseProjectFileCommand"
                         Executed = "CloseCommand_Executed"
                         CanExecute = "CommandCanAlwaysExecute" />
@@ -28,40 +29,136 @@
         <CommandBinding Command = "mainWindow:MwCommands.ExitArcanumCommand"
                         Executed = "ExitArcanum_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenSaveSelectorCommand"
+                        Executed = "OpenSaveSelector_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand"
+                        Executed = "SaveAllModified_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenSettingsCommand"
+                        Executed = "OpenSettingsWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenPluginSettingsCommand"
+                        Executed = "OpenPluginSettingsWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand"
+                        Executed = "OpenReloadFileWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand"
+                        Executed = "OpenReloadFolderWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+
     </Window.CommandBindings>
 
     <base:BaseWindow.HeaderContent>
         <Menu>
             <MenuItem Header = "File">
-
                 <MenuItem Header = "Create new Project"
                           Command = "mainWindow:MwCommands.NewProjectFileCommand">
                     <MenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png"/>
+                        <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header = "Open Project"
-                          Command = "mainWindow:MwCommands.OpenProjectFileCommand" >
+                          Command = "mainWindow:MwCommands.OpenProjectFileCommand">
                     <MenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png"/>
+                        <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header = "Close current Project"
-                          Command = "mainWindow:MwCommands.CloseProjectFileCommand" >
+                          Command = "mainWindow:MwCommands.CloseProjectFileCommand">
                     <MenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Close16x16.png"/>
+                        <Image Source = "../../../Assets/Icons/16x16/Close16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header = "Save All Modifications"
+                          Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Save16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+
+                <MenuItem Header = "Custom Saving Selector"
+                          Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/SaveSelector16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header = "Reload File"
+                          Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/ReloadFile16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header = "Reload Folder"
+                          Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/ReloadFolder16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header = "Settings"
+                          Command = "mainWindow:MwCommands.OpenSettingsCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Settings16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header = "Plugin Settings"
+                          Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/PluginSettings16x16.png" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
                 <MenuItem Header = "Exit"
-                          Command = "mainWindow:MwCommands.ExitArcanumCommand" />
-                <Separator />
-                <MenuItem Header = "Save All Modifications"
-                          Command = "{Binding CloseProjectFileCommand}" />
+                          Command = "mainWindow:MwCommands.ExitArcanumCommand">
+                </MenuItem>
+                >
+            </MenuItem>
 
-                <MenuItem Header = "Custom Saving Selector"
-                          Command = "{Binding CustomSavingSelectorCommand}" />
+            <MenuItem Header = "Edit">
+                <MenuItem Header = "Undo: 'description'">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header = "Step Undo: 'description'">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header = "Redo: 'description'">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header = "Step Redo: 'description'">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+
                 <Separator />
+
+                <MenuItem Header = "Queastor (Find)">
+                    <MenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+
+                <Separator />
+
+                <MenuItem Header = "Copy" />
+                <MenuItem Header = "Cut" />
+                <MenuItem Header = "Paste" />
+
+            </MenuItem>
+
+            <MenuItem Header = "Mod Diagnostics">
+                
+                <MenuItem Header = "Open Loading Log" />
             </MenuItem>
         </Menu>
     </base:BaseWindow.HeaderContent>
