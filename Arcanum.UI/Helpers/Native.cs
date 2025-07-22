@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace Arcanum.UI.Helpers;
 
@@ -41,7 +43,7 @@ public static class NativeMethods
    {
       var mmi = (MinMaxInfo)(Marshal.PtrToStructure(lParam, typeof(MinMaxInfo)) ?? throw new InvalidOperationException());
       var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-
+      
       if (monitor == IntPtr.Zero) return mmi;
       var monitorInfo = new MonitorInfoEx();
       GetMonitorInfo(new HandleRef(null, monitor), monitorInfo); 
@@ -51,6 +53,16 @@ public static class NativeMethods
       mmi.ptMaxPosition.y = Math.Abs(rcWorkArea.Top - rcMonitorArea.Top);
       mmi.ptMaxSize.x = Math.Abs(rcWorkArea.Right - rcWorkArea.Left);
       mmi.ptMaxSize.y = Math.Abs(rcWorkArea.Bottom - rcWorkArea.Top);
+      
+      var source = HwndSource.FromHwnd(hwnd);
+      if (source is not { RootVisual: Window window, CompositionTarget: not null }) return mmi;
+
+      var matrix = source.CompositionTarget.TransformToDevice;
+      var minWidth = (int)(window.MinWidth * matrix.M11);
+      var minHeight = (int)(window.MinHeight * matrix.M22);
+
+      mmi.ptMinTrackSize.x = minWidth;
+      mmi.ptMinTrackSize.y = minHeight;
 
       return mmi;
    }
