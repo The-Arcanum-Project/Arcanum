@@ -1,10 +1,11 @@
-﻿<base:BaseWindow x:Class = "Arcanum.UI.WpfTesting.ExampleWindow"
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.WpfTesting.ExampleWindow"
                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
-                        xmlns:base = "clr-namespace:Arcanum.UI.Components.Base"
                         xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
+                        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                        xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
                         mc:Ignorable = "d"
                         Height = "450"
                         Width = "800"
@@ -19,7 +20,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <base:BaseWindow.HeaderContent>
+    <styleClasses:BaseWindow.HeaderContent>
         <StackPanel Orientation = "Horizontal">
             <ComboBox Width = "100"
                       Style = "{StaticResource BaseComboboxStyle}"
@@ -80,9 +81,9 @@
                 </ComboBox.Items>
             </ComboBox>
         </StackPanel>
-    </base:BaseWindow.HeaderContent>
+    </styleClasses:BaseWindow.HeaderContent>
 
-    <base:BaseWindow.FooterContent>
+    <styleClasses:BaseWindow.FooterContent>
     
             <ComboBox Width = "100"
                       Style = "{StaticResource BaseComboboxStyle}"
@@ -96,7 +97,7 @@
                     <ComboBoxItem Content = "Option 1" />
                 </ComboBox.Items>
             </ComboBox>
-    </base:BaseWindow.FooterContent>
+    </styleClasses:BaseWindow.FooterContent>
     
     <Grid Background = "DarkOliveGreen">
         <Grid.RowDefinitions>
@@ -108,7 +109,7 @@
                 Background = "transparent">
             
             <Grid>
-                <userControls:PropertyGrid SelectedObject="{Binding CurrentSettings}" 
+                <baseControls:PropertyGrid SelectedObject="{Binding CurrentSettings}" 
                                            HorizontalAlignment="Stretch"
                                            VerticalAlignment="Stretch"/>
             </Grid>
@@ -120,4 +121,4 @@
         </Border>
     </Grid>
 
-</base:BaseWindow>
+</styleClasses:BaseWindow>

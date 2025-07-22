@@ -1,13 +1,13 @@
 ﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.SearchTextBox"
              xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.Base.StyleClasses">
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Base/Styles/BaseDarkScrollbar.xaml" />
-                <ResourceDictionary Source = "/Components/Base/Styles/BaseDarkButton.xaml" />
+                <ResourceDictionary Source = "/Components/Styles/Base/BaseScrollbar.xaml" />
+                <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -22,7 +22,7 @@
         <DockPanel LastChildFill = "True">
 
             <!-- Left Icon -->
-            <Image Source = "/Assets/Icons/Missing16x16.png"
+            <Image Source = "/Assets/Icons/20x20/Missing16x16.png"
                    Width = "16"
                    Height = "16"
                    Margin = "4,0"
@@ -30,16 +30,15 @@
                    DockPanel.Dock = "Left" />
 
             <!-- Right Button -->
-            <styleClasses:BaseButton Style = "{StaticResource BaseDarkButtonStyle}"
-                                        Width = "20"
-                                        Height = "20"
-                                        Margin = "1,1, 14, 0"
-                                        Padding = "0"
-                                        VerticalAlignment = "Center"
-                                        HorizontalAlignment = "Center"
-                                        Background = "Transparent"
-                                        DockPanel.Dock = "Right">
-                <Image Source = "/Assets/Icons/Settings.png"
+            <styleClasses:BaseButton Width = "20"
+                                     Height = "20"
+                                     Margin = "1,1, 14, 0"
+                                     Padding = "0"
+                                     VerticalAlignment = "Center"
+                                     HorizontalAlignment = "Center"
+                                     Background = "Transparent"
+                                     DockPanel.Dock = "Right">
+                <Image Source = "/Assets/Icons/20x20/Settings20x20.png"
                        Stretch = "None" />
             </styleClasses:BaseButton>
 

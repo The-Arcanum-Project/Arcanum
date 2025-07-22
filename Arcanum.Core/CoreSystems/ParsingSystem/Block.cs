@@ -76,7 +76,7 @@ public class Block(string name, int startLine, int index) : IElement
 
    public bool GetSubBlockByName(string name, out Block block)
    {
-      return GetBlockByName(name, SubBlocks, out block);
+      return GetBlockByName(name, SubBlocks, out block!);
    }
 
    public bool GetAllSubBlockByName(string name, out List<Block> blocks)

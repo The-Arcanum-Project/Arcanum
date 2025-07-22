@@ -1,5 +1,5 @@
-﻿using Arcanum.UI.Components.MVVM.Models;
-using Arcanum.UI.Components.MVVM.Views.LoadingScreen;
+﻿using Arcanum.UI.Components.Models;
+using Arcanum.UI.Components.Views.LoadingScreen;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 

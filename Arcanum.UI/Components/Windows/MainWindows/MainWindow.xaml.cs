@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.UI.Components.MVVM.Views.MainWindow;
+using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
 

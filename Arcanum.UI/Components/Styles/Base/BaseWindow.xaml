@@ -1,0 +1,158 @@
+﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors = "http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:customBehaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
+                    xmlns:base = "clr-namespace:Arcanum.UI.Components.StyleClasses">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
+        <ResourceDictionary Source = "/Components/Styles/Base/BaseTextBoxStyle.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    <Style TargetType = "{x:Type base:BaseWindow}">
+
+        <Style.Setters>
+            <Setter Property = "Background"
+                    Value = "DarkOliveGreen" />
+            <Setter Property = "BorderThickness"
+                    Value = "0" />
+            <Setter Property = "WindowStyle"
+                    Value = "None" />
+            <Setter Property = "AllowsTransparency"
+                    Value = "False" />
+            <Setter Property = "ResizeMode"
+                    Value = "CanResize" />
+            <Setter Property = "Title"
+                    Value = "Arcanum">
+            </Setter>
+            <Setter Property = "MinWidth"
+                    Value = "400" />
+            <Setter Property = "MinHeight"
+                    Value = "300" />
+            <Setter Property = "Icon"
+                    Value = "/Assets/Logo/ArcanumSimplified.ico" />
+            <Setter Property = "WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome CaptionHeight = "0"
+                                  ResizeBorderThickness = "3"
+                                  GlassFrameThickness = "0"
+                                  CornerRadius = "0" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType = "{x:Type base:BaseWindow}">
+                        <Border Background = "{TemplateBinding Background}"
+                                BorderBrush = "{TemplateBinding BorderBrush}"
+                                BorderThickness = "{TemplateBinding BorderThickness}">
+
+                            <Grid Background = "Transparent">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height = "{TemplateBinding Property=HeaderHeight}" />
+                                    <RowDefinition Height = "*" />
+                                    <RowDefinition Height = "{TemplateBinding Property=FooterHeight}" />
+                                </Grid.RowDefinitions>
+
+                                <DockPanel Grid.Row = "0"
+                                           Background = "{StaticResource DefaultBackColorBrush}"
+                                           LastChildFill = "False">
+                                    <DockPanel.Resources>
+                                        <Style TargetType = "{x:Type base:BaseButton}"
+                                               BasedOn="{StaticResource {x:Type base:BaseButton}}">
+                                            <Setter Property = "DockPanel.Dock"
+                                                    Value = "Right" />
+                                            <Setter Property = "Width"
+                                                    Value = "30" />
+                                            <Setter Property = "Height"
+                                                    Value = "30" />
+                                            <Setter Property = "Padding"
+                                                    Value = "0" />
+                                            <Setter Property = "Margin"
+                                                    Value = "0" />
+                                        </Style>
+                                    </DockPanel.Resources>
+
+                                    <behaviors:Interaction.Behaviors>
+                                        <customBehaviors:WindowDrag />
+                                    </behaviors:Interaction.Behaviors>
+                                    <Image Source = "/Assets/Logo/ArcanumSimplified.png"
+                                           DockPanel.Dock = "Left"
+                                           Stretch = "Uniform"
+                                           Margin = "6,2,2,2"
+                                           Height = "26"
+                                           Width = "26">
+                                    </Image>
+
+                                    <TextBlock Text = "{TemplateBinding Title}"
+                                               VerticalAlignment = "Center"
+                                               HorizontalAlignment = "Left"
+                                               Margin = "10,0,0,2"
+                                               FontSize = "16"
+                                               FontWeight = "Bold"
+                                               Foreground = "{StaticResource DefaultForeColorBrush}"
+                                               DockPanel.Dock = "Left"
+                                               Padding = "0" />
+
+                                    <Rectangle x:Name = "HeaderSeparator"
+                                               Width = "1"
+                                               Fill = "{StaticResource DefaultBorderColorBrush}"
+                                               Margin = "8,5"
+                                               DockPanel.Dock = "Left"
+                                               Visibility = "Collapsed" />
+
+                                    <ContentPresenter x:Name = "HeaderContentPresenter"
+                                                      Content = "{TemplateBinding HeaderContent}"
+                                                      ContentTemplate = "{TemplateBinding HeaderContentTemplate}" />
+
+
+                                    <Border />
+
+                                    <base:BaseButton x:Name = "CloseButton"
+                                                     HoverBackground = "{StaticResource AggressiveRedBackColorBrush}"
+                                                     Margin = "0,0,2,0"
+                                                     Command = "{Binding CloseCommand,
+                                                     RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                        <Image Source = "/Assets/Icons/20x20/Close20x20.png"
+                                               Stretch = "None" />
+                                    </base:BaseButton>
+
+                                    <base:BaseButton x:Name = "MaximizeRestoreButton"
+                                                     Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                        <Image x:Name = "StateImage"
+                                               Source = "/Assets/Icons/20x20/FullScreen20x20.png"
+                                               Stretch = "None" />
+                                    </base:BaseButton>
+
+                                    <base:BaseButton x:Name = "MinimizeButton"
+                                                     Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                        <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
+                                               Stretch = "None" />
+                                    </base:BaseButton>
+
+                                </DockPanel>
+
+
+                                <ContentPresenter Grid.Row = "1"> </ContentPresenter>
+
+                                <Border Grid.Row = "2"
+                                        Background = "{StaticResource DefaultBackColorBrush}"
+                                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                        HorizontalAlignment = "Stretch">
+
+                                    <ContentPresenter x:Name = "FooterContentPresenter"
+                                                      Content = "{TemplateBinding FooterContent}"
+                                                      ContentTemplate = "{TemplateBinding FooterContentTemplate}"
+                                                      HorizontalAlignment = "Stretch"
+                                                      VerticalAlignment = "Center"
+                                                      Margin = "0" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+
+
+    </Style>
+</ResourceDictionary>

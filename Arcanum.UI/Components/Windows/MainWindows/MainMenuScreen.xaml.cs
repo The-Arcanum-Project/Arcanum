@@ -3,8 +3,8 @@ using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.Globals;
-using Arcanum.UI.Components.MVVM.Views.MainMenuScreen;
-using ArcanumViewModel = Arcanum.UI.Components.MVVM.Views.MainMenuScreen.ArcanumViewModel;
+using Arcanum.UI.Components.Views.MainMenuScreen;
+using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -35,7 +35,7 @@ public partial class MainMenuScreen
 
       MainViewModel.PropertyChanged += (_, args) =>
       {
-         if (args.PropertyName == nameof(MVVM.Views.MainMenuScreen.MainViewModel.IsWindowVisible))
+         if (args.PropertyName == nameof(Views.MainMenuScreen.MainViewModel.IsWindowVisible))
             Visibility = MainViewModel.IsWindowVisible;
       };
 

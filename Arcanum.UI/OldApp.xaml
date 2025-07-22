@@ -1,7 +1,6 @@
 ﻿<Application x:Class="Arcanum.UI.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:converters = "clr-namespace:Arcanum.UI.Components.MVVM.Converters"
              StartupUri="/Components/Windows/MainWindows/MainMenuScreen.xaml">
              <!-- StartupUri="../../Components/Windows/ConsoleWindow.xaml"> -->
 
@@ -10,17 +9,17 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source="Assets/ArcanumShared/DefaultFonts.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseDarkButton.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseTextBoxStyle.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseComboboxStyle.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BorderlessComboBox.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseCheckBox.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseDarkScrollbar.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseListBox.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseTextBlock.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/DarkTabControl.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/StackPanelStyle.xaml" />
-                <ResourceDictionary Source="Components/Base/Styles/BaseToolTip.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseTextBoxStyle.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseComboboxStyle.xaml" />
+                <ResourceDictionary Source="Components/Styles/Specific/BorderlessComboBox.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseCheckBox.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseScrollbar.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseListBox.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseTextBlock.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseTabControl.xaml" />
+                <ResourceDictionary Source="Components/Styles/Specific/StackPanelStyle.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseToolTip.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

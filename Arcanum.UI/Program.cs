@@ -5,7 +5,6 @@ using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ParsingSystem;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.Utils.vdfParser;
-using Arcanum.UI.Components.MVVM.Converters;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.WpfTesting;
@@ -26,13 +25,13 @@ internal static class Program
       var resources = new[]
       {
          "Assets/ArcanumShared/DefaultPalette.xaml", "Assets/ArcanumShared/DefaultFonts.xaml",
-         "Components/Base/Styles/BaseDarkButton.xaml", "Components/Base/Styles/BaseTextBoxStyle.xaml",
-         "Components/Base/Styles/BaseComboboxStyle.xaml", "Components/Base/Styles/BorderlessComboBox.xaml",
-         "Components/Base/Styles/BaseCheckBox.xaml", "Components/Base/Styles/BaseDarkScrollbar.xaml",
-         "Components/Base/Styles/BaseListBox.xaml", "Components/Base/Styles/BaseTextBlock.xaml",
-         "Components/Base/Styles/DarkTabControl.xaml", "Components/Base/Styles/StackPanelStyle.xaml",
-         "Components/Base/Styles/BaseToolTip.xaml", "Components/Base/Styles/BaseMenuStyle.xaml",
-         "Components/Base/Styles/BaseMenuItemStyle.xaml", 
+         "Components/Styles/Base/BaseButton.xaml", "Components/Styles/Base/BaseTextBoxStyle.xaml",
+         "Components/Styles/Base/BaseComboboxStyle.xaml", "Components/Styles/Specific/BorderlessComboBox.xaml",
+         "Components/Styles/Base/BaseCheckBox.xaml", "Components/Styles/Base/BaseScrollbar.xaml",
+         "Components/Styles/Base/BaseListBox.xaml", "Components/Styles/Base/BaseTextBlock.xaml",
+         "Components/Styles/Base/BaseTabControl.xaml", "Components/Styles/Specific/StackPanelStyle.xaml",
+         "Components/Styles/Base/BaseToolTip.xaml", "Components/Styles/Base/BaseMenuStyle.xaml",
+         "Components/Styles/Base/BaseMenuItemStyle.xaml", 
       };
 
       foreach (var path in resources)

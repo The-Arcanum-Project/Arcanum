@@ -1,8 +1,8 @@
-﻿<base:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MainWindows.MainWindow"
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MainWindows.MainWindow"
                  xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:base = "clr-namespace:Arcanum.UI.Components.Base"
-                 xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.MVVM.Views.MainWindow"
+                 xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                 xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.Views.MainWindow"
                  Title = "Arcanum"
                  Height = "1080"
                  Width = "1920"
@@ -11,9 +11,9 @@
                  Loaded = "MainWindow_OnLoaded"
                  WindowStartupLocation = "CenterScreen">
 
-    <base:BaseWindow.DataContext>
+    <styleClasses:BaseWindow.DataContext>
         <mainWindow:MainWindowView />
-    </base:BaseWindow.DataContext>
+    </styleClasses:BaseWindow.DataContext>
 
     <Window.CommandBindings>
         <!-- Command Bindings for File MenuItem -->
@@ -50,7 +50,7 @@
 
     </Window.CommandBindings>
 
-    <base:BaseWindow.HeaderContent>
+    <styleClasses:BaseWindow.HeaderContent>
         <Menu>
             <MenuItem Header = "File">
                 <MenuItem Header = "Create new Project"
@@ -161,11 +161,11 @@
                 <MenuItem Header = "Open Loading Log" />
             </MenuItem>
         </Menu>
-    </base:BaseWindow.HeaderContent>
+    </styleClasses:BaseWindow.HeaderContent>
 
-    <base:BaseWindow.FooterContent>
+    <styleClasses:BaseWindow.FooterContent>
         <TextBlock Text = "PerformanceCounters"> </TextBlock>
-    </base:BaseWindow.FooterContent>
+    </styleClasses:BaseWindow.FooterContent>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -182,9 +182,9 @@
 
         <Image Grid.Row = "1"
                Grid.Column = "1"
-               Source = "pack://application:,,,/Assets/Icons/ArcanumForeColor.png">
+               Source = "pack://application:,,,/Assets/Logo/ArcanumForeColor.png">
         </Image>
     </Grid>
 
 
-</base:BaseWindow>
+</styleClasses:BaseWindow>

@@ -2,8 +2,8 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source = "/Components/Base/Styles/BaseDarkButton.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml"> </ResourceDictionary>
         <ResourceDictionary Source = "../Assets/ArcanumShared/DefaultPalette.xaml"> </ResourceDictionary>
-        <ResourceDictionary Source = "../Components/Base/BaseWindow.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Components/Styles/Base/BaseWindow.xaml"> </ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

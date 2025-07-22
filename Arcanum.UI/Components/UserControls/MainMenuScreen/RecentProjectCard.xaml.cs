@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
-using Arcanum.UI.Components.MVVM.Views.MainMenuScreen;
+using Arcanum.UI.Components.Views.MainMenuScreen;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.UserControls.MainMenuScreen;

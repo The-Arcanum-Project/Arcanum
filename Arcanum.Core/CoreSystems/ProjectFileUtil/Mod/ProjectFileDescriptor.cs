@@ -107,7 +107,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    {
       var thumbnailPath = Path.Combine(ModPath, "thumbnail.png");
       if (!File.Exists(thumbnailPath))
-         return new BitmapImage(new Uri("pack://application:,,,/Assets/Icons/ArcanumForeColor.png", UriKind.Absolute));
+         return new BitmapImage(new Uri("pack://application:,,,/Assets/Logo/ArcanumForeColor.png", UriKind.Absolute));
 
       return new BitmapImage(new(thumbnailPath, UriKind.Absolute));
    }

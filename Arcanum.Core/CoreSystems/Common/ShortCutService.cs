@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace Arcanum.Core.CoreSystems.Common;
 

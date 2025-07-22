@@ -1,0 +1,61 @@
+﻿<Window x:Class = "Arcanum.UI.Components.Windows.MinorWindows.SearchWindow"
+        xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
+        mc:Ignorable = "d"
+        Title = "SearchWindow"
+        Height = "450"
+        Width = "800"
+        WindowStyle = "None"
+        ResizeMode = "NoResize"
+        WindowStartupLocation = "CenterScreen">
+
+    <Window.InputBindings>
+        <KeyBinding Key = "Escape"
+                    Command = "{Binding CloseCommand}" />
+    </Window.InputBindings>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Components/Styles/Specific/SearchResultListView.xaml"></ResourceDictionary>
+                <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+
+    <Border BorderThickness = "1"
+            BorderBrush = "{StaticResource DefaultBorderColorBrush}">
+        <Grid Background = "{StaticResource DefaultBackColorBrush}"
+              Margin = "0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "25" />
+                <RowDefinition Height = "7" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+
+            <userControls:SearchTextBox Grid.Row = "0"
+                                      BorderThickness = "0">
+            </userControls:SearchTextBox>
+
+            <Rectangle Grid.Row = "1"
+                       Fill = "{StaticResource DefaultBorderColorBrush}"
+                       Height = "1"
+                       Margin = "15,3" />
+
+            <ListBox x:Name = "SearchResultsListBox"
+                     Grid.Row = "2"
+                     Style = "{StaticResource SearchResultListBoxStyle}"
+                     ItemTemplate = "{StaticResource SearchResultDataTemplate}"
+                     ItemContainerStyle = "{StaticResource SearchResultItemStyle}"
+                     ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                     BorderThickness = "0" />
+
+        </Grid>
+    </Border>
+
+</Window>

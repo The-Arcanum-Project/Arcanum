@@ -9,7 +9,7 @@ public partial class ExampleWindow
 
    public ExampleWindow()
    {
-      SplashScreen splash = new("../Assets/Icons/SplashTest.png");
+      SplashScreen splash = new("../Assets/Icons/SplashTest20x20.png");
       Thread.Sleep(1000); // Simulate some loading time
       splash.Show(false, true);
       InitializeComponent();

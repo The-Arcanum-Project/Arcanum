@@ -33,9 +33,7 @@
         <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Components\MVVM\Helpers\" />
-        <Folder Include="Components\MVVM\Models\MainWindowModels\" />
-        <Folder Include="Components\Specific\Converters\" />
+        <Folder Include="Components\Helpers\" />
         <Folder Include="FeatureSpotlight\" />
         <Folder Include="HostUIServices\" />
     </ItemGroup>
@@ -46,39 +44,40 @@
         <None Remove="Resources\Icons\ArrowUp.png" />
         <None Remove="C#.png" />
         <None Remove="Assets\Icons\Missing16x16.png" />
+        <Resource Include="Assets\Icons\20x20\CheckSquare20x20.png" />
+        <Resource Include="Assets\Icons\20x20\Close20x20.png" />
+        <Resource Include="Assets\Icons\20x20\CloseSquare20x20.png" />
         <Resource Include="Assets\Icons\20x20\Eye20x20.png" />
+        <Resource Include="Assets\Icons\20x20\FullScreen20x20.png" />
+        <Resource Include="Assets\Icons\20x20\Minimize20x20.png" />
         <Resource Include="Assets\Icons\20x20\Missing16x16.png" />
+        <Resource Include="Assets\Icons\20x20\RestoreWindow20x20.png" />
+        <Resource Include="Assets\Icons\20x20\Settings20x20.png" />
+        <Resource Include="Assets\Icons\20x20\SplashTest20x20.png" />
         <Resource Include="Assets\Icons\40x40\LinkSquare40x40.png" />
         <None Remove="Assets\Icons\Missing64x64.png" />
         <None Remove="Assets\Icons\Settings14x14.png" />
         <Resource Include="Assets\Icons\64x64\Missing64x64.png" />
-        <Resource Include="Assets\Icons\Settings.png" />
         <None Remove="Assets\Icons\Quit Full Screen.png" />
         <None Remove="Assets\Icons\Full Screen.png" />
         <None Remove="Assets\Icons\Minimize.png" />
-        <Resource Include="Assets\Icons\Minimize.png" />
         <None Remove="Assets\Icons\Close.png" />
-        <Resource Include="Assets\Icons\Close.png" />
         <None Remove="Assets\Icons\FullScreen.png" />
-        <Resource Include="Assets\Icons\FullScreen.png" />
         <None Remove="Assets\Icons\CheckSquare.png" />
-        <Resource Include="Assets\Icons\CheckSquare.png" />
         <None Remove="Assets\Icons\CloseSquare.png" />
-        <Resource Include="Assets\Icons\CloseSquare.png" />
         <None Remove="Assets\Icons\ArrowDown.png" />
-        <Resource Include="Assets\Icons\ArrowDown.png" />
         <None Remove="Assets\Icons\ArrowUp.png" />
-        <Resource Include="Assets\Icons\ArrowUp.png" />
         <None Remove="Assets\Icons\Eye20x20.png" />
-        <Resource Include="Assets\Icons\SplashTest.png" />
-        <Resource Include="Assets\Icons\Arcanum.png" />
         <None Remove="Assets\Icons\ArcanumSimplified.ico" />
-        <Resource Include="Assets\Icons\ArcanumSimplified.ico" />
         <None Remove="Assets\Images\ProvinceFileCreator1024x1024.png" />
+        <Resource Include="Assets\Icons\Tiny\ArrowDown.png" />
+        <Resource Include="Assets\Icons\Tiny\ArrowUp.png" />
+        <Resource Include="Assets\Images\Discord-Symbol-White.png" />
+        <Resource Include="Assets\Images\github_mark_white.png" />
+        <Resource Include="Assets\Images\PATREON_SYMBOL_1_WHITE_RGB.png" />
         <Resource Include="Assets\Images\ProvinceFileCreator1024x1024.png" />
         <None Remove="Assets\Icons\LinkSquare40x40.png" />
         <None Remove="Assets\Icons\ArcanumForeColor.png" />
-        <Resource Include="Assets\Icons\ArcanumForeColor.png" />
         <None Remove="Assets\Icons\40x40\Close40x40.png" />
         <Resource Include="Assets\Icons\40x40\Close40x40.png" />
         <None Remove="Assets\Icons\30x30\Play30x30.png" />
@@ -105,13 +104,9 @@
         <None Remove="Assets\Icons\20x20\Box20x20.png" />
         <Resource Include="Assets\Icons\20x20\Box20x20.png" />
         <None Remove="Assets\Icons\PATREON_SYMBOL_1_WHITE_RGB.png" />
-        <Resource Include="Assets\Icons\PATREON_SYMBOL_1_WHITE_RGB.png" />
         <None Remove="Assets\Icons\github_mark_white.png" />
-        <Resource Include="Assets\Icons\github_mark_white.png" />
         <None Remove="Assets\Icons\Discord-Symbol-White.png" />
-        <Resource Include="Assets\Icons\Discord-Symbol-White.png" />
         <None Remove="Assets\Icons\ArcanumSimplified.png" />
-        <Resource Include="Assets\Icons\ArcanumSimplified.png" />
         <None Remove="Assets\Icons\20x20\Add20x20.png" />
         <Resource Include="Assets\Icons\20x20\Add20x20.png" />
         <None Remove="Assets\Icons\16x16\FolderOpen16x16.png" />
@@ -139,6 +134,10 @@
         <Resource Include="Assets\Icons\16x16\Redo16x16.png" />
         <None Remove="Assets\Icons\16x16\Magnifer16x16.png" />
         <Resource Include="Assets\Icons\16x16\Magnifer16x16.png" />
+        <Resource Include="Assets\Logo\Arcanum.png" />
+        <Resource Include="Assets\Logo\ArcanumForeColor.png" />
+        <Resource Include="Assets\Logo\ArcanumSimplified.ico" />
+        <Resource Include="Assets\Logo\ArcanumSimplified.png" />
     </ItemGroup>
 
     <ItemGroup>
@@ -205,11 +204,6 @@
         <Page Update="Components\UserControls\SearchTextBox.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
-        <Page Update="Components\Specific\Styles\SearchResultListView.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <XamlRuntime>Wpf</XamlRuntime>
-            <SubType>Designer</SubType>
-        </Page>
         <Page Update="Components\Themes\Generic.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
@@ -256,11 +250,148 @@
           <XamlRuntime>Wpf</XamlRuntime>
           <SubType>Designer</SubType>
         </Page>
+        <Page Update="Components\Styles\Base\BaseCheckBox.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseComboBoxItem.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseComboboxStyle.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseButton.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseScrollbar.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseListBox.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseMenuItemStyle.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseMenuStyle.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseTextBlock.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseTextBoxStyle.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseToolTip.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseMenuButtonTheme.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseTabControl.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Specific\BorderlessComboBox.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Specific\DarkProgressbar.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Specific\PresentationCard.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Specific\StackPanelStyle.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseWindow.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\HomeViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\ModforgeViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\ArcanumViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\FeatureViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\AboutUsViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Views\MainMenuScreen\AttributionsViewModel.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Components\Styles\Base\BaseModBoxItem.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Styles\Specific\SearchResultListView.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\BaseControls\FloatNumericUpDown.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\BaseControls\DecimalBaseNumericUpDown.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\BaseControls\BaseNumericUpDown.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\BaseControls\PropertyGrid.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
     </ItemGroup>
 
     <ItemGroup>
         <None Remove="Assets\Icons\RestoreWindow.png"/>
-        <Resource Include="Assets\Icons\RestoreWindow.png"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -5,27 +5,27 @@
         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
-        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.Base.StyleClasses"
-        xmlns:mainMenuScreen1 = "clr-namespace:Arcanum.UI.Components.MVVM.Views.MainMenuScreen"
+        xmlns:mainMenuScreen = "clr-namespace:Arcanum.UI.Components.Views.MainMenuScreen"
+        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
         mc:Ignorable = "d"
         Height = "550"
         Width = "900"
         WindowStyle = "None"
         ResizeMode = "NoResize"
         WindowStartupLocation = "CenterScreen"
-        Icon = "/Assets/Icons/ArcanumSimplified.ico"
+        Icon = "/Assets/Logo/ArcanumSimplified.ico"
         Activated="MainMenuScreen_OnActivated">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Base/Styles/MenuButtonTheme.xaml" />
+                <ResourceDictionary Source = "/Components/Styles/Base/BaseMenuButtonTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
 
     <Window.DataContext>
-        <mainMenuScreen1:MainViewModel />
+        <mainMenuScreen:MainViewModel />
     </Window.DataContext>
     <!-- #272537 -->
     <Border Background = "{StaticResource AccentGradientBrush}"
@@ -100,7 +100,7 @@
                              FontSize = "14"
                              Command = "{Binding AttributionsVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
-                <Image Source = "/Assets/Icons/ArcanumForeColor.png"
+                <Image Source = "/Assets/Logo/ArcanumForeColor.png"
                        Margin = "40, 73, 40, 40" />
             </StackPanel>
 
@@ -139,7 +139,6 @@
                                                  Width = "25"
                                                  Click = "CreateNewProjectButton_Click"
                                                  Background = "{StaticResource GreenColorBrush}"
-                                                 Style = "{StaticResource BaseDarkButtonStyle}"
                                                  ToolTip = "Create a new Arcanum configuration for a mod">
                             <Image Source = "/Assets/Icons/30x30/AddBordered30x30.png" />
 
@@ -159,8 +158,7 @@
                                                  Width = "25"
                                                  Click = "LoadLastConfigButton_Click"
                                                  MouseEnter = "LoadLastConfigButton_MouseEnter"
-                                                 Background = "{StaticResource GreenColorBrush}"
-                                                 Style = "{StaticResource BaseDarkButtonStyle}">
+                                                 Background = "{StaticResource GreenColorBrush}">
                             <Image Source = "/Assets/Icons/30x30/Play30x30.png" />
                         </styleClasses:BaseButton>
                     </StackPanel>
@@ -172,7 +170,6 @@
                                          HorizontalAlignment = "Right"
                                          Margin = "0"
                                          Padding = "23"
-                                         Style = "{StaticResource BaseDarkButtonStyle}"
                                          Background = "Transparent"
                                          Click = "CloseButton_Click">
                     <Image Source = "/Assets/Icons/40x40/Close40x40.png"
