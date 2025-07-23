@@ -1,0 +1,28 @@
+﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style TargetType = "GridSplitter">
+        <Setter Property = "Background"
+                Value = "{StaticResource DefaultBorderColorBrush}" />
+        <Setter Property = "HorizontalAlignment"
+                Value = "Stretch" />
+        <Setter Property = "VerticalAlignment"
+                Value = "Stretch" />
+        <Setter Property = "SnapsToDevicePixels"
+                Value = "True" />
+        <Setter Property = "Margin"
+                Value = "0,5" />
+
+        <Setter Property = "Template">
+            <Setter.Value>
+                <ControlTemplate TargetType = "GridSplitter">
+                    <Border Background = "{TemplateBinding Background}"
+                            CornerRadius = "3" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+
+</ResourceDictionary>

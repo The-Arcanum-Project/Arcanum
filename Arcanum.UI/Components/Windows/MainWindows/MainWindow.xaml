@@ -18,7 +18,7 @@
     <Window.CommandBindings>
         <!-- Command Bindings for File MenuItem -->
         <CommandBinding Command = "mainWindow:MwCommands.CloseProjectFileCommand"
-                        Executed = "CloseCommand_Executed"
+                        Executed = "GoToArcanumMenuScreenCommand_Executed"
                         CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenProjectFileCommand"
                         Executed = "GoToArcanumMenuScreenCommand_Executed"
@@ -177,21 +177,37 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height = "30" />
             <RowDefinition Height = "*" />
-            <RowDefinition Height = "30" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "20" />
-            <ColumnDefinition Width = "*" />
-            <ColumnDefinition Width = "20" /> <!-- Tool item Column -->
+            <ColumnDefinition Width = "30*" MinWidth="200"/>
+            <ColumnDefinition Width = "Auto" />
+            <ColumnDefinition Width = "50*" MinWidth="400"/>
+            <ColumnDefinition Width = "Auto" />
+            <ColumnDefinition Width = "20*" MinWidth="200"/> 
         </Grid.ColumnDefinitions>
 
-        <Image Grid.Row = "1"
-               Grid.Column = "1"
-               Source = "pack://application:,,,/Assets/Logo/ArcanumForeColor.png">
-        </Image>
+        <Image Grid.Column = "0"
+               Source = "../../../Assets/Icons/Huge/SelectionDataFiller.png" />
+
+        <GridSplitter Grid.Column = "1"
+                      Width = "4"
+                      ResizeBehavior = "PreviousAndNext">
+
+        </GridSplitter>
+
+        <Image Grid.Column = "2"
+               Source = "../../../Assets/Icons/Huge/MapFiller.png" />
+
+        <GridSplitter Grid.Column = "3"
+                      Width = "4"
+                      ResizeBehavior = "PreviousAndNext">
+
+        </GridSplitter>
+
+        <Image Grid.Column = "4"
+               Source = "../../../Assets/Icons/Huge/MapInteractionFiller.png" />
     </Grid>
 
 

@@ -138,6 +138,12 @@
         <Resource Include="Assets\Logo\ArcanumForeColor.png" />
         <Resource Include="Assets\Logo\ArcanumSimplified.ico" />
         <Resource Include="Assets\Logo\ArcanumSimplified.png" />
+        <None Remove="Assets\Icons\Huge\MapFiller.png" />
+        <Resource Include="Assets\Icons\Huge\MapFiller.png" />
+        <None Remove="Assets\Icons\Huge\MapInteractionFiller.png" />
+        <Resource Include="Assets\Icons\Huge\MapInteractionFiller.png" />
+        <None Remove="Assets\Icons\Huge\SelectionDataFiller.png" />
+        <Resource Include="Assets\Icons\Huge\SelectionDataFiller.png" />
     </ItemGroup>
 
     <ItemGroup>

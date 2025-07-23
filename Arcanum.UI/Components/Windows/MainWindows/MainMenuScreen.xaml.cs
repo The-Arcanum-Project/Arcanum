@@ -13,6 +13,9 @@ namespace Arcanum.UI.Components.Windows.MainWindows;
 /// </summary>
 public partial class MainMenuScreen
 {
+#if DEBUG
+   public static bool IsFirstLaunch = true;
+#endif
    public enum MainMenuScreenView
    {
       Home = 0,
@@ -23,37 +26,38 @@ public partial class MainMenuScreen
       Attributions = 5,
    }
 
-   public readonly MainViewModel MainViewModel;
+   public readonly MainMenuViewModel MainMenuViewModel;
 
    public MainMenuScreen()
    {
       InitializeComponent();
-      MainViewModel = new() { MainMenuStackPanel = MenuBarStackPanel };
-      DataContext = MainViewModel;
+      MainMenuViewModel = new() { MainMenuStackPanel = MenuBarStackPanel, MenuWindow = this };
+      DataContext = MainMenuViewModel;
 
       Closed += OnClosed;
 
-      MainViewModel.PropertyChanged += (_, args) =>
+      MainMenuViewModel.PropertyChanged += (_, args) =>
       {
-         if (args.PropertyName == nameof(Views.MainMenuScreen.MainViewModel.IsWindowVisible))
-            Visibility = MainViewModel.IsWindowVisible;
+         if (args.PropertyName == nameof(Views.MainMenuScreen.MainMenuViewModel.IsWindowVisible))
+            Visibility = MainMenuViewModel.IsWindowVisible;
       };
 
-      Debug.Assert(MainViewModel != null, "MainViewModel should not be null");
+      Debug.Assert(MainMenuViewModel != null, "MainMenuViewModel should not be null");
 
 #if DEBUG
       Loaded += (_, _) =>
       {
-
-         if (DebugConfig.Settings.SkipMainMenu)
+         if (DebugConfig.Settings.SkipMainMenu && IsFirstLaunch)
+         {
             LoadLastConfigButton_Click(null!, null!);
+            IsFirstLaunch = false;
+         }
       };
 #endif
    }
 
    private void OnClosed(object? sender, EventArgs? e)
    {
-      Application.Current.Shutdown();
    }
 
    private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -64,15 +68,15 @@ public partial class MainMenuScreen
    private void CreateNewProjectButton_Click(object sender, RoutedEventArgs e)
    {
       ArcanumTabButton.IsChecked = true;
-      MainViewModel.ArcanumVc.Execute(null);
-      MainViewModel.ArcanumVm.ClearUi();
+      MainMenuViewModel.ArcanumVc.Execute(null);
+      MainMenuViewModel.ArcanumVm.ClearUi();
    }
 
    private async void LoadLastConfigButton_Click(object sender, RoutedEventArgs e)
    {
       ProjectFileDescriptor? descriptor;
       // If we are not in the arcanum view model we launch the last project if there is one
-      if (MainViewModel.CurrentView is not ArcanumViewModel)
+      if (MainMenuViewModel.CurrentView is not ArcanumViewModel)
       {
          descriptor = AppData.MainMenuScreenDescriptor.GetLastDescriptor();
          if (descriptor is null)
@@ -84,7 +88,7 @@ public partial class MainMenuScreen
             return;
          }
       }
-      else if (!MainViewModel.GetDescriptorFromInput(out descriptor))
+      else if (!MainMenuViewModel.GetDescriptorFromInput(out descriptor))
       {
          MessageBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
                          "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
@@ -95,13 +99,13 @@ public partial class MainMenuScreen
          return;
       }
 
-      await MainViewModel.LaunchArcanum(descriptor);
+      await MainMenuViewModel.LaunchArcanum(descriptor);
    }
 
    private void LoadLastConfigButton_MouseEnter(object sender, MouseEventArgs e)
    {
       // Set the tooltip to the profile which will be loaded
-      if (MainViewModel.CurrentView is not ArcanumViewModel)
+      if (MainMenuViewModel.CurrentView is not ArcanumViewModel)
       {
          var descriptor = AppData.MainMenuScreenDescriptor.GetLastDescriptor();
          if (descriptor is not null)
@@ -122,6 +126,27 @@ public partial class MainMenuScreen
 
    private void MainMenuScreen_OnActivated(object? sender, EventArgs e)
    {
-      MainViewModel.SetCurrentView(MainViewModel.TargetedView);
+      MainMenuViewModel.SetCurrentView(MainMenuViewModel.TargetedView);
+   }
+
+   public async void LoadAndTransfer()
+   {
+      try
+      {
+         var loadingScreen = new LoadingScreen();
+         await loadingScreen.ShowLoadingAsync();
+         var mw = new MainWindow();
+         Application.Current.MainWindow = mw;
+         Application.Current.MainWindow.Show();
+         mw.Activate();
+         Close();
+      }
+      catch (Exception)
+      {
+         MessageBox.Show("An error occurred while loading the main window. Please try again.",
+                         "Error",
+                         MessageBoxButton.OK,
+                         MessageBoxImage.Error);
+      }
    }
 }

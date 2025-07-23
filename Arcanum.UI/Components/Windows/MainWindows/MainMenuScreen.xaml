@@ -25,7 +25,7 @@
     </Window.Resources>
 
     <Window.DataContext>
-        <mainMenuScreen:MainViewModel />
+        <mainMenuScreen:MainMenuViewModel />
     </Window.DataContext>
     <!-- #272537 -->
     <Border Background = "{StaticResource AccentGradientBrush}"

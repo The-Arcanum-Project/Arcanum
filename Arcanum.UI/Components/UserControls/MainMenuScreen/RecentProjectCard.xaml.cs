@@ -7,7 +7,7 @@ namespace Arcanum.UI.Components.UserControls.MainMenuScreen;
 
 public partial class RecentProjectCard
 {
-   private readonly MainViewModel _mainViewModel;
+   private readonly MainMenuViewModel _mainMenuViewModel;
    private readonly ProjectFileDescriptor _projectFileDescriptor;
    
    // Command to launch Arcanum with the selected project
@@ -16,13 +16,13 @@ public partial class RecentProjectCard
    // Command to load the project in the Arcanum view
    public ICommand LoadProjectCommand => new RelayCommand(() =>
    {
-      _mainViewModel.ArcanumVm.DescriptorToUi(_projectFileDescriptor);
+      _mainMenuViewModel.ArcanumVm.DescriptorToUi(_projectFileDescriptor);
    });
    
-   public RecentProjectCard(ProjectFileDescriptor projectFileDescriptor, MainViewModel mainViewModel)
+   public RecentProjectCard(ProjectFileDescriptor projectFileDescriptor, MainMenuViewModel mainMenuViewModel)
    {
       _projectFileDescriptor = projectFileDescriptor;
-      _mainViewModel = mainViewModel;
+      _mainMenuViewModel = mainMenuViewModel;
       InitializeComponent();
       
       ModNameTextBlock.Text = projectFileDescriptor.ModName;
@@ -31,6 +31,6 @@ public partial class RecentProjectCard
 
    private void LaunchArcanum()
    {
-      _ = _mainViewModel.LaunchArcanum(_projectFileDescriptor);
+      _ = _mainMenuViewModel.LaunchArcanum(_projectFileDescriptor);
    }
 }

@@ -10,7 +10,7 @@ using static Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 
-public class MainViewModel : ObservableObject
+public class MainMenuViewModel : ObservableObject
 {
    internal MainMenuScreenView TargetedView { get; set; } = MainMenuScreenView.Home;
 
@@ -61,8 +61,9 @@ public class MainViewModel : ObservableObject
          OnPropertyChanged(nameof(LaunchButtonText));
       }
    }
+   public required Windows.MainWindows.MainMenuScreen MenuWindow { get; set; }
 
-   public MainViewModel()
+   public MainMenuViewModel()
    {
       HomeVm = new();
       ModforgeVm = new();
@@ -163,13 +164,6 @@ public class MainViewModel : ObservableObject
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 
-      IsWindowVisible = Visibility.Collapsed;
-      var loadingScreen = new Windows.MainWindows.LoadingScreen();
-      await loadingScreen.ShowLoadingAsync();
-      var mw = new Windows.MainWindows.MainWindow();
-      mw.ShowDialog();
-      GC.Collect();
-      GC.WaitForPendingFinalizers();
-      IsWindowVisible = Visibility.Visible;
+      MenuWindow.LoadAndTransfer();
    }
 }

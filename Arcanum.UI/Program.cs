@@ -20,7 +20,7 @@ internal static class Program
    [STAThread]
    private static void Main()
    {
-      var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+      var app = new Application { ShutdownMode = ShutdownMode.OnLastWindowClose };
 
       var resources = new[]
       {
@@ -31,7 +31,7 @@ internal static class Program
          "Components/Styles/Base/BaseListBox.xaml", "Components/Styles/Base/BaseTextBlock.xaml",
          "Components/Styles/Base/BaseTabControl.xaml", "Components/Styles/Specific/StackPanelStyle.xaml",
          "Components/Styles/Base/BaseToolTip.xaml", "Components/Styles/Base/BaseMenuStyle.xaml",
-         "Components/Styles/Base/BaseMenuItemStyle.xaml", 
+         "Components/Styles/Base/BaseMenuItemStyle.xaml", "Components/Styles/Base/BaseGridSplitter.xaml",
       };
 
       foreach (var path in resources)
@@ -44,10 +44,11 @@ internal static class Program
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
 
       var mw = new MainMenuScreen();
-      mw.Closing += (_, _) => { LifecycleManager.Instance.RunShutdownSequence(); };
       app.MainWindow = mw;
 
       mw.Show();
       app.Run();
+      
+      LifecycleManager.Instance.RunShutdownSequence();
    }
 }

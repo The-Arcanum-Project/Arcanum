@@ -27,7 +27,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public string RamUsage
    {
       get => _ramUsage;
-      set
+      private set
       {
          if (value == _ramUsage)
             return;
@@ -39,7 +39,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public string CpuUsage
    {
       get => _cpuUsage;
-      set
+      private set
       {
          if (value == _cpuUsage)
             return;
@@ -60,18 +60,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
               throw new InvalidOperationException("DataContext is not set or is not of type MainWindowView.");
    }
 
-   public void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-   {
-      Close();
-   }
-
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      var menuWindow = Application.Current.Windows.OfType<MainMenuScreen>().FirstOrDefault();
-      if (menuWindow == null)
-         throw new InvalidOperationException("MainMenuScreen window not found.");
-
-      menuWindow.MainViewModel.TargetedView = MainMenuScreen.MainMenuScreenView.Arcanum;
+      var mw = new MainMenuScreen { MainMenuViewModel = { TargetedView = MainMenuScreen.MainMenuScreenView.Arcanum } };
+      Application.Current.MainWindow = mw;
+      Application.Current.MainWindow.Show();
+      mw.Activate();
       Close();
    }
 

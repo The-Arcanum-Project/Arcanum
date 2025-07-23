@@ -16,11 +16,11 @@ public partial class ArcanumViewModel
 {
    public ObservableCollection<BaseModItem> BaseMods { get; set; } = [];
 
-   private readonly MainViewModel _mainViewModel;
+   private readonly MainMenuViewModel _mainMenuViewModel;
 
-   public ArcanumViewModel(List<ProjectFileDescriptor> descriptors, MainViewModel mainViewModel)
+   public ArcanumViewModel(List<ProjectFileDescriptor> descriptors, MainMenuViewModel mainMenuViewModel)
    {
-      _mainViewModel = mainViewModel;
+      _mainMenuViewModel = mainMenuViewModel;
       InitializeComponent();
 
       DataContext = this;
@@ -34,7 +34,7 @@ public partial class ArcanumViewModel
    private void SetRecentProjects(List<ProjectFileDescriptor> descriptors)
    {
       for (var i = 0; i < Math.Min(4, descriptors.Count); i++)
-         RecentProjectsPanel.Children.Add(new RecentProjectCard(descriptors[i], _mainViewModel));
+         RecentProjectsPanel.Children.Add(new RecentProjectCard(descriptors[i], _mainMenuViewModel));
    }
 
    private void AddBaseMod(BaseModItem item) => BaseMods.Add(item);
