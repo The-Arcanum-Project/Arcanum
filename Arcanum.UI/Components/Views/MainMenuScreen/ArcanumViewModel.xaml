@@ -54,7 +54,9 @@
                                       Margin = "3"
                                       FontSize = "14"
                                       x:Name = "VanillaFolderTextBox"
-                                      Style = "{StaticResource BaseTextBoxStyle}">
+                                      Style = "{StaticResource BaseTextBoxStyle}"
+                                      VerticalScrollBarVisibility="Disabled"
+                                      TextWrapping="NoWrap">
         </styleClasses:CorneredTextBox>
 
 
@@ -95,7 +97,9 @@
                                       Margin = "3"
                                       FontSize = "14"
                                       x:Name = "ModFolderTextBox"
-                                      Style = "{StaticResource BaseTextBoxStyle}">
+                                      Style = "{StaticResource BaseTextBoxStyle}"
+                                      VerticalScrollBarVisibility="Disabled"
+                                      TextWrapping="NoWrap">
         </styleClasses:CorneredTextBox>
 
         <Border Grid.Column = "2"

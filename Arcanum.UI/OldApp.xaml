@@ -21,6 +21,7 @@
                 <ResourceDictionary Source="Components/Styles/Specific/StackPanelStyle.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseToolTip.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseGridSplitter.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseContextMenu.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

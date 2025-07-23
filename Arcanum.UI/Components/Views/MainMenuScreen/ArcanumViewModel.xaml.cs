@@ -17,6 +17,7 @@ public partial class ArcanumViewModel
    public ObservableCollection<BaseModItem> BaseMods { get; set; } = [];
 
    private readonly MainMenuViewModel _mainMenuViewModel;
+   private readonly List<ProjectFileDescriptor> _recentProjectDescriptors = [];
 
    public ArcanumViewModel(List<ProjectFileDescriptor> descriptors, MainMenuViewModel mainMenuViewModel)
    {
@@ -28,18 +29,40 @@ public partial class ArcanumViewModel
 
       descriptors.Sort();
 
-      SetRecentProjects(descriptors);
+      _recentProjectDescriptors.AddRange(descriptors);
+      SetRecentProjects();
    }
 
-   private void SetRecentProjects(List<ProjectFileDescriptor> descriptors)
+   private void SetRecentProjects(int start = 0)
    {
-      for (var i = 0; i < Math.Min(4, descriptors.Count); i++)
-         RecentProjectsPanel.Children.Add(new RecentProjectCard(descriptors[i], _mainMenuViewModel));
+      for (var i = start; i < Math.Min(4, _recentProjectDescriptors.Count); i++)
+         RecentProjectsPanel.Children.Add(new RecentProjectCard(_recentProjectDescriptors[i], _mainMenuViewModel));
    }
 
    private void AddBaseMod(BaseModItem item) => BaseMods.Add(item);
 
    private void RemoveBaseMod(BaseModItem item) => BaseMods.Remove(item);
+
+   public void RemoveRecentProject(ProjectFileDescriptor descriptor)
+   {
+      var card = RecentProjectsPanel.Children
+         .OfType<RecentProjectCard>()
+         .FirstOrDefault(c => Equals(c.Descriptor, descriptor));
+
+      if (card != null)
+      {
+         RecentProjectsPanel.Children.Remove(card);
+         _recentProjectDescriptors.Remove(descriptor);
+      }
+
+      AddMoreRecentProjects();
+   }
+
+   private void AddMoreRecentProjects()
+   {
+      var cardCount = RecentProjectsPanel.Children.OfType<RecentProjectCard>().Count();
+      SetRecentProjects(cardCount);
+   }
 
    private void VanillaFolderButton_Click(object sender, RoutedEventArgs e)
    {
@@ -47,7 +70,7 @@ public partial class ArcanumViewModel
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
       VanillaFolderTextBox.Text = path ?? string.Empty;
    }
-   
+
    private void ModFolderButton_Click(object sender, RoutedEventArgs e)
    {
       var modPath = IO.SelectFolder(IO.GetUserModFolderPath, "Select mod folder");
@@ -63,13 +86,12 @@ public partial class ArcanumViewModel
          return;
 
       var newItem = new BaseModItem(RemoveBaseMod) { Path = newItemPath };
-      
 
       AddBaseMod(newItem);
    }
 
    private BaseModItem? _draggedItem;
-   
+
    public void ClearUi()
    {
       ModFolderTextBox.Text = string.Empty;
@@ -78,7 +100,7 @@ public partial class ArcanumViewModel
       BaseMods.Clear();
       BaseModsListBox.ItemsSource = BaseMods;
    }
-   
+
    public void DescriptorToUi(ProjectFileDescriptor descriptor)
    {
       ModFolderTextBox.Text = descriptor.ModPath;
@@ -91,7 +113,6 @@ public partial class ArcanumViewModel
          AddBaseMod(item);
       }
    }
-   
 }
 
 public class ZeroToVisibilityConverter : IValueConverter
