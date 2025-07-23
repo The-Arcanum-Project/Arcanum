@@ -5,7 +5,6 @@ namespace UnitTests;
 
 using Arcanum.API;
 using Arcanum.API.Console;
-using Arcanum.API.UtilServices;
 using Moq;
 using NUnit.Framework;
 

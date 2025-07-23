@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Arcanum.Core.Utils.DelayedEvents;
+﻿using Arcanum.Core.Utils.DelayedEvents;
 
 namespace UnitTests.Utils;
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Arcanum.UI.Components.UserControls.SaveWindow;
+﻿using Arcanum.UI.Components.UserControls.SaveWindow;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 

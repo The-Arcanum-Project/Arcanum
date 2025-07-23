@@ -1,6 +1,4 @@
-﻿using Octokit;
-
-namespace Arcanum.Core.Utils.Git;
+﻿namespace Arcanum.Core.Utils.Git;
 
 public class GitReleaseObject : GitDataObjectBase
 {

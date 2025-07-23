@@ -1,7 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using System.Collections.Generic;
-using System.Linq;
 
 public interface IElement
 {

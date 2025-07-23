@@ -7,7 +7,6 @@ using Arcanum.API;
 using Arcanum.API.Events;
 using Arcanum.API.Settings;
 using Arcanum.Core.Utils.DelayedEvents;
-using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Util;
 
