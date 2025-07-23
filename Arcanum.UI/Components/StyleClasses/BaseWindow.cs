@@ -157,11 +157,11 @@ public class BaseWindow : Window
       
       var imagePath = WindowState switch
       {
-         WindowState.Maximized => "../../Assets/Icons/RestoreWindow20x20.png",
-         _ => "../../Assets/Icons/FullScreen20x20.png",
+         WindowState.Maximized => "pack://application:,,,/Assets/Icons/20x20/RestoreWindow20x20.png",
+         _ => "pack://application:,,,/Assets/Icons/20x20/FullScreen20x20.png",
       };
 
-      image.Source = new BitmapImage(new(imagePath, UriKind.Relative));
+      image.Source = new BitmapImage(new(imagePath));
    }
    private void OnSourceInitialized(object? sender, EventArgs e)
    {

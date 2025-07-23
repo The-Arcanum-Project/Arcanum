@@ -1,25 +1,60 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
-public partial class MainWindow
+public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
    public const int DEFAULT_WIDTH = 1920;
    public const int DEFAULT_HEIGHT = 1080;
 
    private readonly MainWindowView _view;
+   private string _ramUsage = "RAM: [0 MB]";
+   private string _cpuUsage = "CPU: [0%]";
+
+   #region Properties
+
+   public string RamUsage
+   {
+      get => _ramUsage;
+      set
+      {
+         if (value == _ramUsage)
+            return;
+
+         _ramUsage = value;
+         OnPropertyChanged();
+      }
+   }
+   public string CpuUsage
+   {
+      get => _cpuUsage;
+      set
+      {
+         if (value == _cpuUsage)
+            return;
+
+         _cpuUsage = value;
+         OnPropertyChanged();
+      }
+   }
+
+   #endregion
 
    public MainWindow()
    {
       InitializeComponent();
+      PerformanceCountersHelper.Initialize(this);
 
       _view = DataContext as MainWindowView ??
               throw new InvalidOperationException("DataContext is not set or is not of type MainWindowView.");
@@ -65,6 +100,7 @@ public partial class MainWindow
       var settingsWindow = new PluginSettingsWindow();
       settingsWindow.ShowDialog();
    }
+
    private void OpenSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       // TODO @Minnator create a settings window
@@ -88,5 +124,38 @@ public partial class MainWindow
    private void OpenReloadFolderWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       // TODO @MelCo link this to the actual reload folder logic
+   }
+
+   public void SetCpuUsage(string cpuUsage)
+   {
+      if (string.Equals(cpuUsage, CpuUsage, StringComparison.Ordinal))
+         return;
+
+      CpuUsage = cpuUsage;
+   }
+
+   public void SetMemoryUsage(string memoryUsage)
+   {
+      if (string.Equals(memoryUsage, RamUsage, StringComparison.Ordinal))
+         return;
+
+      RamUsage = memoryUsage;
+   }
+
+   public event PropertyChangedEventHandler? PropertyChanged;
+
+   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   {
+      PropertyChanged?.Invoke(this, new(propertyName));
+   }
+
+   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+   {
+      if (EqualityComparer<T>.Default.Equals(field, value))
+         return false;
+
+      field = value;
+      OnPropertyChanged(propertyName);
+      return true;
    }
 }
