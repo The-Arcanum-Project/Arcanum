@@ -99,9 +99,9 @@ public class MainMenuViewModel : ObservableObject
          case MainMenuScreenView.Modforge:
             CurrentView = ModforgeVm;
             break;
-         case MainMenuScreenView.Feature:
-            CurrentView = FeatureFm;
-            break;
+         // case MainMenuScreenView.Feature:
+         //    CurrentView = FeatureFm;
+         //    break;
          case MainMenuScreenView.Arcanum:
             CurrentView = ArcanumVm;
             break;
@@ -119,7 +119,7 @@ public class MainMenuViewModel : ObservableObject
       var buttons = MainMenuStackPanel.Children.OfType<RadioButton>().ToList();
       buttons.ForEach(button => button.IsChecked = false);
       
-      if (MainMenuStackPanel.Children.Count > (int)view)
+      if (buttons.Count > (int)view)
          ((RadioButton)MainMenuStackPanel.Children[(int)view]).IsChecked = true;
 
       TargetedView = view;
@@ -127,7 +127,7 @@ public class MainMenuViewModel : ObservableObject
 
    internal bool GetDescriptorFromInput(out ProjectFileDescriptor descriptor)
    {
-      descriptor = new ProjectFileDescriptor(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
+      descriptor = new (Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
                        ArcanumVm.ModFolderTextBox.Text,
                        ArcanumVm.BaseMods.Select(mod => mod.Path).ToList(), ArcanumVm.VanillaFolderTextBox.Text);
 

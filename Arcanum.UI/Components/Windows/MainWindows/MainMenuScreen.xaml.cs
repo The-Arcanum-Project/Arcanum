@@ -20,10 +20,10 @@ public partial class MainMenuScreen
    {
       Home = 0,
       Arcanum = 1,
-      Feature = 2,
-      Modforge = 3,
-      AboutUs = 4,
-      Attributions = 5,
+      Feature = 0, // Assuming Feature is the same as Home for now as we have disabled that button
+      Modforge = 2,
+      AboutUs = 3,
+      Attributions = 4,
    }
 
    public readonly MainMenuViewModel MainMenuViewModel;

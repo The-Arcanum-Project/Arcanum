@@ -18,7 +18,7 @@
                            TargetType = "Border"
                            BasedOn = "{StaticResource PresentationCard}">
                         <Setter Property = "Width"
-                                Value = "150" />
+                                Value = "300" />
                         <Setter Property = "Height"
                                 Value = "150" />
                         <Setter Property = "Background"
@@ -69,15 +69,17 @@
                     <Style x:Key = "SocialBodyText"
                            TargetType = "TextBlock">
                         <Setter Property = "FontSize"
-                                Value = "18" />
+                                Value = "22" />
                         <Setter Property = "TextAlignment"
                                 Value = "Center" />
                         <Setter Property = "Foreground"
                                 Value = "LightGray" />
                         <Setter Property = "HorizontalAlignment"
                                 Value = "Center" />
+                        <Setter Property = "VerticalAlignment"
+                                Value = "Center" />
                         <Setter Property = "Margin"
-                                Value = "5,12,5,5" />
+                                Value = "5,20,5,5" />
                     </Style>
 
                     <!-- Image Style -->
@@ -95,160 +97,150 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel>
-        <TextBlock Text = "Discover"
-                   Style = "{StaticResource TitleText}"
-                   Margin = "0,0,0,10" />
+    <Grid Margin = "0">
 
-        <StackPanel Orientation = "Horizontal">
-            <!-- News Card -->
-            <Border Width = "400"
-                    Height = "200"
-                    Style = "{StaticResource PresentationCard}">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint = "0,0"
-                                         EndPoint = "1,2">
-                        <GradientStop Color = "CornflowerBlue"
-                                      Offset = "0.0" />
-                        <GradientStop Color = "BlueViolet"
-                                      Offset = "1.0" />
-                    </LinearGradientBrush>
-                </Border.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "1*" />
+            <ColumnDefinition Width = "1*" />
+        </Grid.ColumnDefinitions>
 
-                <Grid>
+
+        <StackPanel Grid.Column = "0">
+
+            <TextBlock Text = "Discover"
+                       Style = "{StaticResource TitleText}"
+                       Margin = "0,20,0,10"
+                       HorizontalAlignment = "Center"
+                       FontSize = "30" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "Auto" />
+                    <ColumnDefinition Width = "1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Latest Release Card -->
+                <Border Grid.Column = "1"
+                        Width = "320"
+                        Height = "320"
+                        Style = "{StaticResource PresentationCard}"
+                        Margin = "0, 30, 0, 0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint = "0,0"
+                                             EndPoint = "1,2">
+                            <GradientStop Color = "SandyBrown"
+                                          Offset = "0.0" />
+                            <GradientStop Color = "Purple"
+                                          Offset = "1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+
                     <StackPanel>
-                        <TextBlock Text = "Arcanum News"
+                        <TextBlock Text = "Latest Release"
                                    Style = "{StaticResource TitleText}"
+                                   HorizontalAlignment = "Center"
+                                   Margin = "10,40,10,20"
+                                   FontSize = "38" />
+                        <TextBlock x:Name = "LatestReleaseNameTextBox"
+                                   Text = "Fetching data..."
+                                   Foreground = "{StaticResource AccentBackColorBrush}"
+                                   TextAlignment = "Center"
+                                   FontSize = "25"
                                    Margin = "20,20,20,0" />
-                        <TextBlock Text = "Editor go BRRRR:&#x0a;Increasing performance of the Selection"
-                                   Width = "250"
-                                   HorizontalAlignment = "Left"
+                        <TextBlock x:Name = "LatestReleaseVersionTextBox"
+                                   Text = "Version 1.1.0.0-beta"
+                                   Foreground = "LightGray"
+                                   TextAlignment = "Center"
+                                   FontSize = "16"
+                                   Margin = "20,0,20,20" />
+                        <TextBlock x:Name = "LatestReleaseUpdateTextBox"
+                                   Text = "Get it now!"
                                    Foreground = "White"
                                    TextWrapping = "WrapWithOverflow"
-                                   FontSize = "18"
-                                   Margin = "20,15,20,20" />
+                                   FontSize = "26"
+                                   HorizontalAlignment = "Center"
+                                   Margin = "20,20,20,20" />
                     </StackPanel>
-                    <Image Width = "120"
-                           Height = "120"
-                           Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
-                           Margin = "270,10,10,10" />
-                </Grid>
-            </Border>
+                </Border>
+            </Grid>
 
-            <!-- Latest Release Card -->
-            <Border Width = "200"
-                    Height = "200"
-                    Margin = "50,0,0,0"
-                    Style = "{StaticResource PresentationCard}">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint = "0,0"
-                                         EndPoint = "1,2">
-                        <GradientStop Color = "SandyBrown"
-                                      Offset = "0.0" />
-                        <GradientStop Color = "Purple"
-                                      Offset = "1.0" />
-                    </LinearGradientBrush>
-                </Border.Background>
-
-                <StackPanel>
-                    <TextBlock Text = "Latest Release"
-                               Style = "{StaticResource TitleText}"
-                               HorizontalAlignment = "Center"
-                               Margin = "10,20,10,0" />
-                    <TextBlock x:Name = "LatestReleaseNameTextBox"
-                               Text = "Fetching data..."
-                               Foreground = "{StaticResource AccentBackColorBrush}"
-                               TextAlignment = "Center"
-                               FontSize = "20"
-                               Margin = "20,20,20,0"/>
-                    <TextBlock x:Name = "LatestReleaseVersionTextBox"
-                               Text = "Version 1.1.0.0-beta"
-                               Foreground = "LightGray"
-                               TextAlignment = "Center"
-                               FontSize = "12"
-                               Margin = "20,5,20,20" />
-                    <TextBlock x:Name = "LatestReleaseUpdateTextBox"
-                        Text = "Get it now!"
-                               Foreground = "White"
-                               TextWrapping = "WrapWithOverflow"
-                               FontSize = "26"
-                               HorizontalAlignment = "Center"
-                               Margin = "20,0,20,20" />
-                </StackPanel>
-            </Border>
         </StackPanel>
 
-        <StackPanel Orientation = "Horizontal"
-                    Margin = "0,15,0,0">
-            <!-- Feature Spotlight -->
-            <StackPanel>
-                <TextBlock Text = "Feature Spotlight"
-                           Style = "{StaticResource SectionHeaderText}" />
-                <Border Width = "315"
-                        Height = "150"
-                        Background = "BlueViolet"
-                        Style = "{StaticResource PresentationCard}"
-                        Margin = "0" />
-            </StackPanel>
+        <StackPanel Grid.Column = "1"
+                    Margin = "20,20,0,0"
+                    HorizontalAlignment = "Stretch">
+            <TextBlock Text = "Socials"
+                       Style = "{StaticResource SectionHeaderText}"
+                       HorizontalAlignment = "Center"
+                       FontSize = "30" />
 
-            <!-- Socials -->
-            <StackPanel Margin = "20,0,0,0">
-                <TextBlock Text = "Socials"
-                           Style = "{StaticResource SectionHeaderText}" />
-                <StackPanel Orientation = "Horizontal">
-                    <!-- Discord -->
-                    <Border Style = "{StaticResource SocialCardBorderStyle}">
-                        <StackPanel>
-                            <StackPanel Orientation = "Horizontal">
-                                <Image Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
-                                       Style = "{StaticResource SocialIconStyle}" />
-                                <TextBlock Style = "{StaticResource SocialHeaderText}"
-                                           PreviewMouseUp="DiscordTextBlock_PreviewMouseUp">
-                                    <Bold> Discord </Bold>
-                                </TextBlock>
-                            </StackPanel>
-                            <TextBlock Text = "Join our Server&#x0a; for Updates!"
-                                       Style = "{StaticResource SocialBodyText}" />
-                        </StackPanel>
-                    </Border>
+            <Grid HorizontalAlignment = "Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "1*" />
+                </Grid.ColumnDefinitions>
 
-                    <!-- GitHub -->
-                    <Border Style = "{StaticResource SocialCardBorderStyle}"
-                            Margin = "15,0,0,0">
-                        <StackPanel>
-                            <StackPanel Orientation = "Horizontal">
-                                <Image Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
-                                       Style = "{StaticResource SocialIconStyle}" />
-                                <TextBlock Style = "{StaticResource SocialHeaderText}"
-                                           PreviewMouseUp="GitHubTextBlock_PreviewMouseUp">
-                                    <Bold> GitHub </Bold>
-                                </TextBlock>
-                            </StackPanel>
-                            <TextBlock Text = "Explore the Wiki,&#x0a; Report Issues"
-                                       Style = "{StaticResource SocialBodyText}" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </StackPanel>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "1*" />
+                    <RowDefinition Height = "1*" />
+                </Grid.RowDefinitions>
+                <!-- Discord -->
+                <Border Grid.Column = "0"
+                        Grid.Row = "0"
+                        Style = "{StaticResource SocialCardBorderStyle}"
+                        Margin = "0, 30, 0, 20">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "80" />
+                                <ColumnDefinition Width = "*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.Column = "0"
+                                   Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                   Style = "{StaticResource SocialIconStyle}" />
+                            <TextBlock Grid.Column = "0"
+                                       Grid.ColumnSpan = "2"
+                                       Style = "{StaticResource SocialHeaderText}"
+                                       PreviewMouseUp = "DiscordTextBlock_PreviewMouseUp"
+                                       HorizontalAlignment = "Center">
+                                <Bold> Discord </Bold>
+                            </TextBlock>
+                        </Grid>
+                        <TextBlock Text = "Join our Server for Updates!"
+                                   Style = "{StaticResource SocialBodyText}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- GitHub -->
+                <Border Grid.Column = "0"
+                        Grid.Row = "1"
+                        Style = "{StaticResource SocialCardBorderStyle}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "80" />
+                                <ColumnDefinition Width = "*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.Column = "0"
+                                   Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                   Style = "{StaticResource SocialIconStyle}" />
+                            <TextBlock Grid.Column = "0"
+                                       Grid.ColumnSpan = "2"
+                                       Style = "{StaticResource SocialHeaderText}"
+                                       PreviewMouseUp = "DiscordTextBlock_PreviewMouseUp"
+                                       HorizontalAlignment = "Center">
+                                <Bold> GitHub </Bold>
+                            </TextBlock>
+                        </Grid>
+                        <TextBlock Text = "Explore the Wiki,&#x0a; Report Issues"
+                                   Style = "{StaticResource SocialBodyText}"
+                                   Margin="0, 5, 0, 0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </StackPanel>
-    </StackPanel>
-
-
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Load over 20,000 game files in under 3 seconds." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Full shader-based map editor with real-time feedback." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Procedural painting tools, 30+ toggleable overlays." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Advanced tooltip system: recursive, live, customizable." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Custom achievement system with event-driven progress." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Trigger and scope engine compatible with Paradox syntax." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• Auto file creation, syncing, and mod structure management." /> -->
-    <!-- <TextBlock Style = "{StaticResource BaseTextBlock}" -->
-    <!--            Text = "• 150+ settings. Built for power users." /> -->
+    </Grid>
 
 </UserControl>

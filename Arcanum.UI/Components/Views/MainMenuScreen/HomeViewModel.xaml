@@ -24,8 +24,6 @@
                                 Value = "150" />
                         <Setter Property = "Background"
                                 Value = "BlueViolet" />
-                        <Setter Property = "Margin"
-                                Value = "0" />
                     </Style>
 
                     <!-- TextBlock Styles -->

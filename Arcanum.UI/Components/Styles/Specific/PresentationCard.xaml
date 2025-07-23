@@ -3,6 +3,7 @@
     
     <Style x:Key="PresentationCard" TargetType="Border">
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="3"/>
         <Setter Property="BorderBrush" Value="{StaticResource BlueSelectionBackColorBrush}"/>
         <Setter Property="CornerRadius" Value="10"/>
         <Style.Triggers>
@@ -13,7 +14,10 @@
                             <!-- Animate Margin -->
                             <ThicknessAnimation 
                                 Storyboard.TargetProperty="BorderThickness" 
-                                To="2" Duration="0:0:0.2"/>
+                                To="3" Duration="0:0:0.2"/>
+                            <ThicknessAnimation 
+                                Storyboard.TargetProperty="Padding" 
+                                To="0" Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </Trigger.EnterActions>
@@ -24,6 +28,9 @@
                             <ThicknessAnimation 
                                 Storyboard.TargetProperty="BorderThickness" 
                                 To="0" Duration="0:0:0.2"/>
+                            <ThicknessAnimation 
+                                Storyboard.TargetProperty="Padding" 
+                                To="3" Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </Trigger.ExitActions>
