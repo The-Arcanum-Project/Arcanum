@@ -394,6 +394,16 @@
           <XamlRuntime>Wpf</XamlRuntime>
           <SubType>Designer</SubType>
         </Page>
+        <Page Update="Components\Windows\MinorWindows\SaveWindow.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\SaveWindow\FileDragDropItem.xaml">
+          <Generator>MSBuild:Compile</Generator>
+          <XamlRuntime>Wpf</XamlRuntime>
+          <SubType>Designer</SubType>
+        </Page>
     </ItemGroup>
 
     <ItemGroup>
