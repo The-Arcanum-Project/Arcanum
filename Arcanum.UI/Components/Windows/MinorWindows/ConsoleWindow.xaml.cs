@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.ConsoleServices;
@@ -20,7 +21,10 @@ public partial class ConsoleWindow : IOutputReceiver
       ConsoleInputTextBox.Text = ConsoleServiceImpl.CMD_PREFIX;
       ConsoleInputTextBox.SelectionStart = ConsoleInputTextBox.Text.Length;
       ConsoleInputTextBox.SelectionLength = 0;
+      
+      ConsoleInputTextBox.Focus();
    }
+   
 
    private void ConsoleInputTextBox_KeyDown(object sender, KeyEventArgs e)
    {

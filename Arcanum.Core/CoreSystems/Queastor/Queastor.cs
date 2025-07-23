@@ -6,7 +6,9 @@ public class Queastor
 {
    private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
    private readonly BkTree _bkTree = new();
-
+   
+   public static readonly Queastor GlobalInstance = new();
+   
    public void AddToIndex(ISearchable item)
    {
       foreach (var term in item.SearchTerms)

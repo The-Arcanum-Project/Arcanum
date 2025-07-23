@@ -317,6 +317,8 @@ public static class DefaultCommands
       yield return CreatePwdCommand();
       yield return CreateTableCommand();
       yield return CreateSetClearanceCommand(consoleService);
+      yield return DebuggingCommands.CreateSearchCommand();
+      yield return DebuggingCommands.CreateSearchExeCommand();
       // Add any new default commands here
    }
 

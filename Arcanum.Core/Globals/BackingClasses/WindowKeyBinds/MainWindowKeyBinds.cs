@@ -26,4 +26,7 @@ public class MainWindowKeyBinds : KeyBindProvider
    // File Reloading
    public KeyGesture OpenReloadFolderWindow { get; set; } = new(Key.R, ModifierKeys.Control | ModifierKeys.Shift);
    public KeyGesture OpenReloadFileWindow { get; set; } = new(Key.R, ModifierKeys.Control);
+   
+   // Console Commands
+   public KeyGesture OpenConsoleCommand { get; set; } = new(Key.F8);
 }

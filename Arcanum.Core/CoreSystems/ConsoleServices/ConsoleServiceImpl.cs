@@ -197,14 +197,12 @@ public class ConsoleServiceImpl : IConsoleService
          return;
 
       var historyList = _history;
+      
+      if (cmd.StartsWith(CMD_PREFIX))
+         cmd = cmd[CMD_PREFIX.Length..];
       // Only add if different from the last command
       if (historyList.Count == 0 || !historyList[^1].Equals(cmd, StringComparison.OrdinalIgnoreCase))
-      {
-         if (cmd.StartsWith(CMD_PREFIX))
-            cmd = cmd[CMD_PREFIX.Length..];
-
          historyList.Add(cmd.Trim()); // Trim to remove leading/trailing spaces
-      }
 
       if (historyList.Count > HISTORY_CAPACITY)
          historyList.RemoveAt(0);

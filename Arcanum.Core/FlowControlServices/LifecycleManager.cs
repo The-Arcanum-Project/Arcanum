@@ -30,7 +30,7 @@ public class LifecycleManager
     *    - Project files manager
     */
 
-   private PluginManager _pluginManager = null!;
+   public PluginManager PluginManager { get; private set; } = null!;
    private static readonly LifecycleManager LfmInstance = new();
 
    public void RunStartUpSequence(IPluginHost host)
@@ -52,8 +52,8 @@ public class LifecycleManager
       //host.LoadConfigurationSettings();
 
       // Step 4: Discover, load and enable plugins
-      _pluginManager = new(host);
-      _pluginManager.LoadAndInitializePlugins();
+      PluginManager = new(host);
+      PluginManager.LoadAndInitializePlugins();
 
       // Step 5: Show the main menu or UI
       //host.ShowMainMenu();
@@ -79,10 +79,10 @@ public class LifecycleManager
    public void RunShutdownSequence()
    {
       // Step 1: Unload plugins
-      _pluginManager.UnloadAll();
+      PluginManager.UnloadAll();
 
       // Step 2: Unload core services
-      _pluginManager.Host.Unload();
+      PluginManager.Host.Unload();
 
       // Step 3: Perform any additional cleanup if necessary
       // This might include saving state, closing files, etc.
@@ -111,10 +111,10 @@ public class LifecycleManager
 #if DEBUG
    public void InsertPluginForTesting(IPlugin plugin)
    {
-      if (_pluginManager == null)
+      if (PluginManager == null)
          throw new InvalidOperationException("PluginManager is not initialized. Call RunStartUpSequence first.");
 
-      _pluginManager.InjectPluginForTesting(plugin);
+      PluginManager.InjectPluginForTesting(plugin);
    }
 #endif
 

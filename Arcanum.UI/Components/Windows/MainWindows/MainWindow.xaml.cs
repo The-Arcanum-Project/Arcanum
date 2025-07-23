@@ -4,9 +4,11 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
+using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
 
@@ -150,5 +152,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       field = value;
       OnPropertyChanged(propertyName);
       return true;
+   }
+
+   private void OpenConsoleCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host, "DebugConsole", category:DefaultCommands.CommandCategory.All));
+      consoleWindow.Show();
    }
 }
