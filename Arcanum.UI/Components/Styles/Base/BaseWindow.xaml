@@ -109,7 +109,7 @@
 
                                     <base:BaseButton x:Name = "CloseButton"
                                                      HoverBackground = "{StaticResource AggressiveRedBackColorBrush}"
-                                                     Margin = "0,0,2,0"
+                                                     Margin = "0"
                                                      Command = "{Binding CloseCommand,
                                                      RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
                                         <Image Source = "/Assets/Icons/20x20/Close20x20.png"
