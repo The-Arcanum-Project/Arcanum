@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
@@ -14,6 +15,9 @@ public class SearchableMenuItem : MenuItem, ISearchable
    public string ResultName { get; private set; }
 
    public List<string> SearchTerms { get; set; } = [];
+   // is modified via Xaml
+   // ReSharper disable once CollectionNeverUpdated.Global
+   internal IList<string> XamlSearchTerms { get; set; } = [];
 
    private const string FALL_BACK = "MenuBar";
 
@@ -21,8 +25,11 @@ public class SearchableMenuItem : MenuItem, ISearchable
    {
       base.OnInitialized(e);
 
+      SearchTerms = new(XamlSearchTerms);
+      
       if (Header?.ToString() is { } header)
-         SearchTerms = QueastorUtils.ExtractSearchTerms(header);
+         SearchTerms.AddRange(QueastorUtils.ExtractSearchTerms(header));
+      
 
       ResultName = Header?.ToString() ?? string.Empty;
       GetNamespace = GetParentAsNamespace();

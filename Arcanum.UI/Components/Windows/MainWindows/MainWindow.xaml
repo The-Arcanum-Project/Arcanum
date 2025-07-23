@@ -4,6 +4,7 @@
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.Views.MainWindow"
                          xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
+                         xmlns:system = "clr-namespace:System;assembly=System.Runtime"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -78,6 +79,13 @@
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Save All Modifications"
                           Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
+                    <!-- <userControls:SearchableMenuItem.XamlSearchTerms> -->
+                    <!--     <x:Array Type="system:String"> -->
+                    <!--         <system:String>Option1</system:String> -->
+                    <!--         <system:String>yolo</system:String> -->
+                    <!--         <system:String>Option3</system:String> -->
+                    <!--     </x:Array> -->
+                    <!-- </userControls:SearchableMenuItem.XamlSearchTerms> -->
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Save16x16.png" />
                     </userControls:SearchableMenuItem.Icon>

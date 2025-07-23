@@ -102,7 +102,7 @@ public class Queastor
       return sorted.Select(x => (GetClosestMatch(query, x.SearchTerms), x)).ToList();
    }
 
-   public string GetClosestMatch(string query, List<string> terms)
+   public string GetClosestMatch(string query, IList<string> terms)
    {
       if (terms.Count == 0)
          return string.Empty;
