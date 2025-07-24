@@ -53,6 +53,7 @@ public partial class PropertyGrid
          Description = string.Empty;
          return;
       }
+      SelectedPropertyItem = item;
 
       if (SelectedObject == null)
          return;
@@ -192,6 +193,7 @@ public class AllOptionsTestObject
    public string TestString { get; set; } = "Test String";
    public int TestInt { get; set; } = 42;
    public bool TestBool { get; set; } = true;
+   [DefaultValue(3.14)]
    public double TestDouble { get; set; } = 3.14;
    // An enum defined as a flag
    public Key FlagEnum { get; set; } = Key.A;

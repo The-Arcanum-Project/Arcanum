@@ -19,7 +19,6 @@
                     x:Name = "SettingsTabControl"
                     HorizontalAlignment = "Stretch"
                     VerticalAlignment = "Stretch"
-                    Style = "{StaticResource DarkTabStyle}"
                     Margin = "3,0, 0, 0"
                     TabStripPlacement = "Left"
                     BorderThickness="0"

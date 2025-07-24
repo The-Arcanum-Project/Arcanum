@@ -35,7 +35,7 @@
             <ComboBox ItemsSource = "{Binding Type, Converter={StaticResource EnumValuesConverter}}"
                       SelectedItem = "{Binding Value, Mode=TwoWay}"
                       Style = "{StaticResource BorderlessComboboxStyle}"
-                      Margin = "1"
+                      Margin = "1, 1, 4, 1"
                       Background = "Transparent" />
         </DataTemplate>
 
