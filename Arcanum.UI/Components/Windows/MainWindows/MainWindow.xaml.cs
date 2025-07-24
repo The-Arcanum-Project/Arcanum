@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing;
 using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -175,6 +176,26 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
+      const string path = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\triggers.log";
+      const string effPath = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\effects.log";
+      var docsTriggers = TriggerParsing.ParseTriggers(path);
+      var sb = new StringBuilder();
+      sb.AppendLine(DocsTrigger.GetCsvHeader());
+      foreach (var trigger in docsTriggers)
+         sb.AppendLine(trigger.ToCsv());
+      
+      File.WriteAllText("EU5_Triggers_Data.csv", sb.ToString());
+
+      var docsEffects = Effectparsing.ParseEffects(effPath);
+      sb.Clear();
+      sb.AppendLine(DocsEffect.GetCsvHeader());
+      foreach (var effect in docsEffects)
+         sb.AppendLine(effect.ToCsv());
+      
+      File.WriteAllText("EU5_Effects_Data.csv", sb.ToString());
+      
+      
+      
       // var modifiers = ParseModifiers.Load();
       //
       // var sb = new StringBuilder();
