@@ -1,11 +1,17 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.OldAndDebug;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -158,5 +164,49 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host, "DebugConsole", category:DefaultCommands.CommandCategory.All));
       consoleWindow.Show();
+   }
+
+   private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      NamedLocationLoading.LoadNamedLocations();
+
+      var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
+      // List< (Memory<System.Drawing.Point>, int)> provs = new (provToId.Count);
+      //
+      // foreach (var (color, points) in provToId)
+      //    provs.provs.Add((new(points.ToArray()), color));
+      //
+      // var debugBmp = new Bitmap(16384, 8192);
+      // foreach (var kvp in provs)
+      //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, debugBmp);
+      //
+      // debugBmp.Save("debugMap.png");
+      
+      var sw = new Stopwatch();
+      sw.Start();
+      var totalPixels = colorToBorder.Values.Sum(points => points.Values.Sum(section => section.Count));
+      List<(Memory<System.Drawing.Point>, int)> borders = new(colorToBorder.Count);
+      foreach (var (color, points) in colorToBorder)
+      {
+         List<System.Drawing.Point> borderSections = [];
+         foreach (var borderSection in points.Values)
+            borderSections.AddRange(borderSection);
+         borders.Add((new(borderSections.ToArray()), color));
+      }
+      
+      var debugBmp = new Bitmap(16384, 8192);
+      var graphics = Graphics.FromImage(debugBmp);
+      graphics.Clear(Color.FromArgb(255, 42, 42, 42)); // Set a background color for better visibility
+      var bmpData = debugBmp.LockBits(new (0, 0, debugBmp.Width, debugBmp.Height), 
+         System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+      foreach (var kvp in borders)
+         MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, bmpData);
+      debugBmp.UnlockBits(bmpData);
+      
+      sw.Stop();
+      Debug.WriteLine($"Drawing took {sw.ElapsedMilliseconds} ms for {borders.Count} borders wit {totalPixels} points");
+      debugBmp.Save("debugBorderMap.png");
+
+      Debug.WriteLine("Loaded " + provToId.Count + " provinces and " + colorToBorder.Count + " borders from old map files.");
    }
 }

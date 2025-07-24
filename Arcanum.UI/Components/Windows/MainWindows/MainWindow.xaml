@@ -52,6 +52,9 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenConsoleCommand"
                         Executed = "OpenConsoleCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.DebugParsingCommand"
+                        Executed = "DebugParsingCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
     </Window.CommandBindings>
 
@@ -174,6 +177,12 @@
             <userControls:SearchableMenuItem Header = "Mod Diagnostics">
 
                 <userControls:SearchableMenuItem Header = "Open Loading Log" />
+            </userControls:SearchableMenuItem>
+            
+            <userControls:SearchableMenuItem Header = "Debug">
+
+                <userControls:SearchableMenuItem Header = "Run Location Parsing" 
+                                                 Command="mainWindow:MwCommands.DebugParsingCommand"/>
             </userControls:SearchableMenuItem>
         </Menu>
     </styleClasses:BaseWindow.HeaderContent>

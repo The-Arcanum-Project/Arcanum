@@ -52,5 +52,9 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenConsoleCommand },
    };
+   public static readonly RoutedCommand DebugParsingCommand = new("DebugParsingCommand", typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.F12) },
+   };
 
 }

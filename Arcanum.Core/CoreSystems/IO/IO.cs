@@ -84,6 +84,27 @@ public static class IO
       }
    }
 
+   public static ReadOnlySpan<char> ReadAllTextAsSpan(string path, Encoding encoding)
+   {
+      if (string.IsNullOrEmpty(path) || !File.Exists(path))
+         return default;
+
+      try
+      {
+         return File.ReadAllText(path, encoding).AsSpan();
+      }
+      catch (IOException)
+      {
+         /* TODO: Log error */
+         return null;
+      }
+      catch (UnauthorizedAccessException)
+      {
+         /* TODO: Log error */
+         return null;
+      }
+   }
+
    public static string[]? ReadAllLines(string path, Encoding encoding)
    {
       if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -356,7 +377,4 @@ public static class IO
       return Task.Run(() => SaveBitmap(path, bmp, format), cancellationToken);
    }
 
-   public static void Unload()
-   {
-   }
 }
