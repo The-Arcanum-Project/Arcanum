@@ -1,14 +1,19 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing;
+using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.OldAndDebug;
@@ -162,12 +167,44 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void OpenConsoleCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host, "DebugConsole", category:DefaultCommands.CommandCategory.All));
+      var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host,
+                                                                   "DebugConsole",
+                                                                   category: DefaultCommands.CommandCategory.All));
       consoleWindow.Show();
    }
 
    private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
+      // var modifiers = ParseModifiers.Load();
+      //
+      // var sb = new StringBuilder();
+      // foreach (var modifier in modifiers)
+      //    sb.AppendLine(modifier.ToString());
+      //
+      // File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
+      //
+      // sb.Clear();
+      // sb.AppendLine(ModifierDefinition.GetCsvHeader());
+      // foreach (var modifier in modifiers)
+      //    sb.AppendLine(modifier.ToCsv());
+      //
+      // File.WriteAllText("EU5_Modifiers_Data_CSV.csv", sb.ToString());
+
+      // var regex = new Regex(@"(\w+)\s*=\s*{");
+      // var filePath =
+      //    "S:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\main_menu\\common\\modifier_icons\\00_modifier_icons.txt";
+      // var content = IO.ReadAllTextUtf8(filePath);
+      // var matches = regex.Matches(content);
+      // var sb = new StringBuilder();
+      //
+      // var strs = matches.Select(match => match.Groups[1].Value).ToList();
+      // strs.Sort();
+      //
+      // foreach (var str in strs)
+      //    sb.AppendLine(str);
+
+      //File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
+
       // NamedLocationLoading.LoadNamedLocations();
       //
       // var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
