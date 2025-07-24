@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Arcanum.Core.Utils.DelayedEvents;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.PopUp;
@@ -179,4 +180,22 @@ public partial class PropertyGrid
    {
       PropertySelected?.Invoke(this, e);
    }
+   
+   public static AllOptionsTestObject GetAllOptionsTestObject()
+   {
+      return new ();
+   }
+}
+
+public class AllOptionsTestObject
+{
+   public string TestString { get; set; } = "Test String";
+   public int TestInt { get; set; } = 42;
+   public bool TestBool { get; set; } = true;
+   public double TestDouble { get; set; } = 3.14;
+   // An enum defined as a flag
+   public Key FlagEnum { get; set; } = Key.A;
+   // an enum defined as a normal enum
+   public Orientation NormalEnum { get; set; } = Orientation.Horizontal;
+   public List<string> TestList { get; set; } = ["Item1", "Item2", "Item3"];
 }

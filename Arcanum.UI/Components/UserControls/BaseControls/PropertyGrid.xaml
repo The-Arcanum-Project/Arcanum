@@ -20,7 +20,9 @@
                                   HorizontalAlignment = "Stretch"
                                   BorderThickness = "0"
                                   Background = "Transparent"
-                                  TextWrapping = "NoWrap" />
+                                  TextWrapping = "NoWrap" 
+                                  Foreground="{StaticResource DefaultForeColorBrush}"
+                                  CaretBrush="{StaticResource DefaultForeColorBrush}"/>
         </DataTemplate>
 
         <DataTemplate x:Key = "BoolTemplate"
@@ -32,7 +34,6 @@
                       DataType = "{x:Type delayedEvents:PropertyItem}">
             <ComboBox ItemsSource = "{Binding Type, Converter={StaticResource EnumValuesConverter}}"
                       SelectedItem = "{Binding Value, Mode=TwoWay}"
-                      DisplayMemberPath = "."
                       Style = "{StaticResource BorderlessComboboxStyle}"
                       Margin = "1"
                       Background = "Transparent" />

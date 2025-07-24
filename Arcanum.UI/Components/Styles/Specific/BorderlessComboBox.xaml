@@ -101,8 +101,7 @@
         <Setter Property = "ItemContainerStyle"
                 Value = "{StaticResource BaseComboBoxItemStyle}" />
         <Setter Property = "HorizontalAlignment"
-                Value = "Stretch">
-        </Setter>
+                Value = "Stretch" />
         <Setter Property = "SnapsToDevicePixels"
                 Value = "True" />
         <Setter Property = "OverridesDefaultStyle"
