@@ -23,7 +23,6 @@
                  AcceptsReturn = "False"
                  IsReadOnly = "True"
                  BorderThickness = "0"
-                 Style = "{StaticResource BaseTextBoxStyle}"
                  Margin = "0, 0, 0, 4"
                  HighlightOnFocus="False"
                  FontFamily="{StaticResource DefaultMonospacedFont}">
@@ -39,7 +38,6 @@
                                       AcceptsReturn = "False"
                                       IsReadOnly = "False"
                                       BorderThickness = "0"
-                                      Style = "{StaticResource BaseTextBoxStyle}"
                                       Margin = "0, 0, 0, 4"
                                       HighlightOnFocus="False"
                                       PreviewKeyDown="ConsoleInputTextBox_KeyDown"

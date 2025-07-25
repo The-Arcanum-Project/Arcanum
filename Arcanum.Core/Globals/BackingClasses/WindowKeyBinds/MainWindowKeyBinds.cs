@@ -29,4 +29,9 @@ public class MainWindowKeyBinds : KeyBindProvider
    
    // Console Commands
    public KeyGesture OpenConsoleCommand { get; set; } = new(Key.F8);
+   
+   // Wiki Commands
+   public KeyGesture OpenEffectWiki { get; set; } = new(Key.None);
+   public KeyGesture OpenTriggerWiki { get; set; } = new(Key.None);
+   public KeyGesture OpenModifierWiki { get; set; } = new(Key.None);
 }

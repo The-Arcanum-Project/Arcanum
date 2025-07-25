@@ -56,5 +56,18 @@ public static class MwCommands
    {
       InputGestures = { new KeyGesture(Key.F12) },
    };
-
+   
+   // Wiki Commands
+   public static readonly RoutedCommand OpenEffectWikiCommand = new("OpenEffectWikiCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenEffectWiki },
+   };
+   public static readonly RoutedCommand OpenTriggerWikiCommand = new("OpenTriggerWikiCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenEffectWiki },
+   };
+   public static readonly RoutedCommand OpenModifierWikiCommand = new("OpenModifierWikiCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenEffectWiki },
+   };
 }

@@ -8,6 +8,7 @@
     <Color x:Key = "LightBackColor"> #393939 </Color>
     <Color x:Key = "SelectedBackColor"> #575757 </Color>
     <Color x:Key = "DarkerSelectedBackColor"> #484848 </Color>
+    <Color x:Key = "RowAlternatingColor"> #757373 </Color>
     <Color x:Key = "BlueSelectionBackColor"> #2e436e </Color>
     <Color x:Key = "AggressiveRedBackColor"> #e81123 </Color>
     <Color x:Key = "GreenColor"> #528d57 </Color>
@@ -27,6 +28,8 @@
     <SolidColorBrush x:Key = "BlueSelectionBackColorBrush"
                      Color = "{StaticResource BlueSelectionBackColor}" />
     <SolidColorBrush x:Key = "DarkerSelectedBackColorBrush"
+                     Color = "{StaticResource DarkerSelectedBackColor}" />
+    <SolidColorBrush x:Key = "RowAlternatingColorColorBrush"
                      Color = "{StaticResource DarkerSelectedBackColor}" />
     <SolidColorBrush x:Key = "AggressiveRedBackColorBrush"
                      Color = "{StaticResource AggressiveRedBackColor}" />

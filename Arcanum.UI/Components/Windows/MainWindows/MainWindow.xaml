@@ -55,6 +55,15 @@
         <CommandBinding Command = "mainWindow:MwCommands.DebugParsingCommand"
                         Executed = "DebugParsingCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenEffectWikiCommand"
+                        Executed = "OpenEffectWikiCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenTriggerWikiCommand"
+                        Executed = "OpenTriggerWikiCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenModifierWikiCommand"
+                        Executed = "OpenModifierWikiCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
     </Window.CommandBindings>
 
@@ -177,6 +186,16 @@
             <userControls:SearchableMenuItem Header = "Mod Diagnostics">
 
                 <userControls:SearchableMenuItem Header = "Open Loading Log" />
+            </userControls:SearchableMenuItem>
+            
+            <userControls:SearchableMenuItem Header = "Wiki">
+
+                <userControls:SearchableMenuItem Header = "Effects Wiki" 
+                                                 Command="mainWindow:MwCommands.OpenEffectWikiCommand"/>
+                <userControls:SearchableMenuItem Header = "Trigger Wiki" 
+                                                 Command="mainWindow:MwCommands.OpenTriggerWikiCommand"/>
+                <userControls:SearchableMenuItem Header = "Modifiers Wiki" 
+                                                 Command="mainWindow:MwCommands.OpenModifierWikiCommand"/>
             </userControls:SearchableMenuItem>
             
             <userControls:SearchableMenuItem Header = "Debug">

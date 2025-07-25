@@ -24,7 +24,7 @@ internal static class Program
          "Components/Styles/Base/BaseTabControl.xaml", "Components/Styles/Specific/StackPanelStyle.xaml",
          "Components/Styles/Base/BaseToolTip.xaml", "Components/Styles/Base/BaseMenuStyle.xaml",
          "Components/Styles/Base/BaseMenuItemStyle.xaml", "Components/Styles/Base/BaseGridSplitter.xaml",
-         "Components/Styles/Base/BaseContextMenu.xaml",
+         "Components/Styles/Base/BaseContextMenu.xaml", "Components/Styles/Base/BaseDataGrid.xaml",
       };
 
       foreach (var path in resources)

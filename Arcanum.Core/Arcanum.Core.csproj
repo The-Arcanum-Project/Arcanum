@@ -16,6 +16,7 @@
   <ItemGroup>
     <Folder Include="CoreSystems\LoadingLifecycle\" />
     <Folder Include="CoreSystems\Parsing\ImageParsingUtil\" />
+    <Folder Include="Utils\SearchingAlgorithms\" />
   </ItemGroup>
 
   <ItemGroup>

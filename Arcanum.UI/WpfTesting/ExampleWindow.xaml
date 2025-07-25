@@ -11,19 +11,9 @@
                         Width = "800"
                         FooterHeight="0">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Base/Styles/BaseComboboxStyle.xaml"/>
-                <ResourceDictionary Source = "/Components/Base/Styles/BaseTextBoxStyle.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <styleClasses:BaseWindow.HeaderContent>
         <StackPanel Orientation = "Horizontal">
             <ComboBox Width = "100"
-                      Style = "{StaticResource BaseComboboxStyle}"
                       Margin = "5">
                 <ComboBox.Items>
                     <ComboBoxItem Content = "Option 1" />
@@ -86,7 +76,6 @@
     <styleClasses:BaseWindow.FooterContent>
     
             <ComboBox Width = "100"
-                      Style = "{StaticResource BaseComboboxStyle}"
                       Margin = "5"
                       IsEditable = "True">
                 <ComboBox.Items>

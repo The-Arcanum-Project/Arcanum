@@ -226,20 +226,33 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       //File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
 
-      // NamedLocationLoading.LoadNamedLocations();
+      NamedLocationLoading.LoadNamedLocations();
+      
+      var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
+      var provIds = new List<int>(provToId.Count);
+      var index = 0;
+      
+      foreach (var kvp in provToId)
+         provIds.Add(kvp.Value.Count);
+      
+      provIds.Sort();
+      var sbb = new StringBuilder();
+      foreach (var provicne in provIds)
+         sbb.AppendLine(provicne.ToString());
+      
+      File.WriteAllText("EU5_Provinces_Pixel_Count.txt", sbb.ToString());
+
+      // List< (Memory<System.Drawing.Point>, int)> provs = new (provToId.Count);
       //
-      // var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
-      // // List< (Memory<System.Drawing.Point>, int)> provs = new (provToId.Count);
-      // //
-      // // foreach (var (color, points) in provToId)
-      // //    provs.provs.Add((new(points.ToArray()), color));
-      // //
-      // // var debugBmp = new Bitmap(16384, 8192);
-      // // foreach (var kvp in provs)
-      // //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, debugBmp);
-      // //
-      // // debugBmp.Save("debugMap.png");
+      // foreach (var (color, points) in provToId)
+      //    provs.provs.Add((new(points.ToArray()), color));
       //
+      // var debugBmp = new Bitmap(16384, 8192);
+      // foreach (var kvp in provs)
+      //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, debugBmp);
+      //
+      // debugBmp.Save("debugMap.png");
+      
       // var sw = new Stopwatch();
       // sw.Start();
       // var totalPixels = colorToBorder.Values.Sum(points => points.Values.Sum(section => section.Count));
@@ -266,5 +279,20 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       // debugBmp.Save("debugBorderMap.png");
       //
       // Debug.WriteLine("Loaded " + provToId.Count + " provinces and " + colorToBorder.Count + " borders from old map files.");
+   }
+
+   private void OpenEffectWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Effects).ShowDialog();
+   }
+
+   private void OpenModifierWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      throw new NotImplementedException();
+   }
+
+   private void OpenTriggerWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Triggers).ShowDialog();
    }
 }

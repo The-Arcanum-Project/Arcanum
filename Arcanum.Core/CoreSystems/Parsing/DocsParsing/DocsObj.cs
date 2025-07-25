@@ -9,6 +9,10 @@ public class DocsObj(string name)
    public string[] Traits { get; set; } = [];
    public string[] Scopes { get; set; } = [];
    public string[] Targets { get; set; } = [];
+   
+   public string TraitsString => string.Join(", ", Traits);
+   public string ScopesString => string.Join(", ", Scopes);
+   public string TargetsString => string.Join(", ", Targets);
 
    public string ToCsv()
    {
