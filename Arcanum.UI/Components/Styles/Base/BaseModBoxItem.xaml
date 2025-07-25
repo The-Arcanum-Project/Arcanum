@@ -28,7 +28,7 @@
                        HorizontalAlignment = "Stretch"
                        FontSize = "12"
                        Margin="5, 0, 0, 0"
-                       Text = "{Binding Path}">
+                       Text = "{Binding DataSpace}">
             </TextBlock>
             
             <styleClasses:BaseButton Grid.Column = "1"

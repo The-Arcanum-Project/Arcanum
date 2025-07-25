@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Globals;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
@@ -11,7 +12,7 @@ public class MainMenuScreenDescriptor
 
    public List<ProjectFileDescriptor> ProjectFiles { get; set; } = [];
    public string? LastProjectFile { get; set; } = null;
-   public string? LastVanillaPath { get; set; } = null;
+   public DataSpace? LastVanillaPath { get; set; } = null;
 
    /// <summary>
    /// Only meant for serialization purposes.

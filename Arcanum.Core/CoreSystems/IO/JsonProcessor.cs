@@ -182,7 +182,7 @@ internal static class JsonProcessor
       catch (JsonException ex)
       {
          throw new
-            JsonDeserializationException($"Failed to deserialize JSON to type {typeof(T).FullName}. JSON: '{json[..Math.Min(json.Length, 100)]}{(json.Length > 100 ? "..." : "")}'",
+            JsonDeserializationException($"Failed to deserialize JSON to type {typeof(T).FullName}. JSON: '{json[..Math.Min(json.Length, 100)]}{(json.Length > 100 ? "..." : "")}'",   
                                          ex);
       }
       catch (NotSupportedException ex) // Can be thrown for types that cannot be deserialized

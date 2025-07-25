@@ -46,8 +46,8 @@ public partial class ArcanumViewModel
    public void RemoveRecentProject(ProjectFileDescriptor descriptor)
    {
       var card = RecentProjectsPanel.Children
-         .OfType<RecentProjectCard>()
-         .FirstOrDefault(c => Equals(c.Descriptor, descriptor));
+                                    .OfType<RecentProjectCard>()
+                                    .FirstOrDefault(c => Equals(c.Descriptor, descriptor));
 
       if (card != null)
       {
@@ -80,22 +80,22 @@ public partial class ArcanumViewModel
    private void AddBaseModButton_Click(object sender, RoutedEventArgs e)
    {
       var newItemPath = IO.SelectFolder(IO.GetUserModFolderPath, "Select a base mod folder");
+      var dataSpace = BaseModItem.CreateBaseModDataSpace(newItemPath ?? string.Empty);
+
       if (string.IsNullOrEmpty(newItemPath) ||
-          BaseMods.Any(item => item.Path == newItemPath) ||
-          !Directory.Exists(newItemPath))
+          BaseMods.Any(item => Equals(item.DataSpace, dataSpace)) ||
+          !dataSpace.IsValid)
          return;
 
-      var newItem = new BaseModItem(RemoveBaseMod) { Path = newItemPath };
+      var newItem = new BaseModItem(RemoveBaseMod) { DataSpace = dataSpace };
 
       AddBaseMod(newItem);
    }
 
-   private BaseModItem? _draggedItem;
-
    public void ClearUi()
    {
       ModFolderTextBox.Text = string.Empty;
-      VanillaFolderTextBox.Text = AppData.MainMenuScreenDescriptor.LastVanillaPath ?? string.Empty;
+      VanillaFolderTextBox.Text = AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? string.Empty;
 
       BaseMods.Clear();
       BaseModsListBox.ItemsSource = BaseMods;
@@ -103,13 +103,13 @@ public partial class ArcanumViewModel
 
    public void DescriptorToUi(ProjectFileDescriptor descriptor)
    {
-      ModFolderTextBox.Text = descriptor.ModPath;
-      VanillaFolderTextBox.Text = descriptor.VanillaPath;
+      ModFolderTextBox.Text = Path.Combine(descriptor.ModPath.Path);
+      VanillaFolderTextBox.Text = Path.Combine(descriptor.VanillaPath.Path);
 
       BaseMods.Clear();
       foreach (var baseMod in descriptor.RequiredMods)
       {
-         var item = new BaseModItem(RemoveBaseMod) { Path = baseMod };
+         var item = new BaseModItem(RemoveBaseMod) { DataSpace = baseMod };
          AddBaseMod(item);
       }
    }

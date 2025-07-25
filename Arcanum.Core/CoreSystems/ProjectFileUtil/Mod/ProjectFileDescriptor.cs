@@ -1,17 +1,18 @@
 ﻿using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 
 public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
 {
    public string ModName { get; set; }
-   public string ModPath { get;  set;}
-   
-   public string VanillaPath { get;  set;}
-   public bool IsSubMod { get;  set;}
-   public List<string> RequiredMods { get;  set;} = [];
+   public DataSpace ModPath { get; set; }
+
+   public DataSpace VanillaPath { get; set; }
+   public bool IsSubMod { get; set; }
+   public List<DataSpace> RequiredMods { get; set; } = [];
    public DateTime LastModified { get; set; }
 
    /// <summary>
@@ -21,7 +22,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    {
    }
 
-   public ProjectFileDescriptor(string modName, string modPath, string vanillaPath)
+   public ProjectFileDescriptor(string modName, DataSpace modPath, DataSpace vanillaPath)
    {
       ModName = modName;
       ModPath = modPath;
@@ -29,7 +30,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       LastModified = DateTime.Now;
    }
 
-   public ProjectFileDescriptor(string modName, string modPath, List<string> requiredMods, string vanillaPath)
+   public ProjectFileDescriptor(string modName, DataSpace modPath, List<DataSpace> requiredMods, DataSpace vanillaPath)
    {
       ModName = modName;
       ModPath = modPath;
@@ -84,7 +85,13 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       // This method should gather the necessary data from the current state of the application
       // and return a new ProjectFileDescriptor instance.
       // For now, we will return a placeholder instance.
-      return new("DefaultMod", "DefaultPath",["RequiredMod1", "RequiredMod2"], "VanillaPath");
+      return new("DefaultMod",
+                 new("example", [], DataSpace.AccessType.ReadOnly),
+                 [
+                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
+                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
+                 ],
+                 new("example", [], DataSpace.AccessType.ReadOnly));
    }
 
    public static bool operator <(ProjectFileDescriptor left, ProjectFileDescriptor right)
@@ -96,18 +103,16 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    public bool IsValid()
    {
       return !string.IsNullOrEmpty(ModName) &&
-             !string.IsNullOrEmpty(ModPath) &&
-             Directory.Exists(ModPath) &&
-             !string.IsNullOrEmpty(VanillaPath) &&
-             Directory.Exists(VanillaPath) &&
-             RequiredMods.All(Directory.Exists);
+             ModPath.IsValid &&
+             VanillaPath.IsValid &&
+             RequiredMods.All(x => x.IsValid);
    }
 
    public ImageSource ModThumbnailOrDefault()
    {
-      var thumbnailPath = Path.Combine(ModPath, "thumbnail.png");
+      var thumbnailPath = Path.Combine(Path.Combine(ModPath.Path), "thumbnail.png");
       if (!File.Exists(thumbnailPath))
-         return new BitmapImage(new Uri("pack://application:,,,/Assets/Logo/ArcanumForeColor.png", UriKind.Absolute));
+         return new BitmapImage(new("pack://application:,,,/Assets/Logo/ArcanumForeColor.png", UriKind.Absolute));
 
       return new BitmapImage(new(thumbnailPath, UriKind.Absolute));
    }

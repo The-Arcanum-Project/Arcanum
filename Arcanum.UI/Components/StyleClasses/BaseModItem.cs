@@ -1,24 +1,26 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.StyleClasses;
 
 public class BaseModItem : INotifyPropertyChanged
 {
-   private string _path = string.Empty;
-   public string Path
+   private DataSpace _dataSpace = DataSpace.Empty;
+   public DataSpace DataSpace
    {
-      get => _path;
+      get => _dataSpace;
       set
       {
-         if (_path == value)
+         if (_dataSpace == value)
             return;
 
-         _path = value;
+         _dataSpace = value;
          OnPropertyChanged();
       }
    }
@@ -35,8 +37,18 @@ public class BaseModItem : INotifyPropertyChanged
 
    private void OpenFolderDialog()
    {
-      Path = IO.SelectFolder(IO.GetUserModFolderPath, "Select a base mod folder") ??
+      var dataSpacePath = IO.SelectFolder(IO.GetUserModFolderPath, "Select a base mod folder") ??
              string.Empty;
+
+      if (string.IsNullOrEmpty(dataSpacePath))
+         return;
+
+      DataSpace = CreateBaseModDataSpace(dataSpacePath);
+   }
+
+   public static DataSpace CreateBaseModDataSpace(string path)
+   {
+      return new(Path.GetDirectoryName(path) ?? path, path.Split('/'), DataSpace.AccessType.ReadOnly);
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;

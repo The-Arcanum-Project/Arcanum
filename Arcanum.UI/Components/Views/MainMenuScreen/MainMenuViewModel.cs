@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Globals;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -37,7 +38,7 @@ public class MainMenuViewModel : ObservableObject
       ArcanumViewModel => "Current Config:",
       _ => "Last Project:",
    };
-   
+
    public Visibility IsWindowVisible
    {
       get => _isWindowVisible;
@@ -81,7 +82,8 @@ public class MainMenuViewModel : ObservableObject
       {
          SetCurrentView(MainMenuScreenView.Arcanum);
          if (string.IsNullOrEmpty(ArcanumVm.ModFolderTextBox.Text))
-            ArcanumVm.VanillaFolderTextBox.Text = AppData.MainMenuScreenDescriptor.LastVanillaPath ?? string.Empty;
+            ArcanumVm.VanillaFolderTextBox.Text =
+               AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? string.Empty;
       });
       AboutUsVc = new(() => { SetCurrentView(MainMenuScreenView.AboutUs); });
       AttributionsVc = new(() => { SetCurrentView(MainMenuScreenView.Attributions); });
@@ -118,7 +120,7 @@ public class MainMenuViewModel : ObservableObject
       // Update the button state of the MainMenuStackPanel
       var buttons = MainMenuStackPanel.Children.OfType<RadioButton>().ToList();
       buttons.ForEach(button => button.IsChecked = false);
-      
+
       if (buttons.Count > (int)view)
          ((RadioButton)MainMenuStackPanel.Children[(int)view]).IsChecked = true;
 
@@ -127,9 +129,22 @@ public class MainMenuViewModel : ObservableObject
 
    internal bool GetDescriptorFromInput(out ProjectFileDescriptor descriptor)
    {
-      descriptor = new (Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
-                       ArcanumVm.ModFolderTextBox.Text,
-                       ArcanumVm.BaseMods.Select(mod => mod.Path).ToList(), ArcanumVm.VanillaFolderTextBox.Text);
+      var modPath = ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)
+                             .Split(Path.DirectorySeparatorChar);
+      var modDataSpace = new DataSpace(Path.GetDirectoryName(ArcanumVm.ModFolderTextBox.Text) ?? string.Empty,
+                                       modPath,
+                                       DataSpace.AccessType.ReadWrite);
+
+      var vanillaPath = ArcanumVm.VanillaFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)
+                                 .Split(Path.DirectorySeparatorChar);
+      var vanillaDataSpace = new DataSpace(Path.GetDirectoryName(ArcanumVm.VanillaFolderTextBox.Text) ?? string.Empty,
+                                           vanillaPath,
+                                           DataSpace.AccessType.ReadOnly);
+
+      descriptor = new(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
+                       modDataSpace,
+                       ArcanumVm.BaseMods.Select(mod => mod.DataSpace).ToList(),
+                       vanillaDataSpace);
 
       return descriptor.IsValid();
    }
@@ -138,7 +153,7 @@ public class MainMenuViewModel : ObservableObject
    // When creating a new project, this method will be called.
    // It validates the project file and launches into the main window of Arcanum
    // if all requirements are met.
-   internal async Task LaunchArcanum(ProjectFileDescriptor descriptor)
+   internal Task LaunchArcanum(ProjectFileDescriptor descriptor)
    {
       if (!descriptor.IsValid())
       {
@@ -148,7 +163,7 @@ public class MainMenuViewModel : ObservableObject
                          "Invalid Project Data",
                          MessageBoxButton.OK,
                          MessageBoxImage.Error);
-         return;
+         return Task.CompletedTask;
       }
 
       // Save the paths to the MainMenuScreenDescriptor
@@ -159,11 +174,12 @@ public class MainMenuViewModel : ObservableObject
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
       {
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                     StringComparison.OrdinalIgnoreCase));
+                                                                  StringComparison.OrdinalIgnoreCase));
       }
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 
       MenuWindow.LoadAndTransfer();
+      return Task.CompletedTask;
    }
 }

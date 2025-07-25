@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.Globals;
 using Arcanum.UI.Components.Views.MainMenuScreen;
@@ -58,6 +59,7 @@ public partial class MainMenuScreen
 
    private void OnClosed(object? sender, EventArgs? e)
    {
+      MainMenuScreenDescriptor.SaveData();
    }
 
    private void CloseButton_Click(object sender, RoutedEventArgs e)
