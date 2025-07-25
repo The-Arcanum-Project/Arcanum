@@ -21,8 +21,8 @@ public enum BiasType
 
 public class ModifierDefinition
 {
-   public IsModifierGood IsGood { get; set; } = IsModifierGood.Good;
    public string Name { get; set; }
+   public IsModifierGood IsGood { get; set; } = IsModifierGood.Good;
    public int NumDecimals { get; set; } = 2;
    public int Min { get; set; } = 0;
    public string Category { get; set; } = string.Empty;

@@ -288,7 +288,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void OpenModifierWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      ModifierBrowser.ShowModifierBrowser();
    }
 
    private void OpenTriggerWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
