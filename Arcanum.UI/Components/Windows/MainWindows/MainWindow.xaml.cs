@@ -178,17 +178,17 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       const string path = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\triggers.log";
       const string effPath = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\effects.log";
-      var docsTriggers = TriggerParsing.ParseTriggers(path);
+      var docsTriggers = DocsParsing.ParseDocs(path);
       var sb = new StringBuilder();
-      sb.AppendLine(DocsTrigger.GetCsvHeader());
+      sb.AppendLine(DocsObj.GetCsvHeader());
       foreach (var trigger in docsTriggers)
          sb.AppendLine(trigger.ToCsv());
       
       File.WriteAllText("EU5_Triggers_Data.csv", sb.ToString());
 
-      var docsEffects = Effectparsing.ParseEffects(effPath);
+      var docsEffects = DocsParsing.ParseDocs(effPath);
       sb.Clear();
-      sb.AppendLine(DocsEffect.GetCsvHeader());
+      sb.AppendLine(DocsObj.GetCsvHeader());
       foreach (var effect in docsEffects)
          sb.AppendLine(effect.ToCsv());
       
