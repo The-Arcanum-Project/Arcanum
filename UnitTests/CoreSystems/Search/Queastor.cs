@@ -6,6 +6,7 @@ namespace UnitTests;
 public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISearchable
 {
    public string GetNamespace => string.Empty;
+   public string ResultName { get; }
    public List<string> SearchTerms { get; set; } = terms.ToList();
 
    public void OnSearchSelected()
