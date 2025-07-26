@@ -18,10 +18,12 @@ using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.Globals;
 using Arcanum.Core.OldAndDebug;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -282,5 +284,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       var browser = DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Triggers);
       browser.Title = "Triggers Browser";
       browser.ShowDialog();
+   }
+
+   private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+   {
+      var metadataPropGrid = new PropertyGridWindow(CoreData.ModMetadata);
+      metadataPropGrid.ShowDialog();
    }
 }

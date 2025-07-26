@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
+﻿using Arcanum.API.UtilServices;
+using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.Utils.Git;
 
@@ -15,4 +16,6 @@ public static class AppData
    
    public static ProjectFileDescriptor CurrentProjectFile { get; set; } = null!;
    
+   
+   public static IWindowLinker WindowLinker { get; set; } = null!;
 }

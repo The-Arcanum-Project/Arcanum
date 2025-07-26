@@ -27,6 +27,26 @@ public static class IO
 
    public static string GetArcanumDataPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData");
 
+   // Directory Utils
+   public static List<string> GetDirectories(string path, string searchString = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+   {
+      if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+         return [];
+
+      try
+      {
+         return Directory.GetDirectories(path, searchString, searchOption).ToList();
+      }
+      catch (IOException)
+      {
+         throw new IOException($"Failed to get directories from path: {path}");
+      }
+      catch (UnauthorizedAccessException)
+      {
+         throw new UnauthorizedAccessException($"Access denied to path: {path}");
+      }
+   }
+
    // --- Dialogs ---
    public static string? SelectFolder(string startPath, string defaultFileName = "Select Folder")
    {

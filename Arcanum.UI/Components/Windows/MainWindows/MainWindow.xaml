@@ -202,6 +202,8 @@
 
                 <userControls:SearchableMenuItem Header = "Run Location Parsing" 
                                                  Command="mainWindow:MwCommands.DebugParsingCommand"/>
+                <userControls:SearchableMenuItem Header = "Browse Mod Metadata" 
+                                                 Click="MenuItem_OnClick"/>
             </userControls:SearchableMenuItem>
         </Menu>
     </styleClasses:BaseWindow.HeaderContent>

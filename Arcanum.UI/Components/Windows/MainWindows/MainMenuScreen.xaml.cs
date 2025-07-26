@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.Globals;
 using Arcanum.UI.Components.Views.MainMenuScreen;
+using Arcanum.UI.Components.WindowLinker;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
@@ -55,6 +56,8 @@ public partial class MainMenuScreen
          }
       };
 #endif
+
+      AppData.WindowLinker = new WindowLinkerImpl();
    }
 
    private void OnClosed(object? sender, EventArgs? e)

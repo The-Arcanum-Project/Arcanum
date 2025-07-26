@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using Arcanum.API.Console;
+using Arcanum.Core.Globals;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -270,6 +271,44 @@ public static class DefaultCommands
                                          );
    }
 
+   public static ICommandDefinition BrowseCommand()
+   {
+      List<string> supportedTypes = ["metadata", "mmsd"];
+
+      var usage =
+         $"browse <{string.Join('|', supportedTypes)}> | Opens the related object in a property browser.";
+
+      return new DefaultCommandDefinition(name: "browse",
+                                          usage: usage,
+                                          execute: args =>
+                                          {
+                                             if (args.Length != 1)
+                                                return [usage];
+
+                                             var type = args[0].ToLowerInvariant();
+                                             switch (type)
+                                             {
+                                                case "metadata":
+                                                   var metadata = CoreData.ModMetadata;
+                                                   AppData.WindowLinker.OpenPropertyGridWindow(metadata);
+                                                   break;
+                                                case "mmsd":
+                                                   AppData.WindowLinker.OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
+                                                   break;
+                                                default:
+                                                   return
+                                                   [
+                                                      $"Unknown type. Supported types: {string.Join(", ", supportedTypes)}"
+                                                   ];
+                                             }
+                                             return ["Finished opening AppData in property browser."];
+                                          },
+                                          clearance: ClearanceLevel.User,
+                                          category: CommandCategory
+                                            .StandardUser,
+                                          aliases: []);
+   }
+
    // --- Helper for table command (no changes) ---
    private static string[] DrawTable(char separator = '|', params string[][] columns)
    {
@@ -319,6 +358,7 @@ public static class DefaultCommands
       yield return CreateSetClearanceCommand(consoleService);
       yield return DebuggingCommands.CreateSearchCommand();
       yield return DebuggingCommands.CreateSearchExeCommand();
+      yield return BrowseCommand();
       // Add any new default commands here
    }
 

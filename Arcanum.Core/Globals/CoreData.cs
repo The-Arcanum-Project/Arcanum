@@ -1,18 +1,8 @@
-﻿using Arcanum.Core.Utils.vdfParser;
+﻿using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 
 namespace Arcanum.Core.Globals;
 
 public static class CoreData
 {
-   private static string _vanillaPath;
-   public static string VanillaPath
-   {
-      get
-      {
-         if (string.IsNullOrEmpty(_vanillaPath))
-            _vanillaPath = VdfParser.GetEu5Path();
-         return _vanillaPath;
-      }
-      set => _vanillaPath = value;
-   }
+   public static ModMetadata ModMetadata { get; set; }
 }

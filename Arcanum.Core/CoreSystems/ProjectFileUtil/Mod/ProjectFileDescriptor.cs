@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
@@ -110,7 +111,8 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
 
    public ImageSource ModThumbnailOrDefault()
    {
-      var thumbnailPath = Path.Combine(Path.Combine(ModPath.Path), "thumbnail.png");
+      var metadata = ExistingModsLoader.ParseModMetadata(ModPath.FullPath);
+      var thumbnailPath = Path.Combine(ModPath.FullPath, ".metadata", metadata?.ThumbnailPath ?? string.Empty);
       if (!File.Exists(thumbnailPath))
          return new BitmapImage(new("pack://application:,,,/Assets/Logo/ArcanumForeColor.png", UriKind.Absolute));
 

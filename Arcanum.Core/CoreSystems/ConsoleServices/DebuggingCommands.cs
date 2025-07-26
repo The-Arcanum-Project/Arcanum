@@ -1,4 +1,5 @@
 ﻿using Arcanum.API.Console;
+using Arcanum.Core.Globals;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -55,4 +56,6 @@ public static class DebuggingCommands
                                                             .Debug, // Assign Category
                                                           aliases: []);
    }
+
+   
 }
