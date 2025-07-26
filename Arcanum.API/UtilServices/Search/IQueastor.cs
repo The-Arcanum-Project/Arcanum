@@ -2,10 +2,11 @@
 
 public interface IQueastor
 {
+   public ISearchSettings Settings { get; set; }
    public void AddToIndex(ISearchable item);
    public void RemoveFromIndex(ISearchable item);
    public void ModifyInIndex(ISearchable item, IReadOnlyList<string> oldTerms);
 
-   public List<ISearchable> Search(string query, int maxDistance = 2);
+   public List<ISearchable> Search(string query);
    public List<ISearchable> SearchExact(string query);
 }

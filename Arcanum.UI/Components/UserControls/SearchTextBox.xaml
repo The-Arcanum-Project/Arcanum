@@ -13,7 +13,7 @@
     </UserControl.Resources>
 
 
-    <Border Padding = "10, 0,0,0"
+    <Border Padding = "5, 0,0,0"
             CornerRadius = "0"
             Background = "{StaticResource DefaultBackColorBrush}"
             BorderBrush = "{StaticResource DefaultBorderColorBrush}"
@@ -22,7 +22,7 @@
         <DockPanel LastChildFill = "True">
 
             <!-- Left Icon -->
-            <Image Source = "/Assets/Icons/20x20/Missing16x16.png"
+            <Image Source = "/Assets/Icons/16x16/Magnifer16x16.png"
                    Width = "16"
                    Height = "16"
                    Margin = "4,0"
@@ -32,12 +32,13 @@
             <!-- Right Button -->
             <styleClasses:BaseButton Width = "20"
                                      Height = "20"
-                                     Margin = "1,1, 14, 0"
+                                     Margin = "1,1, 5, 0"
                                      Padding = "0"
                                      VerticalAlignment = "Center"
                                      HorizontalAlignment = "Center"
                                      Background = "Transparent"
-                                     DockPanel.Dock = "Right">
+                                     DockPanel.Dock = "Right"
+                                     Click="ButtonBase_OnClick">
                 <Image Source = "/Assets/Icons/20x20/Settings20x20.png"
                        Stretch = "None" />
             </styleClasses:BaseButton>

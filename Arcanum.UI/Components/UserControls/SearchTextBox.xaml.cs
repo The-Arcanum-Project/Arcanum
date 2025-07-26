@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Timer = System.Timers.Timer;
 
 namespace Arcanum.UI.Components.UserControls;
@@ -6,6 +8,7 @@ namespace Arcanum.UI.Components.UserControls;
 public partial class SearchTextBox
 {
    public Action<string> RequestSearch { get; set; } = null!;
+   public Action SettingsOpened { get; set; } = null!;
    private readonly Timer _searchTimer;
 
    public SearchTextBox()
@@ -27,5 +30,11 @@ public partial class SearchTextBox
       if (_searchTimer.Enabled)
          _searchTimer.Stop();
       _searchTimer.Start();
+   }
+
+   private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+   {
+      SettingsOpened.Invoke();
+      RequestSearch.Invoke(SearchInputTextBox.Text);
    }
 }

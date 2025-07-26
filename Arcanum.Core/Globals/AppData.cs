@@ -1,6 +1,7 @@
 ﻿using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.Utils.Git;
 
 namespace Arcanum.Core.Globals;
@@ -16,6 +17,7 @@ public static class AppData
    
    public static ProjectFileDescriptor CurrentProjectFile { get; set; } = null!;
    
+   public static SearchSettings SearchSettings { get; set; } = new();
    
    public static IWindowLinker WindowLinker { get; set; } = null!;
 }

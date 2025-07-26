@@ -1,11 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.Globals;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -20,8 +24,11 @@ public partial class SearchWindow
    {
       InitializeComponent();
       SearchTextBox.RequestSearch = Search;
+      SearchTextBox.SettingsOpened = OpenSettingsWindow;
 
       SearchResultsListBox.ItemsSource = new ObservableCollection<SearchResultItem>();
+      
+      Closing += (_, _) => AppData.SearchSettings = (SearchSettings)QueryQueastor.Settings;
    }
 
    /// <summary>
@@ -40,7 +47,9 @@ public partial class SearchWindow
       var window = new SearchWindow { Topmost = alwaysOnTop, QueryQueastor = queastor };
       window.SearchTextBox.SearchInputTextBox.Text = query;
       window.Search(query);
-
+      queastor.Settings = AppData.SearchSettings;
+      window.SetCategory(queastor.Settings.SearchCategory);
+      
       window.Show();
       window.SearchTextBox.SearchInputTextBox.Focus();
 
@@ -50,13 +59,15 @@ public partial class SearchWindow
    internal void Search(string query)
    {
       if (string.IsNullOrEmpty(query))
-      {
          SearchResultsListBox.ItemsSource = new ObservableCollection<ISearchResult>();
-         return;
-      }
+      else
+         SearchResultsListBox.ItemsSource =
+            new ObservableCollection<ISearchable>(QueryQueastor.Search(query));
 
-      SearchResultsListBox.ItemsSource =
-         new ObservableCollection<ISearchable>(QueryQueastor.Search(query));
+      if (SearchResultsListBox.Items.Count == 0)
+         NoResultsTextBlock.Visibility = Visibility.Visible;
+      else
+         NoResultsTextBlock.Visibility = Visibility.Collapsed;
    }
 
    protected override void OnPreviewKeyDown(KeyEventArgs e)
@@ -71,6 +82,8 @@ public partial class SearchWindow
       var point = e.GetPosition(SearchResultsListBox);
       var element = SearchResultsListBox.InputHitTest(point) as DependencyObject;
 
+      if (element is Run run)
+         element = run.Parent;
       while (element != null && element is not ListBoxItem)
          element = VisualTreeHelper.GetParent(element);
 
@@ -79,5 +92,77 @@ public partial class SearchWindow
          searchable.OnSearchSelected();
          CloseCommand.Execute(null);
       }
+   }
+   
+   public void SetCategory(ISearchSettings.Category category)
+   {
+      SettingsToggleButton.IsChecked = (category & ISearchSettings.Category.Settings) != 0;
+      UiElementsToggleButton.IsChecked = (category & ISearchSettings.Category.UiElements) != 0;
+      GameObjectsToggleButton.IsChecked = (category & ISearchSettings.Category.GameObjects) != 0;
+      MapObjectsToggleButton.IsChecked = (category & ISearchSettings.Category.MapObjects) != 0;
+      AllToggleButton.IsChecked = category == ISearchSettings.Category.All;
+   }
+
+   private void SetCategoryFromButtonButtons()
+   {
+      var category = ISearchSettings.Category.None;
+      if (SettingsToggleButton.IsChecked == true)
+         category |= ISearchSettings.Category.Settings;
+      if (UiElementsToggleButton.IsChecked == true)
+         category |= ISearchSettings.Category.UiElements;
+      if (GameObjectsToggleButton.IsChecked == true)
+         category |= ISearchSettings.Category.GameObjects;
+      if (MapObjectsToggleButton.IsChecked == true)
+         category |= ISearchSettings.Category.MapObjects;
+      if (AllToggleButton.IsChecked == true)
+         category = ISearchSettings.Category.All;
+
+      // if all are set except AllToggleButton, we set AllToggleButton to true
+      if ((category & ISearchSettings.Category.Settings) != 0 &&
+          (category & ISearchSettings.Category.UiElements) != 0 &&
+          (category & ISearchSettings.Category.GameObjects) != 0 &&
+          (category & ISearchSettings.Category.MapObjects) != 0)
+         AllToggleButton.IsChecked = true;
+
+      QueryQueastor.Settings.SearchCategory = category;
+
+      if (SearchTextBox.SearchInputTextBox.Text.Length > 0)
+         Search(SearchTextBox.SearchInputTextBox.Text);
+   }
+
+   private void AllToggleButton_OnClick(object sender, RoutedEventArgs e)
+   {
+      var newState = AllToggleButton.IsChecked;
+      if (newState == true)
+      {
+         SettingsToggleButton.IsChecked = newState;
+         UiElementsToggleButton.IsChecked = newState;
+         GameObjectsToggleButton.IsChecked = newState;
+         MapObjectsToggleButton.IsChecked = newState;
+      }
+
+      SetCategoryFromButtonButtons();
+   }
+
+   private void SettingsToggleButton_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (sender is not ToggleButton toggleButton)
+         return;
+
+      if (toggleButton.IsChecked == false)
+         AllToggleButton.IsChecked = false;
+
+      SetCategoryFromButtonButtons();
+   }
+
+   private void OpenSettingsWindow()
+   {
+      var settingsPropWindow =
+         new PropertyGridWindow(QueryQueastor.Settings)
+         {
+            Title = "Search Settings",
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+         };
+      settingsPropWindow.ShowDialog();
    }
 }

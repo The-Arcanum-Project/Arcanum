@@ -22,6 +22,7 @@
                 <ResourceDictionary Source="Components/Styles/Base/BaseToolTip.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseGridSplitter.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseContextMenu.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseToggleButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

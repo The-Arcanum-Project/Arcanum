@@ -1,4 +1,5 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.Windows.Forms.VisualStyles;
+using Arcanum.API.UtilServices.Search;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
@@ -6,9 +7,16 @@ public class Queastor : IQueastor
 {
    private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
    private readonly BkTree _bkTree = new();
-   
-   public static readonly Queastor GlobalInstance = new();
-   
+
+   public Queastor(ISearchSettings searchSettings)
+   {
+      Settings = searchSettings ?? throw new ArgumentNullException(nameof(searchSettings));
+   }
+
+   public static readonly Queastor GlobalInstance = new(new SearchSettings());
+
+   public ISearchSettings Settings { get; set; }
+
    public void AddToIndex(ISearchable item)
    {
       foreach (var term in item.SearchTerms)
@@ -66,19 +74,73 @@ public class Queastor : IQueastor
          InternalAddToIndex(item, term);
    }
 
-   public List<ISearchable> Search(string query, int maxDistance = 2)
+   public List<ISearchable> Search(string query)
    {
       query = query.ToLowerInvariant();
       var results = new HashSet<ISearchable>();
 
       results.UnionWith(SearchExact(query));
 
-      // Fuzzy matches via BK-Tree
-      foreach (var term in _bkTree.Search(query, maxDistance))
-         if (_invertedIndex.TryGetValue(term, out var items))
-            results.UnionWith(items);
+      // If the search mode is ExactMatch, we return only exact matches
+      if (Settings.WholeWord)
+         return results.ToList();
 
-      return results.ToList();
+      HashSet<ISearchable> filteredResults = [];
+      // Fuzzy matches via BK-Tree
+      foreach (var term in _bkTree.Search(query, Settings.MaxLevinsteinDistance))
+         if (_invertedIndex.TryGetValue(term, out var items))
+         {
+            if (Settings.SearchCategory == ISearchSettings.Category.All)
+            {
+               filteredResults.UnionWith(items);
+               continue;
+            }
+            
+            // Filter by search category if specified
+            foreach (var item in items.Where(item => (item.SearchCategory & Settings.SearchCategory) != 0))
+               filteredResults.Add(item);
+         }
+
+      return ApplySorting(filteredResults, query);
+   }
+
+   private List<ISearchable> ApplySorting(HashSet<ISearchable> results, string query)
+   {
+      if (results.Count == 0 || string.IsNullOrWhiteSpace(query))
+         return [];
+
+      var itemsList = results.ToList();
+
+      switch (Settings.SortingOption)
+      {
+         case ISearchSettings.SortingOptions.Relevance:
+            itemsList.Sort((a, b) =>
+                              b.GetRelevanceScore(query).CompareTo(a.GetRelevanceScore(query)));
+            break;
+         case ISearchSettings.SortingOptions.Namespace:
+            itemsList.Sort((a, b) =>
+            {
+               var nsA = a.GetNamespace.Split('>');
+               var nsB = b.GetNamespace.Split('>');
+               var len = Math.Min(nsA.Length, nsB.Length);
+               for (var i = 0; i < len; i++)
+               {
+                  var cmp = string.Compare(nsA[i], nsB[i], StringComparison.Ordinal);
+                  if (cmp != 0)
+                     return cmp;
+               }
+
+               return nsA.Length.CompareTo(nsB.Length);
+            });
+            break;
+         case ISearchSettings.SortingOptions.Alphabetical:
+            itemsList.Sort((a, b) => string.Compare(a.ResultName, b.ResultName, StringComparison.Ordinal));
+            break;
+         default:
+            throw new ArgumentOutOfRangeException(typeof(ISearchSettings.SortingOptions).ToString());
+      }
+
+      return itemsList;
    }
 
    public List<ISearchable> SearchExact(string query)
@@ -89,18 +151,20 @@ public class Queastor : IQueastor
 
       return [];
    }
-
-   public List<(string, ISearchable)> SortSearchResults(List<ISearchable> results, string query, bool sortAscending = false)
-   {
-      if (results.Count == 0 || string.IsNullOrWhiteSpace(query))
-         return [];
-
-      var sorted = sortAscending
-                      ? results.OrderBy(x => x.GetRelevanceScore(query)).ToList()
-                      : results.OrderByDescending(x => x.GetRelevanceScore(query)).ToList();
-
-      return sorted.Select(x => (GetClosestMatch(query, x.SearchTerms), x)).ToList();
-   }
+   //
+   // public List<(string, ISearchable)> SortSearchResults(List<ISearchable> results,
+   //                                                      string query,
+   //                                                      bool sortAscending = false)
+   // {
+   //    if (results.Count == 0 || string.IsNullOrWhiteSpace(query))
+   //       return [];
+   //
+   //    var sorted = sortAscending
+   //                    ? results.OrderBy(x => x.GetRelevanceScore(query)).ToList()
+   //                    : results.OrderByDescending(x => x.GetRelevanceScore(query)).ToList();
+   //
+   //    return sorted.Select(x => (GetClosestMatch(query, x.SearchTerms), x)).ToList();
+   // }
 
    public string GetClosestMatch(string query, IList<string> terms)
    {

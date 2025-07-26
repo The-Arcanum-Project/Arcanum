@@ -73,6 +73,8 @@ public class SearchableMenuItem : MenuItem, ISearchable
 
    public ISearchResult VisualRepresentation
       => new SearchResultItem(null, Header?.ToString() ?? string.Empty, GetNamespaceCombined());
+   
+   public ISearchSettings.Category SearchCategory { get; } = ISearchSettings.Category.UiElements;
 
    private string GetParentAsNamespace()
    {

@@ -20,7 +20,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Components/Styles/Specific/SearchResultListView.xaml"></ResourceDictionary>
+                <ResourceDictionary Source = "/Components/Styles/Specific/SearchResultListView.xaml"> </ResourceDictionary>
                 <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -29,34 +29,104 @@
 
     <Border BorderThickness = "1"
             BorderBrush = "{StaticResource DefaultBorderColorBrush}">
-        <Grid Background = "{StaticResource DefaultBackColorBrush}"
-              Margin = "0">
+        <Grid Background = "{StaticResource DefaultBackColorBrush}">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height = "25" />
-                <RowDefinition Height = "7" />
+                <RowDefinition Height = "34" />
+                <RowDefinition Height = "29" />
+                <RowDefinition Height = "8" />
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
 
-            <userControls:SearchTextBox Grid.Row = "0"
+            <Grid Grid.Row = "0"
+                  x:Name = "CategoryButtonsGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <ToggleButton Grid.Column = "0"
+                              Margin = "2"
+                              IsChecked = "True"
+                              x:Name = "AllToggleButton"
+                              Click="AllToggleButton_OnClick">
+                    <TextBlock FontSize="18"> All </TextBlock>
+                </ToggleButton>
+                <ToggleButton Grid.Column = "1"
+                              Margin = "2"
+                              IsChecked = "True"
+                              x:Name = "UiElementsToggleButton"
+                              Click="SettingsToggleButton_OnClick">
+                    <TextBlock FontSize="18"> UI Elements </TextBlock>
+                </ToggleButton>
+                <ToggleButton Grid.Column = "2"
+                              Margin = "2"
+                              IsChecked = "True"
+                              x:Name = "SettingsToggleButton"
+                              Click="SettingsToggleButton_OnClick">
+                    <TextBlock FontSize="18"> Settings </TextBlock>
+                </ToggleButton>
+                <ToggleButton Grid.Column = "3"
+                              Margin = "2"
+                              IsChecked = "True"
+                              x:Name = "GameObjectsToggleButton"
+                              Click="SettingsToggleButton_OnClick">
+                    <TextBlock FontSize="18"> Game Objects </TextBlock>
+                </ToggleButton>
+                <ToggleButton Grid.Column = "4"
+                              Margin = "2"
+                              IsChecked = "True"
+                              x:Name = "MapObjectsToggleButton"
+                              Click="SettingsToggleButton_OnClick">
+                    <TextBlock FontSize="18"> Map Objects </TextBlock>
+                </ToggleButton>
+            </Grid>
+
+            <userControls:SearchTextBox Grid.Row = "1"
                                         x:Name = "SearchTextBox"
-                                      BorderThickness = "0">
+                                        BorderThickness = "0"
+                                        Margin = "0, 4, 0, 0">
             </userControls:SearchTextBox>
 
-            <Rectangle Grid.Row = "1"
+            <Rectangle Grid.Row = "2"
                        Fill = "{StaticResource DefaultBorderColorBrush}"
-                       Height = "1"
-                       Margin = "15,3" />
+                       Height = "2"
+                       Margin = "3,3" />
 
-            <ListBox x:Name = "SearchResultsListBox"
-                     Grid.Row = "2"
-                     Style = "{StaticResource SearchResultListBoxStyle}"
-                     ItemTemplate = "{StaticResource SearchResultDataTemplate}"
-                     ItemContainerStyle = "{StaticResource SearchResultItemStyle}"
-                     ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
-                     BorderThickness = "0"
-                     MouseUp="SearchResultsListBox_OnMouseUp"/>
+            <Border Grid.Row = "3"
+                    Margin = "3"
+                    BorderThickness = "2"
+                    CornerRadius = "4"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}">
+                <Grid>
+                    <ListBox x:Name = "SearchResultsListBox"
+                             Grid.Row = "0"
+                             Style = "{StaticResource SearchResultListBoxStyle}"
+                             ItemTemplate = "{StaticResource SearchResultDataTemplate}"
+                             ItemContainerStyle = "{StaticResource SearchResultItemStyle}"
+                             ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                             BorderThickness = "0"
+                             MouseUp = "SearchResultsListBox_OnMouseUp" />
 
+                    <TextBlock x:Name = "NoResultsTextBlock"
+                               Grid.Row = "0"
+                               IsHitTestVisible = "False"
+                               VerticalAlignment = "Center"
+                               HorizontalAlignment = "Center"
+                               FontSize = "26"
+                               Opacity = "0.4"
+                               TextAlignment = "Center">
+                        No matching results found.
+                        <LineBreak />
+                        <Run FontSize = "14"
+                             Text = "Type to search">
+                        </Run>
+                    </TextBlock>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 

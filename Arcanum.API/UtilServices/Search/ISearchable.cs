@@ -8,4 +8,5 @@ public interface ISearchable
    public void OnSearchSelected();
    public float GetRelevanceScore(string query) => 1f;
    public ISearchResult VisualRepresentation { get; }
+   public ISearchSettings.Category SearchCategory { get; }
 }
