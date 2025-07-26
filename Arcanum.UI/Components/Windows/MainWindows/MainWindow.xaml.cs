@@ -291,4 +291,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       var metadataPropGrid = new PropertyGridWindow(CoreData.ModMetadata);
       metadataPropGrid.ShowDialog();
    }
+
+   private void OpenSearchWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      SearchWindow.ShowSearchWindow();
+   }
 }

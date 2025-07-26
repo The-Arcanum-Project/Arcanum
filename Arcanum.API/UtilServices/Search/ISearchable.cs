@@ -7,5 +7,5 @@ public interface ISearchable
    public List<string> SearchTerms { get; set; }
    public void OnSearchSelected();
    public float GetRelevanceScore(string query) => 1f;
-
+   public ISearchResult VisualRepresentation { get; }
 }

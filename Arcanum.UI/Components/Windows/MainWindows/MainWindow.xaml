@@ -64,6 +64,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenModifierWikiCommand"
                         Executed = "OpenModifierWikiCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <CommandBinding Command = "mainWindow:MwCommands.OpenSearchWindowCommand"
+                        Executed = "OpenSearchWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
     </Window.CommandBindings>
 
@@ -169,7 +173,8 @@
 
                 <Separator />
 
-                <userControls:SearchableMenuItem Header = "Queastor (Find)">
+                <userControls:SearchableMenuItem Header = "Queastor (Find)"
+                                                 Command="mainWindow:MwCommands.OpenSearchWindowCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
                     </userControls:SearchableMenuItem.Icon>

@@ -2,7 +2,7 @@
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
-public class Queastor
+public class Queastor : IQueastor
 {
    private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
    private readonly BkTree _bkTree = new();

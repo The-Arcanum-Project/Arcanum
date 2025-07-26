@@ -1,11 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.Utils;
+using Arcanum.UI.Components.StyleClasses;
 
 namespace Arcanum.UI.Components.UserControls;
 
@@ -26,10 +25,9 @@ public class SearchableMenuItem : MenuItem, ISearchable
       base.OnInitialized(e);
 
       SearchTerms = new(XamlSearchTerms);
-      
+
       if (Header?.ToString() is { } header)
          SearchTerms.AddRange(QueastorUtils.ExtractSearchTerms(header));
-      
 
       ResultName = Header?.ToString() ?? string.Empty;
       GetNamespace = GetParentAsNamespace();
@@ -72,6 +70,9 @@ public class SearchableMenuItem : MenuItem, ISearchable
                                                     Keyboard.Focus(this);
                                                  }));
    }
+
+   public ISearchResult VisualRepresentation
+      => new SearchResultItem(null, Header?.ToString() ?? string.Empty, GetNamespaceCombined());
 
    private string GetParentAsNamespace()
    {

@@ -70,4 +70,10 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenModifierWiki },
    };
+
+   // Search Commands
+   public static readonly RoutedCommand OpenSearchWindowCommand = new("OpenSearchCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenSearchWindow },
+   };
 }

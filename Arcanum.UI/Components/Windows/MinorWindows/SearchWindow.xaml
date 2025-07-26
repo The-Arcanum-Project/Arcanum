@@ -39,6 +39,7 @@
             </Grid.RowDefinitions>
 
             <userControls:SearchTextBox Grid.Row = "0"
+                                        x:Name = "SearchTextBox"
                                       BorderThickness = "0">
             </userControls:SearchTextBox>
 
@@ -53,7 +54,8 @@
                      ItemTemplate = "{StaticResource SearchResultDataTemplate}"
                      ItemContainerStyle = "{StaticResource SearchResultItemStyle}"
                      ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
-                     BorderThickness = "0" />
+                     BorderThickness = "0"
+                     MouseUp="SearchResultsListBox_OnMouseUp"/>
 
         </Grid>
     </Border>
