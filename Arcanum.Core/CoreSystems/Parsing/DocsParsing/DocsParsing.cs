@@ -2,7 +2,7 @@
 
 namespace Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 
-public static class DocsParsing
+public static class DocsParsingClass
 {
    public static List<DocsObj> ParseDocs(string path)
    {

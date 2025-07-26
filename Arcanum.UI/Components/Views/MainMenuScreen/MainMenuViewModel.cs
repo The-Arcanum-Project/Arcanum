@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Globals;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -166,6 +167,7 @@ public class MainMenuViewModel : ObservableObject
          return Task.CompletedTask;
       }
 
+      descriptor.LoadToApplication();
       // Save the paths to the MainMenuScreenDescriptor
       AppData.MainMenuScreenDescriptor.LastVanillaPath = descriptor.VanillaPath;
       AppData.MainMenuScreenDescriptor.LastProjectFile = descriptor.ModName;

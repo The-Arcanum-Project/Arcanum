@@ -9,8 +9,8 @@ public static partial class VdfParser
    private const string EU5_STEAM_ID = "3450310";
    private const string EU5_FOLDER_NAME = "Europa Universalis V";
    
-   private const string EU4_STEAM_ID = "236850";
-   private const string EU4_FOLDER_NAME = "Europa Universalis IV";
+   // private const string EU4_STEAM_ID = "236850";
+   // private const string EU4_FOLDER_NAME = "Europa Universalis IV";
    
    // TODO Fix this to use the correct path for EU5
    public static string GetEu5Path()
@@ -19,11 +19,11 @@ public static partial class VdfParser
       if (libraries.Count == 0)
          return string.Empty;
       
-      var libPath = libraries.FirstOrDefault(x => x.Value.Contains(EU4_STEAM_ID)).Key;
+      var libPath = libraries.FirstOrDefault(x => x.Value.Contains(EU5_STEAM_ID)).Key;
       if (string.IsNullOrEmpty(libPath))
          return string.Empty;
       
-      return Path.Combine(libPath, "steamapps", "common", EU4_FOLDER_NAME).Replace(@"\\", @"\");
+      return Path.Combine(libPath, "steamapps", "common", EU5_FOLDER_NAME).Replace(@"\\", @"\");
    }
    
    public static Dictionary<string, List<string>> GetLibrariesAndGames()

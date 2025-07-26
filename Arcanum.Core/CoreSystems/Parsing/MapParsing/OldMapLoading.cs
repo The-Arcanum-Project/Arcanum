@@ -1,4 +1,5 @@
 ﻿using System.Drawing.Imaging;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
@@ -8,9 +9,8 @@ public static class OldMapLoading
    public static unsafe (Dictionary<int, List<Point>>, Dictionary<int, Dictionary<int, List<Point>>>)
       LoadLocations()
    {
-      using var bmp =
-         new
-            Bitmap("S:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png");
+      var bmpPath = FileManager.GetDependentPath("game", "in_game", "map_data", "locations.png");
+      using var bmp = new Bitmap(bmpPath);
       var bmpData = bmp.LockBits(new(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
       var width = bmp.Width;

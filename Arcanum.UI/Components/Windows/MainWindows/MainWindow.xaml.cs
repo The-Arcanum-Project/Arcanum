@@ -15,6 +15,7 @@ using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing;
 using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.OldAndDebug;
@@ -23,6 +24,7 @@ using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -176,26 +178,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      const string path = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\triggers.log";
-      const string effPath = "C:\\Users\\david\\Dokumente\\Paradox Interactive\\Europa Universalis V\\docs\\effects.log";
-      var docsTriggers = DocsParsing.ParseDocs(path);
-      var sb = new StringBuilder();
-      sb.AppendLine(DocsObj.GetCsvHeader());
-      foreach (var trigger in docsTriggers)
-         sb.AppendLine(trigger.ToCsv());
-      
-      File.WriteAllText("EU5_Triggers_Data.csv", sb.ToString());
-
-      var docsEffects = DocsParsing.ParseDocs(effPath);
-      sb.Clear();
-      sb.AppendLine(DocsObj.GetCsvHeader());
-      foreach (var effect in docsEffects)
-         sb.AppendLine(effect.ToCsv());
-      
-      File.WriteAllText("EU5_Effects_Data.csv", sb.ToString());
-      
-      
-      
       // var modifiers = ParseModifiers.Load();
       //
       // var sb = new StringBuilder();
@@ -227,20 +209,20 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       //File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
 
       NamedLocationLoading.LoadNamedLocations();
-      
+
       var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
       var provIds = new List<int>(provToId.Count);
       var index = 0;
-      
+
       foreach (var kvp in provToId)
          provIds.Add(kvp.Value.Count);
-      
+
       provIds.Sort();
-      var sbb = new StringBuilder();
+      var sbbb = new StringBuilder();
       foreach (var provicne in provIds)
-         sbb.AppendLine(provicne.ToString());
-      
-      File.WriteAllText("EU5_Provinces_Pixel_Count.txt", sbb.ToString());
+         sbbb.AppendLine(provicne.ToString());
+
+      File.WriteAllText("EU5_Provinces_Pixel_Count.txt", sbbb.ToString());
 
       // List< (Memory<System.Drawing.Point>, int)> provs = new (provToId.Count);
       //
@@ -252,7 +234,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, debugBmp);
       //
       // debugBmp.Save("debugMap.png");
-      
+
       // var sw = new Stopwatch();
       // sw.Start();
       // var totalPixels = colorToBorder.Values.Sum(points => points.Values.Sum(section => section.Count));
@@ -283,16 +265,22 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void OpenEffectWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Effects).ShowDialog();
+      var browser = DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Effects);
+      browser.Title = "Effects Browser";
+      browser.ShowDialog();
    }
 
    private void OpenModifierWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      ModifierBrowser.ShowModifierBrowser();
+      var browser = ModifierBrowser.ShowModifierBrowser();
+      browser.Title = "Modifier Browser";
+      browser.ShowDialog();
    }
 
    private void OpenTriggerWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Triggers).ShowDialog();
+      var browser = DocsObjBrowser.ShowDocsObjBrowser(DocsObjBrowser.DocsObjBrowserType.Triggers);
+      browser.Title = "Triggers Browser";
+      browser.ShowDialog();
    }
 }

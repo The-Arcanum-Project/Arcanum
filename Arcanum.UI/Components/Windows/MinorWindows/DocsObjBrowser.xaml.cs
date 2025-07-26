@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
+using Arcanum.Core.Globals;
 using Timer = System.Timers.Timer;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -44,17 +45,9 @@ public partial class DocsObjBrowser
    {
       List<DocsObj> data;
       if (type == DocsObjBrowserType.Effects)
-         data =
-         [
-            ..DocsParsing
-              .ParseDocs(@"C:\Users\david\Dokumente\Paradox Interactive\Europa Universalis V\docs\effects.log"),
-         ];
+         data = [.. StaticData.DocsEffects];
       else if (type == DocsObjBrowserType.Triggers)
-         data =
-         [
-            ..DocsParsing
-              .ParseDocs(@"C:\Users\david\Dokumente\Paradox Interactive\Europa Universalis V\docs\triggers.log"),
-         ];
+         data = [..StaticData.DocsTriggers];
       else
          throw new ArgumentOutOfRangeException(nameof(type), type, null);
 

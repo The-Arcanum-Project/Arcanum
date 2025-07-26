@@ -4,6 +4,7 @@ using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.Parsing.EffectsAndTriggers;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.Globals;
 using Arcanum.Core.Globals.BackingClasses;
@@ -122,6 +123,7 @@ public class LifecycleManager
    {
       ArcanumDataHandler.LoadDefaultDescriptor(new());
       MainMenuScreenDescriptor.LoadData();
+      EffectsAndTriggersDocsParser.LoadDocs();
    }
 
    private static void InitializeCoreServices(IPluginHost host)

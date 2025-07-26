@@ -64,10 +64,10 @@ public static class MwCommands
    };
    public static readonly RoutedCommand OpenTriggerWikiCommand = new("OpenTriggerWikiCommand", typeof(MainWindowView))
    {
-      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenEffectWiki },
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenTriggerWiki },
    };
    public static readonly RoutedCommand OpenModifierWikiCommand = new("OpenModifierWikiCommand", typeof(MainWindowView))
    {
-      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenEffectWiki },
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenModifierWiki },
    };
 }

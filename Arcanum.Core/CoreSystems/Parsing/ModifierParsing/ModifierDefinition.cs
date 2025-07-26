@@ -24,14 +24,14 @@ public class ModifierDefinition
    public string Name { get; set; }
    public IsModifierGood IsGood { get; set; } = IsModifierGood.Good;
    public int NumDecimals { get; set; } = 2;
-   public int Min { get; set; } = 0;
+   public int Min { get; set; }
    public string Category { get; set; } = string.Empty;
-   public bool Ai { get; set; } = false;
-   public bool IsBoolean { get; set; } = false;
-   public bool IsPercentage { get; set; } = false;
+   public bool Ai { get; set; }
+   public bool IsBoolean { get; set; }
+   public bool IsPercentage { get; set; }
    public bool ShouldShowInModifierTab { get; set; } = true;
-   public bool IsAlreadyPercent { get; set; } = false;
-   public bool ScaleWithPop { get; set; } = false;
+   public bool IsAlreadyPercent { get; set; }
+   public bool ScaleWithPop { get; set; }
    public string Format { get; set; } = string.Empty;
    public BiasType Bias { get; set; } = BiasType.None;
 
@@ -66,15 +66,14 @@ public static class ParseModifiers
 {
    public static List<ModifierDefinition> Load()
    {
-      const string filePath =
-         "S:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\main_menu\\common\\modifier_types\\00_modifier_types.txt";
-      var (Blocks, elements) = ParsingSystem.ElementParser.GetElements(filePath, IO.IO.ReadAllTextUtf8(filePath)!);
+      var filePath = FileManager.GetDependentPath("game", "main_menu", "common", "modifier_types", "00_modifier_types.txt");
+      var (blocks, elements) = ParsingSystem.ElementParser.GetElements(filePath, IO.IO.ReadAllTextUtf8(filePath)!);
 
       if (elements.Count != 0)
          Debug.WriteLine($"[ParseModifiers] Loaded {elements.Count} elements but expected 0.");
 
-      List<ModifierDefinition> definitions = new(Blocks.Count);
-      foreach (var block in Blocks)
+      List<ModifierDefinition> definitions = new(blocks.Count);
+      foreach (var block in blocks)
       {
          var mod = new ModifierDefinition(block.Name);
          if (block.ContentElements.Count > 1)

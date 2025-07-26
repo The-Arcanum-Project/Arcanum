@@ -33,7 +33,6 @@ public partial class ModifierBrowser
       var data = ParseModifiers.Load();
       var browser = new ModifierBrowser { DocsObjDataGrid = { DataContext = new ListCollectionView(data) } };
 
-      browser.Show();
       return browser;
    }
 
