@@ -64,10 +64,28 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenModifierWikiCommand"
                         Executed = "OpenModifierWikiCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
-        
+
         <CommandBinding Command = "mainWindow:MwCommands.OpenSearchWindowCommand"
                         Executed = "OpenSearchWindow_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+
+        <!-- Command Bindings for History MenuItems -->
+        <CommandBinding Command = "mainWindow:MwCommands.UndoCommand"
+                        Executed = "UndoCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.RedoCommand"
+                        Executed = "RedoCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.StepUndoCommand"
+                        Executed = "StepUndoCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.StepRedoCommand"
+                        Executed = "StepRedoCommand_Executed"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenHistoryWindowCommand"
+                        Executed = "OpenHistoryWindow_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+
 
     </Window.CommandBindings>
 
@@ -81,20 +99,20 @@
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <userControls:SearchableMenuItem Header = "Open Project"
-                          Command = "mainWindow:MwCommands.OpenProjectFileCommand">
+                                                 Command = "mainWindow:MwCommands.OpenProjectFileCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <userControls:SearchableMenuItem Header = "Close current Project"
-                          Command = "mainWindow:MwCommands.CloseProjectFileCommand">
+                                                 Command = "mainWindow:MwCommands.CloseProjectFileCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Close16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Save All Modifications"
-                          Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
+                                                 Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
                     <!-- <userControls:SearchableMenuItem.XamlSearchTerms> -->
                     <!--     <x:Array Type="system:String"> -->
                     <!--         <system:String>Option1</system:String> -->
@@ -108,73 +126,80 @@
                 </userControls:SearchableMenuItem>
 
                 <userControls:SearchableMenuItem Header = "Custom Saving Selector"
-                          Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
+                                                 Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/SaveSelector16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Reload File"
-                          Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
+                                                 Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/ReloadFile16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <userControls:SearchableMenuItem Header = "Reload Folder"
-                          Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
+                                                 Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/ReloadFolder16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Settings"
-                          Command = "mainWindow:MwCommands.OpenSettingsCommand">
+                                                 Command = "mainWindow:MwCommands.OpenSettingsCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Settings16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <userControls:SearchableMenuItem Header = "Plugin Settings"
-                          Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
+                                                 Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/PluginSettings16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Console"
-                          Command = "mainWindow:MwCommands.OpenConsoleCommand">
+                                                 Command = "mainWindow:MwCommands.OpenConsoleCommand">
                 </userControls:SearchableMenuItem>
                 <Separator />
                 <userControls:SearchableMenuItem Header = "Exit"
-                          Command = "mainWindow:MwCommands.ExitArcanumCommand">
+                                                 Command = "mainWindow:MwCommands.ExitArcanumCommand">
                 </userControls:SearchableMenuItem>
             </userControls:SearchableMenuItem>
 
             <userControls:SearchableMenuItem Header = "Edit">
-                <userControls:SearchableMenuItem Header = "Undo: 'description'">
+                <userControls:SearchableMenuItem Header = "Undo: 'description'"
+                                                 Command = "mainWindow:MwCommands.UndoCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
-                <userControls:SearchableMenuItem Header = "Step Undo: 'description'">
+                <userControls:SearchableMenuItem Header = "Step Undo: 'description'"
+                                                 Command = "mainWindow:MwCommands.StepUndoCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
-                <userControls:SearchableMenuItem Header = "Redo: 'description'">
+                <userControls:SearchableMenuItem Header = "Redo: 'description'"
+                                                 Command = "mainWindow:MwCommands.RedoCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
-                <userControls:SearchableMenuItem Header = "Step Redo: 'description'">
+                <userControls:SearchableMenuItem Header = "Step Redo: 'description'"
+                                                 Command = "mainWindow:MwCommands.StepRedoCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
+                </userControls:SearchableMenuItem>
+                <userControls:SearchableMenuItem Header = "View History"
+                                                 Command = "mainWindow:MwCommands.OpenHistoryWindowCommand">
                 </userControls:SearchableMenuItem>
 
                 <Separator />
 
                 <userControls:SearchableMenuItem Header = "Queastor (Find)"
-                                                 Command="mainWindow:MwCommands.OpenSearchWindowCommand">
+                                                 Command = "mainWindow:MwCommands.OpenSearchWindowCommand">
                     <userControls:SearchableMenuItem.Icon>
                         <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
                     </userControls:SearchableMenuItem.Icon>
@@ -192,23 +217,23 @@
 
                 <userControls:SearchableMenuItem Header = "Open Loading Log" />
             </userControls:SearchableMenuItem>
-            
+
             <userControls:SearchableMenuItem Header = "Wiki">
 
-                <userControls:SearchableMenuItem Header = "Effects Wiki" 
-                                                 Command="mainWindow:MwCommands.OpenEffectWikiCommand"/>
-                <userControls:SearchableMenuItem Header = "Trigger Wiki" 
-                                                 Command="mainWindow:MwCommands.OpenTriggerWikiCommand"/>
-                <userControls:SearchableMenuItem Header = "Modifiers Wiki" 
-                                                 Command="mainWindow:MwCommands.OpenModifierWikiCommand"/>
+                <userControls:SearchableMenuItem Header = "Effects Wiki"
+                                                 Command = "mainWindow:MwCommands.OpenEffectWikiCommand" />
+                <userControls:SearchableMenuItem Header = "Trigger Wiki"
+                                                 Command = "mainWindow:MwCommands.OpenTriggerWikiCommand" />
+                <userControls:SearchableMenuItem Header = "Modifiers Wiki"
+                                                 Command = "mainWindow:MwCommands.OpenModifierWikiCommand" />
             </userControls:SearchableMenuItem>
-            
+
             <userControls:SearchableMenuItem Header = "Debug">
 
-                <userControls:SearchableMenuItem Header = "Run Location Parsing" 
-                                                 Command="mainWindow:MwCommands.DebugParsingCommand"/>
-                <userControls:SearchableMenuItem Header = "Browse Mod Metadata" 
-                                                 Click="MenuItem_OnClick"/>
+                <userControls:SearchableMenuItem Header = "Run Location Parsing"
+                                                 Command = "mainWindow:MwCommands.DebugParsingCommand" />
+                <userControls:SearchableMenuItem Header = "Browse Mod Metadata"
+                                                 Click = "MenuItem_OnClick" />
             </userControls:SearchableMenuItem>
         </Menu>
     </styleClasses:BaseWindow.HeaderContent>
@@ -232,11 +257,14 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "30*" MinWidth="200"/>
+            <ColumnDefinition Width = "30*"
+                              MinWidth = "200" />
             <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "50*" MinWidth="400"/>
+            <ColumnDefinition Width = "50*"
+                              MinWidth = "400" />
             <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "20*" MinWidth="200"/> 
+            <ColumnDefinition Width = "20*"
+                              MinWidth = "200" />
         </Grid.ColumnDefinitions>
 
         <Image Grid.Column = "0"

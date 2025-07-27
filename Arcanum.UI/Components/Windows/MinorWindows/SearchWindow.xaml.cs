@@ -18,6 +18,9 @@ public partial class SearchWindow
 {
    private Queastor QueryQueastor { get; set; } = null!;
 
+   private readonly Window _parent =
+      Application.Current.MainWindow ?? throw new InvalidOperationException("MainWindow is not set.");
+
    public ICommand CloseCommand => new RelayCommand(Close);
 
    public SearchWindow()
@@ -27,8 +30,37 @@ public partial class SearchWindow
       SearchTextBox.SettingsOpened = OpenSettingsWindow;
 
       SearchResultsListBox.ItemsSource = new ObservableCollection<SearchResultItem>();
-      
+
       Closing += (_, _) => AppData.SearchSettings = (SearchSettings)QueryQueastor.Settings;
+      Deactivated += OnPopupDeactivated;
+   }
+
+   private bool _isClosing;
+
+   private void OnPopupDeactivated(object? sender, EventArgs e)
+   {
+      if (_isClosing)
+         return;
+
+      _isClosing = true;
+      Close();
+      var mousePosition = Mouse.GetPosition(_parent);
+
+      var parentRect = new Rect(_parent.Left,
+                                _parent.Top,
+                                _parent.Width,
+                                _parent.Height);
+
+      var popupRect = new Rect(Left,
+                               Top,
+                               Width,
+                               Height);
+
+      if (parentRect.Contains(mousePosition) && !popupRect.Contains(mousePosition))
+         Close();
+
+      _parent.Focus();
+      Keyboard.Focus(_parent);
    }
 
    /// <summary>
@@ -49,7 +81,7 @@ public partial class SearchWindow
       window.Search(query);
       queastor.Settings = AppData.SearchSettings;
       window.SetCategory(queastor.Settings.SearchCategory);
-      
+
       window.Show();
       window.SearchTextBox.SearchInputTextBox.Focus();
 
@@ -73,7 +105,10 @@ public partial class SearchWindow
    protected override void OnPreviewKeyDown(KeyEventArgs e)
    {
       if (e.Key == Key.Escape)
+      {
+         _isClosing = true;
          CloseCommand.Execute(null);
+      }
       base.OnPreviewKeyDown(e);
    }
 
@@ -93,7 +128,7 @@ public partial class SearchWindow
          CloseCommand.Execute(null);
       }
    }
-   
+
    public void SetCategory(ISearchSettings.Category category)
    {
       SettingsToggleButton.IsChecked = (category & ISearchSettings.Category.Settings) != 0;
@@ -160,8 +195,7 @@ public partial class SearchWindow
       var settingsPropWindow =
          new PropertyGridWindow(QueryQueastor.Settings)
          {
-            Title = "Search Settings",
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Title = "Search Settings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
          };
       settingsPropWindow.ShowDialog();
    }

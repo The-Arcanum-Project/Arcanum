@@ -1,0 +1,26 @@
+﻿namespace Arcanum.Core.CoreSystems.History.Commands;
+
+public class CompactingCommandDummy(CompactHistoryNode node) : ICommand
+{
+   private CompactHistoryNode Node { get; } = node ?? throw new ArgumentNullException(nameof(node));
+
+   public void Execute()
+   {
+      
+   }
+
+   public void Undo()
+   {
+      
+   }
+
+   public void Redo()
+   {
+      
+   }
+
+   public List<int> GetTargetHash() => [-1];
+
+   public string GetDescription => $"Compacting {Node.CompactedNodes.Count} nodes";
+   public string GetDebugInformation(int indent) => throw new NotImplementedException();
+}

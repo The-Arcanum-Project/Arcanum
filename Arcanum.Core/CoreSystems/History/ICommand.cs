@@ -26,7 +26,7 @@ public interface ICommand
    /// <returns></returns>
    public List<int> GetTargetHash();
 
-   public string GetDescription();
+   public string GetDescription { get; }
 
    /// <summary>
    /// Provides detailed information about the command for debugging purposes.
@@ -55,6 +55,6 @@ public class CInitial : ICommand
    }
 
    public List<int> GetTargetHash() => [-1];
-   public string GetDescription() => "Initial Command";
+   public string GetDescription => "Initial Command";
    public string GetDebugInformation(int indent) => "Initial Command Debug Information";
 }

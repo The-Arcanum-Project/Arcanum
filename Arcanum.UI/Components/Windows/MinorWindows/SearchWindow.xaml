@@ -53,35 +53,35 @@
                               IsChecked = "True"
                               x:Name = "AllToggleButton"
                               Click="AllToggleButton_OnClick">
-                    <TextBlock FontSize="18"> All </TextBlock>
+                    <TextBlock FontSize="15" Margin="2"> All </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "1"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "UiElementsToggleButton"
                               Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="18"> UI Elements </TextBlock>
+                    <TextBlock FontSize="15" Margin="2"> UI Elements </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "2"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "SettingsToggleButton"
                               Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="18"> Settings </TextBlock>
+                    <TextBlock FontSize="15" Margin="2"> Settings </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "3"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "GameObjectsToggleButton"
                               Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="18"> Game Objects </TextBlock>
+                    <TextBlock FontSize="15" Margin="2"> Game Objects </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "4"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "MapObjectsToggleButton"
                               Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="18"> Map Objects </TextBlock>
+                    <TextBlock FontSize="15" Margin="2"> Map Objects </TextBlock>
                 </ToggleButton>
             </Grid>
 

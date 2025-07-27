@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Arcanum.Core.CoreSystems.History.Commands;
 
 namespace Arcanum.Core.CoreSystems.History;
 
@@ -140,6 +141,8 @@ public class CompactHistoryNode : HistoryNode
       CompactedNodes = compactedNodes;
       _current = CompactedNodes.Count - 1;
    }
+   
+   public new ICommand Command => new CompactingCommandDummy(this);
 
    /// <summary>
    /// Inserts the compacted history node into the hierarchy of history nodes,
@@ -261,5 +264,5 @@ public class CompactHistoryNode : HistoryNode
    /// is not at the last node, indicating that a step redo operation can be performed.
    /// </remarks>
    public bool HasStepRedo => _current < CompactedNodes.Count - 1;
-   public string GetDescription() => $"Compacting {CompactedNodes.Count} Nodes";
+   public string GetDescription => $"Compacting {CompactedNodes.Count} Nodes";
 }

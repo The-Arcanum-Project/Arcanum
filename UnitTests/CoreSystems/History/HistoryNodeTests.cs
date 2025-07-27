@@ -162,6 +162,6 @@ public class HistoryTests
    public void CompactHistoryNode_GetDescription_ReturnsCorrectString()
    {
       var compacted = new CompactHistoryNode(10, [ new HistoryNode(1, new Mock<ICommand>().Object, HistoryEntryType.Normal) ]);
-      Assert.That(compacted.GetDescription(), Is.EqualTo("Compacting 1 Nodes"));
+      Assert.That(compacted.GetDescription, Is.EqualTo("Compacting 1 Nodes"));
    }
 }

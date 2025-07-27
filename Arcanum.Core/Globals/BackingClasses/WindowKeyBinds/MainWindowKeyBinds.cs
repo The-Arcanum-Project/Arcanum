@@ -5,11 +5,6 @@ namespace Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
 
 public class MainWindowKeyBinds : KeyBindProvider
 {
-   // Only used for serialization purposes.
-   public MainWindowKeyBinds()
-   {
-   }
-
    public KeyGesture CloseProject { get; set; } = new(Key.Escape, ModifierKeys.Control);
    public KeyGesture OpenProject { get; set; } = new(Key.O, ModifierKeys.Control);
    public KeyGesture NewProject { get; set; } = new(Key.N, ModifierKeys.Control | ModifierKeys.Shift);
@@ -37,4 +32,11 @@ public class MainWindowKeyBinds : KeyBindProvider
    
    // Search Bindings
    public KeyGesture OpenSearchWindow { get; set; } = new(Key.F, ModifierKeys.Control);
+   
+   // History Bindings
+   public KeyGesture OpenHistoryWindow { get; set; } = new(Key.H, ModifierKeys.Control);
+   public KeyGesture UndoCommand { get; set; } = new (Key.Z, ModifierKeys.Control);
+   public KeyGesture StepUndoCommand { get; set; } = new (Key.Z, ModifierKeys.Control | ModifierKeys.Shift);
+   public KeyGesture RedoCommand { get; set; } = new (Key.Y, ModifierKeys.Control);
+   public KeyGesture StepRedoCommand { get; set; } = new (Key.Y, ModifierKeys.Control | ModifierKeys.Shift);
 }

@@ -296,4 +296,30 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       SearchWindow.ShowSearchWindow();
    }
+
+   private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var historyWindow = new HistoryTreeView();
+      historyWindow.ShowDialog();
+   }
+
+   private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+   {
+      throw new NotImplementedException();
+   }
+
+   private void StepUndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+   {
+      throw new NotImplementedException();
+   }
+
+   private void RedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+   {
+      throw new NotImplementedException();
+   }
+
+   private void UndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+   {
+      throw new NotImplementedException();
+   }
 }
