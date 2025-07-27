@@ -309,6 +309,26 @@ public class TreeHistoryManager : IHistoryManager
    }
 
    public HistoryNode Root => _root;
+   public bool CanStepRedo
+   {
+      get
+      {
+         if (Current is CompactHistoryNode compNode)
+            return compNode.HasStepRedo;
+
+         return false;
+      }
+   }
+   public bool CanStepUndo
+   {
+      get
+      {
+         if (Current is CompactHistoryNode compNode)
+            return compNode.HasStepUndo;
+
+         return false;
+      }
+   }
 
    public void Clear()
    {

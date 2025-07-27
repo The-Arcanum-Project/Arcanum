@@ -78,10 +78,10 @@
                         CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.StepUndoCommand"
                         Executed = "StepUndoCommand_Executed"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        CanExecute = "CommandCanStepUndoExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.StepRedoCommand"
                         Executed = "StepRedoCommand_Executed"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        CanExecute = "CommandCanStrepRedoExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenHistoryWindowCommand"
                         Executed = "OpenHistoryWindow_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />

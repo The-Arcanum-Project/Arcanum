@@ -305,21 +305,31 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      Globals.HistoryManager.Redo(true);
    }
 
    private void StepUndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      Globals.HistoryManager.Undo(true);
    }
 
    private void RedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      Globals.HistoryManager.Redo(false);
    }
 
    private void UndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      Globals.HistoryManager.Undo(false);
+   }
+
+   private void CommandCanStrepRedoExecute(object sender, CanExecuteRoutedEventArgs e)
+   {
+      e.CanExecute = Globals.HistoryManager.CanStepRedo;
+   }
+
+   private void CommandCanStepUndoExecute(object sender, CanExecuteRoutedEventArgs e)
+   {
+      e.CanExecute = Globals.HistoryManager.CanStepUndo;
    }
 }
