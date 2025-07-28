@@ -15,7 +15,7 @@ public static class IO
    
    // TODO fix this to EU5 once we know the correct path
    public static string GetUserModFolderPath
-      => Path.Combine(GetUserDocumentsPath, "Paradox Interactive", "Europa Universalis IV", "mod");
+      => Path.Combine(GetUserDocumentsPath, "Paradox Interactive", "Europa Universalis V", "mod");
 
    static IO()
    {
