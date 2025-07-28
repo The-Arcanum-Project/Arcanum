@@ -148,6 +148,8 @@
         <Resource Include="Assets\Icons\16x16\Compacted16x16.png" />
         <None Remove="Assets\Icons\16x16\Uncompacted16x16.png" />
         <Resource Include="Assets\Icons\16x16\Uncompacted16x16.png" />
+        <None Remove="Assets\Icons\16x16\History16x16.png" />
+        <Resource Include="Assets\Icons\16x16\History16x16.png" />
     </ItemGroup>
 
     <ItemGroup>

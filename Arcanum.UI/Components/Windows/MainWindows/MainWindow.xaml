@@ -194,6 +194,9 @@
                 </userControls:SearchableMenuItem>
                 <userControls:SearchableMenuItem Header = "View History"
                                                  Command = "mainWindow:MwCommands.OpenHistoryWindowCommand">
+                    <userControls:SearchableMenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/History16x16.png" />
+                    </userControls:SearchableMenuItem.Icon>
                 </userControls:SearchableMenuItem>
 
                 <Separator />
