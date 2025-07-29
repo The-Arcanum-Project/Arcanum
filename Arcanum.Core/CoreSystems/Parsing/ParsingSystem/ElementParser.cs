@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Arcanum.Core.CoreSystems.ParsingSystem;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 // Define a clear enum for the parsing state to replace the 'wasEquals' byte.
 file enum ParsingState : byte

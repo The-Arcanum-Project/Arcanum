@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem;
 
-namespace Arcanum.Core.CoreSystems.ParsingSystem;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 public class Content(string value, int startLine, int index) : IElement
 {

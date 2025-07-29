@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Git;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;

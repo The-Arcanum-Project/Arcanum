@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Timer = System.Timers.Timer;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;

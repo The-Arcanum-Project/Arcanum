@@ -1,5 +1,5 @@
 ﻿using System.Net.Http;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Octokit;
 
 namespace Arcanum.Core.Utils.Git;

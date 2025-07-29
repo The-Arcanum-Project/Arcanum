@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Data;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.MainMenuScreen;

@@ -1,7 +1,7 @@
 ﻿using System.Windows.Input;
 using Arcanum.API.Core.KeyBinds;
 
-namespace Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
+namespace Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
 
 public class MainWindowKeyBinds : KeyBindProvider
 {

@@ -3,7 +3,7 @@ using System.Text;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.SavingSystem;
 
-namespace Arcanum.Core.CoreSystems.ParsingSystem;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 public class Block(string name, int startLine, int index) : IElement
 {

@@ -3,7 +3,7 @@ using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.SavingSystem;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using MessageBox = System.Windows.MessageBox;
 
 namespace Arcanum.Core.CoreSystems.Parsing.EffectsAndTriggers;

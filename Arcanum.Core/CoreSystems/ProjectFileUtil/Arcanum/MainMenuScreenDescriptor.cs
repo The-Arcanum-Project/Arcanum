@@ -2,7 +2,7 @@
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 

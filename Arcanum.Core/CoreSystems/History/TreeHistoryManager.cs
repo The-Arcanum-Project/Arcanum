@@ -49,7 +49,7 @@ public class TreeHistoryManager : IHistoryManager
    /// </summary>
    /// <param name="newCommand">The command to be added to the history.</param>
    /// <param name="type">The type of the history entry associated with the command.</param>
-   public void AddCommand(ICommand newCommand, HistoryEntryType type)
+   public void AddCommand(ICommand newCommand, HistoryEntryType type = HistoryEntryType.Normal)
    {
       var newNode = new HistoryNode(_nodeId++, newCommand, type, Current);
       Current.Children.Add(newNode);

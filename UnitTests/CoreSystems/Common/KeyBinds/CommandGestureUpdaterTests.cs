@@ -2,8 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
-using Arcanum.UI.Helpers;
+using Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
+using Arcanum.Core.Utils.UiUtils;
 
 namespace UnitTests.CoreSystems.Common.KeyBinds;
 

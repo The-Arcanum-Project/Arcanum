@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.ParsingSystem;
+﻿using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 namespace UnitTests.CoreSystems.Parsing;
 

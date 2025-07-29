@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 
-namespace Arcanum.UI.Helpers;
+namespace Arcanum.Core.Utils.UiUtils;
 
 public static class TreeTraversal
 {

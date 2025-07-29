@@ -1,9 +1,8 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 
-namespace Arcanum.Core.CoreSystems.ProjectFileUtil;
+namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 
 public static class ProjectFileUtil
 {

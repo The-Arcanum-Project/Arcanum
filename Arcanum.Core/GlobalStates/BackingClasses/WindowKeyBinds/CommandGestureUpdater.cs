@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Arcanum.UI.Helpers;
+using Arcanum.Core.Utils.UiUtils;
 
-namespace Arcanum.Core.Globals.BackingClasses.WindowKeyBinds;
+namespace Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
 
 public static class CommandGestureUpdater
 {

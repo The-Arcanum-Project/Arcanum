@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 
-namespace Arcanum.Core.Globals;
+namespace Arcanum.Core.GlobalStates;
 
 public static class StaticData
 {

@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;

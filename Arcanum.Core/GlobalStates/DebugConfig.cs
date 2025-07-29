@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-namespace Arcanum.Core.Globals;
+namespace Arcanum.Core.GlobalStates;
 
 public static class DebugConfig
 {

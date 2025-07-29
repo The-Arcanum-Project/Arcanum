@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using Arcanum.API.Console;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 

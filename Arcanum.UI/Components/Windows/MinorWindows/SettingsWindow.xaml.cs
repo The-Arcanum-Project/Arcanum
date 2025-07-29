@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings;
 using Arcanum.UI.Components.UserControls.BaseControls;
 

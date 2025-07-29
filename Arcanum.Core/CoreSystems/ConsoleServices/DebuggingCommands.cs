@@ -1,5 +1,4 @@
 ﻿using Arcanum.API.Console;
-using Arcanum.Core.Globals;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 

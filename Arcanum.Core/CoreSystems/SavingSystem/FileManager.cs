@@ -3,7 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;

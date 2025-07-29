@@ -6,8 +6,8 @@ using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.EffectsAndTriggers;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
-using Arcanum.Core.Globals;
-using Arcanum.Core.Globals.BackingClasses;
+using Arcanum.Core.GlobalStates;
+using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.PluginServices;
 
 namespace Arcanum.Core.FlowControlServices;

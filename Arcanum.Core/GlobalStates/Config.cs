@@ -1,6 +1,6 @@
-﻿using Arcanum.Core.Globals.BackingClasses;
+﻿using Arcanum.Core.GlobalStates.BackingClasses;
 
-namespace Arcanum.Core.Globals;
+namespace Arcanum.Core.GlobalStates;
 
 /// <summary>
 /// This contains all user-defined configuration settings.

@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.Utils.Git;
 
-namespace Arcanum.Core.Globals;
+namespace Arcanum.Core.GlobalStates;
 
 public static class AppData
 {

@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.UI.Components.Views.MainWindow;
 

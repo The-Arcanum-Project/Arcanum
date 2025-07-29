@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Arcanum.Core.CoreSystems.History;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -19,8 +19,8 @@ public partial class HistoryTreeView
       {
          Nodes.Clear();
          Nodes.Add(Globals.HistoryManager.Root);
-         // var node1 = new HistoryNode(1, new CInitial(), HistoryEntryType.Normal, Globals.HistoryManager.Root);
-         // Globals.HistoryManager.Root.Children.Add(node1);
+         // var node1 = new HistoryNode(1, new CInitial(), HistoryEntryType.Normal, GlobalStates.HistoryManager.Root);
+         // GlobalStates.HistoryManager.Root.Children.Add(node1);
          // var node2 = new HistoryNode(2, new CInitial(), HistoryEntryType.Normal, node1);
          // node1.Children.Add(node2);
          // var node3 = new HistoryNode(3, new CInitial(), HistoryEntryType.Normal, node2);

@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.ParsingSystem;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 public class ModifiableStack<T>
 {

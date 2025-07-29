@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.Utils.UiUtils;
 using Arcanum.UI.Helpers;
 using Microsoft.Xaml.Behaviors;
 

@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.Globals;
-using Arcanum.Core.Globals.BackingClasses;
+﻿using Arcanum.Core.GlobalStates;
+using Arcanum.Core.GlobalStates.BackingClasses;
 
 namespace Arcanum.Core.Settings;
 

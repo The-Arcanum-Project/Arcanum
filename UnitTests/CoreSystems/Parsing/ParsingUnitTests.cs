@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ParsingSystem;
+﻿using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
+
 // Use the NUnit framework namespace
 
 namespace UnitTests.CoreSystems.Parsing;

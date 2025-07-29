@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-namespace Arcanum.Core.CoreSystems.ParsingSystem;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
 public interface IElement
 {

@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using static Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen;

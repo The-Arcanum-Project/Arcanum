@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Views.MainMenuScreen;
 using Arcanum.UI.Components.WindowLinker;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;

@@ -18,7 +18,7 @@ using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.Core.Globals;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.OldAndDebug;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
