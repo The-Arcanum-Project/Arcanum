@@ -18,7 +18,7 @@ public class ErrorSystemTestsDiagnostics
                 description: "Detailed error in {0} at {1}",
                 reportSeverity: DiagnosticReportSeverity.Suppressed);
 
-            var diagnostic = new Diagnostic(descriptor, "File.cs", 42);
+            var diagnostic = new DiagnosticException(descriptor, "File.cs", 42);
 
             Assert.That(diagnostic.Message, Is.EqualTo("Error in File.cs at 42"));
             Assert.That(diagnostic.Description, Is.EqualTo("Detailed error in File.cs at 42"));

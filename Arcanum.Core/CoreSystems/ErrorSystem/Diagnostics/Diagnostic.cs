@@ -1,56 +1,45 @@
-﻿using System.Globalization;
-using Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.Common;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 /// <summary>
-/// Represents an instance of a diagnostic which encapsulates a specific diagnostic message, description, and unique code generated from its associated descriptor.
+/// Is being displayed in the ErrorLog
 /// </summary>
-/// <remarks>
-/// This class is designed to wrap a <see cref="DiagnosticDescriptor"/>, providing a formatted message, description, and code derived from the descriptor.
-/// It serves as a concrete diagnostic entry that has been initialized with specific context, such as message arguments, making it usable for reporting and logging purposes.
-/// </remarks>
-public class Diagnostic
+/// <param name="descriptor"></param>
+/// <param name="context"></param>
+/// <param name="severity"></param>
+/// <param name="action"></param>
+/// <param name="message"></param>
+/// <param name="description"></param>
+public sealed class Diagnostic(DiagnosticDescriptor descriptor,
+                               LocationContext context,
+                               DiagnosticSeverity severity,
+                               string action,
+                               string message,
+                               string description)
 {
-   public readonly DiagnosticDescriptor Descriptor;
+   private readonly DiagnosticDescriptor _descriptor = descriptor;
+   public readonly LocationContext Context = context;
+   private readonly string _code = descriptor.ToString();
+   private readonly string _description = description;
+   public DiagnosticSeverity Severity = severity;
+
+   public Diagnostic(DiagnosticException diagnosticException, LocationContext context, string action)
+      : this(diagnosticException.Descriptor,
+             context,
+             diagnosticException.Severity,
+             action,
+             diagnosticException.Message,
+             diagnosticException.Description)
+   {
+   }
+
+   // Example:  PA-002 Validating Province ID failed in File \"./wrong.txt\" at Line 10:4: The Province ID '10' is duplicate and was previously defined
+
    
-   public DiagnosticReportSeverity ReportSeverity;
-   public DiagnosticSeverity Severity;
-   
-   /// <summary>
-   /// Formats a diagnostic message by replacing placeholders with the provided arguments, using an invariant culture.
-   /// </summary>
-   /// <param name="message">The message string containing placeholders to be replaced.</param>
-   /// <param name="args">An array of arguments to replace the placeholders in the message string.</param>
-   /// <returns>A formatted string with the placeholders replaced by the corresponding arguments or the original message if no arguments are provided.</returns>
-   private static string FormatMessage(string message, params object[] args)
+   public override string ToString()
    {
-      return args.Length == 0 ? message : string.Format(CultureInfo.InvariantCulture, message, args);
+      var actionString = string.IsNullOrWhiteSpace(action) ? string.Empty : $" {action} failed";
+      return $"{_code}{actionString} {Context.ToErrorString()} := {message}";
    }
-
-   protected Diagnostic(Diagnostic diagnostic)
-   {
-      Descriptor = diagnostic.Descriptor;
-      Message = diagnostic.Message;
-      Description = diagnostic.Description;
-      Code = diagnostic.Code;
-   }
-
-   public Diagnostic(DiagnosticDescriptor descriptor, params object[] args)
-   {
-      Descriptor = descriptor;
-      Message = FormatMessage(descriptor.Message, args);
-      Description = FormatMessage(descriptor.Description, args);
-      Code = Descriptor
-        .ToString(); // For now take the Descriptor ToString since it is equal / $"{Descriptor.Category.GetPrefix()}-{Descriptor.Id:D4}";
-   }
-
-   public virtual LocationBoundDiagnostic ToLocationBoundDiagnostic(LocationContext context)
-   {
-      return new(this, context);
-   }
-
-   public string Message { get; protected init; }
-   public string Description;
-   public string Code;
 }

@@ -13,10 +13,10 @@ public static class DiagnosticSeveretyExtensions
 {
    /// <summary>
    /// Retrieves the prefix associated with the specified <see cref="DiagnosticSeverity"/> value.
-   /// The prefix has at least one and at maximum three-letters that represent the diagnostic severity.
+   /// The prefix has at least one and at maximum three-letters that represent the diagnosticException severity.
    /// </summary>
-   /// <param name="severity">The diagnostic severity for which the prefix is needed.</param>
-   /// <returns>A string representing the prefix for the given diagnostic severity.</returns>
+   /// <param name="severity">The diagnosticException severity for which the prefix is needed.</param>
+   /// <returns>A string representing the prefix for the given diagnosticException severity.</returns>
    public static string GetPrefix(this DiagnosticSeverity severity)
    {
       return severity switch

@@ -1,6 +1,82 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/CodeStyle/CodeFormatting/XmlFormatter/ProcessingInstructionAttributesFormat/@EntryValue">FirstAttributeOnSingleLine</s:String>
 	<s:String x:Key="/Default/CodeStyle/CodeFormatting/XmlFormatter/TagAttributesFormat/@EntryValue">FirstAttributeOnSingleLine</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Field/=params/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Field/=params/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Shortcut/@EntryValue">FileParse</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=0EAF2CE6D89EA94F8A67ABC41F483256/Text/@EntryValue">while (true)
+      {
+      LocationContext context = new($params$); 
+         try
+         {
+         // Parsing logic
+            break; // Exit the loop if parsing is successful
+         }
+         catch (ReloadFileException) // Do nothing
+         {  
+         // Clean up already initialized resources or reset context
+            // Reset state to before the parsing attempt       
+         }
+         break;
+      }</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Description/@EntryValue">Diagnostic Descriptor Template</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Category/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Category/Order/@EntryValue">2</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Description/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Description/Order/@EntryValue">5</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=id/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=id/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Message/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Message/Order/@EntryValue">4</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Name/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Name/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=ReoprtSeverity/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=ReoprtSeverity/Order/@EntryValue">6</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Severity/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Field/=Severity/Order/@EntryValue">3</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Shortcut/@EntryValue">DD</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Text/@EntryValue">/// &lt;param name="0"&gt;desc&lt;/param&gt;
+public static readonly DiagnosticDescriptor $Name$ = new ($id$,
+DiagnosticCategory.$Category$,
+DiagnosticSeverity.$Severity$,
+"$Message$",
+"$Description$",
+DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Field/=ActionName/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Field/=ActionName/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Field/=Method/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Field/=Method/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Shortcut/@EntryValue">DiagnosticTry</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Text/@EntryValue">try
+         {
+            $Method$
+         }
+         catch (DiagnosticException ex)
+         {
+            // Default case: The Error is ignored
+            ex.HandleDiagnostic(context, "$ActionName$");
+         }</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=acnb/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=CP/@EntryIndexedValue">CP</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=kvps/@EntryIndexedValue">True</s:Boolean>
