@@ -59,7 +59,7 @@ public partial class MainMenuScreen
 
       AppData.WindowLinker = new WindowLinkerImpl();
    }
-
+   
    private void OnClosed(object? sender, EventArgs? e)
    {
       MainMenuScreenDescriptor.SaveData();

@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -81,7 +83,8 @@ public sealed class DiagnosticException : Exception
          default:
             throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
       }
-      // TODO @Minnator: Call the close handler if close is selected create fancy popup for other options
+
+      AppData.WindowLinker.OpenMainMenuScreen();
 
       var diagnostic = new Diagnostic(this, context, action);
       ErrorManager.Diagnostics.Add(diagnostic);

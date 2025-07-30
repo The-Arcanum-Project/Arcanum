@@ -3,4 +3,5 @@
 public interface IWindowLinker
 {
    public void OpenPropertyGridWindow(object obj);
+   public void OpenMainMenuScreen();
 }

@@ -1,7 +1,10 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
+﻿using Arcanum.Core.CoreSystems.SavingSystem;
+
+namespace Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 
 public class ModMetadata(string name)
 {
+   private string[] _replacePaths = null!;
    public string Name { get; } = name;
    public string Id { get; set; } = null!;
    public string Version { get; set; } = null!;
@@ -11,7 +14,17 @@ public class ModMetadata(string name)
    public string ThumbnailPath { get; set; } = null!;
    public string[] Dependencies { get; set; } = null!;
    public bool IsMultiplayerSynchronized { get; set; }
-   public string[] ReplacePaths { get; set; } = null!;
+   public string[] ReplacePaths
+   {
+      get => _replacePaths;
+      set
+      {
+         var normalizedPaths = new string[value.Length];
+         for (var i = 0; i < value.Length; i++)
+            normalizedPaths[i] = FileManager.Normalize(value[i]);
+         _replacePaths = normalizedPaths;
+      }
+   }
 
    public override string ToString()
    {

@@ -17,9 +17,12 @@ public static class FileManager
    public static DataSpace[] DependentDataSpaces;
    public static DataSpace VanillaDataSpace => DependentDataSpaces[0];
 
-   public static List<ISaveable> NewSaveables = [];
+   public static readonly List<ISaveable> NewSaveables = [];
 
    public static readonly DataSpace DocumentsEUV;
+
+   private static readonly char DefaultSeparationChar = Path.DirectorySeparatorChar;
+   private static readonly char AlternativeSeparationChar = Path.AltDirectorySeparatorChar;
 
    static FileManager()
    {
@@ -39,6 +42,8 @@ public static class FileManager
       ];
    }
 
+   public static string Normalize(string path) => path.Replace(AlternativeSeparationChar, DefaultSeparationChar);
+
    /// <summary>
    /// Loads the project file descriptor into the application.
    /// This will set the ModDataSpace and DependentDataSpaces to the values from the descriptor.
@@ -57,7 +62,7 @@ public static class FileManager
                          MessageBoxButtons.CancelTryContinue);
          return;
       }
-      
+
       CoreData.ModMetadata = modMetadata!;
    }
 
@@ -116,8 +121,12 @@ public static class FileManager
       if (subPaths == null || subPaths.Length == 0)
          return false;
 
-      return false;
-      //TODO: @Minnator parse the .metadata file from the mods and implement proper replace checks
+      // if we have a file ending we need to remove it and only check the path
+      var pathToCheck = subPaths.Length > 0 && subPaths[^1].Contains('.')
+                           ? Path.Combine(subPaths[..^1])
+                           : Path.Combine(subPaths);
+
+      return CoreData.ModMetadata.ReplacePaths.Any(replacePath => replacePath.Equals(pathToCheck));
    }
 
    public static void GenerateCustomSavingCatalog()
