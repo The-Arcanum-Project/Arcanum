@@ -20,7 +20,11 @@ public sealed class PropertyItem : INotifyPropertyChanged
 
    public event Action<PropertyItem, object?>? ValueChanged;
 
-   public PropertyItem(PropertyInfo propertyInfo, Type type, Func<object> getter, Action<object>? setter = null, string category = "")
+   public PropertyItem(PropertyInfo propertyInfo,
+                       Type type,
+                       Func<object> getter,
+                       Action<object>? setter = null,
+                       string category = "")
    {
       PropertyInfo = propertyInfo;
       Type = type;
@@ -28,9 +32,14 @@ public sealed class PropertyItem : INotifyPropertyChanged
       _setter = setter;
       Category = category;
       IsReadOnly = setter == null;
-      
+
       _value = _getter();
    }
+
+   public string FormattedName => string.Concat(PropertyInfo.Name.Select((c, i) =>
+                                                                            i > 0 && char.IsUpper(c)
+                                                                               ? " " + c
+                                                                               : c.ToString()));
 
    public object Value
    {
@@ -67,7 +76,6 @@ public sealed class PropertyItem : INotifyPropertyChanged
       }
    }
 
-
    public static PropertyItem FromExpression<TModel, TProp>(TModel instance, Expression<Func<TModel, TProp>> expr)
    {
       var member = (MemberExpression)expr.Body;
@@ -80,6 +88,7 @@ public sealed class PropertyItem : INotifyPropertyChanged
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
+
    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));

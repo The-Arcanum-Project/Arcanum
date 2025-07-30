@@ -20,7 +20,7 @@ public sealed class DiagnosticException : Exception
    public static DiagnosticException Fallback([CallerMemberName] string functionName = "",
                                               [CallerLineNumber] int lineNumber = 0,
                                               [CallerFilePath] string filePath = "")
-      => new(MiscellaneousError.UnknownError, functionName, lineNumber.ToString(), filePath);
+      => new(QADesc.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
 
    public readonly DiagnosticDescriptor Descriptor;
 

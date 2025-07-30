@@ -3,7 +3,7 @@
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 /// <summary>
-/// Is being displayed in the ErrorLog
+/// Represents a diagnostic that has been saved to the ErrorManager.
 /// </summary>
 /// <param name="descriptor"></param>
 /// <param name="context"></param>
@@ -34,12 +34,12 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
    {
    }
 
-   // Example:  PA-002 Validating Province ID failed in File \"./wrong.txt\" at Line 10:4: The Province ID '10' is duplicate and was previously defined
+   // Example:  PA-002 Duplicate Province: Validating Province ID failed in File \"./wrong.txt\" at Line 10:4: The Province ID '10' is duplicate and was previously defined
 
    
    public override string ToString()
    {
       var actionString = string.IsNullOrWhiteSpace(action) ? string.Empty : $" {action} failed";
-      return $"{_code}{actionString} {Context.ToErrorString()} := {message}";
+      return $"{_code}{actionString} {_descriptor.Name}\": {Context.ToErrorString()} := {message}";
    }
 }

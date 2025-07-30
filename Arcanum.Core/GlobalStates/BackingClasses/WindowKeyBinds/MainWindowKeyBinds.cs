@@ -39,4 +39,7 @@ public class MainWindowKeyBinds : KeyBindProvider
    public KeyGesture StepUndoCommand { get; set; } = new (Key.Z, ModifierKeys.Control | ModifierKeys.Shift);
    public KeyGesture RedoCommand { get; set; } = new (Key.Y, ModifierKeys.Control);
    public KeyGesture StepRedoCommand { get; set; } = new (Key.Y, ModifierKeys.Control | ModifierKeys.Shift);
+   
+   // Error Log Bindings
+   public KeyGesture OpenErrorLogWindow { get; set; } = new(Key.F10);
 }

@@ -118,4 +118,11 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.StepRedoCommand },
    };
+
+   // Error Log Commands
+   public static readonly RoutedCommand OpenErrorLogWindowCommand =
+      new("OpenErrorLogWindowCommand", typeof(MainWindowView))
+      {
+         InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenErrorLogWindow },
+      };
 }

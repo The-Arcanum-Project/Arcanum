@@ -6,7 +6,7 @@ namespace Arcanum.Core.CoreSystems.Common;
 /// This context will be modified and passed around during the parsing process.
 /// If an error occurs, it will be used to provide a DiagnosticDescriptor with information.
 /// </summary>
-public struct LocationContext
+public class LocationContext
 {
    
    public int LineNumber { get; set; }
@@ -16,10 +16,14 @@ public struct LocationContext
    /// <summary>
    /// The current action being performed during parsing.
    /// </summary>
-   public string Action { get; set; }
-   
+   public string ToErrorString()
+   {
+      return
+         $"in File \"{FilePath}\" at Line {LineNumber}:{ColumnNumber}";
+   }
+
    public override string ToString()
    {
-      return $"File: {Path.GetFileName(FilePath)}, Line: {LineNumber}, Column: {ColumnNumber}, Action: {Action}";
+      return $"File: {Path.GetFileName(FilePath)}, Line: {LineNumber}, Column: {ColumnNumber}";
    }
 }

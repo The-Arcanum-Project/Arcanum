@@ -1,12 +1,26 @@
 ﻿namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 
+/// <summary>
+/// This enum defines the severity of a Diagnostic.
+/// </summary>
 public enum DiagnosticSeverity
 {
+   /// <summary>
+   /// Indicates a error while parsing a file, which cannot easily be resolved.
+   /// </summary>
    Error,
+   /// <summary>
+   /// Indicates a error while parsing a file, which can be resolved automatically.
+   /// They can also be bad practices but practically do not break the file.
+   /// This includes such things as duplicate items in a list.
+   /// </summary>
    Warning,
-   Information,
-   Debug,
+   /// <summary>
+   /// A simple information message that does not indicate an error or warning.
+   /// This might be used for example to inform the user that a file was reloaded.
+   /// </summary>
+   Information
 }
 
 public static class DiagnosticSeveretyExtensions
@@ -24,7 +38,6 @@ public static class DiagnosticSeveretyExtensions
          DiagnosticSeverity.Error => "ERR",
          DiagnosticSeverity.Warning => "WRN",
          DiagnosticSeverity.Information => "INF",
-         DiagnosticSeverity.Debug => "DBG",
          _ => throw new ArgumentOutOfRangeException(nameof(severity)),
       };
    }

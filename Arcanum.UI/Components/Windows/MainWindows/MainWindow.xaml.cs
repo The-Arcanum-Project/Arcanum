@@ -332,4 +332,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       e.CanExecute = Globals.HistoryManager.CanStepUndo;
    }
+
+   private void OpenErrorLogWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var errorLogWindow = new ErrorLog();
+      errorLogWindow.ShowDialog();
+   }
 }

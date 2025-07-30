@@ -150,6 +150,18 @@
         <Resource Include="Assets\Icons\16x16\Uncompacted16x16.png" />
         <None Remove="Assets\Icons\16x16\History16x16.png" />
         <Resource Include="Assets\Icons\16x16\History16x16.png" />
+        <None Remove="Assets\Icons\16x16\InfoCircle16x16.png" />
+        <Resource Include="Assets\Icons\16x16\InfoCircle16x16.png" />
+        <None Remove="Assets\Icons\16x16\DangerCircle16x16.png" />
+        <Resource Include="Assets\Icons\16x16\DangerCircle16x16.png" />
+        <None Remove="Assets\Icons\16x16\CloseCircle16x16.png" />
+        <Resource Include="Assets\Icons\16x16\CloseCircle16x16.png" />
+        <None Remove="Assets\Icons\40x40\DangerCircle40x40.png" />
+        <Resource Include="Assets\Icons\40x40\DangerCircle40x40.png" />
+        <None Remove="Assets\Icons\40x40\InfoCircle40x40.png" />
+        <Resource Include="Assets\Icons\40x40\InfoCircle40x40.png" />
+        <None Remove="Assets\Icons\40x40\CloseCircle40x40.png" />
+        <Resource Include="Assets\Icons\40x40\CloseCircle40x40.png" />
     </ItemGroup>
 
     <ItemGroup>

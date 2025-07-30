@@ -10,33 +10,54 @@
 
     <UserControl.Resources>
         <converters:EnumValuesConverter x:Key = "EnumValuesConverter" />
+        <converters:EnumValueConverter x:Key = "EnumValueConverter" />
         <converters:DecimalDoubleConverter x:Key = "DecimalDoubleConverter" />
+        <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
 
         <DataTemplate x:Key = "StringTemplate"
                       DataType = "{x:Type delayedEvents:PropertyItem}">
             <styleClasses:CorneredTextBox Text = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Margin = "0, 0, 6, 0"
-                                  VerticalAlignment = "Center"
-                                  HorizontalAlignment = "Stretch"
-                                  BorderThickness = "0"
-                                  Background = "Transparent"
-                                  TextWrapping = "NoWrap" 
-                                  Foreground="{StaticResource DefaultForeColorBrush}"
-                                  CaretBrush="{StaticResource DefaultForeColorBrush}"/>
+                                          Margin = "0, 0, 6, 0"
+                                          VerticalAlignment = "Center"
+                                          HorizontalAlignment = "Stretch"
+                                          BorderThickness = "0"
+                                          Background = "Transparent"
+                                          TextWrapping = "NoWrap"
+                                          Foreground = "{StaticResource DefaultForeColorBrush}"
+                                          CaretBrush = "{StaticResource DefaultForeColorBrush}" />
         </DataTemplate>
 
         <DataTemplate x:Key = "BoolTemplate"
                       DataType = "{x:Type delayedEvents:PropertyItem}">
-            <CheckBox IsChecked = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <CheckBox IsChecked = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </DataTemplate>
 
         <DataTemplate x:Key = "EnumTemplate"
                       DataType = "{x:Type delayedEvents:PropertyItem}">
             <ComboBox ItemsSource = "{Binding Type, Converter={StaticResource EnumValuesConverter}}"
-                      SelectedItem = "{Binding Value, Mode=TwoWay}"
-                      Style = "{StaticResource BorderlessComboboxStyle}"
+                      SelectedItem = "{Binding Value,Converter={StaticResource EnumValueConverter}, Mode=TwoWay}"
                       Margin = "1, 1, 4, 1"
-                      Background = "Transparent" />
+                      Background = "Transparent"
+                      ToolTip="{Binding SelectedItem.Description, RelativeSource={RelativeSource Self}}"
+                      TextSearch.TextPath="Value"
+                      ToolTipService.InitialShowDelay="100">
+                <ComboBox.Style>
+                    <Style TargetType = "ComboBox"
+                           BasedOn = "{StaticResource BorderlessComboboxStyle}">
+                        <Setter Property = "ItemContainerStyle">
+                            <Setter.Value>
+                                <Style TargetType = "ComboBoxItem"
+                                       BasedOn = "{StaticResource BaseComboBoxItemStyle}">
+                                    <Setter Property = "ToolTip"
+                                            Value = "{Binding Description}" />
+                                    <Setter Property = "ToolTipService.InitialShowDelay"
+                                            Value = "100" />
+                                </Style>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
         </DataTemplate>
 
         <DataTemplate x:Key = "DefaultTemplate"
@@ -49,12 +70,12 @@
         <DataTemplate x:Key = "IntTemplate"
                       DataType = "{x:Type delayedEvents:PropertyItem}">
             <baseControls:BaseNumericUpDown Value = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Margin = "0, 0, 6, 0"
-                                  Background = "Transparent"
-                                  BorderThickness = "0"
-                                  Padding = "0"
-                                  HorizontalAlignment = "Stretch"
-                                  VerticalAlignment = "Stretch" />
+                                            Margin = "0, 0, 6, 0"
+                                            Background = "Transparent"
+                                            BorderThickness = "0"
+                                            Padding = "0"
+                                            HorizontalAlignment = "Stretch"
+                                            VerticalAlignment = "Stretch" />
         </DataTemplate>
 
         <DataTemplate x:Key = "DecimalTemplate"
@@ -71,13 +92,14 @@
 
         <DataTemplate x:Key = "FloatTemplate"
                       DataType = "{x:Type delayedEvents:PropertyItem}">
-            <baseControls:FloatNumericUpDown Value = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                   Margin = "0, 0, 6, 0"
-                                   Background = "Transparent"
-                                   BorderThickness = "0"
-                                   Padding = "0"
-                                   HorizontalAlignment = "Stretch"
-                                   VerticalAlignment = "Stretch" />
+            <baseControls:FloatNumericUpDown
+                Value = "{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Margin = "0, 0, 6, 0"
+                Background = "Transparent"
+                BorderThickness = "0"
+                Padding = "0"
+                HorizontalAlignment = "Stretch"
+                VerticalAlignment = "Stretch" />
         </DataTemplate>
 
         <DataTemplate x:Key = "ObjectTemplate"
@@ -97,11 +119,11 @@
                            HorizontalAlignment = "Left" />
 
                 <styleClasses:BaseButton Grid.Column = "1"
-                                 Margin = "2"
-                                 Padding = "0"
-                                 VerticalAlignment = "Stretch"
-                                 Click = "ViewObject_Button_Click"
-                                 HorizontalAlignment = "Stretch">
+                                         Margin = "2"
+                                         Padding = "0"
+                                         VerticalAlignment = "Stretch"
+                                         Click = "ViewObject_Button_Click"
+                                         HorizontalAlignment = "Stretch">
                     <Image Source = "/Assets/Icons/20x20/Eye20x20.png"
                            VerticalAlignment = "Center"
                            HorizontalAlignment = "Center"
@@ -127,11 +149,11 @@
                            HorizontalAlignment = "Left" />
 
                 <styleClasses:BaseButton Grid.Column = "1"
-                                 Margin = "2"
-                                 Padding = "0"
-                                 VerticalAlignment = "Stretch"
-                                 Click = "ViewCollection_Button_Click"
-                                 HorizontalAlignment = "Stretch">
+                                         Margin = "2"
+                                         Padding = "0"
+                                         VerticalAlignment = "Stretch"
+                                         Click = "ViewCollection_Button_Click"
+                                         HorizontalAlignment = "Stretch">
                     <Image Source = "/Assets/Icons/20x20/Eye20x20.png"
                            VerticalAlignment = "Center"
                            HorizontalAlignment = "Center"
@@ -171,7 +193,7 @@
 
                 <TextBlock Grid.Row = "0"
                            Grid.Column = "0"
-                           Text = "{Binding PropertyInfo.Name}"
+                           Text = "{Binding FormattedName}"
                            VerticalAlignment = "Center"
                            Margin = "7, 0, 0, 0" />
 
@@ -220,6 +242,7 @@
                 <RowDefinition Height = "24" />
                 <RowDefinition Height = "1*" />
                 <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "1*" />
@@ -248,8 +271,18 @@
                      ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
                      HorizontalContentAlignment = "Stretch" />
 
-            <Grid Grid.Row = "2"
+
+            <Border Grid.Row = "2"
+                    x:Name = "GridEmbeddedBorder"
+                    BorderThickness = "0"
+                    Visibility = "{Binding ShowGridEmbedded, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Height = "250">
+            </Border>
+
+            <Grid Grid.Row = "3"
+                  x:Name = "DescriptionGrid"
                   MinHeight = "40"
+                  MaxHeight = "100"
                   Margin = "2"
                   Background = "Transparent">
                 <Grid.ColumnDefinitions>
@@ -269,8 +302,10 @@
                            VerticalAlignment = "Stretch" />
 
                 <TextBlock Grid.Row = "1"
+                           x:Name = "DescriptionTextBlock"
                            Margin = "4"
-                           Text = "{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                           Text = "{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           TextWrapping = "Wrap">
                 </TextBlock>
             </Grid>
 

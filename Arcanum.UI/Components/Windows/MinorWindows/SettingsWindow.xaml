@@ -6,7 +6,7 @@
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          mc:Ignorable = "d"
                          Title = "SettingsWindow"
-                         Height = "500"
+                         Height = "700"
                          Width = "800"
                          Background = "{StaticResource DefaultBackColorBrush}">
 

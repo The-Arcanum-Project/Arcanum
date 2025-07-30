@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using Arcanum.API.Attributes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings;
 using Arcanum.UI.Components.UserControls.BaseControls;
@@ -33,7 +34,7 @@ public partial class SettingsWindow
    private void InitTabs(TabControl tc, object obj)
    {
 #if DEBUG_OBJ
-      _allOptionsTestObject = new ();
+      _allOptionsTestObject = new();
       var item = new TabItem
       {
          Header = "PropGirdDebug",
@@ -87,7 +88,8 @@ public partial class SettingsWindow
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.PropertyType.IsClass &&
                             p.PropertyType != typeof(string) &&
-                            p.PropertyType != typeof(object))
+                            p.PropertyType != typeof(object) &&
+                            p.GetCustomAttribute<IgnoreInPropertyGrid>() is null)
                 .ToList();
    }
 
@@ -97,13 +99,48 @@ public partial class SettingsWindow
       return attribute?.Name;
    }
 
+   /// <summary>
+   /// Any property that has a <see cref="CustomResetMethod"/> attribute will be reset using the specified method.
+   /// The method must have the signature: <c>object Method(PropertyInfo)</c>.
+   /// </summary>
+   /// <param name="propGrid"></param>
+   /// <param name="info"></param>
+   /// <exception cref="InvalidOperationException"></exception>
    private static void ResetPropertyToDefault(PropertyGrid propGrid, PropertyInfo info)
    {
-      var defaultValueAttribute = info.GetCustomAttribute<DefaultValueAttribute>();
-      if (defaultValueAttribute == null)
-         return;
+      var customMethod = info.GetCustomAttribute<CustomResetMethod>();
+      object? newValue;
 
-      info.SetValue(propGrid.SelectedObject, defaultValueAttribute.Value);
+      if (customMethod is not null)
+      {
+         var methodInfo = info.DeclaringType?.GetMethod(customMethod.MethodName,
+                                                        BindingFlags.Public |
+                                                        BindingFlags.NonPublic |
+                                                        BindingFlags.Instance);
+         if (methodInfo is null)
+            return;
+
+         var parameters = methodInfo.GetParameters();
+         if (methodInfo.ReturnType != typeof(object) ||
+             parameters.Length != 1 ||
+             parameters[0].ParameterType != typeof(PropertyInfo))
+         {
+            throw new
+               InvalidOperationException($"Method '{customMethod.MethodName}' must have signature: object Method(PropertyInfo)");
+         }
+
+         newValue = methodInfo.Invoke(null, parameters: [info]);
+      }
+      else
+      {
+         var defaultValueAttribute = info.GetCustomAttribute<DefaultValueAttribute>();
+         if (defaultValueAttribute == null)
+            return;
+
+         newValue = defaultValueAttribute.Value;
+      }
+
+      info.SetValue(propGrid.SelectedObject, newValue);
       propGrid.UpdatePropertyItem();
    }
 
@@ -176,6 +213,6 @@ public partial class SettingsWindow
       if (selectedProperty == null)
          return;
 
-      ResetPropertyToDefault(propGrid, selectedProperty);
+      ResetPropertyToDefault(propGrid.GetActive(), selectedProperty);
    }
 }
