@@ -11,6 +11,9 @@
     <Color x:Key = "RowAlternatingColor"> #757373 </Color>
     <Color x:Key = "BlueSelectionBackColor"> #2e436e </Color>
     <Color x:Key = "AggressiveRedBackColor"> #e81123 </Color>
+    <Color x:Key = "DimErrorRedColor"> #a11727 </Color>
+    <Color x:Key = "DiwWarningYellowColor"> #a3850e </Color>
+    <Color x:Key = "DimInformationBlueColor"> #2373b8 </Color>
     <Color x:Key = "BlueAccentColor"> #3574f0 </Color>
     <Color x:Key = "GreenColor"> #528d57 </Color>
 
@@ -38,6 +41,12 @@
                      Color = "{StaticResource AggressiveRedBackColor}" />
     <SolidColorBrush x:Key = "AccentBackColorBrush"
                      Color = "#FF0e3338" />
+    <SolidColorBrush x:Key = "DimErrorRedColorBrush"
+                     Color = "{StaticResource DimErrorRedColor}" />
+    <SolidColorBrush x:Key = "DimWarningYellowColorBrush"
+                     Color = "{StaticResource DiwWarningYellowColor}" />
+    <SolidColorBrush x:Key = "DimInformationBlueColorBrush"
+                     Color = "{StaticResource DimInformationBlueColor}" />
 
     <LinearGradientBrush x:Key = "AccentGradientBrush"
                          StartPoint = "-0.2,-0.2"

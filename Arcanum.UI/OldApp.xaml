@@ -24,6 +24,7 @@
                 <ResourceDictionary Source="Components/Styles/Base/BaseContextMenu.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseToggleButton.xaml" />
                 <ResourceDictionary Source="Components/Styles/Base/BaseTreeView.xaml" />
+                <ResourceDictionary Source="Components/Styles/Base/BaseListView.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

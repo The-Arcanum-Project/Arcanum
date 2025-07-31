@@ -18,11 +18,11 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
                                string message,
                                string description)
 {
-   private readonly DiagnosticDescriptor _descriptor = descriptor;
+   public DiagnosticDescriptor Descriptor { get; }= descriptor;
    public readonly LocationContext Context = context;
    private readonly string _code = descriptor.ToString();
    private readonly string _description = description;
-   public DiagnosticSeverity Severity = severity;
+   public DiagnosticSeverity Severity { get; }= severity;
 
    public Diagnostic(DiagnosticException diagnosticException, LocationContext context, string action)
       : this(diagnosticException.Descriptor,

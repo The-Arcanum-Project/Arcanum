@@ -17,7 +17,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType = "GridSplitter">
                     <Border Background = "{TemplateBinding Background}"
-                            CornerRadius = "3" />
+                            CornerRadius = "2" 
+                            Width="{TemplateBinding Width}"
+                            Margin="{TemplateBinding Margin}"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

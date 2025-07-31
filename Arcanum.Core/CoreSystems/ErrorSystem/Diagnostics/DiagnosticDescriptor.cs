@@ -54,10 +54,10 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
    [Description("The severity of the Diagnostic.")]
    public DiagnosticSeverity Severity { get; set; } = severity;
    public readonly int Id = id;
-   public readonly string Name = name;
-   public readonly string Message = message;
-   public readonly string Description = description;
-   public readonly string Resolution = resolution;
+   public string Name { get; } = name;
+   public string Message { get; } = message;
+   public string Description { get; } = description;
+   public string Resolution { get; } = resolution;
 
    public override string ToString() => $"{Category.GetPrefix()}-{Id:D4} {Name}";
 
