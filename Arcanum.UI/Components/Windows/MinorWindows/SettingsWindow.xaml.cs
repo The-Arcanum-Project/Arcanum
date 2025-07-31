@@ -63,6 +63,8 @@ public partial class SettingsWindow
                             Name = property.Name,
                             Margin = new(0),
                             Padding = new(0),
+                            ForceInlinePropertyGrid =
+                               property.GetCustomAttribute<SettingsForceInlinePropertyGrid>() != null,
                          },
          };
          tc.Items.Add(tabItem);

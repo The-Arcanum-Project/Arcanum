@@ -59,7 +59,7 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
    public readonly string Description = description;
    public readonly string Resolution = resolution;
 
-   public override string ToString() => $"{Category.GetPrefix()}-{Id:D4}";
+   public override string ToString() => $"{Category.GetPrefix()}-{Id:D4} {Name}";
 
    public override int GetHashCode() => HashCode.Combine(Category, Id);
 

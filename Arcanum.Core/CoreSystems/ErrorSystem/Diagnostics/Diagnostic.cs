@@ -40,6 +40,6 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
    public override string ToString()
    {
       var actionString = string.IsNullOrWhiteSpace(action) ? string.Empty : $" {action} failed";
-      return $"{_code}{actionString} {_descriptor.Name}\": {Context.ToErrorString()} := {message}";
+      return $"{_code}: {actionString}: {Context.ToErrorString()} := {message}";
    }
 }

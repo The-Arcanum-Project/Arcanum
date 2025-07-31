@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+﻿using Arcanum.API.Attributes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 
@@ -21,5 +22,19 @@ public class MiscellaneousError
                                                                     DiagnosticSeverity.Error,
                                                                     "Unknown error occurred.",
                                                                     "The internal Arcanum Error handling has just failed! An internal function did not return the respective object!\nin File: {2}\n atLine: {0}, in Function: {1}",
+                                                                    DiagnosticReportSeverity.PopupError);
+   public DiagnosticDescriptor DebugError1 { get; } = new(DiagnosticCategory.Miscellaneous,
+                                                                    1,
+                                                                    "DebugError1",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "Debug Error 1",
+                                                                    "This is a debug error for testing purposes.",
+                                                                    DiagnosticReportSeverity.PopupError);
+    public DiagnosticDescriptor DebugError2 { get; } = new(DiagnosticCategory.Miscellaneous,
+                                                                    2,
+                                                                    "DebugError2",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "Debug Error 2",
+                                                                    "This is another debug error for testing purposes.",
                                                                     DiagnosticReportSeverity.PopupError);
 }

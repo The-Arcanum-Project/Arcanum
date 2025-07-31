@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+﻿using Arcanum.API.Attributes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 

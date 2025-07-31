@@ -19,8 +19,12 @@ public partial class PropertyGrid
    // We only trigger this event after a delay to avoid flooding the UI with events
    public readonly PropGridDelayEvent PropertyValueChanged = new(250);
    public event EventHandler<SelectionChangedEventArgs>? PropertySelected = delegate { };
+   private PropertyGrid? _inlinedPropertyGrid;
 
-   private PropertyGrid? _inlinedPropertyGrid = null;
+   public static Dictionary<Type, Func<object, string>> CustomTypeConverters { get; } = new()
+   {
+      [typeof(KeyGesture)] = (obj) => ((KeyGesture)obj).GetDisplayStringForCulture(CultureInfo.CurrentCulture) ?? string.Empty,
+   };
 
    public PropertyGrid()
    {
@@ -63,6 +67,8 @@ public partial class PropertyGrid
          GridEmbeddedBorder.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
       }
    }
+   
+   public bool ForceInlinePropertyGrid { get; set; }
 
    private void OnPropertyListOnSelectionChanged(object sender, SelectionChangedEventArgs _)
    {
@@ -81,14 +87,14 @@ public partial class PropertyGrid
       if (prop == null)
          throw new ArgumentException($"Property {item.PropertyInfo.Name} not found in {SelectedObject.GetType().Name}");
 
-      if (prop.GetCustomAttribute<InlinePropertyGrid>() is not null)
+      if (ForceInlinePropertyGrid || prop.GetCustomAttribute<InlinePropertyGrid>() is not null)
       {
          // throw an exception if the selected property is not a class or struct
          if (prop.PropertyType is { IsClass: false, IsValueType: false })
             throw new
                ArgumentException($"Property {item.PropertyInfo.Name} is not a class or struct and thus not valid for inline property grid.");
 
-         _inlinedPropertyGrid ??= new() { Margin = new(1) };
+         _inlinedPropertyGrid ??= new() { Margin = new(-1) };
          GridEmbeddedBorder.Child = _inlinedPropertyGrid;
 
          _inlinedPropertyGrid.SelectedObject = prop.GetValue(SelectedObject);
@@ -164,6 +170,7 @@ public partial class PropertyGrid
          return;
 
       var props = e.NewValue.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+      
       foreach (var prop in props)
       {
          if (!prop.CanRead)
