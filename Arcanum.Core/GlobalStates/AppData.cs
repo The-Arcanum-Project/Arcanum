@@ -17,7 +17,7 @@ public static class AppData
    
    public static ProjectFileDescriptor CurrentProjectFile { get; set; } = null!;
    
-   public static SearchSettings SearchSettings { get; set; } = new();
+   public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new();
    
    public static IWindowLinker WindowLinker { get; set; } = null!;
 }

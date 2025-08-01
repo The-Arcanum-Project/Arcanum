@@ -8,14 +8,14 @@ public class Queastor : IQueastor
    private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
    private readonly BkTree _bkTree = new();
 
-   public Queastor(ISearchSettings searchSettings)
+   public Queastor(IQueastorSearchSettings queastorSearchSettings)
    {
-      Settings = searchSettings ?? throw new ArgumentNullException(nameof(searchSettings));
+      Settings = queastorSearchSettings ?? throw new ArgumentNullException(nameof(queastorSearchSettings));
    }
 
-   public static readonly Queastor GlobalInstance = new(new SearchSettings());
+   public static readonly Queastor GlobalInstance = new(new QueastorSearchSettings());
 
-   public ISearchSettings Settings { get; set; }
+   public IQueastorSearchSettings Settings { get; set; }
 
    public void AddToIndex(ISearchable item)
    {
@@ -90,7 +90,7 @@ public class Queastor : IQueastor
       foreach (var term in _bkTree.Search(query, Settings.MaxLevinsteinDistance))
          if (_invertedIndex.TryGetValue(term, out var items))
          {
-            if (Settings.SearchCategory == ISearchSettings.Category.All)
+            if (Settings.SearchCategory == IQueastorSearchSettings.Category.All)
             {
                filteredResults.UnionWith(items);
                continue;
@@ -113,11 +113,11 @@ public class Queastor : IQueastor
 
       switch (Settings.SortingOption)
       {
-         case ISearchSettings.SortingOptions.Relevance:
+         case IQueastorSearchSettings.SortingOptions.Relevance:
             itemsList.Sort((a, b) =>
                               b.GetRelevanceScore(query).CompareTo(a.GetRelevanceScore(query)));
             break;
-         case ISearchSettings.SortingOptions.Namespace:
+         case IQueastorSearchSettings.SortingOptions.Namespace:
             itemsList.Sort((a, b) =>
             {
                var nsA = a.GetNamespace.Split('>');
@@ -133,11 +133,11 @@ public class Queastor : IQueastor
                return nsA.Length.CompareTo(nsB.Length);
             });
             break;
-         case ISearchSettings.SortingOptions.Alphabetical:
+         case IQueastorSearchSettings.SortingOptions.Alphabetical:
             itemsList.Sort((a, b) => string.Compare(a.ResultName, b.ResultName, StringComparison.Ordinal));
             break;
          default:
-            throw new ArgumentOutOfRangeException(typeof(ISearchSettings.SortingOptions).ToString());
+            throw new ArgumentOutOfRangeException(typeof(IQueastorSearchSettings.SortingOptions).ToString());
       }
 
       return itemsList;
@@ -172,11 +172,11 @@ public class Queastor : IQueastor
          return string.Empty;
 
       var closest = terms[0];
-      var minDistance = LevenshteinDistance(query, closest);
+      var minDistance = LevinsteinDistance(query, closest);
 
       foreach (var term in terms)
       {
-         var distance = LevenshteinDistance(query, term);
+         var distance = LevinsteinDistance(query, term);
          if (distance < minDistance)
          {
             minDistance = distance;
@@ -187,7 +187,7 @@ public class Queastor : IQueastor
       return closest;
    }
 
-   public static int LevenshteinDistance(string a, string b)
+   public static int LevinsteinDistance(string a, string b)
    {
       var dp = new int[a.Length + 1, b.Length + 1];
       for (var i = 0; i <= a.Length; i++)

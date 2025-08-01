@@ -22,7 +22,7 @@ public class BkTree
       var current = _root;
       while (true)
       {
-         var distance = Queastor.LevenshteinDistance(term, current.Term);
+         var distance = Queastor.LevinsteinDistance(term, current.Term);
          if (distance == 0)
             return;
 
@@ -50,7 +50,7 @@ public class BkTree
          var node = stack.Pop();
          if (node == null)
             continue;
-         var distance = Queastor.LevenshteinDistance(query, node.Term);
+         var distance = Queastor.LevinsteinDistance(query, node.Term);
          if (distance <= maxDistance)
             results.Add(node.Term);
 

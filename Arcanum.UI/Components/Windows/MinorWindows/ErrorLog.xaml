@@ -44,21 +44,30 @@
             </Grid.ColumnDefinitions>
 
             <CheckBox Grid.Column = "0"
-                      HorizontalAlignment = "Center">
+                      x:Name = "ErrorCheckBox"
+                      HorizontalAlignment = "Center"
+                      Checked="CheckBox_OnClick"
+                      Unchecked="CheckBoxUnCheck_OnClick">
                 Error
             </CheckBox>
             <CheckBox Grid.Column = "1"
-                      HorizontalAlignment = "Center">
+                      x:Name = "WarningCheckBox"
+                      HorizontalAlignment = "Center"
+                      Checked="CheckBox_OnClick"
+                      Unchecked="CheckBoxUnCheck_OnClick">
                 Warning
             </CheckBox>
             <CheckBox Grid.Column = "2"
-                      HorizontalAlignment = "Center">
+                      x:Name = "InformationCheckBox"
+                      HorizontalAlignment = "Center"
+                      Checked="CheckBox_OnClick"
+                      Unchecked="CheckBoxUnCheck_OnClick">
                 Information
             </CheckBox>
 
             <userControls:SearchTextBox Grid.Column = "3"
                                         x:Name = "SearchTextBox"
-                                        BorderThickness = "0, 0, 0, 1">
+                                        ShowTextUnderline="True">
 
             </userControls:SearchTextBox>
 
@@ -97,10 +106,10 @@
                 Margin="4">
             <Grid Margin = "0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height = "40" />
-                    <RowDefinition Height = "200" />
-                    <RowDefinition Height = "200" />
-                    <RowDefinition Height = "*" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="35*" />
+                    <RowDefinition Height="35*" />
+                    <RowDefinition Height="30*" />
                     <RowDefinition Height = "30" />
                 </Grid.RowDefinitions>
 

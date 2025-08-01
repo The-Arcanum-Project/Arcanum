@@ -11,6 +11,18 @@ public partial class SearchTextBox
    public Action SettingsOpened { get; set; } = null!;
    private readonly Timer _searchTimer;
 
+   public bool ShowTextUnderline
+   {
+      get => (bool)GetValue(ShowTextUnderlineProperty);
+      set => SetValue(ShowTextUnderlineProperty, value);
+   }
+
+   public static readonly DependencyProperty ShowTextUnderlineProperty =
+      DependencyProperty.Register(nameof(ShowTextUnderline),
+                                  typeof(bool),
+                                  typeof(SearchTextBox),
+                                  new(false));
+
    public SearchTextBox()
    {
       _searchTimer = new(250);

@@ -2,7 +2,7 @@
 
 public interface IQueastor
 {
-   public ISearchSettings Settings { get; set; }
+   public IQueastorSearchSettings Settings { get; set; }
    public void AddToIndex(ISearchable item);
    public void RemoveFromIndex(ISearchable item);
    public void ModifyInIndex(ISearchable item, IReadOnlyList<string> oldTerms);

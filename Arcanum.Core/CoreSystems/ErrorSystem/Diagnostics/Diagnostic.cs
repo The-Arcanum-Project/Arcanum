@@ -18,8 +18,9 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
                                string message,
                                string description)
 {
+   public string Action { get; } = action;
    public DiagnosticDescriptor Descriptor { get; }= descriptor;
-   public readonly LocationContext Context = context;
+   public LocationContext Context { get; } = context;
    private readonly string _code = descriptor.ToString();
    private readonly string _description = description;
    public DiagnosticSeverity Severity { get; }= severity;
@@ -35,11 +36,11 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
    }
 
    // Example:  PA-002 Duplicate Province: Validating Province ID failed in File \"./wrong.txt\" at Line 10:4: The Province ID '10' is duplicate and was previously defined
-
+   
    
    public override string ToString()
    {
-      var actionString = string.IsNullOrWhiteSpace(action) ? string.Empty : $" {action} failed";
-      return $"{_code}: {actionString}: {Context.ToErrorString()} := {message}";
+      var actionString = string.IsNullOrWhiteSpace(Action) ? string.Empty : $" {Action} failed";
+      return $"{_code}: {actionString}: {Context.ToErrorString} := {message}";
    }
 }

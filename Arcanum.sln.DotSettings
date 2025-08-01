@@ -66,6 +66,33 @@ DiagnosticSeverity.$Severity$,
 "$Message$",
 "$Description$",
 DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=control/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=control/Order/@EntryValue">2</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=defaultValue/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=defaultValue/Order/@EntryValue">3</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=name/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=name/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=type/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=type/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Shortcut/@EntryValue">dependendprop</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Text/@EntryValue">public $type$ $name$
+   {
+      get =&gt; ($type$)GetValue($name$Property);
+      set =&gt; SetValue($name$Property, value);
+   }
+
+   public static readonly DependencyProperty $name$Property =
+      DependencyProperty.Register(nameof($name$),
+                                  typeof($type$),
+                                  typeof($control$),
+                                  new($defaultValue$));</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=F4FE300E3AEDA34AB6ADD681F76AFB5D/Field/=ActionName/@KeyIndexDefined">True</s:Boolean>

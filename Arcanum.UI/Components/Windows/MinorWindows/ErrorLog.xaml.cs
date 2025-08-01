@@ -1,12 +1,15 @@
 ﻿using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using Arcanum.Core.CoreSystems.Common;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.UI.Components.Windows.PopUp;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -14,6 +17,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 {
    public enum FilterType
    {
+      None,
       Severity,
       Name,
       Id,
@@ -79,12 +83,27 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
+   private readonly SimpleCollectionViewFilterProvider _filterProvider = new();
+   private SimpleSearchSettings SearchSettings { get; set; } = new();
+   private bool _isFullyLoaded;
+
+   private string? FilterPropertyPath => FilterComboBox.SelectedItem is not FilterType filterType
+                                            ? null
+                                            : filterType switch
+                                            {
+                                               FilterType.Severity => nameof(Diagnostic.Severity),
+                                               FilterType.Name => "Descriptor.Name",
+                                               FilterType.Id => "Descriptor.Id",
+                                               FilterType.Message => "Descriptor.Message",
+                                               FilterType.Description => "Descriptor.Description",
+                                               FilterType.ErrorAction => nameof(Diagnostic.Action),
+                                               FilterType.Resolution => "Descriptor.Resolution",
+                                               _ => null,
+                                            };
+
    public ErrorLog()
    {
       InitializeComponent();
-
-      FilterComboBox.ItemsSource = Enum.GetValues(typeof(FilterType));
-      ErrorLogListView.ItemsSource = new ListCollectionView(ErrorManager.Diagnostics);
 
       ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError1,
                                        new(),
@@ -111,6 +130,70 @@ public partial class ErrorLog : INotifyPropertyChanged
                                        "Test Action",
                                        "Test Message",
                                        "Test Description"));
+
+      Loaded += OnLoaded;
+   }
+
+   private void OnLoaded(object sender, RoutedEventArgs e)
+   {
+      FilterComboBox.SelectedIndex = 0;
+      FilterComboBox.SelectionChanged += (_, _) => QuerySearch(SearchTextBox.SearchInputTextBox.Text);
+
+      FilterComboBox.ItemsSource = Enum.GetValues(typeof(FilterType));
+      ErrorLogListView.ItemsSource = new ListCollectionView(ErrorManager.Diagnostics);
+
+      SearchTextBox.RequestSearch = QuerySearch;
+      SearchTextBox.SearchInputTextBox.TextChanged += (_, _) =>
+      {
+         if (FilterComboBox.SelectedItem is not FilterType.Severity)
+            return;
+
+         var text = SearchTextBox.SearchInputTextBox.Text.Trim();
+
+         ErrorCheckBox.IsChecked = text.Contains(nameof(DiagnosticSeverity.Error),
+                                                 StringComparison.OrdinalIgnoreCase);
+         WarningCheckBox.IsChecked = text.Contains(nameof(DiagnosticSeverity.Warning),
+                                                   StringComparison.OrdinalIgnoreCase);
+         InformationCheckBox.IsChecked = text.Contains(nameof(DiagnosticSeverity.Information),
+                                                       StringComparison.OrdinalIgnoreCase);
+      };
+
+      SearchTextBox.SettingsOpened = () =>
+      {
+         var settingsPropWindow =
+            new PropertyGridWindow(SearchSettings)
+            {
+               Title = "Search Settings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            };
+         settingsPropWindow.ShowDialog();
+         QuerySearch(SearchTextBox.SearchInputTextBox.Text);
+      };
+
+      _isFullyLoaded = true;
+   }
+
+   private void QuerySearch(string query)
+   {
+      if (!_isFullyLoaded)
+         return;
+
+      if (ErrorLogListView.ItemsSource is not ListCollectionView lcv)
+         throw new InvalidOperationException("DataContext is not a CollectionView.");
+
+      lcv.SortDescriptions.Clear();
+
+      lcv.Filter =
+         SimpleCollectionViewFilterProvider.GenerateFilter(SearchSettings,
+                                                           query,
+                                                           FilterPropertyPath ?? string.Empty);
+
+      // check if we have items to sort
+      if (lcv.Count < 2)
+         lcv.SortDescriptions.Add(new(FilterPropertyPath ?? string.Empty,
+                                      SearchSettings.SortingOption == ISearchSettings.SortingOptions.Acending
+                                         ? ListSortDirection.Ascending
+                                         : ListSortDirection.Descending));
+      lcv.Refresh();
    }
 
    private void ErrorLogListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -135,7 +218,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -147,4 +230,68 @@ public partial class ErrorLog : INotifyPropertyChanged
       OnPropertyChanged(propertyName);
       return true;
    }
+
+   private void CheckBox_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox checkBox)
+         return;
+
+      if (SearchTextBox.SearchInputTextBox.Text.Contains(checkBox.Content.ToString() ?? string.Empty,
+                                                         StringComparison.OrdinalIgnoreCase))
+         return;
+
+      FilterComboBox.SelectedItem = FilterType.Severity;
+      if (OnlySeverityFiltered())
+         SearchTextBox.SearchInputTextBox.Text += ' ' + checkBox.Content.ToString();
+      else
+         SearchTextBox.SearchInputTextBox.Text = checkBox.Content.ToString() ?? string.Empty;
+   }
+
+   private void CheckBoxUnCheck_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox checkBox)
+         return;
+
+      if (!SearchTextBox.SearchInputTextBox.Text.Contains(checkBox.Content.ToString() ?? string.Empty,
+                                                         StringComparison.OrdinalIgnoreCase))
+         return;
+
+      FilterComboBox.SelectedItem = FilterType.None;
+      if (!OnlySeverityFiltered())
+         SearchTextBox.SearchInputTextBox.Text = string.Empty;
+      else
+      {
+         var indexOf = SearchTextBox.SearchInputTextBox.Text.IndexOf(checkBox.Content.ToString() ?? string.Empty,
+                                                                     StringComparison.OrdinalIgnoreCase);
+
+         if (indexOf < 0)
+            return;
+
+         var length = checkBox.Content.ToString()?.Length ?? 0;
+
+         if (indexOf != 0)
+         {
+            indexOf -= 1;
+            length += 1;
+         }
+
+         SearchTextBox.SearchInputTextBox.Text = SearchTextBox.SearchInputTextBox.Text.Remove(indexOf, length);
+      }
+   }
+
+   private bool OnlySeverityFiltered()
+   {
+      var currentSearchString = SearchTextBox.SearchInputTextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+      var enumValues = Enum.GetNames(typeof(DiagnosticSeverity));
+
+      return currentSearchString.All(x => enumValues.Any(y => y.Equals(x, StringComparison.OrdinalIgnoreCase)));
+   }
+}
+
+public class SimpleSearchSettings : ISearchSettings
+{
+   public ISearchSettings.SearchModes SearchMode { get; set; } = ISearchSettings.SearchModes.Default;
+   public ISearchSettings.SortingOptions SortingOption { get; set; } = ISearchSettings.SortingOptions.Acending;
+   public int MaxLevinsteinDistance { get; set; } = 2;
 }

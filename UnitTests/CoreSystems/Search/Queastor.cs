@@ -15,7 +15,7 @@ public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISe
 
    public float GetRelevanceScore(string query) => relevance;
    public ISearchResult VisualRepresentation { get; }
-   public ISearchSettings.Category SearchCategory { get; }
+   public IQueastorSearchSettings.Category SearchCategory { get; }
 }
 
 [TestFixture]
@@ -75,9 +75,9 @@ public class QueastorTests
    [Test]
    public void LevenshteinDistance_IsCorrect()
    {
-      Assert.That(Queastor.LevenshteinDistance("test", "tast"), Is.EqualTo(1));
-      Assert.That(Queastor.LevenshteinDistance("taste", "tast"), Is.EqualTo(1));
-      Assert.That(Queastor.LevenshteinDistance("toast", "tast"), Is.EqualTo(1));
+      Assert.That(Queastor.LevinsteinDistance("test", "tast"), Is.EqualTo(1));
+      Assert.That(Queastor.LevinsteinDistance("taste", "tast"), Is.EqualTo(1));
+      Assert.That(Queastor.LevinsteinDistance("toast", "tast"), Is.EqualTo(1));
    }
 
    [Test]

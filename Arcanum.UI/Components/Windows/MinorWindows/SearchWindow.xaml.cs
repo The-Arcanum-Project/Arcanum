@@ -31,7 +31,7 @@ public partial class SearchWindow
 
       SearchResultsListBox.ItemsSource = new ObservableCollection<SearchResultItem>();
 
-      Closing += (_, _) => AppData.SearchSettings = (SearchSettings)QueryQueastor.Settings;
+      Closing += (_, _) => AppData.QueastorSearchSettings = (QueastorSearchSettings)QueryQueastor.Settings;
       Deactivated += OnPopupDeactivated;
    }
 
@@ -79,7 +79,7 @@ public partial class SearchWindow
       var window = new SearchWindow { Topmost = alwaysOnTop, QueryQueastor = queastor };
       window.SearchTextBox.SearchInputTextBox.Text = query;
       window.Search(query);
-      queastor.Settings = AppData.SearchSettings;
+      queastor.Settings = AppData.QueastorSearchSettings;
       window.SetCategory(queastor.Settings.SearchCategory);
 
       window.Show();
@@ -129,34 +129,34 @@ public partial class SearchWindow
       }
    }
 
-   public void SetCategory(ISearchSettings.Category category)
+   public void SetCategory(IQueastorSearchSettings.Category category)
    {
-      SettingsToggleButton.IsChecked = (category & ISearchSettings.Category.Settings) != 0;
-      UiElementsToggleButton.IsChecked = (category & ISearchSettings.Category.UiElements) != 0;
-      GameObjectsToggleButton.IsChecked = (category & ISearchSettings.Category.GameObjects) != 0;
-      MapObjectsToggleButton.IsChecked = (category & ISearchSettings.Category.MapObjects) != 0;
-      AllToggleButton.IsChecked = category == ISearchSettings.Category.All;
+      SettingsToggleButton.IsChecked = (category & IQueastorSearchSettings.Category.Settings) != 0;
+      UiElementsToggleButton.IsChecked = (category & IQueastorSearchSettings.Category.UiElements) != 0;
+      GameObjectsToggleButton.IsChecked = (category & IQueastorSearchSettings.Category.GameObjects) != 0;
+      MapObjectsToggleButton.IsChecked = (category & IQueastorSearchSettings.Category.MapObjects) != 0;
+      AllToggleButton.IsChecked = category == IQueastorSearchSettings.Category.All;
    }
 
    private void SetCategoryFromButtonButtons()
    {
-      var category = ISearchSettings.Category.None;
+      var category = IQueastorSearchSettings.Category.None;
       if (SettingsToggleButton.IsChecked == true)
-         category |= ISearchSettings.Category.Settings;
+         category |= IQueastorSearchSettings.Category.Settings;
       if (UiElementsToggleButton.IsChecked == true)
-         category |= ISearchSettings.Category.UiElements;
+         category |= IQueastorSearchSettings.Category.UiElements;
       if (GameObjectsToggleButton.IsChecked == true)
-         category |= ISearchSettings.Category.GameObjects;
+         category |= IQueastorSearchSettings.Category.GameObjects;
       if (MapObjectsToggleButton.IsChecked == true)
-         category |= ISearchSettings.Category.MapObjects;
+         category |= IQueastorSearchSettings.Category.MapObjects;
       if (AllToggleButton.IsChecked == true)
-         category = ISearchSettings.Category.All;
+         category = IQueastorSearchSettings.Category.All;
 
       // if all are set except AllToggleButton, we set AllToggleButton to true
-      if ((category & ISearchSettings.Category.Settings) != 0 &&
-          (category & ISearchSettings.Category.UiElements) != 0 &&
-          (category & ISearchSettings.Category.GameObjects) != 0 &&
-          (category & ISearchSettings.Category.MapObjects) != 0)
+      if ((category & IQueastorSearchSettings.Category.Settings) != 0 &&
+          (category & IQueastorSearchSettings.Category.UiElements) != 0 &&
+          (category & IQueastorSearchSettings.Category.GameObjects) != 0 &&
+          (category & IQueastorSearchSettings.Category.MapObjects) != 0)
          AllToggleButton.IsChecked = true;
 
       QueryQueastor.Settings.SearchCategory = category;

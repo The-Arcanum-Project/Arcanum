@@ -16,11 +16,7 @@ public class LocationContext
    /// <summary>
    /// The current action being performed during parsing.
    /// </summary>
-   public string ToErrorString()
-   {
-      return
-         $"in File \"{FilePath}\" at Line {LineNumber}:{ColumnNumber}";
-   }
+   public string ToErrorString => $"in File \"{FilePath}\" at Line {LineNumber}:{ColumnNumber}";
 
    public override string ToString()
    {
