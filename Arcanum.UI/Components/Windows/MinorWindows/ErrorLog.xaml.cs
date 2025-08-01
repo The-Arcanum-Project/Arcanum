@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Windows.PopUp;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -79,6 +80,20 @@ public partial class ErrorLog : INotifyPropertyChanged
             return;
 
          _errorResolution = value;
+         OnPropertyChanged();
+      }
+   }
+
+   private DiagnosticSeverity _selectedSeverity = DiagnosticSeverity.Error;
+   public DiagnosticSeverity SelectedSeverity
+   {
+      get => _selectedSeverity;
+      set
+      {
+         if (_selectedSeverity == value)
+            return;
+
+         _selectedSeverity = value;
          OnPropertyChanged();
       }
    }
@@ -212,6 +227,11 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorDescription = "Error Description";
          ErrorResolution = string.Empty;
       }
+      
+      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+         return;
+      
+      SelectedSeverity = selectedDiagnostic.Severity;
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
@@ -253,7 +273,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          return;
 
       if (!SearchTextBox.SearchInputTextBox.Text.Contains(checkBox.Content.ToString() ?? string.Empty,
-                                                         StringComparison.OrdinalIgnoreCase))
+                                                          StringComparison.OrdinalIgnoreCase))
          return;
 
       FilterComboBox.SelectedItem = FilterType.None;
@@ -286,6 +306,25 @@ public partial class ErrorLog : INotifyPropertyChanged
       var enumValues = Enum.GetNames(typeof(DiagnosticSeverity));
 
       return currentSearchString.All(x => enumValues.Any(y => y.Equals(x, StringComparison.OrdinalIgnoreCase)));
+   }
+
+   private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+         return;
+
+      ProcessHelper.OpenFolder(selectedDiagnostic.Context.FilePath);
+   }
+
+   private void OpenFileAtPos_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+         return;
+
+      ProcessHelper.OpenFileAtLine(selectedDiagnostic.Context.FilePath,
+                                   selectedDiagnostic.Context.LineNumber,
+                                   selectedDiagnostic.Context.ColumnNumber,
+                                   PreferredEditor.VsCode);
    }
 }
 

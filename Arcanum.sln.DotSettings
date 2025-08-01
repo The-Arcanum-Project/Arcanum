@@ -66,6 +66,33 @@ DiagnosticSeverity.$Severity$,
 "$Message$",
 "$Description$",
 DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=name/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=name/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=type/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=type/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=value/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=value/Order/@EntryValue">2</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Shortcut/@EntryValue">PropChangeProp</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Text/@EntryValue">   private $type$ _$name$ = $value$;
+   public $type$ $name$
+   {
+      get =&gt; _$name$;
+      set
+      {
+         if (_$name$ == value)
+            $type$;
+
+         _$name$ = value;
+         OnPropertyChanged();
+      }
+   }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=DE4035C50B2E374BA4383A8148F0CD8E/Field/=control/@KeyIndexDefined">True</s:Boolean>

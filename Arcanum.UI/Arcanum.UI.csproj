@@ -162,6 +162,10 @@
         <Resource Include="Assets\Icons\40x40\InfoCircle40x40.png" />
         <None Remove="Assets\Icons\40x40\CloseCircle40x40.png" />
         <Resource Include="Assets\Icons\40x40\CloseCircle40x40.png" />
+        <None Remove="Assets\Icons\20x20\File20x20.png" />
+        <Resource Include="Assets\Icons\20x20\File20x20.png" />
+        <None Remove="Assets\Icons\20x20\FolderOpen20x20.png" />
+        <Resource Include="Assets\Icons\20x20\FolderOpen20x20.png" />
     </ItemGroup>
 
     <ItemGroup>
