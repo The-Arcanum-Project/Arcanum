@@ -1,32 +1,19 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.ConsoleServices;
-using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing;
-using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
-using Arcanum.Core.CoreSystems.SavingSystem;
-using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.OldAndDebug;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -180,89 +167,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      // var modifiers = ParseModifiers.Load();
-      //
-      // var sb = new StringBuilder();
-      // foreach (var modifier in modifiers)
-      //    sb.AppendLine(modifier.ToString());
-      //
-      // File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
-      //
-      // sb.Clear();
-      // sb.AppendLine(ModifierDefinition.GetCsvHeader());
-      // foreach (var modifier in modifiers)
-      //    sb.AppendLine(modifier.ToCsv());
-      //
-      // File.WriteAllText("EU5_Modifiers_Data_CSV.csv", sb.ToString());
-
-      // var regex = new Regex(@"(\w+)\s*=\s*{");
-      // var filePath =
-      //    "S:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\main_menu\\common\\modifier_icons\\00_modifier_icons.txt";
-      // var content = IO.ReadAllTextUtf8(filePath);
-      // var matches = regex.Matches(content);
-      // var sb = new StringBuilder();
-      //
-      // var strs = matches.Select(match => match.Groups[1].Value).ToList();
-      // strs.Sort();
-      //
-      // foreach (var str in strs)
-      //    sb.AppendLine(str);
-
-      //File.WriteAllText("EU5_Modifiers_Data.txt", sb.ToString());
-
-      NamedLocationLoading.LoadNamedLocations();
-
-      var (provToId, colorToBorder) = OldMapLoading.LoadLocations();
-      var provIds = new List<int>(provToId.Count);
-      var index = 0;
-
-      foreach (var kvp in provToId)
-         provIds.Add(kvp.Value.Count);
-
-      provIds.Sort();
-      var sbbb = new StringBuilder();
-      foreach (var provicne in provIds)
-         sbbb.AppendLine(provicne.ToString());
-
-      File.WriteAllText("EU5_Provinces_Pixel_Count.txt", sbbb.ToString());
-
-      // List< (Memory<System.Drawing.Point>, int)> provs = new (provToId.Count);
-      //
-      // foreach (var (color, points) in provToId)
-      //    provs.provs.Add((new(points.ToArray()), color));
-      //
-      // var debugBmp = new Bitmap(16384, 8192);
-      // foreach (var kvp in provs)
-      //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, debugBmp);
-      //
-      // debugBmp.Save("debugMap.png");
-
-      // var sw = new Stopwatch();
-      // sw.Start();
-      // var totalPixels = colorToBorder.Values.Sum(points => points.Values.Sum(section => section.Count));
-      // List<(Memory<System.Drawing.Point>, int)> borders = new(colorToBorder.Count);
-      // foreach (var (color, points) in colorToBorder)
-      // {
-      //    List<System.Drawing.Point> borderSections = [];
-      //    foreach (var borderSection in points.Values)
-      //       borderSections.AddRange(borderSection);
-      //    borders.Add((new(borderSections.ToArray()), color));
-      // }
-      //
-      // var debugBmp = new Bitmap(16384, 8192);
-      // var graphics = Graphics.FromImage(debugBmp);
-      // graphics.Clear(Color.FromArgb(255, 42, 42, 42)); // Set a background color for better visibility
-      // var bmpData = debugBmp.LockBits(new (0, 0, debugBmp.Width, debugBmp.Height), 
-      //    System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-      // foreach (var kvp in borders)
-      //    MapDrawing.DrawPixelsParallel(kvp.Item1, kvp.Item2, bmpData);
-      // debugBmp.UnlockBits(bmpData);
-      //
-      // sw.Stop();
-      // Debug.WriteLine($"Drawing took {sw.ElapsedMilliseconds} ms for {borders.Count} borders wit {totalPixels} points");
-      // debugBmp.Save("debugBorderMap.png");
-      //
-      // Debug.WriteLine("Loaded " + provToId.Count + " provinces and " + colorToBorder.Count + " borders from old map files.");
+      MBox.Show("Debug parsing is not implemented yet.",
+                "Debug Parsing",
+                MBoxButton.OK,
+                MessageBoxImage.Information);
    }
 
    private void OpenEffectWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)

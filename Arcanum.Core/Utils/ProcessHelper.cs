@@ -1,6 +1,10 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Windows;
+using Arcanum.API.UI;
+using Arcanum.Core.GlobalStates;
 using Microsoft.Win32;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace Arcanum.Core.Utils;
 
@@ -21,7 +25,7 @@ public static class ProcessHelper
       }
       catch (Exception e)
       {
-         MessageBox.Show($"Failed to open file in Notepad++: {e.Message}{Environment.NewLine}Please open the url yourself {path}");
+         AppData.WindowLinker.ShowMBox($"Failed to open file in Notepad++: {e.Message}{Environment.NewLine}Please open the url yourself {path}");
          return false;
       }
 
@@ -75,7 +79,7 @@ public static class ProcessHelper
       }
       catch (Exception ex)
       {
-         MessageBox.Show($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
+         AppData.WindowLinker.ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
          return false;
       }
    }
@@ -88,7 +92,7 @@ public static class ProcessHelper
       }
       catch (Exception ex)
       {
-         MessageBox.Show($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
+         AppData.WindowLinker.ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
       }
    }
 
@@ -112,10 +116,10 @@ public static class ProcessHelper
          return true;
       }
 
-      MessageBox.Show($"The path {path} can not be opened",
-                      "Folder can not be opened",
-                      MessageBoxButtons.OK,
-                      MessageBoxIcon.Warning);
+      AppData.WindowLinker.ShowMBox($"The path {path} can not be opened",
+                                    "Folder can not be opened",
+                                    MBoxButton.OK,
+                                    MessageBoxImage.Warning);
       return false;
    }
 
@@ -130,10 +134,10 @@ public static class ProcessHelper
          return true;
       }
 
-      MessageBox.Show($"The path {path} can not be opened",
-                      "File can not be opened",
-                      MessageBoxButtons.OK,
-                      MessageBoxIcon.Warning);
+      AppData.WindowLinker.ShowMBox($"The path {path} can not be opened",
+                                    "File can not be opened",
+                                    MBoxButton.OK,
+                                    MessageBoxImage.Warning);
       return false;
    }
 

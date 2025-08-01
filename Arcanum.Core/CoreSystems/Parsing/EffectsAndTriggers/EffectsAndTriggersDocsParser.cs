@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Text;
 using System.Windows;
+using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.GlobalStates;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Arcanum.Core.CoreSystems.Parsing.EffectsAndTriggers;
 
@@ -17,9 +17,9 @@ public static class EffectsAndTriggersDocsParser
 
       if (!File.Exists(triggerPath))
       {
-         MessageBox.Show("`triggers.log` file not found. Please run `script_docs` in the game console!",
+         AppData.WindowLinker.ShowMBox("`triggers.log` file not found. Please run `script_docs` in the game console!",
                          "File Not Found",
-                         MessageBoxButton.OK,
+                         MBoxButton.OK,
                          MessageBoxImage.Error);
       }
       else
@@ -37,10 +37,10 @@ public static class EffectsAndTriggersDocsParser
 
       if (!File.Exists(effectPath))
       {
-         MessageBox.Show("`effects.log` file not found. Please run `script_docs` in the game console!",
-                         "File Not Found",
-                         MessageBoxButton.OK,
-                         MessageBoxImage.Error);
+         AppData.WindowLinker.ShowMBox("`effects.log` file not found. Please run `script_docs` in the game console!",
+                                       "File Not Found",
+                                       MBoxButton.OK,
+                                       MessageBoxImage.Error);
          return;
       }
 

@@ -11,13 +11,12 @@ using Image = System.Windows.Controls.Image;
 
 namespace Arcanum.UI.Components.StyleClasses;
 
-
 public class BaseWindow : Window
 {
    public ICommand CloseCommand { get; }
    public ICommand MinimizeCommand { get; }
    public ICommand MaximizeRestoreCommand { get; }
-   
+
    static BaseWindow()
    {
       DefaultStyleKeyProperty.OverrideMetadata(typeof(BaseWindow),
@@ -70,33 +69,31 @@ public class BaseWindow : Window
    {
       get => GetValue(HeaderContentProperty);
       set => SetValue(HeaderContentProperty, value);
-   }   
-   
+   }
+
    public GridLength HeaderHeight
    {
       get => (GridLength)GetValue(HeaderHeightProperty);
       set => SetValue(HeaderHeightProperty, value);
-   } 
-   
+   }
+
    public GridLength FooterHeight
    {
       get => (GridLength)GetValue(FooterHeightProperty);
       set => SetValue(FooterHeightProperty, value);
    }
-   
+
    public static readonly DependencyProperty FooterHeightProperty =
       DependencyProperty.Register(nameof(FooterHeight),
                                   typeof(GridLength),
                                   typeof(BaseWindow),
                                   new(new GridLength(0.0)));
-   
+
    public static readonly DependencyProperty HeaderHeightProperty =
       DependencyProperty.Register(nameof(HeaderHeight),
                                   typeof(GridLength),
                                   typeof(BaseWindow),
                                   new(new GridLength(30.0)));
-   
-   
 
    // Define the DependencyProperty for the Footer
    public static readonly DependencyProperty FooterContentProperty =
@@ -137,6 +134,30 @@ public class BaseWindow : Window
       set => SetValue(FooterContentTemplateProperty, value);
    }
 
+   public static readonly DependencyProperty ShowMinimizeButtonProperty =
+      DependencyProperty.Register(nameof(ShowMinimizeButton),
+                                  typeof(bool),
+                                  typeof(BaseWindow),
+                                  new(true));
+
+   public bool ShowMinimizeButton
+   {
+      get => (bool)GetValue(ShowMinimizeButtonProperty);
+      set => SetValue(ShowMinimizeButtonProperty, value);
+   }
+   
+   public static readonly DependencyProperty ShowMaximizeButtonProperty =
+      DependencyProperty.Register(nameof(ShowMaximizeButton),
+                                  typeof(bool),
+                                  typeof(BaseWindow),
+                                  new(true));
+   
+   public bool ShowMaximizeButton
+   {
+      get => (bool)GetValue(ShowMaximizeButtonProperty);
+      set => SetValue(ShowMaximizeButtonProperty, value);
+   }
+
    private void Minimize()
    {
       WindowState = WindowState.Minimized;
@@ -149,12 +170,12 @@ public class BaseWindow : Window
       else
          WindowState = WindowState.Normal;
    }
-   
+
    private void MainWindow_OnStateChanged(object? sender, EventArgs e)
    {
       if (GetTemplateChild("StateImage") is not Image image)
          return;
-      
+
       var imagePath = WindowState switch
       {
          WindowState.Maximized => "pack://application:,,,/Assets/Icons/20x20/RestoreWindow20x20.png",
@@ -163,6 +184,7 @@ public class BaseWindow : Window
 
       image.Source = new BitmapImage(new(imagePath));
    }
+
    private void OnSourceInitialized(object? sender, EventArgs e)
    {
       if (ResizeMode != ResizeMode.NoResize && new WindowInteropHelper(this).Handle != IntPtr.Zero)
@@ -180,6 +202,7 @@ public class BaseWindow : Window
          Marshal.StructureToPtr(mmi, lParam, true);
          handled = true;
       }
+
       return IntPtr.Zero;
    }
 }

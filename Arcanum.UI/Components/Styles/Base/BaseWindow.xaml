@@ -2,13 +2,17 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:behaviors = "http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:customBehaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
-                    xmlns:base = "clr-namespace:Arcanum.UI.Components.StyleClasses">
+                    xmlns:base = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                    xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
         <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
         <ResourceDictionary Source = "/Components/Styles/Base/BaseTextBoxStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
+
     <Style TargetType = "{x:Type base:BaseWindow}">
 
         <Style.Setters>
@@ -26,9 +30,9 @@
                     Value = "Arcanum">
             </Setter>
             <Setter Property = "MinWidth"
-                    Value = "400" />
+                    Value = "200" />
             <Setter Property = "MinHeight"
-                    Value = "300" />
+                    Value = "100" />
             <Setter Property = "Icon"
                     Value = "/Assets/Logo/ArcanumSimplified.ico" />
             <Setter Property = "WindowChrome.WindowChrome">
@@ -58,7 +62,7 @@
                                            LastChildFill = "False">
                                     <DockPanel.Resources>
                                         <Style TargetType = "{x:Type base:BaseButton}"
-                                               BasedOn="{StaticResource {x:Type base:BaseButton}}">
+                                               BasedOn = "{StaticResource {x:Type base:BaseButton}}">
                                             <Setter Property = "DockPanel.Dock"
                                                     Value = "Right" />
                                             <Setter Property = "Width"
@@ -117,14 +121,16 @@
                                     </base:BaseButton>
 
                                     <base:BaseButton x:Name = "MaximizeRestoreButton"
-                                                     Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                                     Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                     Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
                                         <Image x:Name = "StateImage"
                                                Source = "/Assets/Icons/20x20/FullScreen20x20.png"
                                                Stretch = "None" />
                                     </base:BaseButton>
 
                                     <base:BaseButton x:Name = "MinimizeButton"
-                                                     Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                                     Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                     Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
                                         <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
                                                Stretch = "None" />
                                     </base:BaseButton>

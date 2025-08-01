@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Arcanum.API.UI;
 using Arcanum.API.UtilServices;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Arcanum.UI.Components.Windows.PopUp;
@@ -28,5 +29,15 @@ public class WindowLinkerImpl : IWindowLinker
             ((Window)window).Close();
       mainMenu.Show();
       mainMenu.Activate();
+   }
+
+   public MBoxResult ShowMBox(string message,
+                              string title = "Message",
+                              MBoxButton buttons = MBoxButton.OK,
+                              MessageBoxImage icon = MessageBoxImage.Asterisk,
+                              int height = 150,
+                              int width = 400)
+   {
+      return MBox.Show(message, title, buttons, icon, height, width);
    }
 }

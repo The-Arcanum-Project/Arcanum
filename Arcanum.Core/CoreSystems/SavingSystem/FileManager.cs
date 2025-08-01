@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -57,9 +58,8 @@ public static class FileManager
       var modMetadata = ExistingModsLoader.ParseModMetadata(descriptor.ModPath.FullPath);
       if (modMetadata == null)
       {
-         MessageBox.Show($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
-                         "Mod Metadata Loaded",
-                         MessageBoxButtons.CancelTryContinue);
+         AppData.WindowLinker.ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
+                                       "Mod Metadata Loaded");
          return;
       }
 
