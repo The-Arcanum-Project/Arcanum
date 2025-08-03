@@ -92,6 +92,11 @@
                         CanExecute = "CommandCanAlwaysExecute" />
 
 
+        <!-- Command Bindings for Debug MenuItems -->
+        <CommandBinding Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand"
+                        Executed = "UIElementsBrowserCommandCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+
     </Window.CommandBindings>
 
     <styleClasses:BaseWindow.HeaderContent>
@@ -242,6 +247,12 @@
                                        Command = "mainWindow:MwCommands.DebugParsingCommand" />
                 <uc:SearchableMenuItem Header = "Browse Mod Metadata"
                                        Click = "MenuItem_OnClick" />
+                <uc:SearchableMenuItem Header = "UI Elements Browser"
+                                       Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
+                    <uc:SearchableMenuItem.Icon>
+                        <Image Source = "../../../Assets/Icons/16x16/WindowFrame16x16.png" />
+                    </uc:SearchableMenuItem.Icon>
+                </uc:SearchableMenuItem>
             </uc:SearchableMenuItem>
         </Menu>
     </styleClasses:BaseWindow.HeaderContent>

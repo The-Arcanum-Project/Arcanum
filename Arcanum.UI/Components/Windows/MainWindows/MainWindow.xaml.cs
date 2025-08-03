@@ -10,6 +10,7 @@ using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
+using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -245,5 +246,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       var errorLogWindow = new ErrorLog();
       errorLogWindow.ShowDialog();
+   }
+
+   private void UIElementsBrowserCommandCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      new UIElementsBrowser().ShowDialog();
    }
 }

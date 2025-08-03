@@ -166,6 +166,8 @@
         <Resource Include="Assets\Icons\20x20\File20x20.png" />
         <None Remove="Assets\Icons\20x20\FolderOpen20x20.png" />
         <Resource Include="Assets\Icons\20x20\FolderOpen20x20.png" />
+        <None Remove="Assets\Icons\16x16\WindowFrame16x16.png" />
+        <Resource Include="Assets\Icons\16x16\WindowFrame16x16.png" />
     </ItemGroup>
 
     <ItemGroup>

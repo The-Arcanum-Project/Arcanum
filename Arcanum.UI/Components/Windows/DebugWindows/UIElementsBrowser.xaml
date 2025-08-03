@@ -1,0 +1,515 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.UIElementsBrowser"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:local = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         mc:Ignorable = "d"
+                         Title = "UI Elements Browser"
+                         Height = "450"
+                         Width = "800"
+                         Background = "{StaticResource DefaultBackColorBrush}">
+
+    <ScrollViewer HorizontalScrollBarVisibility = "Auto"
+                  VerticalScrollBarVisibility = "Auto"
+                  Padding = "3">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "200" />
+                <ColumnDefinition Width = "*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row = "0"
+                       Grid.Column = "0"
+                       Text = "BaseButton"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <styleClasses:BaseButton Grid.Row = "0"
+                                     Grid.Column = "1">
+                This is a BaseButton
+            </styleClasses:BaseButton>
+
+            <TextBlock Grid.Row = "1"
+                       Grid.Column = "0"
+                       Text = "CheckBox"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <CheckBox Grid.Row = "1"
+                      Grid.Column = "1">
+                This is a CheckBox
+            </CheckBox>
+
+            <TextBlock Grid.Row = "2"
+                       Grid.Column = "0"
+                       Text = "ComboBox"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ComboBox Grid.Row = "2"
+                      Grid.Column = "1">
+                <ComboBoxItem Content = "ComboBox Item 1" />
+                <ComboBoxItem Content = "ComboBox Item 2" />
+                <ComboBoxItem Content = "ComboBox Item 3" />
+            </ComboBox>
+
+            <TextBlock Grid.Row = "3"
+                       Grid.Column = "0"
+                       Text = "Editable ComboBox"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ComboBox Grid.Row = "3"
+                      Grid.Column = "1"
+                      IsEditable = "True"
+                      IsTextSearchEnabled = "True">
+                <ComboBoxItem Content = "ComboBox Item 1" />
+                <ComboBoxItem Content = "ComboBox Item 2" />
+                <ComboBoxItem Content = "ComboBox Item 3" />
+            </ComboBox>
+
+            <TextBlock Grid.Row = "4"
+                       Grid.Column = "0"
+                       Text = "Context Menu"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <Border Grid.Row = "4"
+                    Grid.Column = "1"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                    BorderThickness = "1"
+                    Padding = "2">
+                <TextBlock Text = "RMB to open context menu">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header = "Option 1" />
+                            <MenuItem Header = "Option 2" />
+                            <Separator />
+                            <MenuItem Header = "Exit" />
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                </TextBlock>
+            </Border>
+
+            <TextBlock Grid.Row = "5"
+                       Grid.Column = "0"
+                       Text = "DataGrid"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <DataGrid Grid.Row = "5"
+                      Grid.Column = "1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header = "Column 1"
+                                        Binding = "{Binding (local:YourDataType.Column1)}" />
+                    <DataGridTextColumn Header = "Column 2"
+                                        Binding = "{Binding (local:YourDataType.Column2)}" />
+                    <DataGridTextColumn Header = "Column 3"
+                                        Binding = "{Binding (local:YourDataType.Column3)}" />
+                </DataGrid.Columns>
+                <DataGrid.ItemsSource>
+                    <x:Array Type = "{x:Type local:YourDataType}">
+                        <local:YourDataType Column1 = "Value 1.1"
+                                            Column2 = "Value 1.2"
+                                            Column3 = "Value 1.3" />
+                        <local:YourDataType Column1 = "Value 2.1"
+                                            Column2 = "Value 2.2"
+                                            Column3 = "Value 2.3" />
+                        <local:YourDataType Column1 = "Value 3.1"
+                                            Column2 = "Value 3.2"
+                                            Column3 = "Value 3.3" />
+                    </x:Array>
+                </DataGrid.ItemsSource>
+            </DataGrid>
+
+            <TextBlock Grid.Row = "6"
+                       Grid.Column = "0"
+                       Text = "GridSplitter"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <GridSplitter Grid.Row = "6"
+                          Grid.Column = "1"
+                          Height = "5"
+                          HorizontalAlignment = "Stretch"
+                          VerticalAlignment = "Top"
+                          ResizeDirection = "Rows"
+                          ResizeBehavior = "PreviousAndNext">
+            </GridSplitter>
+
+            <TextBlock Grid.Row = "7"
+                       Grid.Column = "0"
+                       Text = "ListBox (Multiple Selection)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ListBox Grid.Row = "7"
+                     Grid.Column = "1"
+                     SelectionMode = "Multiple">
+                <ListBoxItem Content = "ListBox Item 1" />
+                <ListBoxItem Content = "ListBox Item 2" />
+                <ListBoxItem Content = "ListBox Item 3" />
+                <ListBoxItem Content = "ListBox Item 4" />
+            </ListBox>
+
+            <TextBlock Grid.Row = "8"
+                       Grid.Column = "0"
+                       Text = "ListBox (Single Selection)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ListBox Grid.Row = "8"
+                     Grid.Column = "1"
+                     SelectionMode = "Single">
+                <ListBoxItem Content = "ListBox Item 1" />
+                <ListBoxItem Content = "ListBox Item 2" />
+                <ListBoxItem Content = "ListBox Item 3" />
+                <ListBoxItem Content = "ListBox Item 4" />
+            </ListBox>
+
+            <TextBlock Grid.Row = "9"
+                       Grid.Column = "0"
+                       Text = "ListView (Extended Selection)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ListView Grid.Row = "9"
+                      Grid.Column = "1"
+                      SelectionMode = "Extended">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header = "Column 1"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column1)}" />
+                        <GridViewColumn Header = "Column 2"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column2)}" />
+                        <GridViewColumn Header = "Column 3"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column3)}" />
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemsSource>
+                    <x:Array Type = "{x:Type local:YourDataType}">
+                        <local:YourDataType Column1 = "Value 1.1"
+                                            Column2 = "Value 1.2"
+                                            Column3 = "Value 1.3" />
+                        <local:YourDataType Column1 = "Value 2.1"
+                                            Column2 = "Value 2.2"
+                                            Column3 = "Value 2.3" />
+                        <local:YourDataType Column1 = "Value 3.1"
+                                            Column2 = "Value 3.2"
+                                            Column3 = "Value 3.3" />
+                    </x:Array>
+                </ListView.ItemsSource>
+            </ListView>
+
+            <TextBlock Grid.Row = "10"
+                       Grid.Column = "0"
+                       Text = "ListView (Single Selection)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ListView Grid.Row = "10"
+                      Grid.Column = "1"
+                      SelectionMode = "Single">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header = "Column 1"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column1)}" />
+                        <GridViewColumn Header = "Column 2"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column2)}" />
+                        <GridViewColumn Header = "Column 3"
+                                        DisplayMemberBinding = "{Binding (local:YourDataType.Column3)}" />
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemsSource>
+                    <x:Array Type = "{x:Type local:YourDataType}">
+                        <local:YourDataType Column1 = "Value 1.1"
+                                            Column2 = "Value 1.2"
+                                            Column3 = "Value 1.3" />
+                        <local:YourDataType Column1 = "Value 2.1"
+                                            Column2 = "Value 2.2"
+                                            Column3 = "Value 2.3" />
+                        <local:YourDataType Column1 = "Value 3.1"
+                                            Column2 = "Value 3.2"
+                                            Column3 = "Value 3.3" />
+                    </x:Array>
+                </ListView.ItemsSource>
+            </ListView>
+
+            <TextBlock Grid.Row = "11"
+                       Grid.Column = "0"
+                       Text = "Menu Item"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <Menu Grid.Row = "11"
+                  Grid.Column = "1">
+                <MenuItem Header = "File">
+                    <MenuItem Header = "New" />
+                    <MenuItem Header = "Open" />
+                    <MenuItem Header = "Save" />
+                    <Separator />
+                    <MenuItem Header = "Exit" />
+                </MenuItem>
+                <MenuItem Header = "Edit">
+                    <MenuItem Header = "Undo" />
+                    <MenuItem Header = "Redo" />
+                    <Separator />
+                    <MenuItem Header = "Cut" />
+                    <MenuItem Header = "Copy" />
+                    <MenuItem Header = "Paste" />
+                </MenuItem>
+            </Menu>
+
+            <TextBlock Grid.Row = "12"
+                       Grid.Column = "0"
+                       Text = "Scrollbar Vertical"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ScrollBar Grid.Row = "12"
+                       Grid.Column = "1"
+                       Orientation = "Vertical"
+                       Width = "20"
+                       Minimum = "0"
+                       Maximum = "100"
+                       Value = "50"
+                       SmallChange = "1"
+                       LargeChange = "10" />
+
+            <TextBlock Grid.Row = "13"
+                       Grid.Column = "0"
+                       Text = "Scrollbar Horizontal"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ScrollBar Grid.Row = "13"
+                       Grid.Column = "1"
+                       Orientation = "Horizontal"
+                       Height = "20"
+                       Minimum = "0"
+                       Maximum = "100"
+                       Value = "50"
+                       SmallChange = "1"
+                       LargeChange = "10" />
+
+            <TextBlock Grid.Row = "14"
+                       Grid.Column = "0"
+                       Text = "TabControl (Top Tabs)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <TabControl Grid.Row = "14"
+                        Grid.Column = "1">
+                <TabItem Header = "Tab 1">
+                    <TextBlock Text = "Content of Tab 1" />
+                </TabItem>
+                <TabItem Header = "Tab 2">
+                    <TextBlock Text = "Content of Tab 2" />
+                </TabItem>
+                <TabItem Header = "Tab 3">
+                    <TextBlock Text = "Content of Tab 3" />
+                </TabItem>
+            </TabControl>
+
+            <TextBlock Grid.Row = "15"
+                       Grid.Column = "0"
+                       Text = "TabControl (Left Tabs Default)"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <TabControl Grid.Row = "15"
+                        Grid.Column = "1"
+                        TabStripPlacement = "Left">
+                <TabItem Header = "Tab 1">
+                    <TextBlock Text = "Content of Tab 1" />
+                </TabItem>
+                <TabItem Header = "Tab 2">
+                    <TextBlock Text = "Content of Tab 2" />
+                </TabItem>
+                <TabItem Header = "Tab 3">
+                    <TextBlock Text = "Content of Tab 3" />
+                </TabItem>
+            </TabControl>
+
+            <TextBlock Grid.Row = "16"
+                       Grid.Column = "0"
+                       Text = "TextBox"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <TextBox Grid.Row = "16"
+                     Grid.Column = "1"
+                     Text = "This is a TextBox. You can type here." />
+
+            <TextBlock Grid.Row = "17"
+                       Grid.Column = "0"
+                       Text = "TextBlock"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <TextBlock Grid.Row = "17"
+                       Grid.Column = "1"
+                       Text = "This is a TextBlock. It displays text content." />
+
+            <TextBlock Grid.Row = "18"
+                       Grid.Column = "0"
+                       Text = "ToggleButton"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <ToggleButton Grid.Row = "18"
+                          Grid.Column = "1"
+                          Content = "This is a ToggleButton. Click to toggle state." />
+
+            <TextBlock Grid.Row = "19"
+                       Grid.Column = "0"
+                       Text = "ToolTip"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <Button Grid.Row = "19"
+                    Grid.Column = "1"
+                    Content = "Hover over me to see a ToolTip"
+                    ToolTip = "This is a ToolTip. It provides additional information when you hover over the button.">
+            </Button>
+
+            <TextBlock Grid.Row = "20"
+                       Grid.Column = "0"
+                       Text = "TreeView"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <TreeView Grid.Row = "20"
+                      Grid.Column = "1">
+                <TreeViewItem Header = "Root Item 1">
+                    <TreeViewItem Header = "Child Item 1.1" />
+                    <TreeViewItem Header = "Child Item 1.2">
+                        <TreeViewItem Header = "Grandchild Item 1.2.1" />
+                        <TreeViewItem Header = "Grandchild Item 1.2.2" />
+                    </TreeViewItem>
+                </TreeViewItem>
+                <TreeViewItem Header = "Root Item 2">
+                    <TreeViewItem Header = "Child Item 2.1" />
+                    <TreeViewItem Header = "Child Item 2.2">
+                        <TreeViewItem Header = "Grandchild Item 2.2.1" />
+                        <TreeViewItem Header = "Grandchild Item 2.2.2" />
+                    </TreeViewItem>
+                </TreeViewItem>
+            </TreeView>
+
+            <TextBlock Grid.Row = "21"
+                       Grid.Column = "0"
+                       Text = "Message Box Popup"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <StackPanel Grid.Row = "21"
+                        Grid.Column = "1"
+                        Orientation = "Horizontal">
+                <styleClasses:BaseButton Content = "MBox (Ok/Cancel)"
+                                         Click = "ShowMessageBoxOkCancel_Click">
+                </styleClasses:BaseButton>
+
+                <styleClasses:BaseButton Content = "MBox (Ok/Retry)"
+                                         Click = "ShowMessageBoxOkRetry_Click">
+                </styleClasses:BaseButton>
+
+                <styleClasses:BaseButton Content = "MBox (Ok/Retry/Cancel)"
+                                         Click = "ShowMessageBoxOkRetryCancel_Click">
+                </styleClasses:BaseButton>
+
+                <styleClasses:BaseButton Content = "MBox (Ok)"
+                                         Click = "ShowMessageBoxOk_Click">
+                </styleClasses:BaseButton>
+            </StackPanel>
+            
+            <TextBlock Grid.Row = "22"
+                       Grid.Column = "0"
+                       Text = "PropertyGrid"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+
+            <baseControls:PropertyGrid Grid.Row = "22"
+                                       Grid.Column = "1"
+                                       SelectedObject = "{Binding SelectedObject, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+            </baseControls:PropertyGrid>
+            
+            <TextBlock Grid.Row = "23"
+                       Grid.Column = "0"
+                       Text = "Int NumericUpDown"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+            
+            <baseControls:BaseNumericUpDown Grid.Row = "23"
+                                         Grid.Column = "1"
+                                         Value = "{Binding IntValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+            </baseControls:BaseNumericUpDown>
+            
+            <TextBlock Grid.Row = "24"
+                       Grid.Column = "0"
+                       Text = "Decimal NumericUpDown"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+            
+            <baseControls:DecimalBaseNumericUpDown Grid.Row = "24"
+                                         Grid.Column = "1"
+                                         Value = "{Binding DecimalValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+            </baseControls:DecimalBaseNumericUpDown>
+            
+            <TextBlock Grid.Row = "25"
+                       Grid.Column = "0"
+                       Text = "Float NumericUpDown"
+                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                       VerticalAlignment = "Center" />
+            
+            <baseControls:FloatNumericUpDown Grid.Row = "25"
+                                         Grid.Column = "1"
+                                         Value = "{Binding FloatValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+            </baseControls:FloatNumericUpDown>
+            
+            
+        </Grid>
+    </ScrollViewer>
+
+</styleClasses:BaseWindow>

@@ -21,7 +21,9 @@
                 Value = "1" />
         <Setter Property = "Cursor"
                 Value = "Arrow" />
-
+        <Setter Property = "MinHeight"
+                Value = "10">
+        </Setter>
         <Setter Property = "HoverBackground"
                 Value = "{StaticResource DarkerSelectedBackColorBrush}">
         </Setter>

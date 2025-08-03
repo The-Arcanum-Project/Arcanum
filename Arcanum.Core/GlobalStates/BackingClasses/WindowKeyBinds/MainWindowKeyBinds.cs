@@ -42,4 +42,7 @@ public class MainWindowKeyBinds : KeyBindProvider
    
    // Error Log Bindings
    public KeyGesture OpenErrorLogWindow { get; set; } = new(Key.F10);
+   
+   // UIElementsBrowser
+   public KeyGesture OpenUIElementsBrowser { get; set; } = new(Key.F11);
 }

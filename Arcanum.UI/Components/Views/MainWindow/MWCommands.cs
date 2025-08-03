@@ -125,4 +125,11 @@ public static class MwCommands
       {
          InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenErrorLogWindow },
       };
+
+   // UIElementsBrowserCommand
+   public static readonly RoutedCommand OpenUIElementsBrowserCommand =
+      new("OpenUIElementsBrowserCommand", typeof(MainWindowView))
+      {
+         InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenUIElementsBrowser },
+      };
 }
