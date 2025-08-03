@@ -25,9 +25,15 @@ public partial class MBox
       Loaded += (_, _) =>
       {
          if (OkButton.Visibility == Visibility.Visible)
+         {
             Keyboard.Focus(OkButton);
+            OkButton.Focus();
+         }
          else if (CancelButton.Visibility == Visibility.Visible)
+         {
             Keyboard.Focus(CancelButton);
+            CancelButton.Focus();
+         }
       };
    }
 
