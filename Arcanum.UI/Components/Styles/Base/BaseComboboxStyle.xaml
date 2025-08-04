@@ -16,7 +16,7 @@
             </Grid.ColumnDefinitions>
             <Border Grid.ColumnSpan = "2"
                     Name = "Border"
-                    BorderBrush = "{TemplateBinding BorderBrush}"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                     CornerRadius = "2"
                     BorderThickness = "{TemplateBinding BorderThickness}"
                     Background = "{TemplateBinding Background}" />
@@ -126,7 +126,8 @@
                                       Focusable = "False"
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Template = "{StaticResource ComboBoxToggleButtonTemplate}"
-                                      Background = "{TemplateBinding Background}" />
+                                      Background = "{TemplateBinding Background}">
+                        </ToggleButton>
 
                         <ContentPresenter Name = "ContentSite"
                                           Margin = "5, 1, 23, 3"
@@ -138,25 +139,24 @@
                                           ContentTemplateSelector = "{TemplateBinding ItemTemplateSelector}">
                         </ContentPresenter>
                         <styleClasses:CorneredTextBox Name = "PART_EditableTextBox"
-                                 Margin = "3, 3, 2, 3"
-                                 IsReadOnly = "{TemplateBinding IsReadOnly}"
-                                 Visibility = "Hidden"
-                                 Background = "{TemplateBinding Background}"
-                                 HorizontalAlignment = "Left"
-                                 VerticalAlignment = "Center"
-                                 Focusable = "True"
-                                 Foreground = "{TemplateBinding Foreground}"
-                                 CaretBrush = "{TemplateBinding Foreground}">
+                                                      Margin = "3, 3, 2, 3"
+                                                      IsReadOnly = "{TemplateBinding IsReadOnly}"
+                                                      Visibility = "Hidden"
+                                                      HorizontalAlignment = "Left"
+                                                      VerticalAlignment = "Center"
+                                                      Focusable = "True"
+                                                      Foreground = "{TemplateBinding Foreground}"
+                                                      CaretBrush = "{TemplateBinding Foreground}">
 
-                            <styleClasses:CorneredTextBox.Template>
-                                <ControlTemplate TargetType = "styleClasses:CorneredTextBox">
-                                    <Border Background = "Transparent">
-                                        <ScrollViewer x:Name = "PART_ContentHost"
-                                                      Background = "Transparent"
-                                                      Focusable = "False" />
-                                    </Border>
-                                </ControlTemplate>
-                            </styleClasses:CorneredTextBox.Template>
+                            <!-- <styleClasses:CorneredTextBox.Template> -->
+                            <!--     <ControlTemplate TargetType = "styleClasses:CorneredTextBox"> -->
+                            <!--         <Border Background = "Transparent"> -->
+                            <!--             <ScrollViewer x:Name = "PART_ContentHost" -->
+                            <!--                           Background = "Transparent" -->
+                            <!--                           Focusable = "False" /> -->
+                            <!--         </Border> -->
+                            <!--     </ControlTemplate> -->
+                            <!-- </styleClasses:CorneredTextBox.Template> -->
                         </styleClasses:CorneredTextBox>
                         <!-- Popup showing items -->
                         <Popup Name = "Popup"
@@ -173,8 +173,8 @@
                                         Background = "{StaticResource DefaultBackColorBrush}"
                                         Margin = "0, 1, 0, 0"
                                         CornerRadius = "2"
-                                        BorderThickness = "{TemplateBinding BorderThickness}"
-                                        BorderBrush = "{TemplateBinding BorderBrush}"
+                                        BorderThickness = "1"
+                                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                                         HorizontalAlignment = "Stretch">
                                     <ScrollViewer Margin = "3, 3, 2, 3"
                                                   SnapsToDevicePixels = "True"
@@ -214,6 +214,11 @@
                             <Setter Property = "UIElement.Visibility"
                                     TargetName = "ContentSite"
                                     Value = "Hidden" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="ToggleButton"
+                                    Property="BorderBrush"
+                                    Value="{StaticResource BlueSelectionBackColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

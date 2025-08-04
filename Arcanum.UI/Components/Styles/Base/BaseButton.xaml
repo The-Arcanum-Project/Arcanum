@@ -16,7 +16,7 @@
         <Setter Property = "BorderBrush"
                 Value = "{StaticResource DefaultBorderColorBrush}" />
         <Setter Property = "BorderThickness"
-                Value = "0" />
+                Value = "2" />
         <Setter Property = "Padding"
                 Value = "1" />
         <Setter Property = "Cursor"
@@ -47,6 +47,9 @@
                             <Setter TargetName = "border"
                                     Property = "Background"
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName = "border"
+                                    Property = "BorderBrush"
+                                    Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
 
                         <MultiTrigger>
@@ -61,7 +64,8 @@
                                     Value = "{StaticResource BlueSelectionBackColorBrush}" />
                             <Setter TargetName = "border"
                                     Property = "BorderThickness"
-                                    Value = "2" />
+                                    Value = "{Binding BorderThickness, RelativeSource={RelativeSource TemplatedParent}}" />
+
                         </MultiTrigger>
 
                         <Trigger Property = "IsEnabled"

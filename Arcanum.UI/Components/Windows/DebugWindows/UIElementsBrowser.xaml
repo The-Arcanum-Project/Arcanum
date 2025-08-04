@@ -374,13 +374,13 @@
 
             <TextBlock Grid.Row = "16"
                        Grid.Column = "0"
-                       Text = "TextBox"
+                       Text = "CorneredTextBox"
                        FontFamily = "{StaticResource DefaultMonospacedFont}"
                        VerticalAlignment = "Center" />
 
-            <TextBox Grid.Row = "16"
-                     Grid.Column = "1"
-                     Text = "This is a TextBox. You can type here." />
+            <styleClasses:CorneredTextBox Grid.Row = "16"
+                             Grid.Column = "1"
+                             Text = "This is a TextBox. You can type here." />
 
             <TextBlock Grid.Row = "17"
                        Grid.Column = "0"

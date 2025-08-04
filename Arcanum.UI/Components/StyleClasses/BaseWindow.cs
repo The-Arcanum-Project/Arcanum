@@ -145,18 +145,91 @@ public class BaseWindow : Window
       get => (bool)GetValue(ShowMinimizeButtonProperty);
       set => SetValue(ShowMinimizeButtonProperty, value);
    }
-   
+
    public static readonly DependencyProperty ShowMaximizeButtonProperty =
       DependencyProperty.Register(nameof(ShowMaximizeButton),
                                   typeof(bool),
                                   typeof(BaseWindow),
                                   new(true));
-   
+
    public bool ShowMaximizeButton
    {
       get => (bool)GetValue(ShowMaximizeButtonProperty);
       set => SetValue(ShowMaximizeButtonProperty, value);
    }
+
+   // Step 1: Assume your source Dependency Properties are already defined.
+   // They MUST have a PropertyChangedCallback to trigger the update.
+
+   public static readonly DependencyProperty ShowWindowBorderProperty =
+      DependencyProperty.Register(nameof(ShowWindowBorder),
+                                  typeof(bool),
+                                  typeof(BaseWindow),
+                                  new(true, OnDependencyChanged));
+
+   public bool ShowWindowBorder
+   {
+      get => (bool)GetValue(ShowWindowBorderProperty);
+      set => SetValue(ShowWindowBorderProperty, value);
+   }
+
+   public static readonly DependencyProperty WindowCornerRadiusProperty =
+      DependencyProperty.Register(nameof(WindowCornerRadius),
+                                  typeof(CornerRadius),
+                                  typeof(BaseWindow),
+                                  new(default(CornerRadius), OnDependencyChanged));
+
+   public CornerRadius WindowCornerRadius
+   {
+      get => (CornerRadius)GetValue(WindowCornerRadiusProperty);
+      set => SetValue(WindowCornerRadiusProperty, value);
+   }
+
+   public static readonly DependencyProperty WindowBorderThicknessProperty =
+      DependencyProperty.Register(nameof(WindowBorderThickness),
+                                  typeof(Thickness),
+                                  typeof(BaseWindow),
+                                  new(default(Thickness), OnDependencyChanged));
+
+   public Thickness WindowBorderThickness
+   {
+      get => (Thickness)GetValue(WindowBorderThicknessProperty);
+      set => SetValue(WindowBorderThicknessProperty, value);
+   }
+
+   // This single callback will handle changes for all source properties.
+   private static void OnDependencyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+   {
+      // When a source property changes, we need to force the system to re-evaluate
+      // our calculated property. CoerceValue is the perfect tool for this.
+      d.CoerceValue(WindowTransparencyProperty);
+   }
+
+   private static readonly DependencyPropertyKey WindowTransparencyPropertyKey =
+      DependencyProperty.RegisterReadOnly("WindowTransparency",
+                                          typeof(bool),
+                                          typeof(BaseWindow),
+                                          new FrameworkPropertyMetadata(false,
+                                                                        null,
+                                                                        CoerceWindowTransparencyValue)); // The COERCE callback does all the work!
+
+   // The public, read-only DependencyProperty identifier.
+   public static readonly DependencyProperty WindowTransparencyProperty =
+      WindowTransparencyPropertyKey.DependencyProperty;
+
+   // The Coerce Callback that contains your calculation logic.
+   // It is called automatically on initialization and whenever CoerceValue is called.
+   private static object CoerceWindowTransparencyValue(DependencyObject d, object baseValue)
+   {
+      var window = (BaseWindow)d;
+
+      return window.ShowWindowBorder &&
+             window.WindowCornerRadius != default &&
+             window.WindowBorderThickness != default;
+   }
+
+   // Note it only has a 'get' accessor, making it read-only to consumers.
+   public bool WindowTransparency => (bool)GetValue(WindowTransparencyProperty);
 
    private void Minimize()
    {

@@ -43,7 +43,8 @@
                                      HorizontalAlignment = "Center"
                                      Background = "Transparent"
                                      DockPanel.Dock = "Right"
-                                     Click = "ButtonBase_OnClick">
+                                     Click = "ButtonBase_OnClick"
+                                     BorderThickness = "0">
                 <Image Source = "/Assets/Icons/20x20/Settings20x20.png"
                        Stretch = "None" />
             </styleClasses:BaseButton>

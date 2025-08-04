@@ -12,6 +12,7 @@
     </ResourceDictionary.MergedDictionaries>
 
     <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
+    <converters:RectConverter x:Key = "RectConverter" />
 
     <Style TargetType = "{x:Type base:BaseWindow}">
 
@@ -22,13 +23,10 @@
                     Value = "0" />
             <Setter Property = "WindowStyle"
                     Value = "None" />
-            <Setter Property = "AllowsTransparency"
-                    Value = "False" />
             <Setter Property = "ResizeMode"
                     Value = "CanResize" />
             <Setter Property = "Title"
-                    Value = "Arcanum">
-            </Setter>
+                    Value = "Arcanum" />
             <Setter Property = "MinWidth"
                     Value = "200" />
             <Setter Property = "MinHeight"
@@ -46,10 +44,11 @@
             <Setter Property = "Template">
                 <Setter.Value>
                     <ControlTemplate TargetType = "{x:Type base:BaseWindow}">
-                        <Border Background = "{TemplateBinding Background}"
+                        <Border x:Name = "OuterBorder"
+                                Background = "{TemplateBinding Background}"
                                 BorderBrush = "{TemplateBinding BorderBrush}"
-                                BorderThickness = "{TemplateBinding BorderThickness}">
-
+                                BorderThickness = "{TemplateBinding WindowBorderThickness}"
+                                CornerRadius = "{TemplateBinding WindowCornerRadius}">
                             <Grid Background = "Transparent">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height = "{TemplateBinding Property=HeaderHeight}" />
@@ -115,14 +114,16 @@
                                                      HoverBackground = "{StaticResource AggressiveRedBackColorBrush}"
                                                      Margin = "0"
                                                      Command = "{Binding CloseCommand,
-                                                     RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                                     RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                     BorderThickness = "0">
                                         <Image Source = "/Assets/Icons/20x20/Close20x20.png"
                                                Stretch = "None" />
                                     </base:BaseButton>
 
                                     <base:BaseButton x:Name = "MaximizeRestoreButton"
                                                      Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                                     Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                     BorderThickness = "0">
                                         <Image x:Name = "StateImage"
                                                Source = "/Assets/Icons/20x20/FullScreen20x20.png"
                                                Stretch = "None" />
@@ -130,7 +131,8 @@
 
                                     <base:BaseButton x:Name = "MinimizeButton"
                                                      Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}">
+                                                     Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                     BorderThickness = "0">
                                         <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
                                                Stretch = "None" />
                                     </base:BaseButton>
@@ -154,6 +156,13 @@
                                 </Border>
                             </Grid>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property = "WindowTransparency"
+                                     Value = "True">
+                                <Setter Property = "AllowsTransparency"
+                                        Value = "True" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

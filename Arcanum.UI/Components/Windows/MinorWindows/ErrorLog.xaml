@@ -229,11 +229,12 @@
                                               IsReadOnly = "True" />
 
                 <StackPanel Grid.Row = "4"
-                            Margin = "4"
+                            Margin = "4, 2"
                             HorizontalAlignment = "Right"
                             Orientation = "Horizontal">
                     <styleClasses:BaseButton Click = "ButtonBase_OnClick"
-                                             ToolTip = "Open folder of selected faulty file">
+                                             ToolTip = "Open folder of selected faulty file"
+                                             BorderBrush="{StaticResource DefaultBackColorBrush}">
                         <Image Source = "../../../Assets/Icons/20x20/FolderOpen20x20.png"
                                Width = "20"
                                Height = "20">
@@ -241,7 +242,8 @@
                     </styleClasses:BaseButton>
                     <styleClasses:BaseButton Margin = "4, 0, 0, 0"
                                              Click = "OpenFileAtPos_OnClick"
-                                             ToolTip = "Open file at error position">
+                                             ToolTip = "Open file at error position"
+                                             BorderBrush="{StaticResource DefaultBackColorBrush}">
                         <Image Source = "../../../Assets/Icons/20x20/File20x20.png"
                                Width = "20"
                                Height = "20">

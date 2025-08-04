@@ -9,10 +9,14 @@
                          Height = "200"
                          Width = "400"
                          FooterHeight = "0"
-                         Background = "{StaticResource DefaultBackColorBrush}"
                          ShowInTaskbar = "False"
                          ShowMaximizeButton = "False"
-                         ShowMinimizeButton = "False">
+                         ShowMinimizeButton = "False"
+                         WindowBorderThickness = "2"
+                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                         WindowCornerRadius = "2"
+                         AllowsTransparency = "True"
+                         Background = "{StaticResource DefaultBackColorBrush}">
 
 
     <Grid Margin = "5">
