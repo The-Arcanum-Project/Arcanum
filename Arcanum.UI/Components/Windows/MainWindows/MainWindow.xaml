@@ -96,6 +96,11 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand"
                         Executed = "UIElementsBrowserCommandCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <!-- Command Bindings for Debug Loading Triggers -->
+        <CommandBinding Command = "mainWindow:MwCommands.LoadLocationsCommand"
+                        Executed = "LoadLocationsCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
     </Window.CommandBindings>
 
@@ -253,6 +258,8 @@
                         <Image Source = "../../../Assets/Icons/16x16/WindowFrame16x16.png" />
                     </uc:SearchableMenuItem.Icon>
                 </uc:SearchableMenuItem>
+                <uc:SearchableMenuItem Header = "Load Locations"
+                                       Command = "mainWindow:MwCommands.LoadLocationsCommand" />
             </uc:SearchableMenuItem>
         </Menu>
     </styleClasses:BaseWindow.HeaderContent>

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
@@ -214,32 +215,32 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      Globals.HistoryManager.Redo(true);
+      AppData.HistoryManager.Redo(true);
    }
 
    private void StepUndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      Globals.HistoryManager.Undo(true);
+      AppData.HistoryManager.Undo(true);
    }
 
    private void RedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      Globals.HistoryManager.Redo(false);
+      AppData.HistoryManager.Redo(false);
    }
 
    private void UndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      Globals.HistoryManager.Undo(false);
+      AppData.HistoryManager.Undo(false);
    }
 
    private void CommandCanStrepRedoExecute(object sender, CanExecuteRoutedEventArgs e)
    {
-      e.CanExecute = Globals.HistoryManager.CanStepRedo;
+      e.CanExecute = AppData.HistoryManager.CanStepRedo;
    }
 
    private void CommandCanStepUndoExecute(object sender, CanExecuteRoutedEventArgs e)
    {
-      e.CanExecute = Globals.HistoryManager.CanStepUndo;
+      e.CanExecute = AppData.HistoryManager.CanStepUndo;
    }
 
    private void OpenErrorLogWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -251,5 +252,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void UIElementsBrowserCommandCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       new UIElementsBrowser().ShowDialog();
+   }
+
+   private void LoadLocationsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      NamedLocationLoading.LoadNamedLocations();
    }
 }

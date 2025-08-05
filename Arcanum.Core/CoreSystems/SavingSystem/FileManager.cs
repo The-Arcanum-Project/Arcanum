@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
+using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
@@ -58,8 +60,9 @@ public static class FileManager
       var modMetadata = ExistingModsLoader.ParseModMetadata(descriptor.ModPath.FullPath);
       if (modMetadata == null)
       {
-         AppData.WindowLinker.ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
-                                       "Mod Metadata Loaded");
+         AppData.WindowLinker
+                .ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
+                          "Mod Metadata Loaded");
          return;
       }
 
@@ -95,6 +98,172 @@ public static class FileManager
       return Path.Combine(ModDataSpace.FullPath, Path.Combine(subPaths));
    }
 
+   public static bool ExistsInMod(string[] internalPath, bool isDirectory = false)
+      => ExistsInMod(Path.Combine(internalPath), isDirectory);
+
+   public static bool ExistsInVanilla(string[] internalPath, bool isDirectory = false)
+      => ExistsInVanilla(Path.Combine(internalPath), isDirectory);
+
+   /// <summary>
+   /// Returns true if the given path exists in the mod data space.
+   /// This will check the mod data space only, not the vanilla data space.
+   /// </summary>
+   /// <param name="path"></param>
+   /// <param name="isDirectory"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentException"></exception>
+   public static bool ExistsInMod(string path, bool isDirectory = false)
+   {
+      if (string.IsNullOrEmpty(path))
+         throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+
+      var fullPath = Path.Combine(ModDataSpace.FullPath, path);
+      return isDirectory ? Directory.Exists(fullPath) : File.Exists(fullPath);
+   }
+
+   /// <summary>
+   /// Returns true if the given path exists in the vanilla data space.
+   /// This will check the vanilla data space only, not the mod data space.
+   /// </summary>
+   /// <param name="path"></param>
+   /// <param name="isDirectory"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentException"></exception>
+   public static bool ExistsInVanilla(string path, bool isDirectory = false)
+   {
+      if (string.IsNullOrEmpty(path))
+         throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+
+      var fullPath = Path.Combine(VanillaDataSpace.FullPath, path);
+      return isDirectory ? Directory.Exists(fullPath) : File.Exists(fullPath);
+      //TODO: @Minnator make this also take base mods into account
+   }
+
+   /// <summary>
+   /// Returns all files in the given subdirectory path from either the mod or vanilla data space.
+   /// Handles <c>replaced paths</c> and also invalid paths.
+   /// </summary>
+   /// <param name="subPath"></param>
+   /// <param name="searchPattern"></param>
+   /// <returns><see cref="ICollection{T}"/> of (<c>string</c>, <c>bool</c>) representing the path and if it is a mod file</returns>
+   /// <exception cref="ArgumentException"></exception>
+   public static ICollection<(string path, bool isMod)> GetAllFilesInDirectory(string[] subPath, string searchPattern)
+   {
+      var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
+      if (vSubPath.Length == 0)
+         throw new ArgumentException("SubPaths cannot be empty after removing the file name entry.", nameof(subPath));
+      if (fileName != null)
+         throw new ArgumentException("The SubPath should NOT point to a file but a directory", nameof(subPath));
+
+      var modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern);
+      if (IsPathReplaced(vSubPath))
+         return modFiles.Select(file => (file, true)).ToArray();
+
+      var defined = new HashSet<string>(modFiles);
+      List<(string path, bool isMod)> fileList = [];
+      fileList.AddRange(defined.Select(file => (file, true)));
+
+      var vanillaFiles = Directory.GetFiles(GetVanillaPath(vSubPath), searchPattern);
+      foreach (var file in vanillaFiles)
+      {
+         if (defined.Contains(file))
+            continue; // We already have this file in the mod data space
+
+         fileList.Add((file, false));
+      }
+
+      return fileList;
+   }
+
+   /// <summary>
+   /// Should only be used for paths pointing to a file not a directory.
+   /// Creates a FileInformation object for the given file type information and dependencies.
+   /// This will check if the file exists in the mod data space or the vanilla data space and return the corresponding FileInformation.
+   /// </summary>
+   /// <param name="fileTypeInfo"></param>
+   /// <param name="savingService"></param>
+   /// <param name="dependencies"></param>
+   /// <param name="subPath"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentException"></exception>
+   /// <exception cref="OhShitHereWeGoAgainException"></exception>
+   public static FileInformation GetGameFileForMod(FileTypeInformation fileTypeInfo,
+                                                   ISavingService savingService,
+                                                   FileDescriptor[] dependencies,
+                                                   params string[] subPath)
+   {
+      // TODO: @Melco @Minnator
+      // How do we handle the Dependencies?
+      // How do we verify that they are already loaded and valid?
+
+      if (subPath == null || subPath.Length == 0)
+         throw new ArgumentException("SubPaths cannot be null or empty.", nameof(subPath));
+
+      var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
+      if (vSubPath.Length == 0)
+         throw new ArgumentException("SubPaths cannot be empty after removing the file name entry.", nameof(subPath));
+
+      if (ExistsInMod(vSubPath, fileName != null))
+      {
+         // We have a mod file, so we return the mod file information
+         Debug.Assert(fileName != null, nameof(fileName) + " != null");
+         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo));
+      }
+
+      if (ExistsInVanilla(vSubPath, fileName != null))
+      {
+         // We have a vanilla file, so we return the vanilla file information
+         Debug.Assert(fileName != null, nameof(fileName) + " != null");
+         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo));
+      }
+
+      throw new
+         OhShitHereWeGoAgainException("No file found in mod or vanilla data space for the given path. Is the file missing or the path incorrect?");
+   }
+
+   /// <summary>
+   /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
+   /// </summary>
+   /// <param name="fileTypeInfo"></param>
+   /// <param name="savingService"></param>
+   /// <param name="dependencies"></param>
+   /// <param name="isMod"></param>
+   /// <param name="subPath"></param>
+   /// <returns></returns>
+   public static List<FileInformation> GetAllFileInfosForDirectory(FileTypeInformation fileTypeInfo,
+                                                                   ISavingService savingService,
+                                                                   FileDescriptor[] dependencies,
+                                                                   params string[] subPath)
+   {
+      return GetAllFileInfosForDirectory(new(dependencies, subPath, savingService, fileTypeInfo));
+   }
+
+   /// <summary>
+   /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
+   /// </summary>
+   /// <param name="descriptor"></param>
+   /// <param name="isMod"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentException"></exception>
+   public static List<FileInformation> GetAllFileInfosForDirectory(FileDescriptor descriptor)
+   {
+      var vSubPath = RemoveFileNameEntryFromPath(descriptor.LocalPath, out var fileName);
+      if (vSubPath.Length == 0)
+         throw new ArgumentException("`descriptor.LocalPath` cannot be empty after removing the file name entry.",
+                                     nameof(descriptor.LocalPath));
+      if (fileName != null)
+         throw new ArgumentException("The `descriptor.LocalPath` should NOT point to a file but a directory",
+                                     nameof(descriptor.LocalPath));
+
+      List<FileInformation> fileInfos = [];
+      foreach (var (file, isMod) in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
+         fileInfos.Add(new(Path.GetFileName(file),
+                           isMod,
+                           descriptor));
+
+      return fileInfos;
+   }
+
    public static string GetDependentPath(params string[]? subPaths)
    {
       if (subPaths == null || subPaths.Length == 0)
@@ -122,11 +291,30 @@ public static class FileManager
          return false;
 
       // if we have a file ending we need to remove it and only check the path
-      var pathToCheck = subPaths.Length > 0 && subPaths[^1].Contains('.')
-                           ? Path.Combine(subPaths[..^1])
-                           : Path.Combine(subPaths);
+      return CoreData.ModMetadata.ReplacePaths.Any(replacePath
+                                                      => replacePath.Equals(RemoveFileNameEntryFromPath(subPaths,
+                                                                             out _)));
+   }
 
-      return CoreData.ModMetadata.ReplacePaths.Any(replacePath => replacePath.Equals(pathToCheck));
+   private static string RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)
+   {
+      if (subPaths.Length == 0)
+      {
+         fileName = null;
+         return string.Empty;
+      }
+
+      // We take it as granted that folders do not contain a dot in their name
+      // so we can safely assume that the last entry is the file name if it contains a dot
+      // If it does not contain a dot, we assume it is a folder name
+      if (subPaths[^1].Contains('.'))
+      {
+         fileName = subPaths[^1];
+         return Path.Combine(subPaths[..^1]);
+      }
+
+      fileName = null;
+      return Path.Combine(subPaths);
    }
 
    public static void GenerateCustomSavingCatalog()

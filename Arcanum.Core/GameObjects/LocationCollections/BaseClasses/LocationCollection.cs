@@ -138,8 +138,8 @@ public abstract class LocationCollection<T>(string name) : LocationComposite(nam
    public void ExecuteAndAdd(ICommand command, bool tryAddEventToHistory)
    {
       command.Execute();
-      if (tryAddEventToHistory && Globals.AppState == AppState.EditingAllowed)
-         Globals.HistoryManager.AddCommand(command);
+      if (tryAddEventToHistory && AppData.AppState == AppState.EditingAllowed)
+         AppData.HistoryManager.AddCommand(command);
    }
 
    public virtual void InternalAdd(T composite) => _subCollection.Add(composite);

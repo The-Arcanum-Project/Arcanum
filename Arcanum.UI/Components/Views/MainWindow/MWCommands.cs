@@ -132,4 +132,11 @@ public static class MwCommands
       {
          InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenUIElementsBrowser },
       };
+
+   // Loading Commands
+   public static readonly RoutedCommand LoadLocationsCommand = new("OpenLoadingWindowCommand",
+                                                                   typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },
+   };
 }

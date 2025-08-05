@@ -16,4 +16,5 @@ public readonly struct FileInformation(string fileName,
     
     
     public readonly FileDescriptor Descriptor = descriptor;
+    
 }

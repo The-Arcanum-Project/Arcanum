@@ -7,6 +7,9 @@ public readonly struct FileTypeInformation(string typeName, string fileEnding, s
     public static FileTypeInformation Default = new("EUV-JSON", "txt", "#");
 
     public readonly string TypeName = typeName;
+    /// <summary>
+    /// Should be in the format of a file ending, e.g. "txt", "json", "xml", etc.
+    /// </summary>
     public readonly string FileEnding = fileEnding;
     public readonly string CommentPrefix = commentPrefix;
 }

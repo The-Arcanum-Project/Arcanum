@@ -21,7 +21,7 @@ public partial class SettingsWindow
    public static SettingsWindow ShowSettingsWindow()
    {
       var settingsWindow = new SettingsWindow();
-      settingsWindow.InitTabs(settingsWindow.SettingsTabControl, Globals.Settings);
+      settingsWindow.InitTabs(settingsWindow.SettingsTabControl, AppData.Settings);
       settingsWindow.Show();
       return settingsWindow;
    }
@@ -187,9 +187,9 @@ public partial class SettingsWindow
       if (result != MessageBoxResult.Yes)
          return;
 
-      Globals.Settings = new();
+      AppData.Settings = new();
       SettingsTabControl.Items.Clear();
-      InitTabs(SettingsTabControl, Globals.Settings);
+      InitTabs(SettingsTabControl, AppData.Settings);
    }
 
    private void ResetSelectedTabItem_OnClick(object sender, RoutedEventArgs e)

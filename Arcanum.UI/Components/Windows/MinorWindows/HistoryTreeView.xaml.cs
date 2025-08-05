@@ -18,7 +18,7 @@ public partial class HistoryTreeView
       Loaded += (_, _) =>
       {
          Nodes.Clear();
-         Nodes.Add(Globals.HistoryManager.Root);
+         Nodes.Add(AppData.HistoryManager.Root);
          // var node1 = new HistoryNode(1, new CInitial(), HistoryEntryType.Normal, GlobalStates.HistoryManager.Root);
          // GlobalStates.HistoryManager.Root.Children.Add(node1);
          // var node2 = new HistoryNode(2, new CInitial(), HistoryEntryType.Normal, node1);
@@ -69,6 +69,6 @@ public partial class HistoryTreeView
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
       if (NodesTreeView.SelectedItem is HistoryNode selectedNode)
-         Globals.HistoryManager.RevertTo(selectedNode.Id);
+         AppData.HistoryManager.RevertTo(selectedNode.Id);
    }
 }
