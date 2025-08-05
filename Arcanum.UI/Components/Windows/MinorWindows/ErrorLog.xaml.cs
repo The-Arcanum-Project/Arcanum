@@ -121,26 +121,26 @@ public partial class ErrorLog : INotifyPropertyChanged
       InitializeComponent();
 
       ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError1,
-                                       new(),
+                                       new(0, 0, "TestFile.txt"),
                                        DiagnosticSeverity.Error,
                                        "Test Action",
                                        "Test Message",
                                        "Test Description"));
 
       ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError1,
-                                       new(),
+                                       new(0, 0, "TestFile.txt"),
                                        DiagnosticSeverity.Warning,
                                        "Test Action",
                                        "Test Message",
                                        "Test Description"));
       ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError2,
-                                       new(),
+                                       new(0, 0, "TestFile.txt"),
                                        DiagnosticSeverity.Information,
                                        "Test Action",
                                        "Test Message",
                                        "Test Description"));
       ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.UnknownError,
-                                       new(),
+                                       new(0, 0, "TestFile.txt"),
                                        DiagnosticSeverity.Error,
                                        "Test Action",
                                        "Test Message",

@@ -23,7 +23,7 @@ public enum DiagnosticSeverity
    Information
 }
 
-public static class DiagnosticSeveretyExtensions
+public static class DiagnosticSeverityExtensions
 {
    /// <summary>
    /// Retrieves the prefix associated with the specified <see cref="DiagnosticSeverity"/> value.

@@ -12,7 +12,6 @@ public static class IO
 
    public static string GetUserDocumentsPath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-   
    // TODO fix this to EU5 once we know the correct path
    public static string GetUserModFolderPath
       => Path.Combine(GetUserDocumentsPath, "Paradox Interactive", "Europa Universalis V", "mod");
@@ -28,7 +27,9 @@ public static class IO
    public static string GetArcanumDataPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData");
 
    // Directory Utils
-   public static List<string> GetDirectories(string path, string searchString = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+   public static List<string> GetDirectories(string path,
+                                             string searchString = "*",
+                                             SearchOption searchOption = SearchOption.TopDirectoryOnly)
    {
       if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
          return [];
@@ -397,4 +398,37 @@ public static class IO
       return Task.Run(() => SaveBitmap(path, bmp, format), cancellationToken);
    }
 
+   #region StreamReaders
+
+   /// <summary>
+   /// Creates a StreamReader for the specified path with the given encoding.
+   /// Returns true if successful, false otherwise.
+   /// The <see cref="StreamReader"/> will have to be disposed by the caller.
+   /// </summary>
+   /// <param name="path"></param>
+   /// <param name="encoding"></param>
+   /// <param name="reader"></param>
+   /// <returns></returns>
+   public static bool CreateStreamReader(string path, Encoding encoding, out StreamReader? reader)
+   {
+      reader = null;
+      if (string.IsNullOrEmpty(path) || !File.Exists(path))
+         return false;
+
+      try
+      {
+         reader = new(path, encoding);
+         return true;
+      }
+      catch (IOException)
+      {
+         return false;
+      }
+      catch (UnauthorizedAccessException)
+      {
+         return false;
+      }
+   }
+
+   #endregion
 }

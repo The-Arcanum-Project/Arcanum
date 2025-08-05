@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.ErrorSystem;
 public static class ErrorManager
 {
    public static List<Diagnostic> Diagnostics { get; } = [];
-   
+
    public static void AddToLog(Diagnostic? diagnostic)
    {
       if (diagnostic == null)
@@ -13,6 +13,13 @@ public static class ErrorManager
 
       Diagnostics.Add(diagnostic);
    }
-   
-   
+
+   public static void AddToLog(List<Diagnostic> diagnostics)
+   {
+      if (diagnostics.Count == 0)
+         return;
+
+      foreach (var diagnostic in diagnostics)
+         Diagnostics.Add(diagnostic);
+   }
 }
