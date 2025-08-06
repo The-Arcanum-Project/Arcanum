@@ -35,7 +35,7 @@ public interface IParsingStep
    /// Progress of the parsing step, if applicable.
    /// Returns the percentage completed and the number of steps done.
    /// </summary>
-   public IProgress<(double percentage, int doneSteps)>? Progress { get; set; }
+   public EventHandler<ParsingStepBase>? SubStepCompleted { get; set; }
    
    /// <summary>
    /// Executes the parsing step.

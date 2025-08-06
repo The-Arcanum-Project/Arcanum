@@ -3,6 +3,7 @@
         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mainWindows = "clr-namespace:Arcanum.UI.Components.Windows.MainWindows"
         mc:Ignorable = "d"
         Title = "LoadingScreen"
         Height = "500"
@@ -11,7 +12,8 @@
         WindowStyle = "None"
         ResizeMode = "NoResize"
         WindowStartupLocation = "CenterScreen"
-        Icon="/Assets/Logo/ArcanumSimplified.ico">
+        Icon = "/Assets/Logo/ArcanumSimplified.ico">
+
 
     <Window.Resources>
         <ResourceDictionary>
@@ -20,7 +22,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Grid Margin = "8">
         <Grid.RowDefinitions>
             <RowDefinition Height = "7*" />
@@ -36,7 +38,6 @@
 
         <TextBlock Grid.Row = "0"
                    Grid.Column = "0"
-                   x:Name = "LoadingTitleTextBlock"
                    Text = "Arcanum"
                    HorizontalAlignment = "Center"
                    VerticalAlignment = "Bottom"
@@ -68,14 +69,15 @@
                    Margin = "0,0,25,0" />
         </Border>
 
-        <TextBlock x:Name = "LoadingPercentage"
-                   Grid.Column = "0"
+        <TextBlock Grid.Column = "0"
                    Grid.Row = "2"
-                   Text="{Binding LoadingText}"
-                   TextAlignment="Center"
+                   Margin="10, 0"
+                   Text = "{Binding LoadingText}"
+                   TextAlignment = "Center"
                    VerticalAlignment = "Center"
                    HorizontalAlignment = "Stretch"
-                   FontSize = "20">
+                   TextWrapping = "Wrap"
+                   FontSize = "13">
         </TextBlock>
 
         <Border Grid.Row = "3"
@@ -91,8 +93,7 @@
 
         <TextBlock Grid.Row = "4"
                    Grid.Column = "0"
-                   x:Name = "LoadingTipTextBlock"
-                   Text="{Binding LoadingTip}"
+                   Text = "{Binding LoadingTip}"
                    VerticalAlignment = "Top"
                    HorizontalAlignment = "Stretch"
                    TextAlignment = "Center"

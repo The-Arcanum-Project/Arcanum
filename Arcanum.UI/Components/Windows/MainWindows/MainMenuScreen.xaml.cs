@@ -59,7 +59,7 @@ public partial class MainMenuScreen
 
       AppData.WindowLinker = new WindowLinkerImpl();
    }
-   
+
    private void OnClosed(object? sender, EventArgs? e)
    {
       MainMenuScreenDescriptor.SaveData();
@@ -134,24 +134,43 @@ public partial class MainMenuScreen
       MainMenuViewModel.SetCurrentView(MainMenuViewModel.TargetedView);
    }
 
-   public async void LoadAndTransfer()
+   // Create a new method that returns a Task for proper async/await
+   public async Task LoadAndTransferAsync()
    {
+      var loadingScreen = new LoadingScreen();
+
       try
       {
-         var loadingScreen = new LoadingScreen();
-         await loadingScreen.ShowLoadingAsync();
+         // 1. Hide this window and show the loading screen.
+         //    Both Show() and Hide() are non-blocking.
+         Hide();
+         loadingScreen.Show();
+
+         // 2. Await the loading logic directly.
+         //    Because we are awaiting, the UI thread is NOW FREE. It can process
+         //    the Dispatcher messages from the loading task and update the text.
+         await loadingScreen.StartLoading();
+
+         // 3. Once loading is done, create and show the new MainWindow.
          var mw = new MainWindow();
-         Application.Current.MainWindow = mw;
-         Application.Current.MainWindow.Show();
-         mw.Activate();
-         Close();
+         Application.Current.MainWindow = mw; // Set the new main window
+         mw.Show();
+
+         // 4. Close the loading screen and this initial window.
+         loadingScreen.Close();
+         Close(); // 'this' refers to the now-hidden LoginWindow
       }
-      catch (Exception)
+      catch (Exception ex)
       {
-         MessageBox.Show("An error occurred while loading the main window. Please try again.",
+         MessageBox.Show($"An error occurred while loading: {ex.Message}",
                          "Error",
                          MessageBoxButton.OK,
                          MessageBoxImage.Error);
+
+         // On error, close the loading screen and show this window again
+         if (loadingScreen.IsLoaded)
+            loadingScreen.Close();
+         Show();
       }
    }
 }

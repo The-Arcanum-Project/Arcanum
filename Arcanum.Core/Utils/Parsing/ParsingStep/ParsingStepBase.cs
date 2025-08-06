@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.Utils.Parsing.ParsingStep;
+using Arcanum.Core.Utils.Sorting;
 
-public abstract class ParsingStepBase : IParsingStep
+namespace Arcanum.Core.Utils.Parsing.ParsingStep;
+
+public abstract class ParsingStepBase : IParsingStep, IDependencyNode<string>
 {
    private readonly Stopwatch _stopwatch = new();
    private readonly List<double> _durations = []; // Stores the durations of each step in milliseconds
@@ -12,7 +13,7 @@ public abstract class ParsingStepBase : IParsingStep
    private const double REPORT_THRESHOLD = 1.0;
 
    private int _doneSteps;
-   private List<double>? _stepWeights;
+   public List<double>? StepWeights { get; set; }
 
    private double _lastReportedPercentage;
    private double _accumulatedWeightDone;
@@ -25,14 +26,15 @@ public abstract class ParsingStepBase : IParsingStep
       Name = GetType().Name;
    }
 
+   public string Id => Name;
+   IEnumerable<string> IDependencyNode<string>.Dependencies => Dependencies;
    public string[] Dependencies { get; }
    public List<Diagnostic> Diagnostics { get; } = [];
    public TimeSpan Duration { get; private set; }
    public bool IsSuccessful { get; private set; }
    public string Name { get; }
 
-   public IProgress<(double percentage, int doneSteps)>? Progress { get; set; }
-
+   public EventHandler<ParsingStepBase>? SubStepCompleted { get; set; }
    public TimeSpan? EstimatedRemaining
    {
       get
@@ -46,7 +48,7 @@ public abstract class ParsingStepBase : IParsingStep
          {
             durationsSnapshot = new(_durations);
             accumulatedWeightDoneSnapshot = _accumulatedWeightDone;
-            stepWeightsSnapshot = _stepWeights is null ? null : [.._stepWeights];
+            stepWeightsSnapshot = StepWeights is null ? null : [..StepWeights];
             totalStepsSnapshot = _totalSteps;
          }
 
@@ -68,26 +70,11 @@ public abstract class ParsingStepBase : IParsingStep
       }
    }
 
-   private double TotalWeight => _stepWeights?.Sum() ?? _totalSteps;
-
-   /// <summary>
-   /// This method is used to initialize the parsing step when being used in a parallel context across multiple files.
-   /// It sets the step weights based on the file sizes of the provided files.
-   /// </summary>
-   /// <param name="files"></param>
-   /// <param name="cancellationToken"></param>
-   /// <returns></returns>
-   public bool Execute(ICollection<string> files, CancellationToken cancellationToken = default)
-   {
-      _stepWeights = files.Count > 0
-                        ? files.Select(f => (double)new FileInfo(f).Length).ToList()
-                        : null;
-
-      return Execute(cancellationToken);
-   }
+   private double TotalWeight => StepWeights?.Sum() ?? _totalSteps;
 
    /// <summary>
    /// This is the main method which will be executed to perform the parsing step.
+   /// To have a proper estimation of the remaining time, it is recommended to set the step weights when using multiple files or steps.
    /// </summary>
    /// <param name="cancellationToken"></param>
    /// <returns></returns>
@@ -135,21 +122,25 @@ public abstract class ParsingStepBase : IParsingStep
          _durations.Add(duration.TotalMilliseconds);
          _doneSteps++;
 
-         var weight = _stepWeights != null && stepIndex >= 0 && stepIndex < _stepWeights.Count
-                         ? _stepWeights[stepIndex]
+         var weight = StepWeights != null && stepIndex >= 0 && stepIndex < StepWeights.Count
+                         ? StepWeights[stepIndex]
                          : 1.0;
 
          _accumulatedWeightDone += weight;
 
-         if (TotalWeight > 0)
+         if (!(TotalWeight > 0))
+            return;
+
+         var percentage = _accumulatedWeightDone / TotalWeight * 100.0;
+         if (Math.Abs(percentage - _lastReportedPercentage) >= REPORT_THRESHOLD)
          {
-            var percentage = _accumulatedWeightDone / TotalWeight * 100.0;
-            if (Math.Abs(percentage - _lastReportedPercentage) >= REPORT_THRESHOLD)
-            {
-               _lastReportedPercentage = percentage;
-               Progress?.Report((percentage, _doneSteps));
-            }
+            SubPercentageCompleted = _lastReportedPercentage = percentage;
+            SubStepsDone = _doneSteps;
+            SubStepCompleted?.Invoke(this, this);
          }
       }
    }
+
+   public double SubPercentageCompleted { get; private set; }
+   public int SubStepsDone { get; set; }
 }

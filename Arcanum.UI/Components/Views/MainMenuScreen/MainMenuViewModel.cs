@@ -154,7 +154,7 @@ public class MainMenuViewModel : ObservableObject
    // When creating a new project, this method will be called.
    // It validates the project file and launches into the main window of Arcanum
    // if all requirements are met.
-   internal Task LaunchArcanum(ProjectFileDescriptor descriptor)
+   internal async Task LaunchArcanum(ProjectFileDescriptor descriptor)
    {
       if (!descriptor.IsValid())
       {
@@ -164,7 +164,7 @@ public class MainMenuViewModel : ObservableObject
                          "Invalid Project Data",
                          MessageBoxButton.OK,
                          MessageBoxImage.Error);
-         return Task.CompletedTask;
+         return;
       }
 
       descriptor.LoadToApplication();
@@ -181,7 +181,6 @@ public class MainMenuViewModel : ObservableObject
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 
-      MenuWindow.LoadAndTransfer();
-      return Task.CompletedTask;
+      await MenuWindow.LoadAndTransferAsync();
    }
 }
