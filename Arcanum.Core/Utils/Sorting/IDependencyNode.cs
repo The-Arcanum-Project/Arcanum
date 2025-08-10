@@ -10,5 +10,5 @@ public interface IDependencyNode<T>
    /// <summary>
    /// Identifiers of the dependencies this node requires.
    /// </summary>
-   IEnumerable<T> Dependencies { get; }
+   IEnumerable<IDependencyNode<T>> Dependencies { get; }
 }

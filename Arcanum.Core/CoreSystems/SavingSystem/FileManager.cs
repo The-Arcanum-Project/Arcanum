@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.Parsing.ParsingStep;
 using Arcanum.Core.Utils.vdfParser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
@@ -66,7 +66,7 @@ public static class FileManager
          return;
       }
 
-      CoreData.ModMetadata = modMetadata!;
+      CoreData.ModMetadata = modMetadata;
    }
 
    public static string GetDocumentsPath(params string[]? subPaths)
@@ -155,9 +155,14 @@ public static class FileManager
       if (fileName != null)
          throw new ArgumentException("The SubPath should NOT point to a file but a directory", nameof(subPath));
 
-      var modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern);
-      if (IsPathReplaced(vSubPath))
-         return modFiles.Select(file => (file, true)).ToArray();
+      string[] modFiles = [];
+      if (Directory.Exists(GetModPath(vSubPath)))
+      {
+         modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern);
+         if (IsPathReplaced(vSubPath))
+            return modFiles.Select(file => (file, true)).ToArray();
+      }
+      
 
       var defined = new HashSet<string>(modFiles);
       List<(string path, bool isMod)> fileList = [];
@@ -183,6 +188,7 @@ public static class FileManager
    /// <param name="fileTypeInfo"></param>
    /// <param name="savingService"></param>
    /// <param name="dependencies"></param>
+   /// <param name="loadingService"></param>
    /// <param name="subPath"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentException"></exception>
@@ -190,6 +196,7 @@ public static class FileManager
    public static FileInformation GetGameFileForMod(FileTypeInformation fileTypeInfo,
                                                    ISavingService savingService,
                                                    FileDescriptor[] dependencies,
+                                                   SingleFileLoadingBase loadingService,
                                                    params string[] subPath)
    {
       // TODO: @Melco @Minnator
@@ -207,14 +214,14 @@ public static class FileManager
       {
          // We have a mod file, so we return the mod file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo));
+         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
       }
 
       if (ExistsInVanilla(vSubPath, fileName != null))
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo));
+         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
       }
 
       throw new
@@ -227,22 +234,22 @@ public static class FileManager
    /// <param name="fileTypeInfo"></param>
    /// <param name="savingService"></param>
    /// <param name="dependencies"></param>
-   /// <param name="isMod"></param>
+   /// <param name="loadingService"></param>
    /// <param name="subPath"></param>
    /// <returns></returns>
    public static List<FileInformation> GetAllFileInfosForDirectory(FileTypeInformation fileTypeInfo,
                                                                    ISavingService savingService,
                                                                    FileDescriptor[] dependencies,
+                                                                   SingleFileLoadingBase loadingService,
                                                                    params string[] subPath)
    {
-      return GetAllFileInfosForDirectory(new(dependencies, subPath, savingService, fileTypeInfo));
+      return GetAllFileInfosForDirectory(new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
    }
 
    /// <summary>
    /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
    /// </summary>
    /// <param name="descriptor"></param>
-   /// <param name="isMod"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentException"></exception>
    public static List<FileInformation> GetAllFileInfosForDirectory(FileDescriptor descriptor)
@@ -257,9 +264,11 @@ public static class FileManager
 
       List<FileInformation> fileInfos = [];
       foreach (var (file, isMod) in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
+      {
          fileInfos.Add(new(Path.GetFileName(file),
-                           isMod,
-                           descriptor));
+                         isMod,
+                         descriptor));
+      }
 
       return fileInfos;
    }

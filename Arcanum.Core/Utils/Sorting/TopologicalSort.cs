@@ -24,7 +24,7 @@ public static class TopologicalSort
             return false;
 
          foreach (var depId in n.Dependencies)
-            if (nodeDict.TryGetValue(depId, out var depNode))
+            if (nodeDict.TryGetValue(depId.Id, out var depNode))
             {
                if (!Visit(depNode))
                   return false;
@@ -64,7 +64,7 @@ public static class TopologicalSort
       result?.Add(current);
 
       foreach (var depId in current.Dependencies)
-         if (nodeMap != null && nodeMap.TryGetValue(depId, out var depNode))
+         if (nodeMap != null && nodeMap.TryGetValue(depId.Id, out var depNode))
             Dfs(depNode, visited, result, nodeMap);
    }
 
@@ -78,10 +78,10 @@ public static class TopologicalSort
       {
          foreach (var depId in node.Dependencies)
          {
-            if (!dependentsMap.TryGetValue(depId, out var list))
+            if (!dependentsMap.TryGetValue(depId.Id, out var list))
             {
                list = [];
-               dependentsMap[depId] = list;
+               dependentsMap[depId.Id] = list;
             }
 
             list.Add(node);

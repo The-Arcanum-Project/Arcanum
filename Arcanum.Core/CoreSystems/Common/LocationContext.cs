@@ -16,6 +16,7 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
    /// The current action being performed during parsing.
    /// </summary>
    public string ToErrorString => $"in File \"{FilePath}\" at Line {LineNumber}:{ColumnNumber}";
+   public static LocationContext Empty { get; } = new(int.MinValue, int.MinValue, string.Empty);
 
    public LocationContext GetInstance() => new(LineNumber, ColumnNumber, FilePath);
 

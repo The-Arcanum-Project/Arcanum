@@ -57,7 +57,6 @@ public partial class LoadingScreen : INotifyPropertyChanged
             return;
 
          _loadingText = value;
-         Debug.WriteLine($"LoadingText changed: {_loadingText}");
          OnPropertyChanged();
       }
    }

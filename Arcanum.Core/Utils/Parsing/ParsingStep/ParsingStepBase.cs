@@ -1,76 +1,91 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.ErrorSystem;
+using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.Utils.Sorting;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.Utils.Parsing.ParsingStep;
 
-public abstract class ParsingStepBase : IParsingStep, IDependencyNode<string>
+public abstract class ParsingStepBase : IParsingStep
 {
    private readonly Stopwatch _stopwatch = new();
    private readonly List<double> _durations = []; // Stores the durations of each step in milliseconds
    private readonly object _lock = new();
+
    private const double REPORT_THRESHOLD = 1.0;
-
-   private int _doneSteps;
-   public List<double>? StepWeights { get; set; }
-
    private double _lastReportedPercentage;
    private double _accumulatedWeightDone;
-   private readonly int _totalSteps;
 
-   protected ParsingStepBase(int totalSteps, string[] dependencies)
+   private int _doneSteps;
+   private bool _isSuccessful;
+   private int TotalSteps => Descriptor.Files.Count;
+
+   private List<double>? StepWeights { get; set; }
+   public FileDescriptor Descriptor { get; }
+   public List<Diagnostic> Diagnostics { get; } = [];
+   public TimeSpan Duration { get; private set; }
+   public bool IsSuccessful
    {
-      _totalSteps = totalSteps;
-      Dependencies = dependencies;
+      get => _isSuccessful;
+      private set => _isSuccessful = value;
+   }
+   private bool IsMultithreadable { get; }
+   public string Name { get; }
+
+   protected ParsingStepBase(FileDescriptor descriptor, bool isMultithreadable)
+   {
+      Descriptor = descriptor;
+      IsMultithreadable = isMultithreadable;
       Name = GetType().Name;
    }
 
-   public string Id => Name;
-   IEnumerable<string> IDependencyNode<string>.Dependencies => Dependencies;
-   public string[] Dependencies { get; }
-   public List<Diagnostic> Diagnostics { get; } = [];
-   public TimeSpan Duration { get; private set; }
-   public bool IsSuccessful { get; private set; }
-   public string Name { get; }
-
    public EventHandler<ParsingStepBase>? SubStepCompleted { get; set; }
+   private double? _smoothedDurationMs;
+
    public TimeSpan? EstimatedRemaining
    {
       get
       {
-         List<double> durationsSnapshot;
-         double accumulatedWeightDoneSnapshot;
-         List<double>? stepWeightsSnapshot;
-         int totalStepsSnapshot;
-
          lock (_lock)
          {
-            durationsSnapshot = new(_durations);
-            accumulatedWeightDoneSnapshot = _accumulatedWeightDone;
-            stepWeightsSnapshot = StepWeights is null ? null : [..StepWeights];
-            totalStepsSnapshot = _totalSteps;
+            if (_doneSteps == 0 || TotalSteps <= 0)
+               return null;
+
+            var remainingWeight = TotalWeight - _accumulatedWeightDone;
+            var averageWeight = StepWeights is { Count: > 0 }
+                                   ? StepWeights.Average()
+                                   : 1.0;
+
+            if (averageWeight <= 0)
+               return null;
+
+            // Use smoothed duration if available, else fallback to simple average
+            var avgMs = _smoothedDurationMs ?? _durations.Average();
+
+            if (avgMs <= 0)
+               return null;
+
+            var estimatedSeconds = (avgMs / 1000.0) * (remainingWeight / averageWeight);
+            return TimeSpan.FromSeconds(estimatedSeconds);
          }
-
-         if (durationsSnapshot.Count == 0 || totalStepsSnapshot <= 0)
-            return null;
-
-         var avg = durationsSnapshot.Average();
-         var totalWeight = stepWeightsSnapshot?.Sum() ?? totalStepsSnapshot;
-         var remainingWeight = totalWeight - accumulatedWeightDoneSnapshot;
-         var averageWeight = stepWeightsSnapshot is { Count: > 0 }
-                                ? stepWeightsSnapshot.Average()
-                                : 1.0;
-
-         if (avg <= 0 || averageWeight <= 0)
-            return null;
-
-         var estimatedSeconds = avg * remainingWeight / averageWeight;
-         return TimeSpan.FromSeconds(estimatedSeconds);
       }
    }
 
-   private double TotalWeight => StepWeights?.Sum() ?? _totalSteps;
+   /// <summary>
+   /// Updates the smoothed average duration using an exponential moving average.
+   /// Call this inside ReportSubStepCompletion.
+   /// </summary>
+   private void UpdateSmoothedDuration(double newDurationMs)
+   {
+      // 20% weight to the new value
+      const double smoothingFactor = 0.2;
+      if (_smoothedDurationMs.HasValue)
+         _smoothedDurationMs = _smoothedDurationMs.Value * (1 - smoothingFactor) + newDurationMs * smoothingFactor;
+      else
+         _smoothedDurationMs = newDurationMs;
+   }
+
+   private double TotalWeight => StepWeights?.Sum() ?? TotalSteps;
 
    /// <summary>
    /// This is the main method which will be executed to perform the parsing step.
@@ -78,33 +93,98 @@ public abstract class ParsingStepBase : IParsingStep, IDependencyNode<string>
    /// </summary>
    /// <param name="cancellationToken"></param>
    /// <returns></returns>
-   public bool Execute(CancellationToken cancellationToken = default)
+   public virtual bool Execute(CancellationToken cancellationToken = default)
    {
+      IsSuccessful = true;
+      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(this))
+         throw
+            new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
+
+      StepWeights = GetFileWeights();
+
       _stopwatch.Restart();
-      _durations.Clear();
       _doneSteps = 0;
-      _accumulatedWeightDone = 0;
-      _lastReportedPercentage = 0;
+      _accumulatedWeightDone = 0.0;
+      _lastReportedPercentage = 0.0;
 
-      try
+      if (IsMultithreadable)
       {
-         IsSuccessful = ExecuteCore(cancellationToken);
-         return IsSuccessful;
+         var files = Descriptor.Files;
+         var totalSize = StepWeights.Sum(f => f > 0 ? f : 1);
+         var avgSize = totalSize / files.Count;
+
+         // Large file threshold for determining degree of parallelism
+         const long largeFileThreshold = 50 * 1024 * 1024; // 50 MB
+
+         int maxThreads;
+         // Few files -> run one per file no need to limit threads as we have less than cores
+         if (files.Count <= Environment.ProcessorCount)
+            maxThreads = files.Count;
+         // Large files -> cap at processor count -> prevent threads from slowing down each other
+         else if (avgSize >= largeFileThreshold)
+            maxThreads = Environment.ProcessorCount;
+         // Small files -> increase up to 4x cores so we can utilize the CPU better as we are limited by IO
+         else
+            maxThreads = Math.Min(Environment.ProcessorCount * 4, files.Count);
+
+         try
+         {
+            Parallel.For(0,
+                         files.Count,
+                         new() { MaxDegreeOfParallelism = maxThreads, CancellationToken = cancellationToken },
+                         i =>
+                         {
+                            var file = files[i];
+                            var startTime = _stopwatch.Elapsed;
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                               Volatile.Write(ref _isSuccessful, false);
+                               return;
+                            }
+
+                            var result = Descriptor.SingleFileLoading.LoadSingleFile(file, _lock);
+                            var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
+                            var weight = StepWeights[i];
+                            ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
+
+                            if (!result)
+                               Volatile.Write(ref _isSuccessful, false);
+                         });
+         }
+         catch (OperationCanceledException)
+         {
+            Volatile.Write(ref _isSuccessful, false);
+            Diagnostics.Add(new(ParsingError.Instance.ParsingBaseStepFailure,
+                                LocationContext.Empty,
+                                DiagnosticSeverity.Error,
+                                $"{GetType().Name} failed to load one or more files.",
+                                "One or more files could not be loaded successfully during the parsing step.",
+                                $"The parsing step {Name} encountered errors while loading files. Please check the diagnostics for more details."));
+         }
       }
-      finally
+      else
       {
-         _stopwatch.Stop();
-         Duration = _stopwatch.Elapsed;
-         ErrorManager.AddToLog(Diagnostics);
+         foreach (var file in Descriptor.Files)
+         {
+            var startTime = _stopwatch.Elapsed;
+            if (cancellationToken.IsCancellationRequested)
+            {
+               IsSuccessful = false;
+               Duration = _stopwatch.Elapsed;
+               return false;
+            }
+
+            if (!Descriptor.SingleFileLoading.LoadSingleFile(file))
+               IsSuccessful = false;
+            ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
+            _doneSteps++;
+         }
       }
+
+      _stopwatch.Stop();
+      Duration = _stopwatch.Elapsed;
+      return IsSuccessful;
    }
-
-   /// <summary>
-   /// This method should be overridden to implement the core logic of the parsing step.
-   /// </summary>
-   /// <param name="cancellationToken"></param>
-   /// <returns></returns>
-   protected abstract bool ExecuteCore(CancellationToken cancellationToken);
 
    /// <summary>
    /// Should be called to report the completion of a sub-step.
@@ -114,18 +194,14 @@ public abstract class ParsingStepBase : IParsingStep, IDependencyNode<string>
    /// If the stepWeights are not set, it defaults to a weight of 1.
    /// </summary>
    /// <param name="duration"></param>
+   /// <param name="weight"></param>
    /// <param name="stepIndex"></param>
-   protected void ReportSubStepCompletion(TimeSpan duration, int stepIndex)
+   private void ReportSubStepCompletion(TimeSpan duration, double weight, int stepIndex)
    {
       lock (_lock)
       {
          _durations.Add(duration.TotalMilliseconds);
-         _doneSteps++;
-
-         var weight = StepWeights != null && stepIndex >= 0 && stepIndex < StepWeights.Count
-                         ? StepWeights[stepIndex]
-                         : 1.0;
-
+         UpdateSmoothedDuration(duration.TotalMilliseconds);
          _accumulatedWeightDone += weight;
 
          if (!(TotalWeight > 0))
@@ -135,12 +211,17 @@ public abstract class ParsingStepBase : IParsingStep, IDependencyNode<string>
          if (Math.Abs(percentage - _lastReportedPercentage) >= REPORT_THRESHOLD)
          {
             SubPercentageCompleted = _lastReportedPercentage = percentage;
-            SubStepsDone = _doneSteps;
+            SubStepsDone = stepIndex;
             SubStepCompleted?.Invoke(this, this);
          }
       }
    }
 
+   protected virtual List<double> GetFileWeights()
+   {
+      return ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
+   }
+
    public double SubPercentageCompleted { get; private set; }
-   public int SubStepsDone { get; set; }
+   public int SubStepsDone { get; private set; }
 }

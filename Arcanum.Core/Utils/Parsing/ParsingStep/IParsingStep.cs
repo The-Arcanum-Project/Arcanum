@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.Utils.Parsing.ParsingStep;
 
@@ -9,6 +10,11 @@ public interface IParsingStep
    /// Will automatically be merged into the global diagnostics list.
    /// </summary>
    public List<Diagnostic> Diagnostics { get; }
+   
+   /// <summary>
+   /// The descriptor for the file type being parsed.
+   /// </summary>
+   public FileDescriptor Descriptor { get; }
    
    /// <summary>
    /// Returns the duration of the parsing step.

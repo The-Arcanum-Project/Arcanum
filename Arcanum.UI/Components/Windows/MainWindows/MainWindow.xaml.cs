@@ -6,10 +6,10 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.ConsoleServices;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
+using Arcanum.Core.Utils.Parsing.Steps;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -256,6 +256,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void LoadLocationsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      NamedLocationLoading.LoadNamedLocations();
+      var locationLoader = new LocationLoading();
+      locationLoader.Execute(new CancellationTokenSource().Token);
    }
 }
