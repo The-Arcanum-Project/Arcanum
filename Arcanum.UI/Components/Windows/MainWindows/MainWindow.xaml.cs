@@ -261,4 +261,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       locationLoader.Execute(new CancellationTokenSource().Token);
       Debug.WriteLine($"Loaded {Globals.Locations.Count} locations from the file.");
    }
+
+   private void GlobalsBrowserCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var globalsBrowser = new GameObjectBrowser();
+      globalsBrowser.ShowDialog();
+   }
 }

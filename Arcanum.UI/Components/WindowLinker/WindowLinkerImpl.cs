@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Arcanum.API.UI;
 using Arcanum.API.UtilServices;
+using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 
@@ -39,5 +40,16 @@ public class WindowLinkerImpl : IWindowLinker
                               int width = 400)
    {
       return MBox.Show(message, title, buttons, icon, height, width);
+   }
+
+   public Window GetPropertyGridOrCollectionView(object? obj)
+   {
+      if (obj is null)
+         throw new ArgumentNullException(nameof(obj), "Object cannot be null");
+
+      if (obj is System.Collections.IEnumerable enumerable)
+         return new BaseCollectionView(enumerable);
+
+      return new PropertyGridWindow(obj);
    }
 }

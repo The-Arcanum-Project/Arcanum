@@ -2,8 +2,8 @@
 
 public abstract class LocationComposite(string name) // TODO: @Melco @Minnator implement ISaveable here
 {
-   public readonly string Name = name;
-   public List<LocationComposite> Parents = [];
+   public string Name { get; } = name;
+   public List<LocationComposite> Parents { get; }= [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }
 

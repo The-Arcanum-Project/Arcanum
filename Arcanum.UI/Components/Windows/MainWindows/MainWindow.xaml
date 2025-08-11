@@ -97,6 +97,10 @@
                         Executed = "UIElementsBrowserCommandCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
         
+        <CommandBinding Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand"
+                        Executed = "GlobalsBrowserCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
+        
         <!-- Command Bindings for Debug Loading Triggers -->
         <CommandBinding Command = "mainWindow:MwCommands.LoadLocationsCommand"
                         Executed = "LoadLocationsCommand_OnExecuted"
@@ -247,7 +251,8 @@
             </uc:SearchableMenuItem>
 
             <uc:SearchableMenuItem Header = "Debug">
-
+                <uc:SearchableMenuItem Header = "Globals Browser"
+                                       Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
                 <uc:SearchableMenuItem Header = "Run Location Parsing"
                                        Command = "mainWindow:MwCommands.DebugParsingCommand" />
                 <uc:SearchableMenuItem Header = "Browse Mod Metadata"

@@ -1,15 +1,15 @@
 ﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.PopUp.BaseCollectionView"
-                 xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
-                 xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-                 xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
-                 xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-                 mc:Ignorable = "d"
-                 Title = "BaseCollectionView"
-                 Height = "500"
-                 Width = "400">
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         mc:Ignorable = "d"
+                         Title = "BaseCollectionView"
+                         Height = "500"
+                         Width = "400">
 
     <styleClasses:BaseWindow.Resources>
         <converters:ComplexTypeVisibilityConverter x:Key = "ComplexTypeVisibilityConverter" />
@@ -38,7 +38,15 @@
                 Margin = "2">
             <ListBox x:Name = "ListItems"
                      SelectionChanged = "ListItems_SelectionChanged"
-                     Background = "Transparent">
+                     Background = "Transparent"
+                     VirtualizingStackPanel.IsVirtualizing = "True"
+                     VirtualizingStackPanel.VirtualizationMode = "Recycling"
+                     ScrollViewer.IsDeferredScrollingEnabled = "True">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Background = "Transparent">
@@ -54,7 +62,7 @@
                                        Text = "{Binding}"
                                        Margin = "5, 2, 2,2"
                                        VerticalAlignment = "Center"
-                                       HorizontalAlignment = "Stretch"/>
+                                       HorizontalAlignment = "Stretch" />
                             <styleClasses:BaseButton Grid.Column = "1"
                                                      Margin = "2"
                                                      Padding = "0"

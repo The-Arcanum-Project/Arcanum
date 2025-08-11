@@ -139,4 +139,10 @@ public static class MwCommands
    {
       InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },
    };
+
+   public static readonly RoutedCommand OpenGlobalsBrowserCommand = new("OpenGlobalsBrowserCommand",
+                                                                   typeof(MainWindowView))
+   {
+      InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenGlobalsBrowser },
+   };
 }

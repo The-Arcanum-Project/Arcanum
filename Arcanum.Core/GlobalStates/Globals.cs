@@ -1,6 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.History;
+﻿#define BROWSABLE_HASHSETS
+
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.Settings;
 
 namespace Arcanum.Core.GlobalStates;
 
@@ -16,4 +16,18 @@ public enum AppState
 public static class Globals
 {
    public static HashSet<Location> Locations { get; } = [];
+
+#if BROWSABLE_HASHSETS
+   private static List<Location> _locationsList = [];
+   public static List<Location> LocationsList
+   {
+      get
+      {
+         if (_locationsList.Count == 0)
+            _locationsList = Locations.ToList();
+         return _locationsList;
+      }
+      set => _locationsList = value;
+   }
+#endif
 }

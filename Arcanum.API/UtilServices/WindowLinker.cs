@@ -15,4 +15,6 @@ public interface IWindowLinker
       MessageBoxImage icon = MessageBoxImage.Information,
       int height = 150,
       int width = 400);
+
+   public Window GetPropertyGridOrCollectionView(object? obj);
 }

@@ -5,7 +5,8 @@
              xmlns:delayedEvents = "clr-namespace:Arcanum.Core.Utils.DelayedEvents;assembly=Arcanum.Core"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls">
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+             xmlns:sys = "clr-namespace:System;assembly=System.Runtime">
 
 
     <UserControl.Resources>
@@ -76,7 +77,9 @@
                                             BorderThickness = "0"
                                             Padding = "0"
                                             HorizontalAlignment = "Stretch"
-                                            VerticalAlignment = "Stretch" />
+                                            VerticalAlignment = "Stretch"
+                                            MaxValue="{x:Static sys:Int32.MaxValue}"
+                                            MinValue="{x:Static sys:Int32.MinValue}"/>
         </DataTemplate>
 
         <DataTemplate x:Key = "DecimalTemplate"

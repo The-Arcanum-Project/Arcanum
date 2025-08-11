@@ -23,7 +23,8 @@ public partial class PropertyGrid
 
    public static Dictionary<Type, Func<object, string>> CustomTypeConverters { get; } = new()
    {
-      [typeof(KeyGesture)] = (obj) => ((KeyGesture)obj).GetDisplayStringForCulture(CultureInfo.CurrentCulture) ?? string.Empty,
+      [typeof(KeyGesture)] = (obj)
+         => ((KeyGesture)obj).GetDisplayStringForCulture(CultureInfo.CurrentCulture) ?? string.Empty,
    };
 
    public PropertyGrid()
@@ -67,7 +68,7 @@ public partial class PropertyGrid
          GridEmbeddedBorder.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
       }
    }
-   
+
    public bool ForceInlinePropertyGrid { get; set; }
 
    private void OnPropertyListOnSelectionChanged(object sender, SelectionChangedEventArgs _)
@@ -169,8 +170,9 @@ public partial class PropertyGrid
       if (e.NewValue == null)
          return;
 
-      var props = e.NewValue.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-      
+      var props = e.NewValue.GetType()
+                   .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+
       foreach (var prop in props)
       {
          if (!prop.CanRead)
@@ -181,7 +183,14 @@ public partial class PropertyGrid
 
          var categoryAttr = prop.GetCustomAttribute<CategoryAttribute>();
          grid.SetValue(TitleProperty, e.NewValue.GetType().Name);
-         var target = e.NewValue;
+
+         if (prop.GetIndexParameters().Length > 0)
+            continue; // skip indexers
+
+         var isStatic = prop.GetMethod?.IsStatic ?? false;
+
+         object Getter() => prop.GetValue(isStatic ? null : e.NewValue)!;
+
          Action<object>? setter = prop.CanWrite
                                      ? v =>
                                      {
@@ -191,16 +200,14 @@ public partial class PropertyGrid
                                                            : Convert.ChangeType(v,
                                                                                 targetType,
                                                                                 CultureInfo.InvariantCulture);
-                                        prop.SetValue(target, safeValue);
+
+                                        prop.SetValue(isStatic ? null : e.NewValue, safeValue);
                                      }
                                      : null;
 
-         PropertyItem newItem = new(prop, prop.PropertyType, Getter, setter, categoryAttr?.Category!);
+         var newItem = new PropertyItem(prop, prop.PropertyType, Getter, setter, categoryAttr?.Category!);
          newItem.ValueChanged += grid.OnPropertyValueChanged;
          grid.Properties.Add(newItem);
-         continue;
-
-         object Getter() => prop.GetValue(target)!;
       }
    }
 
@@ -228,10 +235,8 @@ public partial class PropertyGrid
       if (item.Value == null!)
          return;
 
-      var objectView = new PropertyGridWindow(item.Value)
-      {
-         WindowStartupLocation = WindowStartupLocation.CenterOwner,
-      };
+      var objectView =
+         new PropertyGridWindow(item.Value) { WindowStartupLocation = WindowStartupLocation.CenterOwner, };
       objectView.ShowDialog();
    }
 
