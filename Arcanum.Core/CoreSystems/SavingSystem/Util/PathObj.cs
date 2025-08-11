@@ -25,5 +25,5 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
     /// <summary>
     /// The full path as a string, combining the root position, local path, and filename.
     /// </summary>
-    public string FullPath => string.Join(Path.DirectorySeparatorChar, DataSpace.Path, LocalPath, Filename);
+    public string FullPath => Path.Combine(Path.Combine(DataSpace.Path), Path.Combine(LocalPath), Filename);
 }

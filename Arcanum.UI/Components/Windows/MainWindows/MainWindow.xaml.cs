@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Forms;
@@ -258,5 +259,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       var locationLoader = new LocationLoading();
       locationLoader.Execute(new CancellationTokenSource().Token);
+      Debug.WriteLine($"Loaded {Globals.Locations.Count} locations from the file.");
    }
 }

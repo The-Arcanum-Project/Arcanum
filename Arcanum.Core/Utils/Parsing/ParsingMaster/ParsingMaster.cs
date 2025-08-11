@@ -19,6 +19,7 @@ public class ParsingMaster
    public EventHandler<(double percentage, int doneSteps)>? StepProcessChanged;
    public EventHandler<TimeSpan>? StepDurationEstimationChanged;
    public EventHandler<double>? TotalProgressChanged;
+   
 
    private static Dictionary<FileDescriptor, ParsingStepBase> _stepByDescriptor = [];
 

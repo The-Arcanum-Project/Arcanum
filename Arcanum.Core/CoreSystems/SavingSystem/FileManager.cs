@@ -2,11 +2,9 @@
 using System.IO;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
-using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.Parsing.ParsingStep;
 using Arcanum.Core.Utils.vdfParser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
@@ -147,81 +145,58 @@ public static class FileManager
    /// <param name="searchPattern"></param>
    /// <returns><see cref="ICollection{T}"/> of (<c>string</c>, <c>bool</c>) representing the path and if it is a mod file</returns>
    /// <exception cref="ArgumentException"></exception>
-   public static ICollection<(string path, bool isMod)> GetAllFilesInDirectory(string[] subPath, string searchPattern)
+   public static ICollection<(string fileName, bool isMod)> GetAllFilesInDirectory(
+      string[] subPath,
+      string searchPattern)
    {
       var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
-      if (vSubPath.Length == 0)
-         throw new ArgumentException("SubPaths cannot be empty after removing the file name entry.", nameof(subPath));
       if (fileName != null)
          throw new ArgumentException("The SubPath should NOT point to a file but a directory", nameof(subPath));
 
-      string[] modFiles = [];
+      IEnumerable<string> modFiles = [];
       if (Directory.Exists(GetModPath(vSubPath)))
       {
-         modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern);
+         modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern).Select(Path.GetFileName)!;
          if (IsPathReplaced(vSubPath))
             return modFiles.Select(file => (file, true)).ToArray();
       }
-      
 
       var defined = new HashSet<string>(modFiles);
-      List<(string path, bool isMod)> fileList = [];
+      List<(string fileName, bool isMod)> fileList = [];
       fileList.AddRange(defined.Select(file => (file, true)));
 
       var vanillaFiles = Directory.GetFiles(GetVanillaPath(vSubPath), searchPattern);
       foreach (var file in vanillaFiles)
       {
-         if (defined.Contains(file))
+         var fileNameOnly = Path.GetFileName(file);
+         if (defined.Contains(fileNameOnly))
             continue; // We already have this file in the mod data space
 
-         fileList.Add((file, false));
+         fileList.Add((fileNameOnly, false));
       }
 
       return fileList;
    }
 
-   /// <summary>
-   /// Should only be used for paths pointing to a file not a directory.
-   /// Creates a FileInformation object for the given file type information and dependencies.
-   /// This will check if the file exists in the mod data space or the vanilla data space and return the corresponding FileInformation.
-   /// </summary>
-   /// <param name="fileTypeInfo"></param>
-   /// <param name="savingService"></param>
-   /// <param name="dependencies"></param>
-   /// <param name="loadingService"></param>
-   /// <param name="subPath"></param>
-   /// <returns></returns>
-   /// <exception cref="ArgumentException"></exception>
-   /// <exception cref="OhShitHereWeGoAgainException"></exception>
-   public static FileInformation GetGameFileForMod(FileTypeInformation fileTypeInfo,
-                                                   ISavingService savingService,
-                                                   FileDescriptor[] dependencies,
-                                                   SingleFileLoadingBase loadingService,
-                                                   params string[] subPath)
+   public static FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)
    {
       // TODO: @Melco @Minnator
       // How do we handle the Dependencies?
       // How do we verify that they are already loaded and valid?
 
-      if (subPath == null || subPath.Length == 0)
-         throw new ArgumentException("SubPaths cannot be null or empty.", nameof(subPath));
-
-      var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
-      if (vSubPath.Length == 0)
-         throw new ArgumentException("SubPaths cannot be empty after removing the file name entry.", nameof(subPath));
-
-      if (ExistsInMod(vSubPath, fileName != null))
+      if (ExistsInMod(descriptor.LocalPath, fileName != null))
       {
          // We have a mod file, so we return the mod file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
+         return new DummyFileObj(new(descriptor.LocalPath, fileName, ModDataSpace), descriptor);
       }
 
-      if (ExistsInVanilla(vSubPath, fileName != null))
+      if (ExistsInVanilla(descriptor.LocalPath, fileName != null))
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(fileName, true, new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
+         return new DummyFileObj(new(descriptor.LocalPath, fileName, VanillaDataSpace),
+                                 descriptor);
       }
 
       throw new
@@ -231,44 +206,17 @@ public static class FileManager
    /// <summary>
    /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
    /// </summary>
-   /// <param name="fileTypeInfo"></param>
-   /// <param name="savingService"></param>
-   /// <param name="dependencies"></param>
-   /// <param name="loadingService"></param>
-   /// <param name="subPath"></param>
-   /// <returns></returns>
-   public static List<FileInformation> GetAllFileInfosForDirectory(FileTypeInformation fileTypeInfo,
-                                                                   ISavingService savingService,
-                                                                   FileDescriptor[] dependencies,
-                                                                   SingleFileLoadingBase loadingService,
-                                                                   params string[] subPath)
-   {
-      return GetAllFileInfosForDirectory(new(dependencies, subPath, savingService, fileTypeInfo, loadingService));
-   }
-
-   /// <summary>
-   /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
-   /// </summary>
    /// <param name="descriptor"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentException"></exception>
-   public static List<FileInformation> GetAllFileInfosForDirectory(FileDescriptor descriptor)
+   public static List<FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
    {
-      var vSubPath = RemoveFileNameEntryFromPath(descriptor.LocalPath, out var fileName);
-      if (vSubPath.Length == 0)
-         throw new ArgumentException("`descriptor.LocalPath` cannot be empty after removing the file name entry.",
-                                     nameof(descriptor.LocalPath));
-      if (fileName != null)
-         throw new ArgumentException("The `descriptor.LocalPath` should NOT point to a file but a directory",
-                                     nameof(descriptor.LocalPath));
-
-      List<FileInformation> fileInfos = [];
-      foreach (var (file, isMod) in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
-      {
-         fileInfos.Add(new(Path.GetFileName(file),
-                         isMod,
-                         descriptor));
-      }
+      List<FileObj> fileInfos = [];
+      foreach (var (name, isMod) in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
+         fileInfos.Add(new DummyFileObj(new(descriptor.LocalPath,
+                                            name,
+                                            isMod ? ModDataSpace : VanillaDataSpace),
+                                        descriptor));
 
       return fileInfos;
    }
@@ -326,45 +274,45 @@ public static class FileManager
       return Path.Combine(subPaths);
    }
 
-   public static void GenerateCustomSavingCatalog()
-   {
-      // TODO: Implement for existing saveables
-
-      // For new saveable, we need to set the file dropdown to a new default value
-      // List of a tuple of a string and corresponding FileObj
-      // The default option is marked with the FileObj.Empty
-
-      Dictionary<FileInformation, List<(string, FileObj)>> groupedSaveables = [];
-
-      foreach (var fileInformation in NewSaveables.Select(saveable => saveable.GetFileInformation()))
-      {
-         if (groupedSaveables.TryGetValue(fileInformation, out var fileList))
-            continue;
-
-         fileList = GenerateFileSelection(fileInformation);
-         groupedSaveables[fileInformation] = fileList;
-      }
-   }
-
-   public static List<(string, FileObj)> GenerateFileSelection(FileInformation fileInformation)
-   {
-      var descriptor = fileInformation.Descriptor;
-      var allowsOverwrite = fileInformation.AllowsOverwrite;
-      if (!allowsOverwrite)
-      {
-         // We need to Test if a file with the given name already exists for the descriptor
-         var files = descriptor.Files;
-         if (files.Count > 0)
-         {
-            // There exist at least one file, so we need to check if the file name already exists
-            if (files.Any(file => !file.AllowMultipleInstances && file.Path.Filename == fileInformation.FileName))
-            {
-               throw new
-                  InvalidOperationException($"A file with the name '{fileInformation.FileName}' already exists for the Path '{descriptor.GetFilePath()}' and does not allow multiple instances.");
-            }
-         }
-      }
-
-      return [];
-   }
+   // public static void GenerateCustomSavingCatalog()
+   // {
+   //    // TODO: Implement for existing saveables
+   //
+   //    // For new saveable, we need to set the file dropdown to a new default value
+   //    // List of a tuple of a string and corresponding FileObj
+   //    // The default option is marked with the FileObj.Empty
+   //
+   //    Dictionary<FileInformation, List<(string, FileObj)>> groupedSaveables = [];
+   //
+   //    foreach (var fileInformation in NewSaveables.Select(saveable => saveable.GetFileInformation()))
+   //    {
+   //       if (groupedSaveables.TryGetValue(fileInformation, out var fileList))
+   //          continue;
+   //
+   //       fileList = GenerateFileSelection(fileInformation);
+   //       groupedSaveables[fileInformation] = fileList;
+   //    }
+   // }
+   //
+   // public static List<(string, FileObj)> GenerateFileSelection(FileInformation fileInformation)
+   // {
+   //    var descriptor = fileInformation.Descriptor;
+   //    var allowsOverwrite = fileInformation.AllowsOverwrite;
+   //    if (!allowsOverwrite)
+   //    {
+   //       // We need to Test if a file with the given name already exists for the descriptor
+   //       var files = descriptor.Files;
+   //       if (files.Count > 0)
+   //       {
+   //          // There exist at least one file, so we need to check if the file name already exists
+   //          if (files.Any(file => !file.AllowMultipleInstances && file.Path.Filename == fileInformation.FileName))
+   //          {
+   //             throw new
+   //                InvalidOperationException($"A file with the name '{fileInformation.FileName}' already exists for the Path '{descriptor.GetFilePath()}' and does not allow multiple instances.");
+   //          }
+   //       }
+   //    }
+   //
+   //    return [];
+   // }
 }

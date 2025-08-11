@@ -5,20 +5,33 @@ using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-public class FileDescriptor(
-   FileDescriptor[] dependencies,
-   string[] localPath,
-   ISavingService savingService,
-   FileTypeInformation fileType,
-   SingleFileLoadingBase loadingService) : IDependencyNode<string>
+public class FileDescriptor : IDependencyNode<string>
 {
-   public readonly string[] LocalPath = localPath;
-   public readonly FileDescriptor[] DescriptorDependencies = dependencies;
-   public readonly ISavingService SavingService = savingService;
-   public readonly FileTypeInformation FileType = fileType;
-   public readonly SingleFileLoadingBase SingleFileLoading = loadingService;
+   public readonly string[] LocalPath;
+   public readonly FileDescriptor[] DescriptorDependencies;
+   public readonly ISavingService SavingService;
+   public readonly FileTypeInformation FileType;
+   public readonly SingleFileLoadingBase SingleFileLoading;
+   public readonly bool AllowMultipleInstances;
 
-   public readonly List<FileObj> Files = [];
+   public List<FileObj> Files;
+
+   public FileDescriptor(FileDescriptor[] dependencies,
+                         string[] localPath,
+                         ISavingService savingService,
+                         FileTypeInformation fileType,
+                         SingleFileLoadingBase loadingService,
+                         bool allowMultipleInstances = true)
+   {
+      LocalPath = localPath;
+      DescriptorDependencies = dependencies;
+      SavingService = savingService;
+      FileType = fileType;
+      SingleFileLoading = loadingService;
+      AllowMultipleInstances = allowMultipleInstances;
+      
+      Files = FileManager.GetAllFileInfosForDirectory(this);
+   }
 
    public string GetFilePath()
    {
@@ -32,4 +45,16 @@ public class FileDescriptor(
                                                      ISavingService.Dummy,
                                                      FileTypeInformation.Default,
                                                      SingleFileLoadingBase.Dummy);
+   
+   public override string ToString() => $"FileDescriptor: {GetFilePath()}";
+   
+   public override bool Equals(object? obj)
+   {
+      if (obj is not FileDescriptor other) return false;
+      return GetFilePath() == other.GetFilePath();
+   }
+   public override int GetHashCode()
+   {
+      return GetFilePath().GetHashCode();
+   }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,10 +7,9 @@ using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Parsing.ParsingStep;
 
@@ -57,14 +55,14 @@ public partial class LocationFileLoading : SingleFileLoadingBase
                                               "Please check the file path."));
          return false;
       }
-      
+
       var isFlawless = true;
 
       using (reader)
          while (reader.ReadLine() is { } line)
          {
             // Remove leading whitespace as it can affect the comment checking
-            line = line.TrimStart(); 
+            line = line.TrimStart();
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
             {
                context.LineNumber++;
@@ -100,7 +98,7 @@ public partial class LocationFileLoading : SingleFileLoadingBase
                isFlawless = false;
                continue;
             }
-            
+
             context.ColumnNumber = match.Groups[1].Index;
             var newLocation = new Location(colorInt, match.Groups[1].Value);
 
@@ -115,9 +113,9 @@ public partial class LocationFileLoading : SingleFileLoadingBase
                isFlawless = false;
                continue;
             }
-            
+
             locations.Add(newLocation);
-            
+
             context.LineNumber++;
          }
 

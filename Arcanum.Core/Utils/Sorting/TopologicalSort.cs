@@ -49,6 +49,7 @@ public static class TopologicalSort
       var visited = new HashSet<TId>();
 
       Dfs(root, visited, result, nodeMap);
+      result.Remove(root);
       return result;
    }
 
