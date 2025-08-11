@@ -8,28 +8,26 @@ namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
 public static class DefaultCommands
 {
-   [Flags] // Use Flags attribute to allow combining categories
+   [Flags] 
    public enum CommandCategory
    {
       None = 0, // No commands
-      Basic = 1 << 0, // echo, help, clear, list
-      Alias = 1 << 1, // alias command
-      Macro = 1 << 2, // macro command
-      History = 1 << 3, // history command
-      FileSystem = 1 << 4, // pwd (and potentially others like cd, ls in the future)
-      Table = 1 << 5, // table command
+      Basic = 1 << 0, // echo, help, clear, list...
+      Alias = 1 << 1, // alias command...
+      Macro = 1 << 2, // macro command...
+      History = 1 << 3, // history command...
+      FileSystem = 1 << 4, // pwd...
       Debug = 1 << 6, // set clearance (and other debug-specific commands)
 
       // Common combinations
-      StandardUser = Basic | Alias | Macro | History | FileSystem | Table,
+      StandardUser = Basic | Alias | Macro | History | FileSystem,
 
       All = ~None, // Special value to include all defined categories (bitwise NOT of None)
-      // Or explicitly: Basic | Alias | Macro | History | FileSystem | Table | Debug
    }
 
    public class DefaultCommandDefinition : CommandBase
    {
-      public CommandCategory Category { get; set; } // Add Category property
+      public CommandCategory Category { get; set; } 
 
       public DefaultCommandDefinition(string name,
                                       string usage,
@@ -38,7 +36,7 @@ public static class DefaultCommands
                                       CommandCategory category,
                                       params string[] aliases) : base(name, usage, clearance, aliases, execute)
       {
-         Category = category; // Store Category
+         Category = category; 
       }
    }
 
@@ -61,7 +59,7 @@ public static class DefaultCommands
                                              return [commandDef.Usage, aliasString];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic // Assign Category
+                                          category: CommandCategory.Basic
                                          );
    }
 
@@ -71,7 +69,7 @@ public static class DefaultCommands
                                           usage: "echo <message ...> | Displays the provided message.",
                                           execute: args => [string.Join(" ", args)],
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic, // Assign Category
+                                          category: CommandCategory.Basic, 
                                           aliases: ["say"]);
    }
 
@@ -85,13 +83,12 @@ public static class DefaultCommands
                                              return [];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic, // Assign Category
+                                          category: CommandCategory.Basic, 
                                           aliases: ["cls"]);
    }
 
    public static ICommandDefinition CreateListCommandsCommand(IConsoleService consoleService)
    {
-      // ... (same as before, add Category)
       return new DefaultCommandDefinition(name: "list",
                                           usage: "list | Lists all available commands.",
                                           execute: _ =>
@@ -129,13 +126,12 @@ public static class DefaultCommands
                                                        : ["No commands registered."];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic // Assign Category
+                                          category: CommandCategory.Basic 
                                          );
    }
 
    public static ICommandDefinition CreateAliasCommand(IConsoleService consoleService)
    {
-      // ... (same as before, add Category)
       return new DefaultCommandDefinition(name: "alias",
                                           usage: "alias <name> <command_to_alias> alias -r/-c <name>",
                                           execute: args =>
@@ -160,7 +156,7 @@ public static class DefaultCommands
                                              }
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Alias // Assign Category
+                                          category: CommandCategory.Alias
                                          );
    }
 
@@ -204,13 +200,12 @@ public static class DefaultCommands
                                              return [usage];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Macro // Assign Category
+                                          category: CommandCategory.Macro 
                                          );
    }
 
    public static ICommandDefinition CreateHistoryCommand(IConsoleService consoleService)
    {
-      // ... (same as before, add Category)
       return new DefaultCommandDefinition(name: "history",
                                           usage: "history [-c] | Shows command history or clears it with -c.",
                                           execute: args =>
@@ -227,18 +222,17 @@ public static class DefaultCommands
                                              return ["Command history cleared."];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.History // Assign Category
+                                          category: CommandCategory.History 
                                          );
    }
 
    public static ICommandDefinition CreatePwdCommand()
    {
-      // ... (same as before, but add Category)
       return new DefaultCommandDefinition(name: "pwd",
                                           usage: "pwd | Prints the current working directory of the application.",
                                           execute: _ => [Directory.GetCurrentDirectory()],
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.FileSystem, // Assign Category
+                                          category: CommandCategory.FileSystem, 
                                           aliases: ["cwd", "dir"]);
    }
 
@@ -256,19 +250,18 @@ public static class DefaultCommands
                                              return DrawTable(separator: '|', columns: columns);
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Table // Assign Category
+                                          category: CommandCategory.Basic 
                                          );
    }
 
    public static ICommandDefinition CreateSetClearanceCommand(IConsoleService consoleService)
    {
-      // ... (same as before, add Category)
       return new DefaultCommandDefinition(name: "setclearance",
                                           usage:
                                           "setclearance <User|Admin|Debug> | Sets the clearance level.",
                                           execute: _ => [consoleService.CurrentClearance.ToString()],
                                           clearance: ClearanceLevel.Admin,
-                                          category: CommandCategory.Debug // Assign Category
+                                          category: CommandCategory.Debug 
                                          );
    }
 
@@ -328,10 +321,8 @@ public static class DefaultCommands
                                           category: CommandCategory.Debug);
    }
 
-   // --- Helper for table command (no changes) ---
    private static string[] DrawTable(char separator = '|', params string[][] columns)
    {
-      // ... same logic ...
       if (columns.Length == 0)
          return ["No columns provided for table."];
 
@@ -363,8 +354,6 @@ public static class DefaultCommands
    private static IEnumerable<ICommandDefinition> GetAllDefaultCommandDefinitions(
       IConsoleService consoleService)
    {
-      // Important: Pass the necessary dependencies (consoleService, outputReceiver)
-      // to each factory method when it's called.
       yield return CreateHelpCommand(consoleService);
       yield return CreateEchoCommand();
       yield return CreateClearCommand(consoleService);
@@ -379,10 +368,8 @@ public static class DefaultCommands
       yield return DebuggingCommands.CreateSearchExeCommand();
       yield return BrowseCommand();
       yield return PrintLoadingTimesCommand();
-      // Add any new default commands here
    }
 
-   // --- New method to get commands by Category ---
    public static IEnumerable<ICommandDefinition> GetDefaultCommands(
       CommandCategory categories,
       IConsoleService consoleService)
@@ -392,11 +379,8 @@ public static class DefaultCommands
          // This requires DefaultCommandDefinition to expose its Category.
          if (cmdDef is DefaultCommandDefinition defaultCmd && (defaultCmd.Category & categories) != 0)
             yield return defaultCmd;
-      // If ICommandDefinition itself had a Category property:
-      // if ((cmdDef.Category & categories) != 0) yield return cmdDef;
    }
 
-   // --- Convenience method to register commands by Category ---
    public static void RegisterDefaultCommands(
       IConsoleService consoleService,
       CommandCategory categoriesToRegister)
