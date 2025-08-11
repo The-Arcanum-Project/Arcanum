@@ -7,10 +7,10 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
-using Arcanum.Core.Utils.Parsing.Steps;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -168,12 +168,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       consoleWindow.Show();
    }
 
-   private void DebugParsingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   private void LoadingStepRunnerCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      MBox.Show("Debug parsing is not implemented yet.",
-                "Debug Parsing",
-                MBoxButton.OK,
-                MessageBoxImage.Information);
+      new RunLoadingStep().ShowDialog();
    }
 
    private void OpenEffectWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)

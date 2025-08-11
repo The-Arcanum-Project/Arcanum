@@ -2,6 +2,7 @@
 using System.Text;
 using Arcanum.API.Console;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.Parsing.ParsingMaster;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -309,6 +310,24 @@ public static class DefaultCommands
                                           aliases: []);
    }
 
+   public static ICommandDefinition PrintLoadingTimesCommand()
+   {
+      var usage = "Prints the loading times of the application.";
+      
+      return new DefaultCommandDefinition(name: "printLT",
+                                          usage: usage,
+                                          execute: _ =>
+                                          {
+                                             var output = new List<string> { "Loading Times:" };
+                                             foreach (var (key, value) in ParsingMaster.Instance.StepDurationsByName)
+                                                output.Add($"{key,-25}: {value.TotalMilliseconds,8:#####.0} ms");
+
+                                             return output.ToArray();
+                                          },
+                                          clearance: ClearanceLevel.Debug,
+                                          category: CommandCategory.Debug);
+   }
+
    // --- Helper for table command (no changes) ---
    private static string[] DrawTable(char separator = '|', params string[][] columns)
    {
@@ -359,6 +378,7 @@ public static class DefaultCommands
       yield return DebuggingCommands.CreateSearchCommand();
       yield return DebuggingCommands.CreateSearchExeCommand();
       yield return BrowseCommand();
+      yield return PrintLoadingTimesCommand();
       // Add any new default commands here
    }
 

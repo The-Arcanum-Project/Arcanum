@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.Utils.Parsing.ParsingStep;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 
 public abstract class ParsingStepBase : IParsingStep
 {
@@ -96,7 +96,7 @@ public abstract class ParsingStepBase : IParsingStep
    public virtual bool Execute(CancellationToken cancellationToken = default)
    {
       IsSuccessful = true;
-      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(this))
+      if (!Utils.Parsing.ParsingMaster.ParsingMaster.AreDependenciesLoaded(this))
          throw
             new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
 
@@ -106,6 +106,11 @@ public abstract class ParsingStepBase : IParsingStep
       _doneSteps = 0;
       _accumulatedWeightDone = 0.0;
       _lastReportedPercentage = 0.0;
+      Duration = TimeSpan.Zero;
+      _smoothedDurationMs = null;
+      _durations.Clear();
+      SubPercentageCompleted = 0.0;
+      SubStepsDone = 0;
 
       if (IsMultithreadable)
       {
@@ -219,8 +224,10 @@ public abstract class ParsingStepBase : IParsingStep
 
    protected virtual List<double> GetFileWeights()
    {
-      return ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
+      return Utils.Parsing.ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
    }
+
+   public abstract string GetDebugInfo();
 
    public double SubPercentageCompleted { get; private set; }
    public int SubStepsDone { get; private set; }

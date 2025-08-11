@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.Utils.Parsing.ParsingStep;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 
 public abstract class SingleFileLoadingBase
 {

@@ -22,16 +22,6 @@ public partial class GameObjectBrowser
       FieldInfos = new(type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
    }
 
-   private void OnFieldOpenClick(object sender, RoutedEventArgs e)
-   {
-      if (sender is BaseButton { Tag: FieldInfo fieldInfo })
-      {
-         var value = fieldInfo.GetValue(null);
-         AppData.WindowLinker.GetPropertyGridOrCollectionView(value).ShowDialog();
-         GC.Collect(); // Force garbage collection to clean up any unused objects
-      }
-   }
-
    private void OnPropertyOpenClick(object sender, RoutedEventArgs e)
    {
       if (sender is BaseButton { Tag: PropertyInfo propertyInfo })

@@ -1,9 +1,9 @@
 ﻿using System.DirectoryServices.ActiveDirectory;
 using System.IO;
+using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.Parsing.ParsingStep;
-using Arcanum.Core.Utils.Parsing.Steps;
 using Arcanum.Core.Utils.Sorting;
 using JetBrains.Annotations;
 
@@ -19,7 +19,6 @@ public class ParsingMaster
    public EventHandler<(double percentage, int doneSteps)>? StepProcessChanged;
    public EventHandler<TimeSpan>? StepDurationEstimationChanged;
    public EventHandler<double>? TotalProgressChanged;
-   
 
    private static Dictionary<FileDescriptor, ParsingStepBase> _stepByDescriptor = [];
 
@@ -36,6 +35,10 @@ public class ParsingMaster
    public static ParsingMaster Instance => LazyInstance.Value;
    public int ParsingSteps => _parsingSteps.Count;
    public int ParsingStepsDone { get; private set; }
+   public List<TimeSpan> StepDurations { get; } = [];
+   public List<ParsingStepBase> ParsingStepsList => _parsingSteps;
+   public List<(string, TimeSpan)> StepDurationsByName
+      => _parsingSteps.Select(step => (step.Name, step.Duration)).ToList();
 
    public static bool AreDependenciesLoaded(ParsingStepBase step)
    {
@@ -89,7 +92,6 @@ public class ParsingMaster
    public Task ExecuteAllParsingSteps()
    {
       InitializeSteps();
-      List<TimeSpan> durations = [];
 
       var cts = new CancellationTokenSource();
 
@@ -109,7 +111,7 @@ public class ParsingMaster
          if (cts.IsCancellationRequested)
             break;
 
-         durations.Add(step.Duration);
+         StepDurations.Add(step.Duration);
          ParsingStepsDone++;
       }
 

@@ -1,0 +1,90 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MinorWindows.RunLoadingStep"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         mc:Ignorable = "d"
+                         Title = "RunLoadingStep"
+                         Height = "450"
+                         Width = "1000"
+                         Background = "{StaticResource DarkerSelectedBackColorBrush}">
+    <Grid Margin = "5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "30" />
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "400" />
+            <ColumnDefinition Width = "*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row = "0"
+                   Grid.Column = "0"
+                   FontSize = "26"
+                   VerticalAlignment = "Center"
+                   FontFamily = "{StaticResource DefaultMonospacedFont}">
+            Available Parsing Steps
+        </TextBlock>
+
+        <TextBlock Grid.Row = "0"
+                   Grid.Column = "1"
+                   FontSize = "26"
+                   VerticalAlignment = "Center"
+                   FontFamily = "{StaticResource DefaultMonospacedFont}">
+            Step Results
+        </TextBlock>
+
+        <styleClasses:CorneredTextBox Grid.Row = "1"
+                                      Grid.Column = "1"
+                                      x:Name = "StepResultsTextBox"
+                                      FontFamily="{StaticResource DefaultMonospacedFont}">
+        </styleClasses:CorneredTextBox>
+
+        <ListView Grid.Row = "1"
+                  Grid.Column = "0"
+                  Margin = "0,5,0,0"
+                  FontFamily = "{StaticResource DefaultMonospacedFont}"
+                  FontSize = "16"
+                  ItemsSource = "{Binding Steps, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "*" />
+                            <ColumnDefinition Width = "22" />
+                            <ColumnDefinition Width = "22" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column = "0"
+                                   Text = "{Binding Name}"
+                                   VerticalAlignment = "Center"
+                                   Margin = "5, 0,0, 0" />
+                        <styleClasses:BaseButton Grid.Column = "1"
+                                                 Click = "DoublePlay_OnClick"
+                                                 Tag = "{Binding}"
+                                                 BorderThickness = "0"
+                                                 Background = "Transparent"
+                                                 HorizontalAlignment="Center">
+                            <Image Source = "../../../Assets/Icons/30x30/DoublePlay30x30.png"
+                                   Stretch = "Uniform">
+                            </Image>
+                        </styleClasses:BaseButton>
+                        <styleClasses:BaseButton Grid.Column = "2"
+                                                 Click = "ButtonBase_OnClick"
+                                                 Tag = "{Binding}"
+                                                 BorderThickness = "0"
+                                                 Background = "Transparent"
+                                                 HorizontalAlignment="Center">
+                            <Image Source = "../../../Assets/Icons/30x30/Play30x30.png"
+                                   Stretch = "Uniform">
+                            </Image>
+                        </styleClasses:BaseButton>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </Grid>
+</styleClasses:BaseWindow>
