@@ -145,25 +145,25 @@ public static class FileManager
    /// <param name="searchPattern"></param>
    /// <returns><see cref="ICollection{T}"/> of (<c>string</c>, <c>bool</c>) representing the path and if it is a mod file</returns>
    /// <exception cref="ArgumentException"></exception>
-   public static ICollection<(string fileName, bool isMod)> GetAllFilesInDirectory(
+   public static ICollection<PathObj> GetAllFilesInDirectory(
       string[] subPath,
       string searchPattern)
    {
       var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
       if (fileName != null)
-         throw new ArgumentException("The SubPath should NOT point to a file but a directory", nameof(subPath));
+         return [new(vSubPath, fileName, GetDataSpace(vSubPath))];
 
       IEnumerable<string> modFiles = [];
       if (Directory.Exists(GetModPath(vSubPath)))
       {
          modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern).Select(Path.GetFileName)!;
          if (IsPathReplaced(vSubPath))
-            return modFiles.Select(file => (file, true)).ToArray();
+            return modFiles.Select(file => new PathObj(vSubPath, file, ModDataSpace)).ToList();
       }
 
       var defined = new HashSet<string>(modFiles);
-      List<(string fileName, bool isMod)> fileList = [];
-      fileList.AddRange(defined.Select(file => (file, true)));
+      List<PathObj> fileList = [];
+      fileList.AddRange(defined.Select(file => new PathObj(vSubPath, file, ModDataSpace)));
 
       var vanillaFiles = Directory.GetFiles(GetVanillaPath(vSubPath), searchPattern);
       foreach (var file in vanillaFiles)
@@ -172,10 +172,19 @@ public static class FileManager
          if (defined.Contains(fileNameOnly))
             continue; // We already have this file in the mod data space
 
-         fileList.Add((fileNameOnly, false));
+         fileList.Add(new(vSubPath, fileNameOnly, VanillaDataSpace));
       }
 
       return fileList;
+   }
+
+   private static DataSpace GetDataSpace(string[] subPath)
+   {
+      var vSubPath = Path.Combine(subPath);
+      if (ExistsInMod(vSubPath))
+         return ModDataSpace;
+
+      return VanillaDataSpace;
    }
 
    public static FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)
@@ -212,11 +221,8 @@ public static class FileManager
    public static List<FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
    {
       List<FileObj> fileInfos = [];
-      foreach (var (name, isMod) in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
-         fileInfos.Add(new DummyFileObj(new(descriptor.LocalPath,
-                                            name,
-                                            isMod ? ModDataSpace : VanillaDataSpace),
-                                        descriptor));
+      foreach (var po in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
+         fileInfos.Add(new DummyFileObj(po, descriptor));
 
       return fileInfos;
    }
@@ -253,12 +259,12 @@ public static class FileManager
                                                                              out _)));
    }
 
-   private static string RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)
+   private static string[] RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)
    {
       if (subPaths.Length == 0)
       {
          fileName = null;
-         return string.Empty;
+         return [];
       }
 
       // We take it as granted that folders do not contain a dot in their name
@@ -267,11 +273,11 @@ public static class FileManager
       if (subPaths[^1].Contains('.'))
       {
          fileName = subPaths[^1];
-         return Path.Combine(subPaths[..^1]);
+         return subPaths[..^1];
       }
 
       fileName = null;
-      return Path.Combine(subPaths);
+      return subPaths;
    }
 
    // public static void GenerateCustomSavingCatalog()

@@ -55,7 +55,7 @@ public sealed class DiagnosticException : Exception
    }
 
    public void HandleDiagnostic(LocationContext context,
-                                string action = "",
+                                string action,
                                 DiagnosticSeverity? severity = null,
                                 DiagnosticReportSeverity? reportSeverity = null)
    {

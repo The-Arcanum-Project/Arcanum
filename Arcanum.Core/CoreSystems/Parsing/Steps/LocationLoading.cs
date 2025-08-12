@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem;
@@ -20,13 +21,6 @@ public class LocationFileLoading : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      var method = MethodBase.GetCurrentMethod();
-      if (method?.DeclaringType is null)
-         throw new InvalidOperationException("Could not retrieve the current method information.");
-
-      var actionName =
-         $"{method.DeclaringType.FullName}.{method.Name}({string.Join(' ', method.GetParameters().Select(p => p.ParameterType.FullName))}";
-
       HashSet<Location> locations = new(fileObj.Path.Filename.Equals(DEFAULT_LOCATION_FILE_NAME) ? 29_000 : 100);
 
       var context = new LocationContext(0, 0, fileObj.Path.FullPath);
@@ -36,7 +30,7 @@ public class LocationFileLoading : FileLoadingService
          ErrorManager.AddToLog(new Diagnostic(IOError.Instance.FileReadingError,
                                               context.GetInstance(),
                                               DiagnosticSeverity.Error,
-                                              actionName,
+                                              GetActionName(),
                                               $"Failed to read file '{fileObj.Path.FullPath}'.",
                                               "Please check the file path."));
          return false;
@@ -59,7 +53,7 @@ public class LocationFileLoading : FileLoadingService
             {
                LogWarning(context,
                           ParsingError.Instance.InvalidKeyValuePair,
-                          actionName,
+                          GetActionName(),
                           $"Failed to parse location definition from line: '{line}'.",
                           "Expected format '<location_name> = <hex_color>'.");
                isFlawless = false;
@@ -75,7 +69,7 @@ public class LocationFileLoading : FileLoadingService
             {
                LogWarning(context,
                           ParsingError.Instance.InvalidKeyValuePair,
-                          actionName,
+                          GetActionName(),
                           $"Failed to parse location definition from line: '{line}'.",
                           "Location name or color value missing.");
                isFlawless = false;
@@ -87,7 +81,7 @@ public class LocationFileLoading : FileLoadingService
                context.ColumnNumber = equalIndex + 1 + GetLeadingSpacesCount(valueSpan);
                LogWarning(context,
                           ParsingError.Instance.HexToIntConversionError,
-                          actionName,
+                          GetActionName(),
                           $"Failed to parse color value from line: '{line}'.",
                           "The color value must be a valid hexadecimal number.");
                isFlawless = false;
@@ -98,18 +92,15 @@ public class LocationFileLoading : FileLoadingService
             context.ColumnNumber = line.IndexOf(key, StringComparison.Ordinal);
 
             var newLocation = new Location(fInformation, colorInt, key);
-            if (Globals.Locations.Contains(newLocation))
+            if (!locations.Add(newLocation))
             {
                LogWarning(context,
                           ParsingError.Instance.DuplicateLocationDefinition,
-                          actionName,
+                          GetActionName(),
                           $"Duplicate location name found: '{key}'.",
                           "Location names must be unique.");
                isFlawless = false;
-               continue;
             }
-
-            locations.Add(newLocation);
          }
 
       // if it is null we are not in a multithreaded context

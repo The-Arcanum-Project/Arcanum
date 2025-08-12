@@ -181,7 +181,8 @@ public class DefaultParsingStep
 
             if (!Descriptor.LoadingService.LoadSingleFile(file, Descriptor))
                IsSuccessful = false;
-            ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
+            if (TotalSteps > 1)
+               ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
             _doneSteps++;
          }
 

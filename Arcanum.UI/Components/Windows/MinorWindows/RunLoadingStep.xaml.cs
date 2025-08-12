@@ -29,7 +29,7 @@ public partial class RunLoadingStep
             $"{"Success:",-25} {step.IsSuccessful}\n" +
             $"{"Duration:",-25} {step.Duration.TotalMilliseconds:#####.0} ms\n" +
             $"{"Debug Infos:",-25} {descriptor.LoadingService.GetFileDataDebugInfo()}\n" +
-            $"{"Num of Diagnostics:",-25} {step.Diagnostics.Count} diagnostics\n" +
+            $"{"Num of Diagnostics:",-25} {step.Diagnostics.Count}\n" +
             $"{"Diagnostics:",-25} {string.Join(", ", step.Diagnostics.Select(d => d.ToString()))}";
       }
    }

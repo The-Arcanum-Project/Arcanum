@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
-using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace UnitTests.CoreSystems.Parsing;
 
@@ -15,7 +15,7 @@ public class BlockTests
       _block = new("root", 1, 0);
    }
 
-   private static PathObj DummyPath => new("dummy/path.txt");
+   private static PathObj DummyPath => new(["dummy", "path"], "dummy.txt", DataSpace.Empty);
 
    [Test]
    public void Constructor_InitializesProperties()

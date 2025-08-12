@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
 
@@ -67,7 +68,7 @@ public static class ParseModifiers
    public static List<ModifierDefinition> Load()
    {
       var filePath = FileManager.GetDependentPath("game", "main_menu", "common", "modifier_types", "00_modifier_types.txt");
-      var (blocks, elements) = ParsingSystem.ElementParser.GetElements(filePath, IO.IO.ReadAllTextUtf8(filePath)!);
+      var (blocks, elements) = ParsingSystem.ElementParser.GetElements(PathObj.Empty, IO.IO.ReadAllTextUtf8(filePath)!);
 
       if (elements.Count != 0)
          Debug.WriteLine($"[ParseModifiers] Loaded {elements.Count} elements but expected 0.");

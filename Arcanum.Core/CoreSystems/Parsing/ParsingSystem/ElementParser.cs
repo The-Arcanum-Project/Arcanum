@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 
@@ -12,7 +14,17 @@ file enum ParsingState : byte
 
 public static class ElementParser
 {
-   public static unsafe (List<Block>, List<Content>) GetElements(string path, string input)
+   public static (List<Block> blocks, List<Content> contents) GetElements(PathObj path)
+   {
+      var content = IO.IO.ReadAllTextUtf8(path.FullPath);
+      if (string.IsNullOrEmpty(content))
+         return ([], []);
+      
+      return GetElements(path, content);
+   }
+   
+   [SuppressMessage("Reliability", "CA2014:Do not use stackalloc in loops")]
+   public static unsafe (List<Block>, List<Content>) GetElements(PathObj path, string input)
    {
       var contents = new List<Content>();
       var blocks = new List<Block>();
@@ -102,7 +114,7 @@ public static class ElementParser
 
                   if (currentContent.Length < 1)
                   {
-                     Console.WriteLine($"Error in file {path}: Block name cannot be empty at line {lineIndex + 1}, char {charIndex + 1}");
+                     Console.WriteLine($"Error in file {path.FullPath}: Block name cannot be empty at line {lineIndex + 1}, char {charIndex + 1}");
                      return ([], []);
                   }
 
@@ -111,19 +123,20 @@ public static class ElementParser
                   {
                      if (prevWordStart < 0 || prevWordEnd < 0)
                      {
-                        Console.WriteLine($"Error in file {path}: Block name cannot be empty at line {lineIndex + 1}, char {charIndex + 1}");
+                        Console.WriteLine($"Error in file {path.FullPath}: Block name cannot be empty at line {lineIndex + 1}, char {charIndex + 1}");
                         return ([], []);
                      }
 
                      wordStart = prevWordStart;
                      wordEnd = prevWordEnd;
-                     Console.WriteLine($"Warning in file {path}: Block name is empty at line {lineIndex + 1}, char {charIndex + 1}. Using previous block name.");
+                     Console.WriteLine($"Warning in file {path.FullPath}: Block name is empty at line {lineIndex + 1}, char {charIndex + 1}. Using previous block name.");
                   }
 
                   prevWordStart = -1;
                   prevWordEnd = -1;
 
                   var nameLength = wordEnd - wordStart;
+                  // ReSharper disable once StackAllocInsideLoop
                   Span<char> charSpan = stackalloc char[nameLength];
                   currentContent.CopyTo(wordStart, charSpan, nameLength);
                   currentContent.Remove(wordStart, currentContent.Length - wordStart);
@@ -160,7 +173,7 @@ public static class ElementParser
                   currentContent.Clear();
                   blockStack.Push(newBlock);
                   contentStart = lineIndex;
-                  state = ParsingState.Default; 
+                  state = ParsingState.Default;
                   break;
 
                case '}':
@@ -172,7 +185,7 @@ public static class ElementParser
 
                   if (blockStack.IsEmpty)
                   {
-                     Console.WriteLine($"Error in file {path}: Unmatched closing brace at line {lineIndex + 1}, char {charIndex + 1}");
+                     Console.WriteLine($"Error in file {path.FullPath}: Unmatched closing brace at line {lineIndex + 1}, char {charIndex + 1}");
                      return ([], []);
                   }
 
@@ -192,7 +205,7 @@ public static class ElementParser
 
                   blockStack.Pop();
                   contentStart = lineIndex;
-                  state = ParsingState.Default; 
+                  state = ParsingState.Default;
                   break;
 
                case '#':
@@ -208,13 +221,13 @@ public static class ElementParser
                case '\r':
                   if (charIndex != length - 1)
                   {
-                     Console.WriteLine($"Error in file {path}: Unexpected carriage return at line {lineIndex + 1}, char {charIndex + 1}");
+                     Console.WriteLine($"Error in file {path.FullPath}: Unexpected carriage return at line {lineIndex + 1}, char {charIndex + 1}");
                      if (currentContent.Length >= 1 &&
                          char.IsWhiteSpace(currentContent[^1]) &&
                          currentContent[^1] != '\n')
                         currentContent.Remove(currentContent.Length - 1, 1);
                      currentContent.Append('\n');
-                     state = ParsingState.Default; 
+                     state = ParsingState.Default;
                   }
 
                   break;
@@ -286,13 +299,13 @@ public static class ElementParser
          }
 
          currentContent.Append('\n');
-         state = ParsingState.Default; 
+         state = ParsingState.Default;
          lineIndex++;
       }
 
       if (!blockStack.IsEmpty)
       {
-         Console.WriteLine($"Error in file {path}: Unmatched opening brace at line {blockStack.Peek().StartLine + 1}");
+         Console.WriteLine($"Error in file {path.FullPath}: Unmatched opening brace at line {blockStack.Peek().StartLine + 1}");
          return ([], []);
       }
 

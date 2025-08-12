@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 // Use the NUnit framework namespace
 
@@ -7,7 +8,7 @@ namespace UnitTests.CoreSystems.Parsing;
 [TestFixture] // NUnit attribute to mark a class with tests
 public class ElementParserTests
 {
-   private const string TEST_PATH = "test.txt";
+   private readonly PathObj _testPath = PathObj.Empty;
    private TextWriter _originalConsoleOut;
 
    // Use SetUp and TearDown to manage console output redirection for error tests
@@ -30,7 +31,7 @@ public class ElementParserTests
       var input = "";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
@@ -44,7 +45,7 @@ public class ElementParserTests
       var input = "  \n\t  \n ";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
@@ -58,7 +59,7 @@ public class ElementParserTests
       var input = "key1 = value1\nkey2 = \"value2\"";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
@@ -73,7 +74,7 @@ public class ElementParserTests
       var input = "my_block = {}";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Is.Empty);
@@ -93,7 +94,7 @@ public class ElementParserTests
       var input = "data_block = {\n\tkey = \"value\"\n\tkey2 = 123\n}";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Is.Empty);
@@ -113,7 +114,7 @@ public class ElementParserTests
       var input = "outer = {\n\tinner = {\n\t\tdeep_key = deep_value\n\t}\n}";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Is.Empty);
@@ -138,7 +139,7 @@ public class ElementParserTests
       var input = "# Top level comment\nkey = value # Inline comment\nblock = { # Another comment\n\tval = 1\n}";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Has.Count.EqualTo(1));
@@ -158,7 +159,7 @@ public class ElementParserTests
       var input = "this_is_a_block_name\n{\n\tkey = value\n}";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Is.Empty);
@@ -176,7 +177,7 @@ public class ElementParserTests
       var input = "key = \"a value with \\\"quotes\\\" and a backslash \\\\ in it\"";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
@@ -192,7 +193,7 @@ public class ElementParserTests
       var input = "key = \"value with { # and } inside\"";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Has.Count.EqualTo(1));
@@ -206,7 +207,7 @@ public class ElementParserTests
       var input = "top1 = 1\n\nblock1 = {\n\tinner = val\n}\n\ntop2 = 2";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Has.Count.EqualTo(2));
@@ -228,14 +229,14 @@ public class ElementParserTests
       Console.SetOut(consoleOutput);
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
       Assert.That(contents, Is.Empty);
       var output = consoleOutput.ToString();
       Assert.That(output, Does.Contain("Unmatched opening brace"));
-      Assert.That(output, Does.Contain(TEST_PATH));
+      Assert.That(output, Does.Contain(_testPath.Filename));
    }
 
    [Test]
@@ -247,14 +248,14 @@ public class ElementParserTests
       Console.SetOut(consoleOutput);
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);
       Assert.That(contents, Is.Empty);
       var output = consoleOutput.ToString();
       Assert.That(output, Does.Contain("Unmatched closing brace"));
-      Assert.That(output, Does.Contain(TEST_PATH));
+      Assert.That(output, Does.Contain(_testPath.Filename));
    }
 
    [Test]
@@ -266,7 +267,7 @@ public class ElementParserTests
       Console.SetOut(consoleOutput);
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(TEST_PATH, input);
+      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(blocks, Is.Empty);

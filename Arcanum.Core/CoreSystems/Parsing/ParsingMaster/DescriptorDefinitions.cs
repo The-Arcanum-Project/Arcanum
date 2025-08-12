@@ -10,13 +10,23 @@ public static class DescriptorDefinitions
 
    static DescriptorDefinitions()
    {
+      FileDescriptor locationDescriptor = new([],
+                                              ["game", "in_game", "map_data", "named_locations"],
+                                              ISavingService.Dummy,
+                                              new("LocationsDefinition", "txt", "#"),
+                                              new LocationFileLoading(),
+                                              false);
+
       FileDescriptors =
       [
-         new([],
-             ["game", "in_game", "map_data", "named_locations"],
+         locationDescriptor,
+         // Definitions loading: Province, Area, Region, SuperRegion
+         new([locationDescriptor],
+             ["game", "in_game", "map_data", "definitions.txt"],
              ISavingService.Dummy,
-             new("LocationsDefinition", "txt", "#"),
-             new LocationFileLoading(),
+             new("Definitions", "txt", "#"),
+             new DefinitionFileLoading(),
+             false,
              false),
       ];
    }

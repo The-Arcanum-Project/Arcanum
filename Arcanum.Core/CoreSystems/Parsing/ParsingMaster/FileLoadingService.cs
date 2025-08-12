@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -15,6 +16,13 @@ public abstract class FileLoadingService
       Name = GetType().Name;
    }
 
+   protected string GetActionName([System.Runtime.CompilerServices.CallerMemberName] string caller = "")
+   {
+      var declaringType = GetType();
+      return $"{declaringType.FullName}.{caller}";
+   }
+
+   
    public virtual DefaultParsingStep GetParsingStep(FileDescriptor descriptor)
    {
       return new (descriptor, descriptor.IsMultithreadable);

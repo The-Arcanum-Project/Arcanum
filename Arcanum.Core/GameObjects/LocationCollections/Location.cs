@@ -7,14 +7,13 @@ public class Location : LocationComposite
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
-      
       Color = color;
    }
 
    #region game/in_game/map_data/named_locations.txt
 
    public int Color { get; init; }
-   public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0,"EmptyArcanum");
+   public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0, "EmptyArcanum");
 
    #endregion
 
@@ -28,7 +27,7 @@ public class Location : LocationComposite
    public override bool Equals(object? obj)
    {
       if (obj is Location other)
-         return Color == other.Color && Name == other.Name;
+         return string.Equals(Name, other.Name, StringComparison.Ordinal);
 
       return false;
    }

@@ -6,7 +6,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 public abstract class LocationComposite(string name, FileInformation information) : ISaveable // TODO: @Melco @Minnator implement ISaveable here
 {
-   public string Name { get; } = name;
+   public string Name { get; } = name.Trim();
    public List<LocationComposite> Parents { get; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }
