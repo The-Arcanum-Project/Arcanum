@@ -1,60 +1,48 @@
-﻿using System.DirectoryServices.ActiveDirectory;
-using System.IO;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
-using Arcanum.Core.CoreSystems.Parsing.Steps;
+﻿using System.IO;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Sorting;
 using JetBrains.Annotations;
 
-namespace Arcanum.Core.Utils.Parsing.ParsingMaster;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 public class ParsingMaster
 {
-   private readonly List<ParsingStepBase> _parsingSteps = [];
-
    [UsedImplicitly]
-   public EventHandler<ParsingStepBase>? ParsingStepsChanged;
+   public EventHandler<FileDescriptor>? ParsingStepsChanged;
 
    public EventHandler<(double percentage, int doneSteps)>? StepProcessChanged;
    public EventHandler<TimeSpan>? StepDurationEstimationChanged;
    public EventHandler<double>? TotalProgressChanged;
 
-   private static Dictionary<FileDescriptor, ParsingStepBase> _stepByDescriptor = [];
-
-   /// <summary>
-   /// Here ALL loading steps should be added.
-   /// </summary>
-   private ParsingMaster()
-   {
-      _parsingSteps.Add(new DebugStep());
-      _parsingSteps.Add(new LocationLoading());
-   }
+   private static HashSet<FileDescriptor> _sortedFileDescriptors = [];
 
    private static readonly Lazy<ParsingMaster> LazyInstance = new(() => new());
    public static ParsingMaster Instance => LazyInstance.Value;
-   public int ParsingSteps => _parsingSteps.Count;
+   public int ParsingSteps => _sortedFileDescriptors.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
-   public List<ParsingStepBase> ParsingStepsList => _parsingSteps;
-   public List<(string, TimeSpan)> StepDurationsByName
-      => _parsingSteps.Select(step => (step.Name, step.Duration)).ToList();
+   public static List<(string, TimeSpan)> StepDurationsByName => _sortedFileDescriptors
+                                                                .Select(descriptor
+                                                                           => (descriptor.LoadingService.Name,
+                                                                               descriptor.LastTotalLoadingDuration))
+                                                                .ToList();
 
-   public static bool AreDependenciesLoaded(ParsingStepBase step)
+   public static bool AreDependenciesLoaded(FileDescriptor descriptor)
    {
-      ArgumentNullException.ThrowIfNull(step);
-      if (_stepByDescriptor.Count == 0)
+      ArgumentNullException.ThrowIfNull(descriptor);
+      if (_sortedFileDescriptors.Count == 0)
          throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
 
       var dependentDescriptors =
-         TopologicalSort.GetAllDependencies<string, FileDescriptor>(step.Descriptor, StaticData.FileDescriptors);
+         TopologicalSort.GetAllDependencies<string, FileDescriptor>(descriptor, StaticData.FileDescriptors);
 
       if (dependentDescriptors.Count == 0)
          return true;
 
-      foreach (var descriptor in dependentDescriptors)
+      foreach (var descr in dependentDescriptors)
       {
-         if (_stepByDescriptor.TryGetValue(descriptor, out var parsingStep) && parsingStep.IsSuccessful)
+         if (_sortedFileDescriptors.TryGetValue(descr, out var parsingStep) && parsingStep.SuccessfullyLoaded)
             continue;
 
          return false;
@@ -66,7 +54,7 @@ public class ParsingMaster
    public static List<double> GetStepWeightsByFileSize(FileDescriptor descriptor)
    {
       ArgumentNullException.ThrowIfNull(descriptor);
-      if (_stepByDescriptor.Count == 0)
+      if (_sortedFileDescriptors.Count == 0)
          throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
 
       List<long> fileSizes = [];
@@ -84,9 +72,13 @@ public class ParsingMaster
       return fileSizes.Select(size => size / (double)totalSize).ToList();
    }
 
-   private void InitializeSteps()
+   /// <summary>
+   /// Sorts all file descriptors based on their dependencies and initializes the parsing steps.
+   /// This method should be called before executing any parsing steps to ensure the correct order of execution
+   /// </summary>
+   private static void InitializeSteps()
    {
-      _stepByDescriptor = _parsingSteps.ToDictionary(step => step.Descriptor, step => step);
+      _sortedFileDescriptors = new(TopologicalSort.Sort<string, FileDescriptor>(DescriptorDefinitions.FileDescriptors));
    }
 
    public Task ExecuteAllParsingSteps()
@@ -96,26 +88,27 @@ public class ParsingMaster
       var cts = new CancellationTokenSource();
 
       ParsingStepsDone = 0;
-      foreach (var step in _parsingSteps)
+      foreach (var descriptor in _sortedFileDescriptors)
       {
          TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
-         ParsingStepsChanged?.Invoke(this, step);
-         step.SubStepCompleted += (_, _) =>
+         ParsingStepsChanged?.Invoke(this, descriptor);
+
+         var stepWrapper = descriptor.LoadingService.GetParsingStep(descriptor);
+         
+         stepWrapper.SubStepCompleted += (_, _) =>
          {
-            StepProcessChanged?.Invoke(this, (step.SubPercentageCompleted, step.SubStepsDone));
-            StepDurationEstimationChanged?.Invoke(this, step.EstimatedRemaining ?? TimeSpan.Zero);
+            StepProcessChanged?.Invoke(this, (stepWrapper.SubPercentageCompleted, stepWrapper.SubStepsDone));
+            StepDurationEstimationChanged?.Invoke(this, stepWrapper.EstimatedRemaining ?? TimeSpan.Zero);
          };
 
-         step.Execute(cts.Token);
+         stepWrapper.Execute(cts.Token);
 
          if (cts.IsCancellationRequested)
             break;
 
-         StepDurations.Add(step.Duration);
+         StepDurations.Add(stepWrapper.Duration);
          ParsingStepsDone++;
       }
-
-      Thread.Sleep(2000);
 
       return Task.CompletedTask;
    }

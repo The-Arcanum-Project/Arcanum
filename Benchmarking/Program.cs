@@ -1,6 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
+namespace Benchmarking;
+
 public interface IElement
 {
    int Index { get; }

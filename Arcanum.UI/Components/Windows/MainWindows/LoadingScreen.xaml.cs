@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
-using Arcanum.Core.Utils.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -68,9 +68,9 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    public async Task StartLoading()
    {
-      ParsingMaster.Instance.ParsingStepsChanged += (_, step) =>
+      ParsingMaster.Instance.ParsingStepsChanged += (_, descriptor) =>
       {
-         _stepName = step.Name;
+         _stepName = descriptor.LoadingService.Name;
          FormatLoadingText();
       };
 

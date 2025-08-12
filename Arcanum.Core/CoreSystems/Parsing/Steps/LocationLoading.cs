@@ -5,30 +5,17 @@ using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
-using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
-public class LocationLoading() : ParsingStepBase(new([],
-                                                     ["game", "in_game", "map_data", "named_locations"],
-                                                     ISavingService.Dummy,
-                                                     new("LocationsDefinition", "txt", "#"),
-                                                     new LocationFileLoading()),
-                                                 false)
-{
-   // TODO: @Minnator Add a proper saving service
-   public override string GetDebugInfo()
-   {
-      return $"Parsed '{Globals.Locations.Count}' locations";
-   }
-}
-
-public class LocationFileLoading : SingleFileLoadingBase
+public class LocationFileLoading : FileLoadingService
 {
    private const string DEFAULT_LOCATION_FILE_NAME = "00_default.txt";
+
+   public override string GetFileDataDebugInfo() => $"Loaded '{Globals.Locations.Count}'.";
 
    public override bool LoadSingleFile(FileObj fileObj, object? lockObject = null)
    {
@@ -77,7 +64,9 @@ public class LocationFileLoading : SingleFileLoadingBase
             }
 
             var keySpan = span[..equalIndex].Trim();
-            var valueSpan = span[(equalIndex + 1)..].Trim();
+            var endIndex = span.IndexOf('#');
+            endIndex = endIndex == -1 ? span.Length - 1 : endIndex;
+            var valueSpan = span[(equalIndex + 1)..endIndex].Trim();
 
             if (keySpan.IsEmpty || valueSpan.IsEmpty)
             {
@@ -100,7 +89,7 @@ public class LocationFileLoading : SingleFileLoadingBase
                continue;
             }
 
-            var key = keySpan.ToString(); 
+            var key = keySpan.ToString();
             context.ColumnNumber = line.IndexOf(key, StringComparison.Ordinal);
 
             var newLocation = new Location(colorInt, key);
@@ -126,6 +115,8 @@ public class LocationFileLoading : SingleFileLoadingBase
 
       return isFlawless;
    }
+
+   public override bool UnloadSingleFileContent(FileObj fileObj) => throw new NotImplementedException();
 
    private static void LogWarning(LocationContext ctx, string action, string message, string hint)
       => ErrorManager.AddToLog(new Diagnostic(IOError.Instance.FileReadingError,

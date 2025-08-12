@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem;
 
@@ -12,6 +13,7 @@ public static class ErrorManager
          return;
 
       Diagnostics.Add(diagnostic);
+      Debug.WriteLine($"Added diagnostic: {diagnostic}");
    }
 
    public static void AddToLog(List<Diagnostic> diagnostics)

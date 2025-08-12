@@ -1,7 +1,7 @@
 ﻿using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
 
-namespace UnitTests;
+namespace UnitTests.CoreSystems.Search;
 
 public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISearchable
 {

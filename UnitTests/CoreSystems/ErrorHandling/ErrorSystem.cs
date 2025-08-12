@@ -1,8 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
-namespace UnitTests;
-
-using NUnit.Framework;
+namespace UnitTests.CoreSystems.ErrorHandling;
 
 [TestFixture]
 public class ErrorSystemTestsDiagnostics

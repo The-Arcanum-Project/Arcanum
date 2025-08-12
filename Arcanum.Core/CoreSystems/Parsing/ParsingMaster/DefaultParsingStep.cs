@@ -2,11 +2,13 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
-public abstract class ParsingStepBase : IParsingStep
+
+public class DefaultParsingStep
 {
    private readonly Stopwatch _stopwatch = new();
    private readonly List<double> _durations = []; // Stores the durations of each step in milliseconds
@@ -19,7 +21,7 @@ public abstract class ParsingStepBase : IParsingStep
    private int _doneSteps;
    private bool _isSuccessful;
    private int TotalSteps => Descriptor.Files.Count;
-
+   public bool IsMultithreadable { get; }
    private List<double>? StepWeights { get; set; }
    public FileDescriptor Descriptor { get; }
    public List<Diagnostic> Diagnostics { get; } = [];
@@ -29,17 +31,16 @@ public abstract class ParsingStepBase : IParsingStep
       get => _isSuccessful;
       private set => _isSuccessful = value;
    }
-   private bool IsMultithreadable { get; }
    public string Name { get; }
 
-   protected ParsingStepBase(FileDescriptor descriptor, bool isMultithreadable)
+   public DefaultParsingStep(FileDescriptor descriptor, bool isMultithreadable)
    {
       Descriptor = descriptor;
       IsMultithreadable = isMultithreadable;
       Name = GetType().Name;
    }
 
-   public EventHandler<ParsingStepBase>? SubStepCompleted { get; set; }
+   public EventHandler<FileDescriptor>? SubStepCompleted { get; set; }
    private double? _smoothedDurationMs;
 
    public TimeSpan? EstimatedRemaining
@@ -96,7 +97,7 @@ public abstract class ParsingStepBase : IParsingStep
    public virtual bool Execute(CancellationToken cancellationToken = default)
    {
       IsSuccessful = true;
-      if (!Utils.Parsing.ParsingMaster.ParsingMaster.AreDependenciesLoaded(this))
+      if (!ParsingMaster.AreDependenciesLoaded(Descriptor))
          throw
             new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
 
@@ -147,7 +148,7 @@ public abstract class ParsingStepBase : IParsingStep
                                return;
                             }
 
-                            var result = Descriptor.SingleFileLoading.LoadSingleFile(file, _lock);
+                            var result = Descriptor.LoadingService.LoadSingleFile(file, _lock);
                             var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
                             var weight = StepWeights[i];
                             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
@@ -169,6 +170,7 @@ public abstract class ParsingStepBase : IParsingStep
       }
       else
       {
+         var swInner = Stopwatch.StartNew();
          foreach (var file in Descriptor.Files)
          {
             var startTime = _stopwatch.Elapsed;
@@ -179,11 +181,13 @@ public abstract class ParsingStepBase : IParsingStep
                return false;
             }
 
-            if (!Descriptor.SingleFileLoading.LoadSingleFile(file))
+            if (!Descriptor.LoadingService.LoadSingleFile(file))
                IsSuccessful = false;
             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
             _doneSteps++;
          }
+         swInner.Stop();
+         Debug.WriteLine($"Single-threaded parsing step {Name} took {swInner.Elapsed.TotalMilliseconds:#####.0} ms to complete.");
       }
 
       _stopwatch.Stop();
@@ -217,17 +221,15 @@ public abstract class ParsingStepBase : IParsingStep
          {
             SubPercentageCompleted = _lastReportedPercentage = percentage;
             SubStepsDone = stepIndex;
-            SubStepCompleted?.Invoke(this, this);
+            SubStepCompleted?.Invoke(this, Descriptor);
          }
       }
    }
 
    protected virtual List<double> GetFileWeights()
    {
-      return Utils.Parsing.ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
+      return ParsingMaster.GetStepWeightsByFileSize(Descriptor);
    }
-
-   public abstract string GetDebugInfo();
 
    public double SubPercentageCompleted { get; private set; }
    public int SubStepsDone { get; private set; }

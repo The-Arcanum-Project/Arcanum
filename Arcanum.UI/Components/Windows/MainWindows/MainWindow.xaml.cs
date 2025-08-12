@@ -254,14 +254,17 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void LoadLocationsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var locationLoader = new LocationLoading();
-      locationLoader.Execute(new CancellationTokenSource().Token);
-      Debug.WriteLine($"Loaded {Globals.Locations.Count} locations from the file.");
    }
 
    private void GlobalsBrowserCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var globalsBrowser = new GameObjectBrowser();
       globalsBrowser.ShowDialog();
+   }
+
+   private void GCCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      GC.Collect();
+      GC.WaitForPendingFinalizers();
    }
 }

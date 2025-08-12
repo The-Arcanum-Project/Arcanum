@@ -1,14 +1,31 @@
 ﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 
-public abstract class SingleFileLoadingBase
+public abstract class FileLoadingService
 {
+   public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
    protected TimeSpan Duration => _stopwatch.Elapsed;
-   public static SingleFileLoadingBase Dummy { get; } = new DummySingleFileLoading();
 
+   protected FileLoadingService()
+   {
+      Name = GetType().Name;
+   }
+
+   public virtual DefaultParsingStep GetParsingStep(FileDescriptor descriptor)
+   {
+      return new (descriptor, descriptor.IsMultithreadable);
+   }
+   
+   /// <summary>
+   /// Returns debug information about any data contained in this filetype.
+   /// </summary>
+   /// <returns></returns>
+   public abstract string GetFileDataDebugInfo();
+   
    /// <summary>
    /// Executes the file loading and measures the time taken
    /// The time can be extracted by using the <see cref="Duration"/> property.
@@ -17,7 +34,7 @@ public abstract class SingleFileLoadingBase
    /// </summary>
    /// <param name="fileObj"></param>
    /// <returns></returns>
-   public virtual bool LoadFileWithMetrics(FileObj fileObj)
+   public virtual bool LoadSingleFileWithMetrics(FileObj fileObj)
    {
       _stopwatch.Restart();
 
@@ -35,9 +52,11 @@ public abstract class SingleFileLoadingBase
    /// <param name="lockObject"></param>
    /// <returns></returns>
    public abstract bool LoadSingleFile(FileObj fileObj, object? lockObject = null);
-}
 
-public class DummySingleFileLoading : SingleFileLoadingBase
-{
-   public override bool LoadSingleFile(FileObj fileObj, object? lockObject = null) => true;
+   public abstract bool UnloadSingleFileContent(FileObj fileObj);
+
+   public virtual bool ReloadFile(FileObj fileObj)
+   {
+      return UnloadSingleFileContent(fileObj) && LoadSingleFileWithMetrics(fileObj);
+   }
 }

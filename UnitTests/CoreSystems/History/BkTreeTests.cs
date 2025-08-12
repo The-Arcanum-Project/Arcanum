@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Queastor;
 
-namespace UnitTests;
+namespace UnitTests.CoreSystems.History;
 
 [TestFixture]
 public class BkTreeTests

@@ -145,4 +145,10 @@ public static class MwCommands
    {
       InputGestures = { Config.UserKeyBinds.MainWindowKeyBinds.OpenGlobalsBrowser },
    };
+
+   public static readonly RoutedCommand GCCommand = new("OpenModMetadataCommand",
+                                                        typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.G, ModifierKeys.Control) },
+   };
 }

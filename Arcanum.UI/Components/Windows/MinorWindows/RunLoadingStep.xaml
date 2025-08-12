@@ -58,7 +58,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column = "0"
-                                   Text = "{Binding Name}"
+                                   Text = "{Binding LoadingService.Name}"
                                    VerticalAlignment = "Center"
                                    Margin = "5, 0,0, 0" />
                         <styleClasses:BaseButton Grid.Column = "1"

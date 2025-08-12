@@ -2,11 +2,10 @@
 using System.Text;
 using System.Windows;
 using Arcanum.API.UI;
-using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.EffectsAndTriggers;
+namespace Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 
 public static class EffectsAndTriggersDocsParser
 {

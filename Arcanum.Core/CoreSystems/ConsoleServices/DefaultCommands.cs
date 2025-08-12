@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Text;
 using Arcanum.API.Console;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.Parsing.ParsingMaster;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -312,7 +312,7 @@ public static class DefaultCommands
                                           execute: _ =>
                                           {
                                              var output = new List<string> { "Loading Times:" };
-                                             foreach (var (key, value) in ParsingMaster.Instance.StepDurationsByName)
+                                             foreach (var (key, value) in ParsingMaster.StepDurationsByName)
                                                 output.Add($"{key,-25}: {value.TotalMilliseconds,8:#####.0} ms");
 
                                              return output.ToArray();

@@ -101,6 +101,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand"
                         Executed = "GlobalsBrowserCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <CommandBinding Command = "mainWindow:MwCommands.GCCommand"
+                        Executed = "GCCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute"/>
 
 
         <!-- Command Bindings for Debug Loading Triggers -->
@@ -253,6 +257,8 @@
             </uc:SearchableMenuItem>
 
             <uc:SearchableMenuItem Header = "Debug">
+                <uc:SearchableMenuItem Header = "Garbage Collector"
+                                       Command = "mainWindow:MwCommands.GCCommand" />
                 <uc:SearchableMenuItem Header = "Globals Browser"
                                        Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
                 <uc:SearchableMenuItem Header = "Loading Strep Runner"

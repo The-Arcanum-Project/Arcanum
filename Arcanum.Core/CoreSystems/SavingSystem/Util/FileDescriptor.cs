@@ -11,7 +11,7 @@ public class FileDescriptor : IDependencyNode<string>
    public readonly FileDescriptor[] DescriptorDependencies;
    public readonly ISavingService SavingService;
    public readonly FileTypeInformation FileType;
-   public readonly SingleFileLoadingBase SingleFileLoading;
+   public FileLoadingService LoadingService { get; }
    public readonly bool AllowMultipleInstances;
 
    public List<FileObj> Files;
@@ -20,16 +20,18 @@ public class FileDescriptor : IDependencyNode<string>
                          string[] localPath,
                          ISavingService savingService,
                          FileTypeInformation fileType,
-                         SingleFileLoadingBase loadingService,
+                         FileLoadingService loadingServiceService,
+                         bool isMultithreadable,
                          bool allowMultipleInstances = true)
    {
       LocalPath = localPath;
       DescriptorDependencies = dependencies;
       SavingService = savingService;
       FileType = fileType;
-      SingleFileLoading = loadingService;
+      LoadingService = loadingServiceService;
       AllowMultipleInstances = allowMultipleInstances;
-      
+      IsMultithreadable = isMultithreadable;
+
       Files = FileManager.GetAllFileInfosForDirectory(this);
    }
 
@@ -39,20 +41,27 @@ public class FileDescriptor : IDependencyNode<string>
    }
 
    public string Id => GetFilePath();
+   public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
+   public bool SuccessfullyLoaded { get; set; } = false;
+   public bool IsMultithreadable { get; }
    public IEnumerable<IDependencyNode<string>> Dependencies => DescriptorDependencies;
    public static FileDescriptor Dummy { get; } = new([],
                                                      [],
                                                      ISavingService.Dummy,
                                                      FileTypeInformation.Default,
-                                                     SingleFileLoadingBase.Dummy);
-   
+                                                     null!,
+                                                     false);
+
    public override string ToString() => $"FileDescriptor: {GetFilePath()}";
-   
+
    public override bool Equals(object? obj)
    {
-      if (obj is not FileDescriptor other) return false;
+      if (obj is not FileDescriptor other)
+         return false;
+
       return GetFilePath() == other.GetFilePath();
    }
+
    public override int GetHashCode()
    {
       return GetFilePath().GetHashCode();
