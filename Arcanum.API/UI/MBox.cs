@@ -13,4 +13,5 @@ public enum MBoxButton
    OKCancel,
    OKRetryCancel,
    OKRetry,
+   RetryCancel,
 }

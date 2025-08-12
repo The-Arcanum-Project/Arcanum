@@ -90,9 +90,8 @@ public class DefaultParsingStep
    /// This is the main method which will be executed to perform the parsing step.
    /// To have a proper estimation of the remaining time, it is recommended to set the step weights when using multiple files or steps.
    /// </summary>
-   /// <param name="cancellationToken"></param>
    /// <returns></returns>
-   public virtual bool Execute(CancellationToken cancellationToken = default)
+   public virtual bool Execute()
    {
       IsSuccessful = true;
       if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
@@ -131,8 +130,12 @@ public class DefaultParsingStep
          else
             maxThreads = Math.Min(Environment.ProcessorCount * 4, files.Count);
 
+         
          try
          {
+            CancellationTokenSource cts = new();
+            var cancellationToken = cts.Token;
+            
             Parallel.For(0,
                          files.Count,
                          new() { MaxDegreeOfParallelism = maxThreads, CancellationToken = cancellationToken },
@@ -146,14 +149,19 @@ public class DefaultParsingStep
                                return;
                             }
 
-                            var result = Descriptor.LoadingService.LoadSingleFile(file, Descriptor, _lock);
+                            var ex =
+                               Descriptor.LoadingService.LoadWithErrorHandling(file,
+                                                                               Descriptor,
+                                                                               lockObject: _lock);
+
+                            if (ex is { IsCritical: true })
+                               cts.Cancel();
+
                             var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
                             var weight = StepWeights[i];
                             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
-
-                            if (!result)
-                               Volatile.Write(ref _isSuccessful, false);
                          });
+            
          }
          catch (OperationCanceledException)
          {
@@ -172,15 +180,11 @@ public class DefaultParsingStep
          foreach (var file in Descriptor.Files)
          {
             var startTime = _stopwatch.Elapsed;
-            if (cancellationToken.IsCancellationRequested)
-            {
-               IsSuccessful = false;
-               Duration = _stopwatch.Elapsed;
-               return false;
-            }
 
-            if (!Descriptor.LoadingService.LoadSingleFile(file, Descriptor))
-               IsSuccessful = false;
+            var ex = Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor);
+            if (ex is { IsCritical: true })
+               return false;
+
             if (TotalSteps > 1)
                ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
             _doneSteps++;

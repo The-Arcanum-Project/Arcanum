@@ -149,7 +149,12 @@ public partial class MainMenuScreen
          // 2. Await the loading logic directly.
          //    Because we are awaiting, the UI thread is NOW FREE. It can process
          //    the Dispatcher messages from the loading task and update the text.
-         await loadingScreen.StartLoading();
+         var value = await loadingScreen.StartLoading();
+         if (value == false)
+         {
+            loadingScreen.Close();
+            return;
+         }
 
          // 3. Once loading is done, create and show the new MainWindow.
          var mw = new MainWindow();

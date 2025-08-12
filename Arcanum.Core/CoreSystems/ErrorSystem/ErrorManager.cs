@@ -7,6 +7,12 @@ public static class ErrorManager
 {
    public static List<Diagnostic> Diagnostics { get; } = [];
 
+   public static void ClearLog()
+   {
+      Diagnostics.Clear();
+      Debug.WriteLine("---------------------------------\nCleared diagnostics log.\n---------------------------------");
+   }
+   
    public static void AddToLog(Diagnostic? diagnostic)
    {
       if (diagnostic == null)

@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -27,12 +24,8 @@ public class LocationFileLoading : FileLoadingService
 
       if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var reader) || reader is null)
       {
-         ErrorManager.AddToLog(new Diagnostic(IOError.Instance.FileReadingError,
-                                              context.GetInstance(),
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Failed to read file '{fileObj.Path.FullPath}'.",
-                                              "Please check the file path."));
+         DiagnosticException ex = new(IOError.Instance.FileReadingError, fileObj.Path.FullPath);
+         ex.HandleDiagnostic(context, GetActionName());
          return false;
       }
 
@@ -51,11 +44,10 @@ public class LocationFileLoading : FileLoadingService
             var equalIndex = span.IndexOf('=');
             if (equalIndex <= 0 || equalIndex == span.Length - 1)
             {
-               LogWarning(context,
-                          ParsingError.Instance.InvalidKeyValuePair,
-                          GetActionName(),
-                          $"Failed to parse location definition from line: '{line}'.",
-                          "Expected format '<location_name> = <hex_color>'.");
+               DiagnosticException.LogWarning(context,
+                                              ParsingError.Instance.InvalidKeyValuePair,
+                                              GetActionName(),
+                                              line);
                isFlawless = false;
                continue;
             }
@@ -67,11 +59,10 @@ public class LocationFileLoading : FileLoadingService
 
             if (keySpan.IsEmpty || valueSpan.IsEmpty)
             {
-               LogWarning(context,
-                          ParsingError.Instance.InvalidKeyValuePair,
-                          GetActionName(),
-                          $"Failed to parse location definition from line: '{line}'.",
-                          "Location name or color value missing.");
+               DiagnosticException.LogWarning(context,
+                                              ParsingError.Instance.InvalidKeyValuePair,
+                                              GetActionName(),
+                                              line);
                isFlawless = false;
                continue;
             }
@@ -79,11 +70,10 @@ public class LocationFileLoading : FileLoadingService
             if (!TryParseHexInt(valueSpan, out var colorInt))
             {
                context.ColumnNumber = equalIndex + 1 + GetLeadingSpacesCount(valueSpan);
-               LogWarning(context,
-                          ParsingError.Instance.HexToIntConversionError,
-                          GetActionName(),
-                          $"Failed to parse color value from line: '{line}'.",
-                          "The color value must be a valid hexadecimal number.");
+               DiagnosticException.LogWarning(context,
+                                              ParsingError.Instance.HexToIntConversionError,
+                                              GetActionName(),
+                                              valueSpan.ToString());
                isFlawless = false;
                continue;
             }
@@ -94,11 +84,10 @@ public class LocationFileLoading : FileLoadingService
             var newLocation = new Location(fInformation, colorInt, key);
             if (!locations.Add(newLocation))
             {
-               LogWarning(context,
+               DiagnosticException.LogWarning(context,
                           ParsingError.Instance.DuplicateLocationDefinition,
                           GetActionName(),
-                          $"Duplicate location name found: '{key}'.",
-                          "Location names must be unique.");
+                          key);
                isFlawless = false;
             }
          }
@@ -129,19 +118,6 @@ public class LocationFileLoading : FileLoadingService
       Globals.Locations.TrimExcess();
       return true;
    }
-
-   private static void LogWarning(LocationContext ctx,
-                                  DiagnosticDescriptor descriptor,
-                                  string action,
-                                  string message,
-                                  string hint,
-                                  DiagnosticSeverity severity = DiagnosticSeverity.Error)
-      => ErrorManager.AddToLog(new Diagnostic(descriptor,
-                                              ctx.GetInstance(),
-                                              severity,
-                                              action,
-                                              message,
-                                              hint));
 
    private static bool TryParseHexInt(ReadOnlySpan<char> span, out int value)
    {

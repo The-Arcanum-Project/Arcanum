@@ -2,6 +2,7 @@
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -23,7 +24,8 @@ public partial class RunLoadingStep
       {
          var step = descriptor.LoadingService.GetParsingStep(descriptor);
          step.UnloadAllFiles();
-         step.Execute();
+         if (!step.Execute())
+            AppData.WindowLinker.OpenMainMenuScreen();
          StepResultsTextBox.Text =
             $"{"Step:",-25} '{step.Name}'\n" +
             $"{"Success:",-25} {step.IsSuccessful}\n" +
@@ -45,10 +47,11 @@ public partial class RunLoadingStep
          {
             step = descriptor.LoadingService.GetParsingStep(descriptor);
             step.UnloadAllFiles();
-            step.Execute();
+            if (!step.Execute())
+               AppData.WindowLinker.OpenMainMenuScreen();
             durations[i] = step.Duration;
          }
-   
+
          StepResultsTextBox.Text =
             $"{"Step:",-30} '{step.Name}'\n" +
             $"{"Executed:",-30} {numOfExecutions}x\n" +

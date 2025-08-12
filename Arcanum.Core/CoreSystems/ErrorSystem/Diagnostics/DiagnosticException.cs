@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Runtime.CompilerServices;
-using Arcanum.API.UtilServices;
+using System.Windows;
+using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.GlobalStates;
+using Application = System.Windows.Application;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -67,15 +67,21 @@ public sealed class DiagnosticException : Exception
          case DiagnosticReportSeverity.Silent:
             break;
          case DiagnosticReportSeverity.PopupNotify:
-            Debug.WriteLine("Notification: " + this);
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+                                                                  "Error Encountered",
+                                                                  icon: GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupWarning:
-            Debug.WriteLine("Warning: " + this);
-            ohNoWhatShouldWeDoNow = DiagnosticHandle.Close;
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+                                                                  "Error Encountered",
+                                                                  MBoxButton.OKRetryCancel,
+                                                                  GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupError:
-            Debug.WriteLine("Error: " + this);
-            ohNoWhatShouldWeDoNow = DiagnosticHandle.Retry;
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+                                                                  "Error Encountered",
+                                                                  MBoxButton.RetryCancel,
+                                                                  GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.Suppressed:
             // TODO @Minnator: Write to the Debug log of Arcanum
@@ -84,13 +90,45 @@ public sealed class DiagnosticException : Exception
             throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
       }
 
-      AppData.WindowLinker.OpenMainMenuScreen();
-
       var diagnostic = new Diagnostic(this, context, action);
-      ErrorManager.Diagnostics.Add(diagnostic);
+      ErrorManager.AddToLog(diagnostic);
 
       if (ohNoWhatShouldWeDoNow == DiagnosticHandle.Retry)
          throw new ReloadFileException();
+
+      if (ohNoWhatShouldWeDoNow == DiagnosticHandle.Close)
+         throw new ReloadFileException(true);
+   }
+
+   private static MessageBoxImage GetMessageBoxIconForSeverity(DiagnosticSeverity severity)
+   {
+      return severity switch
+      {
+         DiagnosticSeverity.Error => MessageBoxImage.Error,
+         DiagnosticSeverity.Warning => MessageBoxImage.Warning,
+         DiagnosticSeverity.Information => MessageBoxImage.Information,
+         _ => MessageBoxImage.Question,
+      };
+   }
+
+   public static void LogWarning(LocationContext ctx,
+                                 DiagnosticDescriptor descriptor,
+                                 string action,
+                                 params object[] args)
+   {
+      DiagnosticException diagnosticException = new(descriptor, args);
+      diagnosticException.HandleDiagnostic(ctx, action);
+   }
+
+   private static DiagnosticHandle MBoxResultToDiagnosticHandle(MBoxResult result)
+   {
+      return result switch
+      {
+         MBoxResult.Retry => DiagnosticHandle.Retry,
+         MBoxResult.Cancel => DiagnosticHandle.Close,
+         MBoxResult.OK => DiagnosticHandle.Ignore,
+         _ => throw new ArgumentOutOfRangeException(nameof(result), result, null),
+      };
    }
 
    public readonly string Description;

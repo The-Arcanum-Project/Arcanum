@@ -216,8 +216,8 @@ public partial class ErrorLog : INotifyPropertyChanged
       if (ErrorLogListView.SelectedItem is Diagnostic diagnostic)
       {
          ErrorName = diagnostic.Descriptor.Name;
-         ErrorMessage = diagnostic.Descriptor.Message;
-         ErrorDescription = diagnostic.Descriptor.Description;
+         ErrorMessage = diagnostic.Message;
+         ErrorDescription = diagnostic.Description;
          ErrorResolution = diagnostic.Descriptor.Resolution;
       }
       else

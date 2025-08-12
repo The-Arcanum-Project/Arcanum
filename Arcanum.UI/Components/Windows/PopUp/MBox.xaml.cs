@@ -12,7 +12,6 @@ public partial class MBox
 {
    public MBoxResult Result { get; private set; }
 
-
    public MBox(string message, string title, MBoxButton buttons, MessageBoxImage icon)
    {
       InitializeComponent();
@@ -21,7 +20,7 @@ public partial class MBox
       MessageText.Text = message;
       SetupButtons(buttons);
       SetupIcon(icon);
-      
+
       Loaded += (_, _) =>
       {
          if (OkButton.Visibility == Visibility.Visible)
@@ -60,6 +59,10 @@ public partial class MBox
          case MBoxButton.OKRetry:
             OkButton.Visibility = Visibility.Visible;
             RetryButton.Visibility = Visibility.Visible;
+            break;
+         case MBoxButton.RetryCancel:
+            RetryButton.Visibility = Visibility.Visible;
+            CancelButton.Visibility = Visibility.Visible;
             break;
          default:
             throw new ArgumentOutOfRangeException(nameof(buttons), buttons, null);
@@ -103,12 +106,42 @@ public partial class MBox
       DialogResult = true;
    }
 
-   public static MBoxResult Show(string message,
-                                   string title = "Message",
-                                   MBoxButton buttons = MBoxButton.OK,
-                                   MessageBoxImage icon = MessageBoxImage.None,
-                                   int height = 150,
-                                   int width = 400)
+   public static MBoxResult Show(
+      string message,
+      string title = "Message",
+      MBoxButton buttons = MBoxButton.OK,
+      MessageBoxImage icon = MessageBoxImage.None,
+      int height = 150,
+      int width = 400)
+   {
+      if (Application.Current?.Dispatcher == null)
+         throw new InvalidOperationException("No UI dispatcher found.");
+
+      if (Application.Current.Dispatcher.CheckAccess())
+      {
+         // Already on UI thread
+         return ShowOnCurrentThread(message, title, buttons, icon, height, width);
+      }
+      else
+      {
+         // Marshal to UI thread and wait for result
+         return Application.Current.Dispatcher.Invoke(() =>
+                                                         ShowOnCurrentThread(message,
+                                                                             title,
+                                                                             buttons,
+                                                                             icon,
+                                                                             height,
+                                                                             width));
+      }
+   }
+
+   private static MBoxResult ShowOnCurrentThread(
+      string message,
+      string title,
+      MBoxButton buttons,
+      MessageBoxImage icon,
+      int height,
+      int width)
    {
       var box = new MBox(message, title, buttons, icon)
       {
@@ -117,8 +150,9 @@ public partial class MBox
          WindowStartupLocation = WindowStartupLocation.CenterScreen,
          ResizeMode = ResizeMode.NoResize,
          ShowInTaskbar = false,
-         Topmost = true,
+         Topmost = true
       };
+
       box.ShowDialog();
       return box.Result;
    }

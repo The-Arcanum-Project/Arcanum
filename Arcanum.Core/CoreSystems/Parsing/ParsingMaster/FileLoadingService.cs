@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -22,12 +22,11 @@ public abstract class FileLoadingService
       return $"{declaringType.FullName}.{caller}";
    }
 
-   
    public virtual DefaultParsingStep GetParsingStep(FileDescriptor descriptor)
    {
-      return new (descriptor, descriptor.IsMultithreadable);
+      return new(descriptor, descriptor.IsMultithreadable);
    }
-   
+
    /// <summary>
    /// Returns debug information about any data contained in this filetype.
    /// </summary>
@@ -43,14 +42,37 @@ public abstract class FileLoadingService
    /// <param name="fileObj"></param>
    /// <param name="descriptor"></param>
    /// <returns></returns>
-   public virtual bool LoadSingleFileWithMetrics(FileObj fileObj, FileDescriptor descriptor)
+   public virtual void LoadSingleFileWithMetrics(FileObj fileObj, FileDescriptor descriptor)
    {
       _stopwatch.Restart();
 
-      var result = LoadSingleFile(fileObj, descriptor);
-      _stopwatch.Stop();
+      LoadWithErrorHandling(fileObj, descriptor);
 
-      return result;
+      _stopwatch.Stop();
+   }
+
+   public ReloadFileException? LoadWithErrorHandling(FileObj fileObj,
+                                                     FileDescriptor descriptor,
+                                                     object? lockObject = null)
+   {
+      var repeatLoading = true;
+      while (repeatLoading)
+      {
+         try
+         {
+            LoadSingleFile(fileObj, descriptor, lockObject);
+            repeatLoading = false;
+         }
+         catch (ReloadFileException ex)
+         {
+            if (ex.IsCritical)
+               return ex;
+
+            UnloadSingleFileContent(fileObj, descriptor);
+         }
+      }
+
+      return null;
    }
 
    /// <summary>
@@ -65,8 +87,9 @@ public abstract class FileLoadingService
 
    public abstract bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor);
 
-   public virtual bool ReloadFile(FileObj fileObj, FileDescriptor descriptor)
+   public virtual void ReloadFile(FileObj fileObj, FileDescriptor descriptor)
    {
-      return UnloadSingleFileContent(fileObj, descriptor) && LoadSingleFileWithMetrics(fileObj, descriptor);
+      UnloadSingleFileContent(fileObj, descriptor);
+      LoadSingleFileWithMetrics(fileObj, descriptor);
    }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -156,6 +157,7 @@ public class MainMenuViewModel : ObservableObject
    // if all requirements are met.
    internal async Task LaunchArcanum(ProjectFileDescriptor descriptor)
    {
+      ErrorManager.ClearLog();
       if (!descriptor.IsValid())
       {
          MessageBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +

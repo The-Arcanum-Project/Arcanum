@@ -81,11 +81,9 @@ public class ParsingMaster
       _sortedFileDescriptors = new(TopologicalSort.Sort<string, FileDescriptor>(DescriptorDefinitions.FileDescriptors));
    }
 
-   public Task ExecuteAllParsingSteps()
+   public Task<bool> ExecuteAllParsingSteps()
    {
       InitializeSteps();
-
-      var cts = new CancellationTokenSource();
 
       ParsingStepsDone = 0;
       foreach (var descriptor in _sortedFileDescriptors)
@@ -101,15 +99,16 @@ public class ParsingMaster
             StepDurationEstimationChanged?.Invoke(this, stepWrapper.EstimatedRemaining ?? TimeSpan.Zero);
          };
 
-         stepWrapper.Execute(cts.Token);
-
-         if (cts.IsCancellationRequested)
+         if (!stepWrapper.Execute())
             break;
 
          StepDurations.Add(stepWrapper.Duration);
          ParsingStepsDone++;
       }
+      
+      if (ParsingSteps != ParsingStepsDone)
+         return Task.FromResult(false);
 
-      return Task.CompletedTask;
+      return Task.FromResult(true); 
    }
 }

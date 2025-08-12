@@ -16,21 +16,21 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 public class DefinitionFileLoading : FileLoadingService
 {
    private Dictionary<string, Location> _locationCache = null!;
-   
+
    public override string GetFileDataDebugInfo()
    {
       return "Definition File Loading: \n" +
-             $"Continents: {Globals.Continents.Count}\n" +
-             $"SuperRegions: {Globals.SuperRegions.Count}\n" +
-             $"Regions: {Globals.Regions.Count}\n" +
-             $"Areas: {Globals.Areas.Count}\n" +
-             $"Provinces: {Globals.Provinces.Count}";
+             $"\t\tContinents: {Globals.Continents.Count}\n" +
+             $"\t\tSuperRegions: {Globals.SuperRegions.Count}\n" +
+             $"\t\tRegions: {Globals.Regions.Count}\n" +
+             $"\t\tAreas: {Globals.Areas.Count}\n" +
+             $"\t\tProvinces: {Globals.Provinces.Count}";
    }
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       _locationCache = Globals.Locations.ToDictionary(loc => loc.Name, loc => loc);
-      
+
       var (blocks, content) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
@@ -38,12 +38,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = content[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.ForbiddenElement,
-                                              ctx,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Failed to parse definition file content.",
-                                              "Please check the file content for errors."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.ForbiddenElement,
+                                        GetActionName(),
+                                        content[0].ToString());
       }
 
       var fileInformation = new FileInformation(fileObj.Path.Filename, false, descriptor);
@@ -51,7 +49,7 @@ public class DefinitionFileLoading : FileLoadingService
       foreach (var block in blocks)
          ParseContinent(block, ctx, fileInformation);
 
-      _locationCache = null!; 
+      _locationCache = null!;
       return true;
    }
 
@@ -63,12 +61,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidContentElementCount,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal content element(s); A continent cannot have content elements.",
-                                              "Continents cannot have content elements."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.InvalidContentElementCount,
+                                        GetActionName(),
+                                        block.ContentElements[0].ToString());
       }
 
       Continent continent = new(fileInformation, block.Name);
@@ -76,12 +72,11 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.DuplicateContinentDefinition,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Duplicate continent definition found for '{block.Name}'.",
-                                              "Continents must have unique names."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.DuplicateContinentDefinition,
+                                        GetActionName(),
+                                        block.Name);
+
          return;
       }
 
@@ -104,12 +99,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidContentElementCount,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal content element(s); A super region cannot have content elements.",
-                                              "Super regions cannot have content elements."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.InvalidContentElementCount,
+                                        GetActionName(),
+                                        block.ContentElements[0].ToString());
       }
 
       superRegion = new(fileInformation, block.Name);
@@ -117,12 +110,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.DuplicateSuperRegionDefinition,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Duplicate super region definition found for '{block.Name}'.",
-                                              "Super regions must have unique names."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.DuplicateSuperRegionDefinition,
+                                        GetActionName(),
+                                        block.Name);
          return false;
       }
 
@@ -143,12 +134,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidContentElementCount,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal content element(s); An area cannot have content elements.",
-                                              "Areas cannot have content elements."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.InvalidContentElementCount,
+                                        GetActionName(),
+                                        block.ContentElements[0].ToString());
       }
 
       region = new(fileInformation, block.Name);
@@ -156,12 +145,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.DuplicateRegionDefinition,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Duplicate region definition found for '{block.Name}'.",
-                                              "Regions must have unique names."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.DuplicateRegionDefinition,
+                                        GetActionName(),
+                                        block.Name);
          return false;
       }
 
@@ -182,12 +169,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidContentElementCount,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal content element(s); An area cannot have content elements.",
-                                              "Areas cannot have content elements."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.InvalidContentElementCount,
+                                        GetActionName(),
+                                        block.ContentElements[0].ToString());
       }
 
       area = new(fileInformation, block.Name);
@@ -195,12 +180,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.DuplicateAreaDefinition,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Duplicate area definition found for '{block.Name}'.",
-                                              "Areas must have unique names."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.DuplicateAreaDefinition,
+                                        GetActionName(),
+                                        block.Name);
          return false;
       }
 
@@ -221,12 +204,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.SubBlocks[0].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.ForbiddenBlock,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal sub-block(s)",
-                                              "Provinces cannot have sub-blocks."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.ForbiddenBlock,
+                                        GetActionName(),
+                                        block.SubBlocks[0].ToString());
       }
 
       if (block.ContentElements.Count != 1)
@@ -234,12 +215,10 @@ public class DefinitionFileLoading : FileLoadingService
          var tmpCtx = ctx.GetInstance();
          if (block.ContentElements.Count > 1)
             tmpCtx.LineNumber = block.ContentElements[1].StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidContentElementCount,
-                                              tmpCtx,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              "Illegal content element(s)",
-                                              "Provinces cannot have content elements."));
+         DiagnosticException.LogWarning(tmpCtx,
+                                        ParsingError.Instance.InvalidContentElementCount,
+                                        GetActionName(),
+                                        block.ContentElements.Count.ToString());
       }
 
       province = new(fileInformation, block.Name);
@@ -247,12 +226,10 @@ public class DefinitionFileLoading : FileLoadingService
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
-         ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.DuplicateProvinceDefinition,
-                                              ctxInstance,
-                                              DiagnosticSeverity.Error,
-                                              GetActionName(),
-                                              $"Duplicate province definition found for '{block.Name}'.",
-                                              "Provinces must have unique names."));
+         DiagnosticException.LogWarning(ctxInstance,
+                                        ParsingError.Instance.DuplicateProvinceDefinition,
+                                        GetActionName(),
+                                        block.Name);
          return false;
       }
 
@@ -263,12 +240,10 @@ public class DefinitionFileLoading : FileLoadingService
          {
             var ctxInstance = ctx.GetInstance();
             ctxInstance.LineNumber = lineNum;
-            ErrorManager.AddToLog(new Diagnostic(ParsingError.Instance.InvalidLocationKey,
-                                                 ctxInstance,
-                                                 DiagnosticSeverity.Error,
-                                                 GetActionName(),
-                                                 $"Invalid location name '{location}'in the province definition: '{province.Name}'.",
-                                                 "Location names must be unique and not empty."));
+            DiagnosticException.LogWarning(ctxInstance,
+                                           ParsingError.Instance.InvalidLocationKey,
+                                           GetActionName(),
+                                           province.Name);
             continue;
          }
 

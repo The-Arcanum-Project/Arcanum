@@ -21,8 +21,9 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
    public string Action { get; } = action;
    public DiagnosticDescriptor Descriptor { get; }= descriptor;
    public LocationContext Context { get; } = context;
-   private readonly string _code = descriptor.ToString();
-   private readonly string _description = description;
+   public string Code { get; }= descriptor.ToString();
+   public string Description { get; } = description;
+   public string Message { get; } = message;
    public DiagnosticSeverity Severity { get; }= severity;
 
    public Diagnostic(DiagnosticException diagnosticException, LocationContext context, string action)
@@ -41,6 +42,6 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
    public override string ToString()
    {
       var actionString = string.IsNullOrWhiteSpace(Action) ? string.Empty : $" {Action} failed";
-      return $"{_code}: {actionString}: {Context.ToErrorString} := {message}";
+      return $"{Code}: {actionString}: {Context.ToErrorString} := {Message}";
    }
 }
