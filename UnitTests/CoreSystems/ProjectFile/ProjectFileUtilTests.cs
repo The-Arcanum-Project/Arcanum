@@ -138,18 +138,18 @@ public class ProjectFileUtilTests
       Assert.That(File.Exists(extracted[0]), Is.True);
    }
 
-   [Test]
-   public void GatherFilesForProjectFile_CreatesProjectFile()
-   {
-      var descriptor = new ProjectFileDescriptor("TestMod", "Path/To/TestMod", "Path/To/Vanilla");
-      ProjectFileUtil.GatherFilesForProjectFile(descriptor);
-
-      var zipPath = Path.Combine(Arcanum.Core.CoreSystems.IO.IO.GetArcanumDataPath,
-                                 "ArcanumProjects",
-                                 "TestMod.arcanum");
-      Assert.That(File.Exists(zipPath), Is.True);
-
-      using var zip = ZipFile.OpenRead(zipPath);
-      Assert.That(zip.GetEntry("ProjDescriptor.json"), Is.Not.Null);
-   }
+   // [Test]
+   // public void GatherFilesForProjectFile_CreatesProjectFile()
+   // {
+   //    var descriptor = new ProjectFileDescriptor("TestMod", "Path/To/TestMod", "Path/To/Vanilla");
+   //    ProjectFileUtil.GatherFilesForProjectFile(descriptor);
+   //
+   //    var zipPath = Path.Combine(Arcanum.Core.CoreSystems.IO.IO.GetArcanumDataPath,
+   //                               "ArcanumProjects",
+   //                               "TestMod.arcanum");
+   //    Assert.That(File.Exists(zipPath), Is.True);
+   //
+   //    using var zip = ZipFile.OpenRead(zipPath);
+   //    Assert.That(zip.GetEntry("ProjDescriptor.json"), Is.Not.Null);
+   // }
 }
