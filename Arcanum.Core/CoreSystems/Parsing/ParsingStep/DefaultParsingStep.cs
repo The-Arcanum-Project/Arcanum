@@ -2,11 +2,9 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 
 public class DefaultParsingStep
 {
@@ -97,7 +95,7 @@ public class DefaultParsingStep
    public virtual bool Execute(CancellationToken cancellationToken = default)
    {
       IsSuccessful = true;
-      if (!ParsingMaster.AreDependenciesLoaded(Descriptor))
+      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
          throw
             new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
 
@@ -148,7 +146,7 @@ public class DefaultParsingStep
                                return;
                             }
 
-                            var result = Descriptor.LoadingService.LoadSingleFile(file, _lock);
+                            var result = Descriptor.LoadingService.LoadSingleFile(file, Descriptor, _lock);
                             var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
                             var weight = StepWeights[i];
                             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
@@ -181,11 +179,12 @@ public class DefaultParsingStep
                return false;
             }
 
-            if (!Descriptor.LoadingService.LoadSingleFile(file))
+            if (!Descriptor.LoadingService.LoadSingleFile(file, Descriptor))
                IsSuccessful = false;
             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
             _doneSteps++;
          }
+
          swInner.Stop();
          Debug.WriteLine($"Single-threaded parsing step {Name} took {swInner.Elapsed.TotalMilliseconds:#####.0} ms to complete.");
       }
@@ -193,6 +192,15 @@ public class DefaultParsingStep
       _stopwatch.Stop();
       Duration = _stopwatch.Elapsed;
       return IsSuccessful;
+   }
+
+   public bool UnloadAllFiles()
+   {
+      foreach (var file in Descriptor.Files)
+         if (!Descriptor.LoadingService.UnloadSingleFileContent(file, Descriptor))
+            return false;
+
+      return true;
    }
 
    /// <summary>
@@ -228,7 +236,7 @@ public class DefaultParsingStep
 
    protected virtual List<double> GetFileWeights()
    {
-      return ParsingMaster.GetStepWeightsByFileSize(Descriptor);
+      return ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
    }
 
    public double SubPercentageCompleted { get; private set; }

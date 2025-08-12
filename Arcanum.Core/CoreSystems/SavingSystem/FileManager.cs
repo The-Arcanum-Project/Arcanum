@@ -284,7 +284,7 @@ public static class FileManager
    //
    //    Dictionary<FileInformation, List<(string, FileObj)>> groupedSaveables = [];
    //
-   //    foreach (var fileInformation in NewSaveables.Select(saveable => saveable.GetFileInformation()))
+   //    foreach (var fileInformation in NewSaveables.Select(saveable => saveable.FileInformation()))
    //    {
    //       if (groupedSaveables.TryGetValue(fileInformation, out var fileList))
    //          continue;

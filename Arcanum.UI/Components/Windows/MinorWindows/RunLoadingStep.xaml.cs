@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.UI.Components.StyleClasses;
 
@@ -23,6 +22,7 @@ public partial class RunLoadingStep
       if (sender is BaseButton { Tag: FileDescriptor descriptor })
       {
          var step = descriptor.LoadingService.GetParsingStep(descriptor);
+         step.UnloadAllFiles();
          step.Execute();
          StepResultsTextBox.Text =
             $"{"Step:",-25} '{step.Name}'\n" +
@@ -44,6 +44,7 @@ public partial class RunLoadingStep
          for (var i = 0; i < numOfExecutions; i++)
          {
             step = descriptor.LoadingService.GetParsingStep(descriptor);
+            step.UnloadAllFiles();
             step.Execute();
             durations[i] = step.Duration;
          }

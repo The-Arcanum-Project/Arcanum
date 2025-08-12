@@ -5,6 +5,6 @@ namespace Arcanum.Core.CoreSystems.SavingSystem;
 
 public interface ISaveable
 {
-    public FileInformation GetFileInformation();
+    public FileInformation FileInformation { get; }
     public SaveableType SaveType { get; }
 }

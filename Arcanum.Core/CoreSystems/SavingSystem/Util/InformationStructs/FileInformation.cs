@@ -3,6 +3,8 @@
 public readonly struct FileInformation(string fileName,
     bool allowsOverwrite, FileDescriptor descriptor)
 {
+    public static FileInformation Empty { get; }= new("EmptyFile", false, FileDescriptor.Dummy);
+    
     /// <summary>
     /// The default file name for the saveable
     /// </summary>

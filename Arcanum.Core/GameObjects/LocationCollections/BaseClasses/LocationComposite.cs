@@ -1,9 +1,13 @@
-﻿namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 
-public abstract class LocationComposite(string name) // TODO: @Melco @Minnator implement ISaveable here
+namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+
+public abstract class LocationComposite(string name, FileInformation information) : ISaveable // TODO: @Melco @Minnator implement ISaveable here
 {
    public string Name { get; } = name;
-   public List<LocationComposite> Parents { get; }= [];
+   public List<LocationComposite> Parents { get; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }
 
@@ -44,4 +48,7 @@ public abstract class LocationComposite(string name) // TODO: @Melco @Minnator i
    public static bool operator !=(LocationComposite? left, LocationComposite? right) => !(left == right);
 
    public static LocationComposite Empty { get; } = Location.Empty;
+
+   public FileInformation FileInformation { get; } = information;
+   public SaveableType SaveType { get; } = SaveableType.Location;
 }

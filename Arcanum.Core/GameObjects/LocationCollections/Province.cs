@@ -1,14 +1,15 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public class Province : LocationCollection<Location>
 {
-   public Province(string name, ICollection<Location> provinces) : base(name, provinces)
+   public Province(FileInformation fileInfo, string name, ICollection<Location> provinces) : base(fileInfo, name, provinces)
    {
    }
 
-   public Province(string name) : base(name)
+   public Province(FileInformation fileInfo, string name) : base(fileInfo, name)
    {
    }
 

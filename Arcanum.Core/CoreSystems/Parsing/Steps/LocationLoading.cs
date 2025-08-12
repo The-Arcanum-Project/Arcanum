@@ -4,8 +4,9 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
@@ -17,7 +18,7 @@ public class LocationFileLoading : FileLoadingService
 
    public override string GetFileDataDebugInfo() => $"Loaded '{Globals.Locations.Count}'.";
 
-   public override bool LoadSingleFile(FileObj fileObj, object? lockObject = null)
+   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var method = MethodBase.GetCurrentMethod();
       if (method?.DeclaringType is null)
@@ -42,6 +43,7 @@ public class LocationFileLoading : FileLoadingService
       }
 
       var isFlawless = true;
+      var fInformation = new FileInformation(fileObj.Path.Filename, true, descriptor);
 
       using (reader)
          while (reader.ReadLine() is { } line)
@@ -56,6 +58,7 @@ public class LocationFileLoading : FileLoadingService
             if (equalIndex <= 0 || equalIndex == span.Length - 1)
             {
                LogWarning(context,
+                          ParsingError.Instance.InvalidKeyValuePair,
                           actionName,
                           $"Failed to parse location definition from line: '{line}'.",
                           "Expected format '<location_name> = <hex_color>'.");
@@ -71,6 +74,7 @@ public class LocationFileLoading : FileLoadingService
             if (keySpan.IsEmpty || valueSpan.IsEmpty)
             {
                LogWarning(context,
+                          ParsingError.Instance.InvalidKeyValuePair,
                           actionName,
                           $"Failed to parse location definition from line: '{line}'.",
                           "Location name or color value missing.");
@@ -82,6 +86,7 @@ public class LocationFileLoading : FileLoadingService
             {
                context.ColumnNumber = equalIndex + 1 + GetLeadingSpacesCount(valueSpan);
                LogWarning(context,
+                          ParsingError.Instance.HexToIntConversionError,
                           actionName,
                           $"Failed to parse color value from line: '{line}'.",
                           "The color value must be a valid hexadecimal number.");
@@ -92,10 +97,11 @@ public class LocationFileLoading : FileLoadingService
             var key = keySpan.ToString();
             context.ColumnNumber = line.IndexOf(key, StringComparison.Ordinal);
 
-            var newLocation = new Location(colorInt, key);
+            var newLocation = new Location(fInformation, colorInt, key);
             if (Globals.Locations.Contains(newLocation))
             {
                LogWarning(context,
+                          ParsingError.Instance.DuplicateLocationDefinition,
                           actionName,
                           $"Duplicate location name found: '{key}'.",
                           "Location names must be unique.");
@@ -116,12 +122,32 @@ public class LocationFileLoading : FileLoadingService
       return isFlawless;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj) => throw new NotImplementedException();
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   {
+      List<Location> locationsToRemove = [];
+      // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+      // No link here to prevent fileObj allocations
+      foreach (var location in Globals.Locations)
+         if (location.FileInformation.FileName.Equals(fileObj.Path.Filename))
+            locationsToRemove.Add(location);
 
-   private static void LogWarning(LocationContext ctx, string action, string message, string hint)
-      => ErrorManager.AddToLog(new Diagnostic(IOError.Instance.FileReadingError,
+      if (locationsToRemove.Count == 0)
+         return true;
+
+      Globals.Locations.ExceptWith(locationsToRemove);
+      Globals.Locations.TrimExcess();
+      return true;
+   }
+
+   private static void LogWarning(LocationContext ctx,
+                                  DiagnosticDescriptor descriptor,
+                                  string action,
+                                  string message,
+                                  string hint,
+                                  DiagnosticSeverity severity = DiagnosticSeverity.Error)
+      => ErrorManager.AddToLog(new Diagnostic(descriptor,
                                               ctx.GetInstance(),
-                                              DiagnosticSeverity.Warning,
+                                              severity,
                                               action,
                                               message,
                                               hint));

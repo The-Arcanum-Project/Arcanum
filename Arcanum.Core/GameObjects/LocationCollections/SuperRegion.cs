@@ -1,14 +1,15 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public class SuperRegion : LocationCollection<Region>
 {
-   public SuperRegion(string name, ICollection<Region> provinces) : base(name, provinces)
+   public SuperRegion(FileInformation fileInfo, string name, ICollection<Region> provinces) : base(fileInfo, name, provinces)
    {
    }
 
-   public SuperRegion(string name) : base(name)
+   public SuperRegion(FileInformation fileInfo, string name) : base(fileInfo, name)
    {
    }
 

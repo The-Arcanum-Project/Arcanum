@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 public abstract class FileLoadingService
 {
@@ -25,7 +25,7 @@ public abstract class FileLoadingService
    /// </summary>
    /// <returns></returns>
    public abstract string GetFileDataDebugInfo();
-   
+
    /// <summary>
    /// Executes the file loading and measures the time taken
    /// The time can be extracted by using the <see cref="Duration"/> property.
@@ -33,12 +33,13 @@ public abstract class FileLoadingService
    /// Multiple instances of this will be called in parallel
    /// </summary>
    /// <param name="fileObj"></param>
+   /// <param name="descriptor"></param>
    /// <returns></returns>
-   public virtual bool LoadSingleFileWithMetrics(FileObj fileObj)
+   public virtual bool LoadSingleFileWithMetrics(FileObj fileObj, FileDescriptor descriptor)
    {
       _stopwatch.Restart();
 
-      var result = LoadSingleFile(fileObj);
+      var result = LoadSingleFile(fileObj, descriptor);
       _stopwatch.Stop();
 
       return result;
@@ -49,14 +50,15 @@ public abstract class FileLoadingService
    /// Has to be thread-safe and should not be called directly but always by a manager that handles the performance measurement.
    /// </summary>
    /// <param name="fileObj"></param>
+   /// <param name="descriptor"></param>
    /// <param name="lockObject"></param>
    /// <returns></returns>
-   public abstract bool LoadSingleFile(FileObj fileObj, object? lockObject = null);
+   public abstract bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null);
 
-   public abstract bool UnloadSingleFileContent(FileObj fileObj);
+   public abstract bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor);
 
-   public virtual bool ReloadFile(FileObj fileObj)
+   public virtual bool ReloadFile(FileObj fileObj, FileDescriptor descriptor)
    {
-      return UnloadSingleFileContent(fileObj) && LoadSingleFileWithMetrics(fileObj);
+      return UnloadSingleFileContent(fileObj, descriptor) && LoadSingleFileWithMetrics(fileObj, descriptor);
    }
 }

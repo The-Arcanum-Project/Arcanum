@@ -1,13 +1,14 @@
 ﻿using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
-public abstract class LocationCollection<T>(string name) : LocationComposite(name)
+public abstract class LocationCollection<T>(FileInformation fileInfo, string name) : LocationComposite(name, fileInfo)
    where T : LocationComposite
 // Province, Area, Region, SuperRegion, Continent
 {
-   public LocationCollection(string name, ICollection<T> provinces) : this(name)
+   public LocationCollection(FileInformation fileInfo, string name, ICollection<T> provinces) : this(fileInfo, name)
    {
       SubCollection = provinces;
    }
