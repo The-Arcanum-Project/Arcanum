@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.GlobalStates.BackingClasses;
+﻿using Arcanum.Core.Settings;
 
 namespace Arcanum.Core.GlobalStates;
 
@@ -9,5 +9,5 @@ public static class Config
 {
    internal const string CONFIG_FILE_PATH = "config.json";
    
-   public static UserKeyBinds UserKeyBinds { get; set; } = new ();
+   public static MainSettingsObj Settings { get; set; } = new ();
 }

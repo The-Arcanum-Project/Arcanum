@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.IO.JsonConverters;
 
 // For the interface
@@ -48,13 +49,16 @@ internal static class JsonProcessor
          DefaultBufferSize = rules.DefaultBufferSize,
          IgnoreReadOnlyProperties = rules.IgnoreReadOnlyProperties,
          IncludeFields = rules.IncludeFields,
-         Converters = { new KeyGestureJsonConverter() },
+         Converters =
+         {
+            new KeyGestureJsonConverter(),
+         },
       };
 
       if (rules.IgnoreNullValues)
          options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-      switch (rules.PropertyNamingPolicy)
+      switch (rules.PropertyNamingPolicy)    
       {
          case JsonPropertyNamingPolicyType.CamelCase:
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -159,7 +163,9 @@ internal static class JsonProcessor
       }
    }
 
-   public static T? DefaultDeserialize<T>(string path, Encoding? encoding = null, JsonDeserializationRules? rules = null)
+   public static T? DefaultDeserialize<T>(string path,
+                                          Encoding? encoding = null,
+                                          JsonDeserializationRules? rules = null)
    {
       if (string.IsNullOrEmpty(path) || !File.Exists(path))
          return default;
@@ -182,7 +188,7 @@ internal static class JsonProcessor
       catch (JsonException ex)
       {
          throw new
-            JsonDeserializationException($"Failed to deserialize JSON to type {typeof(T).FullName}. JSON: '{json[..Math.Min(json.Length, 100)]}{(json.Length > 100 ? "..." : "")}'",   
+            JsonDeserializationException($"Failed to deserialize JSON to type {typeof(T).FullName}. JSON: '{json[..Math.Min(json.Length, 100)]}{(json.Length > 100 ? "..." : "")}'",
                                          ex);
       }
       catch (NotSupportedException ex) // Can be thrown for types that cannot be deserialized

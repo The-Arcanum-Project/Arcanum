@@ -4,7 +4,6 @@ using System.Windows;
 using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GlobalStates;
-using Application = System.Windows.Application;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -20,7 +19,7 @@ public sealed class DiagnosticException : Exception
    public static DiagnosticException Fallback([CallerMemberName] string functionName = "",
                                               [CallerLineNumber] int lineNumber = 0,
                                               [CallerFilePath] string filePath = "")
-      => new(QADesc.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
+      => new(ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
 
    public readonly DiagnosticDescriptor Descriptor;
 

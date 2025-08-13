@@ -46,12 +46,10 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
 
    public readonly DiagnosticCategory Category = category;
    private readonly DiagnosticReportSeverity _reportSeverity = reportSeverity;
-   
    [CustomResetMethod(nameof(ResetSettings))]
    [Description("How a diagnostic should be reported in the system. This can be either Silent, or include various levels of user interaction.")]
    public DiagnosticReportSeverity ReportSeverity { get; set; } = reportSeverity;
    private readonly DiagnosticSeverity _severity = severity;
-   
    [CustomResetMethod(nameof(ResetSettings))]
    [Description("The severity of the Diagnostic.")]
    public DiagnosticSeverity Severity { get; set; } = severity;

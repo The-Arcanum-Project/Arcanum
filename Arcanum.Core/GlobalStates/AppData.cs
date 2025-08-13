@@ -1,9 +1,7 @@
 ﻿using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
-using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.Settings;
 using Arcanum.Core.Utils.Git;
 
 namespace Arcanum.Core.GlobalStates;
@@ -26,6 +24,5 @@ public static class AppData
 
    #endregion
    
-   public static MainSettingsObj Settings { get; set; } = new ();
    public static TreeHistoryManager HistoryManager { get; set; } = new (new ());
 }

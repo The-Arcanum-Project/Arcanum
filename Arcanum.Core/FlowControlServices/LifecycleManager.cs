@@ -7,8 +7,8 @@ using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.PluginServices;
+using Arcanum.Core.Settings;
 
 namespace Arcanum.Core.FlowControlServices;
 
@@ -94,7 +94,7 @@ public class LifecycleManager
       MainMenuScreenDescriptor.SaveData();
 
       // Save configs
-      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.UserKeyBinds);
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.Settings);
 
 #if DEBUG
       SaveDebugElements();
@@ -103,10 +103,10 @@ public class LifecycleManager
 
    private void LoadConfig()
    {
-      Config.UserKeyBinds =
-         JsonProcessor.DefaultDeserialize<UserKeyBinds>(Path.Combine(IO.GetArcanumDataPath,
-                                                                     Config.CONFIG_FILE_PATH)) ??
-         new UserKeyBinds();
+      Config.Settings =
+         JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
+                                                                        Config.CONFIG_FILE_PATH)) ??
+         new MainSettingsObj();
    }
 
 #if DEBUG

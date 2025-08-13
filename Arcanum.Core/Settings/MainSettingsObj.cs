@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Arcanum.Core.CoreSystems.ErrorSystem;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.GlobalStates.BackingClasses;
 
@@ -7,6 +6,11 @@ namespace Arcanum.Core.Settings;
 
 public class MainSettingsObj
 {
+   public MainSettingsObj()
+   {
+      // Initialize any default values here if needed
+   }
+   
    [IsSubMenu("Key Binds")]
    public UserKeyBinds UserKeyBinds { get; set; } = new();
    

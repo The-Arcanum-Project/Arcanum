@@ -1,9 +1,9 @@
-﻿using Arcanum.API.Attributes;
+﻿using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 
-public class ParsingError
+public class ParsingError : ILazySingleton
 {
    private static readonly Lazy<ParsingError> LazyInstance = new(() => new());
 
@@ -81,48 +81,48 @@ public class ParsingError
                                                                          "Block contains an invalid number of content elements.",
                                                                          "A block has an invalid number of content elements defined, which does not match the expected count.",
                                                                          DiagnosticReportSeverity.Silent);
-   
+
    public DiagnosticDescriptor InvalidLocationKey { get; } = new(DiagnosticCategory.Parsing,
-                                                                  9,
-                                                                  "Invalid Location Name",
-                                                                  DiagnosticSeverity.Error,
-                                                                  "The location name '{0}' is invalid.",
-                                                                  "This error indicates that the location name provided is not valid or does not conform to the expected format.",
-                                                                  DiagnosticReportSeverity.Silent);
-   
+                                                                 9,
+                                                                 "Invalid Location Name",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "The location name '{0}' is invalid.",
+                                                                 "This error indicates that the location name provided is not valid or does not conform to the expected format.",
+                                                                 DiagnosticReportSeverity.Silent);
+
    public DiagnosticDescriptor DuplicateProvinceDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                           10,
-                                                                           "Duplicate Province Definition",
-                                                                           DiagnosticSeverity.Error,
-                                                                           "Duplicate province definition found for '{0}'.",
-                                                                           "Provinces must have unique names. This error indicates that a province with the same name already exists.",
-                                                                           DiagnosticReportSeverity.PopupNotify);
-   
+                                                                          10,
+                                                                          "Duplicate Province Definition",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "Duplicate province definition found for '{0}'.",
+                                                                          "Provinces must have unique names. This error indicates that a province with the same name already exists.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
+
    public DiagnosticDescriptor DuplicateAreaDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                           11,
-                                                                           "Duplicate Area Definition",
-                                                                           DiagnosticSeverity.Error,
-                                                                           "Duplicate area definition found for '{0}'.",
-                                                                           "Areas must have unique names. This error indicates that an area with the same name already exists.",
-                                                                           DiagnosticReportSeverity.PopupNotify);
-   
-    public DiagnosticDescriptor DuplicateRegionDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                           12,
-                                                                           "Duplicate Region Definition",
-                                                                           DiagnosticSeverity.Error,
-                                                                           "Duplicate region definition found for '{0}'.",
-                                                                           "Regions must have unique names. This error indicates that a region with the same name already exists.",
-                                                                           DiagnosticReportSeverity.PopupNotify);
-    
-    public DiagnosticDescriptor DuplicateSuperRegionDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                           13,
-                                                                           "Duplicate Super Region Definition",
-                                                                           DiagnosticSeverity.Error,
-                                                                           "Duplicate super region definition found for '{0}'.",
-                                                                           "Super regions must have unique names. This error indicates that a super region with the same name already exists.",
-                                                                           DiagnosticReportSeverity.PopupNotify);
-    
-    public DiagnosticDescriptor DuplicateContinentDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                      11,
+                                                                      "Duplicate Area Definition",
+                                                                      DiagnosticSeverity.Error,
+                                                                      "Duplicate area definition found for '{0}'.",
+                                                                      "Areas must have unique names. This error indicates that an area with the same name already exists.",
+                                                                      DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor DuplicateRegionDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                        12,
+                                                                        "Duplicate Region Definition",
+                                                                        DiagnosticSeverity.Error,
+                                                                        "Duplicate region definition found for '{0}'.",
+                                                                        "Regions must have unique names. This error indicates that a region with the same name already exists.",
+                                                                        DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor DuplicateSuperRegionDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                             13,
+                                                                             "Duplicate Super Region Definition",
+                                                                             DiagnosticSeverity.Error,
+                                                                             "Duplicate super region definition found for '{0}'.",
+                                                                             "Super regions must have unique names. This error indicates that a super region with the same name already exists.",
+                                                                             DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor DuplicateContinentDefinition { get; } = new(DiagnosticCategory.Parsing,
                                                                            14,
                                                                            "Duplicate Continent Definition",
                                                                            DiagnosticSeverity.Error,
