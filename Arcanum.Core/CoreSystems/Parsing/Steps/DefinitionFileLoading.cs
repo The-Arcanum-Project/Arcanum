@@ -255,6 +255,11 @@ public class DefinitionFileLoading : FileLoadingService
 
    public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
    {
+      Globals.Areas.Clear();
+      Globals.Continents.Clear();
+      Globals.Provinces.Clear();
+      Globals.Regions.Clear();
+      Globals.SuperRegions.Clear();
       return true;
    }
 }
