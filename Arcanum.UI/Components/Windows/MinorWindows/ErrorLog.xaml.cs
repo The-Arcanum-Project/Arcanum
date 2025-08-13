@@ -1,16 +1,20 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Shapes;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Windows.PopUp;
+using Path = System.IO.Path;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -155,7 +159,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       FilterComboBox.SelectionChanged += (_, _) => QuerySearch(SearchTextBox.SearchInputTextBox.Text);
 
       FilterComboBox.ItemsSource = Enum.GetValues(typeof(FilterType));
-      ErrorLogListView.ItemsSource = new ListCollectionView(ErrorManager.Diagnostics);
+      ErrorLogDataGrid.ItemsSource = new ListCollectionView(ErrorManager.Diagnostics);
 
       SearchTextBox.RequestSearch = QuerySearch;
       SearchTextBox.SearchInputTextBox.TextChanged += (_, _) =>
@@ -183,7 +187,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          settingsPropWindow.ShowDialog();
          QuerySearch(SearchTextBox.SearchInputTextBox.Text);
       };
-
+      
       _isFullyLoaded = true;
    }
 
@@ -192,7 +196,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       if (!_isFullyLoaded)
          return;
 
-      if (ErrorLogListView.ItemsSource is not ListCollectionView lcv)
+      if (ErrorLogDataGrid.ItemsSource is not ListCollectionView lcv)
          throw new InvalidOperationException("DataContext is not a CollectionView.");
 
       lcv.SortDescriptions.Clear();
@@ -211,9 +215,9 @@ public partial class ErrorLog : INotifyPropertyChanged
       lcv.Refresh();
    }
 
-   private void ErrorLogListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+   private void ErrorLogListView_OnSelectionChanged(object sender, SelectedCellsChangedEventArgs s)
    {
-      if (ErrorLogListView.SelectedItem is Diagnostic diagnostic)
+      if (ErrorLogDataGrid.SelectedItem is Diagnostic diagnostic)
       {
          ErrorName = diagnostic.Descriptor.Name;
          ErrorMessage = diagnostic.Message;
@@ -228,7 +232,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorResolution = string.Empty;
       }
       
-      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+      if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
       
       SelectedSeverity = selectedDiagnostic.Severity;
@@ -310,7 +314,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+      if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
 
       ProcessHelper.OpenFolder(selectedDiagnostic.Context.FilePath);
@@ -318,13 +322,28 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    private void OpenFileAtPos_OnClick(object sender, RoutedEventArgs e)
    {
-      if (ErrorLogListView.SelectedItem is not Diagnostic selectedDiagnostic)
+      if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
 
       ProcessHelper.OpenFileAtLine(selectedDiagnostic.Context.FilePath,
                                    selectedDiagnostic.Context.LineNumber,
                                    selectedDiagnostic.Context.ColumnNumber,
                                    PreferredEditor.VsCode);
+   }
+
+   private void ExportToCsv_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (ErrorLogDataGrid.ItemsSource is not List<Diagnostic> diagnostics)
+         return;
+
+      var csvContent = new StringBuilder();
+      csvContent.AppendLine("Severity,Message,Action,DescriptionFilePath/LineNumber/ColumnNumber");
+
+      foreach (var diagnostic in diagnostics)
+         csvContent.AppendLine($"{diagnostic.Severity},{diagnostic.Descriptor.Message.Replace('\n', ';')}," +
+                               $"{diagnostic.Action.Replace('\n', ';')},{diagnostic.Descriptor.Description.Replace('\n', ';')},{diagnostic.Context.ToErrorString.Replace('\n', ';')}");
+
+      IO.WriteAllText(Path.Combine(IO.GetArcanumDataPath, "ErrorLog.csv"), csvContent.ToString(), Encoding.UTF8);
    }
 }
 

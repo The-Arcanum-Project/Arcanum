@@ -50,18 +50,18 @@
                             <Rectangle.Stroke>
                                 <LinearGradientBrush EndPoint = "0.5,1"
                                                      StartPoint = "0.5,0">
-                                    <GradientStop Color = "{DynamicResource BorderLightColor}"
+                                    <GradientStop Color = "Blue"
                                                   Offset = "0" />
-                                    <GradientStop Color = "{DynamicResource BorderMediumColor}"
+                                    <GradientStop Color = "Blue"
                                                   Offset = "1" />
                                 </LinearGradientBrush>
                             </Rectangle.Stroke>
                             <Rectangle.Fill>
                                 <LinearGradientBrush EndPoint = "0.5,1"
                                                      StartPoint = "0.5,0">
-                                    <GradientStop Color = "{DynamicResource ControlLightColor}"
+                                    <GradientStop Color = "GreenYellow"
                                                   Offset = "0" />
-                                    <GradientStop Color = "{DynamicResource ControlMediumColor}"
+                                    <GradientStop Color = "GreenYellow"
                                                   Offset = "1" />
                                 </LinearGradientBrush>
                             </Rectangle.Fill>
@@ -120,7 +120,7 @@
                                                                       Storyboard.TargetProperty = "(Panel.Background).
                       (SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime = "0"
-                                                                 Value = "{DynamicResource ControlLightColor}" />
+                                                                 Value = "GreenYellow" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -506,10 +506,7 @@
                                                Grid.Row = "0"
                                                Grid.RowSpan = "2"
                                                SelectiveScrollingGrid.SelectiveScrollingOrientation = "Vertical"
-                                               Visibility = "{Binding HeadersVisibility, 
-                ConverterParameter={x:Static DataGridHeadersVisibility.Row}, 
-                Converter={x:Static DataGrid.HeadersVisibilityConverter}, 
-                RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
+                                               Visibility = "Collapsed" />
                         </SelectiveScrollingGrid>
                     </Border>
                 </ControlTemplate>
@@ -524,7 +521,7 @@
         <Setter Property = "Height"
                 Value = "8" />
         <Setter Property = "Background"
-                Value = "Transparent" />
+                Value = "Red" />
         <Setter Property = "Cursor"
                 Value = "SizeNS" />
         <Setter Property = "Template">
@@ -645,17 +642,10 @@
                 <ControlTemplate TargetType = "{x:Type DataGridColumnHeader}">
                     <Grid>
                         <Border x:Name = "columnHeaderBorder"
-                                BorderThickness = "1"
-                                Padding = "3,0,3,0">
-                            <Border.BorderBrush>
-                                <LinearGradientBrush EndPoint = "0.5,1"
-                                                     StartPoint = "0.5,0">
-                                    <GradientStop Color = "{DynamicResource BorderLightColor}"
-                                                  Offset = "0" />
-                                    <GradientStop Color = "{DynamicResource BorderDarkColor}"
-                                                  Offset = "1" />
-                                </LinearGradientBrush>
-                            </Border.BorderBrush>
+                                Margin=" 0, 2"
+                                BorderThickness = "1, 0, 1,1"
+                                Padding = "3,0,3,0"
+                                BorderBrush="{StaticResource RowAlternatingColorColorBrush}">
                             <Border.Background>
                                 <SolidColorBrush Color="{StaticResource InlineBackColor}"></SolidColorBrush>
                             </Border.Background>

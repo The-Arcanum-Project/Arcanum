@@ -25,7 +25,8 @@ public static class ProcessHelper
       }
       catch (Exception e)
       {
-         AppData.WindowLinker.ShowMBox($"Failed to open file in Notepad++: {e.Message}{Environment.NewLine}Please open the url yourself {path}");
+         AppData.WindowLinker
+                .ShowMBox($"Failed to open file in Notepad++: {e.Message}{Environment.NewLine}Please open the url yourself {path}");
          return false;
       }
 
@@ -79,7 +80,8 @@ public static class ProcessHelper
       }
       catch (Exception ex)
       {
-         AppData.WindowLinker.ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
+         AppData.WindowLinker
+                .ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
          return false;
       }
    }
@@ -92,7 +94,8 @@ public static class ProcessHelper
       }
       catch (Exception ex)
       {
-         AppData.WindowLinker.ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
+         AppData.WindowLinker
+                .ShowMBox($"Failed to open the browser: {ex.Message}{Environment.NewLine}Please open the url yourself {link}");
       }
    }
 
@@ -110,17 +113,22 @@ public static class ProcessHelper
 
    public static bool OpenFolder(string path)
    {
+      string validPath;
       if (Directory.Exists(path))
+         validPath = path;
+      else if (File.Exists(path))
+         validPath = Path.GetDirectoryName(path) ?? string.Empty;
+      else
       {
-         Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
-         return true;
+         AppData.WindowLinker.ShowMBox($"The path {path} can not be opened",
+                                       "Folder can not be opened",
+                                       MBoxButton.OK,
+                                       MessageBoxImage.Warning);
+         return false;
       }
 
-      AppData.WindowLinker.ShowMBox($"The path {path} can not be opened",
-                                    "Folder can not be opened",
-                                    MBoxButton.OK,
-                                    MessageBoxImage.Warning);
-      return false;
+      Process.Start(new ProcessStartInfo { FileName = validPath, UseShellExecute = true });
+      return true;
    }
 
    public static bool OpenFile(string path)
