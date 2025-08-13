@@ -73,6 +73,7 @@
                          CaretBrush = "{StaticResource DefaultForeColorBrush}"
                          TextChanged = "SearchInputTextBox_OnTextChanged" />
 
+
             </Grid>
         </DockPanel>
     </Border>

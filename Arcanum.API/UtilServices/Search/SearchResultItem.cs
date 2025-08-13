@@ -1,8 +1,6 @@
 ﻿
 
-using Arcanum.API.UtilServices.Search;
-
-namespace Arcanum.UI.Components.StyleClasses;
+namespace Arcanum.API.UtilServices.Search;
 
 public class SearchResultItem : ISearchResult
 {

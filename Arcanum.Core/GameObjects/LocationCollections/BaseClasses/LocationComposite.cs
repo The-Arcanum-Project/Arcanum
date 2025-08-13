@@ -1,12 +1,24 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem;
+﻿using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
-public abstract class LocationComposite(string name, FileInformation information) : ISaveable // TODO: @Melco @Minnator implement ISaveable here
+public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco @Minnator implement ISaveable here
 {
-   public string Name { get; } = name.Trim();
+   protected LocationComposite(string name, FileInformation information)
+   {
+      Name = name.Trim();
+      SearchTerms = [Name];
+      FileInformation = information;
+
+      Queastor.GlobalInstance.AddToIndex(this);
+   }
+
+   public string Name { get; }
    public List<LocationComposite> Parents { get; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }
@@ -49,6 +61,36 @@ public abstract class LocationComposite(string name, FileInformation information
 
    public static LocationComposite Empty { get; } = Location.Empty;
 
-   public FileInformation FileInformation { get; } = information;
+   public FileInformation FileInformation { get; }
    public SaveableType SaveType { get; } = SaveableType.Location;
+
+   #region ISearchable Implementation
+
+   public string GetNamespace => BuildNamespace();
+   public string ResultName
+      => $"{Name} - ({string.Join(',', Parents)})"; // TODO: @Minnator replace this with the localisation of the objects once localisation is implemented
+   public List<string> SearchTerms { get; set; }
+   public void OnSearchSelected() => AppData.WindowLinker.OpenPropertyGridWindow(this);
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, Name, GetNamespace);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.MapObjects;
+
+   protected string BuildNamespace()
+   {
+      foreach (var parent in Parents)
+         if (parent.LCType == LCType + 1)
+            return $"{parent.GetNamespace}{((ISearchable)this).NamespaceSeparator}{LCType}";
+      return $"{LCType}";
+   }
+
+   public float GetRelevanceScore(string query)
+   {
+      var minDistance = int.MaxValue;
+      foreach (var term in SearchTerms)
+         if (Queastor.LevinsteinDistance(term, query) < minDistance)
+            minDistance = Queastor.LevinsteinDistance(term, query);
+      return minDistance;
+   }
+
+   #endregion
 }

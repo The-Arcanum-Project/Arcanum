@@ -3,21 +3,19 @@
                  xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
                  xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                  xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
                  mc:Ignorable = "d"
                  Title = "PropertyGridWindow"
                  Height = "450"
-                 Width = "300"
+                 Width = "500"
                  Background = "{StaticResource DefaultBackColorBrush}"
                  BorderThickness="0"
                  FooterHeight = "4"
-                 >
+                 WindowStartupLocation="CenterScreen">
     
     
-    <baseControls:PropertyGrid x:Name = "PropertyGrid"
-                               Margin = "2"
+    <baseControls:PropertyGrid Margin = "2"
                                Background = "{StaticResource DefaultBackColorBrush}"
                                BorderThickness = "0"
                                BorderBrush = "{StaticResource DefaultBorderColorBrush}"

@@ -11,7 +11,7 @@ public class WindowLinkerImpl : IWindowLinker
 {
    public void OpenPropertyGridWindow(object obj)
    {
-      new PropertyGridWindow(obj).ShowDialog();
+      OpenWindowOnSTAThread(GetPropertyGridOrCollectionView(obj), true);
    }
 
    public void OpenMainMenuScreen()
@@ -28,8 +28,16 @@ public class WindowLinkerImpl : IWindowLinker
       foreach (var window in Application.Current.Windows)
          if (window is not MainMenuScreen)
             ((Window)window).Close();
-      mainMenu.Show();
+      OpenWindowOnSTAThread(mainMenu, false);
       mainMenu.Activate();
+   }
+
+   private void OpenWindowOnSTAThread(Window window, bool asDialog)
+   {
+      if (Application.Current.Dispatcher.CheckAccess())
+         window.Show();
+      else
+         Application.Current.Dispatcher.Invoke(asDialog ? window.ShowDialog : window.Show);
    }
 
    public MBoxResult ShowMBox(string message,

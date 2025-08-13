@@ -366,6 +366,7 @@ public static class DefaultCommands
       yield return CreateSetClearanceCommand(consoleService);
       yield return DebuggingCommands.CreateSearchCommand();
       yield return DebuggingCommands.CreateSearchExeCommand();
+      yield return DebuggingCommands.PrintQueastorStatsCommand();
       yield return BrowseCommand();
       yield return PrintLoadingTimesCommand();
    }

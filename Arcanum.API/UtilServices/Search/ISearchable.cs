@@ -9,4 +9,5 @@ public interface ISearchable
    public float GetRelevanceScore(string query) => 1f;
    public ISearchResult VisualRepresentation { get; }
    public IQueastorSearchSettings.Category SearchCategory { get; }
+   public char NamespaceSeparator => '>'; 
 }

@@ -56,5 +56,31 @@ public static class DebuggingCommands
                                                           aliases: []);
    }
 
-   
+   public static ICommandDefinition PrintQueastorStatsCommand()
+   {
+      const string usage = "queastor_stats | Prints the current Queastor statistics.";
+      return new DefaultCommands.DefaultCommandDefinition(name: "queastor_stats",
+                                                          usage: usage,
+                                                          execute: _ =>
+                                                          {
+                                                             var numOfEntries =
+                                                                Queastor.Queastor.GlobalInstance.SearchIndexSize;
+                                                             var numPerCategory =
+                                                                Queastor.Queastor.GlobalInstance
+                                                                        .GetEntriesPerCategory();
+
+                                                             List<string> stats =
+                                                             [
+                                                                $"Queastor Index Size: {numOfEntries}",
+                                                                "   Entries per Category:",
+                                                             ];
+                                                             foreach (var (category, count) in numPerCategory)
+                                                                stats.Add($"\t- {category}: {count}");
+                                                             return stats.ToArray();
+                                                          },
+                                                          ClearanceLevel.Debug,
+                                                          category: DefaultCommands.CommandCategory
+                                                            .Debug,
+                                                          aliases: ["qstat"]);
+   }
 }

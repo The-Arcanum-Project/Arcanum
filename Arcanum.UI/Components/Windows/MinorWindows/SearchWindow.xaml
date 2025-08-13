@@ -4,6 +4,7 @@
         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
         xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
+        xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
         mc:Ignorable = "d"
         Title = "SearchWindow"
         Height = "450"
@@ -23,6 +24,7 @@
                 <ResourceDictionary Source = "/Components/Styles/Specific/SearchResultListView.xaml"> </ResourceDictionary>
                 <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -38,8 +40,7 @@
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row = "0"
-                  x:Name = "CategoryButtonsGrid">
+            <Grid Grid.Row = "0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "*" />
                     <ColumnDefinition Width = "*" />
@@ -52,36 +53,51 @@
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "AllToggleButton"
-                              Click="AllToggleButton_OnClick">
-                    <TextBlock FontSize="15" Margin="2"> All </TextBlock>
+                              Click = "AllToggleButton_OnClick">
+                    <TextBlock FontSize = "15"
+                               Margin = "2">
+                        All
+                    </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "1"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "UiElementsToggleButton"
-                              Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="15" Margin="2"> UI Elements </TextBlock>
+                              Click = "SettingsToggleButton_OnClick">
+                    <TextBlock FontSize = "15"
+                               Margin = "2">
+                        UI Elements
+                    </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "2"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "SettingsToggleButton"
-                              Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="15" Margin="2"> Settings </TextBlock>
+                              Click = "SettingsToggleButton_OnClick">
+                    <TextBlock FontSize = "15"
+                               Margin = "2">
+                        Settings
+                    </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "3"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "GameObjectsToggleButton"
-                              Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="15" Margin="2"> Game Objects </TextBlock>
+                              Click = "SettingsToggleButton_OnClick">
+                    <TextBlock FontSize = "15"
+                               Margin = "2">
+                        Game Objects
+                    </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "4"
                               Margin = "2"
                               IsChecked = "True"
                               x:Name = "MapObjectsToggleButton"
-                              Click="SettingsToggleButton_OnClick">
-                    <TextBlock FontSize="15" Margin="2"> Map Objects </TextBlock>
+                              Click = "SettingsToggleButton_OnClick">
+                    <TextBlock FontSize = "15"
+                               Margin = "2">
+                        Map Objects
+                    </TextBlock>
                 </ToggleButton>
             </Grid>
 
@@ -90,6 +106,23 @@
                                         BorderThickness = "0"
                                         Margin = "0, 4, 0, 0">
             </userControls:SearchTextBox>
+
+
+            <TextBlock Grid.Row = "1"
+                       Grid.Column = "0"
+                       Visibility = "{Binding ShowCount, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibilityConverter}}"
+                       VerticalAlignment = "Center"
+                       HorizontalAlignment = "Right"
+                       Margin = "0, 3, 30, 0"
+                       Text = "{Binding SearchResultCount, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Found: {0} results'}">
+            </TextBlock>
+
+            <TextBlock Grid.Row = "1"
+                       VerticalAlignment = "Center"
+                       Margin = "0, 0, 50, 0"
+                       HorizontalAlignment = "Right"
+                       Text = "{Binding }">
+            </TextBlock>
 
             <Rectangle Grid.Row = "2"
                        Fill = "{StaticResource DefaultBorderColorBrush}"

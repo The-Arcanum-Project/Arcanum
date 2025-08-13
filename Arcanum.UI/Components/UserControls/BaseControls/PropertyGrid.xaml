@@ -128,7 +128,8 @@
                                          Padding = "0"
                                          VerticalAlignment = "Stretch"
                                          Click = "ViewObject_Button_Click"
-                                         HorizontalAlignment = "Stretch">
+                                         HorizontalAlignment = "Stretch"
+                                         BorderThickness = "0">
                     <Image Source = "/Assets/Icons/20x20/Eye20x20.png"
                            VerticalAlignment = "Center"
                            HorizontalAlignment = "Center"
@@ -158,7 +159,8 @@
                                          Padding = "0"
                                          VerticalAlignment = "Stretch"
                                          Click = "ViewCollection_Button_Click"
-                                         HorizontalAlignment = "Stretch">
+                                         HorizontalAlignment = "Stretch"
+                                         BorderThickness = "0">
                     <Image Source = "/Assets/Icons/20x20/Eye20x20.png"
                            VerticalAlignment = "Center"
                            HorizontalAlignment = "Center"

@@ -1,4 +1,7 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿#define TIME_QUEASTOR
+
+using System.Diagnostics;
+using Arcanum.API.UtilServices.Search;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
@@ -6,6 +9,8 @@ public class Queastor : IQueastor
 {
    private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
    private readonly BkTree _bkTree = new();
+
+   public int SearchIndexSize { get; private set; } = 0;
 
    public Queastor(IQueastorSearchSettings queastorSearchSettings)
    {
@@ -33,6 +38,7 @@ public class Queastor : IQueastor
 
       list.Add(item);
       _bkTree.Add(lowerTerm);
+      SearchIndexSize++;
    }
 
    public void RemoveFromIndex(ISearchable item)
@@ -43,6 +49,7 @@ public class Queastor : IQueastor
          if (_invertedIndex.TryGetValue(lowerTerm, out var list))
          {
             list.Remove(item);
+            SearchIndexSize--;
             if (list.Count == 0)
                _invertedIndex.Remove(lowerTerm);
          }
@@ -55,11 +62,9 @@ public class Queastor : IQueastor
       foreach (var term in oldTerms)
       {
          var lowerTerm = term.ToLowerInvariant();
-         if (newTerms.Contains(lowerTerm))
-         {
-            newTerms.Remove(lowerTerm);
+         
+         if (newTerms.Remove(lowerTerm))
             continue;
-         }
 
          if (_invertedIndex.TryGetValue(lowerTerm, out var list))
          {
@@ -75,6 +80,9 @@ public class Queastor : IQueastor
 
    public List<ISearchable> Search(string query)
    {
+#if TIME_QUEASTOR
+      var sw = Stopwatch.StartNew();
+#endif
       query = query.ToLowerInvariant();
       var results = new HashSet<ISearchable>();
 
@@ -94,11 +102,14 @@ public class Queastor : IQueastor
                filteredResults.UnionWith(items);
                continue;
             }
-            
+
             // Filter by search category if specified
             foreach (var item in items.Where(item => (item.SearchCategory & Settings.SearchCategory) != 0))
                filteredResults.Add(item);
          }
+#if TIME_QUEASTOR
+      Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {results.Count} exact matches and {filteredResults.Count} fuzzy matches.");
+#endif
 
       return ApplySorting(filteredResults, query);
    }
@@ -114,13 +125,13 @@ public class Queastor : IQueastor
       {
          case IQueastorSearchSettings.SortingOptions.Relevance:
             itemsList.Sort((a, b) =>
-                              b.GetRelevanceScore(query).CompareTo(a.GetRelevanceScore(query)));
+                              -b.GetRelevanceScore(query).CompareTo(a.GetRelevanceScore(query)));
             break;
          case IQueastorSearchSettings.SortingOptions.Namespace:
             itemsList.Sort((a, b) =>
             {
-               var nsA = a.GetNamespace.Split('>');
-               var nsB = b.GetNamespace.Split('>');
+               var nsA = a.GetNamespace.Split(a.NamespaceSeparator);
+               var nsB = b.GetNamespace.Split(b.NamespaceSeparator);
                var len = Math.Min(nsA.Length, nsB.Length);
                for (var i = 0; i < len; i++)
                {
@@ -203,5 +214,19 @@ public class Queastor : IQueastor
          }
 
       return dp[a.Length, b.Length];
+   }
+
+   public Dictionary<IQueastorSearchSettings.Category, int> GetEntriesPerCategory()
+   {
+      var categoryCounts = new Dictionary<IQueastorSearchSettings.Category, int>();
+      foreach (var entry in _invertedIndex)
+      {
+         var category = (IQueastorSearchSettings.Category)entry.Value.FirstOrDefault()?.SearchCategory!;
+         var count = categoryCounts.GetValueOrDefault(category, 0);
+
+         categoryCounts[category] = count + entry.Value.Count;
+      }
+      
+      return categoryCounts;
    }
 }

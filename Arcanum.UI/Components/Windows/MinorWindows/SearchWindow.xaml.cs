@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -8,18 +10,45 @@ using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
-public partial class SearchWindow
+public partial class SearchWindow : INotifyPropertyChanged
 {
    private Queastor QueryQueastor { get; set; } = null!;
+   private static string _lastSearchQuery = string.Empty;
 
-   private readonly Window _parent =
-      Application.Current.MainWindow ?? throw new InvalidOperationException("MainWindow is not set.");
+   // private readonly Window _parent =
+   //    Application.Current.MainWindow ?? throw new InvalidOperationException("MainWindow is not set.");
+
+   public static readonly DependencyProperty ShowCountProperty =
+      DependencyProperty.Register(nameof(ShowCount),
+                                  typeof(bool),
+                                  typeof(SearchWindow),
+                                  new(true));
+
+   private int _searchResultCount;
+
+   public bool ShowCount
+   {
+      get => (bool)GetValue(ShowCountProperty);
+      set => SetValue(ShowCountProperty, value);
+   }
+
+   public int SearchResultCount
+   {
+      get => _searchResultCount;
+      private set
+      {
+         if (value == _searchResultCount)
+            return;
+
+         _searchResultCount = value;
+         OnPropertyChanged();
+      }
+   }
 
    public ICommand CloseCommand => new RelayCommand(Close);
 
@@ -33,34 +62,46 @@ public partial class SearchWindow
 
       Closing += (_, _) => AppData.QueastorSearchSettings = (QueastorSearchSettings)QueryQueastor.Settings;
       Deactivated += OnPopupDeactivated;
+
+      SearchTextBox.SearchInputTextBox.TextChanged += (sender, _) =>
+      {
+         if (sender is TextBox textBox)
+            _lastSearchQuery = textBox.Text;
+      };
+
+      Loaded += (_, _) =>
+      {
+         SearchTextBox.SearchInputTextBox.Text = _lastSearchQuery;
+         SearchTextBox.SearchInputTextBox.CaretIndex = _lastSearchQuery.Length;
+      };
    }
 
-   private bool _isClosing;
+   // private bool _isClosing;
 
    private void OnPopupDeactivated(object? sender, EventArgs e)
    {
-      if (_isClosing)
-         return;
-
-      _isClosing = true;
-      Close();
-      var mousePosition = Mouse.GetPosition(_parent);
-
-      var parentRect = new Rect(_parent.Left,
-                                _parent.Top,
-                                _parent.Width,
-                                _parent.Height);
-
-      var popupRect = new Rect(Left,
-                               Top,
-                               Width,
-                               Height);
-
-      if (parentRect.Contains(mousePosition) && !popupRect.Contains(mousePosition))
-         Close();
-
-      _parent.Focus();
-      Keyboard.Focus(_parent);
+      // if (_isClosing)
+      //    return;
+      //
+      // _isClosing = true;
+      // Close();
+      // var mousePosition = Mouse.GetPosition(_parent);
+      //
+      // var parentRect = new Rect(_parent.Left,
+      //                           _parent.Top,
+      //                           _parent.Width,
+      //                           _parent.Height);
+      //
+      // var popupRect = new Rect(Left,
+      //                          Top,
+      //                          Width,
+      //                          Height);
+      //
+      // if (parentRect.Contains(mousePosition) && !popupRect.Contains(mousePosition))
+      //    Close();
+      //
+      // _parent.Focus();
+      // Keyboard.Focus(_parent);
    }
 
    /// <summary>
@@ -100,15 +141,18 @@ public partial class SearchWindow
          NoResultsTextBlock.Visibility = Visibility.Visible;
       else
          NoResultsTextBlock.Visibility = Visibility.Collapsed;
+
+      SearchResultCount = SearchResultsListBox.Items.Count;
    }
 
    protected override void OnPreviewKeyDown(KeyEventArgs e)
    {
       if (e.Key == Key.Escape)
       {
-         _isClosing = true;
+         // _isClosing = true;
          CloseCommand.Execute(null);
       }
+
       base.OnPreviewKeyDown(e);
    }
 
@@ -198,5 +242,22 @@ public partial class SearchWindow
             Title = "Search Settings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
          };
       settingsPropWindow.ShowDialog();
+   }
+
+   public event PropertyChangedEventHandler? PropertyChanged;
+
+   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   {
+      PropertyChanged?.Invoke(this, new(propertyName));
+   }
+
+   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+   {
+      if (EqualityComparer<T>.Default.Equals(field, value))
+         return false;
+
+      field = value;
+      OnPropertyChanged(propertyName);
+      return true;
    }
 }
