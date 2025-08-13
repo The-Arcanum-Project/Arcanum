@@ -3,6 +3,7 @@ using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
@@ -95,6 +96,8 @@ public class LifecycleManager
 
       // Save configs
       JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.Settings);
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.DIAGNOSTIC_CONFIG_PATH),
+                              Config.Settings.ErrorDescriptors.Save());
 
 #if DEBUG
       SaveDebugElements();
@@ -107,6 +110,11 @@ public class LifecycleManager
          JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
                                                                         Config.CONFIG_FILE_PATH)) ??
          new MainSettingsObj();
+
+      var edcs =
+         JsonProcessor.DefaultDeserialize<List<ErrorDataClass>>(Path.Combine(IO.GetArcanumDataPath,
+                                                                             Config.DIAGNOSTIC_CONFIG_PATH)) ?? [];
+      Config.Settings.ErrorDescriptors.WriteConfig(edcs);
    }
 
 #if DEBUG

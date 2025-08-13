@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem;
+﻿using System.Text.Json.Serialization;
+using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.GlobalStates.BackingClasses;
 
@@ -14,6 +15,7 @@ public class MainSettingsObj
    [IsSubMenu("Key Binds")]
    public UserKeyBinds UserKeyBinds { get; set; } = new();
    
+   [JsonIgnore]
    [IsSubMenu("Error Handling")]
    public ErrorDescriptors ErrorDescriptors { get; set; } = ErrorDescriptors.Instance;
    
