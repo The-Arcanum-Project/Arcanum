@@ -1,6 +1,10 @@
 using System.Windows;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.WindowLinker;
 using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.WpfTesting;
 
 namespace Arcanum.UI;
 
@@ -38,11 +42,17 @@ internal static class Program
       var pluginHost = new PluginHost.PluginHost();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
 
+      //var mw = new ExampleWindow();
       var mw = new MainMenuScreen();
       app.MainWindow = mw;
-
+      
+      //var tracer = new MapTracing();
+      //tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp", mw);
+      //tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", mw);
+      
       mw.Show();
       app.Run();
+
       
       LifecycleManager.Instance.RunShutdownSequence();
    }
