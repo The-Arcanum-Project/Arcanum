@@ -1,5 +1,6 @@
 ﻿#define BROWSABLE_HASHSETS
 
+using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
@@ -16,12 +17,13 @@ public enum AppState
 
 public static class Globals
 {
-   public static HashSet<Location> Locations { get; } = [];
+   public static Dictionary<string, Location> Locations { get; } = [];
    public static HashSet<Province> Provinces { get; } = [];
    public static HashSet<Area> Areas { get; } = [];
    public static HashSet<Region> Regions { get; } = [];
    public static HashSet<SuperRegion> SuperRegions { get; } = [];
    public static HashSet<Continent> Continents { get; } = [];
+   public static DefaultMapDefinition DefaultMapDefinition { get; set; }
    
 
 #if BROWSABLE_HASHSETS
@@ -31,7 +33,7 @@ public static class Globals
       get
       {
          if (_locationsList.Count == 0)
-            _locationsList = Locations.ToList();
+            _locationsList = Locations.Values.ToList();
          return _locationsList;
       }
       set => _locationsList = value;

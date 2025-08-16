@@ -98,7 +98,8 @@
                   Grid.Column = "0"
                   x:Name = "ErrorLogDataGrid"
                   AutoGenerateColumns = "False"
-                  SelectedCellsChanged = "ErrorLogListView_OnSelectionChanged">
+                  SelectedCellsChanged = "ErrorLogListView_OnSelectionChanged"
+                  IsReadOnly="True">
 
             <DataGrid.Columns>
                 <!-- Severity Icon Column -->

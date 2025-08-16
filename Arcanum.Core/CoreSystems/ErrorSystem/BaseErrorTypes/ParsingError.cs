@@ -74,14 +74,17 @@ public class ParsingError : ILazySingleton
                                                              "A block has sub-blocks defined where no sub-blocks are allowed or the number of allowed sub-blocks is exceeded.",
                                                              DiagnosticReportSeverity.Silent);
 
+   /// <param name="0">Expected content element count</param>
+   /// <param name="1">Actual content element count</param>
    public DiagnosticDescriptor InvalidContentElementCount { get; } = new(DiagnosticCategory.Parsing,
                                                                          8,
                                                                          "Invalid Content Element Count",
                                                                          DiagnosticSeverity.Error,
-                                                                         "Block contains an invalid number of content elements.",
+                                                                         "Block contains an invalid number of content elements. Expected {0}, but found {1}.",
                                                                          "A block has an invalid number of content elements defined, which does not match the expected count.",
                                                                          DiagnosticReportSeverity.Silent);
 
+   /// <param name="0">The location name that is invalid</param>
    public DiagnosticDescriptor InvalidLocationKey { get; } = new(DiagnosticCategory.Parsing,
                                                                  9,
                                                                  "Invalid Location Name",
@@ -129,4 +132,69 @@ public class ParsingError : ILazySingleton
                                                                            "Duplicate continent definition found for '{0}'.",
                                                                            "Continents must have unique names. This error indicates that a continent with the same name already exists.",
                                                                            DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The blocks parent</param>
+   /// <param name="1">The expected block count</param>
+   /// <param name="2">The actual block count</param>
+   public DiagnosticDescriptor InvalidBlockCount { get; } = new(DiagnosticCategory.Parsing,
+                                                                15,
+                                                                "Invalid Block Count",
+                                                                DiagnosticSeverity.Error,
+                                                                "The block count of '{0}' is invalid. Expected {1}, but found {2}.",
+                                                                "This error indicates that the number of blocks defined does not match the expected count.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   public DiagnosticDescriptor BoolParsingError { get; } = new(DiagnosticCategory.Parsing,
+                                                               16,
+                                                               "Boolean Parsing Error",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse boolean value from '{0}'.",
+                                                               "This error indicates that the parser could not convert the provided string to a boolean value. Please ensure it is 'yes' or 'no'.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+   
+    /// <param name="0">The string that could not be parsed</param>
+   public DiagnosticDescriptor IntParsingError { get; } = new(DiagnosticCategory.Parsing,
+                                                               17,
+                                                               "Integer Parsing Error",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse integer value from '{0}'.",
+                                                               "This error indicates that the parser could not convert the provided string to an integer value. Please ensure it is a valid integer.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+   
+   /// <param name="0">The string that could not be parsed</param>
+    public DiagnosticDescriptor FloatParsingError { get; } = new(DiagnosticCategory.Parsing,
+                                                                    18,
+                                                                    "Float Parsing Error",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "Failed to parse float value from '{0}'.",
+                                                                    "This error indicates that the parser could not convert the provided string to a float value. Please ensure it is a valid float.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+    
+   /// <param name="0">The unknown key.</param>
+    public DiagnosticDescriptor UnknownKeyInDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                    19,
+                                                                    "Unknown Key in Definition",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The key '{0}' is not recognized in the current context.",
+                                                                    "This error indicates that the parser encountered a key that is not defined or recognized in the current parsing context.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+   
+   /// <param name="0">The default map collection name that is unknown.</param>
+   public DiagnosticDescriptor UnknownDefaultMapCollectionName { get; } = new(DiagnosticCategory.Parsing,
+                                                                    20,
+                                                                    "Unknown Default Map Collection Name",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The default map collection name '{0}' is not recognized.",
+                                                                    "The only valid location collection names are: sound_tolls, non_ownable, impassable_mountains, volcanoes, earthquakes, sea_zones, lakes.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+   
+   public DiagnosticDescriptor InvalidDefaultMapDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                    21,
+                                                                    "Invalid Default Map Definition",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The default map definition is invalid.",
+                                                                    "The default.map is either missing a bock of location definitions or one of its defining attributes is invalid.",
+                                                                    DiagnosticReportSeverity.PopupError);
+   
 }

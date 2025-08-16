@@ -41,7 +41,8 @@ public class Content(string value, int startLine, int index) : IElement
       }
    }
    
-   public IEnumerable<(string, int)> GetStringListEnumerator()
+   
+   public IEnumerable<(string value, int lineNumber)> GetStringListEnumerator()
    {
       var lines = Value.Split('\n');
       var lineNum = StartLine;

@@ -18,7 +18,8 @@ public class LocationFileLoading : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      HashSet<Location> locations = new(fileObj.Path.Filename.Equals(DEFAULT_LOCATION_FILE_NAME) ? 29_000 : 100);
+      Dictionary<string, Location> locations =
+         new(fileObj.Path.Filename.Equals(DEFAULT_LOCATION_FILE_NAME) ? 29_000 : 100);
 
       var context = new LocationContext(0, 0, fileObj.Path.FullPath);
 
@@ -82,12 +83,12 @@ public class LocationFileLoading : FileLoadingService
             context.ColumnNumber = line.IndexOf(key, StringComparison.Ordinal);
 
             var newLocation = new Location(fInformation, colorInt, key);
-            if (!locations.Add(newLocation))
+            if (!locations.TryAdd(key, newLocation))
             {
                DiagnosticException.LogWarning(context,
-                          ParsingError.Instance.DuplicateLocationDefinition,
-                          GetActionName(),
-                          key);
+                                              ParsingError.Instance.DuplicateLocationDefinition,
+                                              GetActionName(),
+                                              key);
                isFlawless = false;
             }
          }
@@ -95,9 +96,11 @@ public class LocationFileLoading : FileLoadingService
       // if it is null we are not in a multithreaded context
       if (lockObject is not null)
          lock (lockObject)
-            Globals.Locations.UnionWith(locations);
+            foreach (var location in locations)
+               Globals.Locations[location.Key] = location.Value;
       else
-         Globals.Locations.UnionWith(locations);
+         foreach (var location in locations)
+            Globals.Locations[location.Key] = location.Value;
 
       return isFlawless;
    }
@@ -107,14 +110,16 @@ public class LocationFileLoading : FileLoadingService
       List<Location> locationsToRemove = [];
       // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
       // No link here to prevent fileObj allocations
-      foreach (var location in Globals.Locations)
+      foreach (var location in Globals.Locations.Values)
          if (location.FileInformation.FileName.Equals(fileObj.Path.Filename))
             locationsToRemove.Add(location);
 
       if (locationsToRemove.Count == 0)
          return true;
 
-      Globals.Locations.ExceptWith(locationsToRemove);
+      foreach (var locToRemove in locationsToRemove)
+         Globals.Locations.Remove(locToRemove.Name);
+      
       Globals.Locations.TrimExcess();
       return true;
    }

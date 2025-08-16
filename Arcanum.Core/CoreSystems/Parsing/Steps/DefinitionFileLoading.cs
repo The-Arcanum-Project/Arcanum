@@ -14,8 +14,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class DefinitionFileLoading : FileLoadingService
 {
-   private Dictionary<string, Location> _locationCache = null!;
-
    public override string GetFileDataDebugInfo()
    {
       return "Definition File Loading: \n" +
@@ -28,8 +26,6 @@ public class DefinitionFileLoading : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      _locationCache = Globals.Locations.ToDictionary(loc => loc.Name, loc => loc);
-
       var (blocks, content) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
@@ -48,7 +44,6 @@ public class DefinitionFileLoading : FileLoadingService
       foreach (var block in blocks)
          ParseContinent(block, ctx, fileInformation);
 
-      _locationCache = null!;
       return true;
    }
 
@@ -235,7 +230,7 @@ public class DefinitionFileLoading : FileLoadingService
       foreach (var (location, lineNum) in block.ContentElements[0].GetStringListEnumerator())
       {
          if (string.IsNullOrWhiteSpace(location) ||
-             !_locationCache.TryGetValue(location, out var existingLocation))
+             !Globals.Locations.TryGetValue(location, out var existingLocation))
          {
             var ctxInstance = ctx.GetInstance();
             ctxInstance.LineNumber = lineNum;
