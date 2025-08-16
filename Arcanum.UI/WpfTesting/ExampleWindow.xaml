@@ -7,107 +7,26 @@
                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
                         mc:Ignorable = "d"
-                        Height = "450"
-                        Width = "800"
+                        Height = "1020"
+                        Width = "1020"
+                        MinHeight="1020"
+                        MinWidth="1020"
                         FooterHeight="0">
 
-    <styleClasses:BaseWindow.HeaderContent>
-        <StackPanel Orientation = "Horizontal">
-            <ComboBox Width = "100"
-                      Margin = "5">
-                <ComboBox.Items>
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                </ComboBox.Items>
-            </ComboBox>
-        </StackPanel>
-    </styleClasses:BaseWindow.HeaderContent>
-
-    <styleClasses:BaseWindow.FooterContent>
-    
-            <ComboBox Width = "100"
-                      Margin = "5"
-                      IsEditable = "True">
-                <ComboBox.Items>
-                    <ComboBoxItem Content = "Option 1" />
-                    <ComboBoxItem Content = "Option 2" />
-                    <ComboBoxItem Content = "Option 3" />
-                    <ComboBoxItem Content = "Option 4" />
-                    <ComboBoxItem Content = "Option 1" />
-                </ComboBox.Items>
-            </ComboBox>
-    </styleClasses:BaseWindow.FooterContent>
-    
-    <Grid Background = "DarkOliveGreen">
-        <Grid.RowDefinitions>
-            <RowDefinition Height = "1*" />
-        </Grid.RowDefinitions>
-        
-
-        <Border Grid.Row="0"
-                Background = "transparent">
-            
-            <Grid>
-                <baseControls:PropertyGrid SelectedObject="{Binding CurrentSettings}" 
-                                           HorizontalAlignment="Stretch"
-                                           VerticalAlignment="Stretch"/>
-            </Grid>
-            
-            <!-- <TextBox Text = "This is an example window with a custom test control." -->
-            <!--            Style = "{StaticResource BaseTextBoxStyle}" -->
-            <!--            AcceptsReturn = "True"> -->
-            <!-- </TextBox> -->
-        </Border>
-    </Grid>
+    <ScrollViewer x:Name="MainScrollViewer"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  PanningMode="Both"
+                  Background="LightGray">
+        <Canvas Name="drawingCanvas" Background="White" Margin="10" MaxHeight="888" MaxWidth="736"
+                MouseWheel="Window_MouseWheel"
+                MouseDown="Window_MouseDown"
+                MouseUp="Window_MouseUp"
+                MouseMove="Window_MouseMove">
+            <Canvas.LayoutTransform>
+                <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1"/>
+            </Canvas.LayoutTransform>
+        </Canvas>
+    </ScrollViewer>
 
 </styleClasses:BaseWindow>
