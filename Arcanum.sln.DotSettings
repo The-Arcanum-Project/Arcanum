@@ -48,6 +48,10 @@
                                            $ErrorClass$.Instance.$ErrorKey$,
                                            $ActionName$,
                                            $args$);</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2AD2BFBEC38E3F4A90776F97B46E619E/Text/@EntryValue">DiagnosticException.LogWarning(new($lineNumber$, 0, fileObj.Path.FullPath), 
+                                           $ParsingError$.Instance.$InvalidAdjacencyLine$,
+                                           GetActionName(),
+                                           $args$);</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5AB809EBFF057241ADE5017D015E5D83/Text/@EntryValue">public class $Name$
 {
    private static readonly Lazy&lt;$Name$&gt; LazyInstance = new(() =&gt; new ());
@@ -165,6 +169,7 @@ DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
          }</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=acnb/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=CP/@EntryIndexedValue">CP</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=adjacencies/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=kvps/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=melco/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=minnators/@EntryIndexedValue">True</s:Boolean>
