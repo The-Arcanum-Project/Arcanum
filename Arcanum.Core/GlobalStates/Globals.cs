@@ -1,6 +1,7 @@
 ﻿#define BROWSABLE_HASHSETS
 
 using Arcanum.Core.CoreSystems.Parsing.Steps;
+using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 

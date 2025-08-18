@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
@@ -25,7 +27,7 @@ public class Content(string value, int startLine, int index) : IElement
          SavingTemp.AddString(ref tabs, kvp.Value, kvp.Key, ref sb);
    }
 
-   public IEnumerable<(string, int)> GetLineEnumerator() 
+   public IEnumerable<(string, int)> GetLineEnumerator()
    {
       var lines = Value.Split('\n');
       var lineNum = StartLine;
@@ -36,12 +38,13 @@ public class Content(string value, int startLine, int index) : IElement
             lineNum++;
             continue;
          }
+
          yield return (line, lineNum);
+
          lineNum++;
       }
    }
-   
-   
+
    public IEnumerable<(string value, int lineNumber)> GetStringListEnumerator()
    {
       var lines = Value.Split('\n');
@@ -53,13 +56,15 @@ public class Content(string value, int startLine, int index) : IElement
             lineNum++;
             continue;
          }
+
          var strings = line.Split(' ');
          foreach (var str in strings)
             yield return (str, lineNum);
+
          lineNum++;
       }
    }
-   
+
    public IEnumerable<LineKvp<string, string>> GetLineKvpEnumerator(PathObj po,
                                                                     bool showError = true,
                                                                     bool trimQuotes = true)
@@ -80,8 +85,11 @@ public class Content(string value, int startLine, int index) : IElement
             if (split.Length < 2)
             {
                if (showError)
-                  // TODO: Update to use the new error handling system
-                  Console.WriteLine($"Error in file x: Invalid line format at line {lineNum}: '{line}'");
+                  DiagnosticException.LogWarning(new(lineNum, 0, po.FullPath),
+                                                 ParsingError.Instance.InvalidLineFormat,
+                                                 nameof(GetLineKvpEnumerator),
+                                                 lineNum,
+                                                 line);
 
                continue;
             }

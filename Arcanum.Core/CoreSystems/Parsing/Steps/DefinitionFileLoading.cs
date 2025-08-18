@@ -237,7 +237,7 @@ public class DefinitionFileLoading : FileLoadingService
             DiagnosticException.LogWarning(ctxInstance,
                                            ParsingError.Instance.InvalidLocationKey,
                                            GetActionName(),
-                                           province.Name);
+                                           location);
             continue;
          }
 

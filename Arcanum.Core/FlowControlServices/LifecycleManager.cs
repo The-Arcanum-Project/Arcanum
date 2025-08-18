@@ -35,6 +35,8 @@ public class LifecycleManager
    public PluginManager PluginManager { get; private set; } = null!;
    private static readonly LifecycleManager LfmInstance = new();
 
+   public event EventHandler? OnApplicationShutDownCompleted;
+
    public void RunStartUpSequence(IPluginHost host)
    {
 #if DEBUG
@@ -102,6 +104,9 @@ public class LifecycleManager
 #if DEBUG
       SaveDebugElements();
 #endif
+      
+      // Step 4: Notify that the application has shut down
+      OnApplicationShutDownCompleted?.Invoke(this, EventArgs.Empty);
    }
 
    private void LoadConfig()

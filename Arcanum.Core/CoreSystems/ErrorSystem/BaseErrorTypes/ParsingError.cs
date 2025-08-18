@@ -197,4 +197,15 @@ public class ParsingError : ILazySingleton
                                                                     "The default.map is either missing a bock of location definitions or one of its defining attributes is invalid.",
                                                                     DiagnosticReportSeverity.PopupError);
    
+    /// <param name="0">The line number where the error occurred</param>
+    /// <param name="1">The line content that caused the error</param>
+    public DiagnosticDescriptor InvalidLineFormat { get; } = new(DiagnosticCategory.Parsing,
+                                                                    22,
+                                                                    "Invalid Line Format",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "Invalid line format at line {0}: '{1}'. Expected format is 'key=value'.",
+                                                                    "This error indicates that the line does not conform to the expected key-value pair format.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+    
+   
 }

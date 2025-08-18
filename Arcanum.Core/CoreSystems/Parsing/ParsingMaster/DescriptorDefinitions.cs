@@ -10,22 +10,29 @@ public static class DescriptorDefinitions
 
    static DescriptorDefinitions()
    {
-      FileDescriptor defaultMapDescriptor = new([],
+      FileDescriptor defaultMapPreDescriptor = new([],
+                                                   ["game", "in_game", "map_data", "default.map"],
+                                                   ISavingService.Dummy,
+                                                   new("default.map", "map", "#"),
+                                                   new DefaultMapPreParsingStep(),
+                                                   false,
+                                                   uniqueId: 'P');
+
+      FileDescriptor defaultMapDescriptor = new([defaultMapPreDescriptor],
                                                 ["game", "in_game", "map_data", "default.map"],
                                                 ISavingService.Dummy,
                                                 new("default.map", "map", "#"),
                                                 new DefaultMapParsing(),
                                                 false);
-      
-      FileDescriptor locationDescriptor = new([defaultMapDescriptor],
+
+      FileDescriptor locationDescriptor = new([defaultMapPreDescriptor],
                                               ["game", "in_game", "map_data", "named_locations"],
                                               ISavingService.Dummy,
                                               new("LocationsDefinition", "txt", "#"),
                                               new LocationFileLoading(),
                                               false);
 
-
-      FileDescriptor definitionsDescriptor = new([locationDescriptor, defaultMapDescriptor],
+      FileDescriptor definitionsDescriptor = new([locationDescriptor, defaultMapPreDescriptor],
                                                  ["game", "in_game", "map_data", "definitions.txt"],
                                                  ISavingService.Dummy,
                                                  new("definitions", "txt", "#"),
@@ -33,12 +40,6 @@ public static class DescriptorDefinitions
                                                  false,
                                                  false);
 
-      FileDescriptors =
-      [
-         locationDescriptor,
-         defaultMapDescriptor,
-         definitionsDescriptor,
-        
-      ];
+      FileDescriptors = [defaultMapPreDescriptor, locationDescriptor, defaultMapDescriptor, definitionsDescriptor,];
    }
 }
