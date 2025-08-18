@@ -171,6 +171,8 @@
         <Resource Include="Assets\Icons\16x16\WindowFrame16x16.png" />
         <None Remove="Assets\Icons\30x30\DoublePlay30x30.png" />
         <Resource Include="Assets\Icons\30x30\DoublePlay30x30.png" />
+        <None Remove="Assets\Icons\20x20\ExportAsCsv20x20.png" />
+        <Resource Include="Assets\Icons\20x20\ExportAsCsv20x20.png" />
     </ItemGroup>
 
     <ItemGroup>

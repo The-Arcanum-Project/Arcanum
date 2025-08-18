@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Windows.PopUp;
 using Path = System.IO.Path;
@@ -98,6 +99,19 @@ public partial class ErrorLog : INotifyPropertyChanged
             return;
 
          _selectedSeverity = value;
+         OnPropertyChanged();
+      }
+   }
+   
+   private string _selectedPath = string.Empty;
+   public string SelectedPath
+   {
+      get => _selectedPath;
+      set
+      {
+         if (_selectedPath == value)
+            return;
+         _selectedPath = value;
          OnPropertyChanged();
       }
    }
@@ -223,6 +237,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorMessage = diagnostic.Message;
          ErrorDescription = diagnostic.Description;
          ErrorResolution = diagnostic.Descriptor.Resolution;
+         SelectedPath = FileManager.SanitizePath(diagnostic.Context.FilePath);
       }
       else
       {
@@ -230,12 +245,14 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorMessage = "Error Message";
          ErrorDescription = "Error Description";
          ErrorResolution = string.Empty;
+         SelectedPath = string.Empty;
       }
       
       if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
       
       SelectedSeverity = selectedDiagnostic.Severity;
+      
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
