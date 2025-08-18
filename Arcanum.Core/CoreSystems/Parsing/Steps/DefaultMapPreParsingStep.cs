@@ -116,6 +116,16 @@ public class DefaultMapPreParsingStep : FileLoadingService
                                         po.FullPath);
          dmd.SetDefaultValues();
       }
+      
+      // Set the values for the file names to the matching DescriptorDefinitions
+      DescriptorDefinitions.LocationDescriptor.LocalPath[^1] = dmd.ProvinceFileName;
+      //DescriptorDefinitions.RiverDescriptor.LocalPath[^1] = dmd.Rivers;
+      //DescriptorDefinitions.HeightMapDescriptor.LocalPath[^1] = dmd.HeightMap;
+      DescriptorDefinitions.AdjacenciesDescriptor.LocalPath[^1] = dmd.Adjacencies;
+      DescriptorDefinitions.DefinitionsDescriptor.LocalPath[^1] = dmd.Setup;
+      //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports;
+      //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates;
+      
       Globals.DefaultMapDefinition = dmd;
    }
 

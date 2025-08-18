@@ -8,38 +8,50 @@ public static class DescriptorDefinitions
 {
    public static List<FileDescriptor> FileDescriptors { get; }
 
+   public static readonly FileDescriptor DefaultMapPreDescriptor = new([],
+                                                                       ["game", "in_game", "map_data", "default.map"],
+                                                                       ISavingService.Dummy,
+                                                                       new("default.map", "map", "#"),
+                                                                       new DefaultMapPreParsingStep(),
+                                                                       false,
+                                                                       uniqueId: 'P');
+
+   public static readonly FileDescriptor DefaultMapDescriptor = new([DefaultMapPreDescriptor],
+                                                                    ["game", "in_game", "map_data", "default.map"],
+                                                                    ISavingService.Dummy,
+                                                                    new("default.map", "map", "#"),
+                                                                    new DefaultMapParsing(),
+                                                                    false);
+
+   public static readonly FileDescriptor LocationDescriptor = new([DefaultMapPreDescriptor],
+                                                                  ["game", "in_game", "map_data", "named_locations"],
+                                                                  ISavingService.Dummy,
+                                                                  new("LocationsDefinition", "txt", "#"),
+                                                                  new LocationFileLoading(),
+                                                                  false);
+
+   public static readonly FileDescriptor DefinitionsDescriptor = new([LocationDescriptor, DefaultMapPreDescriptor],
+                                                                     ["game", "in_game", "map_data", "definitions.txt"],
+                                                                     ISavingService.Dummy,
+                                                                     new("definitions", "txt", "#"),
+                                                                     new DefinitionFileLoading(),
+                                                                     false,
+                                                                     false);
+
+   public static readonly FileDescriptor AdjacenciesDescriptor = new([DefaultMapPreDescriptor, LocationDescriptor],
+                                                                     ["game", "in_game", "map_data", "adjacencies.csv"],
+                                                                     ISavingService.Dummy,
+                                                                     new("Adjacencies", "csv", string.Empty),
+                                                                     new AdjacencyFileLoading(),
+                                                                     false,
+                                                                     false);
+
    static DescriptorDefinitions()
    {
-      FileDescriptor defaultMapPreDescriptor = new([],
-                                                   ["game", "in_game", "map_data", "default.map"],
-                                                   ISavingService.Dummy,
-                                                   new("default.map", "map", "#"),
-                                                   new DefaultMapPreParsingStep(),
-                                                   false,
-                                                   uniqueId: 'P');
-
-      FileDescriptor defaultMapDescriptor = new([defaultMapPreDescriptor],
-                                                ["game", "in_game", "map_data", "default.map"],
-                                                ISavingService.Dummy,
-                                                new("default.map", "map", "#"),
-                                                new DefaultMapParsing(),
-                                                false);
-
-      FileDescriptor locationDescriptor = new([defaultMapPreDescriptor],
-                                              ["game", "in_game", "map_data", "named_locations"],
-                                              ISavingService.Dummy,
-                                              new("LocationsDefinition", "txt", "#"),
-                                              new LocationFileLoading(),
-                                              false);
-
-      FileDescriptor definitionsDescriptor = new([locationDescriptor, defaultMapPreDescriptor],
-                                                 ["game", "in_game", "map_data", "definitions.txt"],
-                                                 ISavingService.Dummy,
-                                                 new("definitions", "txt", "#"),
-                                                 new DefinitionFileLoading(),
-                                                 false,
-                                                 false);
-
-      FileDescriptors = [defaultMapPreDescriptor, locationDescriptor, defaultMapDescriptor, definitionsDescriptor,];
+      FileDescriptors =
+      [
+         DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
+         AdjacenciesDescriptor,
+      ];
    }
 }
