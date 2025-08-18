@@ -40,7 +40,14 @@ public class Adjacency
    public int EndX { get; }
    public int EndY { get; }
 
-   public override string ToString() => $"{Name,15}: {From.Name,15} -> {To.Name,15} ({Type})";
+   public int GetLength()
+   {
+      var dx = EndX - StartX;
+      var dy = EndY - StartY;
+      return (int)Math.Sqrt(dx * dx + dy * dy);
+   }
+   
+   public override string ToString() => $"{Name}: {From.Name} -> {To.Name} ({Type})";
 
    public override bool Equals(object? obj)
       => obj is Adjacency other && other.Name.Equals(Name, StringComparison.Ordinal);

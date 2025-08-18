@@ -94,7 +94,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
                   dmd.EquatorY = equatorY;
                else
                   DiagnosticException.LogWarning(LocationContext.Empty,
-                                                 ParsingError.Instance.IntParsingError,
+                                                 ParsingError.Instance.InvalidIntMarkup,
                                                  actionName,
                                                  nameof(DefaultMapDefinition.EquatorY),
                                                  kvp.Value);
@@ -118,13 +118,13 @@ public class DefaultMapPreParsingStep : FileLoadingService
       }
       
       // Set the values for the file names to the matching DescriptorDefinitions
-      DescriptorDefinitions.LocationDescriptor.LocalPath[^1] = dmd.ProvinceFileName;
-      //DescriptorDefinitions.RiverDescriptor.LocalPath[^1] = dmd.Rivers;
-      //DescriptorDefinitions.HeightMapDescriptor.LocalPath[^1] = dmd.HeightMap;
-      DescriptorDefinitions.AdjacenciesDescriptor.LocalPath[^1] = dmd.Adjacencies;
-      DescriptorDefinitions.DefinitionsDescriptor.LocalPath[^1] = dmd.Setup;
-      //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports;
-      //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates;
+      //DescriptorDefinitions.MapDescriptor.LocalPath[^1] = dmd.ProvinceFileName.TrimQuotes();
+      //DescriptorDefinitions.RiverDescriptor.LocalPath[^1] = dmd.Rivers.TrimQuotes();
+      //DescriptorDefinitions.HeightMapDescriptor.LocalPath[^1] = dmd.HeightMap.TrimQuotes();
+      DescriptorDefinitions.AdjacenciesDescriptor.LocalPath[^1] = dmd.Adjacencies.TrimQuotes();
+      DescriptorDefinitions.DefinitionsDescriptor.LocalPath[^1] = dmd.Setup.TrimQuotes();
+      //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports.TrimQuotes();
+      //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates.TrimQuotes();
       
       Globals.DefaultMapDefinition = dmd;
    }

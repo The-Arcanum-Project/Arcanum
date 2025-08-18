@@ -26,6 +26,16 @@ public sealed class DiagnosticException : Exception
    public DiagnosticReportSeverity ReportSeverity;
    public DiagnosticSeverity Severity;
 
+   public static void CreateAndHandle(LocationContext context,
+                                      DiagnosticDescriptor descriptor,
+                                      string action,
+                                      DiagnosticSeverity? severity = null,
+                                      DiagnosticReportSeverity? reportSeverity = null,
+                                      params object[] args)
+   {
+      new DiagnosticException(descriptor, args).HandleDiagnostic(context, action, severity, reportSeverity);
+   }
+
    /// <summary>
    /// Formats a diagnosticException message by replacing placeholders with the provided arguments, using an invariant culture.
    /// </summary>

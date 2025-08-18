@@ -17,7 +17,7 @@ public class IOError
                                                                0,
                                                                "FileReadingError",
                                                                DiagnosticSeverity.Error,
-                                                               "The given file does not exist or could not be read.",
+                                                               "The given file does not exist or could not be read:\n {0}",
                                                                "Tried to read the file '{0}' but it does not exist or could not be read.\nPlease check the file path and permissions.\n",
                                                                DiagnosticReportSeverity.PopupError);
    

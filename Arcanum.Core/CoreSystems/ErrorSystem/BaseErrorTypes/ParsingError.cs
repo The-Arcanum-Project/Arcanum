@@ -1,5 +1,6 @@
 ﻿using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.GameObjects;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 
@@ -152,60 +153,79 @@ public class ParsingError : ILazySingleton
                                                                "Failed to parse boolean value from '{0}'.",
                                                                "This error indicates that the parser could not convert the provided string to a boolean value. Please ensure it is 'yes' or 'no'.",
                                                                DiagnosticReportSeverity.PopupNotify);
-   
-    /// <param name="0">The string that could not be parsed</param>
-   public DiagnosticDescriptor IntParsingError { get; } = new(DiagnosticCategory.Parsing,
-                                                               17,
-                                                               "Integer Parsing Error",
-                                                               DiagnosticSeverity.Error,
-                                                               "Failed to parse integer value from '{0}'.",
-                                                               "This error indicates that the parser could not convert the provided string to an integer value. Please ensure it is a valid integer.",
-                                                               DiagnosticReportSeverity.PopupNotify);
-   
+
    /// <param name="0">The string that could not be parsed</param>
-    public DiagnosticDescriptor FloatParsingError { get; } = new(DiagnosticCategory.Parsing,
-                                                                    18,
-                                                                    "Float Parsing Error",
-                                                                    DiagnosticSeverity.Error,
-                                                                    "Failed to parse float value from '{0}'.",
-                                                                    "This error indicates that the parser could not convert the provided string to a float value. Please ensure it is a valid float.",
-                                                                    DiagnosticReportSeverity.PopupNotify);
-    
+   public DiagnosticDescriptor InvalidIntMarkup { get; } = new(DiagnosticCategory.Parsing,
+                                                              17,
+                                                              "Integer Parsing Error",
+                                                              DiagnosticSeverity.Error,
+                                                              "Failed to parse integer value from '{0}'.",
+                                                              "This error indicates that the parser could not convert the provided string to an integer value. Please ensure it is a valid integer.",
+                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   public DiagnosticDescriptor FloatParsingError { get; } = new(DiagnosticCategory.Parsing,
+                                                                18,
+                                                                "Float Parsing Error",
+                                                                DiagnosticSeverity.Error,
+                                                                "Failed to parse float value from '{0}'.",
+                                                                "This error indicates that the parser could not convert the provided string to a float value. Please ensure it is a valid float.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
    /// <param name="0">The unknown key.</param>
-    public DiagnosticDescriptor UnknownKeyInDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                    19,
-                                                                    "Unknown Key in Definition",
-                                                                    DiagnosticSeverity.Error,
-                                                                    "The key '{0}' is not recognized in the current context.",
-                                                                    "This error indicates that the parser encountered a key that is not defined or recognized in the current parsing context.",
-                                                                    DiagnosticReportSeverity.PopupNotify);
-   
+   public DiagnosticDescriptor UnknownKeyInDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                     19,
+                                                                     "Unknown Key in Definition",
+                                                                     DiagnosticSeverity.Error,
+                                                                     "The key '{0}' is not recognized in the current context.",
+                                                                     "This error indicates that the parser encountered a key that is not defined or recognized in the current parsing context.",
+                                                                     DiagnosticReportSeverity.PopupNotify);
+
    /// <param name="0">The default map collection name that is unknown.</param>
    public DiagnosticDescriptor UnknownDefaultMapCollectionName { get; } = new(DiagnosticCategory.Parsing,
-                                                                    20,
-                                                                    "Unknown Default Map Collection Name",
-                                                                    DiagnosticSeverity.Error,
-                                                                    "The default map collection name '{0}' is not recognized.",
-                                                                    "The only valid location collection names are: sound_tolls, non_ownable, impassable_mountains, volcanoes, earthquakes, sea_zones, lakes.",
-                                                                    DiagnosticReportSeverity.PopupNotify);
-   
+                                                                              20,
+                                                                              "Unknown Default Map Collection Name",
+                                                                              DiagnosticSeverity.Error,
+                                                                              "The default map collection name '{0}' is not recognized.",
+                                                                              "The only valid location collection names are: sound_tolls, non_ownable, impassable_mountains, volcanoes, earthquakes, sea_zones, lakes.",
+                                                                              DiagnosticReportSeverity.PopupNotify);
+
    public DiagnosticDescriptor InvalidDefaultMapDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                    21,
-                                                                    "Invalid Default Map Definition",
-                                                                    DiagnosticSeverity.Error,
-                                                                    "The default map definition is invalid.",
-                                                                    "The default.map is either missing a bock of location definitions or one of its defining attributes is invalid.",
-                                                                    DiagnosticReportSeverity.PopupError);
-   
-    /// <param name="0">The line number where the error occurred</param>
-    /// <param name="1">The line content that caused the error</param>
-    public DiagnosticDescriptor InvalidLineFormat { get; } = new(DiagnosticCategory.Parsing,
-                                                                    22,
-                                                                    "Invalid Line Format",
-                                                                    DiagnosticSeverity.Error,
-                                                                    "Invalid line format at line {0}: '{1}'. Expected format is 'key=value'.",
-                                                                    "This error indicates that the line does not conform to the expected key-value pair format.",
-                                                                    DiagnosticReportSeverity.PopupNotify);
-    
-   
+                                                                          21,
+                                                                          "Invalid Default Map Definition",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "The default map definition is invalid.",
+                                                                          "The default.map is either missing a bock of location definitions or one of its defining attributes is invalid.",
+                                                                          DiagnosticReportSeverity.PopupError);
+
+   /// <param name="0">The line number where the error occurred</param>
+   /// <param name="1">The line content that caused the error</param>
+   public DiagnosticDescriptor InvalidLineFormat { get; } = new(DiagnosticCategory.Parsing,
+                                                                22,
+                                                                "Invalid Line Format",
+                                                                DiagnosticSeverity.Error,
+                                                                "Invalid line format at line {0}: '{1}'. Expected format is 'key=value'.",
+                                                                "This error indicates that the line does not conform to the expected key-value pair format.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The line number where the error occurred</param>
+   /// <param name="1">The line content that caused the error</param>
+   /// <param name="2">The number of columns found in the line</param>
+   public DiagnosticDescriptor InvalidAdjacencyLine { get; } = new(DiagnosticCategory.Parsing,
+                                                                   23,
+                                                                   "Invalid Adjacency Line",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "Invalid adjacency line format at line {0}: '{1}'. Expected 9 columns but found {2}.",
+                                                                   "There is a mismatch in the expected number of columns for an adjacency line. Expected 9 in format 'From;To;Type;Through;start_x;start_y;stop_x;stop_y;Comment'",
+                                                                   DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The adjacency type that is invalid</param>
+   /// <param name="1">The line number where the error occurred</param>
+   public DiagnosticDescriptor InvalidAdjacencyType { get; } = new(DiagnosticCategory.Parsing,
+                                                                   24,
+                                                                   "Invalid Adjacency Type",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "Invalid adjacency type '{0}' in line {1}. Expected.",
+                                                                   $"The adjacency type specified in the adjacency line is not recognized. Valid types are {string.Join(", ", Enum.GetNames<AdjacencyType>().Select(x => $"'{x}'"))}.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
 }

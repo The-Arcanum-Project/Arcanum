@@ -9,7 +9,7 @@
                          mc:Ignorable = "d"
                          Title = "BaseCollectionView"
                          Height = "500"
-                         Width = "400">
+                         Width = "600">
 
     <styleClasses:BaseWindow.Resources>
         <converters:ComplexTypeVisibilityConverter x:Key = "ComplexTypeVisibilityConverter" />
