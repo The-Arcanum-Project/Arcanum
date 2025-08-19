@@ -1,6 +1,7 @@
 ﻿#define DEBUG_OBJ
 
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -68,6 +69,38 @@ public partial class SettingsWindow
                          },
          };
          tc.Items.Add(tabItem);
+      }
+   }
+
+   public void NavigateToSetting(string[] path)
+   {
+      var tabControl = SettingsTabControl;
+      var i = 0;
+
+      while (i < path.Length)
+      {
+         var step = path[i];
+
+         var tabs = tabControl.Items.OfType<TabItem>();
+         foreach (var item in tabs)
+         {
+            if (item.Header.ToString()?.Equals(step) ?? false)
+            {
+               tabControl.SelectedItem = item;
+
+               if (item.Content is TabControl nestedTabControl)
+                  tabControl = nestedTabControl;
+               
+               
+               if (i < path.Length - 1 && item.Content is PropertyGrid pg && pg.NavigateToProperty(path[i + 1]))
+                  return; // We found the property grid, no need to continue
+
+               break;
+            }
+
+         }
+
+         i++;
       }
    }
 

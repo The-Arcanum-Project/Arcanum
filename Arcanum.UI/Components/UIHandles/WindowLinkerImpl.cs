@@ -1,17 +1,25 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 using Arcanum.API.UI;
 using Arcanum.API.UtilServices;
-using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Common.UI;
 
 namespace Arcanum.UI.Components.WindowLinker;
+
+public class InClassName(PropertyInfo info)
+{
+   public PropertyInfo Info { get; } = info;
+}
 
 public class WindowLinkerImpl : IWindowLinker
 {
    public void OpenPropertyGridWindow(object obj)
    {
-      OpenWindowOnSTAThread(GetPropertyGridOrCollectionView(obj), true);
+      UIHandle.Instance.UIUtils.OpenWindowOnSTAThread(GetPropertyGridOrCollectionView(obj), true);
    }
 
    public void OpenMainMenuScreen()
@@ -28,16 +36,8 @@ public class WindowLinkerImpl : IWindowLinker
       foreach (var window in Application.Current.Windows)
          if (window is not MainMenuScreen)
             ((Window)window).Close();
-      OpenWindowOnSTAThread(mainMenu, false);
+      UIHandle.Instance.UIUtils.OpenWindowOnSTAThread(mainMenu, false);
       mainMenu.Activate();
-   }
-
-   private void OpenWindowOnSTAThread(Window window, bool asDialog)
-   {
-      if (Application.Current.Dispatcher.CheckAccess())
-         window.Show();
-      else
-         Application.Current.Dispatcher.Invoke(asDialog ? window.ShowDialog : window.Show);
    }
 
    public MBoxResult ShowMBox(string message,
@@ -60,4 +60,5 @@ public class WindowLinkerImpl : IWindowLinker
 
       return new PropertyGridWindow(obj);
    }
+
 }

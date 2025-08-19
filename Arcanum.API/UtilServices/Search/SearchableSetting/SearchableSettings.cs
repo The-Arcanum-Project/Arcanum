@@ -8,12 +8,14 @@ namespace Arcanum.API.UtilServices.Search.SearchableSetting;
 public abstract partial class SearchableSettings : ISearchable
 {
    private readonly Type _topLevelType;
+   private readonly object _root;
 
-   protected SearchableSettings(Type topLevelType, List<string>? searchTerms = null)
+   protected SearchableSettings(object root, Type topLevelType, List<string>? searchTerms = null)
    {
       _topLevelType = topLevelType ?? throw new ArgumentNullException(nameof(topLevelType));
       GetNamespace = BuildNameSpace(topLevelType, GetType().FullName!, ((ISearchable)this).NamespaceSeparator);
       SearchTerms = searchTerms ?? GenerateSearchTerms(GetType().Name);
+      _root = root;
    }
 
    public List<ISearchable> GetAllSearchableObjects()
@@ -39,7 +41,10 @@ public abstract partial class SearchableSettings : ISearchable
                                                           ?.IconPath,
                                                          nameSpace,
                                                          pd.Name,
-                                                         searchTerms);
+                                                         searchTerms,
+                                                         _root,
+                                                         settingsObj,
+                                                         pd.Name);
 
          searchables.Add(searchable);
       }
@@ -57,13 +62,13 @@ public abstract partial class SearchableSettings : ISearchable
    {
       var parts = CamelCaseSplitter().Split(desc);
 
-      List<string> terms = [..parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.ToLower()),];
+      List<string> terms = [..parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.ToLower())];
 
       // Build progressive substrings
       for (var i = 2; i <= parts.Length; i++) // start at 2 to avoid first match being empty
          terms.Add(string.Join("", parts[..i]));
 
-      return terms.ToList();
+      return terms;
    }
 
    private static string BuildNameSpace(Type topLevelType, string targetNameSpace, char separator)
@@ -92,10 +97,7 @@ public abstract partial class SearchableSettings : ISearchable
    [IgnoreSettingProperty]
    public List<string> SearchTerms { get; set; }
 
-   public void OnSearchSelected()
-   {
-      throw new NotImplementedException();
-   }
+   public abstract void OnSearchSelected();
 
    [JsonIgnore]
    [IgnoreSettingProperty]

@@ -109,6 +109,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"
                         Executed = "OpenParsingStepBrowserCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <CommandBinding Command = "mainWindow:MwCommands.TempTestingCommand"
+                        Executed = "TempTestingCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
 
         <!-- Command Bindings for Debug Loading Triggers -->

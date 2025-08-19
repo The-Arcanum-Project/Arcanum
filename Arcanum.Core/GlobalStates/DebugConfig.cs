@@ -16,7 +16,7 @@ public static class DebugConfig
 /// <summary>
 /// This will only be used for debugging purposes, and if the project is built in Debug mode.
 /// </summary>
-public class DebugConfigSettings : InternalSearchableSetting
+public class DebugConfigSettings() : InternalSearchableSetting(Config.Settings)
 {
     public bool EnableDebugLogging { get; set; } = true;
     public bool SkipMainMenu { get; set; } = false;

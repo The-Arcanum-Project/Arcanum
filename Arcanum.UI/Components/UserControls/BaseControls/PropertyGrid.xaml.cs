@@ -79,6 +79,11 @@ public partial class PropertyGrid
          return;
       }
 
+      SelectionChangedInternal(item);      
+   }
+
+   private void SelectionChangedInternal(PropertyItem item)
+   {
       SelectedPropertyItem = item;
 
       if (SelectedObject == null)
@@ -258,6 +263,19 @@ public partial class PropertyGrid
    public PropertyGrid GetActive()
    {
       return ShowGridEmbedded ? _inlinedPropertyGrid?.GetActive() ?? this : this;
+   }
+
+   public bool NavigateToProperty(string propertyName)
+   {
+      foreach (var item in Properties)
+         if (item.PropertyInfo.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+         {
+            PropertyList.SelectedItem = item;
+            SelectionChangedInternal(item);
+            return true;
+         }
+
+      return false;
    }
 }
 

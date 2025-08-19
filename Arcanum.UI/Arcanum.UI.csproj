@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Common\Common.csproj" />
         <ProjectReference Include="..\Nexus.Analyzer\Nexus.Analyzer.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>

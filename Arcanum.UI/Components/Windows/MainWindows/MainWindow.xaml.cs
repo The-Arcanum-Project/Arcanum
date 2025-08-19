@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Forms;
@@ -10,12 +11,17 @@ using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Settings;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
+using Arcanum.Core.Utils.PropertyHelpers;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
+using Common.UI;
+using Common.Utils.PropertyUtils;
 using Application = System.Windows.Application;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
@@ -272,5 +278,16 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       var parsingStepBrowser = new ParsingViewer();
       parsingStepBrowser.ShowDialog();
+   }
+
+   private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var path =
+         PropertyPathBuilder.GetPathToProperty(Config.Settings,
+                                               typeof(MainSettingsObj).GetProperty(nameof(ErrorLogExportOptions))!
+                                                                      .PropertyType
+                                                                      .GetProperty(nameof(ErrorLogExportOptions
+                                                                             .ExportFilePath))!);
+      UIHandle.Instance.PopUpHandle.NavigateToSetting(path);
    }
 }

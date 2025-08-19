@@ -1,9 +1,15 @@
-﻿namespace Arcanum.API.UtilServices.Search.SearchableSetting;
+﻿using Common.UI;
+using Common.Utils.PropertyUtils;
+
+namespace Arcanum.API.UtilServices.Search.SearchableSetting;
 
 public class SearchableSettingsProperty(string? iconPath,
                                         string nSpace,
                                         string resultName,
-                                        List<string> searchTerms)
+                                        List<string> searchTerms,
+                                        object root,
+                                        object parent,
+                                        string propName)
    : ISearchable
 {
    [IgnoreSettingProperty]
@@ -16,7 +22,12 @@ public class SearchableSettingsProperty(string? iconPath,
 
    public void OnSearchSelected()
    {
-      //TODO: @Minnator Implement navigation in Settings UI and PropertyGrids
+      var info = parent.GetType().GetProperty(propName);
+      if (info == null)
+         throw new InvalidOperationException($"Property '{propName}' not found in type '{parent.GetType().Name}'.");
+      
+      var path = PropertyPathBuilder.GetPathToProperty(root, info);
+      UIHandle.Instance.PopUpHandle.NavigateToSetting(path);
    }
 
    [IgnoreSettingProperty]

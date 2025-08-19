@@ -158,4 +158,9 @@ public static class MwCommands
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenParsingStepBrowser },
    };
    
+   public static readonly RoutedCommand TempTestingCommand = new("TempTestingCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.TempTestingCommand },
+   };
+   
 }

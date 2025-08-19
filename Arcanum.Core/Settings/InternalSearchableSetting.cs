@@ -2,6 +2,9 @@
 using Arcanum.API.Attributes;
 using Arcanum.API.UtilServices.Search.SearchableSetting;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.GlobalStates;
+using Common.UI;
+using Common.Utils.PropertyUtils;
 
 namespace Arcanum.Core.Settings;
 
@@ -12,8 +15,8 @@ namespace Arcanum.Core.Settings;
 /// It also defaults the topLevelType to <see cref="MainSettingsObj"/> which is the main settings object of the Arcanum project.
 /// </summary>
 /// <param name="searchTerms"></param>
-public abstract class InternalSearchableSetting(List<string>? searchTerms = null)
-   : SearchableSettings(typeof(MainSettingsObj), searchTerms)
+public abstract class InternalSearchableSetting(object parent, List<string>? searchTerms = null)
+   : SearchableSettings(Config.Settings, typeof(MainSettingsObj), searchTerms)
 {
    public override float GetRelevanceScore(string query)
       => Queastor.GlobalInstance.MinLevinsteinDistanceToTerms(this, query);
@@ -21,4 +24,15 @@ public abstract class InternalSearchableSetting(List<string>? searchTerms = null
    [IgnoreInPropertyGrid]
    [JsonIgnore]
    public override string ResultName => GetType().Name;
+
+   public override void OnSearchSelected()
+   {
+      var info = parent.GetType().GetProperty(GetType().Name);
+      if (info == null)
+         throw new
+            InvalidOperationException($"Property '{GetType().Name}' not found in type '{parent.GetType().Name}'.");
+
+      var path = PropertyPathBuilder.GetPathToProperty(parent, info);
+      UIHandle.Instance.PopUpHandle.NavigateToSetting(path);
+   }
 }

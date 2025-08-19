@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 using Arcanum.API.UI;
 
 namespace Arcanum.API.UtilServices;

@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
+using Arcanum.Core.GlobalStates;
+
 namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
-public class ErrorLogExportOptions : InternalSearchableSetting
+public class ErrorLogExportOptions() : InternalSearchableSetting(Config.Settings)
 {
    [Description("'*,' = Export this column, 'x' = Do not export this column\nThere are 4 columns in the error log: Severity, Message, Action, Description")]
    [DefaultValue("*,*,*,*,")]
