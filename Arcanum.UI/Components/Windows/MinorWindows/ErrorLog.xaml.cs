@@ -14,6 +14,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Windows.PopUp;
 using Path = System.IO.Path;
@@ -103,7 +104,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          OnPropertyChanged();
       }
    }
-   
+
    private string _selectedPath = string.Empty;
    public string SelectedPath
    {
@@ -112,6 +113,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       {
          if (_selectedPath == value)
             return;
+
          _selectedPath = value;
          OnPropertyChanged();
       }
@@ -202,7 +204,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          settingsPropWindow.ShowDialog();
          QuerySearch(SearchTextBox.SearchInputTextBox.Text);
       };
-      
+
       _isFullyLoaded = true;
    }
 
@@ -248,12 +250,11 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorResolution = string.Empty;
          SelectedPath = string.Empty;
       }
-      
+
       if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
-      
+
       SelectedSeverity = selectedDiagnostic.Severity;
-      
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
@@ -355,16 +356,42 @@ public partial class ErrorLog : INotifyPropertyChanged
          return;
 
       var csvContent = new StringBuilder();
-      csvContent.AppendLine("Severity,Message,Action,DescriptionFilePath/LineNumber/ColumnNumber");
 
-      foreach (Diagnostic diagnostic in view)
-         csvContent.AppendLine($"{diagnostic.Severity},{diagnostic.Descriptor.Message.Replace('\n', ';')}," +
-                               $"{diagnostic.Action.Replace('\n', ';')},{diagnostic.Descriptor.Description.Replace('\n', ';')},{diagnostic.Context.ToErrorString.Replace('\n', ';')}");
+      var cols = Config.Settings.ErrorLogExportOptions.ColumnsToExport.Split(',')
+                       .Select(x => x.Equals("*"))
+                       .ToArray();
 
-      var filePath = Path.Combine(IO.GetArcanumDataPath, "ErrorLog.csv");
+      // Add the header row based on selected columns
+      if (cols[0])
+         csvContent.Append("Severity,");
+      if (cols[1])
+         csvContent.Append("Message,");
+      if (cols[2])
+         csvContent.Append("Action,");
+      if (cols[3])
+         csvContent.Append("DescriptionFilePath/LineNumber/ColumnNumber,");
+      csvContent.AppendLine();
+
+      foreach (Diagnostic d in view)
+      {
+         if (cols[0])
+            csvContent.Append($"{d.Severity},");
+         if (cols[1])
+            csvContent.Append($"{d.Message.Replace('\n', ';')},");
+         if (cols[2])
+            csvContent.Append($"{d.Action.Replace('\n', ';')},");
+         if (cols[3])
+            csvContent.Append($"{d.Description.Replace('\n', ';')},");
+         csvContent.AppendLine();
+      }
+
+      var folder = string.IsNullOrWhiteSpace(Config.Settings.ErrorLogExportOptions.ExportFilePath)
+                      ? IO.GetArcanumDataPath
+                      : Config.Settings.ErrorLogExportOptions.ExportFilePath;
+      var filePath = Path.Combine(folder, Config.Settings.ErrorLogExportOptions.ExportFileName);
+
       IO.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8);
-      
-      
+
       if (e.ChangedButton == MouseButton.Right)
          ProcessHelper.OpenFile(filePath);
    }

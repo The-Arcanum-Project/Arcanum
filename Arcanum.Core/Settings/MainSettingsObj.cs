@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.GlobalStates.BackingClasses;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 
 namespace Arcanum.Core.Settings;
 
@@ -18,6 +19,8 @@ public class MainSettingsObj
    [JsonIgnore]
    [IsSubMenu("Error Handling")]
    public ErrorDescriptors ErrorDescriptors { get; set; } = ErrorDescriptors.Instance;
+   
+   public ErrorLogExportOptions ErrorLogExportOptions { get; set; } = new ();
    
    
    #if DEBUG

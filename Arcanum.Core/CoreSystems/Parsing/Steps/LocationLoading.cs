@@ -46,7 +46,7 @@ public class LocationFileLoading : FileLoadingService
             var equalIndex = span.IndexOf('=');
             if (equalIndex <= 0 || equalIndex == span.Length - 1)
             {
-               DiagnosticException.LogWarning(context,
+               DiagnosticException.LogWarning(context.GetInstance(),
                                               ParsingError.Instance.InvalidKeyValuePair,
                                               GetActionName(),
                                               line);
@@ -61,7 +61,7 @@ public class LocationFileLoading : FileLoadingService
 
             if (keySpan.IsEmpty || valueSpan.IsEmpty)
             {
-               DiagnosticException.LogWarning(context,
+               DiagnosticException.LogWarning(context.GetInstance(),
                                               ParsingError.Instance.InvalidKeyValuePair,
                                               GetActionName(),
                                               line);
@@ -72,7 +72,7 @@ public class LocationFileLoading : FileLoadingService
             if (!TryParseHexInt(valueSpan, out var colorInt))
             {
                context.ColumnNumber = equalIndex + 1 + GetLeadingSpacesCount(valueSpan);
-               DiagnosticException.LogWarning(context,
+               DiagnosticException.LogWarning(context.GetInstance(),
                                               ParsingError.Instance.HexToIntConversionError,
                                               GetActionName(),
                                               valueSpan.ToString());
@@ -86,7 +86,7 @@ public class LocationFileLoading : FileLoadingService
             var newLocation = new Location(fInformation, colorInt, key);
             if (!locations.TryAdd(key, newLocation))
             {
-               DiagnosticException.LogWarning(context,
+               DiagnosticException.LogWarning(context.GetInstance(),
                                               ParsingError.Instance.DuplicateLocationDefinition,
                                               GetActionName(),
                                               key);
