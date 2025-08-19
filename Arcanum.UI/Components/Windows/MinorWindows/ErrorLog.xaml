@@ -334,8 +334,8 @@
                     </styleClasses:CorneredTextBox>
 
                     <styleClasses:BaseButton Grid.Column = "1"
-                                             Click = "ExportToCsv_OnClick"
-                                             ToolTip = "Export the error log to a .csv file"
+                                             MouseUp = "ExportToCsv_OnClick"
+                                             ToolTip = "Export the error log to a .csv file&#10;RMB to export and open the file"
                                              Margin = "2, 0"
                                              BorderBrush = "{StaticResource DefaultBackColorBrush}">
                         <Image Source = "../../../Assets/Icons/20x20/ExportAsCsv20x20.png"

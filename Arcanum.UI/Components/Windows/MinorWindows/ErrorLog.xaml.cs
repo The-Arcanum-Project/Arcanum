@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Shapes;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.ErrorSystem;
@@ -348,19 +349,24 @@ public partial class ErrorLog : INotifyPropertyChanged
                                    PreferredEditor.VsCode);
    }
 
-   private void ExportToCsv_OnClick(object sender, RoutedEventArgs e)
+   private void ExportToCsv_OnClick(object sender, MouseButtonEventArgs e)
    {
-      if (ErrorLogDataGrid.ItemsSource is not List<Diagnostic> diagnostics)
+      if (ErrorLogDataGrid.ItemsSource is not ListCollectionView view)
          return;
 
       var csvContent = new StringBuilder();
       csvContent.AppendLine("Severity,Message,Action,DescriptionFilePath/LineNumber/ColumnNumber");
 
-      foreach (var diagnostic in diagnostics)
+      foreach (Diagnostic diagnostic in view)
          csvContent.AppendLine($"{diagnostic.Severity},{diagnostic.Descriptor.Message.Replace('\n', ';')}," +
                                $"{diagnostic.Action.Replace('\n', ';')},{diagnostic.Descriptor.Description.Replace('\n', ';')},{diagnostic.Context.ToErrorString.Replace('\n', ';')}");
 
-      IO.WriteAllText(Path.Combine(IO.GetArcanumDataPath, "ErrorLog.csv"), csvContent.ToString(), Encoding.UTF8);
+      var filePath = Path.Combine(IO.GetArcanumDataPath, "ErrorLog.csv");
+      IO.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8);
+      
+      
+      if (e.ChangedButton == MouseButton.Right)
+         ProcessHelper.OpenFile(filePath);
    }
 }
 
