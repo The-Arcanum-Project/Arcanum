@@ -1,4 +1,6 @@
-﻿#if DEBUG
+﻿using Arcanum.Core.Settings;
+
+#if DEBUG
 namespace Arcanum.Core.GlobalStates;
 
 public static class DebugConfig
@@ -14,7 +16,7 @@ public static class DebugConfig
 /// <summary>
 /// This will only be used for debugging purposes, and if the project is built in Debug mode.
 /// </summary>
-public class DebugConfigSettings
+public class DebugConfigSettings : InternalSearchableSetting
 {
     public bool EnableDebugLogging { get; set; } = true;
     public bool SkipMainMenu { get; set; } = false;

@@ -80,17 +80,11 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
       foreach (var parent in Parents)
          if (parent.LCType == LCType + 1)
             return $"{parent.GetNamespace}{((ISearchable)this).NamespaceSeparator}{LCType}";
+
       return $"{LCType}";
    }
 
-   public float GetRelevanceScore(string query)
-   {
-      var minDistance = int.MaxValue;
-      foreach (var term in SearchTerms)
-         if (Queastor.LevinsteinDistance(term, query) < minDistance)
-            minDistance = Queastor.LevinsteinDistance(term, query);
-      return minDistance;
-   }
+   public float GetRelevanceScore(string query) => Queastor.GlobalInstance.MinLevinsteinDistanceToTerms(this, query);
 
    #endregion
 }

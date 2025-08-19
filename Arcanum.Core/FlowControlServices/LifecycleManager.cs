@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
+using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
@@ -15,7 +16,7 @@ namespace Arcanum.Core.FlowControlServices;
 
 public class LifecycleManager
 {
-   public static LifecycleManager Instance => LfmInstance;
+   public static LifecycleManager Instance { get; } = new();
 
    /* --- Bootup Sequence ---
     *
@@ -33,7 +34,6 @@ public class LifecycleManager
     */
 
    public PluginManager PluginManager { get; private set; } = null!;
-   private static readonly LifecycleManager LfmInstance = new();
 
    public event EventHandler? OnApplicationShutDownCompleted;
 
@@ -48,6 +48,7 @@ public class LifecycleManager
       // Step 1: Initialize core services
       LoadConfig();
       InitializeCoreServices(host);
+      Queastor.GlobalInstance.IndexSettings();
 
       // Step 2: Initialize plugin host services
       host.RegisterDefaultServices();

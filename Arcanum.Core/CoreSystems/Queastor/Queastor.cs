@@ -1,7 +1,10 @@
 ﻿#define TIME_QUEASTOR
 
 using System.Diagnostics;
+using System.Reflection;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.API.UtilServices.Search.SearchableSetting;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
@@ -62,7 +65,7 @@ public class Queastor : IQueastor
       foreach (var term in oldTerms)
       {
          var lowerTerm = term.ToLowerInvariant();
-         
+
          if (newTerms.Remove(lowerTerm))
             continue;
 
@@ -161,6 +164,15 @@ public class Queastor : IQueastor
 
       return [];
    }
+
+   public int MinLevinsteinDistanceToTerms(ISearchable item, string query)
+   {
+      var minDistance = int.MaxValue;
+      foreach (var term in item.SearchTerms)
+         if (LevinsteinDistance(term, query) < minDistance)
+            minDistance = LevinsteinDistance(term, query);
+      return minDistance;
+   }
    //
    // public List<(string, ISearchable)> SortSearchResults(List<ISearchable> results,
    //                                                      string query,
@@ -226,7 +238,74 @@ public class Queastor : IQueastor
 
          categoryCounts[category] = count + entry.Value.Count;
       }
-      
+
       return categoryCounts;
+   }
+
+   public void IndexSettings()
+   {
+      var settings = FindAllSearchableSettings(Config.Settings);
+      foreach (var setting in settings)
+      {
+         var serachables = setting.GetAllSearchableObjects();
+         foreach (var searchable in serachables)
+            AddToIndex(searchable);
+      }
+   }
+
+   /// <summary>
+   /// Returns all <see cref="SearchableSettings"/> found in the given object tree. <br/>
+   /// Currently collections of <see cref="SearchableSettings"/> are not supported, only single instances.
+   /// They can be enabled by uncommenting the collection support code in the method below but is currently not required.
+   /// </summary>
+   /// <param name="root"></param>
+   /// <returns></returns>
+   private static List<SearchableSettings> FindAllSearchableSettings(object root)
+   {
+      var results = new List<SearchableSettings>();
+      var stack = new Stack<object>();
+      stack.Push(root);
+
+      while (stack.Count > 0)
+      {
+         var current = stack.Pop();
+         if (current == null!)
+            continue;
+
+         var type = current.GetType();
+         foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+         {
+            if (!prop.CanRead)
+               continue;
+
+            object? value;
+            try
+            {
+               value = prop.GetValue(current);
+            }
+            catch
+            {
+               continue; // skip problematic getters
+            }
+
+            if (value is SearchableSettings ss)
+               results.Add(ss);
+
+            // For now there is no need for collection support
+
+            // if (value is System.Collections.IEnumerable enumerable && value is not string)
+            // {
+            //    foreach (var item in enumerable)
+            //       if (item != null)
+            //          stack.Push(item);
+            // }
+            // else
+            // {
+            //    stack.Push(value);
+            // }
+         }
+      }
+
+      return results;
    }
 }

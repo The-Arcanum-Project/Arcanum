@@ -176,4 +176,5 @@ DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=queastor/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=saveable/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=saveables/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=searchables/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=universalis/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
