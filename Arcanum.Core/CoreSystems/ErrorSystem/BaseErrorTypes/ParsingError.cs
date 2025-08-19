@@ -248,4 +248,53 @@ public class ParsingError : ILazySingleton
                                                                           "The key '{0}' is unexpected in the key-value pair.",
                                                                           "A key-value pair was expected to have the key '{1}', but the parser encountered the key '{0}' instead.",
                                                                           DiagnosticReportSeverity.PopupNotify);
+
+    /// <param name="0">The integer value that is out of range</param>
+    /// <param name="1">The minimum allowed value</param>
+    /// <param name="2">The maximum allowed value</param>
+   public DiagnosticDescriptor IntOutOfRange { get; } = new(DiagnosticCategory.Parsing,
+                                                            27,
+                                                            "Integer Out of Range",
+                                                            DiagnosticSeverity.Error,
+                                                            "The integer value '{0}' is out of the allowed range ({1} to {2}).",
+                                                            "The given integer '{0}' is outside the allowed range of {1} to {2}. Please ensure the value is within this range.",
+                                                            DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The float value that is out of range</param>
+    public DiagnosticDescriptor InvalidFloatMarkup { get; } = new(DiagnosticCategory.Parsing,
+                                                               28,
+                                                               "Invalid Float Markup",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse float value from '{0}'.",
+                                                               "The provided string '{0}' could not be parsed as a valid float value. Please ensure it is a valid float in the format '0.00'.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The float value that is out of range</param>
+    /// <param name="1">The minimum allowed value</param>
+    /// <param name="2">The maximum allowed value</param>
+    public DiagnosticDescriptor FloatOutOfRange { get; } = new(DiagnosticCategory.Parsing,
+                                                                   29,
+                                                                   "Float Out of Range",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "The float value '{0}' is out of the allowed range ({1} to {2}).",
+                                                                   "The given float '{0}' is outside the allowed range of {1} to {2}. Please ensure the value is within this range.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The string that could not be parsed</param>
+    public DiagnosticDescriptor InvalidBoolMarkup { get; } = new(DiagnosticCategory.Parsing,
+                                                               30,
+                                                               "Invalid Boolean Markup",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse boolean value from '{0}'. Expected 'yes' or 'no'.",
+                                                               "The provided string '{0}' could not be parsed as a valid boolean value. Please ensure it is either 'yes' or 'no'.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The key that is missing in the key-value pair</param>
+    public DiagnosticDescriptor MissingKeyValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                   31,
+                                                                   "Missing Key Value",
+                                                                   DiagnosticSeverity.Warning,
+                                                                   "The key '{0}' is missing in the key-value pair.",
+                                                                   "The key '{0}' was expected in the current content but was not found.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
 }

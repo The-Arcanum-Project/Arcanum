@@ -12,7 +12,6 @@ namespace Arcanum.Core.PluginServices;
 public class PluginManager : ISubroutineLogger
 {
    private const string PM_LOG_PREFIX = "PlgnMngr"; // Prefix should be short, max 8 characters.
-   private readonly IPluginHost _host;
    private readonly Dictionary<Guid, IPlugin> _plugins = [];
    private readonly string _pluginFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
    public IReadOnlyList<IPlugin> LoadedPlugins => _plugins.Values.ToList();
@@ -22,16 +21,17 @@ public class PluginManager : ISubroutineLogger
    private readonly ICrossPluginCommunicator _cpcService;
    private IPluginInfoService PInfoService { get; }
 
-   public IPluginHost Host => _host;
+   public IPluginHost Host { get; }
+
    public PluginManager(IPluginHost host)
    {
-      _host = host;
+      Host = host;
       PInfoService = new PluginInfoService(this);
       // Register the plugin info service so that it can be used by other plugins. 
       // We do this here to not expose the PluginInfoService directly to the plugins.
       _cpcService = new CrossPluginCommunicatorService(host, PInfoService);
-      _host.RegisterService(PInfoService);
-      _host.RegisterService(_cpcService);
+      Host.RegisterService(PInfoService);
+      Host.RegisterService(_cpcService);
       _events = host.GetService<IEventBus>();
    }
    
@@ -248,7 +248,7 @@ public class PluginManager : ISubroutineLogger
       {
          var sw = Stopwatch.StartNew();
          // if the plugin returns false, it will be marked as unloaded and inactive.;
-         plugin.IsActive = plugin.Initialize(_host);
+         plugin.IsActive = plugin.Initialize(Host);
          sw.Stop();
          plugin.RuntimeInfo = new(plugin.IsActive, sw.Elapsed);
          plugin.Status = !plugin.IsActive ? PluginStatus.Error : PluginStatus.Initialized;
@@ -349,7 +349,7 @@ public class PluginManager : ISubroutineLogger
    }
 
    public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
-      => _host.Log(PM_LOG_PREFIX, message, verbosity);
+      => Host.Log(PM_LOG_PREFIX, message, verbosity);
 
    
    private string AppPath => AppDomain.CurrentDomain.BaseDirectory;

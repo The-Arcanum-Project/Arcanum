@@ -10,8 +10,8 @@
                          Title = "Parsing Explorer"
                          Height = "450"
                          Width = "800"
-                         Background="{StaticResource LightBackColorBrush}"
-                         WindowStartupLocation="CenterScreen">
+                         Background = "{StaticResource LightBackColorBrush}"
+                         WindowStartupLocation = "CenterScreen">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -42,8 +42,13 @@
                   SelectionChanged = "ParsingListView_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="2">
-                        <TextBlock Text = "{Binding FilePath}" />
+                    <Border Margin = "2">
+                        <StackPanel Orientation = "Horizontal">
+                            <CheckBox IsChecked = "{Binding LoadingService.IsFullyParsed, Mode=OneWay}"
+                                      IsEnabled="False"> </CheckBox>
+                            <TextBlock Text = "{Binding FilePath}"
+                                       VerticalAlignment = "Center" />
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -64,13 +69,13 @@
                   ItemsSource = "{Binding CurrentDescriptor.Files, RelativeSource={RelativeSource AncestorType=local:ParsingViewer}, FallbackValue='No Step Selected'}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="2">
+                    <Border Margin = "2">
                         <TextBlock Text = "{Binding Path.Filename}" />
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        
+
         <TextBlock Grid.Column = "2"
                    Grid.Row = "0"
                    Text = "Parsed / Created Objects"
@@ -79,19 +84,19 @@
                    Margin = "5"
                    FontSize = "14"
                    FontWeight = "Bold" />
-        
+
         <ListView Grid.Column = "2"
                   Grid.Row = "1"
                   Margin = "2"
                   ItemsSource = "{Binding CurrentDescriptor.LoadingService.ParsedObjects, RelativeSource={RelativeSource AncestorType=local:ParsingViewer}, FallbackValue='No Step Selected'}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="2">
+                    <Border Margin = "2">
                         <TextBlock Text = "{Binding Name}" />
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
-        </ListView> 
+        </ListView>
 
     </Grid>
 </styleClasses:BaseWindow>

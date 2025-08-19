@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.GlobalStates;
@@ -23,4 +24,5 @@ public static class Globals
    public static HashSet<Continent> Continents { get; } = [];
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static List<Adjacency> Adjacencies { get; } = [];
+   public static HashSet<PopType> PopTypes { get; } = [];
 }

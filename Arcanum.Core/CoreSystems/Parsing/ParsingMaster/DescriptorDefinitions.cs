@@ -53,13 +53,20 @@ public static class DescriptorDefinitions
                                                                      new MarketParsing(),
                                                                      false,
                                                                      false);
+   
+   public static readonly FileDescriptor PopTypeDescriptor = new([],
+                                                                     ["game", "in_game", "common", "pop_types"],
+                                                                     ISavingService.Dummy,
+                                                                     new("01_pop_types", "txt", "#"),
+                                                                     new PopTypeParsing(),
+                                                                     false);
 
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
-         AdjacenciesDescriptor, MarketDescriptor,
+         AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor,
       ];
    }
 }

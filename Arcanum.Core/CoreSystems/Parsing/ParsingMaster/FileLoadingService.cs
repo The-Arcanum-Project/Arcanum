@@ -105,4 +105,6 @@ public abstract class FileLoadingService
       UnloadSingleFileContent(fileObj, descriptor);
       LoadSingleFileWithMetrics(fileObj, descriptor);
    }
+   
+   public virtual bool IsFullyParsed { get; } = true; 
 }
