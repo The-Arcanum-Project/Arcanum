@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
@@ -17,6 +18,14 @@ public class Location : LocationComposite
 
    #endregion
 
+   #region Market: game/main_menu/setup/start
+
+   public Market Market { get; set; } = Market.Empty;
+   public bool HasMarket => Market != Market.Empty;
+
+   #endregion
+   
+   
    public override string ToString() => $"{Name} (Color: {Color:X})";
    public override int GetHashCode() => Name.GetHashCode();
 

@@ -45,13 +45,21 @@ public static class DescriptorDefinitions
                                                                      new AdjacencyFileLoading(),
                                                                      false,
                                                                      false);
+   
+   public static readonly FileDescriptor MarketDescriptor = new([LocationDescriptor],
+                                                                     ["game", "main_menu", "setup", "start", "03_markets.txt"],
+                                                                     ISavingService.Dummy,
+                                                                     new("03_markets", "txt", "#"),
+                                                                     new MarketParsing(),
+                                                                     false,
+                                                                     false);
 
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
-         AdjacenciesDescriptor,
+         AdjacenciesDescriptor, MarketDescriptor,
       ];
    }
 }

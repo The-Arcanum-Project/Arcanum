@@ -5,6 +5,14 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
+/// <summary>
+/// Defines how a file is loaded and parsed. <br/>
+/// How to add it to the loading / parsing system:<br/>
+/// 1. Create a new instance of <see cref="FileLoadingService"/> and a <see cref="Arcanum.Core.CoreSystems.SavingSystem.Services.ISavingService"/> <br/>
+/// 2. Create a new <see cref="FileDescriptor"/> with the instance of these in <see cref="DescriptorDefinitions"/><br/>
+/// 3. Make sure to define all dependencies in the <see cref="FileDescriptor.Dependencies"/> <br/>
+/// 4. Add it to the <see cref="DescriptorDefinitions.FileDescriptors"/> list<br/>
+/// </summary>
 public abstract class FileLoadingService
 {
    public string Name { get; }

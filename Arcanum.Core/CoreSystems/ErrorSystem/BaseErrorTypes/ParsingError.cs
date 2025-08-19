@@ -77,12 +77,13 @@ public class ParsingError : ILazySingleton
 
    /// <param name="0">Expected content element count</param>
    /// <param name="1">Actual content element count</param>
+   /// <param name="2">Block name</param>
    public DiagnosticDescriptor InvalidContentElementCount { get; } = new(DiagnosticCategory.Parsing,
                                                                          8,
                                                                          "Invalid Content Element Count",
                                                                          DiagnosticSeverity.Error,
                                                                          "Block contains an invalid number of content elements. Expected {0}, but found {1}.",
-                                                                         "A block has an invalid number of content elements defined, which does not match the expected count.",
+                                                                         "{0} content elements are expected in the block '{2}' but {1} were found.",
                                                                          DiagnosticReportSeverity.Silent);
 
    /// <param name="0">The location name that is invalid</param>
@@ -156,12 +157,12 @@ public class ParsingError : ILazySingleton
 
    /// <param name="0">The string that could not be parsed</param>
    public DiagnosticDescriptor InvalidIntMarkup { get; } = new(DiagnosticCategory.Parsing,
-                                                              17,
-                                                              "Integer Parsing Error",
-                                                              DiagnosticSeverity.Error,
-                                                              "Failed to parse integer value from '{0}'.",
-                                                              "This error indicates that the parser could not convert the provided string to an integer value. Please ensure it is a valid integer.",
-                                                              DiagnosticReportSeverity.PopupNotify);
+                                                               17,
+                                                               "Integer Parsing Error",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse integer value from '{0}'.",
+                                                               "This error indicates that the parser could not convert the provided string to an integer value. Please ensure it is a valid integer.",
+                                                               DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The string that could not be parsed</param>
    public DiagnosticDescriptor FloatParsingError { get; } = new(DiagnosticCategory.Parsing,
@@ -228,4 +229,23 @@ public class ParsingError : ILazySingleton
                                                                    "Invalid adjacency type '{0}' in line {1}. Expected.",
                                                                    $"The adjacency type specified in the adjacency line is not recognized. Valid types are {string.Join(", ", Enum.GetNames<AdjacencyType>().Select(x => $"'{x}'"))}.",
                                                                    DiagnosticReportSeverity.PopupNotify);
+   /// <param name="0">The block name that is invalid</param>
+   /// <param name="1">The expected block name</param>
+   public DiagnosticDescriptor InvalidBlockName { get; } = new(DiagnosticCategory.Parsing,
+                                                               25,
+                                                               "Invalid Block Name",
+                                                               DiagnosticSeverity.Error,
+                                                               "The block name '{0}' is invalid in the current context.",
+                                                               "A block with the name '{1}' was expected but the parser encountered a block with the name '{0}' instead.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The unexpected key in the key-value pair</param>
+   /// <param name="1">The expected key in the key-value pair</param>
+   public DiagnosticDescriptor UnexpectedKeyInKeyValuePair { get; } = new(DiagnosticCategory.Parsing,
+                                                                          26,
+                                                                          "Unexpected Key in Key-Value Pair",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "The key '{0}' is unexpected in the key-value pair.",
+                                                                          "A key-value pair was expected to have the key '{1}', but the parser encountered the key '{0}' instead.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
 }

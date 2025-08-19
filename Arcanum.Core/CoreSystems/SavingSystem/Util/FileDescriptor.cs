@@ -57,6 +57,11 @@ public class FileDescriptor : IDependencyNode<string>
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
    public bool SuccessfullyLoaded { get; set; } = false;
    public bool IsMultithreadable { get; }
+   
+   /// <summary>
+   /// Points to other file descriptors that this file depends on.
+   /// This is used to ensure that the files are loaded in the correct order.
+   /// </summary>
    public IEnumerable<IDependencyNode<string>> Dependencies => DescriptorDependencies;
    public static FileDescriptor Dummy { get; } = new([],
                                                      [],
