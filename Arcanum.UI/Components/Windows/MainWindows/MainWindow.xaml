@@ -105,6 +105,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.GCCommand"
                         Executed = "GCCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute"/>
+        
+        <CommandBinding Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"
+                        Executed = "OpenParsingStepBrowserCommand_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
 
         <!-- Command Bindings for Debug Loading Triggers -->
@@ -265,6 +269,8 @@
                                        Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
                 <uc:SearchableMenuItem Header = "Browse Mod Metadata"
                                        Click = "MenuItem_OnClick" />
+                <uc:SearchableMenuItem Header = "ParsingStepBrowser"
+                                       Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"/>
                 <uc:SearchableMenuItem Header = "UI Elements Browser"
                                        Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
                     <uc:SearchableMenuItem.Icon>

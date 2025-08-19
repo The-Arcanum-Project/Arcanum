@@ -5,12 +5,14 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class DefaultMapParsing : FileLoadingService
 {
+   public override List<Type> ParsedObjects => [typeof(DefaultMapDefinition)];
    public override string GetFileDataDebugInfo()
    {
       return $"IsValid:{Globals.DefaultMapDefinition.IsValid()}\n" +

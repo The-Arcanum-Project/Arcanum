@@ -14,6 +14,7 @@ public class LocationFileLoading : FileLoadingService
 {
    private const string DEFAULT_LOCATION_FILE_NAME = "00_default.txt";
 
+   public override List<Type> ParsedObjects => [typeof(Location)];
    public override string GetFileDataDebugInfo() => $"Loaded '{Globals.Locations.Count}'.";
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)

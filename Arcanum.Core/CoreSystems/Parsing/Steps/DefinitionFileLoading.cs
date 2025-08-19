@@ -14,6 +14,11 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class DefinitionFileLoading : FileLoadingService
 {
+   public override List<Type> ParsedObjects =>
+   [
+      typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province),
+   ];
+
    public override string GetFileDataDebugInfo()
    {
       return "Definition File Loading: \n" +

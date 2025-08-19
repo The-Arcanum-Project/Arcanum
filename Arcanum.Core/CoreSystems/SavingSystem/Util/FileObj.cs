@@ -4,7 +4,7 @@ public abstract class FileObj(PathObj path, FileDescriptor descriptor)
 {
    public FileDescriptor Descriptor { get; set; } = descriptor;
 
-   public readonly PathObj Path = path;
+   public PathObj Path { get; }= path;
 
    public abstract IEnumerable<ISaveable> GetSaveables();
 }

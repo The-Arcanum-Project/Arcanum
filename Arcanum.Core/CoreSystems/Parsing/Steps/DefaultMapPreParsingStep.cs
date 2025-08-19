@@ -16,6 +16,8 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 /// </summary>
 public class DefaultMapPreParsingStep : FileLoadingService
 {
+   public override List<Type> ParsedObjects => [typeof(DefaultMapDefinition)];
+
    public override string GetFileDataDebugInfo()
    {
       return $"IsValid:{Globals.DefaultMapDefinition.IsValid()}\n" +
@@ -121,8 +123,8 @@ public class DefaultMapPreParsingStep : FileLoadingService
       //DescriptorDefinitions.MapDescriptor.LocalPath[^1] = dmd.ProvinceFileName.TrimQuotes();
       //DescriptorDefinitions.RiverDescriptor.LocalPath[^1] = dmd.Rivers.TrimQuotes();
       //DescriptorDefinitions.HeightMapDescriptor.LocalPath[^1] = dmd.HeightMap.TrimQuotes();
-      DescriptorDefinitions.AdjacenciesDescriptor.LocalPath[^1] = dmd.Adjacencies.TrimQuotes();
-      DescriptorDefinitions.DefinitionsDescriptor.LocalPath[^1] = dmd.Setup.TrimQuotes();
+      DescriptorDefinitions.AdjacenciesDescriptor.SetPathFileName(dmd.Adjacencies.TrimQuotes());
+      DescriptorDefinitions.DefinitionsDescriptor.SetPathFileName(dmd.Setup.TrimQuotes());
       //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports.TrimQuotes();
       //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates.TrimQuotes();
       

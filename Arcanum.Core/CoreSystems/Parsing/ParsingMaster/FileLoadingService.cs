@@ -15,7 +15,12 @@ public abstract class FileLoadingService
    {
       Name = GetType().Name;
    }
-
+   
+   /// <summary>
+   /// Returns a list of types that this file loading service creates / parses from the file
+   /// </summary>
+   public abstract List<Type> ParsedObjects { get; }
+   
    protected string GetActionName([System.Runtime.CompilerServices.CallerMemberName] string caller = "")
    {
       var declaringType = GetType();

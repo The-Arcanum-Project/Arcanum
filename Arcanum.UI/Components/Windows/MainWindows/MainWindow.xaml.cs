@@ -267,4 +267,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       GC.Collect();
       GC.WaitForPendingFinalizers();
    }
+
+   private void OpenParsingStepBrowserCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var parsingStepBrowser = new ParsingViewer();
+      parsingStepBrowser.ShowDialog();
+   }
 }

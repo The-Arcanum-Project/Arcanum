@@ -19,8 +19,9 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
     public static readonly PathObj Empty = new PathObj([], string.Empty, DataSpace.Empty);
 
     public readonly string[] LocalPath = localPath;
-    public readonly string Filename = filename;
+    public string Filename { get; } = filename;
     public readonly DataSpace DataSpace = dataSpace;
+    
     
     /// <summary>
     /// The full path as a string, combining the root position, local path, and filename.

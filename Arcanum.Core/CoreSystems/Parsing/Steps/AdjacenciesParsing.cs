@@ -10,6 +10,8 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class AdjacencyFileLoading : FileLoadingService
 {
+   public override List<Type> ParsedObjects => [typeof(Adjacency)];
+
    public override string GetFileDataDebugInfo()
    {
       return $"Loaded '{Globals.Adjacencies.Count}' adjacencies.\n" + 
@@ -141,6 +143,7 @@ public class AdjacencyFileLoading : FileLoadingService
    {
       Globals.Adjacencies.Clear();
       Globals.Adjacencies.TrimExcess();
+      var sqrt = Math.Sqrt(2342);
       return true;
    }
 }

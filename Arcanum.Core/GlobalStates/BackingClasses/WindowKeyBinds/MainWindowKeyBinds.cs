@@ -46,4 +46,5 @@ public class MainWindowKeyBinds : KeyBindProvider
    // UIElementsBrowser
    public KeyGesture OpenUIElementsBrowser { get; set; } = new(Key.F11);
    public KeyGesture OpenGlobalsBrowser { get; set; } = new(Key.F7);
+   public KeyGesture OpenParsingStepBrowser { get; set; } = new(Key.F9);
 }

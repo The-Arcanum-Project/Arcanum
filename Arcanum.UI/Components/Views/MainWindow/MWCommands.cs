@@ -133,7 +133,7 @@ public static class MwCommands
          InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenUIElementsBrowser },
       };
 
-   // Loading Commands
+   // Debug Commands
    public static readonly RoutedCommand LoadLocationsCommand = new("OpenLoadingWindowCommand",
                                                                    typeof(MainWindowView))
    {
@@ -151,4 +151,11 @@ public static class MwCommands
    {
       InputGestures = { new KeyGesture(Key.G, ModifierKeys.Control) },
    };
+
+   public static readonly RoutedCommand OpenParsingStepBrowserCommand = new("OpenParsingStepBrowserCommand",
+                                                                   typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenParsingStepBrowser },
+   };
+   
 }

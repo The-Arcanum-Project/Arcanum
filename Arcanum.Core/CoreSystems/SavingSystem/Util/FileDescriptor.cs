@@ -18,9 +18,9 @@ public class FileDescriptor : IDependencyNode<string>
    /// this is use for cases like the default.map file which are loaded in several steps.
    /// But each step needs it's own identifier and hasValue to be sorted for loading so we can configure this to make it happen.
    /// </summary>
-   public readonly char UniqueId; 
+   public readonly char UniqueId;
 
-   public List<FileObj> Files;
+   public List<FileObj> Files { get; }
 
    public FileDescriptor(FileDescriptor[] dependencies,
                          string[] localPath,
@@ -29,7 +29,7 @@ public class FileDescriptor : IDependencyNode<string>
                          FileLoadingService loadingServiceService,
                          bool isMultithreadable,
                          bool allowMultipleInstances = true,
-                         char uniqueId  = 'G')
+                         char uniqueId = 'G')
    {
       LocalPath = localPath;
       DescriptorDependencies = dependencies;
@@ -51,12 +51,9 @@ public class FileDescriptor : IDependencyNode<string>
       LocalPath[^1] = newFileName;
    }
 
-   public string GetFilePath()
-   {
-      return $"{UniqueId}:{string.Join("/", LocalPath)}";
-   }
+   public string FilePath => $"{UniqueId}:{string.Join("/", LocalPath)}";
 
-   public string Id => GetFilePath();
+   public string Id => FilePath;
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
    public bool SuccessfullyLoaded { get; set; } = false;
    public bool IsMultithreadable { get; }
@@ -68,18 +65,18 @@ public class FileDescriptor : IDependencyNode<string>
                                                      null!,
                                                      false);
 
-   public override string ToString() => $"FileDescriptor: {GetFilePath()}";
+   public override string ToString() => $"FileDescriptor: {FilePath}";
 
    public override bool Equals(object? obj)
    {
       if (obj is not FileDescriptor other)
          return false;
 
-      return GetFilePath() == other.GetFilePath();
+      return FilePath == other.FilePath;
    }
 
    public override int GetHashCode()
    {
-      return GetFilePath().GetHashCode();
+      return FilePath.GetHashCode();
    }
 }
