@@ -1,9 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
-using Arcanum.Core;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using DiagnosticDescriptor = Microsoft.CodeAnalysis.DiagnosticDescriptor;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace UnitTests;

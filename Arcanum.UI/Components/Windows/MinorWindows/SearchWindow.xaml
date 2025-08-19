@@ -104,7 +104,8 @@
             <userControls:SearchTextBox Grid.Row = "1"
                                         x:Name = "SearchTextBox"
                                         BorderThickness = "0"
-                                        Margin = "0, 4, 0, 0">
+                                        Margin = "0, 4, 0, 0"
+                                        KeyUp="SearchTextBox_OnKeyUp">
             </userControls:SearchTextBox>
 
 

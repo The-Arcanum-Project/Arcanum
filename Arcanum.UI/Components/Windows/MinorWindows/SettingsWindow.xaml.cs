@@ -1,7 +1,6 @@
 ﻿#define DEBUG_OBJ
 
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;

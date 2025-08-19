@@ -3,7 +3,6 @@ using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;

@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.IO.JsonConverters;
 
 // For the interface

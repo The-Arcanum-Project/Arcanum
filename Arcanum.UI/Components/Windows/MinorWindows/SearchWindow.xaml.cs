@@ -167,10 +167,13 @@ public partial class SearchWindow : INotifyPropertyChanged
          element = VisualTreeHelper.GetParent(element);
 
       if (element is ListBoxItem { DataContext: ISearchable searchable })
-      {
-         searchable.OnSearchSelected();
-         CloseCommand.Execute(null);
-      }
+         ExecuteOnSelected(searchable);
+   }
+
+   private void ExecuteOnSelected(ISearchable searchable)
+   {
+      searchable.OnSearchSelected();
+      CloseCommand.Execute(null);
    }
 
    public void SetCategory(IQueastorSearchSettings.Category category)
@@ -259,5 +262,42 @@ public partial class SearchWindow : INotifyPropertyChanged
       field = value;
       OnPropertyChanged(propertyName);
       return true;
+   }
+
+   private void SearchTextBox_OnKeyUp(object sender, KeyEventArgs e)
+   {
+      switch (e.Key)
+      {
+         case Key.Enter:
+            var listViewItem = SearchResultsListBox.SelectedItem;
+            if (listViewItem is ISearchable searchable)
+               ExecuteOnSelected(searchable);
+            e.Handled = true;
+            break;
+         case Key.Down:
+            if (SearchResultsListBox.Items.Count > 0)
+            {
+               if (SearchResultsListBox.SelectedIndex < SearchResultsListBox.Items.Count - 1)
+                  SearchResultsListBox.SelectedIndex++;
+               else
+                  SearchResultsListBox.SelectedIndex = 0;
+
+               SearchResultsListBox.ScrollIntoView(SearchResultsListBox.SelectedItem);
+            }
+            e.Handled = true;
+            break;
+         case Key.Up:
+            if (SearchResultsListBox.Items.Count > 0)
+            {
+               if (SearchResultsListBox.SelectedIndex > 0)
+                  SearchResultsListBox.SelectedIndex--;
+               else
+                  SearchResultsListBox.SelectedIndex = SearchResultsListBox.Items.Count - 1;
+
+               SearchResultsListBox.ScrollIntoView(SearchResultsListBox.SelectedItem);
+            }
+            e.Handled = true;
+            break;
+      }
    }
 }

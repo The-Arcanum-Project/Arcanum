@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 

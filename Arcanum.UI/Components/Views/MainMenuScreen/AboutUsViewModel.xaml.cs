@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.Git;
 using Common;
 

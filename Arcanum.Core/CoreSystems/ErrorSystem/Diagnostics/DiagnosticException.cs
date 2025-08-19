@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 using Common.UI.MBox;
 

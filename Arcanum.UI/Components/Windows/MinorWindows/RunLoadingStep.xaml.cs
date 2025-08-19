@@ -2,7 +2,6 @@
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Common.UI;
 

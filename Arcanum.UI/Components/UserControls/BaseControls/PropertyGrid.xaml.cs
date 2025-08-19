@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Shapes;
 using Arcanum.API.Attributes;
 using Arcanum.Core.Utils.DelayedEvents;
 using Arcanum.UI.Components.StyleClasses;
