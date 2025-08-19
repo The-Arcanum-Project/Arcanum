@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Arcanum.API.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.Windows.PopUp;
 

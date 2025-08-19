@@ -1,4 +1,7 @@
-﻿namespace Common.UI.Interfaces;
+﻿using System.Windows;
+using Common.UI.MBox;
+
+namespace Common.UI.Interfaces;
 
 public interface IPopUpHandle
 {
@@ -7,4 +10,16 @@ public interface IPopUpHandle
    /// </summary>
    /// <returns></returns>
    public void NavigateToSetting(string[] path);
+
+   public void OpenPropertyGridWindow(object obj);
+
+   public MBoxResult ShowMBox(
+      string message,
+      string title = "Message",
+      MBoxButton buttons = MBoxButton.OK,
+      MessageBoxImage icon = MessageBoxImage.Information,
+      int height = 150,
+      int width = 400);
+
+   public Window GetPropertyGridOrCollectionView(object? obj);
 }

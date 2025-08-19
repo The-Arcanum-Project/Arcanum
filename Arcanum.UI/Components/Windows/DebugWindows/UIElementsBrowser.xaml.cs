@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using Arcanum.API.UI;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.Windows.PopUp;
+using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 

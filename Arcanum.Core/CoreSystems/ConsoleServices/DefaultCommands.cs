@@ -3,6 +3,7 @@ using System.Text;
 using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -284,10 +285,10 @@ public static class DefaultCommands
                                              {
                                                 case "metadata":
                                                    var metadata = CoreData.ModMetadata;
-                                                   AppData.WindowLinker.OpenPropertyGridWindow(metadata);
+                                                   UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(metadata);
                                                    break;
                                                 case "mmsd":
-                                                   AppData.WindowLinker.OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
+                                                   UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
                                                    break;
                                                 default:
                                                    return

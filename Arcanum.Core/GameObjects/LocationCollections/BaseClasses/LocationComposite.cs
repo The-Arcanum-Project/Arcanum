@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
@@ -70,7 +71,7 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
    public string ResultName
       => $"{Name} - ({string.Join(',', Parents)})"; // TODO: @Minnator replace this with the localisation of the objects once localisation is implemented
    public List<string> SearchTerms { get; set; }
-   public void OnSearchSelected() => AppData.WindowLinker.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Name, GetNamespace);
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.MapObjects;

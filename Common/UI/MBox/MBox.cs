@@ -1,4 +1,4 @@
-﻿namespace Arcanum.API.UI;
+﻿namespace Common.UI.MBox;
 
 public enum MBoxResult
 {

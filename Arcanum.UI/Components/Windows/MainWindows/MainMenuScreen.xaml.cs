@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Views.MainMenuScreen;
-using Arcanum.UI.Components.WindowLinker;
 using Common.UI;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
@@ -60,7 +59,7 @@ public partial class MainMenuScreen
 #endif
       UIHandle.Instance.UIUtils = new UIUtilsImpl();
       UIHandle.Instance.PopUpHandle = new PopUpHandleImpl();
-      AppData.WindowLinker = new WindowLinkerImpl();
+      UIHandle.Instance.MainWindowsHandle = new MainWindowHandleImpl();
    }
 
    private void OnClosed(object? sender, EventArgs? e)

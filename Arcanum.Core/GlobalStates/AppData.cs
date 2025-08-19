@@ -16,8 +16,6 @@ public static class AppData
    
    public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new();
    
-   public static IWindowLinker WindowLinker { get; set; } = null!;
-   
    #region State of the application
 
    public static AppState AppState = AppState.Loading;

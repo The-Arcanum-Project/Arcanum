@@ -14,4 +14,5 @@ public class UIHandle
    
    public IPopUpHandle PopUpHandle { get; set; } = null!;
    public IUIUtils UIUtils { get; set; } = null!;
+   public IMainWindowsHandle MainWindowsHandle { get; set; } = null!;
 }

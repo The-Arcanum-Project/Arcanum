@@ -1,9 +1,10 @@
 ﻿using System.IO;
 using System.Text;
 using System.Windows;
-using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 
@@ -16,10 +17,11 @@ public static class EffectsAndTriggersDocsParser
 
       if (!File.Exists(triggerPath))
       {
-         AppData.WindowLinker.ShowMBox("`triggers.log` file not found. Please run `script_docs` in the game console!",
-                         "File Not Found",
-                         MBoxButton.OK,
-                         MessageBoxImage.Error);
+         UIHandle.Instance.PopUpHandle
+                 .ShowMBox("`triggers.log` file not found. Please run `script_docs` in the game console!",
+                           "File Not Found",
+                           MBoxButton.OK,
+                           MessageBoxImage.Error);
       }
       else
       {
@@ -36,10 +38,11 @@ public static class EffectsAndTriggersDocsParser
 
       if (!File.Exists(effectPath))
       {
-         AppData.WindowLinker.ShowMBox("`effects.log` file not found. Please run `script_docs` in the game console!",
-                                       "File Not Found",
-                                       MBoxButton.OK,
-                                       MessageBoxImage.Error);
+         UIHandle.Instance.PopUpHandle
+                 .ShowMBox("`effects.log` file not found. Please run `script_docs` in the game console!",
+                           "File Not Found",
+                           MBoxButton.OK,
+                           MessageBoxImage.Error);
          return;
       }
 
@@ -52,7 +55,7 @@ public static class EffectsAndTriggersDocsParser
 #if DEBUG
       File.WriteAllText("EU5_Effects_Data.csv", sbb.ToString());
 #endif
-      
+
       StaticData.DocsEffects = docsEffects;
    }
 }

@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
+using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -43,7 +44,7 @@ public static class FileManager
              DataSpace.AccessType.ReadOnly),
       ];
    }
-   
+
    public static string SanitizePath(string path)
    {
       if (string.IsNullOrEmpty(path))
@@ -51,15 +52,19 @@ public static class FileManager
 
       // Remove the mod or vanilla path if it is the beginning of the path
       if (path.StartsWith(ModDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
-         return ArrayToPointingPath(path[ModDataSpace.FullPath.Length..].TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+         return ArrayToPointingPath(path[ModDataSpace.FullPath.Length..]
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
       if (path.StartsWith(VanillaDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
-         return ArrayToPointingPath(path[VanillaDataSpace.FullPath.Length..].TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+         return ArrayToPointingPath(path[VanillaDataSpace.FullPath.Length..]
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
       if (path.StartsWith(DocumentsEUV.FullPath, StringComparison.OrdinalIgnoreCase))
-         return ArrayToPointingPath(path[(DocumentsEUV.FullPath.Length - 1)..].TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+         return ArrayToPointingPath(path[(DocumentsEUV.FullPath.Length - 1)..]
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+
       // If the path does not start with any of the known paths, we return the path as is
       return path;
    }
-   
+
    public static string ArrayToPointingPath(string[] pathParts)
    {
       if (pathParts.Length == 0)
@@ -67,6 +72,7 @@ public static class FileManager
 
       return string.Join(DEFAULT_PATH_POINTING_CHAR, pathParts);
    }
+
    public static string ArrayToPointingPath(string path)
    {
       if (string.IsNullOrEmpty(path))
@@ -91,9 +97,9 @@ public static class FileManager
       var modMetadata = ExistingModsLoader.ParseModMetadata(descriptor.ModPath.FullPath);
       if (modMetadata == null)
       {
-         AppData.WindowLinker
-                .ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
-                          "Mod Metadata Loaded");
+         UIHandle.Instance.PopUpHandle
+                 .ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
+                           "Mod Metadata Loaded");
          return;
       }
 

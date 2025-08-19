@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Windows;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
+using Common.UI;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -27,7 +28,7 @@ public partial class GameObjectBrowser
       if (sender is BaseButton { Tag: PropertyInfo propertyInfo })
       {
          var value = propertyInfo.GetValue(null);
-         AppData.WindowLinker.GetPropertyGridOrCollectionView(value).ShowDialog();
+         UIHandle.Instance.PopUpHandle.GetPropertyGridOrCollectionView(value).ShowDialog();
          GC.Collect(); // Force garbage collection to clean up any unused objects
       }
    }

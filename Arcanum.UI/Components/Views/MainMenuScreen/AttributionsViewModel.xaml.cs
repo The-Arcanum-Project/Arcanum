@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using System.Windows.Navigation;
 using Arcanum.Core.Utils;
+using Common;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 

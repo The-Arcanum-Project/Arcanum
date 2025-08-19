@@ -1,9 +1,10 @@
 ﻿using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using Arcanum.API.UI;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -76,18 +77,18 @@ public sealed class DiagnosticException : Exception
          case DiagnosticReportSeverity.Silent:
             break;
          case DiagnosticReportSeverity.PopupNotify:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
                                                                   "Error Encountered",
                                                                   icon: GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupWarning:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
                                                                   "Error Encountered",
                                                                   MBoxButton.OKRetryCancel,
                                                                   GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupError:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(AppData.WindowLinker.ShowMBox(ToString(),
+            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
                                                                   "Error Encountered",
                                                                   MBoxButton.RetryCancel,
                                                                   GetMessageBoxIconForSeverity(Severity)));
