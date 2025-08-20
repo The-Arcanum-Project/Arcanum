@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.Pops;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
@@ -24,7 +25,12 @@ public class Location : LocationComposite
    public bool HasMarket => Market != Market.Empty;
 
    #endregion
-   
+
+   #region Pops: game/main_menu/setup/start/06_pops.txt
+
+   public List<Pop> Pops { get; } = [];
+
+   #endregion
    
    public override string ToString() => $"{Name} (Color: {Color:X})";
    public override int GetHashCode() => Name.GetHashCode();

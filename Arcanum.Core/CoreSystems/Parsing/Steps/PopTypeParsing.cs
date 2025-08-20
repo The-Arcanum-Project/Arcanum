@@ -55,7 +55,8 @@ public class PopTypeParsing : FileLoadingService
          NumberParsing.TryParseFloat(values[0], ctx, out var foodConsumption, 0f, fallback: 0f);
          NumberParsing.TryParseFloat(values[1], ctx, out var assimilationConversionFactor, 0f, fallback: 0f);
 
-         Globals.PopTypes.Add(new(block.Name,
+         Globals.PopTypes.Add(block.Name,
+                              new(block.Name,
                                   values[2],
                                   foodConsumption,
                                   assimilationConversionFactor));

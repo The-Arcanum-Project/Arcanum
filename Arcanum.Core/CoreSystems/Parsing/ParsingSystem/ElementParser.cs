@@ -56,13 +56,13 @@ public static class ElementParser
          }
          else
          {
-            line = remainingInput.Slice(0, lineBreakIndex);
-            remainingInput = remainingInput.Slice(lineBreakIndex + 1);
+            line = remainingInput[..lineBreakIndex];
+            remainingInput = remainingInput[(lineBreakIndex + 1)..];
          }
 
          if (!line.IsEmpty && line[^1] == '\r')
          {
-            line = line.Slice(0, line.Length - 1);
+            line = line[..^1];
          }
 
          // Per-line state is reset here, which is correct.
@@ -136,8 +136,7 @@ public static class ElementParser
                   prevWordEnd = -1;
 
                   var nameLength = wordEnd - wordStart;
-                  // ReSharper disable once StackAllocInsideLoop
-                  Span<char> charSpan = stackalloc char[nameLength];
+                 var charSpan = new char[nameLength];
                   currentContent.CopyTo(wordStart, charSpan, nameLength);
                   currentContent.Remove(wordStart, currentContent.Length - wordStart);
                   Block newBlock;

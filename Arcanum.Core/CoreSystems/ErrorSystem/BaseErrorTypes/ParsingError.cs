@@ -221,12 +221,11 @@ public class ParsingError : ILazySingleton
                                                                    DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The adjacency type that is invalid</param>
-   /// <param name="1">The line number where the error occurred</param>
    public DiagnosticDescriptor InvalidAdjacencyType { get; } = new(DiagnosticCategory.Parsing,
                                                                    24,
                                                                    "Invalid Adjacency Type",
                                                                    DiagnosticSeverity.Error,
-                                                                   "Invalid adjacency type '{0}' in line {1}. Expected.",
+                                                                   "Invalid adjacency type '{0}' Expected.",
                                                                    $"The adjacency type specified in the adjacency line is not recognized. Valid types are {string.Join(", ", Enum.GetNames<AdjacencyType>().Select(x => $"'{x}'"))}.",
                                                                    DiagnosticReportSeverity.PopupNotify);
    /// <param name="0">The block name that is invalid</param>
@@ -297,4 +296,23 @@ public class ParsingError : ILazySingleton
                                                                    "The key '{0}' is missing in the key-value pair.",
                                                                    "The key '{0}' was expected in the current content but was not found.",
                                                                    DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The pop type key that is invalid</param>
+    public DiagnosticDescriptor InvalidPopTypeKey { get; } = new(DiagnosticCategory.Parsing,
+                                                               32,
+                                                               "Invalid Pop Type Key",
+                                                               DiagnosticSeverity.Error,
+                                                               "The pop type key '{0}' is invalid.",
+                                                               "The provided pop type key does not match any known pop types. Please ensure it is a valid pop type.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The unknown key</param>
+    /// <param name="1">The value associated with the unknown key</param>
+    public DiagnosticDescriptor UnknownKey { get; } = new(DiagnosticCategory.Parsing,
+                                                               33,
+                                                               "Unknown Key",
+                                                               DiagnosticSeverity.Error,
+                                                               "The key '{0}' is unknown in the current context.",
+                                                               "The key '{0}' with the value '{1}' is not recognized in the current parsing context.",
+                                                               DiagnosticReportSeverity.PopupNotify);
 }

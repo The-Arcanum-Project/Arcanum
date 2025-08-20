@@ -40,8 +40,7 @@ public class DefinitionFileLoading : FileLoadingService
          ctxInstance.LineNumber = content[0].StartLine;
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.ForbiddenElement,
-                                        GetActionName(),
-                                        content[0].ToString());
+                                        GetActionName());
       }
 
       var fileInformation = new FileInformation(fileObj.Path.Filename, false, descriptor);
@@ -63,6 +62,8 @@ public class DefinitionFileLoading : FileLoadingService
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.InvalidContentElementCount,
                                         GetActionName(),
+                                        0,
+                                        block.ContentElements.Count,
                                         block.ContentElements[0].ToString());
       }
 
@@ -100,7 +101,8 @@ public class DefinitionFileLoading : FileLoadingService
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.InvalidContentElementCount,
-                                        GetActionName(),
+                                        GetActionName(),0,
+                                        block.ContentElements.Count,
                                         block.ContentElements[0].ToString());
       }
 
@@ -136,6 +138,8 @@ public class DefinitionFileLoading : FileLoadingService
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.InvalidContentElementCount,
                                         GetActionName(),
+                                        0,
+                                        block.ContentElements.Count,
                                         block.ContentElements[0].ToString());
       }
 
@@ -171,6 +175,8 @@ public class DefinitionFileLoading : FileLoadingService
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.InvalidContentElementCount,
                                         GetActionName(),
+                                        0,
+                                        block.ContentElements.Count,
                                         block.ContentElements[0].ToString());
       }
 
@@ -205,8 +211,7 @@ public class DefinitionFileLoading : FileLoadingService
          ctxInstance.LineNumber = block.SubBlocks[0].StartLine;
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.ForbiddenBlock,
-                                        GetActionName(),
-                                        block.SubBlocks[0].ToString());
+                                        GetActionName());
       }
 
       if (block.ContentElements.Count != 1)
@@ -217,6 +222,8 @@ public class DefinitionFileLoading : FileLoadingService
          DiagnosticException.LogWarning(tmpCtx,
                                         ParsingError.Instance.InvalidContentElementCount,
                                         GetActionName(),
+                                        0,
+                                        block.ContentElements.Count,
                                         block.ContentElements.Count.ToString());
       }
 

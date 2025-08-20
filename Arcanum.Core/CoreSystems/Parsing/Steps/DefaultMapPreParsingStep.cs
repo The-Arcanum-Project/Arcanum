@@ -53,7 +53,8 @@ public class DefaultMapPreParsingStep : FileLoadingService
                                         ParsingError.Instance.InvalidContentElementCount,
                                         actionName,
                                         "at least one",
-                                        0);
+                                        contents.Count,
+                                        string.Empty);
          return;
       }
 
@@ -88,7 +89,6 @@ public class DefaultMapPreParsingStep : FileLoadingService
                   DiagnosticException.LogWarning(LocationContext.Empty,
                                                  ParsingError.Instance.BoolParsingError,
                                                  actionName,
-                                                 nameof(DefaultMapDefinition.WrapX),
                                                  kvp.Value);
                break;
             case "equator_y":
@@ -98,15 +98,13 @@ public class DefaultMapPreParsingStep : FileLoadingService
                   DiagnosticException.LogWarning(LocationContext.Empty,
                                                  ParsingError.Instance.InvalidIntMarkup,
                                                  actionName,
-                                                 nameof(DefaultMapDefinition.EquatorY),
                                                  kvp.Value);
                break;
             default:
                DiagnosticException.LogWarning(LocationContext.Empty,
                                               ParsingError.Instance.UnknownKeyInDefinition,
                                               actionName,
-                                              kvp.Key,
-                                              po.FullPath);
+                                              kvp.Key);
                break;
          }
 
@@ -114,8 +112,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
       {
          DiagnosticException.LogWarning(LocationContext.Empty,
                                         ParsingError.Instance.InvalidDefaultMapDefinition,
-                                        actionName,
-                                        po.FullPath);
+                                        actionName);
          dmd.SetDefaultValues();
       }
       

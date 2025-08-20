@@ -27,7 +27,7 @@
         <ProjectReference Include="..\Nexus.SourceGen\Nexus.SourceGen.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\Analyzers.DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj" 
+        <ProjectReference Include="..\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj"
                           OutputItemType="Analyzer" 
                           ReferenceOutputAssembly="false"/>
     </ItemGroup>

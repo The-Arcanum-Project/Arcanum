@@ -1,9 +1,14 @@
-﻿namespace Arcanum.Core.GameObjects.Pops;
+﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.GlobalStates;
+
+namespace Arcanum.Core.GameObjects.Pops;
 
 public class PopType(string name,
                      string colorKey,
                      float foodConsumption,
-                     float assimilationConversionFactor)
+                     float assimilationConversionFactor) : IParseable<PopType>
 {
    public string Name { get; } = name;
    public string ColorKey { get; } = colorKey;
@@ -13,6 +18,22 @@ public class PopType(string name,
    public override string ToString()
    {
       return $"{Name} ({ColorKey})";
+   }
+   
+   public static PopType Empty { get; } = new(string.Empty, string.Empty, 0f, 0f);
+
+   public bool Parse(string? str, out PopType? result)
+   {
+      if (Globals.PopTypes.TryGetValue(str ?? string.Empty, out result))
+         return true;
+
+      DiagnosticException.LogWarning(LocationContext.Empty,
+                                     ParsingError.Instance.InvalidPopTypeKey,
+                                     nameof(Parse).GetType().FullName!,
+                                     str ?? "null");
+
+      result = Empty;
+      return false;
    }
 
    public override bool Equals(object? obj)
