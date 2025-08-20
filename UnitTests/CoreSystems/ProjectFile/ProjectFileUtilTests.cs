@@ -143,7 +143,7 @@ public class ProjectFileUtilTests
    //    var descriptor = new ProjectFileDescriptor("TestMod", "Path/To/TestMod", "Path/To/Vanilla");
    //    ProjectFileUtil.GatherFilesForProjectFile(descriptor);
    //
-   //    var zipPath = Path.Combine(Arcanum.Core.CoreSystems.IO.IO.GetArcanumDataPath,
+   //    var zipPath = Path.Combine(Arcanum.Nexus.Core.CoreSystems.IO.IO.GetArcanumDataPath,
    //                               "ArcanumProjects",
    //                               "TestMod.arcanum");
    //    Assert.That(File.Exists(zipPath), Is.True);

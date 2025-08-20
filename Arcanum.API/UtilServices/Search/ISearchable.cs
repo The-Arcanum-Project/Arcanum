@@ -11,7 +11,7 @@ public interface ISearchable
 {
    /// <summary>
    /// A namespace pointing to the location of the search result. <br/>
-   /// This can either be UI navigation help (menu>submenu>item) or a file path (e.g. "Arcanum.Core.GameObjects.Economy.Market").
+   /// This can either be UI navigation help (menu>submenu>item) or a file path (e.g. "Arcanum.Nexus.Core.GameObjects.Economy.Market").
    /// </summary>
    public string GetNamespace { get; }
    /// <summary>

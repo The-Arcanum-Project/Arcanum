@@ -5,7 +5,7 @@ using Common;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 
-public partial class HomeViewModel : UserControl
+public partial class HomeViewModel
 {
    public HomeViewModel()
    {

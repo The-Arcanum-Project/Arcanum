@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="UI\" />

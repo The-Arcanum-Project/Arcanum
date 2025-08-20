@@ -101,15 +101,15 @@
         <CommandBinding Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand"
                         Executed = "GlobalsBrowserCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
-        
+
         <CommandBinding Command = "mainWindow:MwCommands.GCCommand"
                         Executed = "GCCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute"/>
-        
+                        CanExecute = "CommandCanAlwaysExecute" />
+
         <CommandBinding Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"
                         Executed = "OpenParsingStepBrowserCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
-        
+
         <CommandBinding Command = "mainWindow:MwCommands.TempTestingCommand"
                         Executed = "TempTestingCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
@@ -274,7 +274,7 @@
                 <uc:SearchableMenuItem Header = "Browse Mod Metadata"
                                        Click = "MenuItem_OnClick" />
                 <uc:SearchableMenuItem Header = "ParsingStepBrowser"
-                                       Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"/>
+                                       Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
                 <uc:SearchableMenuItem Header = "UI Elements Browser"
                                        Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
                     <uc:SearchableMenuItem.Icon>
@@ -316,8 +316,10 @@
                               MinWidth = "200" />
         </Grid.ColumnDefinitions>
 
-        <Image Grid.Column = "0"
-               Source = "../../../Assets/Icons/Huge/SelectionDataFiller.png" />
+
+        <ContentPresenter Grid.Column = "0"
+                          x:Name = "UiPresenter">
+        </ContentPresenter>
 
         <GridSplitter Grid.Column = "1"
                       Width = "4"

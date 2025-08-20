@@ -169,6 +169,14 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
+      
+      // 4. Generate the indexer
+      builder.AppendLine();
+      builder.AppendLine("    public object this[Enum key]");
+      builder.AppendLine("    {");
+      builder.AppendLine("        get => _getValue(key);");
+      builder.AppendLine("        set => _setValue(key, value);");
+      builder.AppendLine("    }");
 
       builder.AppendLine("}"); // Close class
 

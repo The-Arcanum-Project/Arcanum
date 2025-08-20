@@ -14,7 +14,7 @@ public static class GitDataService
    
    public const string MODFORGE_DISCORD_URL = "https://discord.gg/22AhD5qkme";
    
-   private const string RELEASE_NOTES_FILE_PATH = "Arcanum.Core/ReleaseNotes";
+   private const string RELEASE_NOTES_FILE_PATH = "Arcanum.Nexus.Core/ReleaseNotes";
 
    public static string GetFileFromRepositoryUrl(string owner, string repository, string branch, string filePath)
    {

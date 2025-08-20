@@ -12,10 +12,10 @@ public enum PluginEventId
      * <Prefix>_<EventName>
      *
      * Prefixes:
-     * - Load 1-200: Events that are triggered during the loading phase of Arcanum.Core
-     * - Settings 201-300: Events that are triggered when settings are changed in Arcanum.Core
-     * - Selection 301-400: Events that are triggered when a selection is made in Arcanum.Core
-     * - GUI 401-600: Events that are triggered when the GUI is interacted with in Arcanum.Core by the user
+     * - Load 1-200: Events that are triggered during the loading phase of Arcanum.Nexus.Core
+     * - Settings 201-300: Events that are triggered when settings are changed in Arcanum.Nexus.Core
+     * - Selection 301-400: Events that are triggered when a selection is made in Arcanum.Nexus.Core
+     * - GUI 401-600: Events that are triggered when the GUI is interacted with in Arcanum.Nexus.Core by the user
      * - Plugin 1000-1099: Events that are triggered by plugin management in Arcanum.PluginHost
      */
     

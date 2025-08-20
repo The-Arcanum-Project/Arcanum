@@ -7,17 +7,16 @@ using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Settings;
-using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
-using Common.UI;
-using Common.Utils.PropertyUtils;
+using Arcanum.UI.NUI.Generator;
+using Common.UI.NUI;
 using Nexus.Core;
 using Application = System.Windows.Application;
 
@@ -279,15 +278,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      // var path =
-      //    PropertyPathBuilder.GetPathToProperty(Config.Settings,
-      //                                          typeof(MainSettingsObj).GetProperty(nameof(ErrorLogExportOptions))!
-      //                                                                 .PropertyType
-      //                                                                 .GetProperty(nameof(ErrorLogExportOptions
-      //                                                                        .ExportFilePath))!);
-      // UIHandle.Instance.PopUpHandle.NavigateToSetting(path);
-
-      var ng = new NG();
-      Properties.Set(ng, NG.Field.Priority, 10);
+      var pop = Globals.Locations["stockholm"].Pops[0];
+      var ui = NUIGenerators.Generator.GenerateView(pop, Pop.Field.Type, Pop.Field.Culture, [Pop.Field.Religion, Pop.Field.Culture, Pop.Field.Type], true);
+      UiPresenter.Content = ui;
+      
    }
 }

@@ -18,21 +18,21 @@ class C
 {
     void M()
     {
-        var descriptor = new Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor(
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticCategory.Miscellaneous,
+        var descriptor = new Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor(
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticCategory.Miscellaneous,
             1,
             ""DA001"",
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticSeverity.Error,
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticSeverity.Error,
             ""Message {0} {1}"",
             ""Parsing some shit"",
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticReportSeverity.Silent);
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticReportSeverity.Silent);
 
         // Call CreateAndHandle with too few arguments
         CreateAndHandle(null, descriptor, () => {}, 42);
     }
 
     void CreateAndHandle(object context, 
-                         Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor descriptor,
+                         Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor descriptor,
                          System.Action action,
                          params object[] args) {}
 }";
@@ -73,17 +73,17 @@ class C
 {
     void M()
     {
-        var descriptor = new Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor(
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticCategory.Miscellaneous,
+        var descriptor = new Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticDescriptor(
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticCategory.Miscellaneous,
             1,
             ""DA001"",
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticSeverity.Error,
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticSeverity.Error,
             ""Message {0} {1}"",
             ""Parsing some shit"",
-            Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticReportSeverity.Silent);
+            Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticReportSeverity.Silent);
 
         // Correct number of arguments
-        var exception = new Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticException(descriptor, 42, 99);
+        var exception = new Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics.DiagnosticException(descriptor, 42, 99);
     }
 }";
 

@@ -127,10 +127,3 @@ public class PopsParsing : FileLoadingService
    }
    
 }
-
-
-public partial class NG : Nexus.Core.INexus
-{
-   [Nexus.Core.AddModifiable]
-   public int Priority { get; set; }= 0;
-}

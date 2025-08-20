@@ -6,4 +6,6 @@ public interface INexus
 
    void _setValue(
       Enum property, object value);
+   
+   object this[Enum key] { get; set; }
 }

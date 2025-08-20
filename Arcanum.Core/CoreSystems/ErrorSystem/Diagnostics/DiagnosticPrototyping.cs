@@ -1,8 +1,8 @@
 ﻿// using System.Diagnostics;
-// using Arcanum.Core.CoreSystems.Common;
-// using ErrorProvider = Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes.ErrorProvider;
+// using Arcanum.Nexus.Core.CoreSystems.Common;
+// using ErrorProvider = Arcanum.Nexus.Core.CoreSystems.ErrorSystem.BaseErrorTypes.ErrorProvider;
 //
-// namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+// namespace Arcanum.Nexus.Core.CoreSystems.ErrorSystem.Diagnostics;
 //
 // public static class DiagnosticPrototyping
 // {

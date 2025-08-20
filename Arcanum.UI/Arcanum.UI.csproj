@@ -31,13 +31,14 @@
         <ProjectReference Include="..\Nexus.Analyzer\Nexus.Analyzer.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj"/>
+        <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Components\Helpers\" />
         <Folder Include="Components\Models\" />
         <Folder Include="FeatureSpotlight\" />
         <Folder Include="HostUIServices\" />
+        <Folder Include="NUI\UserControls\" />
     </ItemGroup>
 
 
