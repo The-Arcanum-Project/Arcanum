@@ -5,6 +5,8 @@
                          xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.Views.MainWindow"
                          xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:system = "clr-namespace:System;assembly=System.Runtime"
+                         xmlns:nui = "clr-namespace:Arcanum.UI.NUI"
+                         xmlns:nui1 = "clr-namespace:Arcanum.Core.CoreSystems.NUI;assembly=Arcanum.Core"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -318,7 +320,7 @@
 
 
         <ContentPresenter Grid.Column = "0"
-                          x:Name = "UiPresenter">
+                             x:Name = "UiPresenter">
         </ContentPresenter>
 
         <GridSplitter Grid.Column = "1"

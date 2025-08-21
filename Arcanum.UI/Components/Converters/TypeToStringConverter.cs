@@ -16,7 +16,7 @@ public class TypeToStringConverter : IValueConverter
       if (PropertyGrid.CustomTypeConverters.TryGetValue(valueType, out var customConverter))
          return customConverter.Invoke(value!);
 
-      var method = valueType.GetMethod(nameof(ToString), BindingFlags.Instance | BindingFlags.Public);
+      var method = valueType.GetMethod(nameof(ToString), BindingFlags.Instance | BindingFlags.Public, Type.EmptyTypes);
       return method?.DeclaringType != typeof(object) ? value!.ToString()! : valueType.Name;
    }
 

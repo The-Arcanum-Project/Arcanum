@@ -1,14 +1,9 @@
 ﻿using System.ComponentModel;
-using System.Windows.Controls;
-using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.NUI.NUIUserControls;
 using Arcanum.Core.GlobalStates;
-using Common.UI.NUI;
-using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
@@ -17,10 +12,10 @@ public partial class PopType(string name,
                              float foodConsumption,
                              float assimilationConversionFactor) : IParseable<PopType>, INUI
 {
-   public string Name { get; } = name;
-   public string ColorKey { get; } = colorKey;
-   public float FoodConsumption { get; } = foodConsumption;
-   public float AssimilationConversionFactor { get; } = assimilationConversionFactor;
+   public string Name { get; set; } = name;
+   public string ColorKey { get; set; } = colorKey;
+   public float FoodConsumption { get; set; } = foodConsumption;
+   public float AssimilationConversionFactor { get; set; } = assimilationConversionFactor;
 
    public override string ToString()
    {
@@ -73,26 +68,8 @@ public partial class PopType(string name,
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
-   public NUIUserControl GetObjectView(Enum[]? e = null) => throw new NotImplementedException();
 
-   public NUIUserControl GetEmbeddedView(Enum[] e)
-   {
-      var defaultNui = new DefaultNUI(this, ViewType.EmbeddedView)
-      {
-         DataContext = this,
-         Content = new Border()
-         {
-            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 200, 66, 66)), BorderThickness = new(5),
-         }
-      };
-      return defaultNui;
-   }
-
-   public NUIUserControl GetEmbeddedEditorView(Enum[]? e = null) => throw new NotImplementedException();
-
-   public NUIUserControl GetShortInfoView(Enum[]? e = null) => throw new NotImplementedException();
-
-   public KeyValuePair<string, string> GetTitleAndSubTitle() => throw new NotImplementedException();
-
-   public NUIUserControl GetBaseUI(ViewType view) => new DefaultNUI(this, view) { DataContext = this };
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.PopTypeSettings;
+   public INavigate[] Navigations { get; } = [];
 }

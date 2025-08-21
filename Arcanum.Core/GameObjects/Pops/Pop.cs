@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.NUI.NUIUserControls;
-using Common.UI.NUI;
-using Nexus.Core;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
@@ -51,38 +49,16 @@ public partial class Pop(PopType type,
       return !(left == right);
    }
 
-   public NUIUserControl GetObjectView(Enum[]? e = null)
-   {
-      var fields = e ?? [Field.Culture, Field.Type];
-      foreach (var field in fields)
-      {
-         var fd = (Field)field;
-         var type = Nx.TypeOf(this, fd);
-      }
-      
-      throw new NotImplementedException($"GetObjectView for {this.GetType().Name} is not implemented yet.");
-   }
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.PopSettings;
 
-   public NUIUserControl GetEmbeddedView(Enum[] e) => throw new NotImplementedException();
-
-   public NUIUserControl GetEmbeddedEditorView(Enum[]? e = null) => throw new NotImplementedException();
-
-   public NUIUserControl GetShortInfoView(Enum[]? e = null) => throw new NotImplementedException();
-   public KeyValuePair<string, string> GetTitleAndSubTitle() => new(Type.Name, Culture);
-
-   public NUIUserControl GetBaseUI(ViewType view)
-   {
-      return new DefaultNUI(this, view)
-      {
-         DataContext = this,
-      };
-   }
+   public INavigate[] Navigations { get; } = [];
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new (propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

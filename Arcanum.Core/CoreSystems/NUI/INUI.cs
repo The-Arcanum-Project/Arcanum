@@ -14,18 +14,14 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// </summary>
 public interface INUI : INexus, INotifyPropertyChanged
 {
+   [IgnoreModifiable]
+   public bool IsReadonly { get; }
+   [IgnoreModifiable]
+   public NUISetting Settings { get; }
+
    /// <summary>
-   /// The enum defines the <see cref="INexus"/> fields which should be displayed.
-   /// Default is null in which the settings will be pulled and fields displayed accordingly.
+   /// An optional list of elements that can be navigated to from this MainItems RMB
    /// </summary>
-   /// <param name="e"></param>
-   /// <returns></returns>
-   public NUIUserControl GetObjectView(Enum[]? e = null);
-
-   public NUIUserControl GetEmbeddedView(Enum[] e);
-   public NUIUserControl GetEmbeddedEditorView(Enum[]? e = null);
-   public NUIUserControl GetShortInfoView(Enum[]? e = null);
-
-   public KeyValuePair<string, string> GetTitleAndSubTitle();
-   public NUIUserControl GetBaseUI(ViewType view);
+   [IgnoreModifiable]
+   public INavigate[] Navigations { get; }
 }

@@ -13,6 +13,9 @@ public class MainSettingsObj
       // Initialize any default values here if needed
    }
    
+   [IsSubMenu("NUI Settings")]
+   public NUISettings NUISettings { get; set; } = new ();
+   
    [JsonIgnore]
    [IsSubMenu("Error Handling")]
    public ErrorDescriptors ErrorDescriptors { get; set; } = ErrorDescriptors.Instance;

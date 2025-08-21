@@ -6,17 +6,13 @@
 public enum ViewType
 {
    /// <summary>
-   /// The view of an entire object. Should contain subViews of <see cref="EmbeddedView"/> from other objects
+   /// The view of an entire object. Should contain subViews of <see cref="Embedded"/> from other objects
    /// </summary>
    View,
    /// <summary>
    /// A compact view only showing context information about the object.
    /// </summary>
-   EmbeddedView,
-   /// <summary>
-   /// A compact view offering an embedded editor for the object.
-   /// </summary>
-   EmbeddedEditorView,
+   Embedded,
    /// <summary>
    /// A short info view that displays only the most important information about an object.
    /// </summary>

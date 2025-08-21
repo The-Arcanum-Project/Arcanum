@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.Windows.Controls;
+using System.Windows.Input;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace Arcanum.Core.CoreSystems.NUI;
 
@@ -8,8 +10,8 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// <param name="nuiRoot"></param>
 /// <param name="getTargetView"></param>
 /// <param name="canExecute"></param>
-public sealed class NavigationCommand(NUIRoot nuiRoot,
-                                      Func<NUIUserControl> getTargetView,
+public sealed class NavigationCommand(ContentPresenter nuiRoot,
+                                      Func<UserControl> getTargetView,
                                       Func<bool>? canExecute = null)
    : ICommand
 {
@@ -21,17 +23,17 @@ public sealed class NavigationCommand(NUIRoot nuiRoot,
    /// <summary>
    /// The root of the NUI system that is used to set the view.
    /// </summary>
-   private readonly NUIRoot _nuiRoot = nuiRoot ?? throw new ArgumentNullException(nameof(nuiRoot));
+   private readonly ContentPresenter _nuiRoot = nuiRoot ?? throw new ArgumentNullException(nameof(nuiRoot));
 
    /// <summary>
    /// The Function which returns the target view to be set in the NUIRoot.
    /// </summary>
-   private readonly Func<NUIUserControl> _getTargetView =
+   private readonly Func<UserControl> _getTargetView =
       getTargetView ?? throw new ArgumentNullException(nameof(getTargetView));
 
    public bool CanExecute(object? parameter) => _canExecute();
 
-   public void Execute(object? parameter) => _nuiRoot.SetView(_getTargetView.Invoke());
+   public void Execute(object? parameter) => _nuiRoot.Content = _getTargetView.Invoke();
 
    public event EventHandler? CanExecuteChanged;
 }

@@ -9,7 +9,7 @@ public interface INavigate
    /// The target control that this navigation system will navigate to.
    /// </summary>
    /// <returns></returns>
-   public NUIUserControl GetTargetControl();
+   public UserControl GetTargetControl();
 
    /// <summary>
    /// The string that will be displayed in a navigation tool strip.

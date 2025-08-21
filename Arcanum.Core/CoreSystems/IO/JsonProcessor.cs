@@ -20,18 +20,30 @@ internal static class JsonProcessor
 
    static JsonProcessor()
    {
-      var defaultRules = new JsonSerializationRules { WriteIndented = true, };
+      // --- START OF FIX ---
+
+      // Create ONE set of default rules that includes your required converters.
+      var defaultSerializationRules = new JsonSerializationRules 
+      { 
+         WriteIndented = true,
+         // THIS IS THE CRITICAL CHANGE:
+         // Ensure the custom converter is part of the default rules.
+         Converters = { new EnumJsonConverter() }
+      };
 
       var defaultDeserializationRules = new JsonDeserializationRules
       {
-         PropertyNameCaseInsensitive = true, AllowTrailingCommas = true,
+         PropertyNameCaseInsensitive = true, 
+         AllowTrailingCommas = true,
+         // Also add it here for symmetry and clarity.
+         Converters = { new EnumJsonConverter() }
       };
 
-      // Initialize default serializer options
-      DefaultSerializerOptions = CreateSerializerOptions(defaultRules);
-
-      // Initialize default deserializer options
+      // Now, when these are created, they will be built correctly.
+      DefaultSerializerOptions = CreateSerializerOptions(defaultSerializationRules);
       DefaultDeserializerOptions = CreateDeserializerOptions(defaultDeserializationRules);
+
+      // --- END OF FIX ---
    }
 
    /// <summary>
@@ -48,16 +60,12 @@ internal static class JsonProcessor
          DefaultBufferSize = rules.DefaultBufferSize,
          IgnoreReadOnlyProperties = rules.IgnoreReadOnlyProperties,
          IncludeFields = rules.IncludeFields,
-         Converters =
-         {
-            new KeyGestureJsonConverter(),
-         },
       };
 
       if (rules.IgnoreNullValues)
          options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-      switch (rules.PropertyNamingPolicy)    
+      switch (rules.PropertyNamingPolicy)
       {
          case JsonPropertyNamingPolicyType.CamelCase:
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -68,23 +76,32 @@ internal static class JsonProcessor
             break;
       }
 
+      // Manually add your base converters first
+      options.Converters.Add(new KeyGestureJsonConverter());
+
+      // Check if our custom Enum converter is specified in the rules.
+      var hasCustomEnumConverter = rules.Converters.Any(c => c is EnumJsonConverter);
+
       var stringEnumConverterAdded = false;
-      if (rules.EnumSerialization != JsonStringEnumConverterOptions.SerializeAsNumber)
+      // ONLY add the standard string enum converter if our special one is NOT being used.
+      if (!hasCustomEnumConverter && rules.EnumSerialization != JsonStringEnumConverterOptions.SerializeAsNumber)
       {
          var enumNamingPolicy = rules.PropertyNamingPolicy == JsonPropertyNamingPolicyType.CamelCase ||
-                                rules.EnumSerialization ==
-                                JsonStringEnumConverterOptions.SerializeAsStringCamelCase
+                                rules.EnumSerialization == JsonStringEnumConverterOptions.SerializeAsStringCamelCase
                                    ? JsonNamingPolicy.CamelCase
                                    : null;
          options.Converters.Add(new JsonStringEnumConverter(enumNamingPolicy));
          stringEnumConverterAdded = true;
       }
 
+      // Now, add all converters from the rules, ensuring no duplicates.
       foreach (var converter in rules.Converters)
       {
-         // Avoid adding JsonStringEnumConverter twice if already handled
          if (stringEnumConverterAdded && converter is JsonStringEnumConverter)
             continue;
+
+         if (options.Converters.Any(c => c.GetType() == converter.GetType()))
+            continue; 
 
          options.Converters.Add(converter);
       }
@@ -105,26 +122,38 @@ internal static class JsonProcessor
          PropertyNameCaseInsensitive = rules.PropertyNameCaseInsensitive,
          AllowTrailingCommas = rules.AllowTrailingCommas,
          DefaultBufferSize = rules.DefaultBufferSize,
-         Converters = { new KeyGestureJsonConverter() },
       };
 
+      options.Converters.Add(new KeyGestureJsonConverter());
+      options.Converters.Add(new EnumJsonConverter());
+
+      // Check if the custom Enum converter is present (it always will be with the line above,
+      // but this is good practice in case you change the logic).
+      bool hasCustomEnumConverter = options.Converters.Any(c => c is EnumJsonConverter) ||
+                                    (rules.Converters.Any(c => c is EnumJsonConverter));
+
+
       var stringEnumConverterAdded = false;
-      if (rules.EnumDeserialization != JsonStringEnumConverterOptions.SerializeAsNumber)
+      // ONLY add the standard string enum converter if our special one is NOT being used.
+      if (!hasCustomEnumConverter && rules.EnumDeserialization != JsonStringEnumConverterOptions.SerializeAsNumber)
       {
          var enumNamingPolicy =
             rules.EnumDeserialization == JsonStringEnumConverterOptions.SerializeAsStringCamelCase
                ? JsonNamingPolicy.CamelCase
                : null;
-         options.Converters.Add(new JsonStringEnumConverter(enumNamingPolicy,
-                                                            allowIntegerValues:
-                                                            true)); // Allow numbers too for robustness
+         options.Converters.Add(new JsonStringEnumConverter(enumNamingPolicy, allowIntegerValues: true));
          stringEnumConverterAdded = true;
       }
 
+      // Now, add all converters from the rules, ensuring no duplicates.
       foreach (var converter in rules.Converters)
       {
          if (stringEnumConverterAdded && converter is JsonStringEnumConverter)
             continue;
+
+         
+         if (options.Converters.Any(c => c.GetType() == converter.GetType()))
+            continue; 
 
          options.Converters.Add(converter);
       }
@@ -178,7 +207,7 @@ internal static class JsonProcessor
          return default;
 
       var options = rules == null
-                       ? DefaultSerializerOptions
+                       ? DefaultDeserializerOptions 
                        : CreateDeserializerOptions(rules);
       try
       {

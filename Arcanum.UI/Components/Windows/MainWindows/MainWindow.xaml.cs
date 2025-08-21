@@ -16,7 +16,6 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI.Generator;
-using Common.UI.NUI;
 using Nexus.Core;
 using Application = System.Windows.Application;
 
@@ -278,8 +277,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var pop = Globals.Locations["stockholm"].Pops[0];
-      var ui = NUIGenerators.Generator.GenerateView(pop, Pop.Field.Type, Pop.Field.Culture, [Pop.Field.Religion, Pop.Field.Culture, Pop.Field.Type], true);
+      var pop = Globals.Locations["stockholm"].Pops[3];
+      var ui = NUIViewGenerator.GenerateView(pop, true, UiPresenter);
       UiPresenter.Content = ui;
       
    }
