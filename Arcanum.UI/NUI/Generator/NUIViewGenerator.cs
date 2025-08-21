@@ -3,26 +3,35 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.NUI.Headers;
 using Arcanum.UI.NUI.UserControls.BaseControls;
+using Microsoft.Xaml.Behaviors.Core;
 using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
 
 public static class NUIViewGenerator
 {
-   public static UserControl GenerateView<T>(T target,
-                                             bool generateSubViews,
-                                             ContentPresenter root) where T : INUI
+   private static int index = 0;
+
+   public static void GenerateAndSetView(NUINavHistory navHistory)
    {
+      var view = GenerateView(navHistory);
+      navHistory.Root.Content = view;
+   }
+
+   public static UserControl GenerateView(NUINavHistory navHistory)
+   {
+      var target = navHistory.Target;
       var titleBinding = GetOneWayBinding(target, target.Settings.Title);
       var subtitleBinding = GetOneWayBinding(target, target.Settings.Description);
 
-      var baseUI = new BaseView();
+      var baseUI = new BaseView { Name = $"{target.Settings.Title}_{index}" };
 
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(50, GridUnitType.Pixel) } } };
 
-      var header = GetDescHeader(titleBinding, subtitleBinding);
+      var header = GetDescHeader(titleBinding, subtitleBinding, target.Navigations, navHistory.Root, target);
       baseGrid.Children.Add(header);
       Grid.SetRow(header, 0);
       Grid.SetColumn(header, 0);
@@ -32,19 +41,19 @@ public static class NUIViewGenerator
          var nxProp = target.Settings.ViewFields[i];
          UIElement element;
          var type = Nx.TypeOf(target, nxProp);
-         if (typeof(INUI).IsAssignableFrom(type))
+         if (typeof(INUI).IsAssignableFrom(type) || typeof(INUI) == type)
          {
             // Detect if value has ref to target. --> 1 to n relationship.
-            if (generateSubViews)
+            if (navHistory.GenerateSubViews)
             {
                INUI value = null!;
                Nx.ForceGet(target, nxProp, ref value);
-               element = GetEmbeddedView(value, root);
+               element = GetEmbeddedView(value, navHistory.Root);
                baseGrid.RowDefinitions.Add(new() { Height = new(40, GridUnitType.Auto) });
             }
             else
             {
-               element = GetStackPanel(target, nxProp);
+               element = GenerateShortInfo(target, navHistory.Root);
             }
          }
          else
@@ -59,6 +68,7 @@ public static class NUIViewGenerator
       }
 
       baseUI.BaseViewBorder.Child = baseGrid;
+      index++;
       return baseUI;
    }
 
@@ -86,7 +96,7 @@ public static class NUIViewGenerator
          {
             INUI value = null!;
             Nx.ForceGet(target, nxProp, ref value);
-            element = GenerateShortInfo(value);
+            element = GenerateShortInfo(value, root);
             baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Auto) });
          }
          else
@@ -104,9 +114,53 @@ public static class NUIViewGenerator
       return baseUI;
    }
 
-   private static UIElement GenerateShortInfo<T>(T value) where T : INUI
+   private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
    {
-      throw new NotImplementedException();
+      var stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
+      object headerValue = null!;
+      Nx.ForceGet(value, value.Settings.Title, ref headerValue);
+      var headerBlock = new TextBlock
+      {
+         Text = headerValue.ToString() ?? "Unknown", Cursor = Cursors.Hand,
+      };
+      var sInfo = string.Empty;
+      foreach (var nxProp in value.Settings.ShortInfoFields)
+      {
+         if (sInfo.Length > 0)
+            sInfo += ", ";
+         object propValue = null!;
+         Nx.ForceGet(value, nxProp, ref propValue);
+         sInfo += $"{propValue}";
+      }
+
+      var infoBlock = new TextBlock
+      {
+         Text = sInfo, Cursor = Cursors.Hand,
+      };
+      stackPanel.Children.Add(headerBlock);
+      stackPanel.Children.Add(infoBlock);
+
+      headerBlock.MouseUp += (sender, e) =>
+      {
+         if (e.ChangedButton == MouseButton.Right)
+         {
+            if (value.Navigations.Length == 0)
+            {
+               e.Handled = true;
+               return;
+            }
+
+            var contextMenu = GetContextMenu(value.Navigations, root, value);
+            contextMenu.PlacementTarget = sender as UIElement ?? headerBlock;
+            contextMenu.IsOpen = true;
+            e.Handled = true;
+         }
+         else if (e.ChangedButton == MouseButton.Left)
+         {
+            root.Content = GenerateView(new(value, true, root));
+         }
+      };
+      return stackPanel;
    }
 
    private static StackPanel GetStackPanel(INUI target, Enum nxProp)
@@ -116,7 +170,7 @@ public static class NUIViewGenerator
          case var t when t == typeof(string):
          case var f when f == typeof(float):
             var desc = DescriptorBlock(nxProp);
-            var textBox = new TextBox();
+            var textBox = new CorneredTextBox();
             textBox.SetBinding(TextBox.TextProperty, GetTwoWayBinding(target, nxProp));
             return new() { Children = { desc, textBox }, Orientation = Orientation.Horizontal };
       }
@@ -131,7 +185,7 @@ public static class NUIViewGenerator
    }
 
    private static TextBlock NavigationHeader<T>(Binding headerBinding,
-                                                INavigate[] navigations,
+                                                INUINavigation[] navigations,
                                                 ContentPresenter root,
                                                 T value) where T : INUI
    {
@@ -142,23 +196,20 @@ public static class NUIViewGenerator
       {
          if (e.ChangedButton == MouseButton.Right)
          {
-            var contextMenu = new ContextMenu();
-            foreach (var navigation in navigations)
-               contextMenu.Items.Add(new MenuItem
-               {
-                  Header = navigation.ToolStripString, Command = navigation.Command,
-               });
-
-            if (contextMenu.Items.Count > 0)
+            if (navigations.Length == 0)
             {
-               contextMenu.PlacementTarget = sender as UIElement ?? header;
-               contextMenu.IsOpen = true;
                e.Handled = true;
+               return;
             }
+
+            var contextMenu = GetContextMenu(navigations, root, value);
+            contextMenu.PlacementTarget = sender as UIElement ?? header;
+            contextMenu.IsOpen = true;
+            e.Handled = true;
          }
          else if (e.ChangedButton == MouseButton.Left)
          {
-            root.Content = GenerateView(value, true, root);
+            root.Content = GenerateView(new(value, true, root));
          }
       };
       header.Cursor = Cursors.Hand;
@@ -166,11 +217,52 @@ public static class NUIViewGenerator
       return header;
    }
 
-   private static DefaultHeader GetDescHeader(Binding titleBinding, Binding subtitleBinding)
+   private static ContextMenu GetContextMenu<T>(INUINavigation[] navigations, ContentPresenter root, T target)
+      where T : INUI
    {
+      var contextMenu = new ContextMenu();
+      foreach (var navigation in navigations)
+         contextMenu.Items.Add(new MenuItem
+         {
+            Header = navigation.ToolStripString,
+            Command = new ActionCommand(() => { GenerateAndSetView(new(navigation.Target, true, root)); }),
+         });
+
+      return contextMenu;
+   }
+
+   private static DefaultHeader GetDescHeader(Binding titleBinding,
+                                              Binding subtitleBinding,
+                                              INUINavigation[] navigations,
+                                              ContentPresenter root,
+                                              INUI target)
+   {
+      //var header = new DefaultHeader { TitleTextBlock = NavigationHeader(subtitleBinding, navigations, root, target) };
       var header = new DefaultHeader();
-      header.TitleTextBlock.SetBinding(TextBlock.TextProperty, subtitleBinding);
-      header.SubTitleTextBlock.SetBinding(TextBlock.TextProperty, titleBinding);
+      header.TitleTextBlock.SetBinding(TextBlock.TextProperty, titleBinding);
+      header.TitleTextBlock.MouseUp += (sender, e) =>
+      {
+         if (e.ChangedButton == MouseButton.Right)
+         {
+            if (navigations.Length == 0)
+            {
+               e.Handled = true;
+               return;
+            }
+
+            var contextMenu = GetContextMenu(navigations, root, target);
+            contextMenu.PlacementTarget = sender as UIElement ?? header;
+            contextMenu.IsOpen = true;
+            e.Handled = true;
+         }
+         else if (e.ChangedButton == MouseButton.Left)
+         {
+            root.Content = GenerateView(new(target, true, root));
+         }
+      };
+
+      header.Cursor = Cursors.Hand;
+      header.SubTitleTextBlock.SetBinding(TextBlock.TextProperty, subtitleBinding);
       return header;
    }
 

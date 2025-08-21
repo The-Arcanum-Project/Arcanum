@@ -15,6 +15,7 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
+using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
 using Nexus.Core;
 using Application = System.Windows.Application;
@@ -278,8 +279,22 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var pop = Globals.Locations["stockholm"].Pops[3];
-      var ui = NUIViewGenerator.GenerateView(pop, true, UiPresenter);
+      var ui = NUIViewGenerator.GenerateView(new(pop, true, UiPresenter));
       UiPresenter.Content = ui;
-      
+   }
+
+   private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+   {
+      // Check which button was pressed
+      if (e.ChangedButton == MouseButton.XButton1)
+      {
+         NUINavigation.Instance.Back();
+         e.Handled = true;
+      }
+      else if (e.ChangedButton == MouseButton.XButton2)
+      {
+         NUINavigation.Instance.Forward();
+         e.Handled = true;
+      }
    }
 }

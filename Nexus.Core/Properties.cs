@@ -21,7 +21,7 @@ public static class Nx
       INexus target,
       [LinkedPropertyEnum(nameof(target))] Enum e)
    {
-      Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
+      //Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
       return (T)target._getValue(e);
    }
 
@@ -31,7 +31,7 @@ public static class Nx
       [LinkedPropertyEnum(nameof(target))] Enum e,
       ref T returnValue)
    {
-      Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
+      //Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
       returnValue = (T)target._getValue(e);
    }
 
@@ -39,7 +39,7 @@ public static class Nx
       INexus target, Enum e,
       ref T returnValue)
    {
-      Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
+      //Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
       returnValue = (T)target._getValue(e);
    }
 

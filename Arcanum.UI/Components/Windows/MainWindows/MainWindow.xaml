@@ -13,6 +13,7 @@
                          FooterHeight = "26"
                          HeaderHeight = "30"
                          Loaded = "MainWindow_OnLoaded"
+                         PreviewMouseDown="Window_PreviewMouseDown"
                          WindowStartupLocation = "CenterScreen">
 
     <styleClasses:BaseWindow.DataContext>
