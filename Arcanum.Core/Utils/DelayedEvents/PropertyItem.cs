@@ -75,6 +75,15 @@ public sealed class PropertyItem : INotifyPropertyChanged
          return $"{type.Name}: ({collection.Count}) Items of {itemType?.Name}";
       }
    }
+   
+   /// <summary>
+   /// Forces a INotifyPropertyChanged event to be raised for the Value property.
+   /// Call this when the underlying object of Value has been mutated internally.
+   /// </summary>
+   public void RefreshValue()
+   {
+      OnPropertyChanged(nameof(Value));
+   }
 
    public static PropertyItem FromExpression<TModel, TProp>(TModel instance, Expression<Func<TModel, TProp>> expr)
    {

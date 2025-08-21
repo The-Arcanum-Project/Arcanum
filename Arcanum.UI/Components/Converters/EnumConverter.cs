@@ -35,7 +35,7 @@ public class EnumWithDescription(Enum value)
    public override string ToString() => Value.ToString(); // Optional: affects default display
 }
 
-class EnumValuesConverter : IValueConverter
+public class EnumValuesConverter : IValueConverter
 {
    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {
@@ -65,7 +65,7 @@ class EnumValuesConverter : IValueConverter
    private static bool IsSingleBit(long value) => (value & (value - 1)) == 0;
 }
 
-class EnumValueConverter : IValueConverter
+public class EnumValueConverter : IValueConverter
 {
    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {

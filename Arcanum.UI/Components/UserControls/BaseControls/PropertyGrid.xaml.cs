@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Arcanum.API.Attributes;
 using Arcanum.Core.Utils.DelayedEvents;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
@@ -78,7 +79,7 @@ public partial class PropertyGrid
          return;
       }
 
-      SelectionChangedInternal(item);      
+      SelectionChangedInternal(item);
    }
 
    private void SelectionChangedInternal(PropertyItem item)
@@ -195,19 +196,26 @@ public partial class PropertyGrid
 
          object Getter() => prop.GetValue(isStatic ? null : e.NewValue)!;
 
-         Action<object>? setter = prop.CanWrite
-                                     ? v =>
-                                     {
-                                        var targetType = prop.PropertyType;
-                                        var safeValue = v == null! || targetType.IsInstanceOfType(v)
-                                                           ? v
-                                                           : Convert.ChangeType(v,
-                                                                                targetType,
-                                                                                CultureInfo.InvariantCulture);
+         Action<object>? setter;
+         if (prop.CanWrite)
+            setter = v =>
+            {
+               var targetType = prop.PropertyType;
+               object safeValue;
+               if (v == null! || targetType.IsInstanceOfType(v))
+                  safeValue = v;
+               else
+                  safeValue = Convert.ChangeType(v,
+                                                 targetType,
+                                                 CultureInfo.InvariantCulture);
 
-                                        prop.SetValue(isStatic ? null : e.NewValue, safeValue);
-                                     }
-                                     : null;
+               if (isStatic)
+                  prop.SetValue(null, safeValue);
+               else
+                  prop.SetValue(e.NewValue, safeValue);
+            };
+         else
+            setter = null;
 
          var newItem = new PropertyItem(prop, prop.PropertyType, Getter, setter, categoryAttr?.Category!);
          newItem.ValueChanged += grid.OnPropertyValueChanged;
@@ -275,6 +283,37 @@ public partial class PropertyGrid
          }
 
       return false;
+   }
+
+   private void ViewEnumArray_Button_Click(object sender, RoutedEventArgs e)
+   {
+      if (sender is not BaseButton { DataContext: PropertyItem item })
+         return;
+
+      if (item.Value is not Enum[] enumArray)
+         return;
+
+      ICollection<string> collection = enumArray.Select(num => num.ToString()).ToList();
+
+      var first = collection.Cast<object>().FirstOrDefault();
+      if (first == null)
+         return;
+
+      var values = Enum.GetValues(enumArray.GetValue(0)!.GetType());
+      var available = values.Cast<object>()
+                            .Select(v => v.ToString() ?? string.Empty)
+                            .Where(v => !string.IsNullOrEmpty(v))
+                            .ToList();
+
+      var collectionEditor = new CollectionEditor(available, collection);
+      collectionEditor.ShowDialog();
+      var selectedItems = collectionEditor.SelectedItems
+                                          .Select(item => Enum.Parse(enumArray.GetValue(0)!.GetType(), item))
+                                          .Cast<Enum>()
+                                          .ToArray();
+      
+      item.Value = selectedItems;
+      item.RefreshValue();
    }
 }
 

@@ -35,6 +35,14 @@ public static class Nx
       returnValue = (T)target._getValue(e);
    }
 
+   public static void ForceGet<T>(
+      INexus target, Enum e,
+      ref T returnValue)
+   {
+      Console.WriteLine($"Getting generic value for {e} from {target.GetType().Name}");
+      returnValue = (T)target._getValue(e);
+   }
+
    public static Type TypeOf(INexus target,
                              [LinkedPropertyEnum(nameof(target))] Enum e)
    {

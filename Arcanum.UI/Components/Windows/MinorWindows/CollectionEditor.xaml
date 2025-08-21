@@ -1,0 +1,53 @@
+﻿<sc:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MinorWindows.CollectionEditor"
+               xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:local = "clr-namespace:Arcanum.UI.Components.Windows.MinorWindows"
+               xmlns:sc = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+               mc:Ignorable = "d"
+               Title = "CollectionEditor"
+               Height = "500"
+               Width = "600"
+               WindowStartupLocation = "CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "40" />
+            <ColumnDefinition Width = "*" />
+        </Grid.ColumnDefinitions>
+
+        <ListView Grid.Column = "0"
+                  x:Name = "SelectedItemsView"
+                  ItemsSource = "{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=sc:BaseWindow}}">
+
+        </ListView>
+
+        <StackPanel Grid.Column = "1">
+            <sc:BaseButton Margin = "3"
+                           HorizontalAlignment = "Stretch"
+                           VerticalAlignment = "Top"
+                           Click="MoveLeftButton_OnClick"
+                           x:Name = "MoveLeftButton"
+                           ToolTip = "Move selected items to the left"
+                           Height = "34">
+                <Image Source = "../../../Assets/Icons/30x30/ArrowLeft30x30.png"> </Image>
+            </sc:BaseButton>
+
+            <sc:BaseButton Margin = "3"
+                           HorizontalAlignment = "Stretch"
+                           VerticalAlignment = "Top"
+                           Click="MoveRightButton_OnClick"
+                           x:Name = "MoveRightButton"
+                           ToolTip = "Move selected items to the right"
+                           Height = "34">
+                <Image Source = "../../../Assets/Icons/30x30/ArrowRight30x30.png"> </Image>
+            </sc:BaseButton>
+        </StackPanel>
+
+        <ListView x:Name = "AvailableItemsView"
+                  Grid.Column = "2"
+                  ItemsSource = "{Binding AvailableItems, RelativeSource={RelativeSource AncestorType=sc:BaseWindow}}">
+        </ListView>
+    </Grid>
+</sc:BaseWindow>
