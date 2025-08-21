@@ -7,10 +7,22 @@
              mc:Ignorable = "d"
              d:DesignHeight = "300"
              d:DesignWidth = "300">
-    <Border x:Name = "BaseEmbeddedBorder"
-            BorderThickness = "2"
-            BorderBrush = "{StaticResource AggressiveRedBackColorBrush}"
-            Margin="2">
-        
-    </Border>
+
+    <Grid x:Name = "ContentGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "*" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name = "EmbedMarker"
+                Grid.Column = "0"
+                Background = "{StaticResource SelectedBackColorBrush}"
+                BorderBrush = "{StaticResource SelectedBackColorBrush}"
+                BorderThickness = "2"
+                CornerRadius = "1"
+                Width = "4"
+                Margin = "0, 0, 2, 0"
+                HorizontalAlignment = "Left">
+        </Border>
+    </Grid>
+
 </UserControl>

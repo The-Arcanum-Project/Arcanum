@@ -13,7 +13,7 @@
                          FooterHeight = "26"
                          HeaderHeight = "30"
                          Loaded = "MainWindow_OnLoaded"
-                         PreviewMouseDown="Window_PreviewMouseDown"
+                         PreviewMouseDown = "Window_PreviewMouseDown"
                          WindowStartupLocation = "CenterScreen">
 
     <styleClasses:BaseWindow.DataContext>
@@ -319,10 +319,17 @@
                               MinWidth = "200" />
         </Grid.ColumnDefinitions>
 
+        <Border Grid.Column = "0"
+                Background="{StaticResource LightBackColorBrush}"
+                BorderBrush="{DynamicResource DisabledForeColorBrush}"
+                BorderThickness="2"
+                CornerRadius="8"
+                Margin="0, 0, 2, 0">
+            <ContentPresenter 
+                              x:Name = "UiPresenter">
+            </ContentPresenter>
 
-        <ContentPresenter Grid.Column = "0"
-                             x:Name = "UiPresenter">
-        </ContentPresenter>
+        </Border>
 
         <GridSplitter Grid.Column = "1"
                       Width = "4"
