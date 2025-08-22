@@ -24,7 +24,9 @@ public partial class Pop(PopType type,
    public override bool Equals(object? obj)
    {
       if (obj is Pop other)
-         return Type == other.Type && Size.Equals(other.Size) && Culture == other.Culture && Religion == other.Religion;
+         return Type == other.Type && Size.Equals(other.Size) &&
+                string.Equals(Culture, other.Culture, StringComparison.Ordinal) &&
+                string.Equals(Religion, other.Religion, StringComparison.Ordinal);
       return false;
    }
 

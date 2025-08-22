@@ -26,4 +26,18 @@ public class NUINavHistory
    public INUI Target { get; }
    public bool GenerateSubViews { get; }
    public ContentPresenter Root { get; }
+   
+   public override bool Equals(object? obj)
+   {
+      if (obj is not NUINavHistory other)
+         return false;
+
+      return Target.Equals(other.Target) && GenerateSubViews == other.GenerateSubViews &&
+             Root.Equals(other.Root);
+   }
+   
+   public override int GetHashCode()
+   {
+      return HashCode.Combine(Target, GenerateSubViews, Root);
+   }
 }

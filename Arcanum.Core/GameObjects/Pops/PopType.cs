@@ -41,7 +41,7 @@ public partial class PopType(string name,
    public override bool Equals(object? obj)
    {
       if (obj is PopType other)
-         return Name == other.Name;
+         return GetHashCode().Equals(other.GetHashCode());
 
       return false;
    }

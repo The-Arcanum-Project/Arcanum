@@ -14,9 +14,13 @@ public class NUINavigation(int capacity)
 
    public void Navigate(NUINavHistory item)
    {
+      if (_current != null && _current.Value.Equals(item))
+         return;
+      
       while (_current?.Next != null)
          _items.Remove(_current.Next);
 
+      
       _items.AddLast(item);
       _current = _items.Last;
 

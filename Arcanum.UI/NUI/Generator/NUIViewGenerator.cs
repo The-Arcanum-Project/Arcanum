@@ -28,7 +28,6 @@ public static class NUIViewGenerator
    {
       var target = navHistory.Target;
       var titleBinding = GetOneWayBinding(target, target.Settings.Title);
-      var subtitleBinding = GetOneWayBinding(target, target.Settings.Description);
 
       var baseUI = new BaseView
       {
@@ -37,7 +36,11 @@ public static class NUIViewGenerator
 
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
 
-      var header = GetDescHeader(titleBinding, subtitleBinding, target.Navigations, navHistory.Root, target);
+      var header = NavigationHeader(titleBinding, target.Navigations, navHistory.Root, target);
+      header.FontSize = 24;
+      header.Height = 32;
+      header.HorizontalAlignment = HorizontalAlignment.Center;
+      header.VerticalAlignment = VerticalAlignment.Top;
       baseGrid.Children.Add(header);
       Grid.SetRow(header, 0);
       Grid.SetColumn(header, 0);
@@ -80,19 +83,22 @@ public static class NUIViewGenerator
    private static BaseEmbeddedView GetEmbeddedView<T>(T target,
                                                       ContentPresenter root) where T : INUI
    {
-      var header = target.Settings.Title;
       var embeddedFields = target.Settings.EmbeddedFields;
 
       var baseUI = new BaseEmbeddedView();
+      var baseGrid = baseUI.ContentGrid;
 
-      var baseGrid = baseUI.ContentGrid; 
-      baseGrid.RowDefinitions.Add(new() { Height = new(30, GridUnitType.Pixel) });
-      var titleBinding = GetOneWayBinding(target, header);
-      var headerBlock = NavigationHeader(titleBinding, target.Navigations, root, target);
+      var headerBlock = NavigationHeader(null, target.Navigations, root, target, target.GetType().Name);
       headerBlock.Margin = new(6, 0, 0, 0);
+      baseGrid.RowDefinitions.Add(new() { Height = new(headerBlock.Height, GridUnitType.Pixel) });
+      baseGrid.Children.Add(headerBlock);
       Grid.SetRow(headerBlock, 0);
       Grid.SetColumn(headerBlock, 0);
-      baseGrid.Children.Add(headerBlock);
+
+      var embedMarker = GetEmbedBorder();
+      baseGrid.Children.Add(embedMarker);
+      Grid.SetRow(embedMarker, 0);
+      Grid.SetColumn(embedMarker, 0);
 
       for (var i = 0; i < embeddedFields.Length; i++)
       {
@@ -104,7 +110,7 @@ public static class NUIViewGenerator
             INUI value = null!;
             Nx.ForceGet(target, nxProp, ref value);
             element = GenerateShortInfo(value, root);
-            baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Auto) });
+            baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
          }
          else
          {
@@ -116,8 +122,9 @@ public static class NUIViewGenerator
          Grid.SetColumn(element, 0);
       }
 
-      Grid.SetRowSpan(baseUI.EmbedMarker, baseGrid.RowDefinitions.Count);
-      
+      baseGrid.RowDefinitions.Add(new() { Height = new(4, GridUnitType.Pixel) });
+      Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
+
       return baseUI;
    }
 
@@ -170,7 +177,7 @@ public static class NUIViewGenerator
    {
       UIElement element;
       var desc = DescriptorBlock(nxProp);
-      desc.Margin = new (leftMargin, 0, 0, 0);
+      desc.Margin = new(leftMargin, 0, 0, 0);
       switch (Nx.TypeOf(target, nxProp))
       {
          case var t when t == typeof(string):
@@ -189,9 +196,7 @@ public static class NUIViewGenerator
             throw
                new NotSupportedException($"Type {Nx.TypeOf(target, nxProp)} is not supported for property {nxProp}.");
       }
-      
-      
-      
+
       var line = new Rectangle
       {
          Height = 1,
@@ -203,7 +208,7 @@ public static class NUIViewGenerator
          HorizontalAlignment = HorizontalAlignment.Stretch,
          VerticalAlignment = VerticalAlignment.Bottom,
          SnapsToDevicePixels = true,
-         Margin = new (leftMargin, 0, 5, 3),
+         Margin = new(leftMargin, 0, 5, 3),
       };
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
 
@@ -221,7 +226,7 @@ public static class NUIViewGenerator
       grid.Children.Add(desc);
       Grid.SetRow(desc, 0);
       Grid.SetColumn(desc, 0);
-      
+
       grid.Children.Add(line);
       Grid.SetRow(line, 0);
       Grid.SetColumn(line, 0);
@@ -239,13 +244,26 @@ public static class NUIViewGenerator
       return textBlock;
    }
 
-   private static TextBlock NavigationHeader<T>(Binding headerBinding,
+   private static TextBlock NavigationHeader<T>(Binding? headerBinding,
                                                 INUINavigation[] navigations,
                                                 ContentPresenter root,
-                                                T value) where T : INUI
+                                                T value,
+                                                string Text = "") where T : INUI
    {
-      var header = new TextBlock();
-      header.SetBinding(TextBlock.TextProperty, headerBinding);
+      var header = new TextBlock
+      {
+         Background = Brushes.Transparent,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontWeight = FontWeights.Bold,
+         Margin = new(4, 0, 0, 0),
+         FontSize = 16,
+         Height = 22,
+         Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
+      };
+      if (headerBinding != null)
+         header.SetBinding(TextBlock.TextProperty, headerBinding);
+      else
+         header.Text = Text;
 
       header.MouseUp += (sender, e) =>
       {
@@ -283,41 +301,6 @@ public static class NUIViewGenerator
          });
 
       return contextMenu;
-   }
-
-   private static DefaultHeader GetDescHeader(Binding titleBinding,
-                                              Binding subtitleBinding,
-                                              INUINavigation[] navigations,
-                                              ContentPresenter root,
-                                              INUI target)
-   {
-      //var header = new DefaultHeader { TitleTextBlock = NavigationHeader(subtitleBinding, navigations, root, target) };
-      var header = new DefaultHeader();
-      header.TitleTextBlock.SetBinding(TextBlock.TextProperty, titleBinding);
-      header.TitleTextBlock.MouseUp += (sender, e) =>
-      {
-         if (e.ChangedButton == MouseButton.Right)
-         {
-            if (navigations.Length == 0)
-            {
-               e.Handled = true;
-               return;
-            }
-
-            var contextMenu = GetContextMenu(navigations, root);
-            contextMenu.PlacementTarget = sender as UIElement ?? header;
-            contextMenu.IsOpen = true;
-            e.Handled = true;
-         }
-         else if (e.ChangedButton == MouseButton.Left)
-         {
-            root.Content = GenerateView(new(target, true, root));
-         }
-      };
-
-      header.Cursor = Cursors.Hand;
-      header.SubTitleTextBlock.SetBinding(TextBlock.TextProperty, subtitleBinding);
-      return header;
    }
 
    private static Binding GetTwoWayBinding<T>(T target, Enum property) where T : INUI
@@ -377,7 +360,7 @@ public static class NUIViewGenerator
                                                          INUI target,
                                                          Enum nxProp,
                                                          Grid baseGrid,
-                                                         int leftmargin = 0)
+                                                         int leftMargin = 0)
    {
       UIElement element;
       var itemType = GetCollectionItemType(type);
@@ -400,7 +383,7 @@ public static class NUIViewGenerator
             {
                new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
             },
-            Margin = new(leftmargin, 0, 0, 0),
+            Margin = new(leftMargin, 0, 0, 0),
          };
 
          var count = -1;
@@ -446,7 +429,7 @@ public static class NUIViewGenerator
          }
          else
          {
-            element = GetDefaultGrid(target, nxProp, leftmargin);
+            element = GetDefaultGrid(target, nxProp, leftMargin);
             baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
          }
 
@@ -471,10 +454,41 @@ public static class NUIViewGenerator
       }
       else
       {
-         element = GetDefaultGrid(target, nxProp, leftmargin);
+         element = GetDefaultGrid(target, nxProp, leftMargin);
          baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
       }
 
       return element;
+   }
+
+   private static Rectangle GetSeparatorLine(DoubleCollection dashes)
+   {
+      return new()
+      {
+         Height = 1,
+         Fill = Brushes.Transparent,
+         Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         StrokeThickness = 1,
+         StrokeDashArray = dashes,
+         StrokeDashCap = PenLineCap.Flat,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Bottom,
+         SnapsToDevicePixels = true,
+      };
+   }
+
+   private static Border GetEmbedBorder()
+   {
+      return new()
+      {
+         Name = "EmbedMarker",
+         Background = Brushes.Transparent,
+         BorderBrush = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+         BorderThickness = new(1, 1, 0, 1),
+         CornerRadius = new(1, 0, 0, 1),
+         Margin = new(2, 0, 2, 0),
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         IsHitTestVisible = false,
+      };
    }
 }

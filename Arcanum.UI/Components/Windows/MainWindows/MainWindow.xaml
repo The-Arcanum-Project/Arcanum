@@ -14,7 +14,8 @@
                          HeaderHeight = "30"
                          Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown"
-                         WindowStartupLocation = "CenterScreen">
+                         WindowStartupLocation = "CenterScreen"
+                         Background = "{DynamicResource DefaultBackColorBrush}">
 
     <styleClasses:BaseWindow.DataContext>
         <mainWindow:MainWindowView />
@@ -320,8 +321,7 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column = "0"
-                Background="{StaticResource LightBackColorBrush}"
-                BorderBrush="{DynamicResource DisabledForeColorBrush}"
+                BorderBrush="{DynamicResource DefaultBorderColorBrush}"
                 BorderThickness="2"
                 CornerRadius="8"
                 Margin="0, 0, 2, 0">

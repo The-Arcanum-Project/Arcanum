@@ -10,7 +10,7 @@ public static class ErrorManager
    public static void ClearLog()
    {
       Diagnostics.Clear();
-      Debug.WriteLine("---------------------------------\nCleared diagnostics log.\n---------------------------------");
+      //Debug.WriteLine("---------------------------------\nCleared diagnostics log.\n---------------------------------");
    }
    
    public static void AddToLog(Diagnostic? diagnostic)
@@ -19,7 +19,7 @@ public static class ErrorManager
          return;
 
       Diagnostics.Add(diagnostic);
-      Debug.WriteLine($"Added diagnostic: {diagnostic}");
+      //Debug.WriteLine($"Added diagnostic: {diagnostic}");
    }
 
    public static void AddToLog(List<Diagnostic> diagnostics)
