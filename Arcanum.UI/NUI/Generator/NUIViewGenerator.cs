@@ -48,7 +48,7 @@ public static class NUIViewGenerator
       for (var i = 0; i < target.Settings.ViewFields.Length; i++)
       {
          var nxProp = target.Settings.ViewFields[i];
-         UIElement element;
+         FrameworkElement  element;
          var type = Nx.TypeOf(target, nxProp);
          if (typeof(INUI).IsAssignableFrom(type) || typeof(INUI) == type)
          {
@@ -58,7 +58,6 @@ public static class NUIViewGenerator
                INUI value = null!;
                Nx.ForceGet(target, nxProp, ref value);
                element = GetEmbeddedView(value, navHistory.Root);
-               baseGrid.RowDefinitions.Add(new() { Height = new(40, GridUnitType.Auto) });
             }
             else
             {
@@ -70,6 +69,8 @@ public static class NUIViewGenerator
             element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp, baseGrid);
          }
 
+         element.VerticalAlignment = VerticalAlignment.Stretch;
+         baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
          baseGrid.Children.Add(element);
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
@@ -96,6 +97,7 @@ public static class NUIViewGenerator
       Grid.SetColumn(headerBlock, 0);
 
       var embedMarker = GetEmbedBorder();
+      embedMarker.BorderBrush = Brushes.Purple;
       baseGrid.Children.Add(embedMarker);
       Grid.SetRow(embedMarker, 0);
       Grid.SetColumn(embedMarker, 0);
@@ -103,20 +105,20 @@ public static class NUIViewGenerator
       for (var i = 0; i < embeddedFields.Length; i++)
       {
          var nxProp = embeddedFields[i];
-         UIElement element;
+         FrameworkElement  element;
          var type = Nx.TypeOf(target, nxProp);
          if (typeof(INUI).IsAssignableFrom(type))
          {
             INUI value = null!;
             Nx.ForceGet(target, nxProp, ref value);
             element = GenerateShortInfo(value, root);
-            baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
          }
          else
          {
             element = BuildCollectionOrDefaultView(root, type, target, nxProp, baseGrid, 6);
          }
 
+         baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
          baseGrid.Children.Add(element);
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
@@ -124,19 +126,18 @@ public static class NUIViewGenerator
 
       baseGrid.RowDefinitions.Add(new() { Height = new(4, GridUnitType.Pixel) });
       Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
-
       return baseUI;
    }
 
    private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
    {
-      var stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
+      var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20};
       object headerValue = null!;
       Nx.ForceGet(value, value.Settings.Title, ref headerValue);
       var sInfo = string.Empty;
       foreach (var nxProp in value.Settings.ShortInfoFields)
       {
-         if (sInfo.Length > 0)
+         if (sInfo.Length > 0 && !sInfo.EndsWith(", "))
             sInfo += ", ";
 
          var type = Nx.TypeOf(value, nxProp);
@@ -144,15 +145,15 @@ public static class NUIViewGenerator
          var arrayType = GetArrayItemType(type);
          if (itemType != null && typeof(INUI).IsAssignableFrom(itemType))
          {
-            ICollection<INUI> collection = null!;
+            IReadOnlyList<INUI> collection = null!;
             Nx.ForceGet(value, nxProp, ref collection);
-            sInfo += $"{collection.Count}:{nxProp}";
+            sInfo += $"{nxProp}:{collection.Count}";
          }
          else if (arrayType != null && typeof(INUI).IsAssignableFrom(arrayType))
          {
             INUI[] array = null!;
             Nx.ForceGet(value, nxProp, ref array);
-            sInfo += $"{array.Length}:{nxProp}";
+            sInfo += $"{nxProp}:{array.Length}";
          }
          else
          {
@@ -162,12 +163,27 @@ public static class NUIViewGenerator
          }
       }
 
-      var headerBlock = NavigationHeader(GetOneWayBinding(value, value.Settings.Title), value.Navigations, root, value);
+      var fontSize = 11;
+      var headerBlock = NavigationHeader(null, value.Navigations, root, value, value.GetType().Name, fontSize, FontWeights.Normal);
+      headerBlock.Margin = new(6, 0, 0, 0);
       var infoBlock = new TextBlock
       {
-         Text = sInfo, Cursor = Cursors.Hand,
+         Text = sInfo,
+         TextTrimming = TextTrimming.CharacterEllipsis,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = fontSize,
+         Height = fontSize + 4,
+      };
+      var dashBlock = new TextBlock
+      {
+         Text = " — ",
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = fontSize,
+         Height = fontSize + 4,
       };
       stackPanel.Children.Add(headerBlock);
+      stackPanel.Children.Add(dashBlock);
       stackPanel.Children.Add(infoBlock);
 
       return stackPanel;
@@ -182,6 +198,10 @@ public static class NUIViewGenerator
       {
          case var t when t == typeof(string):
          case var f when f == typeof(float):
+         case var i when i == typeof(int):
+         case var o when o == typeof(object):
+         case var b when b == typeof(bool):
+         case { IsClass: true }:
             var textBox = new CorneredTextBox
             {
                Height = 23,
@@ -248,22 +268,25 @@ public static class NUIViewGenerator
                                                 INUINavigation[] navigations,
                                                 ContentPresenter root,
                                                 T value,
-                                                string Text = "") where T : INUI
+                                                string text = "",
+                                                int fontSize = 16,
+                                                FontWeight? fontWeight = null) where T : INUI
    {
+      var height = fontSize + 4;
       var header = new TextBlock
       {
          Background = Brushes.Transparent,
          VerticalAlignment = VerticalAlignment.Center,
-         FontWeight = FontWeights.Bold,
+         FontWeight = fontWeight ?? FontWeights.Bold,
          Margin = new(4, 0, 0, 0),
-         FontSize = 16,
-         Height = 22,
+         FontSize = fontSize,
+         Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
       };
       if (headerBinding != null)
          header.SetBinding(TextBlock.TextProperty, headerBinding);
       else
-         header.Text = Text;
+         header.Text = text;
 
       header.MouseUp += (sender, e) =>
       {
@@ -327,6 +350,9 @@ public static class NUIViewGenerator
 
    public static Type? GetCollectionItemType(Type collectionType)
    {
+      if (collectionType == typeof(string) || !collectionType.IsGenericType)
+         return null;
+
       var enumerableInterface = collectionType.GetInterfaces()
                                               .FirstOrDefault(i => i.IsGenericType &&
                                                                    i.GetGenericTypeDefinition() ==
@@ -337,6 +363,9 @@ public static class NUIViewGenerator
 
    public static Type? GetArrayItemType(Type arrayType)
    {
+      if (arrayType == typeof(string) || !arrayType.IsArray)
+         return null;
+
       return arrayType.IsArray ? arrayType.GetElementType() : null;
    }
 
@@ -347,38 +376,32 @@ public static class NUIViewGenerator
          Margin = new(2),
          Height = 20,
          Width = 20,
-         Content = new Image()
+         HorizontalAlignment = HorizontalAlignment.Left,
+         BorderThickness = new(1),
+         Content = new Image
          {
             Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
-            Stretch = Stretch.None,
+            Stretch = Stretch.UniformToFill,
          }
       };
    }
 
-   private static UIElement BuildCollectionOrDefaultView(ContentPresenter root,
-                                                         Type type,
-                                                         INUI target,
-                                                         Enum nxProp,
-                                                         Grid baseGrid,
-                                                         int leftMargin = 0)
+   private static FrameworkElement  BuildCollectionOrDefaultView(ContentPresenter root,
+                                                                 Type type,
+                                                                 INUI target,
+                                                                 Enum nxProp,
+                                                                 Grid baseGrid,
+                                                                 int leftMargin = 0)
    {
-      UIElement element;
+      FrameworkElement  element;
       var itemType = GetCollectionItemType(type);
       var arrayType = GetArrayItemType(type);
 
-      if (itemType == null || arrayType == null)
+      if (itemType != null || arrayType != null)
       {
          // 6 rows, 2 columns
          var grid = new Grid
          {
-            RowDefinitions =
-            {
-               new() { Height = new(25, GridUnitType.Pixel) },
-               new() { Height = new(20, GridUnitType.Pixel) },
-               new() { Height = new(20, GridUnitType.Pixel) },
-               new() { Height = new(20, GridUnitType.Pixel) },
-               new() { Height = new(20, GridUnitType.Pixel) },
-            },
             ColumnDefinitions =
             {
                new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
@@ -391,16 +414,19 @@ public static class NUIViewGenerator
          // Collection of INUI
          if (typeof(INUI).IsAssignableFrom(itemType))
          {
+            // Row for header
+            grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
             // We show the first 5 items of the collection as a ShortInfo
-            ICollection<INUI> collection = null!;
+            IReadOnlyCollection<INUI> collection = null!;
             Nx.ForceGet(target, nxProp, ref collection);
 
             foreach (var j in Enumerable.Range(0, Math.Min(5, collection.Count)))
             {
                var value = collection.ElementAt(j);
                var shortInfo = GenerateShortInfo(value, root);
+               grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
                grid.Children.Add(shortInfo);
-               Grid.SetRow(shortInfo, j);
+               Grid.SetRow(shortInfo, j + 1);
                Grid.SetColumn(shortInfo, 0);
                Grid.SetColumnSpan(shortInfo, 2);
             }
@@ -418,8 +444,9 @@ public static class NUIViewGenerator
             {
                var value = array[j];
                var shortInfo = GenerateShortInfo(value, root);
+               grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
                grid.Children.Add(shortInfo);
-               Grid.SetRow(shortInfo, j);
+               Grid.SetRow(shortInfo, j + 1);
                Grid.SetColumn(shortInfo, 0);
                Grid.SetColumnSpan(shortInfo, 2);
             }
@@ -433,29 +460,63 @@ public static class NUIViewGenerator
             baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
          }
 
+         var strackPanel = new StackPanel
+         {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new(0, 0, 0, 0),
+         };
+         
          var nheader = new TextBlock
          {
-            Text = $"{nxProp}: {count} Items", FontWeight = FontWeights.Bold,
+            Text = $"{nxProp}: {count} Items",
+            FontWeight = FontWeights.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 14,
          };
-         grid.Children.Add(nheader);
-         Grid.SetRow(nheader, 0);
-         Grid.SetColumn(nheader, 0);
+         
 
          var openButton = GetEyeButton();
+         openButton.Margin = new(4, 0, 0, 0);
 
          openButton.Click += (sender, e) =>
          {
             // TODO open proper collection editor for any kind of object
          };
 
-         grid.Children.Add(openButton);
-         Grid.SetRow(openButton, 0);
-         Grid.SetColumn(openButton, 1);
+         strackPanel.Children.Add(nheader);
+         strackPanel.Children.Add(openButton);
+         
+         grid.Children.Add(strackPanel);
+         Grid.SetRow(strackPanel, 0);
+         Grid.SetColumn(strackPanel, 0);
+         Grid.SetColumnSpan(strackPanel, 2);
+
+         if (grid.RowDefinitions.Count > 1)
+         {
+            var rect = new Rectangle()
+            {
+               Width = 1,
+               Fill = Brushes.Transparent,
+               Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+               StrokeThickness = 2,
+               StrokeDashArray = new([4, 6]),
+               StrokeDashCap = PenLineCap.Flat,
+               HorizontalAlignment = HorizontalAlignment.Left,
+               VerticalAlignment = VerticalAlignment.Stretch,
+               SnapsToDevicePixels = true,
+            };
+
+            grid.Children.Add(rect);
+            Grid.SetRow(rect, 1);
+            Grid.SetColumn(rect, 0);
+            Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
+         }
       }
       else
       {
          element = GetDefaultGrid(target, nxProp, leftMargin);
-         baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
       }
 
       return element;

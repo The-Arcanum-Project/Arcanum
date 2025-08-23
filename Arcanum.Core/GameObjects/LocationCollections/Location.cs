@@ -1,20 +1,27 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public class Location : LocationComposite
+public partial class Location : LocationComposite, INUI
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
       Color = color;
+      Name = name.Trim();
    }
 
+   public override string Name { get; set; } 
+   
    #region game/in_game/map_data/named_locations.txt
 
-   public int Color { get; init; }
+   public int Color { get; set; }
    public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0, "EmptyArcanum");
 
    #endregion
@@ -28,7 +35,7 @@ public class Location : LocationComposite
 
    #region Pops: game/main_menu/setup/start/06_pops.txt
 
-   public List<Pop> Pops { get; } = [];
+   public List<Pop> Pops { get; set; } = [];
 
    #endregion
    
@@ -56,4 +63,12 @@ public class Location : LocationComposite
    }
 
    public static bool operator !=(Location? left, Location? right) => !(left == right);
+   
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.LocationSettings;
+   public INUINavigation[] Navigations { get; } = [
+      //new NUINavigation(Market, "Market"),
+      
+      
+      ];
 }

@@ -278,8 +278,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var pop = Globals.Locations["stockholm"].Pops[3];
-      var ui = NUIViewGenerator.GenerateView(new(pop, true, UiPresenter));
+      var location = Globals.Locations["stockholm"];
+      var ui = NUIViewGenerator.GenerateView(new(location, true, UiPresenter));
       UiPresenter.Content = ui;
    }
 

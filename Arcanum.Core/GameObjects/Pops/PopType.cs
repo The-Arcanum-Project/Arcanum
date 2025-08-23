@@ -19,7 +19,7 @@ public partial class PopType(string name,
 
    public override string ToString()
    {
-      return $"{Name} ({ColorKey})";
+      return $"{Name}";
    }
 
    public static PopType Empty { get; } = new(string.Empty, string.Empty, 0f, 0f);
@@ -66,8 +66,6 @@ public partial class PopType(string name,
    {
       return !(left == right);
    }
-
-   public event PropertyChangedEventHandler? PropertyChanged;
 
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUISettings.PopTypeSettings;

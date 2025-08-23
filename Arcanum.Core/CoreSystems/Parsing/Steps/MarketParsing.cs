@@ -96,7 +96,7 @@ public class MarketParsing : FileLoadingService
          }
          
          if (Globals.Locations.TryGetValue(kvp.Value, out var location))
-            location.Market = Market.Exists;
+            location.Market = new (location);
          else
          {
             ctx.ColumnNumber = kvp.Line;

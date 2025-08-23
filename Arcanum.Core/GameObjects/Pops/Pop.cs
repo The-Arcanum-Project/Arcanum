@@ -24,9 +24,11 @@ public partial class Pop(PopType type,
    public override bool Equals(object? obj)
    {
       if (obj is Pop other)
-         return Type == other.Type && Size.Equals(other.Size) &&
+         return Type == other.Type &&
+                Size.Equals(other.Size) &&
                 string.Equals(Culture, other.Culture, StringComparison.Ordinal) &&
                 string.Equals(Religion, other.Religion, StringComparison.Ordinal);
+
       return false;
    }
 
@@ -55,21 +57,4 @@ public partial class Pop(PopType type,
    public NUISetting Settings { get; } = Config.Settings.NUISettings.PopSettings;
 
    public INUINavigation[] Navigations { get; } = [new NUINavigation(type, "Pop Type")];
-
-   public event PropertyChangedEventHandler? PropertyChanged;
-
-   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-   {
-      PropertyChanged?.Invoke(this, new (propertyName));
-   }
-
-   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-   {
-      if (EqualityComparer<T>.Default.Equals(field, value))
-         return false;
-
-      field = value;
-      OnPropertyChanged(propertyName);
-      return true;
-   }
 }
