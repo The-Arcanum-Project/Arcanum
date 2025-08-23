@@ -162,5 +162,14 @@ public static class MwCommands
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.TempTestingCommand },
    };
+
+   public static readonly RoutedCommand GoToPreviousINUICommand = new("GoToPreviousINUICommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.GoToPreviousINUI },
+   };
    
+   public static readonly RoutedCommand GoToNextINUICommand = new("GoToNextINUICommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.GoToNextINUI },
+   };
 }

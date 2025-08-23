@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Xaml.Behaviors;
 
 namespace Arcanum.UI.Components.Behaviors;
@@ -39,10 +40,50 @@ public class WindowDrag : Behavior<FrameworkElement>
       AssociatedObject.MouseLeftButtonDown -= AssociatedObject_MouseLeftButtonDown;
    }
 
+   // ===================================================================
+   // ATTACHED PROPERTY FOR EXCLUSION ZONES
+   // ===================================================================
+   public static readonly DependencyProperty IsDoubleClickExclusionZoneProperty =
+      DependencyProperty.RegisterAttached("IsDoubleClickExclusionZone",
+                                          typeof(bool),
+                                          typeof(WindowDrag),
+                                          new FrameworkPropertyMetadata(false));
+
+   /// <summary>
+   /// Gets the value of the IsDoubleClickExclusionZone attached property for a specified UIElement.
+   /// </summary>
+   public static bool GetIsDoubleClickExclusionZone(UIElement element)
+   {
+      return (bool)element.GetValue(IsDoubleClickExclusionZoneProperty);
+   }
+
+   /// <summary>
+   /// Sets the value of the IsDoubleClickExclusionZone attached property for a specified UIElement.
+   /// When set to true, double-clicks on this element will not trigger window maximization.
+   /// </summary>
+   public static void SetIsDoubleClickExclusionZone(UIElement element, bool value)
+   {
+      element.SetValue(IsDoubleClickExclusionZoneProperty, value);
+   }
+   // ===================================================================
+
    private void AssociatedObject_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
    {
       if (e.ClickCount == 2 && EnableDoubleClickMaximize)
       {
+         var clickPoint = e.GetPosition(AssociatedObject);
+         foreach (var zone in FindExclusionZones(AssociatedObject))
+         {
+            // Get the bounds of the exclusion zone relative to the AssociatedObject (the header).
+            // This is crucial for correct hit-testing.
+            var zoneBounds = zone.TransformToAncestor(AssociatedObject)
+                                 .TransformBounds(new Rect(0, 0, zone.ActualWidth, zone.ActualHeight));
+
+            if (zoneBounds.Contains(clickPoint))
+               // The click was inside an exclusion zone, so we do nothing.
+               return;
+         }
+
          if (_window.WindowState == WindowState.Normal)
             _window.WindowState = WindowState.Maximized;
          else if (_window.WindowState == WindowState.Maximized)
@@ -81,5 +122,27 @@ public class WindowDrag : Behavior<FrameworkElement>
       }
 
       _window.DragMove();
+   }
+
+   /// <summary>
+   /// Traverses the visual tree starting from the parent and finds all FrameworkElements
+   /// tagged with the IsDoubleClickExclusionZone attached property.
+   /// </summary>
+   private static IEnumerable<FrameworkElement> FindExclusionZones(DependencyObject parent)
+   {
+      if (parent == null!)
+         yield break;
+
+      var childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+      for (var i = 0; i < childrenCount; i++)
+      {
+         var child = VisualTreeHelper.GetChild(parent, i);
+         if (child is FrameworkElement frameworkElement && GetIsDoubleClickExclusionZone(frameworkElement))
+            yield return frameworkElement;
+
+         // Recurse into the child's children
+         foreach (var nestedZone in FindExclusionZones(child))
+            yield return nestedZone;
+      }
    }
 }

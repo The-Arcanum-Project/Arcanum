@@ -49,96 +49,102 @@
                                 BorderBrush = "{TemplateBinding BorderBrush}"
                                 BorderThickness = "{TemplateBinding WindowBorderThickness}"
                                 CornerRadius = "{TemplateBinding WindowCornerRadius}">
-                            <Grid Background = "Transparent">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height = "{TemplateBinding Property=HeaderHeight}" />
                                     <RowDefinition Height = "*" />
                                     <RowDefinition Height = "{TemplateBinding Property=FooterHeight}" />
                                 </Grid.RowDefinitions>
 
-                                <DockPanel Grid.Row = "0"
-                                           Background = "{StaticResource DefaultBackColorBrush}"
-                                           LastChildFill = "False">
-                                    <DockPanel.Resources>
-                                        <Style TargetType = "{x:Type base:BaseButton}"
-                                               BasedOn = "{StaticResource {x:Type base:BaseButton}}">
-                                            <Setter Property = "DockPanel.Dock"
-                                                    Value = "Right" />
-                                            <Setter Property = "Width"
-                                                    Value = "30" />
-                                            <Setter Property = "Height"
-                                                    Value = "30" />
-                                            <Setter Property = "Padding"
-                                                    Value = "0" />
-                                            <Setter Property = "Margin"
-                                                    Value = "0" />
-                                        </Style>
-                                    </DockPanel.Resources>
+                                <Border Grid.Row = "0"
+                                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                        BorderThickness = "{TemplateBinding HeaderBorder}"
+                                        HorizontalAlignment = "Stretch"
+                                        VerticalAlignment = "Stretch"
+                                        Margin="{TemplateBinding HeaderMargin}">
+                                    
+                                    <DockPanel Background = "{TemplateBinding HeaderBackGroundBrush}"
+                                               LastChildFill = "False">
+                                        <DockPanel.Resources>
+                                            <Style TargetType = "{x:Type base:BaseButton}"
+                                                   BasedOn = "{StaticResource {x:Type base:BaseButton}}">
+                                                <Setter Property = "DockPanel.Dock"
+                                                        Value = "Right" />
+                                                <Setter Property = "Width"
+                                                        Value = "30" />
+                                                <Setter Property = "Height"
+                                                        Value = "30" />
+                                                <Setter Property = "Padding"
+                                                        Value = "0" />
+                                                <Setter Property = "Margin"
+                                                        Value = "0" />
+                                            </Style>
+                                        </DockPanel.Resources>
 
-                                    <behaviors:Interaction.Behaviors>
-                                        <customBehaviors:WindowDrag />
-                                    </behaviors:Interaction.Behaviors>
-                                    <Image Source = "/Assets/Logo/ArcanumSimplified.png"
-                                           DockPanel.Dock = "Left"
-                                           Stretch = "Uniform"
-                                           Margin = "6,2,2,2"
-                                           Height = "26"
-                                           Width = "26">
-                                    </Image>
-
-                                    <TextBlock Text = "{TemplateBinding Title}"
-                                               VerticalAlignment = "Center"
-                                               HorizontalAlignment = "Left"
-                                               Margin = "10,0,0,2"
-                                               FontSize = "16"
-                                               FontWeight = "Bold"
-                                               Foreground = "{StaticResource DefaultForeColorBrush}"
+                                        <behaviors:Interaction.Behaviors>
+                                            <customBehaviors:WindowDrag />
+                                        </behaviors:Interaction.Behaviors>
+                                        <Image Source = "/Assets/Logo/ArcanumSimplified.png"
                                                DockPanel.Dock = "Left"
-                                               Padding = "0" />
+                                               Stretch = "Uniform"
+                                               Margin = "6,2,2,2"
+                                               Height = "26"
+                                               Width = "26">
+                                        </Image>
 
-                                    <Rectangle x:Name = "HeaderSeparator"
-                                               Width = "1"
-                                               Fill = "{StaticResource DefaultBorderColorBrush}"
-                                               Margin = "8,5"
-                                               DockPanel.Dock = "Left"
-                                               Visibility = "Collapsed" />
+                                        <TextBlock Text = "{TemplateBinding Title}"
+                                                   VerticalAlignment = "Center"
+                                                   HorizontalAlignment = "Left"
+                                                   Margin = "10,0,0,2"
+                                                   FontSize = "16"
+                                                   FontWeight = "Bold"
+                                                   Foreground = "{StaticResource DefaultForeColorBrush}"
+                                                   DockPanel.Dock = "Left"
+                                                   Padding = "0" />
 
-                                    <ContentPresenter x:Name = "HeaderContentPresenter"
-                                                      Content = "{TemplateBinding HeaderContent}"
-                                                      ContentTemplate = "{TemplateBinding HeaderContentTemplate}" />
+                                        <Rectangle x:Name = "HeaderSeparator"
+                                                   Width = "1"
+                                                   Fill = "{StaticResource DefaultBorderColorBrush}"
+                                                   Margin = "8,5"
+                                                   DockPanel.Dock = "Left"
+                                                   Visibility = "Collapsed" />
+
+                                        <ContentPresenter x:Name = "HeaderContentPresenter"
+                                                          Content = "{TemplateBinding HeaderContent}"
+                                                          ContentTemplate = "{TemplateBinding HeaderContentTemplate}" />
 
 
-                                    <Border />
+                                        <Border />
 
-                                    <base:BaseButton x:Name = "CloseButton"
-                                                     HoverBackground = "{StaticResource AggressiveRedBackColorBrush}"
-                                                     Margin = "0"
-                                                     Command = "{Binding CloseCommand,
+                                        <base:BaseButton x:Name = "CloseButton"
+                                                         HoverBackground = "{StaticResource AggressiveRedBackColorBrush}"
+                                                         Margin = "0"
+                                                         Command = "{Binding CloseCommand,
                                                      RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     BorderThickness = "0">
-                                        <Image Source = "/Assets/Icons/20x20/Close20x20.png"
-                                               Stretch = "None" />
-                                    </base:BaseButton>
+                                                         BorderThickness = "0">
+                                            <Image Source = "/Assets/Icons/20x20/Close20x20.png"
+                                                   Stretch = "None" />
+                                        </base:BaseButton>
 
-                                    <base:BaseButton x:Name = "MaximizeRestoreButton"
-                                                     Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     BorderThickness = "0">
-                                        <Image x:Name = "StateImage"
-                                               Source = "/Assets/Icons/20x20/FullScreen20x20.png"
-                                               Stretch = "None" />
-                                    </base:BaseButton>
+                                        <base:BaseButton x:Name = "MaximizeRestoreButton"
+                                                         Command = "{Binding MaximizeRestoreCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                         Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                         BorderThickness = "0">
+                                            <Image x:Name = "StateImage"
+                                                   Source = "/Assets/Icons/20x20/FullScreen20x20.png"
+                                                   Stretch = "None" />
+                                        </base:BaseButton>
 
-                                    <base:BaseButton x:Name = "MinimizeButton"
-                                                     Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
-                                                     BorderThickness = "0">
-                                        <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
-                                               Stretch = "None" />
-                                    </base:BaseButton>
+                                        <base:BaseButton x:Name = "MinimizeButton"
+                                                         Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                         Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
+                                                         BorderThickness = "0">
+                                            <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
+                                                   Stretch = "None" />
+                                        </base:BaseButton>
 
-                                </DockPanel>
-
+                                    </DockPanel>
+                                </Border>
 
                                 <ContentPresenter Grid.Row = "1"> </ContentPresenter>
 

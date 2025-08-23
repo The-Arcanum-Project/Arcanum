@@ -297,4 +297,16 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          e.Handled = true;
       }
    }
+
+   private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
+      => e.CanExecute = NUINavigation.Instance.CanBack;
+
+   private void GoToPreviousINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
+      => NUINavigation.Instance.Back();
+
+   private void CanGoToNextINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
+      => e.CanExecute = NUINavigation.Instance.CanForward;
+
+   private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
+      => NUINavigation.Instance.Forward();
 }

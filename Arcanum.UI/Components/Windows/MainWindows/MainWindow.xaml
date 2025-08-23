@@ -4,18 +4,45 @@
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.Views.MainWindow"
                          xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
-                         xmlns:system = "clr-namespace:System;assembly=System.Runtime"
-                         xmlns:nui = "clr-namespace:Arcanum.UI.NUI"
-                         xmlns:nui1 = "clr-namespace:Arcanum.Core.CoreSystems.NUI;assembly=Arcanum.Core"
+                         xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
                          FooterHeight = "26"
-                         HeaderHeight = "30"
+                         HeaderHeight = "35"
                          Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown"
                          WindowStartupLocation = "CenterScreen"
-                         Background = "{DynamicResource DefaultBackColorBrush}">
+                         Background = "{DynamicResource DefaultBackColorBrush}"
+                         HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}"
+                         HeaderBorder="0, 0, 0, 2"
+                         HeaderMargin="0, 0, 0, 3">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <Style x:Key = "HeaderButtonStyle"
+                   TargetType = "styleClasses:BaseButton"
+                   BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+                <Style.Setters>
+                    <Setter Property = "Background"
+                            Value = "Transparent">
+                    </Setter>
+                    <Setter Property = "Height"
+                            Value = "20">
+                    </Setter>
+                    <Setter Property = "Width"
+                            Value = "20">
+                    </Setter>
+                    <Setter Property = "VerticalAlignment"
+                            Value = "Center">
+                    </Setter>
+                    <Setter Property = "BorderThickness"
+                            Value = "0">
+                    </Setter>
+                </Style.Setters>
+            </Style>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
 
     <styleClasses:BaseWindow.DataContext>
         <mainWindow:MainWindowView />
@@ -123,172 +150,188 @@
         <CommandBinding Command = "mainWindow:MwCommands.LoadLocationsCommand"
                         Executed = "LoadLocationsCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <!-- Command Bindings for Navigation Buttons -->
+        <CommandBinding Command = "mainWindow:MwCommands.GoToPreviousINUICommand"
+                        Executed = "GoToPreviousINUICommand_Executed"
+                        CanExecute = "CanGoToPreviousINUICommand_Executed" />
+        <CommandBinding Command = "mainWindow:MwCommands.GoToNextINUICommand"
+                        Executed = "GoToNextINUICommand_Executed"
+                        CanExecute = "CanGoToNextINUICommand_Executed" />
 
     </Window.CommandBindings>
 
     <styleClasses:BaseWindow.HeaderContent>
-        <Menu>
-            <uc:SearchableMenuItem Header = "File">
-                <uc:SearchableMenuItem Header = "Create new Project"
-                                       Command = "mainWindow:MwCommands.NewProjectFileCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Open Project"
-                                       Command = "mainWindow:MwCommands.OpenProjectFileCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Close current Project"
-                                       Command = "mainWindow:MwCommands.CloseProjectFileCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Close16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <Separator />
-                <uc:SearchableMenuItem Header = "Save All Modifications"
-                                       Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
-                    <!-- <userControls:SearchableMenuItem.XamlSearchTerms> -->
-                    <!--     <x:Array Type="system:String"> -->
-                    <!--         <system:String>Option1</system:String> -->
-                    <!--         <system:String>yolo</system:String> -->
-                    <!--         <system:String>Option3</system:String> -->
-                    <!--     </x:Array> -->
-                    <!-- </userControls:SearchableMenuItem.XamlSearchTerms> -->
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Save16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
+        <StackPanel Orientation = "Horizontal">
+            <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}"
+                                     ToolTip = "Go Back to previous object view"
+                                     Command="mainWindow:MwCommands.GoToPreviousINUICommand"
+                                     behaviors:WindowDrag.IsDoubleClickExclusionZone="True">
+                <Image Source = "../../../Assets/Icons/20x20/GoBack20x20.png" />
+            </styleClasses:BaseButton>
+            <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}"
+                                     ToolTip = "Go Forward to next object view"
+                                     Command="mainWindow:MwCommands.GoToNextINUICommand"
+                                     behaviors:WindowDrag.IsDoubleClickExclusionZone="True">
+                <Image Source = "../../../Assets/Icons/20x20/GoForward20x20.png" />
+            </styleClasses:BaseButton>
+
+            <Menu>
+                <uc:SearchableMenuItem Header = "File">
+                    <uc:SearchableMenuItem Header = "Create new Project"
+                                           Command = "mainWindow:MwCommands.NewProjectFileCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Open Project"
+                                           Command = "mainWindow:MwCommands.OpenProjectFileCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Close current Project"
+                                           Command = "mainWindow:MwCommands.CloseProjectFileCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Close16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <Separator />
+                    <uc:SearchableMenuItem Header = "Save All Modifications"
+                                           Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Save16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+
+                    <uc:SearchableMenuItem Header = "Custom Saving Selector"
+                                           Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/SaveSelector16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <Separator />
+                    <uc:SearchableMenuItem Header = "Reload File"
+                                           Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/ReloadFile16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Reload Folder"
+                                           Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/ReloadFolder16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <Separator />
+                    <uc:SearchableMenuItem Header = "Settings"
+                                           Command = "mainWindow:MwCommands.OpenSettingsCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Settings16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Plugin Settings"
+                                           Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/PluginSettings16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <Separator />
+                    <uc:SearchableMenuItem Header = "Console"
+                                           Command = "mainWindow:MwCommands.OpenConsoleCommand">
+                    </uc:SearchableMenuItem>
+                    <Separator />
+                    <uc:SearchableMenuItem Header = "Exit"
+                                           Command = "mainWindow:MwCommands.ExitArcanumCommand">
+                    </uc:SearchableMenuItem>
                 </uc:SearchableMenuItem>
 
-                <uc:SearchableMenuItem Header = "Custom Saving Selector"
-                                       Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/SaveSelector16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <Separator />
-                <uc:SearchableMenuItem Header = "Reload File"
-                                       Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/ReloadFile16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Reload Folder"
-                                       Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/ReloadFolder16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <Separator />
-                <uc:SearchableMenuItem Header = "Settings"
-                                       Command = "mainWindow:MwCommands.OpenSettingsCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Settings16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Plugin Settings"
-                                       Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/PluginSettings16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <Separator />
-                <uc:SearchableMenuItem Header = "Console"
-                                       Command = "mainWindow:MwCommands.OpenConsoleCommand">
-                </uc:SearchableMenuItem>
-                <Separator />
-                <uc:SearchableMenuItem Header = "Exit"
-                                       Command = "mainWindow:MwCommands.ExitArcanumCommand">
-                </uc:SearchableMenuItem>
-            </uc:SearchableMenuItem>
+                <uc:SearchableMenuItem Header = "Edit">
+                    <uc:SearchableMenuItem Header = "Undo: 'description'"
+                                           Command = "mainWindow:MwCommands.UndoCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Step Undo: 'description'"
+                                           Command = "mainWindow:MwCommands.StepUndoCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Redo: 'description'"
+                                           Command = "mainWindow:MwCommands.RedoCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Step Redo: 'description'"
+                                           Command = "mainWindow:MwCommands.StepRedoCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "View History"
+                                           Command = "mainWindow:MwCommands.OpenHistoryWindowCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/History16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
 
-            <uc:SearchableMenuItem Header = "Edit">
-                <uc:SearchableMenuItem Header = "Undo: 'description'"
-                                       Command = "mainWindow:MwCommands.UndoCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Step Undo: 'description'"
-                                       Command = "mainWindow:MwCommands.StepUndoCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Redo: 'description'"
-                                       Command = "mainWindow:MwCommands.RedoCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Step Redo: 'description'"
-                                       Command = "mainWindow:MwCommands.StepRedoCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
-                </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "View History"
-                                       Command = "mainWindow:MwCommands.OpenHistoryWindowCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/History16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
+                    <Separator />
+
+                    <uc:SearchableMenuItem Header = "Queastor (Find)"
+                                           Command = "mainWindow:MwCommands.OpenSearchWindowCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+
+                    <Separator />
+
+                    <uc:SearchableMenuItem Header = "Copy" />
+                    <uc:SearchableMenuItem Header = "Cut" />
+                    <uc:SearchableMenuItem Header = "Paste" />
+
                 </uc:SearchableMenuItem>
 
-                <Separator />
-
-                <uc:SearchableMenuItem Header = "Queastor (Find)"
-                                       Command = "mainWindow:MwCommands.OpenSearchWindowCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
+                <uc:SearchableMenuItem Header = "Mod Diagnostics">
+                    <uc:SearchableMenuItem Header = "Open Loading Log"
+                                           Command = "mainWindow:MwCommands.OpenErrorLogWindowCommand" />
                 </uc:SearchableMenuItem>
 
-                <Separator />
+                <uc:SearchableMenuItem Header = "Wiki">
 
-                <uc:SearchableMenuItem Header = "Copy" />
-                <uc:SearchableMenuItem Header = "Cut" />
-                <uc:SearchableMenuItem Header = "Paste" />
-
-            </uc:SearchableMenuItem>
-
-            <uc:SearchableMenuItem Header = "Mod Diagnostics">
-                <uc:SearchableMenuItem Header = "Open Loading Log"
-                                       Command = "mainWindow:MwCommands.OpenErrorLogWindowCommand" />
-            </uc:SearchableMenuItem>
-
-            <uc:SearchableMenuItem Header = "Wiki">
-
-                <uc:SearchableMenuItem Header = "Effects Wiki"
-                                       Command = "mainWindow:MwCommands.OpenEffectWikiCommand" />
-                <uc:SearchableMenuItem Header = "Trigger Wiki"
-                                       Command = "mainWindow:MwCommands.OpenTriggerWikiCommand" />
-                <uc:SearchableMenuItem Header = "Modifiers Wiki"
-                                       Command = "mainWindow:MwCommands.OpenModifierWikiCommand" />
-            </uc:SearchableMenuItem>
-
-            <uc:SearchableMenuItem Header = "Debug">
-                <uc:SearchableMenuItem Header = "Garbage Collector"
-                                       Command = "mainWindow:MwCommands.GCCommand" />
-                <uc:SearchableMenuItem Header = "Globals Browser"
-                                       Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
-                <uc:SearchableMenuItem Header = "Loading Strep Runner"
-                                       Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
-                <uc:SearchableMenuItem Header = "Browse Mod Metadata"
-                                       Click = "MenuItem_OnClick" />
-                <uc:SearchableMenuItem Header = "ParsingStepBrowser"
-                                       Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
-                <uc:SearchableMenuItem Header = "UI Elements Browser"
-                                       Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
-                    <uc:SearchableMenuItem.Icon>
-                        <Image Source = "../../../Assets/Icons/16x16/WindowFrame16x16.png" />
-                    </uc:SearchableMenuItem.Icon>
+                    <uc:SearchableMenuItem Header = "Effects Wiki"
+                                           Command = "mainWindow:MwCommands.OpenEffectWikiCommand" />
+                    <uc:SearchableMenuItem Header = "Trigger Wiki"
+                                           Command = "mainWindow:MwCommands.OpenTriggerWikiCommand" />
+                    <uc:SearchableMenuItem Header = "Modifiers Wiki"
+                                           Command = "mainWindow:MwCommands.OpenModifierWikiCommand" />
                 </uc:SearchableMenuItem>
-                <uc:SearchableMenuItem Header = "Load Locations"
-                                       Command = "mainWindow:MwCommands.LoadLocationsCommand" />
-            </uc:SearchableMenuItem>
-        </Menu>
+
+                <uc:SearchableMenuItem Header = "Debug">
+                    <uc:SearchableMenuItem Header = "Garbage Collector"
+                                           Command = "mainWindow:MwCommands.GCCommand" />
+                    <uc:SearchableMenuItem Header = "Globals Browser"
+                                           Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
+                    <uc:SearchableMenuItem Header = "Loading Strep Runner"
+                                           Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
+                    <uc:SearchableMenuItem Header = "Browse Mod Metadata"
+                                           Click = "MenuItem_OnClick" />
+                    <uc:SearchableMenuItem Header = "ParsingStepBrowser"
+                                           Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
+                    <uc:SearchableMenuItem Header = "UI Elements Browser"
+                                           Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
+                        <uc:SearchableMenuItem.Icon>
+                            <Image Source = "../../../Assets/Icons/16x16/WindowFrame16x16.png" />
+                        </uc:SearchableMenuItem.Icon>
+                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Load Locations"
+                                           Command = "mainWindow:MwCommands.LoadLocationsCommand" />
+                </uc:SearchableMenuItem>
+            </Menu>
+        </StackPanel>
     </styleClasses:BaseWindow.HeaderContent>
 
     <styleClasses:BaseWindow.FooterContent>
@@ -321,12 +364,11 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column = "0"
-                BorderBrush="{DynamicResource DefaultBorderColorBrush}"
-                BorderThickness="2"
-                CornerRadius="8"
-                Margin="0, 0, 2, 0">
-            <ContentPresenter 
-                              x:Name = "UiPresenter">
+                BorderBrush = "{DynamicResource DefaultBorderColorBrush}"
+                BorderThickness = "2"
+                CornerRadius = "8"
+                Margin = "0, 0, 2, 0">
+            <ContentPresenter x:Name = "UiPresenter">
             </ContentPresenter>
 
         </Border>

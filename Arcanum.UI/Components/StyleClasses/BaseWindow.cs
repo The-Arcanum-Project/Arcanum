@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.UI.Helpers;
@@ -195,6 +196,39 @@ public class BaseWindow : Window
    {
       get => (Thickness)GetValue(WindowBorderThicknessProperty);
       set => SetValue(WindowBorderThicknessProperty, value);
+   }
+
+   public Brush HeaderBackGroundBrush
+   {
+      get => (Brush)GetValue(WindowCornerRadiusProperty);
+      set => SetValue(HeaderBackGroundBrushProperty, value);
+   }
+
+   public static readonly DependencyProperty HeaderBackGroundBrushProperty =
+      DependencyProperty.Register(nameof(HeaderBackGroundBrush),
+                                  typeof(Brush),
+                                  typeof(BaseWindow),
+                                  new(Brushes.Transparent, OnDependencyChanged));
+
+   public static readonly DependencyProperty HeaderBorderProperty =
+      DependencyProperty.Register(nameof(HeaderBorder),
+                                  typeof(Thickness),
+                                  typeof(BaseWindow),
+                                  new(default(Thickness)));
+
+   public static readonly DependencyProperty HeaderMarginProperty =
+      DependencyProperty.Register(nameof(HeaderMargin), typeof(Thickness), typeof(BaseWindow), new(default(Thickness)));
+
+   public Thickness HeaderMargin
+   {
+      get => (Thickness)GetValue(HeaderMarginProperty);
+      set => SetValue(HeaderMarginProperty, value);
+   }
+
+   public Thickness HeaderBorder
+   {
+      get => (Thickness)GetValue(HeaderBorderProperty);
+      set => SetValue(HeaderBorderProperty, value);
    }
 
    // This single callback will handle changes for all source properties.

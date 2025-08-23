@@ -5,6 +5,11 @@ namespace Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
 
 public class MainWindowKeyBinds : KeyBindProvider
 {
+   // Menu Items
+   public KeyGesture GoToPreviousINUI { get; set; } = new(Key.Left, ModifierKeys.Alt);
+   public KeyGesture GoToNextINUI { get; set; } = new(Key.Right, ModifierKeys.Alt);
+   
+   // Project Management
    public KeyGesture CloseProject { get; set; } = new(Key.Escape, ModifierKeys.Control);
    public KeyGesture OpenProject { get; set; } = new(Key.O, ModifierKeys.Control);
    public KeyGesture NewProject { get; set; } = new(Key.N, ModifierKeys.Control | ModifierKeys.Shift);
@@ -48,4 +53,6 @@ public class MainWindowKeyBinds : KeyBindProvider
    public KeyGesture OpenGlobalsBrowser { get; set; } = new(Key.F7);
    public KeyGesture OpenParsingStepBrowser { get; set; } = new(Key.F9);
    public KeyGesture TempTestingCommand { get; set; } = new(Key.F5);
+   
+   
 }
