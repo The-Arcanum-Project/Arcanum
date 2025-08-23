@@ -14,7 +14,7 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
    }
 
    private readonly ICollection<T> _subCollection = [];
-   internal ICollection<T> SubCollection
+   public virtual ICollection<T> SubCollection
    {
       get => _subCollection;
       init => AddRange(value);

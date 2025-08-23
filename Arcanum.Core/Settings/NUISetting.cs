@@ -24,4 +24,8 @@ public class NUISettings
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray());
+   public NUISetting ProvinceSettings { get; set; } = new(Province.Field.Name,
+                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray());
 }

@@ -19,7 +19,7 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
    }
 
    public virtual string Name { get; set; }
-   public List<LocationComposite> Parents { get; } = [];
+   public List<LocationComposite> Parents { get; set; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }
 

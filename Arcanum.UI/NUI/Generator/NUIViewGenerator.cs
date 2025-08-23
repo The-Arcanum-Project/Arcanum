@@ -546,8 +546,8 @@ public static class NUIViewGenerator
          Background = Brushes.Transparent,
          BorderBrush = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
          BorderThickness = new(1, 1, 0, 1),
-         CornerRadius = new(1, 0, 0, 1),
-         Margin = new(2, 0, 2, 0),
+         CornerRadius = new(3, 0, 0, 3),
+         Margin = new(0, 0, 2, 0),
          HorizontalAlignment = HorizontalAlignment.Stretch,
          IsHitTestVisible = false,
       };

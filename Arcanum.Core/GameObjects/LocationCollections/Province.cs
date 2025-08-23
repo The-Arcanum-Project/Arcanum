@@ -1,9 +1,11 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public class Province : LocationCollection<Location>
+public partial class Province : LocationCollection<Location>, INUI
 {
    public Province(FileInformation fileInfo, string name, ICollection<Location> provinces) : base(fileInfo, name, provinces)
    {
@@ -13,6 +15,8 @@ public class Province : LocationCollection<Location>
    {
    }
 
+   public override string Name { get; set; }
+   public override ICollection<Location> SubCollection { get; init; }
    public override LocationCollectionType LCType => LocationCollectionType.Province;
    public override void RemoveGlobal()
    {
@@ -23,4 +27,8 @@ public class Province : LocationCollection<Location>
    {
       throw new NotImplementedException();
    }
+
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.ProvinceSettings;
+   public INUINavigation[] Navigations { get; }
 }

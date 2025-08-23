@@ -17,7 +17,7 @@ public partial class SettingsWindow
    {
       InitializeComponent();
    }
-
+   
    public static SettingsWindow ShowSettingsWindow()
    {
       var settingsWindow = new SettingsWindow();
