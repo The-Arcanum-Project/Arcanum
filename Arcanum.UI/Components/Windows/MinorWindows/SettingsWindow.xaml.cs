@@ -26,24 +26,19 @@ public partial class SettingsWindow
       return settingsWindow;
    }
 
-#if DEBUG_OBJ
-   // ReSharper disable once FieldCanBeMadeReadOnly.Local
-   private AllOptionsTestObject _allOptionsTestObject = new();
-#endif
-
    private void InitTabs(TabControl tc, object obj)
    {
 #if DEBUG_OBJ
-      _allOptionsTestObject = new();
-      var item = new TabItem
-      {
-         Header = "PropGirdDebug",
-         Content = new PropertyGrid
-         {
-            SelectedObject = _allOptionsTestObject, Name = _allOptionsTestObject.GetType().Name,
-         },
-      };
-      tc.Items.Add(item);
+      // _allOptionsTestObject = new();
+      // var item = new TabItem
+      // {
+      //    Header = "PropGirdDebug",
+      //    Content = new PropertyGrid
+      //    {
+      //       SelectedObject = _allOptionsTestObject, Name = _allOptionsTestObject.GetType().Name,
+      //    },
+      // };
+      // tc.Items.Add(item);
 #endif
 
       var settingsProperties = GetPublicProperties(obj);

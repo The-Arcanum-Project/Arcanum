@@ -262,11 +262,6 @@ public partial class PropertyGrid
       PropertySelected?.Invoke(this, e);
    }
 
-   public static AllOptionsTestObject GetAllOptionsTestObject()
-   {
-      return new();
-   }
-
    public PropertyGrid GetActive()
    {
       return ShowGridEmbedded ? _inlinedPropertyGrid?.GetActive() ?? this : this;
