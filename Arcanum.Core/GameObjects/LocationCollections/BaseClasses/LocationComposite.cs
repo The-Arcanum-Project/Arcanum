@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Common.UI;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
@@ -18,7 +19,9 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
       Queastor.GlobalInstance.AddToIndex(this);
    }
 
-   public virtual string Name { get; set; }
+   [AddModifiable]
+   public string Name { get; set; }
+   [AddModifiable]
    public List<LocationComposite> Parents { get; set; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }

@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
@@ -14,10 +15,12 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
    }
 
    private readonly ICollection<T> _subCollection = [];
+   
+   [AddModifiable]
    public virtual ICollection<T> SubCollection
    {
       get => _subCollection;
-      init => AddRange(value);
+      set => AddRange(value);
    }
 
    /// <summary>

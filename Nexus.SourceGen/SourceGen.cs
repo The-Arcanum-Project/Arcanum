@@ -15,39 +15,8 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       const string targetInterfaceName = "Nexus.Core.INexus";
 
       var classDeclarations = context.SyntaxProvider
-                                     .CreateSyntaxProvider(predicate: (node, _)
-                                                              => node is ClassDeclarationSyntax cds &&
-                                                                 cds.Modifiers.Any(m => m.IsKind(SyntaxKind
-                                                                           .PartialKeyword)),
-                                                           transform: (ctx, cancellationToken) =>
-                                                           {
-                                                              var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
-                                                              var semanticModel = ctx.SemanticModel;
-
-                                                              // Get the symbol for the interface we're looking for
-                                                              var interfaceSymbol =
-                                                                 semanticModel.Compilation
-                                                                              .GetTypeByMetadataName(targetInterfaceName);
-                                                              if (interfaceSymbol is null)
-                                                              {
-                                                                 // The interface isn't defined in this compilation, so no classes can implement it.
-                                                                 return null;
-                                                              }
-
-                                                              // Get the symbol for the class we're inspecting. 
-                                                              // GetDeclaredSymbol returns ISymbol, so we must safely cast it to INamedTypeSymbol.
-
-                                                              // Check if the class implements the interface, using the SymbolEqualityComparer for a robust check
-                                                              if (ctx.SemanticModel.GetDeclaredSymbol(classDeclaration,
-                                                                      cancellationToken) is { } classSymbol &&
-                                                                  classSymbol.AllInterfaces.Contains(interfaceSymbol,
-                                                                      SymbolEqualityComparer.Default))
-                                                              {
-                                                                 return classDeclaration;
-                                                              }
-
-                                                              return null;
-                                                           })
+                                     .CreateSyntaxProvider(predicate: Predicate,
+                                                           transform: Transform)
                                      .Where(x => x is not null); // Filter out the nulls
 
       // Combine them with the compilation
@@ -57,6 +26,44 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       // Generate the source
       context.RegisterSourceOutput(compilationAndClasses,
                                    (spc, source) => Execute(source.Left, source.Right!, spc));
+      return;
+
+      ClassDeclarationSyntax? Transform(GeneratorSyntaxContext genSyntaxCtx, CancellationToken cancellationToken)
+      {
+         var classDeclaration = (ClassDeclarationSyntax)genSyntaxCtx.Node;
+         var semanticModel = genSyntaxCtx.SemanticModel;
+
+         // Get the symbol for the interface we're looking for
+         var interfaceSymbol = semanticModel.Compilation.GetTypeByMetadataName(targetInterfaceName);
+         if (interfaceSymbol is null)
+         {
+            // The interface isn't defined in this compilation, so no classes can implement it.
+            return null;
+         }
+
+         // Get the symbol for the class we're inspecting. 
+         // GetDeclaredSymbol returns ISymbol, so we must safely cast it to INamedTypeSymbol.
+
+         // Check if the class implements the interface, using the SymbolEqualityComparer for a robust check
+         if (genSyntaxCtx.SemanticModel.GetDeclaredSymbol(classDeclaration,
+                                                          cancellationToken) is { } classSymbol &&
+             classSymbol.AllInterfaces.Contains(interfaceSymbol,
+                                                SymbolEqualityComparer.Default))
+         {
+            return classDeclaration;
+         }
+
+         return null;
+      }
+   }
+
+   private bool Predicate(SyntaxNode node, CancellationToken _)
+   {
+      if (node is ClassDeclarationSyntax cds &&
+          cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+         return true;
+
+      return false;
    }
 
    private void Execute(Compilation compilation,
@@ -80,7 +87,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
          var attributeData = classSymbol.GetAttributes()
                                         .FirstOrDefault(ad =>
                                                            ad.AttributeClass?.ToDisplayString() ==
-                                                           Helpers.ExplicitPropertiesAttributeString);
+                                                           Helpers.EXPLICIT_PROPERTIES_ATTRIBUTE_STRING);
 
          // Find all eligible properties and fields
          var members = Helpers.FindModifiableMembers(classSymbol, attributeData is null, context);

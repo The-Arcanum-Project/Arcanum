@@ -20,7 +20,6 @@ public partial class Location : LocationComposite, INUI
    
    #region game/in_game/map_data/named_locations.txt
 
-   public override string Name { get; set; } 
    public int Color { get; set; }
    public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0, "EmptyArcanum");
 

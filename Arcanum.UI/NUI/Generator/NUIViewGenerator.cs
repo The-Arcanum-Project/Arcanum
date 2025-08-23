@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -48,7 +49,7 @@ public static class NUIViewGenerator
       for (var i = 0; i < target.Settings.ViewFields.Length; i++)
       {
          var nxProp = target.Settings.ViewFields[i];
-         FrameworkElement  element;
+         FrameworkElement element;
          var type = Nx.TypeOf(target, nxProp);
          if (typeof(INUI).IsAssignableFrom(type) || typeof(INUI) == type)
          {
@@ -105,7 +106,7 @@ public static class NUIViewGenerator
       for (var i = 0; i < embeddedFields.Length; i++)
       {
          var nxProp = embeddedFields[i];
-         FrameworkElement  element;
+         FrameworkElement element;
          var type = Nx.TypeOf(target, nxProp);
          if (typeof(INUI).IsAssignableFrom(type))
          {
@@ -131,44 +132,37 @@ public static class NUIViewGenerator
 
    private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
    {
-      var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20};
+      var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20 };
       object headerValue = null!;
       Nx.ForceGet(value, value.Settings.Title, ref headerValue);
-      var sInfo = string.Empty;
+      var shortInfoParts = new List<string>();
       foreach (var nxProp in value.Settings.ShortInfoFields)
       {
-         if (sInfo.Length > 0 && !sInfo.EndsWith(", "))
-            sInfo += ", ";
-
-         var type = Nx.TypeOf(value, nxProp);
-         var itemType = GetCollectionItemType(type);
-         var arrayType = GetArrayItemType(type);
-         if (itemType != null && typeof(INUI).IsAssignableFrom(itemType))
+         object pVal = null!;
+         Nx.ForceGet(value, nxProp, ref pVal);
+         if (pVal is IEnumerable collection and not string)
          {
-            IReadOnlyList<INUI> collection = null!;
-            Nx.ForceGet(value, nxProp, ref collection);
-            sInfo += $"{nxProp}:{collection.Count}";
-         }
-         else if (arrayType != null && typeof(INUI).IsAssignableFrom(arrayType))
-         {
-            INUI[] array = null!;
-            Nx.ForceGet(value, nxProp, ref array);
-            sInfo += $"{nxProp}:{array.Length}";
+            var count = collection.Cast<object>().Count();
+            shortInfoParts.Add($"{nxProp}: {count}");
          }
          else
          {
-            object propValue = null!;
-            Nx.ForceGet(value, nxProp, ref propValue);
-            sInfo += $"{propValue}";
+            shortInfoParts.Add($"{pVal}");
          }
       }
 
-      var fontSize = 11;
-      var headerBlock = NavigationHeader(null, value.Navigations, root, value, value.GetType().Name, fontSize, FontWeights.Normal);
+      const int fontSize = 11;
+      var headerBlock = NavigationHeader(null,
+                                         value.Navigations,
+                                         root,
+                                         value,
+                                         value.GetType().Name,
+                                         fontSize,
+                                         FontWeights.Normal);
       headerBlock.Margin = new(6, 0, 0, 0);
       var infoBlock = new TextBlock
       {
-         Text = sInfo,
+         Text = string.Join(", ", shortInfoParts),
          TextTrimming = TextTrimming.CharacterEllipsis,
          HorizontalAlignment = HorizontalAlignment.Stretch,
          VerticalAlignment = VerticalAlignment.Center,
@@ -386,156 +380,114 @@ public static class NUIViewGenerator
       };
    }
 
-   private static FrameworkElement  BuildCollectionOrDefaultView(ContentPresenter root,
-                                                                 Type type,
-                                                                 INUI target,
-                                                                 Enum nxProp,
-                                                                 Grid baseGrid,
-                                                                 int leftMargin = 0)
+   private static Grid BuildCollectionOrDefaultView(ContentPresenter root,
+                                                    Type type,
+                                                    INUI target,
+                                                    Enum nxProp,
+                                                    Grid baseGrid,
+                                                    int leftMargin = 0)
    {
-      FrameworkElement  element;
-      var itemType = GetCollectionItemType(type);
-      var arrayType = GetArrayItemType(type);
+      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
 
-      if (itemType != null || arrayType != null)
+      // If it is not a collection or array, fall back to default handling.
+      if (itemType == null)
       {
-         // 6 rows, 2 columns
-         var grid = new Grid
-         {
-            ColumnDefinitions =
-            {
-               new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
-            },
-            Margin = new(leftMargin, 0, 0, 0),
-         };
-
-         var count = -1;
-
-         // Collection of INUI
-         if (typeof(INUI).IsAssignableFrom(itemType))
-         {
-            // Row for header
-            grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
-            // We show the first 5 items of the collection as a ShortInfo
-            IReadOnlyCollection<INUI> collection = null!;
-            Nx.ForceGet(target, nxProp, ref collection);
-
-            foreach (var j in Enumerable.Range(0, Math.Min(5, collection.Count)))
-            {
-               var value = collection.ElementAt(j);
-               var shortInfo = GenerateShortInfo(value, root);
-               grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
-               grid.Children.Add(shortInfo);
-               Grid.SetRow(shortInfo, j + 1);
-               Grid.SetColumn(shortInfo, 0);
-               Grid.SetColumnSpan(shortInfo, 2);
-            }
-
-            count = collection.Count;
-            element = grid;
-         }
-         else if (typeof(INUI).IsAssignableFrom(arrayType))
-         {
-            // We show the first 5 items of the array as a ShortInfo
-            INUI[] array = null!;
-            Nx.ForceGet(target, nxProp, ref array);
-
-            foreach (var j in Enumerable.Range(0, Math.Min(5, array.Length)))
-            {
-               var value = array[j];
-               var shortInfo = GenerateShortInfo(value, root);
-               grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
-               grid.Children.Add(shortInfo);
-               Grid.SetRow(shortInfo, j + 1);
-               Grid.SetColumn(shortInfo, 0);
-               Grid.SetColumnSpan(shortInfo, 2);
-            }
-
-            count = array.Length;
-            element = grid;
-         }
-         else
-         {
-            element = GetDefaultGrid(target, nxProp, leftMargin);
-            baseGrid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
-         }
-
-         var strackPanel = new StackPanel
-         {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new(0, 0, 0, 0),
-         };
-         
-         var nheader = new TextBlock
-         {
-            Text = $"{nxProp}: {count} Items",
-            FontWeight = FontWeights.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-            FontSize = 14,
-         };
-         
-
-         var openButton = GetEyeButton();
-         openButton.Margin = new(4, 0, 0, 0);
-
-         openButton.Click += (sender, e) =>
-         {
-            // TODO open proper collection editor for any kind of object
-         };
-
-         strackPanel.Children.Add(nheader);
-         strackPanel.Children.Add(openButton);
-         
-         grid.Children.Add(strackPanel);
-         Grid.SetRow(strackPanel, 0);
-         Grid.SetColumn(strackPanel, 0);
-         Grid.SetColumnSpan(strackPanel, 2);
-
-         if (grid.RowDefinitions.Count > 1)
-         {
-            var rect = new Rectangle()
-            {
-               Width = 1,
-               Fill = Brushes.Transparent,
-               Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-               StrokeThickness = 2,
-               StrokeDashArray = new([4, 6]),
-               StrokeDashCap = PenLineCap.Flat,
-               HorizontalAlignment = HorizontalAlignment.Left,
-               VerticalAlignment = VerticalAlignment.Stretch,
-               SnapsToDevicePixels = true,
-            };
-
-            grid.Children.Add(rect);
-            Grid.SetRow(rect, 1);
-            Grid.SetColumn(rect, 0);
-            Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
-         }
-      }
-      else
-      {
-         element = GetDefaultGrid(target, nxProp, leftMargin);
+         return GetDefaultGrid(target, nxProp, leftMargin);
       }
 
-      return element;
-   }
+      object collectionObject = null!;
+      Nx.ForceGet(target, nxProp, ref collectionObject);
 
-   private static Rectangle GetSeparatorLine(DoubleCollection dashes)
-   {
-      return new()
+      // Cast to the non-generic IEnumerable to handle any collection type.
+      if (collectionObject is not IEnumerable collection)
       {
-         Height = 1,
-         Fill = Brushes.Transparent,
-         Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-         StrokeThickness = 1,
-         StrokeDashArray = dashes,
-         StrokeDashCap = PenLineCap.Flat,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Bottom,
-         SnapsToDevicePixels = true,
+         return GetDefaultGrid(target, nxProp, leftMargin);
+      }
+
+      // Filter the collection for items that ACTUALLY implement INUI at runtime.
+      var inuiItems = collection.OfType<INUI>().ToList();
+
+      if (inuiItems.Count == 0)
+      {
+         return GetDefaultGrid(target, nxProp, leftMargin);
+      }
+
+      var grid = new Grid
+      {
+         ColumnDefinitions =
+         {
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
+         },
+         Margin = new(leftMargin, 0, 0, 0),
       };
+
+      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
+
+      // Displaying Concrete Types
+      foreach (var item in inuiItems.Take(5))
+      {
+         var shortInfo = GenerateShortInfo(item, root);
+
+         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
+         grid.Children.Add(shortInfo);
+         Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
+         Grid.SetColumn(shortInfo, 0);
+         Grid.SetColumnSpan(shortInfo, 2);
+      }
+
+      var stackPanel = new StackPanel
+      {
+         Orientation = Orientation.Horizontal,
+         HorizontalAlignment = HorizontalAlignment.Left,
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+
+      var nheader = new TextBlock
+      {
+         Text = $"{nxProp}: {inuiItems.Count} Items",
+         FontWeight = FontWeights.Bold,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = 14,
+      };
+
+      var openButton = GetEyeButton();
+      openButton.Margin = new(4, 0, 0, 0);
+      openButton.Click += (sender, e) =>
+      {
+         // TODO open proper collection editor for any kind of object
+      };
+
+      stackPanel.Children.Add(nheader);
+      stackPanel.Children.Add(openButton);
+
+      grid.Children.Add(stackPanel);
+      Grid.SetRow(stackPanel, 0);
+      Grid.SetColumn(stackPanel, 0);
+      Grid.SetColumnSpan(stackPanel, 2);
+
+      // --- Decorative Border ---
+      if (grid.RowDefinitions.Count > 1)
+      {
+         var rect = new Rectangle()
+         {
+            Width = 1,
+            Fill = Brushes.Transparent,
+            Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+            StrokeThickness = 2,
+            StrokeDashArray = new([4, 6]),
+            StrokeDashCap = PenLineCap.Flat,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            SnapsToDevicePixels = true,
+         };
+
+         grid.Children.Add(rect);
+         Grid.SetRow(rect, 1);
+         Grid.SetColumn(rect, 0);
+         Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
+      }
+
+      return grid;
    }
 
    private static Border GetEmbedBorder()

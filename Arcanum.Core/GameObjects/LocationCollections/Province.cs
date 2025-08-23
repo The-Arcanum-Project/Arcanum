@@ -15,8 +15,6 @@ public partial class Province : LocationCollection<Location>, INUI
    {
    }
 
-   public override string Name { get; set; }
-   public override ICollection<Location> SubCollection { get; init; }
    public override LocationCollectionType LCType => LocationCollectionType.Province;
    public override void RemoveGlobal()
    {
