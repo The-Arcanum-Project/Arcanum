@@ -17,7 +17,6 @@ public partial class Location : LocationComposite, INUI
       Name = name.Trim();
    }
 
-   
    #region game/in_game/map_data/named_locations.txt
 
    public int Color { get; set; }
@@ -37,7 +36,7 @@ public partial class Location : LocationComposite, INUI
    public List<Pop> Pops { get; set; } = [];
 
    #endregion
-   
+
    public override string ToString() => $"{Name} (Color: {Color:X})";
    public override int GetHashCode() => Name.GetHashCode();
 
@@ -62,12 +61,28 @@ public partial class Location : LocationComposite, INUI
    }
 
    public static bool operator !=(Location? left, Location? right) => !(left == right);
-   
+
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUISettings.LocationSettings;
-   public INUINavigation[] Navigations { get; } = [
-      //new NUINavigation(Market, "Market"),
-      
-      
-      ];
+   public INUINavigation[] Navigations
+   {
+      get
+      {
+         List<INUINavigation?> navigations = [];
+         var parent = GetFirstParentOfType(LocationCollectionType.Province);
+         if (parent != Empty)
+            navigations.Add(new NUINavigation((INUI)parent, $"Province: {parent.Name}"));
+
+         navigations.Add(null);
+         navigations.AddRange(Pops.Select(pop => new NUINavigation(pop, $"Pop: {pop.Type} ({pop.Culture}, {pop.Religion})")));
+
+         if (HasMarket)
+         {
+            navigations.Add(null);
+            navigations.Add(new NUINavigation(Market, "Market"));
+         }
+
+         return navigations.ToArray()!;
+      }
+   }
 }

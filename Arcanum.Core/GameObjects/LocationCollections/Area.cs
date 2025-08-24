@@ -1,9 +1,11 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public class Area : LocationCollection<Province>
+public partial class Area : LocationCollection<Province>, INUI
 {
    public Area(FileInformation fileInfo, string name, ICollection<Province> provinces) : base(fileInfo, name, provinces)
    {
@@ -23,5 +25,26 @@ public class Area : LocationCollection<Province>
    public override void AddGlobal()
    {
       throw new NotImplementedException();
+   }
+
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.AreaSettings;
+   public INUINavigation[] Navigations 
+   {
+      get
+      {
+         List<INUINavigation?> navigations = [];
+         var parent = GetFirstParentOfType(LocationCollectionType.Region);
+         if (parent != Empty)
+            navigations.Add(new NUINavigation((INUI)parent, $"Region: {parent.Name}"));
+         
+         if (SubCollection.Count > 0)
+            navigations.Add(null);
+         
+         foreach (var location in SubCollection)
+            navigations.Add(new NUINavigation(location, $"Areas: {location.Name}"));
+         
+         return navigations.ToArray()!;
+      }
    }
 }

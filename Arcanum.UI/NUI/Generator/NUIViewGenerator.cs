@@ -70,6 +70,7 @@ public static class NUIViewGenerator
             element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp, baseGrid);
          }
 
+         element.IsEnabled = !target.IsReadonly;
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
          baseGrid.Children.Add(element);
@@ -147,7 +148,7 @@ public static class NUIViewGenerator
          }
          else
          {
-            shortInfoParts.Add($"{pVal}");
+            shortInfoParts.Add($"{GetDisplayString(pVal)}");
          }
       }
 
@@ -282,7 +283,7 @@ public static class NUIViewGenerator
       else
          header.Text = text;
 
-      header.MouseUp += (sender, e) =>
+      MouseButtonEventHandler clickHandler = (sender, e) =>
       {
          if (e.ChangedButton == MouseButton.Right)
          {
@@ -298,24 +299,42 @@ public static class NUIViewGenerator
             e.Handled = true;
          }
          else if (e.ChangedButton == MouseButton.Left)
-         {
             root.Content = GenerateView(new(value, true, root));
-         }
       };
+      header.MouseUp += clickHandler;
+      header.Unloaded += (_, _) => { header.MouseUp -= clickHandler; };
       header.Cursor = Cursors.Hand;
 
       return header;
    }
 
-   private static ContextMenu GetContextMenu(INUINavigation[] navigations, ContentPresenter root)
+   /// <summary>
+   /// Define the context menu for navigation options.
+   /// Use <c>null</c> as a value in the <see cref="navigations"/> array to create a separator.
+   /// </summary>
+   /// <param name="navigations"></param>
+   /// <param name="root"></param>
+   /// <returns></returns>
+   private static ContextMenu GetContextMenu(INUINavigation?[] navigations, ContentPresenter root)
    {
       var contextMenu = new ContextMenu();
       foreach (var navigation in navigations)
+      {
+         if (navigation == null)
+         {
+            contextMenu.Items.Add(new Separator());
+            continue;
+         }
+
          contextMenu.Items.Add(new MenuItem
          {
+            FontSize = 12,
+            FontWeight = FontWeights.Normal,
+            Foreground = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
             Header = navigation.ToolStripString,
             Command = new ActionCommand(() => { GenerateAndSetView(new(navigation.Target, true, root)); }),
          });
+      }
 
       return contextMenu;
    }
@@ -452,7 +471,7 @@ public static class NUIViewGenerator
 
       var openButton = GetEyeButton();
       openButton.Margin = new(4, 0, 0, 0);
-      openButton.Click += (sender, e) =>
+      openButton.Click += (_, _) =>
       {
          // TODO open proper collection editor for any kind of object
       };
@@ -503,5 +522,30 @@ public static class NUIViewGenerator
          HorizontalAlignment = HorizontalAlignment.Stretch,
          IsHitTestVisible = false,
       };
+   }
+
+   /// <summary>
+   /// Gets a user-friendly string for an object. If the object has a custom
+   /// ToString() override, it's used. Otherwise, the class's simple name is returned.
+   /// </summary>
+   private static string GetDisplayString(object? obj)
+   {
+      if (obj is null)
+         return "null"; // Or string.Empty, depending on what you prefer for nulls
+
+      var type = obj.GetType();
+
+      // Get the MethodInfo for the ToString method.
+      // This will get the most-derived override of ToString().
+      var toStringMethod = type.GetMethod(nameof(ToString), Type.EmptyTypes);
+
+      // If the method was declared on a type other than System.Object,
+      // it means it has been overridden somewhere in the inheritance chain.
+      if (toStringMethod != null && toStringMethod.DeclaringType != typeof(object))
+         // It's an override, so call it.
+         return obj.ToString() ?? string.Empty;
+
+      // It's the default object.ToString(), so just return the type name.
+      return $"<{type.Name}>";
    }
 }

@@ -7,7 +7,8 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public partial class Province : LocationCollection<Location>, INUI
 {
-   public Province(FileInformation fileInfo, string name, ICollection<Location> provinces) : base(fileInfo, name, provinces)
+   public Province(FileInformation fileInfo, string name, ICollection<Location> provinces) :
+      base(fileInfo, name, provinces)
    {
    }
 
@@ -16,6 +17,7 @@ public partial class Province : LocationCollection<Location>, INUI
    }
 
    public override LocationCollectionType LCType => LocationCollectionType.Province;
+
    public override void RemoveGlobal()
    {
       throw new NotImplementedException();
@@ -28,5 +30,22 @@ public partial class Province : LocationCollection<Location>, INUI
 
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUISettings.ProvinceSettings;
-   public INUINavigation[] Navigations { get; }
+   public INUINavigation[] Navigations
+   {
+      get
+      {
+         List<INUINavigation?> navigations = [];
+         var parent = GetFirstParentOfType(LocationCollectionType.Area);
+         if (parent != Empty)
+            navigations.Add(new NUINavigation((INUI)parent, $"Area: {parent.Name}"));
+         
+         if (SubCollection.Count > 0)
+            navigations.Add(null);
+         
+         foreach (var location in SubCollection)
+            navigations.Add(new NUINavigation(location, $"Location: {location.Name}"));
+         
+         return navigations.ToArray()!;
+      }
+   }
 }

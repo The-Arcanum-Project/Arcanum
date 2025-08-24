@@ -1,9 +1,11 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public class Continent : LocationCollection<SuperRegion>
+public partial class Continent : LocationCollection<SuperRegion>, INUI
 {
    public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) : base(fileInfo, name, provinces)
    {
@@ -24,4 +26,8 @@ public class Continent : LocationCollection<SuperRegion>
    {
       throw new NotImplementedException();
    }
+
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUISettings.ContinentSettings;
+   public INUINavigation[] Navigations { get; } = [];
 }
