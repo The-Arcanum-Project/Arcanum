@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -8,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.NUI.Headers;
+using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Microsoft.Xaml.Behaviors.Core;
 using Nexus.Core;
@@ -37,7 +38,7 @@ public static class NUIViewGenerator
 
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
 
-      var header = NavigationHeader(titleBinding, target.Navigations, navHistory.Root, target);
+      var header = NavigationHeader(target.Navigations, navHistory.Root, target);
       header.FontSize = 24;
       header.Height = 32;
       header.HorizontalAlignment = HorizontalAlignment.Center;
@@ -67,10 +68,9 @@ public static class NUIViewGenerator
          }
          else
          {
-            element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp, baseGrid);
+            element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp);
          }
-
-         element.IsEnabled = !target.IsReadonly;
+         
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
          baseGrid.Children.Add(element);
@@ -91,7 +91,7 @@ public static class NUIViewGenerator
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
 
-      var headerBlock = NavigationHeader(null, target.Navigations, root, target, target.GetType().Name);
+      var headerBlock = NavigationHeader(target.Navigations, root, target, target.GetType().Name);
       headerBlock.Margin = new(6, 0, 0, 0);
       baseGrid.RowDefinitions.Add(new() { Height = new(headerBlock.Height, GridUnitType.Pixel) });
       baseGrid.Children.Add(headerBlock);
@@ -113,11 +113,13 @@ public static class NUIViewGenerator
          {
             INUI value = null!;
             Nx.ForceGet(target, nxProp, ref value);
+            if (value == null!)
+               continue;
             element = GenerateShortInfo(value, root);
          }
          else
          {
-            element = BuildCollectionOrDefaultView(root, type, target, nxProp, baseGrid, 6);
+            element = BuildCollectionOrDefaultView(root, type, target, nxProp, 6);
          }
 
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -153,8 +155,7 @@ public static class NUIViewGenerator
       }
 
       const int fontSize = 11;
-      var headerBlock = NavigationHeader(null,
-                                         value.Navigations,
+      var headerBlock = NavigationHeader(value.Navigations,
                                          root,
                                          value,
                                          value.GetType().Name,
@@ -184,33 +185,32 @@ public static class NUIViewGenerator
       return stackPanel;
    }
 
-   private static Grid GetDefaultGrid(INUI target, Enum nxProp, int leftMargin = 0)
+   private static Grid GetTypeSpecificGrid(INUI target, Enum nxProp, int leftMargin = 0)
    {
-      UIElement element;
+      var type = Nx.TypeOf(target, nxProp);
+      var binding = GetTwoWayBinding(target, nxProp);
+      Control element;
+      // Fallback to existing logic
+      if (type == typeof(float))
+         element = GetFloatUI(binding);
+      else if (type == typeof(string))
+         element = GetStringUI(binding);
+      else if (type == typeof(bool))
+         element = GetBoolUI(binding);
+      else if (type.IsEnum)
+         element = GetEnumUI(type, binding);
+      else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
+         element = GetIntUI(binding);
+      else if (type == typeof(double) || type == typeof(decimal))
+         element = GetDoubleUI(binding);
+      else
+         throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+
+      element.IsEnabled = !target.IsReadonly;
+      element.VerticalAlignment = VerticalAlignment.Stretch;
+
       var desc = DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
-      switch (Nx.TypeOf(target, nxProp))
-      {
-         case var t when t == typeof(string):
-         case var f when f == typeof(float):
-         case var i when i == typeof(int):
-         case var o when o == typeof(object):
-         case var b when b == typeof(bool):
-         case { IsClass: true }:
-            var textBox = new CorneredTextBox
-            {
-               Height = 23,
-               FontSize = 12,
-               Margin = new(0),
-               BorderThickness = new(1),
-            };
-            textBox.SetBinding(TextBox.TextProperty, GetTwoWayBinding(target, nxProp));
-            element = textBox;
-            break;
-         default:
-            throw
-               new NotSupportedException($"Type {Nx.TypeOf(target, nxProp)} is not supported for property {nxProp}.");
-      }
 
       var line = new Rectangle
       {
@@ -259,11 +259,10 @@ public static class NUIViewGenerator
       return textBlock;
    }
 
-   private static TextBlock NavigationHeader<T>(Binding? headerBinding,
-                                                INUINavigation[] navigations,
+   private static TextBlock NavigationHeader<T>(INUINavigation[] navigations,
                                                 ContentPresenter root,
                                                 T value,
-                                                string text = "",
+                                                string text = null!,
                                                 int fontSize = 16,
                                                 FontWeight? fontWeight = null) where T : INUI
    {
@@ -278,10 +277,13 @@ public static class NUIViewGenerator
          Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
       };
-      if (headerBinding != null)
-         header.SetBinding(TextBlock.TextProperty, headerBinding);
-      else
-         header.Text = text;
+      if (string.IsNullOrWhiteSpace(text))
+      {
+         object headerValue = null!;
+         Nx.ForceGet(value, value.Settings.Title, ref headerValue);
+         text = GetDisplayString(headerValue);
+      }
+      header.Text = text;
 
       MouseButtonEventHandler clickHandler = (sender, e) =>
       {
@@ -403,7 +405,6 @@ public static class NUIViewGenerator
                                                     Type type,
                                                     INUI target,
                                                     Enum nxProp,
-                                                    Grid baseGrid,
                                                     int leftMargin = 0)
    {
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
@@ -411,7 +412,7 @@ public static class NUIViewGenerator
       // If it is not a collection or array, fall back to default handling.
       if (itemType == null)
       {
-         return GetDefaultGrid(target, nxProp, leftMargin);
+         return GetTypeSpecificGrid(target, nxProp, leftMargin);
       }
 
       object collectionObject = null!;
@@ -420,16 +421,12 @@ public static class NUIViewGenerator
       // Cast to the non-generic IEnumerable to handle any collection type.
       if (collectionObject is not IEnumerable collection)
       {
-         return GetDefaultGrid(target, nxProp, leftMargin);
+         return GetTypeSpecificGrid(target, nxProp, leftMargin);
       }
 
       // Filter the collection for items that ACTUALLY implement INUI at runtime.
       var inuiItems = collection.OfType<INUI>().ToList();
 
-      if (inuiItems.Count == 0)
-      {
-         return GetDefaultGrid(target, nxProp, leftMargin);
-      }
 
       var grid = new Grid
       {
@@ -548,4 +545,98 @@ public static class NUIViewGenerator
       // It's the default object.ToString(), so just return the type name.
       return $"<{type.Name}>";
    }
+
+   #region Contorl Generators
+
+   private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      FloatNumericUpDown numericUpDown = new()
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = float.MinValue,
+         MaxValue = float.MaxValue,
+         StepSize = 0.1f,
+      };
+      numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
+   }
+
+   private static TextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      var textBox = new CorneredTextBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         BorderThickness = new(1, 1, 1, 1),
+      };
+      textBox.SetBinding(TextBox.TextProperty, binding);
+      return textBox;
+   }
+
+   private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      var checkBox = new CheckBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+      checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
+      return checkBox;
+   }
+
+   private static ComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
+   {
+      var comboBox = new ComboBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         BorderThickness = new(1),
+         ItemsSource = Enum.GetValues(enumType),
+      };
+      comboBox.SetBinding(Selector.SelectedItemProperty, binding);
+      return comboBox;
+   }
+
+   private static BaseNumericUpDown GetIntUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      BaseNumericUpDown numericUpDown = new()
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1, 1, 1, 1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = int.MinValue,
+         MaxValue = int.MaxValue,
+      };
+      numericUpDown.SetBinding(BaseNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
+   }
+
+   private static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      DecimalBaseNumericUpDown numericUpDown = new()
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1, 1, 1, 1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = decimal.MinValue,
+         MaxValue = decimal.MaxValue,
+         StepSize = new(0.1),
+      };
+      numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
+   }
+
+   #endregion
 }

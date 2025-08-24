@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -11,6 +12,30 @@ public partial class DecimalBaseNumericUpDown
    {
       InitializeComponent();
       PreviewKeyDown += NudTextBox_PreviewKeyDown;
+   }
+
+   public static readonly DependencyProperty InnerBorderThicknessProperty =
+      DependencyProperty.Register(nameof(InnerBorderThickness),
+                                  typeof(Thickness),
+                                  typeof(DecimalBaseNumericUpDown),
+                                  new(default(Thickness)));
+
+   public Thickness InnerBorderThickness
+   {
+      get => (Thickness)GetValue(InnerBorderThicknessProperty);
+      set => SetValue(InnerBorderThicknessProperty, value);
+   }
+
+   public static readonly DependencyProperty InnerBorderBrushProperty =
+      DependencyProperty.Register(nameof(InnerBorderBrush),
+                                  typeof(Brush),
+                                  typeof(DecimalBaseNumericUpDown),
+                                  new(default(Brush)));
+
+   public Brush InnerBorderBrush
+   {
+      get => (Brush)GetValue(InnerBorderBrushProperty);
+      set => SetValue(InnerBorderBrushProperty, value);
    }
 
    public decimal MinValue
@@ -137,7 +162,7 @@ public partial class DecimalBaseNumericUpDown
    {
       if (NudTextBox.Text == string.Empty)
          return;
-      
+
       if (decimal.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) &&
           number >= MinValue &&
           number <= MaxValue)

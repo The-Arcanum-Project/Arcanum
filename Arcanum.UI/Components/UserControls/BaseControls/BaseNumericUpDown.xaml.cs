@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -10,6 +11,30 @@ public partial class BaseNumericUpDown
    {
       InitializeComponent();
       NudTextBox.Text = Value.ToString();
+   }
+
+   public static readonly DependencyProperty InnerBorderThicknessProperty =
+      DependencyProperty.Register(nameof(InnerBorderThickness),
+                                  typeof(Thickness),
+                                  typeof(BaseNumericUpDown),
+                                  new(new Thickness(1, 1, 1, 1)));
+
+   public Thickness InnerBorderThickness
+   {
+      get => (Thickness)GetValue(InnerBorderThicknessProperty);
+      set => SetValue(InnerBorderThicknessProperty, value);
+   }
+
+   public static readonly DependencyProperty InnerBorderBrushProperty =
+      DependencyProperty.Register(nameof(InnerBorderBrush),
+                                  typeof(Brush),
+                                  typeof(BaseNumericUpDown),
+                                  new(default(Brush)));
+
+   public Brush InnerBorderBrush
+   {
+      get => (Brush)GetValue(InnerBorderBrushProperty);
+      set => SetValue(InnerBorderBrushProperty, value);
    }
 
    public int MinValue
@@ -95,7 +120,7 @@ public partial class BaseNumericUpDown
    {
       if (NudTextBox.Text == string.Empty)
          return;
-      
+
       if (int.TryParse(NudTextBox.Text, out var number) &&
           number >= MinValue &&
           number <= MaxValue)
@@ -109,7 +134,7 @@ public partial class BaseNumericUpDown
          NudTextBox.SelectionStart = NudTextBox.Text.Length;
       }
    }
-   
+
    private void NudTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
    {
       var textBox = (TextBox)sender;

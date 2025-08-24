@@ -5,8 +5,8 @@
              MinHeight = "22"
              MinWidth = "60">
 
-    <Border BorderThickness = "{Binding BorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            BorderBrush = "{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+    <Border BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
             CornerRadius = "2"
             Background = "Transparent">
         <Grid Background = "Transparent">

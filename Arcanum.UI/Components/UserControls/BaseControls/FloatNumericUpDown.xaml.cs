@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -10,6 +11,22 @@ public partial class FloatNumericUpDown
    public FloatNumericUpDown()
    {
       InitializeComponent();
+   }
+
+   public static readonly DependencyProperty InnerBorderThicknessProperty = DependencyProperty.Register(nameof(InnerBorderThickness), typeof(Thickness), typeof(FloatNumericUpDown), new(default(Thickness)));
+
+   public Thickness InnerBorderThickness
+   {
+      get => (Thickness)GetValue(InnerBorderThicknessProperty);
+      set => SetValue(InnerBorderThicknessProperty, value);
+   }
+
+   public static readonly DependencyProperty InnerBorderBrushProperty = DependencyProperty.Register(nameof(InnerBorderBrush), typeof(Brush), typeof(FloatNumericUpDown), new(default(Brush)));
+
+   public Brush InnerBorderBrush
+   {
+      get => (Brush)GetValue(InnerBorderBrushProperty);
+      set => SetValue(InnerBorderBrushProperty, value);
    }
 
    public float MinValue
