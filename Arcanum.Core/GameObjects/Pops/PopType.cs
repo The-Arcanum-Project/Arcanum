@@ -10,7 +10,7 @@ namespace Arcanum.Core.GameObjects.Pops;
 public partial class PopType(string name,
                              string colorKey,
                              float foodConsumption,
-                             float assimilationConversionFactor) : IParseable<PopType>, INUI
+                             float assimilationConversionFactor) : IParseable<PopType>, INUI, ICollectionProvider<PopType>
 {
    public string Name { get; set; } = name;
    public string ColorKey { get; set; } = colorKey;
@@ -37,6 +37,8 @@ public partial class PopType(string name,
       result = Empty;
       return false;
    }
+
+   public static IEnumerable<PopType> GetGlobalItems() => Pop.GetGlobalItems().Select(p => p.Type).Distinct();
 
    public override bool Equals(object? obj)
    {

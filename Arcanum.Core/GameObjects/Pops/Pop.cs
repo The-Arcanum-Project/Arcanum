@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -9,7 +7,7 @@ public partial class Pop(PopType type,
                          float size,
                          string culture,
                          string religion)
-   : INUI
+   : INUI, ICollectionProvider<Pop>
 {
    public PopType Type { get; set; } = type;
    public float Size { get; set; } = size;
@@ -20,6 +18,8 @@ public partial class Pop(PopType type,
    {
       return $"{Type?.Name} ({Size})";
    }
+
+   public static IEnumerable<Pop> GetGlobalItems() => Globals.Locations.Values.SelectMany(l => l.Pops);
 
    public override bool Equals(object? obj)
    {

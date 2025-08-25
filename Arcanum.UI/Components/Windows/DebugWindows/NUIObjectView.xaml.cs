@@ -64,12 +64,17 @@ public partial class NUIObjectView
           implementedType != null)
       {
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
-         if (methodInfo == null)
+         if (methodInfo != null)
+         {
+            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
+            NUIObjects = allItems.Cast<INUI>().ToList();
+            ObjectListView.SelectedIndex = 0;
             return;
-
-         var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
-         NUIObjects = allItems.Cast<INUI>().ToList();
+         }
       }
+      SelectedObjectName = "No objects found";
+      NUIObjects = [];
+      ViewPresenter.Content = null;
    }
 
    private void ObjectSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)

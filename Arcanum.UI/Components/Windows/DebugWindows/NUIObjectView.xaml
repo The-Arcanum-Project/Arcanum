@@ -63,7 +63,8 @@
                   Grid.Row = "1"
                   Margin = "4"
                   ItemsSource = "{Binding NUIObjects, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                  SelectionChanged = "ObjectSelector_OnSelectionChanged">
+                  SelectionChanged = "ObjectSelector_OnSelectionChanged"
+                  x:Name = "ObjectListView">
         </ListView>
 
         <Border Grid.Column = "2"
@@ -72,8 +73,9 @@
                 BorderBrush = "{StaticResource DefaultBackColorBrush}"
                 CornerRadius="3"
                 BorderThickness = "2">
-            <ContentPresenter x:Name = "ViewPresenter">
-            </ContentPresenter>
+            <ScrollViewer>
+                <ContentPresenter x:Name = "ViewPresenter"/>
+            </ScrollViewer>
         </Border>
     </Grid>
 </styleClasses:BaseWindow>

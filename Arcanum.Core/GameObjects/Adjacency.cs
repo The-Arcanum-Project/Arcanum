@@ -17,7 +17,7 @@ public partial class Adjacency(Location from,
                                int startX,
                                int startY,
                                int endX,
-                               int endY) : INUI
+                               int endY) : INUI, ICollectionProvider<Adjacency>
 {
    public Location From { get; set; } = from;
    public Location To { get; set; } = to;
@@ -38,8 +38,10 @@ public partial class Adjacency(Location from,
 
    public override string ToString()
    {
-      return $"{Name}: {From?.Name} -> {To?.Name} ({Type})";
+      return $"{Name}: {From.Name} -> {To.Name} ({Type})";
    }
+
+   public static IEnumerable<Adjacency> GetGlobalItems() => Globals.Adjacencies;
 
    public override bool Equals(object? obj)
    {
