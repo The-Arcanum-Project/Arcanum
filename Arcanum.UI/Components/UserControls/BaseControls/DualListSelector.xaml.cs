@@ -79,7 +79,7 @@ public partial class DualListSelector
          Title = title,
          Width = 600,
          Height = 400,
-         WindowStartupLocation = WindowStartupLocation.CenterOwner,
+         WindowStartupLocation = WindowStartupLocation.CenterScreen,
          ResizeMode = ResizeMode.CanResize,
          Content = new DualListSelector
          {

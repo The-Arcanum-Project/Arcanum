@@ -62,7 +62,7 @@
         <!-- Middle Buttons -->
         <StackPanel Grid.Column = "1"
                     VerticalAlignment = "Top"
-                    Margin = "2, 0">
+                    Margin = "2, 53, 2, 0">
             <styleClasses:BaseButton x:Name = "MoveToAvailableButton"
                                      Margin = "1, 2, 1, 2"
                                      ToolTip = "Remove selected item(s)"

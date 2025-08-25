@@ -7,7 +7,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Location : LocationComposite, INUI
+public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
@@ -42,6 +42,8 @@ public partial class Location : LocationComposite, INUI
    public override ICollection<Location> GetLocations() => [this];
 
    public override LocationCollectionType LCType => LocationCollectionType.Location;
+
+   public static IEnumerable<Location> GetGlobalItems() => Globals.Locations.Values;
 
    public override bool Equals(object? obj)
    {

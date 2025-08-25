@@ -17,11 +17,11 @@ public enum AppState
 public static class Globals
 {
    public static Dictionary<string, Location> Locations { get; } = [];
-   public static HashSet<Province> Provinces { get; } = [];
-   public static HashSet<Area> Areas { get; } = [];
-   public static HashSet<Region> Regions { get; } = [];
-   public static HashSet<SuperRegion> SuperRegions { get; } = [];
-   public static HashSet<Continent> Continents { get; } = [];
+   public static Dictionary<string, Province> Provinces { get; } = [];
+   public static Dictionary<string, Area> Areas { get; } = [];
+   public static Dictionary<string, Region> Regions { get; } = [];
+   public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
+   public static Dictionary<string, Continent> Continents { get; } = [];
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static List<Adjacency> Adjacencies { get; } = [];
    public static Dictionary<string, PopType> PopTypes { get; } = [];

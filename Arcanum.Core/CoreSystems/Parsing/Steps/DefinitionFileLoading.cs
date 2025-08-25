@@ -68,7 +68,7 @@ public class DefinitionFileLoading : FileLoadingService
       }
 
       Continent continent = new(fileInformation, block.Name);
-      if (Globals.Continents.Contains(continent))
+      if (Globals.Continents.ContainsKey(continent.Name))
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
@@ -87,7 +87,7 @@ public class DefinitionFileLoading : FileLoadingService
             continent.Add(superRegion);
          }
 
-      Globals.Continents.Add(continent);
+      Globals.Continents.Add(continent.Name, continent);
    }
 
    private bool ParseSuperRegion(Block block,
@@ -107,7 +107,7 @@ public class DefinitionFileLoading : FileLoadingService
       }
 
       superRegion = new(fileInformation, block.Name);
-      if (Globals.SuperRegions.Contains(superRegion))
+      if (Globals.SuperRegions.ContainsKey(superRegion.Name))
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
@@ -125,7 +125,7 @@ public class DefinitionFileLoading : FileLoadingService
             superRegion.Add(region);
          }
 
-      Globals.SuperRegions.Add(superRegion);
+      Globals.SuperRegions.Add(superRegion.Name, superRegion);
       return true;
    }
 
@@ -144,7 +144,7 @@ public class DefinitionFileLoading : FileLoadingService
       }
 
       region = new(fileInformation, block.Name);
-      if (Globals.Regions.Contains(region))
+      if (Globals.Regions.ContainsKey(region.Name))
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
@@ -162,7 +162,7 @@ public class DefinitionFileLoading : FileLoadingService
             region.Add(area);
          }
 
-      Globals.Regions.Add(region);
+      Globals.Regions.Add(region.Name, region);
       return true;
    }
 
@@ -181,7 +181,7 @@ public class DefinitionFileLoading : FileLoadingService
       }
 
       area = new(fileInformation, block.Name);
-      if (Globals.Areas.Contains(area))
+      if (Globals.Areas.ContainsKey(area.Name))
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
@@ -199,7 +199,7 @@ public class DefinitionFileLoading : FileLoadingService
             area.Add(province);
          }
 
-      Globals.Areas.Add(area);
+      Globals.Areas.Add(area.Name, area);
       return true;
    }
 
@@ -228,7 +228,7 @@ public class DefinitionFileLoading : FileLoadingService
       }
 
       province = new(fileInformation, block.Name);
-      if (Globals.Provinces.Contains(province))
+      if (Globals.Provinces.ContainsKey(province.Name))
       {
          var ctxInstance = ctx.GetInstance();
          ctxInstance.LineNumber = block.StartLine;
@@ -256,7 +256,7 @@ public class DefinitionFileLoading : FileLoadingService
          province.Add(existingLocation);
       }
 
-      Globals.Provinces.Add(province);
+      Globals.Provinces.Add(province.Name, province);
       return true;
    }
 

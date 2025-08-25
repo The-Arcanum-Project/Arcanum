@@ -389,6 +389,53 @@ public static class NUIViewGenerator
       return arrayType.IsArray ? arrayType.GetElementType() : null;
    }
 
+   /// <summary>
+   /// Determines the concrete item type of a collection, even if the collection is
+   /// declared with an abstract or base type.
+   /// </summary>
+   /// <param name="collection">The collection instance.</param>
+   /// <param name="ownerType">The type of the object that owns the collection property.</param>
+   /// <param name="propertyName"></param>
+   /// <returns>The concrete type of the items, or null if it cannot be determined.</returns>
+   private static Type? GetConcreteCollectionItemType(IEnumerable collection, Type ownerType, string propertyName)
+   {
+      // check the first actual item.
+      var firstItem = collection.Cast<object>().FirstOrDefault();
+      if (firstItem != null)
+         return firstItem.GetType();
+
+      // A reflection-based approach (expensive, but works in all cases):
+      // Map the generic parameter of the property in a generic base class
+      // to the concrete type provided by the derived class.
+      var currentType = ownerType;
+      while (currentType != null && currentType != typeof(object))
+      {
+         if (currentType.IsGenericType)
+         {
+            var genericDefinition = currentType.GetGenericTypeDefinition();
+            var propertyOnGenericDef =
+               genericDefinition.GetProperty(propertyName,
+                                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            if (propertyOnGenericDef != null)
+            {
+               var genericItemType = GetCollectionItemType(propertyOnGenericDef.PropertyType);
+
+               if (genericItemType is { IsGenericTypeParameter: true })
+               {
+                  var typeParamIndex = Array.IndexOf(genericDefinition.GetGenericArguments(), genericItemType);
+
+                  if (typeParamIndex != -1)
+                     return currentType.GetGenericArguments()[typeParamIndex];
+               }
+            }
+         }
+
+         currentType = currentType.BaseType;
+      }
+      return null;
+   }
+
    private static BaseButton GetEyeButton()
    {
       return new()
@@ -412,7 +459,6 @@ public static class NUIViewGenerator
                                                     Enum nxProp,
                                                     int leftMargin = 0)
    {
-      // Check if it's a collection type
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
       if (itemType == null)
          return GetTypeSpecificGrid(target, nxProp, leftMargin);
@@ -423,6 +469,11 @@ public static class NUIViewGenerator
       // We need a modifiable list (IList) for the editor to work.
       if (collectionObject is not IList modifiableList)
          return GetTypeSpecificGrid(target, nxProp, leftMargin);
+
+      // if we have an abstract class or interface as item type, try to find the concrete type
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, target.GetType(), nxProp.ToString());
+      if (concreteItemType != null)
+         itemType = concreteItemType;
 
       var inuiItems = modifiableList.OfType<INUI>().ToList();
 
@@ -449,31 +500,31 @@ public static class NUIViewGenerator
       openButton.Margin = new(4, 0, 0, 0);
 
       var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
-      if (providerInterfaceType.IsInstanceOfType(target))
+      if (providerInterfaceType.IsAssignableFrom(itemType))
       {
          RoutedEventHandler clickHandler = (_, _) =>
          {
-            var methodInfo = providerInterfaceType.GetMethod("GetGlobalItems");
+            var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
             if (methodInfo == null)
                return;
 
-            var allItems = (IEnumerable)methodInfo.Invoke(target, null)!;
+            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
+
             DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
 
             navHeader.Text = $"{nxProp}: {modifiableList.Count} Items";
-
-            GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
+            GenerateCollectionItemPreview(navHistory, modifiableList.OfType<INUI>().ToList(), grid, modifiableList);
          };
 
          openButton.Click += clickHandler;
          openButton.Unloaded += (_, _) => openButton.Click -= clickHandler;
-
          openButton.ToolTip = "Open Collection Editor";
       }
       else
       {
          openButton.IsEnabled = false;
-         openButton.ToolTip = "This collection is not editable because a global item source is not provided.";
+         openButton.ToolTip =
+            $"This collection is not editable because the '{itemType.Name}' type does not provide a static GetGlobalItems() method.";
       }
 
       var stackPanel = new StackPanel
@@ -523,7 +574,8 @@ public static class NUIViewGenerator
       for (var i = grid.Children.Count - 1; i >= 0; i--)
       {
          var child = grid.Children[i];
-         if (Grid.GetRow(child) > 0 && child.GetType() != typeof(Rectangle)) // Only remove children that are not in the header row
+         if (Grid.GetRow(child) > 0 &&
+             child.GetType() != typeof(Rectangle)) // Only remove children that are not in the header row
             grid.Children.RemoveAt(i);
       }
 
@@ -591,14 +643,14 @@ public static class NUIViewGenerator
       if (member != null)
       {
          var toStringArgsAttr = member.GetCustomAttribute<ToStringArgumentsAttribute>();
-        
+
          if (toStringArgsAttr != null && value is IFormattable formattable)
             return formattable.ToString(toStringArgsAttr.Format, CultureInfo.InvariantCulture);
       }
 
       return GetDisplayString(value);
    }
-   
+
    /// <summary>
    /// Gets a user-friendly string for an object. If the object has a custom
    /// ToString() override, it's used. Otherwise, the class's simple name is returned.

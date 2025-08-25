@@ -5,7 +5,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Region : LocationCollection<Area>, INUI
+public partial class Region : LocationCollection<Area>, INUI, ICollectionProvider<Region>
 {
    public Region(FileInformation fileInfo, string name, ICollection<Area> provinces) : base(fileInfo, name, provinces)
    {
@@ -47,4 +47,5 @@ public partial class Region : LocationCollection<Area>, INUI
          return navigations.ToArray()!;
       }
    }
+   public static IEnumerable<Region> GetGlobalItems() => Globals.Regions.Values;
 }

@@ -5,7 +5,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Continent : LocationCollection<SuperRegion>, INUI
+public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>
 {
    public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) : base(fileInfo, name, provinces)
    {
@@ -14,7 +14,6 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI
    public Continent(FileInformation fileInfo, string name) : base(fileInfo, name)
    {
    }
-
    public override LocationCollectionType LCType => LocationCollectionType.Continent;
 
    public override void RemoveGlobal()
@@ -30,4 +29,5 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
+   public static IEnumerable<Continent> GetGlobalItems() => Globals.Continents.Values;
 }
