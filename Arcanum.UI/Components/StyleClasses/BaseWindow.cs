@@ -94,7 +94,7 @@ public class BaseWindow : Window
       DependencyProperty.Register(nameof(HeaderHeight),
                                   typeof(GridLength),
                                   typeof(BaseWindow),
-                                  new(new GridLength(30.0)));
+                                  new(new GridLength(32.0)));
 
    // Define the DependencyProperty for the Footer
    public static readonly DependencyProperty FooterContentProperty =

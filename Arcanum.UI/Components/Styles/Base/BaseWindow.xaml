@@ -31,6 +31,14 @@
                     Value = "200" />
             <Setter Property = "MinHeight"
                     Value = "100" />
+            <Setter Property = "WindowBorderThickness"
+                    Value = "1" />
+            <Setter Property = "WindowCornerRadius"
+                    Value = "0" />
+            <Setter Property = "HeaderBorder"
+                    Value = "0, 0, 0, 1" />
+            <Setter Property = "BorderBrush"
+                    Value = "{StaticResource DefaultBorderColorBrush}" />
             <Setter Property = "Icon"
                     Value = "/Assets/Logo/ArcanumSimplified.ico" />
             <Setter Property = "WindowChrome.WindowChrome">
