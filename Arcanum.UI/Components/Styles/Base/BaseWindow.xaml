@@ -18,7 +18,7 @@
 
         <Style.Setters>
             <Setter Property = "Background"
-                    Value = "DarkOliveGreen" />
+                    Value = "{StaticResource DefaultBackColorBrush}" />
             <Setter Property = "BorderThickness"
                     Value = "0" />
             <Setter Property = "WindowStyle"
@@ -37,6 +37,8 @@
                     Value = "0" />
             <Setter Property = "HeaderBorder"
                     Value = "0, 0, 0, 1" />
+            <Setter Property = "HeaderBackGroundBrush"
+                    Value = "{StaticResource AccentGradientBrush}" />
             <Setter Property = "BorderBrush"
                     Value = "{StaticResource DefaultBorderColorBrush}" />
             <Setter Property = "Icon"
@@ -69,8 +71,8 @@
                                         BorderThickness = "{TemplateBinding HeaderBorder}"
                                         HorizontalAlignment = "Stretch"
                                         VerticalAlignment = "Stretch"
-                                        Margin="{TemplateBinding HeaderMargin}">
-                                    
+                                        Margin = "{TemplateBinding HeaderMargin}">
+
                                     <DockPanel Background = "{TemplateBinding HeaderBackGroundBrush}"
                                                LastChildFill = "False">
                                         <DockPanel.Resources>

@@ -18,7 +18,7 @@ public partial class Pop(PopType type,
 
    public override string ToString()
    {
-      return $"{Type.Name} ({Size})";
+      return $"{Type?.Name} ({Size})";
    }
 
    public override bool Equals(object? obj)

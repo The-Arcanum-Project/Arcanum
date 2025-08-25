@@ -172,4 +172,9 @@ public static class MwCommands
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.GoToNextINUI },
    };
+   
+   public static readonly RoutedCommand ViewINUIObjectsCommand = new("ViewINUIObjectsCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.ViewINUIObjects },
+   };
 }

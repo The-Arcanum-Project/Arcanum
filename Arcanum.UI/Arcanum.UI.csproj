@@ -25,6 +25,8 @@
         <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj"/>
         <ProjectReference Include="..\Arcanum.PluginHost\Arcanum.PluginHost.csproj"/>
     </ItemGroup>
+    
+    
 
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj" />

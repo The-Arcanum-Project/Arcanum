@@ -48,11 +48,11 @@ public class MainWindowKeyBinds : KeyBindProvider
    // Error Log Bindings
    public KeyGesture OpenErrorLogWindow { get; set; } = new(Key.F10);
    
-   // UIElementsBrowser
+   // Debug Bindings
    public KeyGesture OpenUIElementsBrowser { get; set; } = new(Key.F11);
    public KeyGesture OpenGlobalsBrowser { get; set; } = new(Key.F7);
    public KeyGesture OpenParsingStepBrowser { get; set; } = new(Key.F9);
    public KeyGesture TempTestingCommand { get; set; } = new(Key.F5);
-   
+   public KeyGesture ViewINUIObjects { get; set; } = new(Key.F6);
    
 }

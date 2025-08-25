@@ -5,9 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
-using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Components.Views.MainWindow;
@@ -17,7 +15,6 @@ using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
-using Nexus.Core;
 using Application = System.Windows.Application;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
@@ -27,7 +24,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public const int DEFAULT_WIDTH = 1920;
    public const int DEFAULT_HEIGHT = 1080;
 
-   private readonly MainWindowView _view;
    private string _ramUsage = "RAM: [0 MB]";
    private string _cpuUsage = "CPU: [0%]";
 
@@ -64,9 +60,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       InitializeComponent();
       PerformanceCountersHelper.Initialize(this);
-
-      _view = DataContext as MainWindowView ??
-              throw new InvalidOperationException("DataContext is not set or is not of type MainWindowView.");
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -309,4 +302,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
       => NUINavigation.Instance.Forward();
+
+   private void ViewINUIObjectsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var nuiObjectView = new NUIObjectView();
+      nuiObjectView.ShowDialog();
+   }
 }

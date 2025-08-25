@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
@@ -51,4 +52,9 @@ public class NUISettings
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting AdjacencySettings { get; set; } = new(Adjacency.Field.Name,
+                                                           Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray());
 }

@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects;
 
@@ -7,38 +9,25 @@ public enum AdjacencyType
    Sea,
 }
 
-public class Adjacency
+public partial class Adjacency(Location from,
+                               Location to,
+                               AdjacencyType type,
+                               string name,
+                               string comment,
+                               int startX,
+                               int startY,
+                               int endX,
+                               int endY) : INUI
 {
-   public Adjacency(Location from,
-                    Location to,
-                    AdjacencyType type,
-                    string name,
-                    string comment,
-                    int startX,
-                    int startY,
-                    int endX,
-                    int endY)
-   {
-      From = from;
-      To = to;
-      Type = type;
-      Name = name;
-      Comment = comment;
-      StartX = startX;
-      StartY = startY;
-      EndX = endX;
-      EndY = endY;
-   }
-
-   public Location From { get; }
-   public Location To { get; }
-   public AdjacencyType Type { get; }
-   public string Name { get; }
-   public string Comment { get; }
-   public int StartX { get; }
-   public int StartY { get; }
-   public int EndX { get; }
-   public int EndY { get; }
+   public Location From { get; set; } = from;
+   public Location To { get; set; } = to;
+   public AdjacencyType Type { get; set; } = type;
+   public string Name { get; set; } = name;
+   public string Comment { get; set; } = comment;
+   public int StartX { get; set; } = startX;
+   public int StartY { get; set; } = startY;
+   public int EndX { get; set; } = endX;
+   public int EndY { get; set; } = endY;
 
    public int GetLength()
    {
@@ -46,11 +35,27 @@ public class Adjacency
       var dy = EndY - StartY;
       return (int)Math.Sqrt(dx * dx + dy * dy);
    }
-   
-   public override string ToString() => $"{Name}: {From.Name} -> {To.Name} ({Type})";
+
+   public override string ToString()
+   {
+      return $"{Name}: {From?.Name} -> {To?.Name} ({Type})";
+   }
 
    public override bool Equals(object? obj)
-      => obj is Adjacency other && other.Name.Equals(Name, StringComparison.Ordinal);
+   {
+      if (obj is null)
+         return false;
+      
+      if (ReferenceEquals(this, obj))
+         return true;
+      
+      return obj is Adjacency other && other.Name.Equals(Name, StringComparison.Ordinal);
+   }
 
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
+   public bool IsReadonly { get; } = false;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
+   public INUINavigation[] Navigations
+      => [new NUINavigation(From, $"From {From.Name}"), new NUINavigation(To, $"To {To.Name}")];
 }
