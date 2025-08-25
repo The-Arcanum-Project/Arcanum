@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -22,12 +23,24 @@ public static class NUIViewGenerator
 {
    private static int _index;
 
+   /// <summary>
+   /// Generates a view for the given <see cref="NUINavHistory"/> and sets it as the content of the root ContentPresenter.
+   /// This method is a convenience wrapper around <see cref="GenerateView(NUINavHistory)"/> that directly updates the UI.
+   /// </summary>
+   /// <param name="navHistory"></param>
    public static void GenerateAndSetView(NUINavHistory navHistory)
    {
       var view = GenerateView(navHistory);
       navHistory.Root.Content = view;
    }
 
+   /// <summary>
+   /// Generates a WPF UserControl view for the given <see cref="NUINavHistory"/>.
+   /// The view includes navigation headers, property editors, and handles nested INUI objects and collections.
+   /// Each generated view is wrapped in a BaseView control for consistent styling.
+   /// </summary>
+   /// <param name="navHistory"></param>
+   /// <returns></returns>
    public static UserControl GenerateView(NUINavHistory navHistory)
    {
       var target = navHistory.Target;
@@ -152,7 +165,7 @@ public static class NUIViewGenerator
          }
          else
          {
-            shortInfoParts.Add($"{GetDisplayString(pVal)}");
+            shortInfoParts.Add($"{GetFormattedDisplayString(pVal, value, nxProp)}");
          }
       }
 
@@ -283,7 +296,7 @@ public static class NUIViewGenerator
       {
          object headerValue = null!;
          Nx.ForceGet(value, value.Settings.Title, ref headerValue);
-         text = GetDisplayString(headerValue);
+         text = GetFormattedDisplayString(headerValue, value, value.Settings.Title);
       }
 
       header.Text = text;
@@ -559,6 +572,33 @@ public static class NUIViewGenerator
       };
    }
 
+   /// <summary>
+   /// Formats the display string for a property value based on any <see cref="ToStringArgumentsAttribute"/>
+   /// applied to the corresponding property in the INUI target. If no such attribute exists,
+   /// it falls back to the default display string logic.
+   /// </summary>
+   /// <param name="value"></param>
+   /// <param name="target"></param>
+   /// <param name="nxProp"></param>
+   /// <returns></returns>
+   private static string GetFormattedDisplayString(object value, INUI? target, Enum nxProp)
+   {
+      if (value == null! || target == null!)
+         return "null";
+
+      var member = target.GetType().GetMember(nxProp.ToString()).FirstOrDefault();
+
+      if (member != null)
+      {
+         var toStringArgsAttr = member.GetCustomAttribute<ToStringArgumentsAttribute>();
+        
+         if (toStringArgsAttr != null && value is IFormattable formattable)
+            return formattable.ToString(toStringArgsAttr.Format, CultureInfo.InvariantCulture);
+      }
+
+      return GetDisplayString(value);
+   }
+   
    /// <summary>
    /// Gets a user-friendly string for an object. If the object has a custom
    /// ToString() override, it's used. Otherwise, the class's simple name is returned.

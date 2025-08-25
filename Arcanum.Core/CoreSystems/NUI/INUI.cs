@@ -14,8 +14,15 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// </summary>
 public interface INUI : INexus, INotifyPropertyChanged
 {
+   /// <summary>
+   /// Whether any property of this object can be modified in the NUI.
+   /// </summary>
    [IgnoreModifiable]
    public bool IsReadonly { get; }
+   
+   /// <summary>
+   /// The settings defining how this object should be displayed in the different NUI states.
+   /// </summary>
    [IgnoreModifiable]
    public NUISetting Settings { get; }
 

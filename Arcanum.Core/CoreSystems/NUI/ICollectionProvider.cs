@@ -4,7 +4,7 @@
 /// Defines an interface for providing a collection of items of type T which could be used anywhere this type is used.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface ICollectionProvider<T>
+public interface ICollectionProvider<out T>
 {
    /// <summary>
    /// Gets a sequence of all globally available items of type T.
@@ -24,8 +24,6 @@ public static class CollectionProviderExtensions
    /// <returns>An <see cref="IEnumerable{T}"/> that contains elements from the input sequence that satisfy the condition.</returns>
    public static IEnumerable<T> GetGlobalItems<T>(this ICollectionProvider<T> provider, Func<T, bool> predicate)
    {
-      // Note: We return IEnumerable<T> to allow further chaining.
-      // The caller can use .ToList() if they need a list.
       return provider.GetGlobalItems().Where(predicate);
    }
 }

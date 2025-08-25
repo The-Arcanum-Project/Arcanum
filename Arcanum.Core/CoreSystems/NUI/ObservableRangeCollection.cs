@@ -3,16 +3,13 @@ using System.Collections.Specialized;
 
 namespace Arcanum.Core.CoreSystems.NUI;
 
+/// <summary>
+/// The <see cref="ObservableRangeCollection{T}"/> class is an extension of <see cref="ObservableCollection{T}"/>
+/// that provides methods to add or replace a range of items with a single notification to observers.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class ObservableRangeCollection<T> : ObservableCollection<T>
 {
-   public ObservableRangeCollection()
-   {
-   }
-
-   public ObservableRangeCollection(IEnumerable<T> collection) : base(collection)
-   {
-   }
-
    /// <summary>
    /// Adds a collection of items and raises a single notification.
    /// </summary>
@@ -30,7 +27,7 @@ public class ObservableRangeCollection<T> : ObservableCollection<T>
    /// </summary>
    public void ReplaceRange(IEnumerable<T> range)
    {
-      Items.Clear(); 
+      Items.Clear();
       AddRange(range);
    }
 }

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -14,11 +12,11 @@ public partial class Location : LocationComposite, INUI
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
       Color = color;
-      Name = name.Trim();
    }
 
    #region game/in_game/map_data/named_locations.txt
 
+   [ToStringArguments("X")]
    public int Color { get; set; }
    public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0, "EmptyArcanum");
 
@@ -38,6 +36,7 @@ public partial class Location : LocationComposite, INUI
    #endregion
 
    public override string ToString() => $"{Name} (Color: {Color:X})";
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
 
    public override ICollection<Location> GetLocations() => [this];
