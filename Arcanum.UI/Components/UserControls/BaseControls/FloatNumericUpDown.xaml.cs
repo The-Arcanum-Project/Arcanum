@@ -11,9 +11,35 @@ public partial class FloatNumericUpDown
    public FloatNumericUpDown()
    {
       InitializeComponent();
+
+      NudTextBox.Text = Value.ToString(StringFormat, CultureInfo.InvariantCulture);
    }
 
-   public static readonly DependencyProperty InnerBorderThicknessProperty = DependencyProperty.Register(nameof(InnerBorderThickness), typeof(Thickness), typeof(FloatNumericUpDown), new(default(Thickness)));
+   public string StringFormat
+   {
+      get => (string)GetValue(StringFormatProperty);
+      set => SetValue(StringFormatProperty, value);
+   }
+
+   public static readonly DependencyProperty StringFormatProperty =
+      DependencyProperty.Register(nameof(StringFormat),
+                                  typeof(string),
+                                  typeof(FloatNumericUpDown),
+                                  new FrameworkPropertyMetadata("F2",
+                                                                OnStringFormatChanged)); // Default to 2 decimal places
+
+   private static void OnStringFormatChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+   {
+      // When the format changes, update the text
+      var control = (FloatNumericUpDown)d;
+      control.NudTextBox.Text = control.Value.ToString(control.StringFormat, CultureInfo.InvariantCulture);
+   }
+
+   public static readonly DependencyProperty InnerBorderThicknessProperty =
+      DependencyProperty.Register(nameof(InnerBorderThickness),
+                                  typeof(Thickness),
+                                  typeof(FloatNumericUpDown),
+                                  new(default(Thickness)));
 
    public Thickness InnerBorderThickness
    {
@@ -21,7 +47,11 @@ public partial class FloatNumericUpDown
       set => SetValue(InnerBorderThicknessProperty, value);
    }
 
-   public static readonly DependencyProperty InnerBorderBrushProperty = DependencyProperty.Register(nameof(InnerBorderBrush), typeof(Brush), typeof(FloatNumericUpDown), new(default(Brush)));
+   public static readonly DependencyProperty InnerBorderBrushProperty =
+      DependencyProperty.Register(nameof(InnerBorderBrush),
+                                  typeof(Brush),
+                                  typeof(FloatNumericUpDown),
+                                  new(default(Brush)));
 
    public Brush InnerBorderBrush
    {
@@ -65,7 +95,8 @@ public partial class FloatNumericUpDown
                                   typeof(FloatNumericUpDown),
                                   new FrameworkPropertyMetadata(10.0f,
                                                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                                                                OnValueChanged));
+                                                                OnValueChanged, // PropertyChangedCallback
+                                                                CoerceValue)); // CoerceValueCallback
 
    public float StepSize
    {
@@ -127,12 +158,12 @@ public partial class FloatNumericUpDown
                                   CultureInfo.InvariantCulture,
                                   out _);
    }
-   
+
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
       if (NudTextBox.Text == string.Empty)
          return;
-      
+
       if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) &&
           number >= MinValue &&
           number <= MaxValue)
@@ -153,5 +184,24 @@ public partial class FloatNumericUpDown
          NUDButtonUP_Click(sender, e);
       else
          NUDButtonDown_Click(sender, e);
+   }
+
+   /// <summary>
+   /// This callback is executed BEFORE the value is set. It ensures the value is always
+   /// clamped and rounded, preventing floating point errors from being stored.
+   /// </summary>
+   private static object CoerceValue(DependencyObject d, object baseValue)
+   {
+      var control = (FloatNumericUpDown)d;
+      var value = (float)baseValue;
+
+      // 1. Clamp the value
+      value = Math.Clamp(value, control.MinValue, control.MaxValue);
+
+      // 2. Round the value to a high precision to eliminate common arithmetic errors
+      // Using decimal for rounding is more accurate for base-10 fractions.
+      value = (float)Math.Round((decimal)value, 7); // 7 decimal places is plenty for most UI floats
+
+      return value;
    }
 }

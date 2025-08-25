@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -70,7 +71,7 @@ public static class NUIViewGenerator
          {
             element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp);
          }
-         
+
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
          baseGrid.Children.Add(element);
@@ -115,6 +116,7 @@ public static class NUIViewGenerator
             Nx.ForceGet(target, nxProp, ref value);
             if (value == null!)
                continue;
+
             element = GenerateShortInfo(value, root);
          }
          else
@@ -283,6 +285,7 @@ public static class NUIViewGenerator
          Nx.ForceGet(value, value.Settings.Title, ref headerValue);
          text = GetDisplayString(headerValue);
       }
+
       header.Text = text;
 
       MouseButtonEventHandler clickHandler = (sender, e) =>
@@ -427,7 +430,6 @@ public static class NUIViewGenerator
       // Filter the collection for items that ACTUALLY implement INUI at runtime.
       var inuiItems = collection.OfType<INUI>().ToList();
 
-
       var grid = new Grid
       {
          ColumnDefinitions =
@@ -529,6 +531,23 @@ public static class NUIViewGenerator
    {
       if (obj is null)
          return "null"; // Or string.Empty, depending on what you prefer for nulls
+
+      if (obj is IConvertible convertible)
+         switch (convertible.GetTypeCode())
+         {
+            case TypeCode.Single: // float
+            case TypeCode.Double:
+            case TypeCode.Decimal:
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+            case TypeCode.UInt16:
+            case TypeCode.UInt32:
+            case TypeCode.UInt64:
+            case TypeCode.Byte:
+            case TypeCode.SByte:
+               return convertible.ToString(CultureInfo.InvariantCulture);
+         }
 
       var type = obj.GetType();
 
