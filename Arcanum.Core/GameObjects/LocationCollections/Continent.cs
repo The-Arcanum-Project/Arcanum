@@ -28,6 +28,6 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.ContinentSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
 }

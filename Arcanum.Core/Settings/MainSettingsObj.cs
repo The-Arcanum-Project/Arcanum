@@ -13,8 +13,10 @@ public class MainSettingsObj
       // Initialize any default values here if needed
    }
    
+   public GeneralNUISettings NUIConfig { get; set; } = new();
+   
    [IsSubMenu("NUI Settings")]
-   public NUISettings NUISettings { get; set; } = new ();
+   public NUISettings NUIObjectSettings { get; set; } = new ();
    
    [JsonIgnore]
    [IsSubMenu("Error Handling")]

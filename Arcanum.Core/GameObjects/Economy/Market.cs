@@ -28,6 +28,6 @@ public partial class Market(Location location) : INUI
 
    public static bool operator !=(Market? left, Market? right) => !(left == right);
    public bool IsReadonly { get; } = true;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.MarketSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations { get; } = [];
 }

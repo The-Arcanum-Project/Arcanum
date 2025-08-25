@@ -6,8 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.Windows.PopUp;
+using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -114,9 +117,22 @@ public partial class DualListSelector
 
    #region Button Click Logic
 
+   private bool CanItemsBeMoved(int count, string from, string to)
+   {
+      if (count > Config.Settings.NUIConfig.MaxItemsMovedWithoutWarning)
+         return MBox.Show($"Do you really want to move {count} items from '{from}' to '{to}'?",
+                          "Confirm Move",
+                          MBoxButton.OKCancel,
+                          MessageBoxImage.Question) ==
+                MBoxResult.OK;
+      return true;
+   }
+
    private void MoveToSelected_Click(object sender, RoutedEventArgs e)
    {
       var itemsToMove = AvailableListView.SelectedItems.Cast<object>().ToList();
+      if (!CanItemsBeMoved(itemsToMove.Count, "Available", "Selected"))
+         return;
       foreach (var item in itemsToMove)
       {
          AvailableItems.Remove(item);
@@ -128,6 +144,8 @@ public partial class DualListSelector
    private void MoveToAvailable_Click(object sender, RoutedEventArgs e)
    {
       var itemsToMove = SelectedListView.SelectedItems.Cast<object>().ToList();
+      if (!CanItemsBeMoved(itemsToMove.Count, "Selected", "Available"))
+         return;
       foreach (var item in itemsToMove)
       {
          SelectedItems.Remove(item);

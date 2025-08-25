@@ -28,7 +28,7 @@ public partial class Area : LocationCollection<Province>, INUI
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.AreaSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
    public INUINavigation[] Navigations 
    {
       get

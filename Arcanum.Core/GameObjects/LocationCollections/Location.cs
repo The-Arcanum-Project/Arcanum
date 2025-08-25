@@ -63,7 +63,7 @@ public partial class Location : LocationComposite, INUI
    public static bool operator !=(Location? left, Location? right) => !(left == right);
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.LocationSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.LocationSettings;
    public INUINavigation[] Navigations
    {
       get

@@ -28,7 +28,7 @@ public partial class SuperRegion : LocationCollection<Region>, INUI
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.SuperRegionSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
    public INUINavigation[] Navigations 
    {
       get

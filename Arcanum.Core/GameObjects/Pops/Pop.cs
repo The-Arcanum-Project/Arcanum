@@ -54,7 +54,7 @@ public partial class Pop(PopType type,
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.PopSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.PopSettings;
 
    public INUINavigation[] Navigations { get; } = [new NUINavigation(type, "Pop Type")];
 }

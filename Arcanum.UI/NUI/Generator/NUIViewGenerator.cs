@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.UserControls.BaseControls;
@@ -388,7 +389,7 @@ public static class NUIViewGenerator
          {
             Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
             Stretch = Stretch.UniformToFill,
-         }
+         },
       };
    }
 
@@ -398,25 +399,19 @@ public static class NUIViewGenerator
                                                     Enum nxProp,
                                                     int leftMargin = 0)
    {
+      // Check if it's a collection type
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
-
-      // If it is not a collection or array, fall back to default handling.
       if (itemType == null)
-      {
          return GetTypeSpecificGrid(target, nxProp, leftMargin);
-      }
 
       object collectionObject = null!;
       Nx.ForceGet(target, nxProp, ref collectionObject);
 
-      // Cast to the non-generic IEnumerable to handle any collection type.
-      if (collectionObject is not IEnumerable collection)
-      {
+      // We need a modifiable list (IList) for the editor to work.
+      if (collectionObject is not IList modifiableList)
          return GetTypeSpecificGrid(target, nxProp, leftMargin);
-      }
 
-      // Filter the collection for items that ACTUALLY implement INUI at runtime.
-      var inuiItems = collection.OfType<INUI>().ToList();
+      var inuiItems = modifiableList.OfType<INUI>().ToList();
 
       var grid = new Grid
       {
@@ -427,18 +422,45 @@ public static class NUIViewGenerator
          Margin = new(leftMargin, 0, 0, 0),
       };
 
-      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
-
-      // Displaying Concrete Types
-      foreach (var item in inuiItems.Take(5))
+      var navHeader = new TextBlock
       {
-         var shortInfo = GenerateShortInfo(item, navHistory.Root);
+         Text = $"{nxProp}: {modifiableList.Count} Items",
+         FontWeight = FontWeights.Bold,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = 14,
+      };
 
-         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
-         grid.Children.Add(shortInfo);
-         Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
-         Grid.SetColumn(shortInfo, 0);
-         Grid.SetColumnSpan(shortInfo, 2);
+      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
+      GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
+      var openButton = GetEyeButton();
+      openButton.Margin = new(4, 0, 0, 0);
+
+      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
+      if (providerInterfaceType.IsInstanceOfType(target))
+      {
+         RoutedEventHandler clickHandler = (_, _) =>
+         {
+            var methodInfo = providerInterfaceType.GetMethod("GetGlobalItems");
+            if (methodInfo == null)
+               return;
+
+            var allItems = (IEnumerable)methodInfo.Invoke(target, null)!;
+            DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
+
+            navHeader.Text = $"{nxProp}: {modifiableList.Count} Items";
+
+            GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
+         };
+
+         openButton.Click += clickHandler;
+         openButton.Unloaded += (_, _) => openButton.Click -= clickHandler;
+
+         openButton.ToolTip = "Open Collection Editor";
+      }
+      else
+      {
+         openButton.IsEnabled = false;
+         openButton.ToolTip = "This collection is not editable because a global item source is not provided.";
       }
 
       var stackPanel = new StackPanel
@@ -447,44 +469,6 @@ public static class NUIViewGenerator
          HorizontalAlignment = HorizontalAlignment.Left,
          VerticalAlignment = VerticalAlignment.Center,
       };
-
-      var navHeader = new TextBlock
-      {
-         Text = $"{nxProp}: {inuiItems.Count} Items",
-         FontWeight = FontWeights.Bold,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = 14,
-      };
-
-      // We require the collection to be modifiable (IList) to allow editing.
-      if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(target, nxProp, leftMargin);
-
-      var openButton = GetEyeButton();
-      openButton.Margin = new(4, 0, 0, 0);
-      
-      // Constructing the generic interface type we're looking for, e.g., ICollectionProvider<Location>
-      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
-
-      if (providerInterfaceType.IsInstanceOfType(target))
-      {
-         openButton.Click += (_, _) =>
-         {
-            var methodInfo = providerInterfaceType.GetMethod("GetGlobalItems");
-            if (methodInfo != null)
-            {
-               var allItems = (IEnumerable)methodInfo.Invoke(target, null)!;
-               DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
-            }
-            GenerateAndSetView(navHistory);
-         };
-         openButton.ToolTip = "Open Collection Editor";
-      }
-      else
-      {
-         openButton.IsEnabled = false;
-         openButton.ToolTip = "This collection is not editable because a global item source is not provided.";
-      }
 
       stackPanel.Children.Add(navHeader);
       stackPanel.Children.Add(openButton);
@@ -497,7 +481,7 @@ public static class NUIViewGenerator
       // --- Decorative Border ---
       if (grid.RowDefinitions.Count > 1)
       {
-         var rect = new Rectangle()
+         var rect = new Rectangle
          {
             Width = 1,
             Fill = Brushes.Transparent,
@@ -509,7 +493,6 @@ public static class NUIViewGenerator
             VerticalAlignment = VerticalAlignment.Stretch,
             SnapsToDevicePixels = true,
          };
-
          grid.Children.Add(rect);
          Grid.SetRow(rect, 1);
          Grid.SetColumn(rect, 0);
@@ -517,6 +500,48 @@ public static class NUIViewGenerator
       }
 
       return grid;
+   }
+
+   private static void GenerateCollectionItemPreview(NUINavHistory navHistory,
+                                                     IEnumerable<INUI> inuiItems,
+                                                     Grid grid,
+                                                     IList modifiableList)
+   {
+      for (var i = grid.Children.Count - 1; i >= 0; i--)
+      {
+         var child = grid.Children[i];
+         if (Grid.GetRow(child) > 0 && child.GetType() != typeof(Rectangle)) // Only remove children that are not in the header row
+            grid.Children.RemoveAt(i);
+      }
+
+      // Clear all row definitions except the one for the header
+      while (grid.RowDefinitions.Count > 1)
+         grid.RowDefinitions.RemoveAt(1);
+
+      foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
+      {
+         var shortInfo = GenerateShortInfo(item, navHistory.Root);
+         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
+         grid.Children.Add(shortInfo);
+         Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
+         Grid.SetColumn(shortInfo, 0);
+         Grid.SetColumnSpan(shortInfo, 2);
+      }
+
+      if (modifiableList.Count > Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
+      {
+         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
+         grid.Children.Add(new TextBlock
+         {
+            Text = $"... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more items",
+            FontStyle = FontStyles.Italic,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new(6, 0, 0, 0),
+         });
+         Grid.SetRow(grid.Children[^1], grid.RowDefinitions.Count - 1);
+         Grid.SetColumn(grid.Children[^1], 0);
+         Grid.SetColumnSpan(grid.Children[^1], 2);
+      }
    }
 
    private static Border GetEmbedBorder()

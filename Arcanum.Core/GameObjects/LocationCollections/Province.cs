@@ -29,7 +29,7 @@ public partial class Province : LocationCollection<Location>, INUI, ICollectionP
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUISettings.ProvinceSettings;
+   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
    public INUINavigation[] Navigations
    {
       get
