@@ -15,6 +15,13 @@ public static class Nx
    {
       target._setValue(e, value);
    }
+   
+   public static void ForceSet<T>(T value,
+                               INexus target,
+                               Enum e)
+   {
+      target._setValue(e, value);
+   }
 
    [PropertyGetter]
    public static T Get<T>(

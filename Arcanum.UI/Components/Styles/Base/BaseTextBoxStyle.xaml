@@ -30,7 +30,7 @@
         <Setter Property = "BorderThickness"
                 Value = "1" />
         <Setter Property = "MinHeight"
-                Value = "23" />
+                Value = "15" />
         <Setter Property = "VerticalScrollBarVisibility"
                 Value = "Auto" />
 

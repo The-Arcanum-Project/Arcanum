@@ -16,6 +16,7 @@ using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Microsoft.Xaml.Behaviors.Core;
 using Nexus.Core;
+using AutoCompleteComboBox = Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox.AutoCompleteComboBox;
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -73,7 +74,7 @@ public static class NUIViewGenerator
             {
                INUI value = null!;
                Nx.ForceGet(target, nxProp, ref value);
-               element = GetEmbeddedView(value, navHistory);
+               element = GetEmbeddedView(target, nxProp, value, navHistory);
             }
             else
             {
@@ -97,21 +98,95 @@ public static class NUIViewGenerator
       return baseUI;
    }
 
-   private static BaseEmbeddedView GetEmbeddedView<T>(T target,
+   private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,
+                                                      Enum property,
+                                                      T target,
                                                       NUINavHistory navHistory) where T : INUI
    {
       var embeddedFields = target.Settings.EmbeddedFields;
-
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
 
-      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
-      headerBlock.Margin = new(6, 0, 0, 0);
-      baseGrid.RowDefinitions.Add(new() { Height = new(headerBlock.Height, GridUnitType.Pixel) });
-      baseGrid.Children.Add(headerBlock);
-      Grid.SetRow(headerBlock, 0);
-      Grid.SetColumn(headerBlock, 0);
+      // --- Logic to get all possible items for the ComboBox ---
+      var itemType = target.GetType();
+      var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
+      IEnumerable? allItems = null;
+      if (methodInfo != null)
+         allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
+      // The clickable title, as before
+      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
+      baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
+
+      // If the type provides a global list, create the AutoCompleteBox
+      if (allItems != null)
+      {
+         var objectSelector = new AutoCompleteComboBox
+         {
+            ItemsSource = allItems,
+            SelectedItem = target,
+            Height = 23,
+            Margin = new(1),
+            Padding = new(2, 0, 2, 0),
+            FontSize = 11,
+         };
+
+         // --- NEW Two-Way Binding Logic ---
+         // 1. Create a two-way binding to the parent's property.
+         var binding = new Binding(property.ToString())
+         {
+            Source = parent,
+            Mode = BindingMode.TwoWay,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+         };
+         // 2. Apply this binding to your control's SelectedItem property.
+         objectSelector.SetBinding(Selector.SelectedItemProperty, binding);
+
+         // 3. (Optional but Recommended) Add a simple event handler to refresh the parent view
+         //    AFTER the property has been changed by the binding.
+         // objectSelector.SelectionChanged += (sender, args) =>
+         // {
+         //    // We only need to refresh if the selection is valid and has actually changed.
+         //    if (objectSelector.SelectedItem != null && !objectSelector.SelectedItem.Equals(target))
+         //    {
+         //       // The binding has ALREADY updated the parent object.
+         //       // We just need to tell the UI to redraw itself based on the new data.
+         //       var parentNavHistory = new NUINavHistory(parent, navHistory.GenerateSubViews, navHistory.Root);
+         //       GenerateAndSetView(parentNavHistory);
+         //    }
+         // };
+
+         // Your SelectionChanged logic... (with improvements below)
+
+         var headerGrid = new Grid
+         {
+            ColumnDefinitions =
+            {
+               new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(6, GridUnitType.Star) },
+            },
+         };
+
+         headerGrid.Children.Add(headerBlock);
+         Grid.SetRow(headerBlock, 0);
+         Grid.SetColumn(headerBlock, 0);
+         headerGrid.Children.Add(objectSelector);
+         Grid.SetRow(objectSelector, 0);
+         Grid.SetColumn(objectSelector, 1);
+
+         baseGrid.Children.Add(headerGrid);
+         Grid.SetRow(headerGrid, 0);
+         Grid.SetColumn(headerGrid, 0);
+      }
+      else
+      {
+         // Fallback logic is correct
+         headerBlock.Margin = new(6, 0, 0, 0);
+         baseGrid.Children.Add(headerBlock);
+         Grid.SetRow(headerBlock, 0);
+         Grid.SetColumn(headerBlock, 0);
+      }
+
+      // --- The rest of the method is identical to your original ---
       var embedMarker = GetEmbedBorder();
       embedMarker.BorderBrush = Brushes.Purple;
       baseGrid.Children.Add(embedMarker);
@@ -433,6 +508,7 @@ public static class NUIViewGenerator
 
          currentType = currentType.BaseType;
       }
+
       return null;
    }
 

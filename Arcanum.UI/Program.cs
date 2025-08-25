@@ -26,7 +26,7 @@ internal static class Program
          "Components/Styles/Base/BaseMenuItemStyle.xaml", "Components/Styles/Base/BaseGridSplitter.xaml",
          "Components/Styles/Base/BaseContextMenu.xaml", "Components/Styles/Base/BaseDataGrid.xaml",
          "Components/Styles/Base/BaseToggleButton.xaml", "Components/Styles/Base/BaseTreeView.xaml",
-         "Components/Styles/Base/BaseListView.xaml",
+         "Components/Styles/Base/BaseListView.xaml", "Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
       };
 
       foreach (var path in resources)

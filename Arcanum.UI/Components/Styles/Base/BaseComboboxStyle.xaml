@@ -91,7 +91,6 @@
     </ControlTemplate>
 
     <Style TargetType = "{x:Type ComboBox}">
-
         <Setter Property = "FontSize"
                 Value = "{StaticResource DefaultFontSize}" />
         <Setter Property = "FontFamily"
