@@ -30,7 +30,6 @@ public static class NUIViewGenerator
    public static UserControl GenerateView(NUINavHistory navHistory)
    {
       var target = navHistory.Target;
-      var titleBinding = GetOneWayBinding(target, target.Settings.Title);
 
       var baseUI = new BaseView
       {
@@ -60,7 +59,7 @@ public static class NUIViewGenerator
             {
                INUI value = null!;
                Nx.ForceGet(target, nxProp, ref value);
-               element = GetEmbeddedView(value, navHistory.Root);
+               element = GetEmbeddedView(value, navHistory);
             }
             else
             {
@@ -69,7 +68,7 @@ public static class NUIViewGenerator
          }
          else
          {
-            element = BuildCollectionOrDefaultView(navHistory.Root, type, target, nxProp);
+            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp);
          }
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
@@ -85,14 +84,14 @@ public static class NUIViewGenerator
    }
 
    private static BaseEmbeddedView GetEmbeddedView<T>(T target,
-                                                      ContentPresenter root) where T : INUI
+                                                      NUINavHistory navHistory) where T : INUI
    {
       var embeddedFields = target.Settings.EmbeddedFields;
 
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
 
-      var headerBlock = NavigationHeader(target.Navigations, root, target, target.GetType().Name);
+      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
       headerBlock.Margin = new(6, 0, 0, 0);
       baseGrid.RowDefinitions.Add(new() { Height = new(headerBlock.Height, GridUnitType.Pixel) });
       baseGrid.Children.Add(headerBlock);
@@ -117,11 +116,11 @@ public static class NUIViewGenerator
             if (value == null!)
                continue;
 
-            element = GenerateShortInfo(value, root);
+            element = GenerateShortInfo(value, navHistory.Root);
          }
          else
          {
-            element = BuildCollectionOrDefaultView(root, type, target, nxProp, 6);
+            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp, 6);
          }
 
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -355,18 +354,7 @@ public static class NUIViewGenerator
       };
    }
 
-   private static Binding GetOneWayBinding<T>(T target, Enum property) where T : INUI
-   {
-      return new()
-      {
-         Source = target,
-         Path = new("Item[(0)]", property),
-         Mode = BindingMode.OneWay,
-         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-      };
-   }
-
-   public static Type? GetCollectionItemType(Type collectionType)
+   private static Type? GetCollectionItemType(Type collectionType)
    {
       if (collectionType == typeof(string) || !collectionType.IsGenericType)
          return null;
@@ -379,7 +367,7 @@ public static class NUIViewGenerator
       return enumerableInterface?.GetGenericArguments()[0];
    }
 
-   public static Type? GetArrayItemType(Type arrayType)
+   private static Type? GetArrayItemType(Type arrayType)
    {
       if (arrayType == typeof(string) || !arrayType.IsArray)
          return null;
@@ -404,7 +392,7 @@ public static class NUIViewGenerator
       };
    }
 
-   private static Grid BuildCollectionOrDefaultView(ContentPresenter root,
+   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
                                                     Type type,
                                                     INUI target,
                                                     Enum nxProp,
@@ -444,7 +432,7 @@ public static class NUIViewGenerator
       // Displaying Concrete Types
       foreach (var item in inuiItems.Take(5))
       {
-         var shortInfo = GenerateShortInfo(item, root);
+         var shortInfo = GenerateShortInfo(item, navHistory.Root);
 
          grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
          grid.Children.Add(shortInfo);
@@ -460,7 +448,7 @@ public static class NUIViewGenerator
          VerticalAlignment = VerticalAlignment.Center,
       };
 
-      var nheader = new TextBlock
+      var navHeader = new TextBlock
       {
          Text = $"{nxProp}: {inuiItems.Count} Items",
          FontWeight = FontWeights.Bold,
@@ -468,14 +456,37 @@ public static class NUIViewGenerator
          FontSize = 14,
       };
 
+      // We require the collection to be modifiable (IList) to allow editing.
+      if (collectionObject is not IList modifiableList)
+         return GetTypeSpecificGrid(target, nxProp, leftMargin);
+
       var openButton = GetEyeButton();
       openButton.Margin = new(4, 0, 0, 0);
-      openButton.Click += (_, _) =>
-      {
-         // TODO open proper collection editor for any kind of object
-      };
+      
+      // Constructing the generic interface type we're looking for, e.g., ICollectionProvider<Location>
+      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
 
-      stackPanel.Children.Add(nheader);
+      if (providerInterfaceType.IsInstanceOfType(target))
+      {
+         openButton.Click += (_, _) =>
+         {
+            var methodInfo = providerInterfaceType.GetMethod("GetGlobalItems");
+            if (methodInfo != null)
+            {
+               var allItems = (IEnumerable)methodInfo.Invoke(target, null)!;
+               DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
+            }
+            GenerateAndSetView(navHistory);
+         };
+         openButton.ToolTip = "Open Collection Editor";
+      }
+      else
+      {
+         openButton.IsEnabled = false;
+         openButton.ToolTip = "This collection is not editable because a global item source is not provided.";
+      }
+
+      stackPanel.Children.Add(navHeader);
       stackPanel.Children.Add(openButton);
 
       grid.Children.Add(stackPanel);
@@ -526,11 +537,12 @@ public static class NUIViewGenerator
    /// <summary>
    /// Gets a user-friendly string for an object. If the object has a custom
    /// ToString() override, it's used. Otherwise, the class's simple name is returned.
+   /// Numeric types are formatted using invariant culture.
    /// </summary>
    private static string GetDisplayString(object? obj)
    {
       if (obj is null)
-         return "null"; // Or string.Empty, depending on what you prefer for nulls
+         return "null";
 
       if (obj is IConvertible convertible)
          switch (convertible.GetTypeCode())
@@ -551,17 +563,9 @@ public static class NUIViewGenerator
 
       var type = obj.GetType();
 
-      // Get the MethodInfo for the ToString method.
-      // This will get the most-derived override of ToString().
-      var toStringMethod = type.GetMethod(nameof(ToString), Type.EmptyTypes);
-
-      // If the method was declared on a type other than System.Object,
-      // it means it has been overridden somewhere in the inheritance chain.
-      if (toStringMethod != null && toStringMethod.DeclaringType != typeof(object))
-         // It's an override, so call it.
+      if (type.GetMethod(nameof(ToString), Type.EmptyTypes)?.DeclaringType != typeof(object))
          return obj.ToString() ?? string.Empty;
 
-      // It's the default object.ToString(), so just return the type name.
       return $"<{type.Name}>";
    }
 
@@ -584,7 +588,7 @@ public static class NUIViewGenerator
       return numericUpDown;
    }
 
-   private static TextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
+   private static CorneredTextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
    {
       var textBox = new CorneredTextBox
       {

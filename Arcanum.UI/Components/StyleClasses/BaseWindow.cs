@@ -24,7 +24,7 @@ public class BaseWindow : Window
                                                new FrameworkPropertyMetadata(typeof(BaseWindow)));
    }
 
-   protected BaseWindow()
+   public BaseWindow()
    {
       StateChanged += MainWindow_OnStateChanged;
       CloseCommand = new RelayCommand(Close);

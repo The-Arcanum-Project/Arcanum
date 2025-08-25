@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
 using Nexus.Core;
@@ -11,16 +12,16 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
 {
    public LocationCollection(FileInformation fileInfo, string name, ICollection<T> provinces) : this(fileInfo, name)
    {
-      SubCollection = provinces;
+      _subCollection.AddRange(provinces);
    }
 
-   private readonly ICollection<T> _subCollection = [];
-   
+   private readonly ObservableRangeCollection<T> _subCollection = [];
+
    [AddModifiable]
    public virtual ICollection<T> SubCollection
    {
       get => _subCollection;
-      set => AddRange(value);
+      set => _subCollection.ReplaceRange(value);
    }
 
    /// <summary>
@@ -30,7 +31,7 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
    public override ICollection<Location> GetLocations()
    {
       var provinces = new List<Location>();
-      foreach (var subCollection in SubCollection)
+      foreach (var subCollection in _subCollection)
          provinces.AddRange(subCollection.GetLocations());
       return provinces;
    }
@@ -62,8 +63,14 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
 
    public void AddRange(ICollection<T> composites)
    {
-      foreach (var composite in composites)
-         Add(composite);
+      var toAdd = composites.Where(c => !_subCollection.Contains(c)).ToList();
+      if (toAdd.Count != 0)
+      {
+         foreach (var composite in toAdd)
+            composite.Parents.Add(this);
+
+         _subCollection.AddRange(toAdd);
+      }
    }
 
    public virtual ICommand GetAddCommand(LocationCollection<T> collection,

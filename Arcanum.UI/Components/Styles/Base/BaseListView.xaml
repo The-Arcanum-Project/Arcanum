@@ -27,7 +27,7 @@
                             BorderBrush = "{TemplateBinding BorderBrush}"
                             BorderThickness = "{TemplateBinding BorderThickness}"
                             Padding = "{TemplateBinding Padding}"
-                            CornerRadius="4">
+                            CornerRadius = "4">
                         <ScrollViewer Focusable = "false">
                             <ItemsPresenter />
                         </ScrollViewer>
@@ -53,13 +53,15 @@
                         <Setter.Value>
                             <ControlTemplate TargetType = "ListViewItem">
                                 <Border x:Name = "Bd"
+                                        BorderThickness = "1"
+                                        BorderBrush = "{TemplateBinding Background}"
                                         Background = "{TemplateBinding Background}"
                                         SnapsToDevicePixels = "true"
-                                        CornerRadius = "4">
-                                    <ContentPresenter
-                                        HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}"
-                                        VerticalAlignment = "{TemplateBinding VerticalContentAlignment}"
-                                        SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}" />
+                                        CornerRadius = "3">
+                                    <ContentPresenter Margin = "2, 0, 0, 0"
+                                                      HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment = "{TemplateBinding VerticalContentAlignment}"
+                                                      SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <!-- Alternating row colors -->
@@ -84,12 +86,15 @@
                                         <Setter TargetName = "Bd"
                                                 Property = "Background"
                                                 Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                        <Setter TargetName = "Bd"
+                                                Property = "BorderBrush"
+                                                Value = "{StaticResource BlueSelectionBackColorBrush}" />
                                     </Trigger>
                                     <Trigger Property = "IsMouseOver"
                                              Value = "True">
                                         <Setter TargetName = "Bd"
-                                                Property = "Background"
-                                                Value = "{StaticResource LightBackColorBrush}" />
+                                                Property = "BorderBrush"
+                                                Value = "{StaticResource BlueAccentColorBrush}" />
                                     </Trigger>
                                     <Trigger Property = "IsEnabled"
                                              Value = "False">
