@@ -31,6 +31,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             return _editableTextBoxCache;
          }
       }
+      
 
       /// <summary>
       /// Gets text to match with the query from an item.

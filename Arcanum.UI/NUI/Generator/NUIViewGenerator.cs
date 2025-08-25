@@ -131,32 +131,20 @@ public static class NUIViewGenerator
             FontSize = 11,
          };
 
-         // --- NEW Two-Way Binding Logic ---
-         // 1. Create a two-way binding to the parent's property.
          var binding = new Binding(property.ToString())
          {
             Source = parent,
             Mode = BindingMode.TwoWay,
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
          };
-         // 2. Apply this binding to your control's SelectedItem property.
+         
          objectSelector.SetBinding(Selector.SelectedItemProperty, binding);
 
-         // 3. (Optional but Recommended) Add a simple event handler to refresh the parent view
-         //    AFTER the property has been changed by the binding.
-         // objectSelector.SelectionChanged += (sender, args) =>
-         // {
-         //    // We only need to refresh if the selection is valid and has actually changed.
-         //    if (objectSelector.SelectedItem != null && !objectSelector.SelectedItem.Equals(target))
-         //    {
-         //       // The binding has ALREADY updated the parent object.
-         //       // We just need to tell the UI to redraw itself based on the new data.
-         //       var parentNavHistory = new NUINavHistory(parent, navHistory.GenerateSubViews, navHistory.Root);
-         //       GenerateAndSetView(parentNavHistory);
-         //    }
-         // };
-
-         // Your SelectionChanged logic... (with improvements below)
+         objectSelector.SelectionChanged += (_, args) =>
+         {
+            if (args.AddedItems.Count > 0 && !args.AddedItems[0]!.Equals(target))
+               GenerateAndSetView(navHistory);
+         };
 
          var headerGrid = new Grid
          {
