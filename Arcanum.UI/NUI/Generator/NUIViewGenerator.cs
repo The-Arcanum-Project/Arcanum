@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -9,7 +10,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
@@ -137,7 +141,7 @@ public static class NUIViewGenerator
             Mode = BindingMode.TwoWay,
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
          };
-         
+
          objectSelector.SetBinding(Selector.SelectedItemProperty, binding);
 
          objectSelector.SelectionChanged += (_, args) =>
@@ -157,6 +161,21 @@ public static class NUIViewGenerator
          headerGrid.Children.Add(headerBlock);
          Grid.SetRow(headerBlock, 0);
          Grid.SetColumn(headerBlock, 0);
+         
+         var inferActions = GenerateInferActions(parent,
+                                                 navHistory,
+                                                 property,
+                                                 target.GetType(),
+                                                 null,
+                                                 null);
+         
+         if (inferActions != null)
+         {
+            headerGrid.Children.Add(inferActions);
+            Grid.SetRow(inferActions, 0);
+            Grid.SetColumn(inferActions, 0);
+         }
+         
          headerGrid.Children.Add(objectSelector);
          Grid.SetRow(objectSelector, 0);
          Grid.SetColumn(objectSelector, 1);
@@ -263,7 +282,352 @@ public static class NUIViewGenerator
       return stackPanel;
    }
 
-   private static Grid GetTypeSpecificGrid(INUI target, Enum nxProp, int leftMargin = 0)
+   // #########################################################
+   // ###################### Helpers ##########################
+   // #########################################################
+
+   /// <summary>
+   /// Dynamically generates a StackPanel with map inference action buttons if the property's
+   /// item type supports the IMapInferable contract.
+   /// </summary>
+   /// <param name="parent">The parent INUI object that owns the property.</param>
+   /// <param name="navHistory"></param>
+   /// <param name="property">The enum representing the property being displayed.</param>
+   /// <param name="concreteItemType"></param>
+   /// <param name="collection">The actual IList instance of the collection property.</param>
+   /// <param name="nxPropType"></param>
+   /// <returns>A StackPanel containing the action buttons, or null if the contract is not met.</returns>
+   private static StackPanel? GenerateInferActions(INUI parent,
+                                                   NUINavHistory navHistory,
+                                                   Enum property,
+                                                   Type nxPropType,
+                                                   Type? concreteItemType,
+                                                   IList? collection)
+   {
+      // Infer actions are disabled globally
+      if (Config.Settings.NUIConfig.DisableNUIInferFromMapActions)
+         return null;
+
+      // Determine the target type for the IMapInferable<T> interface.
+      // For collections, it's the item type. For single objects, it's the property type itself.
+      var targetType = collection != null
+                          ? concreteItemType
+                          : nxPropType;
+
+      Debug.Assert(targetType != null, "Target type should not be null here.");
+
+      var inferableInterfaceType = typeof(IMapInferable<>).MakeGenericType(targetType);
+      if (!inferableInterfaceType.IsAssignableFrom(targetType))
+         return null;
+
+      // (Optional) Check for [DisableMapInferActions] attribute.
+      var memberInfo = parent.GetType().GetMember(property.ToString()).FirstOrDefault();
+      if (memberInfo?.IsDefined(typeof(DisableMapInferActionsAttribute), false) ?? false)
+         return null;
+
+      // --- Contract is met. Get reflection info. ---
+      var getListMethod = targetType.GetMethod("GetInferredList", BindingFlags.Public | BindingFlags.Static);
+      var getMapModeProp = targetType.GetProperty("GetMapMode", BindingFlags.Public | BindingFlags.Static);
+      if (getListMethod == null || getMapModeProp == null)
+         return null;
+
+      var actionsPanel = new StackPanel
+      {
+         Orientation = Orientation.Horizontal,
+         HorizontalAlignment = HorizontalAlignment.Right,
+      };
+
+      // --- Button 1: Set Map Mode ---
+      var mapMode = (IMapMode)getMapModeProp.GetValue(null)!;
+      var mapModeButton = new BaseButton
+      {
+         Content = "M",
+         ToolTip = $"Set to '{mapMode.Name}' Map Mode",
+         Margin = new(1),
+         Width = 20,
+         Height = 20,
+         BorderThickness = new(1),
+      };
+      mapModeButton.Click += (_, _) => { MapModeManager.Activate(mapMode.Type); };
+      actionsPanel.Children.Add(mapModeButton);
+
+      // --- Branching Logic: Generate buttons based on whether it's a collection or single item ---
+      if (collection != null)
+      {
+         // --- Path A: It's a collection ---
+         var addButton = new BaseButton
+         {
+            Content = new Image
+            {
+               Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Add20x20.png")),
+               Stretch = Stretch.UniformToFill,
+            },
+            ToolTip = "Add inferred items from map selection",
+            Margin = new(1),
+            Width = 20,
+            Height = 20,
+            BorderThickness = new(1),
+         };
+         addButton.Click += (_, _) =>
+         {
+            var selectedLocations = Selection.SelectedLocations;
+            if (selectedLocations.Count == 0)
+               return;
+
+            var itemsToAdd = (IEnumerable)getListMethod.Invoke(null, [selectedLocations])!;
+
+            // --- THIS IS THE ROBUST ADD LOGIC ---
+            // Use reflection on the collection's ACTUAL runtime type to find AddRange.
+            var addRangeMethod = collection.GetType().GetMethod("AddRange");
+
+            if (addRangeMethod != null)
+            {
+               // The fast path: The collection has an AddRange method.
+               addRangeMethod.Invoke(collection, [itemsToAdd]);
+            }
+            else
+            {
+               // The safe fallback: Add items one by one.
+               foreach (var item in itemsToAdd)
+               {
+                  if (!collection.Contains(item))
+                  {
+                     collection.Add(item);
+                  }
+               }
+            }
+
+            GenerateAndSetView(navHistory);
+         };
+         actionsPanel.Children.Add(addButton);
+
+         var removeButton = new BaseButton
+         {
+            Content = new Image
+            {
+               Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Minimize20x20.png")),
+               Stretch = Stretch.UniformToFill,
+            },
+            ToolTip = "Remove inferred items from map selection",
+            Margin = new(1),
+            Width = 20,
+            Height = 20,
+            BorderThickness = new(1),
+         };
+         removeButton.Click += (_, _) =>
+         {
+            var selectedLocations = Selection.SelectedLocations;
+            if (selectedLocations.Count == 0)
+               return;
+
+            var itemsToRemove = (IEnumerable)getListMethod.Invoke(null, [selectedLocations])!;
+            foreach (var item in itemsToRemove)
+            {
+               collection.Remove(item);
+               GenerateAndSetView(navHistory);
+            }
+         };
+         actionsPanel.Children.Add(removeButton);
+      }
+      else
+      {
+         // --- Path B: It's a single value ---
+         var setButton = new BaseButton
+         {
+            Content = "S",
+            ToolTip = "Set item from inferred list (chooses first)",
+            Margin = new(1),
+            Width = 20,
+            Height = 20,
+            BorderThickness = new(1),
+         };
+         setButton.Click += (_, _) =>
+         {
+            var selectedLocations = Selection.SelectedLocations;
+            if (selectedLocations.Count == 0)
+               return;
+
+            var inferredList = (IEnumerable)getListMethod.Invoke(null, [selectedLocations])!;
+            var firstItem = inferredList.Cast<object>().FirstOrDefault();
+
+            if (firstItem != null)
+            {
+               Nx.ForceSet(firstItem, parent, property);
+               GenerateAndSetView(navHistory);
+            }
+         };
+         actionsPanel.Children.Add(setButton);
+      }
+
+      return actionsPanel;
+   }
+
+   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
+                                                    Type type,
+                                                    INUI target,
+                                                    Enum nxProp,
+                                                    int leftMargin = 0)
+   {
+      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
+      if (itemType == null)
+         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
+
+      object collectionObject = null!;
+      Nx.ForceGet(target, nxProp, ref collectionObject);
+
+      // We need a modifiable list (IList) for the editor to work.
+      if (collectionObject is not IList modifiableList)
+         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
+
+      // if we have an abstract class or interface as item type, try to find the concrete type
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, target.GetType(), nxProp.ToString());
+      if (concreteItemType != null)
+         itemType = concreteItemType;
+
+      var inuiItems = modifiableList.OfType<INUI>().ToList();
+
+      var grid = new Grid
+      {
+         ColumnDefinitions =
+         {
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
+         },
+         Margin = new(leftMargin, 0, 0, 0),
+      };
+
+      var navHeader = new TextBlock
+      {
+         Text = $"{nxProp}: {modifiableList.Count} Items",
+         FontWeight = FontWeights.Bold,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = 14,
+      };
+
+      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
+      GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
+      var openButton = GetEyeButton();
+      openButton.Margin = new(4, 0, 0, 0);
+
+      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
+      SetupCollectionEditorButton(navHistory,
+                                  nxProp,
+                                  providerInterfaceType,
+                                  itemType,
+                                  modifiableList,
+                                  navHeader,
+                                  grid,
+                                  openButton);
+
+      var inferActions = GenerateInferActions(target,
+                                              navHistory,
+                                              nxProp,
+                                              type,
+                                              concreteItemType,
+                                              modifiableList);
+
+      var headerStack = new StackPanel
+      {
+         Orientation = Orientation.Horizontal,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+      headerStack.Children.Add(navHeader);
+      headerStack.Children.Add(openButton);
+      FrameworkElement header;
+
+      if (inferActions != null)
+      {
+         var headerGrid = new Grid
+         {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            ColumnDefinitions =
+            {
+               new() { Width = new(7, GridUnitType.Star) }, new() { Width = new(3, GridUnitType.Star) },
+            },
+         };
+
+         headerGrid.Children.Add(headerStack);
+         Grid.SetRow(headerStack, 0);
+         Grid.SetColumn(headerStack, 0);
+
+         headerGrid.Children.Add(inferActions);
+         Grid.SetRow(inferActions, 0);
+         Grid.SetColumn(inferActions, 1);
+         header = headerGrid;
+      }
+      else
+      {
+         header = headerStack;
+      }
+
+      grid.Children.Add(header);
+      Grid.SetRow(header, 0);
+      Grid.SetColumn(header, 0);
+      Grid.SetColumnSpan(header, 2);
+
+      // --- Decorative Border ---
+      if (grid.RowDefinitions.Count > 1)
+      {
+         var rect = new Rectangle
+         {
+            Width = 1,
+            Fill = Brushes.Transparent,
+            Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+            StrokeThickness = 2,
+            StrokeDashArray = new([4, 6]),
+            StrokeDashCap = PenLineCap.Flat,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            SnapsToDevicePixels = true,
+         };
+         grid.Children.Add(rect);
+         Grid.SetRow(rect, 1);
+         Grid.SetColumn(rect, 0);
+         Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
+      }
+
+      return grid;
+   }
+
+   private static void SetupCollectionEditorButton(NUINavHistory navHistory,
+                                                   Enum nxProp,
+                                                   Type providerInterfaceType,
+                                                   Type itemType,
+                                                   IList modifiableList,
+                                                   TextBlock navHeader,
+                                                   Grid grid,
+                                                   BaseButton openButton)
+   {
+      if (providerInterfaceType.IsAssignableFrom(itemType))
+      {
+         RoutedEventHandler clickHandler = (_, _) =>
+         {
+            var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
+            if (methodInfo == null)
+               return;
+
+            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
+
+            DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
+
+            navHeader.Text = $"{nxProp}: {modifiableList.Count} Items";
+            GenerateCollectionItemPreview(navHistory, modifiableList.OfType<INUI>().ToList(), grid, modifiableList);
+         };
+
+         openButton.Click += clickHandler;
+         openButton.Unloaded += (_, _) => openButton.Click -= clickHandler;
+         openButton.ToolTip = "Open Collection Editor";
+      }
+      else
+      {
+         openButton.IsEnabled = false;
+         openButton.ToolTip =
+            $"This collection is not editable because the '{itemType.Name}' type does not provide a static GetGlobalItems() method.";
+      }
+   }
+
+   private static Grid GetTypeSpecificGrid(INUI target, Enum nxProp, NUINavHistory navHistory, int leftMargin = 0)
    {
       var type = Nx.TypeOf(target, nxProp);
       var binding = GetTwoWayBinding(target, nxProp);
@@ -289,6 +653,13 @@ public static class NUIViewGenerator
 
       var desc = DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
+
+      var inferActions = GenerateInferActions(target,
+                                              navHistory,
+                                              nxProp,
+                                              type,
+                                              null,
+                                              null);
 
       var line = new Rectangle
       {
@@ -327,6 +698,13 @@ public static class NUIViewGenerator
       grid.Children.Add(element);
       Grid.SetRow(element, 0);
       Grid.SetColumn(element, 1);
+      
+      if (inferActions != null)
+      {
+         grid.Children.Add(inferActions);
+         Grid.SetRow(inferActions, 0);
+         Grid.SetColumn(inferActions, 0);
+      }
 
       return grid;
    }
@@ -515,119 +893,6 @@ public static class NUIViewGenerator
             Stretch = Stretch.UniformToFill,
          },
       };
-   }
-
-   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
-                                                    Type type,
-                                                    INUI target,
-                                                    Enum nxProp,
-                                                    int leftMargin = 0)
-   {
-      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
-      if (itemType == null)
-         return GetTypeSpecificGrid(target, nxProp, leftMargin);
-
-      object collectionObject = null!;
-      Nx.ForceGet(target, nxProp, ref collectionObject);
-
-      // We need a modifiable list (IList) for the editor to work.
-      if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(target, nxProp, leftMargin);
-
-      // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, target.GetType(), nxProp.ToString());
-      if (concreteItemType != null)
-         itemType = concreteItemType;
-
-      var inuiItems = modifiableList.OfType<INUI>().ToList();
-
-      var grid = new Grid
-      {
-         ColumnDefinitions =
-         {
-            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
-         },
-         Margin = new(leftMargin, 0, 0, 0),
-      };
-
-      var navHeader = new TextBlock
-      {
-         Text = $"{nxProp}: {modifiableList.Count} Items",
-         FontWeight = FontWeights.Bold,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = 14,
-      };
-
-      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
-      GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
-      var openButton = GetEyeButton();
-      openButton.Margin = new(4, 0, 0, 0);
-
-      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
-      if (providerInterfaceType.IsAssignableFrom(itemType))
-      {
-         RoutedEventHandler clickHandler = (_, _) =>
-         {
-            var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
-            if (methodInfo == null)
-               return;
-
-            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
-
-            DualListSelector.CreateWindow(allItems, modifiableList, $"{nxProp} Editor").ShowDialog();
-
-            navHeader.Text = $"{nxProp}: {modifiableList.Count} Items";
-            GenerateCollectionItemPreview(navHistory, modifiableList.OfType<INUI>().ToList(), grid, modifiableList);
-         };
-
-         openButton.Click += clickHandler;
-         openButton.Unloaded += (_, _) => openButton.Click -= clickHandler;
-         openButton.ToolTip = "Open Collection Editor";
-      }
-      else
-      {
-         openButton.IsEnabled = false;
-         openButton.ToolTip =
-            $"This collection is not editable because the '{itemType.Name}' type does not provide a static GetGlobalItems() method.";
-      }
-
-      var stackPanel = new StackPanel
-      {
-         Orientation = Orientation.Horizontal,
-         HorizontalAlignment = HorizontalAlignment.Left,
-         VerticalAlignment = VerticalAlignment.Center,
-      };
-
-      stackPanel.Children.Add(navHeader);
-      stackPanel.Children.Add(openButton);
-
-      grid.Children.Add(stackPanel);
-      Grid.SetRow(stackPanel, 0);
-      Grid.SetColumn(stackPanel, 0);
-      Grid.SetColumnSpan(stackPanel, 2);
-
-      // --- Decorative Border ---
-      if (grid.RowDefinitions.Count > 1)
-      {
-         var rect = new Rectangle
-         {
-            Width = 1,
-            Fill = Brushes.Transparent,
-            Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-            StrokeThickness = 2,
-            StrokeDashArray = new([4, 6]),
-            StrokeDashCap = PenLineCap.Flat,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            SnapsToDevicePixels = true,
-         };
-         grid.Children.Add(rect);
-         Grid.SetRow(rect, 1);
-         Grid.SetColumn(rect, 0);
-         Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
-      }
-
-      return grid;
    }
 
    private static void GenerateCollectionItemPreview(NUINavHistory navHistory,

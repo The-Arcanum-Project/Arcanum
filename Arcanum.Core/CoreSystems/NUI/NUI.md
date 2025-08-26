@@ -49,6 +49,7 @@ public class NUISetting(Enum title,
    public Enum[] EmbeddedFields { get; set; } = embeddedFields;
 
    public Enum[] ShortInfoFields { get; set; } = shortInfoFields;
+   public bool InferActionsInEmbedded { get; set; } = true;
 }
 ```
 
@@ -68,8 +69,16 @@ public sealed class ToStringArgumentsAttribute(string format) : Attribute
    public string Format { get; } = format;
 }
 ```
-
 The `ToStringArgumentsAttribute` can be applied to properties or fields to specify a custom format for the `ToString` method which is used by the NUI system to generate display strings.
+
+
+### DisableMapInferAttribute
+
+```c#
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public sealed class DisableMapInferActionsAttribute : Attribute { }
+```
+If this attribute is applied to a property or field, the NUI system will not attempt to infer mapping actions for that property or field when generating views.
 
 ### NUINavHistory
 
@@ -104,3 +113,19 @@ public static class NUIViewGenerator
 The only two public methods are `GenerateAndSetView` and `GenerateView` with `GenerateAndSetView` being a convenience method that calls `GenerateView` and sets the generated view to the `ContentPresenter` in the `NUINavHistory`.
 
 Any UI element that wants to display an `INUI` object can use these methods to generate the appropriate view based on the object's settings.
+
+### InferActionsButtons
+
+```c#
+public interface IMapInferable<T> : IHasMapMode
+{
+   public static abstract List<T> GetInferredList(IEnumerable<Location> sLocs);
+}
+```
+`IMapInferable<T>` is an interface that can be implemented by classes that want to provide inferred mapping actions. It includes a static abstract method `GetInferredList` that takes a collection of `Location` objects and returns a list of inferred actions of type `T`.
+
+The provided Locations are always the current selection on the map. Thus this interfaces is used to generate up to 3 of these for 4 buttons for any type displayed in NUI that implements this interface:
+- 'M' sets the mapmode to the one of the property/field type
+- 'A' adds the inferred list to the current selection
+- 'R' removes the inferred list from the current selection
+- 'S' (only available for non collection properties/fields) sets the selection to the inferred value, does not work if more than one are selected

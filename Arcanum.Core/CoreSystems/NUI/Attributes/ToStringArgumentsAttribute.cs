@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.NUI;
+﻿namespace Arcanum.Core.CoreSystems.NUI.Attributes;
 
 /// <summary>
 /// Specifies the format string to be used when calling <c>ToString()</c> on a property's value for UI display.

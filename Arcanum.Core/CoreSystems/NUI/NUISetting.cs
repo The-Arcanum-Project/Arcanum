@@ -31,4 +31,9 @@ public class NUISetting(Enum title,
    /// The fields to be displayed in a short info panel or tooltip.
    /// </summary>
    public Enum[] ShortInfoFields { get; set; } = shortInfoFields;
+
+   /// <summary>
+   /// If <c>true</c>, the system will attempt to infer actions for embedded objects based on their context.
+   /// </summary>
+   public bool InferActionsInEmbedded { get; set; } = true;
 }

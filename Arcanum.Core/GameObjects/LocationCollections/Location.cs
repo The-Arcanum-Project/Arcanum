@@ -1,4 +1,7 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -7,7 +10,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>
+public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
@@ -44,6 +47,9 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
    public override LocationCollectionType LCType => LocationCollectionType.Location;
 
    public static IEnumerable<Location> GetGlobalItems() => Globals.Locations.Values;
+
+   public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Distinct().ToList();
+   public static IMapMode GetMapMode { get; } = new BaseMapMode();
 
    public override bool Equals(object? obj)
    {
