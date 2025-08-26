@@ -12,7 +12,7 @@ public class NexusAnalyzer : DiagnosticAnalyzer
 {
    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
    [
-      Diagnostics.SetValueTypeMismatch, Diagnostics.GetValueTypeMismatch, Diagnostics.EnumMismatch
+      Diagnostics.SetValueTypeMismatch, Diagnostics.GetValueTypeMismatch, Diagnostics.EnumMismatch,
    ];
 
    public override void Initialize(AnalysisContext context)
@@ -22,7 +22,6 @@ public class NexusAnalyzer : DiagnosticAnalyzer
 
       context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
    }
-
    private void AnalyzeInvocation(OperationAnalysisContext context)
    {
       if (!(context.Operation is IInvocationOperation invocation))
@@ -97,7 +96,6 @@ public class NexusAnalyzer : DiagnosticAnalyzer
    private void AnalyzeGetter(OperationAnalysisContext context, IInvocationOperation invocation)
    {
       var method = invocation.TargetMethod;
-      var returnType = method.ReturnType;
 
       // --- Path 1: It's a "Generic Getter" like T GetValue<T>(...) ---
       // We can identify this because its return type is a generic type parameter.
@@ -156,10 +154,8 @@ public class NexusAnalyzer : DiagnosticAnalyzer
                {
                   var par = parameter[index];
 
-                  if (typeArgument.Equals(par.Type))
-                  {
+                  if (SymbolEqualityComparer.Default.Equals(typeArgument, par.Type))
                      location = invocation.Arguments[index].Syntax.GetLocation();
-                  }
                }
             }
 

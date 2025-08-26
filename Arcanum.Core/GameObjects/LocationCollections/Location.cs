@@ -31,7 +31,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
 
    #region Pops: game/main_menu/setup/start/06_pops.txt
 
-   public List<Pop> Pops { get; set; } = [];
+   public ObservableRangeCollection<Pop> Pops { get; set; } = [];
 
    #endregion
 

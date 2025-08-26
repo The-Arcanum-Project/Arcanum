@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +21,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 
    public override void Initialize(AnalysisContext context)
    {
-      //context.EnableConcurrentExecution();
+      context.EnableConcurrentExecution();
       context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
       context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
    }

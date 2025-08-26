@@ -34,7 +34,7 @@ public class PopsParsing : FileLoadingService
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var de = new DiagnosticException(ParsingError.Instance.InvalidBlockCount, []);
-      
+
       var sw = Stopwatch.StartNew();
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
       sw.Stop();
@@ -77,7 +77,7 @@ public class PopsParsing : FileLoadingService
          var culture = string.Empty;
          var religion = string.Empty;
          var valid = true;
-         
+
          foreach (var kvp in block.SubBlocks[0].ContentElements[0].GetLineKvpEnumerator(fileObj.Path))
          {
             switch (kvp.Key)
@@ -109,8 +109,6 @@ public class PopsParsing : FileLoadingService
             if (valid)
                location!.Pops.Add(new(popType!, size, culture, religion));
          }
-         
-         
       }
 
       return true;
@@ -119,11 +117,7 @@ public class PopsParsing : FileLoadingService
    public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
    {
       foreach (var location in Globals.Locations)
-      {
          location.Value.Pops.Clear();
-         location.Value.Pops.TrimExcess();
-      }
       return true;
    }
-   
 }

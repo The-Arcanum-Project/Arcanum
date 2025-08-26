@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
@@ -33,7 +34,7 @@ public partial class PopType(string name,
                                      ParsingError.Instance.InvalidPopTypeKey,
                                      nameof(Parse).GetType().FullName!,
                                      str ?? "null");
-
+      
       result = Empty;
       return false;
    }

@@ -30,6 +30,9 @@
         <ProjectReference Include="..\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj"
                           OutputItemType="Analyzer" 
                           ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\CodeFixers\CodeFixers.csproj"
+                          OutputItemType="Analyzer" 
+                          ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\NUITypeRegistryGenerator\NUITypeRegistryGenerator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
