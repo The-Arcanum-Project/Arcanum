@@ -7,13 +7,16 @@ namespace Arcanum.Core.GameObjects.Economy;
 /// <summary>
 /// Placeholder for the market type. Not sure how to do it yet.
 /// </summary>
-public partial class Market(Location location) : INUI
+public partial class Market(Location location) : INUI, ICollectionProvider<Market>
 {
    public Location Location { get; set; } = location;
    public static Market Empty { get; } = new((Location)Location.Empty);
 
+   public static IEnumerable<Market> GetGlobalItems() => Globals.Locations.Values.Where(loc => loc.HasMarket).Select(loc => loc.Market);
+
    public override bool Equals(object? obj) => obj is Market market && Location == market.Location;
 
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Location.GetHashCode();
 
    public static bool operator ==(Market? left, Market? right)
