@@ -1,11 +1,13 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Area : LocationCollection<Province>, INUI, ICollectionProvider<Area>
+public partial class Area : LocationCollection<Province>, INUI, ICollectionProvider<Area>, IMapInferable<Area>
 {
    public Area(FileInformation fileInfo, string name, ICollection<Province> provinces) : base(fileInfo, name, provinces)
    {
@@ -29,7 +31,7 @@ public partial class Area : LocationCollection<Province>, INUI, ICollectionProvi
 
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
-   public INUINavigation[] Navigations 
+   public INUINavigation[] Navigations
    {
       get
       {
@@ -37,15 +39,25 @@ public partial class Area : LocationCollection<Province>, INUI, ICollectionProvi
          var parent = GetFirstParentOfType(LocationCollectionType.Region);
          if (parent != Empty)
             navigations.Add(new NUINavigation((INUI)parent, $"Region: {parent.Name}"));
-         
+
          if (SubCollection.Count > 0)
             navigations.Add(null);
-         
+
          foreach (var location in SubCollection)
             navigations.Add(new NUINavigation(location, $"Areas: {location.Name}"));
-         
+
          return navigations.ToArray()!;
       }
    }
    public static IEnumerable<Area> GetGlobalItems() => Globals.Areas.Values;
+
+   public static List<Area> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                           .Select(loc => (Area)
+                                                                               loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                    .Area))
+                                                                           .Distinct()
+                                                                           .ToList();
+
+   public static IMapMode GetMapMode { get; } = new BaseMapMode();
 }

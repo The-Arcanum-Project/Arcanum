@@ -1,11 +1,13 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>
+public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>
 {
    public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) : base(fileInfo, name, provinces)
    {
@@ -30,4 +32,12 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollect
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Continent> GetGlobalItems() => Globals.Continents.Values;
+   public static List<Continent> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                             .Select(loc => (Continent)loc
+                                                                                .GetFirstParentOfType(LocationCollectionType
+                                                                                   .Area))
+                                                                             .Distinct()
+                                                                             .ToList();
+
+   public static IMapMode GetMapMode { get; } = new BaseMapMode();
 }

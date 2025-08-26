@@ -1,11 +1,13 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class SuperRegion : LocationCollection<Region>, INUI, ICollectionProvider<SuperRegion>
+public partial class SuperRegion : LocationCollection<Region>, INUI, ICollectionProvider<SuperRegion>, IMapInferable<SuperRegion>
 {
    public SuperRegion(FileInformation fileInfo, string name, ICollection<Region> provinces) : base(fileInfo, name, provinces)
    {
@@ -48,4 +50,12 @@ public partial class SuperRegion : LocationCollection<Region>, INUI, ICollection
       }
    }
    public static IEnumerable<SuperRegion> GetGlobalItems() => Globals.SuperRegions.Values;
+   public static List<SuperRegion> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                             .Select(loc => (SuperRegion)loc
+                                                                                .GetFirstParentOfType(LocationCollectionType
+                                                                                   .Area))
+                                                                             .Distinct()
+                                                                             .ToList();
+
+   public static IMapMode GetMapMode { get; } = new BaseMapMode();
 }
