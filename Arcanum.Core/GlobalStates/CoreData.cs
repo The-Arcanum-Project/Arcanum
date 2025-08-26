@@ -4,5 +4,5 @@ namespace Arcanum.Core.GlobalStates;
 
 public static class CoreData
 {
-   public static ModMetadata ModMetadata { get; set; }
+   public static ModMetadata ModMetadata { get; set; } = null!;
 }

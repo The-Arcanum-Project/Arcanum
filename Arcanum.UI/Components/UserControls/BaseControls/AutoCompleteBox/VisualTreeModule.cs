@@ -5,17 +5,20 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 
 static class VisualTreeModule
 {
-   public static FrameworkElement FindChild(DependencyObject obj, string childName)
+   public static FrameworkElement? FindChild(DependencyObject? obj, string childName)
    {
       if (obj == null!)
          return null!;
 
-      var queue = new Queue<DependencyObject>();
+      var queue = new Queue<DependencyObject?>();
       queue.Enqueue(obj);
 
       while (queue.Count > 0)
       {
          obj = queue.Dequeue();
+
+         if (obj == null)
+            continue;
 
          var childCount = VisualTreeHelper.GetChildrenCount(obj);
          for (var i = 0; i < childCount; i++)

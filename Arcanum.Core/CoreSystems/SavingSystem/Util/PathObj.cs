@@ -16,7 +16,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 /// </param>
 public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
 {
-    public static readonly PathObj Empty = new PathObj([], string.Empty, DataSpace.Empty);
+    public static readonly PathObj Empty = new([], string.Empty, DataSpace.Empty);
 
     public readonly string[] LocalPath = localPath;
     public string Filename { get; } = filename;

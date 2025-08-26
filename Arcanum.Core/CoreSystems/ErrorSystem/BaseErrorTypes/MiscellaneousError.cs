@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 
 public class MiscellaneousError : ILazySingleton
 {
-    private static readonly Lazy<MiscellaneousError> LazyInstance = new(() => new MiscellaneousError());
+    private static readonly Lazy<MiscellaneousError> LazyInstance = new(() => new());
     public static MiscellaneousError Instance => LazyInstance.Value;
     
     private MiscellaneousError()

@@ -14,7 +14,7 @@ public class SaveableItem(string name)
 public partial class FileDragDropItem
 {
     public static readonly DependencyProperty ItemsProperty = DependencyProperty.Register(nameof(Items),
-        typeof(IList<SaveableItem>), typeof(FileDragDropItem), new PropertyMetadata(default(IList<SaveableItem>)));
+        typeof(IList<SaveableItem>), typeof(FileDragDropItem), new(default(IList<SaveableItem>)));
 
     public FileDragDropItem(string fileName, IList<SaveableItem> items, ItemTag tagGroup)
     {
@@ -27,7 +27,7 @@ public partial class FileDragDropItem
     // Register the FileName property to bind it in XAML
     public static readonly DependencyProperty FileNameProperty =
         DependencyProperty.Register(nameof(FileName), typeof(string), typeof(FileDragDropItem),
-            new PropertyMetadata(string.Empty));
+            new(string.Empty));
 
     public string FileName
     {
@@ -43,7 +43,7 @@ public partial class FileDragDropItem
 
     public static readonly DependencyProperty TagFileProperty =
         DependencyProperty.Register(nameof(TagGroup), typeof(ItemTag), typeof(FileDragDropItem),
-            new PropertyMetadata(ItemTag.TagA));
+            new(ItemTag.TagA));
 
     public ItemTag TagGroup
     {
@@ -77,13 +77,9 @@ public partial class FileDragDropItem
         if (Parent is not Panel parentPanel) return;
 
         foreach (var child in parentPanel.Children)
-        {
             if (child is FileDragDropItem item)
-            {
                 item.IsEnabled = true;
-                //item.Visibility =  Visibility.Visible;
-            }
-        }
+        //item.Visibility =  Visibility.Visible;
     }
     
 
@@ -92,13 +88,9 @@ public partial class FileDragDropItem
         if (Parent is not Panel parentPanel) return;
 
         foreach (var child in parentPanel.Children)
-        {
             if (child is FileDragDropItem item && item.TagGroup != tag)
-            {
                 //item.Visibility = tag.Equals(item.TagGroup) ? Visibility.Visible : Visibility.Collapsed;
                 item.IsEnabled = false;
-            }
-        }
     }
 
 
@@ -126,9 +118,7 @@ public partial class FileDragDropItem
 
         Items.Add(myData);
         if (e.Data.GetData("source") is FileDragDropItem source && source.Items.Contains(myData))
-        {
             source.Items.Remove(myData);
-        }
     }
 }
 

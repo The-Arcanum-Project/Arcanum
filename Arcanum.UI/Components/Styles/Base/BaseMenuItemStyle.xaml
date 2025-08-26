@@ -54,7 +54,8 @@
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
                                   VerticalAlignment = "Center"
                                   Width = "16" />
-                <Path x:Name = "GlyphPanel"
+                <Path Grid.Column = "0"
+                      x:Name = "GlyphPanel"
                       Data = "{StaticResource Checkmark}"
                       FlowDirection = "LeftToRight"
                       Fill = "{StaticResource DefaultForeColorBrush}"
@@ -144,7 +145,8 @@
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
                                   VerticalAlignment = "Center"
                                   Width = "16" />
-                <Path x:Name = "GlyphPanel"
+                <Path Grid.Column = "0"
+                      x:Name = "GlyphPanel"
                       Data = "{StaticResource Checkmark}"
                       FlowDirection = "LeftToRight"
                       Fill = "{TemplateBinding Foreground}"
@@ -157,7 +159,8 @@
                                   RecognizesAccessKey = "True"
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
                                   HorizontalAlignment = "Left"/>
-                <Popup x:Name = "PART_Popup"
+                <Popup Grid.Column = "0"
+                       x:Name = "PART_Popup"
                        AllowsTransparency = "true"
                        Focusable = "false"
                        IsOpen = "{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
@@ -282,7 +285,8 @@
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
                                   HorizontalAlignment = "Left"
                                   VerticalAlignment = "Center" />
-                <Border x:Name = "GlyphPanel"
+                <Border Grid.Column = "0"
+                        x:Name = "GlyphPanel"
                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                         BorderThickness = "1"
                         ClipToBounds = "False"
@@ -397,7 +401,8 @@
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
                                   VerticalAlignment = "Center"
                                   Width = "16" />
-                <Border x:Name = "GlyphPanel"
+                <Border Grid.Column = "0"
+                        x:Name = "GlyphPanel"
                         Background = "{StaticResource DefaultBackColorBrush}"
                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                         BorderThickness = "1"
@@ -433,7 +438,8 @@
                       HorizontalAlignment = "Left"
                       Margin = "10,0,0,0"
                       VerticalAlignment = "Center" />
-                <Popup x:Name = "PART_Popup"
+                <Popup Grid.Column = "0"
+                       x:Name = "PART_Popup"
                        AllowsTransparency = "true"
                        Focusable = "false"
                        HorizontalOffset = "-2"

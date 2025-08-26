@@ -24,7 +24,7 @@ public static class ElementParser
    }
    
    [SuppressMessage("Reliability", "CA2014:Do not use stackalloc in loops")]
-   public static unsafe (List<Block>, List<Content>) GetElements(PathObj path, string input)
+   public static (List<Block>, List<Content>) GetElements(PathObj path, string input)
    {
       var contents = new List<Content>();
       var blocks = new List<Block>();
@@ -32,8 +32,8 @@ public static class ElementParser
       var blockStack = new ModifiableStack<Block>();
 
       var isInQuotes = false;
-      var isInWord = false;
-      var isInWhiteSpace = false;
+      bool isInWord;
+      bool isInWhiteSpace;
       var contentStart = 0;
       var elementIndex = 0;
 
@@ -61,9 +61,7 @@ public static class ElementParser
          }
 
          if (!line.IsEmpty && line[^1] == '\r')
-         {
             line = line[..^1];
-         }
 
          // Per-line state is reset here, which is correct.
          var length = line.Length;
@@ -310,11 +308,9 @@ public static class ElementParser
 
       var (finalTrimmedStart, finalTrimmedLength) = GetTrimmedRange(currentContent);
       if (finalTrimmedLength > 0)
-      {
          contents.Add(new(currentContent.ToString(finalTrimmedStart, finalTrimmedLength),
                           contentStart,
-                          elementIndex++));
-      }
+                          elementIndex));
 
       return (blocks, contents);
    }
@@ -323,15 +319,11 @@ public static class ElementParser
    {
       var start = 0;
       while (start < sb.Length && char.IsWhiteSpace(sb[start]))
-      {
          start++;
-      }
 
       var end = sb.Length - 1;
       while (end > start && char.IsWhiteSpace(sb[end]))
-      {
          end--;
-      }
 
       if (end < start)
          return (0, 0);

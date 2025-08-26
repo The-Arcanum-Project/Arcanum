@@ -281,10 +281,8 @@ public class ConsoleServiceImpl : IConsoleService
          {
             _macros.Clear(); // Clear existing before loading
             foreach (var entry in loadedMacros!)
-            {
                if (!_macros.ContainsKey(entry.Key))
                   _macros[entry.Key] = entry.Value;
-            }
          }
          else
          {

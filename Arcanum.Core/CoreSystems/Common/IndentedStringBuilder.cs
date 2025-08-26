@@ -49,10 +49,8 @@ public class IndentedStringBuilder(string indentString = "\t")
     public IndentedStringBuilder Append(string text)
     {
         if (string.IsNullOrEmpty(text))
-        {
             return this;
-        }
-        
+
         PrependIndentIfNecessary();
         _builder.Append(text);
         return this;
@@ -76,9 +74,7 @@ public class IndentedStringBuilder(string indentString = "\t")
     public IndentedStringBuilder AppendLines(IEnumerable<string> lines)
     {
         foreach (var line in lines)
-        {
             AppendLine(line);
-        }
         return this;
     }
 
@@ -88,9 +84,7 @@ public class IndentedStringBuilder(string indentString = "\t")
     public IndentedStringBuilder AppendLineIf(bool condition, string text)
     {
         if (condition)
-        {
             AppendLine(text);
-        }
         return this;
     }
 

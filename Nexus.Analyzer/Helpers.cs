@@ -10,10 +10,8 @@ public static class Helpers
       string attributeName)
    {
       for (var i = 0; i < method.Parameters.Length; i++)
-      {
          if (method.Parameters[i].GetAttributes().Any(a => a.AttributeClass?.Name == attributeName))
             return (method.Parameters[i], i);
-      }
 
       return (null, -1);
    }
@@ -21,10 +19,8 @@ public static class Helpers
    public static (IParameterSymbol? parameter, int index) FindParameterByName(IMethodSymbol method, string name)
    {
       for (var i = 0; i < method.Parameters.Length; i++)
-      {
          if (method.Parameters[i].Name == name)
             return (method.Parameters[i], i);
-      }
 
       return (null, -1);
    }

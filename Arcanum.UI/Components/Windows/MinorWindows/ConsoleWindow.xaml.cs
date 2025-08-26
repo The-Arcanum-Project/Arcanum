@@ -37,9 +37,7 @@ public partial class ConsoleWindow : IOutputReceiver
       {
          if (ConsoleInputTextBox.Text.Length ==
              ConsoleServiceImpl.CMD_PREFIX_LENGTH) // we don't allow the user to delete the CMD_PREFIX chars
-         {
             e.Handled = true;
-         }
       }
       else if (e.Key == Key.Up)
       {

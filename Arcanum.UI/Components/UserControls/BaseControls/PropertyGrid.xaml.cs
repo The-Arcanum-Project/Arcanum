@@ -201,7 +201,7 @@ public partial class PropertyGrid
             setter = v =>
             {
                var targetType = prop.PropertyType;
-               object safeValue;
+               object? safeValue;
                if (v == null! || targetType.IsInstanceOfType(v))
                   safeValue = v;
                else
@@ -303,7 +303,7 @@ public partial class PropertyGrid
       var collectionEditor = new CollectionEditor(available, collection);
       collectionEditor.ShowDialog();
       var selectedItems = collectionEditor.SelectedItems
-                                          .Select(item => Enum.Parse(enumArray.GetValue(0)!.GetType(), item))
+                                          .Select(value => Enum.Parse(enumArray.GetValue(0)!.GetType(), value))
                                           .Cast<Enum>()
                                           .ToArray();
       

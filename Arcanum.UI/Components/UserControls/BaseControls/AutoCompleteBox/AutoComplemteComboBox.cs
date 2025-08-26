@@ -25,7 +25,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             if (_editableTextBoxCache == null!)
             {
                const string name = "PART_EditableTextBox";
-               _editableTextBoxCache = (TextBox)VisualTreeModule.FindChild(this, name);
+               _editableTextBoxCache = (TextBox)VisualTreeModule.FindChild(this, name)!;
             }
 
             return _editableTextBoxCache;
@@ -96,9 +96,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 
          // if ItemsSource doesn't contain previousSelectedItem
          if (comboBox.SelectedItem != previousSelectedItem)
-         {
             comboBox.SelectedItem = null;
-         }
       }
 
       #endregion ItemsSource
@@ -141,14 +139,12 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       {
          var count = 0;
          foreach (var x in xs)
-         {
             if (predicate(x))
             {
                count++;
                if (count > maxCount)
                   return count;
             }
-         }
 
          return count;
       }
@@ -163,10 +159,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       {
          using (new TextBoxStatePreserver(EditableTextBox))
             using (Items.DeferRefresh())
-            {
                // Can empty the text box. I don't why.
                Items.Filter = filter;
-            }
       }
 
       private void OpenDropDown(Predicate<object> filter)
@@ -191,9 +185,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             SelectedItem = null;
 
             using (Items.DeferRefresh())
-            {
                Items.Filter = _defaultItemsFilter;
-            }
          }
          else if (SelectedItem != null && TextFromItem(SelectedItem) == text)
          {
@@ -203,18 +195,14 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          else
          {
             using (new TextBoxStatePreserver(EditableTextBox))
-            {
                SelectedItem = null;
-            }
 
             var filter = GetFilter();
             var maxCount = SettingOrDefault.MaxSuggestionCount;
             var count = CountWithMax(ItemsSource.Cast<object>(), filter, maxCount);
 
             if (0 < count && count <= maxCount)
-            {
                OpenDropDown(filter);
-            }
          }
       }
 

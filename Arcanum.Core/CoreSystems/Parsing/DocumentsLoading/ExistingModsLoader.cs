@@ -6,11 +6,11 @@ namespace Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 
 public static class ExistingModsLoader
 {
-   public static void LoadExistingMods()
+   public static List<ModMetadata> LoadExistingMods()
    {
       var allModFolders = IO.IO.GetDirectories(FileManager.GetDocumentsPath("mod"));
       if (allModFolders.Count == 0)
-         return;
+         return [];
 
       List<ModMetadata> existingMods = [];
       foreach (var modFolder in allModFolders)
@@ -19,6 +19,7 @@ public static class ExistingModsLoader
          if (metadata != null)
             existingMods.Add(metadata);
       }
+      return existingMods;
    }
 
    public static ModMetadata? ParseModMetadata(string modFolder)

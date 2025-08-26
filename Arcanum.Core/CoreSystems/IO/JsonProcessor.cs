@@ -129,8 +129,8 @@ internal static class JsonProcessor
 
       // Check if the custom Enum converter is present (it always will be with the line above,
       // but this is good practice in case you change the logic).
-      bool hasCustomEnumConverter = options.Converters.Any(c => c is EnumJsonConverter) ||
-                                    (rules.Converters.Any(c => c is EnumJsonConverter));
+      var hasCustomEnumConverter = options.Converters.Any(c => c is EnumJsonConverter) ||
+                                   (rules.Converters.Any(c => c is EnumJsonConverter));
 
 
       var stringEnumConverterAdded = false;

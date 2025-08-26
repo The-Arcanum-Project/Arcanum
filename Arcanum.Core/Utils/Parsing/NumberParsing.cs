@@ -97,7 +97,7 @@ public static class NumberParsing
          DiagnosticException.LogWarning(context,
                                         ParsingError.Instance.InvalidBoolMarkup,
                                         nameof(TryParseBool).GetType().FullName!,
-                                        input ?? "null");
+                                        input);
          return false;
       }
 

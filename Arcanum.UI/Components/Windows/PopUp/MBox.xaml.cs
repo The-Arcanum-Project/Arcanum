@@ -118,12 +118,9 @@ public partial class MBox
          throw new InvalidOperationException("No UI dispatcher found.");
 
       if (Application.Current.Dispatcher.CheckAccess())
-      {
          // Already on UI thread
          return ShowOnCurrentThread(message, title, buttons, icon, height, width);
-      }
       else
-      {
          // Marshal to UI thread and wait for result
          return Application.Current.Dispatcher.Invoke(() =>
                                                          ShowOnCurrentThread(message,
@@ -132,7 +129,6 @@ public partial class MBox
                                                                              icon,
                                                                              height,
                                                                              width));
-      }
    }
 
    private static MBoxResult ShowOnCurrentThread(

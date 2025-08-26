@@ -1,11 +1,9 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util;
-
-namespace UnitTests.CoreSystems.ProjectFile;
+﻿namespace UnitTests.CoreSystems.ProjectFile;
 
 [TestFixture]
 public class ProjectFileDescriptorTests
 {
-   private DataSpace ModDataSpace => new ("mod", ["ModData", "ModDataPath", "ModDataPath"], DataSpace.AccessType.ReadOnly);
+   //private DataSpace ModDataSpace => new ("mod", ["ModData", "ModDataPath", "ModDataPath"], DataSpace.AccessType.ReadOnly);
    //
    // [Test]
    // public void Constructor_InitializesProperties()

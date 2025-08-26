@@ -148,10 +148,8 @@ public partial class SearchWindow : INotifyPropertyChanged
    protected override void OnPreviewKeyDown(KeyEventArgs e)
    {
       if (e.Key == Key.Escape)
-      {
          // _isClosing = true;
          CloseCommand.Execute(null);
-      }
 
       base.OnPreviewKeyDown(e);
    }

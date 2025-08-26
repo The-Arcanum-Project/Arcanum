@@ -125,14 +125,12 @@ public partial class PluginSettingsWindow
                                                 PropertyGrid propGrid)
    {
       if (e.ChangedItem != null)
-      {
          Dispatcher.BeginInvoke(() =>
          {
             MessageBox.Show($"Property '{e.ChangedItem.PropertyInfo.Name}' changed.\n" +
                             $"Old Value: {e.OldValue ?? "null"}\n" +
                             $"New Value: {e.ChangedItem.Value}");
          });
-      }
 
       // Notify the host about the setting change
       var eventArgs = new PluginSettingEventArgs(((IPluginSetting)propGrid.SelectedObject!).OwnerGuid,

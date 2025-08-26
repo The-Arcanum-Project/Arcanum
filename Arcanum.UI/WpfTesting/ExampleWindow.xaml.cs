@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -16,7 +15,7 @@ public partial class ExampleWindow : IDebugDrawer
 {
    public UserSettings CurrentSettings { get; } = new();
    private double _currentScale = 1.0;
-   private const double ZoomFactor = 1.1;
+   private const double ZOOM_FACTOR = 1.1;
    public ExampleWindow()
    {
       InitializeComponent();
@@ -25,28 +24,29 @@ public partial class ExampleWindow : IDebugDrawer
    }
    private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
    {
-      Point mousePosition = e.GetPosition(MainScrollViewer);
-      double oldScale = _currentScale;
+      var mousePosition = e.GetPosition(MainScrollViewer);
+      var oldScale = _currentScale;
 
       if (e.Delta > 0)
-         _currentScale *= ZoomFactor;
+         _currentScale *= ZOOM_FACTOR;
       else
-         _currentScale /= ZoomFactor;
+         _currentScale /= ZOOM_FACTOR;
 
       _currentScale = Math.Max(0.1, Math.Min(10.0, _currentScale));
 
       CanvasScaleTransform.ScaleX = _currentScale;
       CanvasScaleTransform.ScaleY = _currentScale;
 
-      double newHorizontalOffset = (MainScrollViewer.HorizontalOffset + mousePosition.X) * _currentScale / oldScale - mousePosition.X;
-      double newVerticalOffset = (MainScrollViewer.VerticalOffset + mousePosition.Y) * _currentScale / oldScale - mousePosition.Y;
+      var newHorizontalOffset = (MainScrollViewer.HorizontalOffset + mousePosition.X) * _currentScale / oldScale - mousePosition.X;
+      var newVerticalOffset = (MainScrollViewer.VerticalOffset + mousePosition.Y) * _currentScale / oldScale - mousePosition.Y;
 
       MainScrollViewer.ScrollToHorizontalOffset(newHorizontalOffset);
       MainScrollViewer.ScrollToVerticalOffset(newVerticalOffset);
    }
+/*
    private void DrawLine_Click(object sender, RoutedEventArgs e)
    {
-      Line line = new Line
+      var line = new Line
       {
          X1 = 50,
          Y1 = 50,
@@ -58,6 +58,7 @@ public partial class ExampleWindow : IDebugDrawer
 
       drawingCanvas.Children.Add(line);
    }
+*/
    private Point? _lastDragPoint;
    private void Window_MouseDown(object sender, MouseButtonEventArgs e)
    {
@@ -79,9 +80,9 @@ public partial class ExampleWindow : IDebugDrawer
    {
       if (_lastDragPoint.HasValue)
       {
-         Point currentPos = e.GetPosition(MainScrollViewer);
-         double dX = currentPos.X - _lastDragPoint.Value.X;
-         double dY = currentPos.Y - _lastDragPoint.Value.Y;
+         var currentPos = e.GetPosition(MainScrollViewer);
+         var dX = currentPos.X - _lastDragPoint.Value.X;
+         var dY = currentPos.Y - _lastDragPoint.Value.Y;
 
          MainScrollViewer.ScrollToHorizontalOffset(MainScrollViewer.HorizontalOffset - dX);
          MainScrollViewer.ScrollToVerticalOffset(MainScrollViewer.VerticalOffset - dY);
@@ -102,26 +103,26 @@ public partial class ExampleWindow : IDebugDrawer
    private const int SCALE = 4;
    private static Point ConvertCoordinates(int x, int y)
    {
-      return new Point(x * (SCALE - 1) + 0.5 + MARGIN, y * (SCALE - 1) + 0.5 + MARGIN);
+      return new(x * (SCALE - 1) + 0.5 + MARGIN, y * (SCALE - 1) + 0.5 + MARGIN);
    }
    
    private void LoadMap()
    {
-      BitmapImage bitmapImage = new BitmapImage(new Uri("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", UriKind.RelativeOrAbsolute));
-      FormatConvertedBitmap formattedBitmap = new FormatConvertedBitmap(bitmapImage, PixelFormats.Bgra32, null, 0);
+      var bitmapImage = new BitmapImage(new("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", UriKind.RelativeOrAbsolute));
+      var formattedBitmap = new FormatConvertedBitmap(bitmapImage, PixelFormats.Bgra32, null, 0);
       
       
-      int width = formattedBitmap.PixelWidth;
-      int height = formattedBitmap.PixelHeight;
-      int stride = width * 4;
-      byte[] pixels = new byte[height * stride];
+      var width = formattedBitmap.PixelWidth;
+      var height = formattedBitmap.PixelHeight;
+      var stride = width * 4;
+      var pixels = new byte[height * stride];
       formattedBitmap.CopyPixels(pixels, stride, 0);
 
-      drawingCanvas.Children.Clear();
+      DrawingCanvas.Children.Clear();
 
-      int pixelSize = 2;
-      int margin = 1;
-      int step = pixelSize + margin;
+      var pixelSize = 2;
+      var margin = 1;
+      var step = pixelSize + margin;
 /*
       for (int y = 0; y < height; y++)
       {
@@ -150,20 +151,20 @@ public partial class ExampleWindow : IDebugDrawer
 */
       width = 1 + width * step;
       height = 1 + height * step;
-      drawingCanvas.MaxWidth = width;
-      drawingCanvas.MaxHeight = height;
+      DrawingCanvas.MaxWidth = width;
+      DrawingCanvas.MaxHeight = height;
       Debug.WriteLine($"Loaded image with dimensions: {width}x{step}");
-      drawingCanvas.Width = width;
-      drawingCanvas.Height = height;
+      DrawingCanvas.Width = width;
+      DrawingCanvas.Height = height;
    }
-   private static readonly Random _rand = new Random();
+   private static readonly Random Rand = new();
    public static SolidColorBrush GetRandomBrush()
    {
-      byte r = (byte)_rand.Next(0, 256);
-      byte g = (byte)_rand.Next(0, 256);
-      byte b = (byte)_rand.Next(0, 256);
+      var r = (byte)Rand.Next(0, 256);
+      var g = (byte)Rand.Next(0, 256);
+      var b = (byte)Rand.Next(0, 256);
 
-      return new SolidColorBrush(Color.FromRgb(r, g, b));
+      return new(Color.FromRgb(r, g, b));
    }
    public void DrawLine(int x1, int y1, int x2, int y2)
    {
@@ -179,7 +180,7 @@ public partial class ExampleWindow : IDebugDrawer
          Stroke = _currentBush,
          StrokeThickness = 1,
       };
-      drawingCanvas.Children.Add(line);
+      DrawingCanvas.Children.Add(line);
       Panel.SetZIndex(line,1);
    }
 
@@ -194,7 +195,7 @@ public partial class ExampleWindow : IDebugDrawer
          Fill = GetRandomBrush()
       };
       
-      drawingCanvas.Children.Add(poly);
+      DrawingCanvas.Children.Add(poly);
       Panel.SetZIndex(poly,-1);
    }
 
@@ -215,7 +216,7 @@ public partial class ExampleWindow : IDebugDrawer
       Canvas.SetLeft(circle, ConvertCoordinates(x, y).X - circle.Width / 2);
       Canvas.SetTop(circle, ConvertCoordinates(x, y).Y - circle.Height / 2);
 
-      drawingCanvas.Children.Add(circle);
+      DrawingCanvas.Children.Add(circle);
       Panel.SetZIndex(circle,2);
       _currentBush = GetRandomBrush();
    }
@@ -256,7 +257,7 @@ public class UserSettings
    [Description("This is a list of Point objects with a description.")]
    public List<List<Point>> NestedCoordinates { get; set; } =
    [
-      new List<Point> { new(1.0, 2.0), new(3.0, 4.0) }, new List<Point> { new(5.0, 6.0), new(7.0, 8.0) }
+      new() { new(1.0, 2.0), new(3.0, 4.0) }, new() { new(5.0, 6.0), new(7.0, 8.0) }
    ];
 
    [Description("This is a complex object containing various properties.")]

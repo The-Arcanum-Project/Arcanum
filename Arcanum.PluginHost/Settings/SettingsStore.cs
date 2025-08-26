@@ -380,8 +380,8 @@ internal class SettingsStore : ISettingsStore
          throw new InvalidOperationException("Required services are not available: IJsonProcessor or IFileOperations.");
 
       var path = Path.Combine(ioService.GetArcanumDataPath, PLUGIN_SETTINGS_FILE);
-      Dictionary<Guid, (Type, object)> settingsToSave = _settings.ToDictionary(pair => pair.Key,
-                                                                         pair => (pair.GetType(), (object)pair.Value));
+      var settingsToSave = _settings.ToDictionary(pair => pair.Key,
+                                                  pair => (pair.GetType(), (object)pair.Value));
       var jsonContent = jsonProcessor.Serialize(settingsToSave);
       if (string.IsNullOrWhiteSpace(jsonContent))
       {

@@ -49,6 +49,7 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
       return false;
    }
 
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
    public override string ToString() => Name;
 

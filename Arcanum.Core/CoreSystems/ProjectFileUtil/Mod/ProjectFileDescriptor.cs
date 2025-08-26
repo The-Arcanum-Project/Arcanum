@@ -1,8 +1,10 @@
 ﻿using System.IO;
+using System.Text.Json.Serialization;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+// ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 
@@ -19,7 +21,10 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    /// <summary>
    /// Only meant for serialization purposes.
    /// </summary>
+   [JsonConstructor]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
    public ProjectFileDescriptor()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
    {
    }
 
@@ -58,12 +63,10 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    public override bool Equals(object? obj)
    {
       if (obj is ProjectFileDescriptor other)
-      {
          return ModName == other.ModName &&
                 IsSubMod == other.IsSubMod &&
                 ModPath == other.ModPath &&
                 RequiredMods.SequenceEqual(other.RequiredMods);
-      }
 
       return false;
    }

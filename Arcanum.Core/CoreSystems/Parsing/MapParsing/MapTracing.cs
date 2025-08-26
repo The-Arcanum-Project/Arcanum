@@ -24,23 +24,23 @@ public readonly record struct Point(int X, int Y)
 
     public static Point operator +(Point p1, Point p2)
     {
-        return new Point(p1.X + p2.X, p1.Y + p2.Y);
+        return new(p1.X + p2.X, p1.Y + p2.Y);
     }
 
     public static Point operator -(Point p1, Point p2)
     {
-        return new Point(p1.X - p2.X, p1.Y - p2.Y);
+        return new(p1.X - p2.X, p1.Y - p2.Y);
     }
 
     public static Point operator *(Point p, int scalar)
     {
-        return new Point(p.X * scalar, p.Y * scalar);
+        return new(p.X * scalar, p.Y * scalar);
     }
 
     public static Point operator /(Point p, int scalar)
     {
         if (scalar == 0) throw new DivideByZeroException("Cannot divide by zero.");
-        return new Point(p.X / scalar, p.Y / scalar);
+        return new(p.X / scalar, p.Y / scalar);
     }
 
     public static int operator *(Point p1, Point p2)
@@ -67,16 +67,10 @@ public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isFo
     public void AddToList(List<Point> points)
     {
         if (IsForward)
-        {
             points.AddRange(Segment.Points);
-        }
         else
-        {
             for (var i = Segment.Points.Count - 1; i >= 0; i--)
-            {
                 points.Add(Segment.Points[i]);
-            }
-        }
     }
 
     public BorderSegmentDirectional Invert()
@@ -151,7 +145,7 @@ public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direct
 public class Node
 {
 #if DEBUG
-    private static int _totalNodes = 0;
+    private static int _totalNodes;
     private int _nodeId;
 
     public override string ToString()
@@ -267,9 +261,7 @@ public unsafe class MapTracing
     public int GetColorWithOutsideCheck(int x, int y)
     {
         if (x < 0 || x >= width || y < 0 || y >= height)
-        {
             return OUTSIDE_COLOR;
-        }
 
         return GetColor(x, y);
     }
@@ -295,7 +287,7 @@ public unsafe class MapTracing
         BorderSegment lastSegment = null!;
 
         // Top Left Corner
-        firstSegment.Points.Add(new Point(0, 0));
+        firstSegment.Points.Add(new(0, 0));
         var currentSegment = firstSegment;
 
 
@@ -303,7 +295,7 @@ public unsafe class MapTracing
         void FinalizeSegmentAndStartNew(int x, int y, int color, Direction d)
         {
             // Add the new node's location to complete the current segment's path.
-            currentSegment.Points.Add(new Point(x, y));
+            currentSegment.Points.Add(new(x, y));
 
 #if ENABLE_VISUAL_TRACING
             // Draw the complete path of the segment that just ended.
@@ -319,23 +311,23 @@ public unsafe class MapTracing
 
             // Create the new node and a new segment starting at this node.
             var newSegment = new BorderSegment();
-            newSegment.Points.Add(new Point(x, y));
+            newSegment.Points.Add(new(x, y));
             Node node;
             if (lastNode != null)
             {
                 node = new(
-                    new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
-                    new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateLeft()));
+                    new(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
+                    new(null, null, d),
+                    new(null, null, d.RotateLeft()));
                 lastNode.CachedSegment2.Node = node;
                 lastNode.CachedSegment2.Segment = new(currentSegment, true);
             }
             else
             {
                 node = new(
-                    new CacheNodeInfo(null, null, d.RotateLeft()),
-                    new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateLeft()));
+                    new(null, null, d.RotateLeft()),
+                    new(null, null, d),
+                    new(null, null, d.RotateLeft()));
                 firstNode = node;
             }
 
@@ -354,58 +346,48 @@ public unsafe class MapTracing
         {
             var color = GetColor(0, y);
             if (color != lastColor)
-            {
                 FinalizeSegmentAndStartNew(0, y, color, Direction.East);
-            }
         }
 
         // Bottom Left Corner
-        currentSegment.Points.Add(new Point(0, height));
+        currentSegment.Points.Add(new(0, height));
 
         // Bottom Edge (left to right)
         for (var x = 1; x <= lastColumn; x++)
         {
             var color = GetColor(x, lastRow);
             if (color != lastColor)
-            {
                 FinalizeSegmentAndStartNew(x, height, color, Direction.North);
-            }
         }
 
         // Bottom Right Corner
-        currentSegment.Points.Add(new Point(width, height));
+        currentSegment.Points.Add(new(width, height));
 
         // Right Edge (bottom to top)
         for (var y = lastRow; y > 0; y--)
         {
             var color = GetColor(lastColumn, y - 1);
             if (color != lastColor)
-            {
                 FinalizeSegmentAndStartNew(width, y, color, Direction.West);
-            }
         }
 
         // Top Right Corner
-        currentSegment.Points.Add(new Point(width, 0));
+        currentSegment.Points.Add(new(width, 0));
 
         // Top Edge (right to left)
         for (var x = lastColumn; x > 0; x--)
         {
             var color = GetColor(x - 1, 0);
             if (color != lastColor)
-            {
                 FinalizeSegmentAndStartNew(x, 0, color, Direction.South);
-            }
         }
 
         currentSegment.Points.AddRange(firstSegment.Points);
         firstSegment = currentSegment;
 
         if (lastNode == null)
-        {
             throw new InvalidOperationException(
-                "No nodes were on the border of the image. We currently do not support maps without nodes on the border.");
-        }
+                                                "No nodes were on the border of the image. We currently do not support maps without nodes on the border.");
 
         lastNode.CachedSegment2.Node = firstNode;
         lastNode.CachedSegment2.Segment = new(currentSegment, true);
@@ -493,15 +475,11 @@ public unsafe class MapTracing
         if (dir)
         {
             if (sign)
-            {
                 // Move right
                 x++;
-            }
             else
-            {
                 // Move left
                 x--;
-            }
         }
 
         else if (sign)
@@ -533,7 +511,7 @@ public unsafe class MapTracing
         var lColor = GetColorWithOutsideCheck(xl, yl);
         var rColor = GetColorWithOutsideCheck(xr, yr);
         
-        Polygon polygon = new Polygon(rColor);
+        var polygon = new Polygon(rColor);
         
         var (dir, sign) = currentDirection.GetDeltaMove();
         while (true)
@@ -555,21 +533,17 @@ public unsafe class MapTracing
                 yl = yr;
                 // The old right pixel is the new right pixel
                 if (dir)
-                {
                     // Horizontal movement
                     xr = cache;
-                }
                 else
-                {
                     // Vertical movement
                     yr = cache;
-                }
 
                 currentDirection = currentDirection.RotateRight();
                 (dir, sign) = currentDirection.GetDeltaMove();
                 //Probably not needed, but just to be sure
                 lColor = rTest;
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
             }
             // Turn left
             else if (lTest == rColor && rTest == rColor)
@@ -579,26 +553,22 @@ public unsafe class MapTracing
                 yr = yl;
                 // The old left pixel is the new left pixel
                 if (dir)
-                {
                     // Horizontal movement
                     xl = cache;
-                }
                 else
-                {
                     // Vertical movement
                     yl = cache;
-                }
 
                 currentDirection = currentDirection.RotateLeft();
                 (dir, sign) = currentDirection.GetDeltaMove();
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
                 rColor = lTest;
             }
             else if (lTest == lColor || rTest == rColor)
             {
                 var dir1 = currentDirection.Invert();
-                Direction dir2 = currentDirection;
-                Direction dir3 = currentDirection;
+                var dir2 = currentDirection;
+                var dir3 = currentDirection;
                 if (lTest == lColor)
                 {
                     dir2 = currentDirection.RotateRight();
@@ -622,7 +592,7 @@ public unsafe class MapTracing
                     var cache1 = new CacheNodeInfo(null, new BorderSegmentDirectional(segment, false), dir1);
                     var cache2 = new CacheNodeInfo(null, null, dir2);
                     var cache3 = new CacheNodeInfo(null, null, dir3);
-                    node = new Node(cache1, cache2, cache3);
+                    node = new(cache1, cache2, cache3);
                 }
                 else
                 {
@@ -631,7 +601,7 @@ public unsafe class MapTracing
                 }
                 
                 BorderSegmentDirectional? newSegment;
-                Node? newNode = node;
+                var newNode = node;
                 while (true)
                 {
                     newNode!.Visit(ref currentDirection, out newSegment, out newNode);
@@ -659,7 +629,7 @@ public unsafe class MapTracing
     {
         var segment = new BorderSegment();
 
-        segment.Points.Add(new Point(x, y));
+        segment.Points.Add(new(x, y));
         var currentDirection = d;
 
         var (xl, yl, xr, yr) = DirectionHelper.GetStartPos(x, y, d);
@@ -678,14 +648,12 @@ public unsafe class MapTracing
             MoveGridPoint(dir, sign, ref x, ref y);
             if (!MoveDirWithCheck(dir, sign, ref xl, ref yl, ref xr, ref yr, out var cache))
             {
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
                 // We have reached the edge of the image
                 if (!NodeCache.TryGetValue((x, y), out var node))
-                {
                     // We have a node at this position, so we can add the segment to it.
                     //node = new Node(new BorderSegmentDirectional(segment, true), currentDirection);
                     NodeCache[(x, y)] = node;
-                }
 
                 //NodeCache[(x, y)] = new Node(new BorderSegmentDirectional(segment, true), currentDirection);
 #if ENABLE_VISUAL_TRACING
@@ -718,21 +686,17 @@ public unsafe class MapTracing
                 yl = yr;
                 // The old right pixel is the new right pixel
                 if (dir)
-                {
                     // Horizontal movement
                     xr = cache;
-                }
                 else
-                {
                     // Vertical movement
                     yr = cache;
-                }
 
                 currentDirection = currentDirection.RotateRight();
                 (dir, sign) = currentDirection.GetDeltaMove();
                 //Probably not needed, but just to be sure
                 lColor = rTest;
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
             }
             // Turn left
             else if (lTest == rColor && rTest == rColor)
@@ -742,24 +706,20 @@ public unsafe class MapTracing
                 yr = yl;
                 // The old left pixel is the new left pixel
                 if (dir)
-                {
                     // Horizontal movement
                     xl = cache;
-                }
                 else
-                {
                     // Vertical movement
                     yl = cache;
-                }
 
                 currentDirection = currentDirection.RotateLeft();
                 (dir, sign) = currentDirection.GetDeltaMove();
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
                 rColor = lTest;
             }
             else
             {
-                segment.Points.Add(new Point(x, y));
+                segment.Points.Add(new(x, y));
                 // We have found a node, so we can stop tracing this edge.
                 // Add the segment to the node cache.
                 // Still need a good method to get the node position.
@@ -804,7 +764,7 @@ public unsafe class MapTracing
     public void LoadLocations(string filePath, IDebugDrawer mw)
     {
         var bmp = new Bitmap(filePath);
-        var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly,
+        var bmpData = bmp.LockBits(new(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly,
             PixelFormat.Format24bppRgb);
         width = bmp.Width;
         height = bmp.Height;

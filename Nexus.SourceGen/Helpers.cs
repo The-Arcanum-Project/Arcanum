@@ -28,9 +28,7 @@ public static class Helpers
          {
             // If we've already added a member with this name from a more derived class, skip.
             if (processedMemberNames.Contains(member.Name))
-            {
                continue;
-            }
 
             // Must not be static
             if (member.IsStatic)
@@ -83,20 +81,16 @@ public static class Helpers
             if (addAttr is null)
             {
                if (!inclusive)
-               {
                   // In explicit mode, we only include members with [AddModifiable].
                   // This applies to both the class's own members and inherited members.
                   continue;
-               }
 
                // In implicit mode, we have a special case for inherited members:
                // only include them if they are explicitly marked with [AddModifiable].
                // This prevents polluting the derived class with all public members from its base.
                // We only apply this check to members from a base type.
                if (!currentType.Equals(classSymbol, SymbolEqualityComparer.Default))
-               {
                   continue;
-               }
             }
             else if (inclusive)
             {
@@ -115,13 +109,9 @@ public static class Helpers
 
             // For properties, must have an accessible setter
             if (member is IPropertySymbol property)
-            {
                // The setter must also be accessible from the derived class.
                if (property.SetMethod == null || !IsAccessibleFrom(property.SetMethod, classSymbol))
-               {
                   continue;
-               }
-            }
 
             members.Add(member);
             processedMemberNames.Add(member.Name); // Mark this name as processed

@@ -70,7 +70,6 @@ public abstract class FileLoadingService
    {
       var repeatLoading = true;
       while (repeatLoading)
-      {
          try
          {
             LoadSingleFile(fileObj, descriptor, lockObject);
@@ -83,7 +82,6 @@ public abstract class FileLoadingService
 
             UnloadSingleFileContent(fileObj, descriptor);
          }
-      }
 
       return null;
    }

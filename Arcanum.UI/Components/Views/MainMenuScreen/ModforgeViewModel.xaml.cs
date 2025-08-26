@@ -40,6 +40,7 @@ public partial class ModforgeViewModel
       }
    }
 
+/*
    private void GitHubTextBlock_PreviewMouseUp(object sender, MouseButtonEventArgs e)
    {
       if (e.ChangedButton == MouseButton.Left)
@@ -48,4 +49,5 @@ public partial class ModforgeViewModel
          ProcessHelper.OpenLink(GitDataService.MODFORGE_REPOSITORY_URL);
       }
    }
+*/
 }

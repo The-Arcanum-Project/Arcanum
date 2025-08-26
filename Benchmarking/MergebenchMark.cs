@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 
+// ReSharper disable NotAccessedVariable
+
 namespace Benchmarking;
 
 public interface IElement
@@ -20,9 +22,9 @@ public class Content : IElement
 [MemoryDiagnoser]
 public class MergeBenchmark
 {
-   private List<Block> _blocks;
-   private List<Content> _contents;
-   private List<IElement> _output;
+   private List<Block> _blocks = null!;
+   private List<Content> _contents = null!;
+   private List<IElement> _output = null!;
 
    [Params(10, 1000, 100_000)]
    public int Count;
@@ -38,7 +40,7 @@ public class MergeBenchmark
                             .Where(i => i % 2 != 0)
                             .Select(i => new Content { Index = i })
                             .ToList();
-      _output = new List<IElement>(_blocks.Count + _contents.Count);
+      _output = new(_blocks.Count + _contents.Count);
    }
 
    [Benchmark]
@@ -46,11 +48,9 @@ public class MergeBenchmark
    {
       var sum = 0;
       foreach (var element in MergeBlocksAndContent(_blocks, _contents))
-      {
          sum += element.Index;
-      }
    }
-   
+
    [Benchmark]
    public void AsListIterate()
    {
@@ -58,11 +58,9 @@ public class MergeBenchmark
       var sum = 0;
       MergeInto(_blocks, _contents, _output);
       foreach (var element in _output)
-      {
          sum += element.Index;
-      }
    }
-   
+
    [Benchmark]
    public List<IElement> MergeBlocksAndContent_Yield()
    {

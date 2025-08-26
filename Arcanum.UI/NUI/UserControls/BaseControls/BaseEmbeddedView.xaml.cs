@@ -1,8 +1,7 @@
-﻿using System.Windows.Controls;
-
+﻿
 namespace Arcanum.UI.NUI.UserControls.BaseControls;
 
-public partial class BaseEmbeddedView : UserControl
+public partial class BaseEmbeddedView
 {
    public BaseEmbeddedView()
    {

@@ -8,11 +8,6 @@ namespace Arcanum.Core.Settings;
 
 public class MainSettingsObj
 {
-   public MainSettingsObj()
-   {
-      // Initialize any default values here if needed
-   }
-   
    public GeneralNUISettings NUIConfig { get; set; } = new();
    
    [IsSubMenu("NUI Settings")]

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.UI.NUI.Generator;
 
 namespace Arcanum.UI.NUI;
@@ -58,7 +57,7 @@ public class Test : INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

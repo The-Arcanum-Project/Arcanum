@@ -53,9 +53,7 @@ public class BaseWindow : Window
       var separator = GetTemplateChild("HeaderSeparator") as Rectangle;
 
       if (presenter != null && separator != null)
-      {
          separator.Visibility = presenter.Content != null ? Visibility.Visible : Visibility.Collapsed;
-      }
    }
 
    // Define the DependencyProperty for the Header
@@ -295,9 +293,7 @@ public class BaseWindow : Window
    private void OnSourceInitialized(object? sender, EventArgs e)
    {
       if (ResizeMode != ResizeMode.NoResize && new WindowInteropHelper(this).Handle != IntPtr.Zero)
-      {
          HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(WindowProc);
-      }
    }
 
    private static IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

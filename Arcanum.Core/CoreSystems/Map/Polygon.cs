@@ -67,9 +67,7 @@ public sealed class Polygon
          throw new ArgumentNullException(nameof(vertices));
 
       foreach (var vertex in vertices)
-      {
          Vertices.Remove(vertex);
-      }
 
       Bounds = CalculateBounds();
       TriangleIndices = Triangulate(Vertices);
@@ -110,7 +108,7 @@ public sealed class Polygon
       if (!Bounds.Contains(point))
          return false;
 
-      for (int i = 0; i < TriangleIndices.Count; i += 3)
+      for (var i = 0; i < TriangleIndices.Count; i += 3)
       {
          var a = Vertices[TriangleIndices[i]];
          var b = Vertices[TriangleIndices[i + 1]];

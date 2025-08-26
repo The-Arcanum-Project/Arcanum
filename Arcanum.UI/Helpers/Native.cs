@@ -22,12 +22,16 @@ public static class NativeMethods
    
    [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Auto, Pack=4)]
    private class MonitorInfoEx { 
+/*
       public int     cbSize = Marshal.SizeOf(typeof(MonitorInfoEx));
-      public Rect    rcMonitor = new Rect(); 
-      public Rect    rcWork = new Rect(); 
-      public int     dwFlags = 0;
+*/
+      public Rect    rcMonitor = new(); 
+      public Rect    rcWork = new(); 
+      // public int     dwFlags = 0;
+/*
       [MarshalAs(UnmanagedType.ByValArray, SizeConst=32)] 
       public char[]  szDevice = new char[32];
+*/
    }
    
    [DllImport("user32.dll")]
@@ -46,7 +50,7 @@ public static class NativeMethods
       
       if (monitor == IntPtr.Zero) return mmi;
       var monitorInfo = new MonitorInfoEx();
-      GetMonitorInfo(new HandleRef(null, monitor), monitorInfo); 
+      GetMonitorInfo(new(null, monitor), monitorInfo); 
       var rcWorkArea = monitorInfo.rcWork;
       var rcMonitorArea = monitorInfo.rcMonitor;
       mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.Left - rcMonitorArea.Left);

@@ -36,10 +36,8 @@ public class PropertyModifierGenerator : IIncrementalGenerator
          // Get the symbol for the interface we're looking for
          var interfaceSymbol = semanticModel.Compilation.GetTypeByMetadataName(targetInterfaceName);
          if (interfaceSymbol is null)
-         {
             // The interface isn't defined in this compilation, so no classes can implement it.
             return null;
-         }
 
          // Get the symbol for the class we're inspecting. 
          // GetDeclaredSymbol returns ISymbol, so we must safely cast it to INamedTypeSymbol.
@@ -49,9 +47,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
                                                           cancellationToken) is { } classSymbol &&
              classSymbol.AllInterfaces.Contains(interfaceSymbol,
                                                 SymbolEqualityComparer.Default))
-         {
             return classDeclaration;
-         }
 
          return null;
       }
@@ -125,7 +121,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("    {");
       foreach (var member in members)
       {
-         ITypeSymbol memberType = member switch
+         var memberType = member switch
          {
             IPropertySymbol p => p.Type,
             IFieldSymbol f => f.Type,

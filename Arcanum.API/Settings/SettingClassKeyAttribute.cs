@@ -17,9 +17,8 @@ public sealed class PluginSettingKeyAttribute : Attribute
    public PluginSettingKeyAttribute(string key)
    {
       if (string.IsNullOrWhiteSpace(key))
-      {
          throw new ArgumentNullException(nameof(key), "Plugin setting key cannot be null or whitespace.");
-      }
+
       Key = key;
    }
 }

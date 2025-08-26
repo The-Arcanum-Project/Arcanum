@@ -82,15 +82,13 @@ public class NexusAnalyzer : DiagnosticAnalyzer
 
       var conversionInfo = context.Compilation.ClassifyConversion(actualValueType, expectedValueType!);
       if (conversionInfo is { IsIdentity: false, IsImplicit: false })
-      {
          context.ReportDiagnostic(Diagnostic.Create(Diagnostics.SetValueTypeMismatch,
                                                     valueArgument.Syntax.GetLocation(),
                                                     enumMemberSymbol!.Name,
                                                     expectedValueType!.ToDisplayString(SymbolDisplayFormat
-                                                      .MinimallyQualifiedFormat),
+                                                          .MinimallyQualifiedFormat),
                                                     actualValueType.ToDisplayString(SymbolDisplayFormat
-                                                      .MinimallyQualifiedFormat)));
-      }
+                                                          .MinimallyQualifiedFormat)));
    }
 
    private void AnalyzeGetter(OperationAnalysisContext context, IInvocationOperation invocation)

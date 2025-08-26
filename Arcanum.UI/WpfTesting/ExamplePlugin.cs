@@ -42,11 +42,11 @@ public class ExamplePluginSettings2 : IPluginSetting
 public class ExamplePlugin : IPlugin
 {
    public Guid Guid { get; } = Guid.NewGuid();
-   public Version PluginVersion { get; }
-   public Version RequiredHostVersion { get; }
+   public Version PluginVersion { get; } = null!;
+   public Version RequiredHostVersion { get; } = null!;
    public string Name { get; } = "Example Plugin";
-   public string Author { get; }
-   public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; }
+   public string Author { get; } = null!;
+   public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; } = null!;
    public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
    {
       throw new NotImplementedException();
@@ -54,8 +54,8 @@ public class ExamplePlugin : IPlugin
 
    public PluginStatus Status { get; set; }
    public bool IsActive { get; set; }
-   public PluginRuntimeInfo RuntimeInfo { get; set; }
-   public string AssemblyPath { get; set; }
+   public PluginRuntimeInfo RuntimeInfo { get; set; } = null!;
+   public string AssemblyPath { get; set; } = null!;
    public bool Initialize(IPluginHost host) => throw new NotImplementedException();
 
    public void OnEnable()
@@ -77,11 +77,11 @@ public class ExamplePlugin : IPlugin
 public class TheMotherOfAllPluginNamesIsHere : IPlugin
 {
    public Guid Guid { get; } = Guid.NewGuid();
-   public Version PluginVersion { get; }
-   public Version RequiredHostVersion { get; }
+   public Version PluginVersion { get; } = null!;
+   public Version RequiredHostVersion { get; } = null!;
    public string Name { get; } = "TheMotherOfAllPlugins";
-   public string Author { get; }
-   public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; }
+   public string Author { get; } = null!;
+   public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; } = null!;
    public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
    {
       throw new NotImplementedException();
@@ -89,8 +89,8 @@ public class TheMotherOfAllPluginNamesIsHere : IPlugin
 
    public PluginStatus Status { get; set; }
    public bool IsActive { get; set; }
-   public PluginRuntimeInfo RuntimeInfo { get; set; }
-   public string AssemblyPath { get; set; }
+   public PluginRuntimeInfo RuntimeInfo { get; set; } = null!;
+   public string AssemblyPath { get; set; } = null!;
    public bool Initialize(IPluginHost host) => throw new NotImplementedException();
 
    public void OnEnable()

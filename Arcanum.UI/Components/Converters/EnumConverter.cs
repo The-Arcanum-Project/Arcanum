@@ -85,5 +85,4 @@ public class EnumValueConverter : IValueConverter
       return enumWithDescription.Value;
    }
 
-   private static bool IsSingleBit(long value) => (value & (value - 1)) == 0;
 }

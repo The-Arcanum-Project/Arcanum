@@ -1,10 +1,8 @@
-﻿using System.ComponentModel;
-using Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
-using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
@@ -51,6 +49,7 @@ public partial class PopType(string name,
 
    public override int GetHashCode()
    {
+      // ReSharper disable once NonReadonlyMemberInGetHashCode
       return Name.GetHashCode();
    }
 

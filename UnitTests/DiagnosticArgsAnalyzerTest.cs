@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.Testing.Verifiers;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
+// ReSharper disable RedundantNameQualifier
+
 namespace UnitTests;
 
 [TestFixture]
@@ -11,6 +13,7 @@ namespace UnitTests;
 public class DiagnosticArgsAnalyzerTest
 {
    [Test]
+   [Obsolete("Obsolete")]
    public async Task TooFewArguments_ShouldTriggerDiagnostic()
    {
       var testCode = @"
@@ -38,7 +41,7 @@ class C
 }";
 
       var expected = new DiagnosticResult("DA001", DiagnosticSeverity.Error)
-                    .WithSpan(16, 9, 16, 56)  // line/column of the CreateAndHandle call
+                    .WithSpan(16, 9, 16, 56) // line/column of the CreateAndHandle call
                     .WithArguments("2", "1");
 
       var test = new CSharpAnalyzerTest<DiagnosticArgsAnalyzer.DiagnosticArgsAnalyzer, NUnitVerifier>
@@ -66,6 +69,7 @@ class C
    }
 
    [Test]
+   [Obsolete("Obsolete")]
    public async Task CorrectNumberOfArguments_ShouldNotTriggerDiagnostic()
    {
       var testCode = @"

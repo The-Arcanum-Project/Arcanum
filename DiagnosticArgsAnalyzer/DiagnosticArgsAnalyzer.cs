@@ -87,12 +87,10 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
          var providedArgs = args.Count - 3; // after context, descriptor, action
 
          if (requiredArgs != providedArgs)
-         {
             context.ReportDiagnostic(Diagnostic.Create(Rule,
                                                        invocation.GetLocation(),
                                                        requiredArgs,
                                                        providedArgs));
-         }
       }
    }
 

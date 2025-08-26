@@ -42,7 +42,7 @@ public class TreeHistoryManager : IHistoryManager
    private Timer? _updateToolStripTimer;
    private DateTime _nextCompactionTime = DateTime.Now;
 
-   public void Add(ICommand command) => AddCommand(command, HistoryEntryType.Normal);
+   public void Add(ICommand command) => AddCommand(command);
 
    /// <summary>
    /// Adds a new command to the history with the specified entry type.

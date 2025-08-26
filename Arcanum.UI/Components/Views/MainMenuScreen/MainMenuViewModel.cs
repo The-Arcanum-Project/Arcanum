@@ -176,10 +176,8 @@ public class MainMenuViewModel : ObservableObject
 
       if (AppData.MainMenuScreenDescriptor.ProjectFiles
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
-      {
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                  StringComparison.OrdinalIgnoreCase));
-      }
+                                                                     StringComparison.OrdinalIgnoreCase));
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 

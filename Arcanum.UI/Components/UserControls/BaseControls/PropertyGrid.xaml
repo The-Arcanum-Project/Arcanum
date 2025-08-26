@@ -1,15 +1,12 @@
 ﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.PropertyGrid"
              xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
              xmlns:propItem = "clr-namespace:Arcanum.Core.Utils.DelayedEvents;assembly=Arcanum.Core"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
              xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
-             xmlns:propertyGrid = "clr-namespace:Arcanum.UI.Components.UserControls.PropertyGrid"
-             xmlns:win = "clr-namespace:System.Drawing;assembly=System.Drawing.Primitives"
-             xmlns:global = "clr-namespace:;assembly=Arcanum.Core">
+             xmlns:propertyGrid = "clr-namespace:Arcanum.UI.Components.UserControls.PropertyGrid">
 
 
     <UserControl.Resources>
@@ -69,6 +66,7 @@
 
         <DataTemplate x:Key = "EnumTemplate"
                       DataType = "{x:Type propItem:PropertyItem}">
+            <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
             <ComboBox ItemsSource = "{Binding Type, Converter={StaticResource EnumValuesConverter}}"
                       SelectedItem = "{Binding Value,Converter={StaticResource EnumValueConverter}, Mode=TwoWay}"
                       Margin = "1, 1, 4, 1"
@@ -81,6 +79,7 @@
                            BasedOn = "{StaticResource BorderlessComboboxStyle}">
                         <Setter Property = "ItemContainerStyle">
                             <Setter.Value>
+                                <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                                 <Style TargetType = "ComboBoxItem"
                                        BasedOn = "{StaticResource BaseComboBoxItemStyle}">
                                     <Setter Property = "ToolTip"

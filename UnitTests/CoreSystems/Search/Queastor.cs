@@ -6,7 +6,7 @@ namespace UnitTests.CoreSystems.Search;
 public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISearchable
 {
    public string GetNamespace => string.Empty;
-   public string ResultName { get; }
+   public string ResultName { get; } = null!;
    public List<string> SearchTerms { get; set; } = terms.ToList();
 
    public void OnSearchSelected()
@@ -14,8 +14,8 @@ public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISe
    }
 
    public float GetRelevanceScore(string query) => relevance;
-   public ISearchResult VisualRepresentation { get; }
-   public IQueastorSearchSettings.Category SearchCategory { get; }
+   public ISearchResult VisualRepresentation { get; } = null!;
+   public IQueastorSearchSettings.Category SearchCategory { get; } = IQueastorSearchSettings.Category.All;
 }
 
 [TestFixture]

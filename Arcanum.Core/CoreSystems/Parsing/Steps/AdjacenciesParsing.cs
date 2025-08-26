@@ -143,7 +143,6 @@ public class AdjacencyFileLoading : FileLoadingService
    {
       Globals.Adjacencies.Clear();
       Globals.Adjacencies.TrimExcess();
-      var sqrt = Math.Sqrt(2342);
       return true;
    }
 }

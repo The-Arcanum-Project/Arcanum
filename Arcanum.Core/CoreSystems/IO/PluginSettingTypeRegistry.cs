@@ -35,10 +35,8 @@ public static class PluginSettingTypeRegistry
             if (attribute != null)
             {
                if (!SKeyToTypeMap.TryAdd(attribute.Key, type))
-               {
                   throw new
                      InvalidOperationException($"Duplicate plugin setting key '{attribute.Key}' detected on type '{type.FullName}'.");
-               }
 
                STypeToKeyMap.TryAdd(type, attribute.Key);
                Console.WriteLine($"Registered plugin setting: '{attribute.Key}' -> {type.FullName}");

@@ -1,17 +1,16 @@
-﻿using System.Windows.Controls;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using System.Windows.Navigation;
 using Common;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 
-public partial class AttributionsViewModel : UserControl
+public partial class AttributionsViewModel
 {
    public AttributionsViewModel()
    {
       InitializeComponent();
       
-      BBY40LicenseLink.RequestNavigate += Hyperlink_OnRequestNavigate;
+      Bby40LicenseLink.RequestNavigate += Hyperlink_OnRequestNavigate;
    }
 
    private void Hyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -21,6 +20,6 @@ public partial class AttributionsViewModel : UserControl
 
    private void BBY40LicenseLink_OnMouseUp(object sender, MouseButtonEventArgs e)
    {
-      ProcessHelper.OpenLink(BBY40LicenseLink.NavigateUri.AbsolutePath);
+      ProcessHelper.OpenLink(Bby40LicenseLink.NavigateUri.AbsolutePath);
    }
 }

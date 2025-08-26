@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
+// ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace Arcanum.Core.GameObjects.Pops;
 
@@ -16,7 +17,7 @@ public partial class Pop(PopType type,
 
    public override string ToString()
    {
-      return $"{Type?.Name} ({Size})";
+      return $"{Type.Name} ({Size})";
    }
 
    public static IEnumerable<Pop> GetGlobalItems() => Globals.Locations.Values.SelectMany(l => l.Pops);

@@ -35,13 +35,9 @@ public class QueueDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TVal
         set
         {
             if (_dictionary.TryGetValue(key, out var node))
-            {
-                node.Value = new KeyValuePair<TKey, TValue>(key, value);
-            }
+                node.Value = new(key, value);
             else
-            {
                 Enqueue(key, value);
-            }
         }
     }
 
@@ -53,11 +49,9 @@ public class QueueDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TVal
     public void Enqueue(TKey key, TValue value)
     {
         if (_dictionary.ContainsKey(key))
-        {
             throw new ArgumentException("An element with the same key already exists.", nameof(key));
-        }
 
-        var node = new LinkedListNode<KeyValuePair<TKey, TValue>>(new KeyValuePair<TKey, TValue>(key, value));
+        var node = new LinkedListNode<KeyValuePair<TKey, TValue>>(new(key, value));
         _linkedList.AddLast(node);
         _dictionary.Add(key, node);
     }
@@ -69,9 +63,7 @@ public class QueueDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TVal
     public KeyValuePair<TKey, TValue> Dequeue()
     {
         if (_linkedList.First == null)
-        {
             throw new InvalidOperationException("The QueueDictionary is empty.");
-        }
 
         var node = _linkedList.First;
         _linkedList.RemoveFirst();
@@ -86,9 +78,7 @@ public class QueueDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TVal
     public KeyValuePair<TKey, TValue> Peek()
     {
         if (_linkedList.First == null)
-        {
             throw new InvalidOperationException("The QueueDictionary is empty.");
-        }
 
         return _linkedList.First.Value;
     }

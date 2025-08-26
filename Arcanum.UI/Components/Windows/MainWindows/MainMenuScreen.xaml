@@ -59,7 +59,6 @@
                              Margin = "40,0,40,10"
                              Content = "Home"
                              Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
                              FontSize = "14"
                              Command = "{Binding HomeVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
@@ -67,7 +66,6 @@
                              Margin = "40,0,40,10"
                              Content = "Arcanum"
                              Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
                              FontSize = "14"
                              Command = "{Binding ArcanumVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
@@ -82,21 +80,18 @@
                              Margin = "40,0,40,10"
                              Content = "Modforge"
                              Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
                              FontSize = "14"
                              Command = "{Binding ModforgeVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
                 <RadioButton Margin = "40,0,40,10"
                              Content = "About Us"
                              Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
                              FontSize = "14"
                              Command = "{Binding AboutUsVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
                 <RadioButton Margin = "40,0,40,10"
                              Content = "Attributions"
                              Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
                              FontSize = "14"
                              Command = "{Binding AttributionsVc}"
                              Style = "{StaticResource MenuButtonTheme}" />

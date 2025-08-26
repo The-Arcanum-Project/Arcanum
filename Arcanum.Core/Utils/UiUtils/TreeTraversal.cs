@@ -10,13 +10,11 @@ public static class TreeTraversal
       if (parent == null)
          return null;
 
-      for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+      for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
       {
          var child = VisualTreeHelper.GetChild(parent, i);
          if (child is T typedChild)
-         {
             return typedChild;
-         }
 
          var result = FindVisualChild<T>(child);
          if (result != null)

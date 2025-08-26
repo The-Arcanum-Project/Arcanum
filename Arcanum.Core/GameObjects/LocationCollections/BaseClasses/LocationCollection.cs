@@ -103,12 +103,10 @@ public abstract class LocationCollection<T>(FileInformation fileInfo, string nam
       List<LocationComposite> toAdd = [];
       var count = composites.Count;
       foreach (var composite in composites)
-      {
          if (_subCollection.Contains(composite))
             count--;
          else
             toAdd.Add(composite);
-      }
 
       var command = GetAddCommand(this, addToGlobal, toAdd);
       if (count != 0)

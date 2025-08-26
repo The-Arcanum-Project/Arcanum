@@ -1,11 +1,10 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using Arcanum.Core.Utils.Git;
 using Common;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 
-public partial class AboutUsViewModel : UserControl
+public partial class AboutUsViewModel
 {
    public AboutUsViewModel()
    {

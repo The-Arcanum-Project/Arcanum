@@ -6,9 +6,9 @@ namespace Arcanum.Core.CoreSystems.Queastor;
 
 public class SimpleCollectionViewFilterProvider : ICollectionViewFilterProvider
 {
-   public new static Predicate<object> GenerateFilter(ISearchSettings settings,
-                                                      string query,
-                                                      string targetPropName = "")
+   public static Predicate<object> GenerateFilter(ISearchSettings settings,
+                                                  string query,
+                                                  string targetPropName = "")
    {
       if (settings == null)
          throw new ArgumentNullException(nameof(settings));
@@ -85,7 +85,7 @@ public class SimpleCollectionViewFilterProvider : ICollectionViewFilterProvider
       return queryParts.Any(part => input.Contains(part, StringComparison.OrdinalIgnoreCase));
    }
 
-   private static string GetSearchStringFromObject(object input, string targetPropPath)
+   private static string GetSearchStringFromObject(object? input, string targetPropPath)
    {
       if (string.IsNullOrEmpty(targetPropPath))
          return input?.ToString() ?? string.Empty;

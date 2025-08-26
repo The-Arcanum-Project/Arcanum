@@ -104,10 +104,8 @@ public static class TopologicalSort
          result.Add(current);
 
          if (dependentsMap.TryGetValue(current.Id, out var dependents))
-         {
             foreach (var depNode in dependents)
                stack.Push(depNode);
-         }
       }
 
       return result;

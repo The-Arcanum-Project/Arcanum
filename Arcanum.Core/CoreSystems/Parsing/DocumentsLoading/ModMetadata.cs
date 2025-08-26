@@ -45,5 +45,6 @@ public class ModMetadata(string name)
       return false;
    }
 
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => HashCode.Combine(Name, Id);
 }

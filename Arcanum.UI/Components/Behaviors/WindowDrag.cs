@@ -77,7 +77,7 @@ public class WindowDrag : Behavior<FrameworkElement>
             // Get the bounds of the exclusion zone relative to the AssociatedObject (the header).
             // This is crucial for correct hit-testing.
             var zoneBounds = zone.TransformToAncestor(AssociatedObject)
-                                 .TransformBounds(new Rect(0, 0, zone.ActualWidth, zone.ActualHeight));
+                                 .TransformBounds(new(0, 0, zone.ActualWidth, zone.ActualHeight));
 
             if (zoneBounds.Contains(clickPoint))
                // The click was inside an exclusion zone, so we do nothing.

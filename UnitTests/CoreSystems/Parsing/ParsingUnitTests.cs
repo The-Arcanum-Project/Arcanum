@@ -193,7 +193,7 @@ public class ElementParserTests
       var input = "key = \"value with { # and } inside\"";
 
       // Act
-      var (blocks, contents) = ElementParser.GetElements(_testPath, input);
+      var (_, contents) = ElementParser.GetElements(_testPath, input);
 
       // Assert
       Assert.That(contents, Has.Count.EqualTo(1));

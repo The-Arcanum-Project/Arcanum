@@ -22,7 +22,7 @@ public class PropGridDelayEventTests
    [Test]
    public void Should_FireEvent_AfterDelay()
    {
-      var item = CreateItem("TestProp", "val1");
+      var item = CreateItem("val1");
 
       _event.Invoke(this, new(item, "val0"));
       Thread.Sleep(100);
@@ -34,7 +34,7 @@ public class PropGridDelayEventTests
    [Test]
    public void Should_NotFire_IfValueUnchanged()
    {
-      var item = CreateItem("TestProp", "same");
+      var item = CreateItem("same");
 
       _event.Invoke(this, new(item, "same"));
       Thread.Sleep(100);
@@ -58,7 +58,7 @@ public class PropGridDelayEventTests
    [Test]
    public void Should_TrackOriginalOldValue()
    {
-      var item = CreateItem("TestProp", "val2");
+      var item = CreateItem("val2");
 
       _event.Invoke(this, new(item, "original"));
       Thread.Sleep(600);
@@ -73,7 +73,7 @@ public class PropGridDelayEventTests
    public void Should_CancelOnRevertToOriginalValue()
    {
       _calls.Clear();
-      var item = CreateItem("TestProp", "start");
+      var item = CreateItem("start");
 
       _event.Invoke(this, new(item, "start"));
       Thread.Sleep(30);
@@ -86,7 +86,7 @@ public class PropGridDelayEventTests
    [Test]
    public void Dispose_ShouldPreventFiring()
    {
-      var item = CreateItem("TestProp", "abc");
+      var item = CreateItem("abc");
 
       _event.Invoke(this, new(item, "xyz"));
       _event.Dispose();
@@ -95,10 +95,10 @@ public class PropGridDelayEventTests
       Assert.That(_calls, Is.Empty);
    }
 
-   private static PropertyItem CreateItem(string propName, object? value)
+   private static PropertyItem CreateItem(object? value)
    {
       var propInfo = typeof(Dummy).GetProperty(nameof(Dummy.Value))!;
-      return new(propInfo, typeof(object), () => value, v => { value = v; }, "TestCategory");
+      return new(propInfo, typeof(object), () => value!, v => { value = v; }, "TestCategory");
    }
 
    private class Dummy

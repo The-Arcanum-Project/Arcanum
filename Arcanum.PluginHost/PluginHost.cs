@@ -17,13 +17,7 @@ public class PluginHost : IPluginHost
    private readonly Dictionary<Type, IService> _services = new();
 
    // Required services for the host to be functional and valid.
-   private readonly ISettingsUiService _uiSettingsService;
-
-   public PluginHost()
-   {
-      // TODO use WPF instead of WinForms
-      //_uiSettingsService = uiSettingsService ?? throw new ArgumentNullException(nameof(uiSettingsService), "UI Settings Service cannot be null.");
-   }
+   private readonly ISettingsUiService _uiSettingsService = null!;
 
    public void RegisterDefaultServices()
    {

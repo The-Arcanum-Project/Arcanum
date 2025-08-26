@@ -10,7 +10,7 @@ namespace Arcanum.UI.Components.UserControls;
 public class SearchableMenuItem : MenuItem, ISearchable
 {
    public string GetNamespace { get; private set; } = string.Empty;
-   public string ResultName { get; private set; }
+   public string ResultName { get; private set; } = null!;
 
    public List<string> SearchTerms { get; set; } = [];
    // is modified via Xaml
@@ -52,9 +52,7 @@ public class SearchableMenuItem : MenuItem, ISearchable
       while (parent != null)
       {
          if (!parent.IsSubmenuOpen)
-         {
             parent.IsSubmenuOpen = true;
-         }
 
          parent = GetParentMenuItem(parent);
       }

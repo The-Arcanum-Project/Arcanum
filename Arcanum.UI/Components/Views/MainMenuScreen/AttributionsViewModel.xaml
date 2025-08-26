@@ -39,7 +39,7 @@
                  FontSize = "16" />
             <LineBreak />
             <Run Text = "- " />
-            <Hyperlink x:Name = "BBY40LicenseLink"
+            <Hyperlink x:Name = "Bby40LicenseLink"
                        NavigateUri = "https://creativecommons.org/licenses/by/4.0"
                        RequestNavigate = "Hyperlink_OnRequestNavigate"
                        MouseUp = "BBY40LicenseLink_OnMouseUp">

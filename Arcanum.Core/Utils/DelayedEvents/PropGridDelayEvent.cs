@@ -48,7 +48,7 @@ public class PropGridDelayEvent : DelayedEvent<PropertyValueChangedEventArgs>
       }
    }
 
-   private new void OnElapsed()
+   private void OnElapsed()
    {
       object? sender;
 
@@ -61,7 +61,7 @@ public class PropGridDelayEvent : DelayedEvent<PropertyValueChangedEventArgs>
             return;
 
          var firstOldValue = _firstInvocationValues
-                            .FirstOrDefault(kvp => kvp.Key == LastEventArgs.ChangedItem?.PropertyInfo?.Name)
+                            .FirstOrDefault(kvp => kvp.Key == LastEventArgs.ChangedItem?.PropertyInfo.Name)
                             .Value;
 
          var newArgs = new PropertyValueChangedEventArgs(LastEventArgs.ChangedItem,

@@ -35,7 +35,7 @@ public class MainMenuScreenDescriptor
       if (File.Exists(path))
       {
          var json = IO.IO.ReadAllTextAnsi(path);
-         AppData.MainMenuScreenDescriptor = JsonProcessor.Deserialize<MainMenuScreenDescriptor>(json ?? string.Empty, null) ??
+         AppData.MainMenuScreenDescriptor = JsonProcessor.Deserialize<MainMenuScreenDescriptor>(json ?? string.Empty) ??
                                             new MainMenuScreenDescriptor();
       }
       else

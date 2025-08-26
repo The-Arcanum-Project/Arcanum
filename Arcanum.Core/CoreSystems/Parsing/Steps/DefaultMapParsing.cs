@@ -27,7 +27,7 @@ public class DefaultMapParsing : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
+      var (blocks, _) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
       if (blocks.Count != 7)

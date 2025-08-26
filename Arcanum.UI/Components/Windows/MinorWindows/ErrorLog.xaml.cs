@@ -117,7 +117,6 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
-   private readonly SimpleCollectionViewFilterProvider _filterProvider = new();
    private SimpleSearchSettings SearchSettings { get; set; } = new();
    private bool _isFullyLoaded;
 

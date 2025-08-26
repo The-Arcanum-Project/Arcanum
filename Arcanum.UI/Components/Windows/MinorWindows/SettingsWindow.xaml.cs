@@ -77,7 +77,6 @@ public partial class SettingsWindow
 
          var tabs = tabControl.Items.OfType<TabItem>();
          foreach (var item in tabs)
-         {
             if (item.Header.ToString()?.Equals(step) ?? false)
             {
                tabControl.SelectedItem = item;
@@ -91,8 +90,6 @@ public partial class SettingsWindow
 
                break;
             }
-
-         }
 
          i++;
       }
@@ -153,10 +150,8 @@ public partial class SettingsWindow
          if (methodInfo.ReturnType != typeof(object) ||
              parameters.Length != 1 ||
              parameters[0].ParameterType != typeof(PropertyInfo))
-         {
             throw new
                InvalidOperationException($"Method '{customMethod.MethodName}' must have signature: object Method(PropertyInfo)");
-         }
 
          newValue = methodInfo.Invoke(null, parameters: [info]);
       }

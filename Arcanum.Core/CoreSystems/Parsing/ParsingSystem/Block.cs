@@ -19,9 +19,7 @@ public class Block(string name, int startLine, int index) : IElement
    public List<Block> GetSubBlocks(bool onlyBlocks)
    {
       if (onlyBlocks && ContentElements.Count > 0)
-      {
          throw new ArgumentException("Expected no content elements in block: " + Name, nameof(onlyBlocks));
-      }
 
       return SubBlocks;
    }

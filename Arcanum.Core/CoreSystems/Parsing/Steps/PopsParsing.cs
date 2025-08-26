@@ -20,12 +20,10 @@ public class PopsParsing : FileLoadingService
       Dictionary<PopType, int> popTypes = new(Globals.PopTypes.Count);
       foreach (var pop in Globals.Locations)
          foreach (var popEntry in pop.Value.Pops)
-         {
             if (popTypes.TryGetValue(popEntry.Type, out var count))
                popTypes[popEntry.Type] = count + 1;
             else
                popTypes[popEntry.Type] = 1;
-         }
 
       return $"Pops: {popTypes.Sum(x => x.Value)} entries:\n" +
              string.Join("\n", popTypes.Select(x => $"\t{x.Key.Name,-15} ({x.Key.ColorKey,-15}): {x.Value,-5}"));
@@ -33,8 +31,6 @@ public class PopsParsing : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      var de = new DiagnosticException(ParsingError.Instance.InvalidBlockCount, []);
-
       var sw = Stopwatch.StartNew();
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
       sw.Stop();

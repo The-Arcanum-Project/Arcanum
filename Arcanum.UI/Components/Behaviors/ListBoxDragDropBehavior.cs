@@ -18,14 +18,14 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
             nameof(DragHandleExclusionType),
             typeof(Type),
             typeof(ListBoxDragDropBehavior),
-            new PropertyMetadata(null));
+            new(null));
     
     public static readonly DependencyProperty ScrollAreaHeightProperty =
         DependencyProperty.Register(
             nameof(ScrollAreaHeight),
             typeof(int),
             typeof(ListBoxDragDropBehavior),
-            new PropertyMetadata(50)); // Default scroll area height
+            new(50)); // Default scroll area height
     
     public Type DragHandleExclusionType
     {
@@ -49,7 +49,7 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
         AssociatedObject.Drop += OnDrop;
         AssociatedObject.DragOver += OnDragOver;
         AssociatedObject.QueryContinueDrag += OnQueryContinueDrag;
-        AssociatedObject.Loaded += (s, e) => _scrollViewer = TreeTraversal.FindVisualChild<ScrollViewer>(AssociatedObject);
+        AssociatedObject.Loaded += (_, _) => _scrollViewer = TreeTraversal.FindVisualChild<ScrollViewer>(AssociatedObject);
     }
 
     protected override void OnDetaching()
@@ -66,7 +66,7 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
     private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         // If an exclusion type is set (e.g., Button), check if the click was on it.
-        if (DragHandleExclusionType != null)
+        if (DragHandleExclusionType != null!)
         {
             var element = e.OriginalSource as DependencyObject;
             if (TreeTraversal.FindVisualParent(element, DragHandleExclusionType) != null)
@@ -86,16 +86,12 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
         if (_scrollViewer == null) return;
 
         const double scrollTolerance = 10; // Proximity to edge to start scrolling
-        Point mousePosition = e.GetPosition(AssociatedObject);
+        var mousePosition = e.GetPosition(AssociatedObject);
 
         if (mousePosition.Y < scrollTolerance)
-        {
             _scrollViewer.LineUp();
-        }
         else if (mousePosition.Y > AssociatedObject.ActualHeight - scrollTolerance)
-        {
             _scrollViewer.LineDown();
-        }
     }
     
     private void OnPreviewMouseMove(object sender, MouseEventArgs e)
@@ -111,9 +107,7 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
     private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
     {
         if (e.Action == DragAction.Cancel || e.Action == DragAction.Drop)
-        {
             e.Handled = true;
-        }
 
         // Always reset after drag ends (cancel or drop), regardless of target.
         _isDragging = false;
@@ -127,13 +121,11 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
         var targetItem = GetItemUnderMouse(e.GetPosition(AssociatedObject));
 
         if (droppedData == null || targetItem == null || ReferenceEquals(droppedData, targetItem))
-        {
             return;
-        }
 
         if (AssociatedObject.ItemsSource is IList list)
         {
-            int targetIndex = list.IndexOf(targetItem);
+            var targetIndex = list.IndexOf(targetItem);
             if (targetIndex < 0) return;
 
             list.Remove(droppedData);

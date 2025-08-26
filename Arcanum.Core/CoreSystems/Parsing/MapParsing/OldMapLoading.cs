@@ -181,7 +181,7 @@ public static class OldMapLoading
       return (totalProvToId, totalColorToBorder);
    }
 
-   private static bool AddToBorder(int current,
+   private static void AddToBorder(int current,
                                    int neighbour,
                                    ref Point pixel,
                                    ref Point neighbourPixel,
@@ -189,7 +189,7 @@ public static class OldMapLoading
    {
       // We don't want to add a border to itself
       if (current == neighbour)
-         return false;
+         return;
 
       // We add the pixel to the border of the current province
 
@@ -222,7 +222,6 @@ public static class OldMapLoading
       }
 
       borderPixels.Add(neighbourPixel);
-      return true;
    }
 
    private const int ALPHA = 255 << 24;

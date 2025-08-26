@@ -23,6 +23,6 @@ public class EnumValuesToStringConverter : IValueConverter
       return "No Enum Values";
    }
 
-   public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+   public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
       => throw new NotImplementedException();
 }
