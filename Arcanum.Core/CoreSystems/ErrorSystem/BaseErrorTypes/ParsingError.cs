@@ -135,7 +135,7 @@ public class ParsingError : ILazySingleton
                                                                            "Continents must have unique names. This error indicates that a continent with the same name already exists.",
                                                                            DiagnosticReportSeverity.PopupNotify);
 
-   /// <param name="0">The blocks parent</param>
+   /// <param name="0">The blocks Name</param>
    /// <param name="1">The expected block count</param>
    /// <param name="2">The actual block count</param>
    public DiagnosticDescriptor InvalidBlockCount { get; } = new(DiagnosticCategory.Parsing,
@@ -325,6 +325,15 @@ public class ParsingError : ILazySingleton
                                                                           DiagnosticSeverity.Error,
                                                                           "Duplicate object definition found for '{0}' of type '{1}'.",
                                                                           "Objects of type '{1}' are uniquely identified by their '{2}' property.\n'{0}' Is defined multiple times which is not allowed.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The location name that is used for both start and end of the road</param>
+    public DiagnosticDescriptor InvalidRoadSameLocation { get; } = new(DiagnosticCategory.Parsing,
+                                                                          35,
+                                                                          "Invalid Road Definition - Same Location",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "Invalid road definition: start and end locations are the same ('{0}').",
+                                                                          "A road cannot connect a location to itself. Please ensure that the start and end locations are different.",
                                                                           DiagnosticReportSeverity.PopupNotify);
     
 }

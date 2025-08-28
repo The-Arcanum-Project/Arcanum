@@ -3,7 +3,9 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
-// Requires regions, areas, provinces, locations, location_ranks, climate, topography, vacation, coastal, river to be loaded first
+// Requires xregions, xareas, xprovinces, xlocations, xlocation_ranks, climate, topography, vegetation, coastal, river to be loaded first
+
+// Climate, topographyvegetation, requires new Parser
 // public class DevelopmentParsing : FileLoadingService
 // {
 //    public override List<Type> ParsedObjects { get; }

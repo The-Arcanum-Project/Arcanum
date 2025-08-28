@@ -77,12 +77,21 @@ public static class DescriptorDefinitions
                                                                      false,
                                                                      false);
    
+   public static readonly FileDescriptor RoadsAndCountriesDescriptor = new([LocationDescriptor],
+                                                                     ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
+                                                                     ISavingService.Dummy,
+                                                                     new("10_countries_and_roads", "txt", "#"),
+                                                                     new RoadsAndCountriesParsing(),
+                                                                     false,
+                                                                     false);
+   
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
+         RoadsAndCountriesDescriptor,
       ];
    }
 }

@@ -57,9 +57,25 @@ public class NUISettings
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting LocationRankSettings { get; set; } = new(LocationRank.Field.Name,
+                                                              Enum.GetValues<LocationRank.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<LocationRank.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<LocationRank.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray());
+
+   public NUISetting RoadSettings { get; set; } = new(Road.Field.StartLocation,
+                                                      Enum.GetValues<Road.Field>().Cast<Enum>().ToArray(),
+                                                      Enum.GetValues<Road.Field>().Cast<Enum>().ToArray(),
+                                                      Enum.GetValues<Road.Field>().Cast<Enum>().ToArray());
    
-    public NUISetting LocationRankSettings { get; set; } = new(LocationRank.Field.Name,
-                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray(),
-                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray(),
-                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray());
+   public NUISetting CountrySettings { get; set; } = new(Country.Field.Tag,
+                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray());
 }
