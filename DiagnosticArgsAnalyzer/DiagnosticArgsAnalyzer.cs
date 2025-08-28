@@ -95,7 +95,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
       if (creation == null)
          return;
 
-      // Extract the message string (5th argument)
+      // Extract the message string and description string from the descriptor creation.
       if (creation.ArgumentList?.Arguments.Count >= 5)
       {
          var message = creation.ArgumentList.Arguments[4].ToString().Trim('"');
@@ -107,9 +107,32 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 
          var requiredArgs = max + 1;
          var providedArgs = 0;
-         var paramsIndex = paramsParameter.Ordinal;
-         if (args.Count > paramsIndex)
-            providedArgs = args.Count - paramsIndex;
+
+         // Check if the 'params' argument was passed by name (e.g., args: ...).
+         var namedParamsArgument = args.FirstOrDefault(a => a.NameColon?.Name.Identifier.Text == paramsParameter.Name);
+
+         if (namedParamsArgument != null)
+         {
+            // Path A: The argument was named.
+
+            providedArgs = namedParamsArgument.Expression switch
+            {
+               // Passed as an explicit array: args: new object[] { "a", "b" }
+               ArrayCreationExpressionSyntax arrayCreation => arrayCreation.Initializer?.Expressions.Count ?? 0,
+               // Passed as an implicit array: args: new[] { "a", "b" }
+               ImplicitArrayCreationExpressionSyntax implicitArray => implicitArray.Initializer?.Expressions.Count ?? 0,
+               // A collection expression's children are its elements.
+               CollectionExpressionSyntax collectionExpression => collectionExpression.Elements.Count,
+               _ => 1,
+            };
+         }
+         else
+         {
+            // Path B: The arguments are passed positionally (the original logic).
+            var paramsIndex = paramsParameter.Ordinal;
+            if (args.Count > paramsIndex)
+               providedArgs = args.Count - paramsIndex;
+         }
 
          if (requiredArgs != providedArgs)
          {
