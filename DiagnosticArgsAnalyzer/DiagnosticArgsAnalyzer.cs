@@ -12,7 +12,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 {
    private static readonly DiagnosticDescriptor Rule = new("DA001",
                                                            "Incorrect diagnostic arguments",
-                                                           "Descriptor expects {0} arguments but call provides {1}",
+                                                           "Descriptor message format expects '{0}' arguments but call provides '{1}'",
                                                            "Usage",
                                                            DiagnosticSeverity.Error,
                                                            isEnabledByDefault: true);
@@ -26,17 +26,36 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
       context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
    }
 
+   private static readonly ImmutableHashSet<string> TargetMethodNames =
+      ImmutableHashSet.Create("LogWarning", "CreateAndHandle");
+
    private void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
    {
       var invocation = (InvocationExpressionSyntax)context.Node;
 
-      // Only analyze CreateAndHandle calls
-      var symbol = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-      if (symbol is not { Name: "LogWarning" })
+      if (context.SemanticModel.GetSymbolInfo(invocation).Symbol is not IMethodSymbol methodSymbol)
+         return;
+
+      // --- Step 2: Check if the method is one we care about ---
+      if (!TargetMethodNames.Contains(methodSymbol.Name))
+         return;
+
+      // --- Step 3: Find the parameters we need from the method's signature ---
+      var descriptorParameter =
+         methodSymbol.Parameters.FirstOrDefault(p => p.Type.Name == nameof(DiagnosticDescriptor));
+      var paramsParameter =
+         methodSymbol.Parameters.FirstOrDefault(p => p.IsParams &&
+                                                     p.Type is IArrayTypeSymbol
+                                                     {
+                                                        ElementType.SpecialType: SpecialType.System_Object
+                                                     });
+
+      // If the method doesn't have the required parameters, it's not the one we're looking for.
+      if (descriptorParameter == null || paramsParameter == null)
          return;
 
       var args = invocation.ArgumentList.Arguments;
-      if (args.Count < 2)
+      if (args.Count <= descriptorParameter.Ordinal)
          return;
 
       var descriptorExpr = args[1].Expression;
@@ -84,7 +103,10 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
          MaxArgumentsInString(description, ref max);
 
          var requiredArgs = max + 1;
-         var providedArgs = args.Count - 3; // after context, descriptor, action
+         var providedArgs = 0;
+         var paramsIndex = paramsParameter.Ordinal;
+         if (args.Count > paramsIndex)
+            providedArgs = args.Count - paramsIndex;
 
          if (requiredArgs != providedArgs)
             context.ReportDiagnostic(Diagnostic.Create(Rule,
