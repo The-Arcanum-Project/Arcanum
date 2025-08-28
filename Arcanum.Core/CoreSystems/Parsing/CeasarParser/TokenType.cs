@@ -28,6 +28,7 @@ public enum TokenType
    AtIdentifier,   // @my_variable
    String,         // "Hello, World!"
    Number,         // 123, 45.67
+   Date,           // 2023.10.05
 
    // Keywords
    Yes,            // yes
@@ -36,5 +37,5 @@ public enum TokenType
    // Control
    Comment,        // # this is a comment (usually skipped)
    EndOfFile,      // EOF
-   Unexpected      // For error handling
+   Unexpected,     // For error handling
 }

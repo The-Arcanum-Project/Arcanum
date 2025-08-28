@@ -9,7 +9,7 @@
                          Title = "ParserTest"
                          Height = "500"
                          Width = "1200"
-                         WindowStartupLocation="CenterScreen">
+                         WindowStartupLocation = "CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "3*" />
@@ -27,6 +27,7 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
+                <ColumnDefinition Width = "500" />
                 <ColumnDefinition Width = "80" />
                 <ColumnDefinition Width = "80" />
             </Grid.ColumnDefinitions>
@@ -34,21 +35,29 @@
             <ComboBox
                 ItemsSource = "{Binding FilesToTestValues, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                 SelectedItem = "{Binding SelectedFile, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                Margin="3"
-                VerticalAlignment="Center"/>
-            
+                Margin = "3"
+                VerticalAlignment = "Center" />
+
+            <styleClasses:CorneredTextBox Grid.Column = "1"
+                                          VerticalAlignment = "Center"
+                                          Margin = "3"
+                                          FontFamily = "Consolas"
+                                          FontSize = "11"
+                                          Text = "{Binding Time, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
+            </styleClasses:CorneredTextBox>
+
             <styleClasses:BaseButton Content = "Run Lexer"
-                    Grid.Column = "1"
-                    Margin = "3"
-                    VerticalAlignment = "Center"
-                    Click="RunLexer_ButtonClick"/>
-            
+                                     Grid.Column = "2"
+                                     Margin = "3"
+                                     VerticalAlignment = "Center"
+                                     Click = "RunLexer_ButtonClick" />
+
             <styleClasses:BaseButton Content = "Run Parser"
-                    Grid.Column = "2"
-                    Margin = "3"
-                    VerticalAlignment = "Center"
-                    Click="RunParser_ButtonClick"/>
-            
+                                     Grid.Column = "3"
+                                     Margin = "3"
+                                     VerticalAlignment = "Center"
+                                     Click = "RunParser_ButtonClick" />
+
         </Grid>
 
         <styleClasses:CorneredTextBox x:Name = "InputTextBox"

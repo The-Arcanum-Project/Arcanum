@@ -336,4 +336,24 @@ public class ParsingError : ILazySingleton
                                                                           "A road cannot connect a location to itself. Please ensure that the start and end locations are different.",
                                                                           DiagnosticReportSeverity.PopupNotify);
     
+    /// <param name="0">The line number where the syntax error occurred</param>
+    /// <param name="1">The column number where the syntax error occurred</param>
+    /// <param name="2">The unexpected token that caused the syntax error</param>
+    /// <param name="3">The expected token or tokens</param>
+    public DiagnosticDescriptor SyntaxError { get; } = new(DiagnosticCategory.Parsing,
+                                                            36,
+                                                            "Syntax Error",
+                                                            DiagnosticSeverity.Error,
+                                                            "Syntax Error on line {0}:{1}: Unexpected token '{2}'.",
+                                                            "Expected {3}.",
+                                                            DiagnosticReportSeverity.PopupNotify);
+    
+    public DiagnosticDescriptor UnexpectedToken { get; } = new(DiagnosticCategory.Parsing,
+                                                            37,
+                                                            "Unexpected Token",
+                                                            DiagnosticSeverity.Error,
+                                                            "Unexpected token '{0}' in line {1}:{2}.",
+                                                            "The parser encountered a token that was not expected in the current context. Please check the syntax and structure of the input.",
+                                                            DiagnosticReportSeverity.PopupNotify);
+    
 }
