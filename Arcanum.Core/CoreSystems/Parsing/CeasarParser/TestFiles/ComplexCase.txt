@@ -1,0 +1,38 @@
+﻿default_block = {
+    title = "MainConfig"
+    width = 1280
+    height = 720
+    min_width <= 640
+    max_width >= 1920
+    fullscreen ?= no
+    scale = @[ 2 * 3 + 1 ]
+
+    graphics = {
+        vsync = yes
+        quality = high
+    } graphics = {
+        vsync = yes
+        quality = high
+    }
+
+
+    colors = {
+        background = rgb { 0, 0, 0 }
+        highlight = hsv { 0.8, 0.6, 0.9 }
+    }
+
+    audio
+    {
+        volume = 80
+        mute = no
+    }
+    
+    {
+        block = {
+            key = value
+        }
+        block2 = {
+            key2 = value2
+        }
+    }
+}

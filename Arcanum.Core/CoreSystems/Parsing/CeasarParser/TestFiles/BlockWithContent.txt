@@ -1,0 +1,4 @@
+﻿default_block = {
+    width = 1024
+    location:wuerzburg = hello
+}

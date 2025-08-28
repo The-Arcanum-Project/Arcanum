@@ -151,8 +151,8 @@
 
 
         <!-- Command Bindings for Debug Loading Triggers -->
-        <CommandBinding Command = "mainWindow:MwCommands.LoadLocationsCommand"
-                        Executed = "LoadLocationsCommand_OnExecuted"
+        <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer"
+                        Executed = "ExecuteLexer"
                         CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for Navigation Buttons -->
@@ -335,7 +335,7 @@
                                            Command = "mainWindow:MwCommands.ViewINUIObjectsCommand" />
                     <Separator />
                     <uc:SearchableMenuItem Header = "Load Locations"
-                                           Command = "mainWindow:MwCommands.LoadLocationsCommand" />
+                                           Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
             </Menu>
         </StackPanel>

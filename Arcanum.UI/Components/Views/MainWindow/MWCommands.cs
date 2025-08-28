@@ -134,7 +134,7 @@ public static class MwCommands
       };
 
    // Debug Commands
-   public static readonly RoutedCommand LoadLocationsCommand = new("OpenLoadingWindowCommand",
+   public static readonly RoutedCommand ExecuteLexer = new("OpenLoadingWindowCommand",
                                                                    typeof(MainWindowView))
    {
       InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },

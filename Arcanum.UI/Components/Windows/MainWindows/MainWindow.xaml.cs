@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
@@ -246,8 +247,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       new UIElementsBrowser().ShowDialog();
    }
 
-   private void LoadLocationsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   private void ExecuteLexer(object sender, ExecutedRoutedEventArgs e)
    {
+      var lexerWindow = new ParserTest();
+      lexerWindow.ShowDialog();
    }
 
    private void GlobalsBrowserCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
