@@ -26,7 +26,7 @@ public class AdjacencyFileLoading : FileLoadingService
          DiagnosticException.CreateAndHandle(new(0, 0, fileObj.Path.FullPath),
                                              IOError.Instance.FileReadingError,
                                              GetActionName(),
-                                             args: fileObj.Path.FullPath);
+                                             args: [fileObj.Path.FullPath]);
          return false;
       }
 

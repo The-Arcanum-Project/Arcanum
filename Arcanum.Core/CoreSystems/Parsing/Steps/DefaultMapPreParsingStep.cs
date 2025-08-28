@@ -34,18 +34,19 @@ public class DefaultMapPreParsingStep : FileLoadingService
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      
       var (_, elements) = ElementParser.GetElements(fileObj.Path);
       var dmd = new DefaultMapDefinition();
-      
+
       ParseDefaultMapElements(elements, fileObj.Path, dmd, GetActionName());
       Globals.DefaultMapDefinition = dmd;
-      
+
       return dmd.IsValid();
    }
-   
-   
-   public static void ParseDefaultMapElements(List<Content> contents, PathObj po, DefaultMapDefinition dmd, string actionName)
+
+   public static void ParseDefaultMapElements(List<Content> contents,
+                                              PathObj po,
+                                              DefaultMapDefinition dmd,
+                                              string actionName)
    {
       if (contents.Count == 0)
       {
@@ -83,13 +84,8 @@ public class DefaultMapPreParsingStep : FileLoadingService
                dmd.LocationsTemplates = kvp.Value;
                break;
             case "wrap_x":
-               if (ParsingUtil.TryParseBool(kvp.Value, out var wrapX))
-                  dmd.WrapX = wrapX;
-               else
-                  DiagnosticException.LogWarning(LocationContext.Empty,
-                                                 ParsingError.Instance.BoolParsingError,
-                                                 actionName,
-                                                 kvp.Value);
+               ValuesParsing.ParseBool(kvp.Value, LocationContext.Empty, actionName, out var wrapX);
+               dmd.WrapX = wrapX;
                break;
             case "equator_y":
                if (int.TryParse(kvp.Value, out var equatorY))
@@ -115,7 +111,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
                                         actionName);
          dmd.SetDefaultValues();
       }
-      
+
       // Set the values for the file names to the matching DescriptorDefinitions
       //DescriptorDefinitions.MapDescriptor.LocalPath[^1] = dmd.ProvinceFileName.TrimQuotes();
       //DescriptorDefinitions.RiverDescriptor.LocalPath[^1] = dmd.Rivers.TrimQuotes();
@@ -124,7 +120,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
       DescriptorDefinitions.DefinitionsDescriptor.SetPathFileName(dmd.Setup.TrimQuotes());
       //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports.TrimQuotes();
       //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates.TrimQuotes();
-      
+
       Globals.DefaultMapDefinition = dmd;
    }
 

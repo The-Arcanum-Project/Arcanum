@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.Utils.Parsing;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class LocationChecks
 {

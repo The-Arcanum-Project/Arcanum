@@ -9,31 +9,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class ParsingUtil
 {
-   public static bool TryParseBool(string value, out bool result)
-   {
-      if (string.IsNullOrWhiteSpace(value))
-      {
-         result = false;
-         return false;
-      }
-
-      value = value.Trim().ToLowerInvariant();
-      if (string.Equals(value, "yes", StringComparison.Ordinal))
-      {
-         result = true;
-         return true;
-      }
-
-      if (string.Equals(value, "no", StringComparison.Ordinal))
-      {
-         result = false;
-         return true;
-      }
-
-      result = false;
-      return false;
-   }
-
+   
    public static List<Location> ParseLocationList(Content content, LocationContext ctx)
    {
       List<Location> locations = [];

@@ -69,12 +69,20 @@ public static class DescriptorDefinitions
                                                                      false,
                                                                      false);
 
+   public static readonly FileDescriptor LocationRankDescriptor = new([],
+                                                                     ["game", "in_game", "common", "location_ranks"],
+                                                                     ISavingService.Dummy,
+                                                                     new("location_ranks", "txt", "#"),
+                                                                     new LocationRankLoading(),
+                                                                     false,
+                                                                     false);
+   
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
-         AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor,
+         AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
       ];
    }
 }

@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.Utils.Parsing;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class GetKeyValues
 {
@@ -43,6 +43,17 @@ public static class GetKeyValues
             }
    }
 
+   /// <summary>
+   /// Finds the values for the specified keys in the provided list of content elements. <br/>
+   /// Values can be marked as optional by prefixing the key with a '?' character.<br/>
+   /// If an optional key is not found, its value will be set to string.Empty.<br/>
+   /// If a required key is not found, a warning will be logged.
+   /// </summary>
+   /// <param name="contents"></param>
+   /// <param name="keys"></param>
+   /// <param name="ctx"></param>
+   /// <param name="po"></param>
+   /// <returns></returns>
    public static string[] GetKeyValuesFromContents(List<Content> contents, string[] keys, LocationContext ctx, PathObj po)
    {
       if (keys.Length == 0)
@@ -56,6 +67,9 @@ public static class GetKeyValues
       for (var i = 0; i < keys.Length; i++)
       {
          if (!string.IsNullOrEmpty(keyValues[i]))
+            continue;
+         // This value is optional
+         if (keys[i].StartsWith('?'))
             continue;
          
          keyValues[i] = string.Empty;

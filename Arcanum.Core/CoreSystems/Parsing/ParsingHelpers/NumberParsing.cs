@@ -2,7 +2,7 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
-namespace Arcanum.Core.Utils.Parsing;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class NumberParsing
 {

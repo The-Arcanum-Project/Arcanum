@@ -57,4 +57,9 @@ public class NUISettings
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray());
+   
+    public NUISetting LocationRankSettings { get; set; } = new(LocationRank.Field.Name,
+                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<LocationRank.Field>().Cast<Enum>().ToArray());
 }

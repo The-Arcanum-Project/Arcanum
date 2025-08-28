@@ -315,4 +315,16 @@ public class ParsingError : ILazySingleton
                                                                "The key '{0}' is unknown in the current context.",
                                                                "The key '{0}' with the value '{1}' is not recognized in the current parsing context.",
                                                                DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The object value that is duplicated</param>
+    /// <param name="1">The object type that is duplicated</param>
+    /// <param name="2">The property that uniquely identifies the object type</param>
+    public DiagnosticDescriptor DuplicateObjectDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                          34,
+                                                                          "Duplicate Object Definition",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "Duplicate object definition found for '{0}' of type '{1}'.",
+                                                                          "Objects of type '{1}' are uniquely identified by their '{2}' property.\n'{0}' Is defined multiple times which is not allowed.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
+    
 }
