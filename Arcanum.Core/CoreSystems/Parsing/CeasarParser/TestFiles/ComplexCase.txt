@@ -15,6 +15,9 @@
         quality = high
     }
 
+    # {
+    # lexme comment
+    # }
 
     colors = {
         background = rgb { 0, 0, 0 }

@@ -66,13 +66,13 @@ public partial class ParserTest : INotifyPropertyChanged
       var source = System.IO.File.ReadAllText(filePath);
       InputText = source;
       var lexer = new Lexer(source);
-      var tokens = lexer.ScanTokens();
+      var result = lexer.ScanTokens();
       
-      if (tokens.Count != 0)
+      if (result.Tokens.Count != 0)
       {
-         OutputText = $"--- Tokens Found ({tokens.Count}) ---\n";
-         foreach (var token in tokens)
-            OutputText += token + "\n";
+         OutputText = $"--- Tokens Found ({result.Tokens.Count}) ---\n";
+         foreach (var token in result.Tokens)
+            OutputText += token.ToString(result.Source) + "\n";
       }
       else
       {
