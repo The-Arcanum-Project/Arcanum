@@ -25,4 +25,5 @@ public static class Globals
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static List<Adjacency> Adjacencies { get; } = [];
    public static Dictionary<string, PopType> PopTypes { get; } = [];
+   public static List<LocationRank> LocationRanks { get; } = [];
 }
