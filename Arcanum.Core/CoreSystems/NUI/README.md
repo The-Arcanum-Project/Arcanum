@@ -18,7 +18,7 @@ public interface INUI : INexus, INotifyPropertyChanged
 }
 ```
 
-`INUI` requires the implementation of the `INexus` interface as well as `INotifyPropertyChanged`.
+`INUI` requires the implementation of the `INexus` [Nexus Documentation](../../../Nexus.Core/README.md) interface as well as `INotifyPropertyChanged`.
 
 Any Object that implements this interface can be used as a navigation point in the NUI system or as a source for navigation points.
 
