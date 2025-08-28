@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 {
    private static readonly DiagnosticDescriptor Rule = new("DA001",
                                                            "Incorrect diagnostic arguments",
-                                                           "Descriptor message format expects '{0}' arguments but call provides '{1}'",
+                                                           "The call provides {0} argument(s), but the descriptor expects {1}: {2}", // New format
                                                            "Usage",
                                                            DiagnosticSeverity.Error,
                                                            isEnabledByDefault: true);
@@ -58,12 +59,14 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
       if (args.Count <= descriptorParameter.Ordinal)
          return;
 
-      var descriptorExpr = args[1].Expression;
-
-      BaseObjectCreationExpressionSyntax? creation = null;
+      var descriptorExpr = args[descriptorParameter.Ordinal].Expression;
 
       // Handle local variable descriptor
       var descriptorSymbol = context.SemanticModel.GetSymbolInfo(descriptorExpr).Symbol;
+      if (descriptorSymbol == null)
+         return;
+
+      BaseObjectCreationExpressionSyntax? creation = null;
 
       var syntax = descriptorSymbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
 
@@ -109,11 +112,50 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
             providedArgs = args.Count - paramsIndex;
 
          if (requiredArgs != providedArgs)
+         {
+            var expectedParamsString = GetExpectedParamsFromDocs(descriptorSymbol!, requiredArgs);
             context.ReportDiagnostic(Diagnostic.Create(Rule,
                                                        invocation.GetLocation(),
+                                                       providedArgs,
                                                        requiredArgs,
-                                                       providedArgs));
+                                                       expectedParamsString));
+         }
       }
+   }
+
+   /// <summary>
+   /// NEW HELPER: Parses the XML doc comments of a symbol to extract parameter descriptions.
+   /// </summary>
+   private string GetExpectedParamsFromDocs(ISymbol symbol, int requiredCount)
+   {
+      var xmlDocs = symbol.GetDocumentationCommentXml();
+      if (string.IsNullOrEmpty(xmlDocs))
+         return $"<{requiredCount} unnamed arguments>";
+
+      try
+      {
+         var xml = XDocument.Parse(xmlDocs);
+         var paramElements = xml.Root?.Elements("param")
+                                .Where(p => int.TryParse(p.Attribute("name")?.Value, out _))
+                                .OrderBy(p => int.Parse(p.Attribute("name")!.Value))
+                                .Select(p => $"'{p.Value.Trim()}'")
+                                .ToList();
+
+         if (paramElements != null && paramElements.Any())
+         {
+            var joinedParams = string.Empty;
+            for (var i = 0; i < paramElements.Count; i++)
+               joinedParams += $"\n{i} : {paramElements[i]}";
+
+            return joinedParams;
+         }
+      }
+      catch
+      {
+         /* XML parsing can fail, fall back gracefully */
+      }
+
+      return $"<{requiredCount} arguments>";
    }
 
    private static void MaxArgumentsInString(string message, ref int max)
