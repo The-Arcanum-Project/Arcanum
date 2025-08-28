@@ -224,9 +224,9 @@ public class Lexer
    private char PeekNext() => _current + 1 >= _source.Length ? '\0' : _source[_current + 1];
 
    private static bool IsDigit(char c) => char.IsDigit(c);
-   private static bool IsAlpha(char c) => char.IsLetter(c) || c == '_' || c == '|';
+   private static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';
    private static bool IsAlphaNumeric(char c) => IsAlpha(c) || IsDigit(c);
-   private static bool IsIdentifierContinuationChar(char c) => IsAlphaNumeric(c) || c == ':' || c == '.';
+   private static bool IsIdentifierContinuationChar(char c) => IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
 
    #endregion
 }

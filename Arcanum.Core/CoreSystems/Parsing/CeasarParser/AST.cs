@@ -91,3 +91,22 @@ public class ScriptedStatementNode(Token keyword, Token name) : StatementNode
    public Token Name { get; } = name; // The identifier for the defined scripted token
    public List<StatementNode> Children { get; } = []; // The content inside the braces
 }
+
+/// <summary>
+/// Represents a statement that is just a key with no value, common in lists.
+/// e.g., the "stockholm" in `own_control_core = { stockholm norrtalje ... }`
+/// </summary>
+public class KeyOnlyNode(Token key) : StatementNode
+{
+   public Token Key { get; } = key;
+}
+
+/// <summary>
+/// Represents a unary expression, like a negative number.
+/// e.g., the "-10" in `offset = -10`
+/// </summary>
+public class UnaryNode(Token op, ValueNode right) : ValueNode
+{
+   public Token Operator { get; } = op;    // The operator token (e.g., '-')
+   public ValueNode Right { get; } = right; // The value being operated on
+}

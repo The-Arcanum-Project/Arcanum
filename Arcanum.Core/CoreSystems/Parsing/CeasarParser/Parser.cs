@@ -49,11 +49,15 @@ public class Parser(LexerResult lexerResult)
               or TokenType.QuestionEquals:
                return ParseContentOrBlockStatement();
          }
+         
+         
+         return new KeyOnlyNode(Advance());
       }
 
       if (Check(TokenType.AtIdentifier))
          return ParseContentOrBlockStatement();
 
+      
       DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, ""),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
@@ -116,6 +120,15 @@ public class Parser(LexerResult lexerResult)
 
    private ValueNode ParseValue()
    {
+      if (Match(TokenType.Minus))
+      {
+         var op = Previous();
+         // After the '-', we recursively call ParseValue to get the operand.
+         // This is powerful because it could handle `-(2+3)` if you extend the grammar later.
+         var right = ParseValue(); 
+         return new UnaryNode(op, right);
+      }
+      
       // An Identifier followed by a LeftBrace is a function call.
       if (Check(TokenType.Identifier) && PeekNext().Type == TokenType.LeftBrace)
          return ParseFunctionCallNode();
@@ -289,6 +302,15 @@ public class Parser(LexerResult lexerResult)
                           : block.Identifier.GetValue(source);
             sb.AppendLine($"{indent}Block: '{name}'");
             block.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
+            break;
+         
+         case UnaryNode unary:
+            sb.Append($"Unary: '{unary.Operator.GetValue(source)}' on ");
+            PrintValue(unary.Right, source, sb);
+            break;
+         
+         case KeyOnlyNode keyOnly:
+            sb.AppendLine($"{indent}Key: '{keyOnly.Key.GetValue(source)}'");
             break;
 
          case ScriptedStatementNode scripted:

@@ -82,7 +82,10 @@ public partial class ParserTest : INotifyPropertyChanged
          return;
 
       var source = System.IO.File.ReadAllText(filePath);
-      InputText = source;
+      if (source.Length < MAX_OUTPUT_LENGTH)
+         InputText = source;
+      else
+         InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
       var lexer = new Lexer(source);
 
       var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -120,7 +123,7 @@ public partial class ParserTest : INotifyPropertyChanged
          }
       }
 
-      Time += $", lines: {result.Tokens[^1].Line}|{sb.Length} chars";
+      Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
@@ -160,7 +163,10 @@ public partial class ParserTest : INotifyPropertyChanged
             return;
 
          var source = System.IO.File.ReadAllText(filePath);
-         InputText = source;
+         if (source.Length < MAX_OUTPUT_LENGTH)
+            InputText = source;
+         else
+            InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
          var lexer = new Lexer(source);
          var watch = System.Diagnostics.Stopwatch.StartNew();
          var result = lexer.ScanTokens();
@@ -180,7 +186,7 @@ public partial class ParserTest : INotifyPropertyChanged
 
          Time +=
             $", Parsing {watch.ElapsedMilliseconds} ms, Total {lexTime + watch.ElapsedMilliseconds} ms";
-         Time += $", lines: {result.Tokens[^1].Line}|{sb.Length} chars";
+         Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
       }
       catch (Exception e)
       {
