@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
@@ -27,6 +28,9 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollect
    {
       throw new NotImplementedException();
    }
+
+   [IgnoreModifiable]
+   public new ObservableRangeCollection<LocationComposite> Parents { get; set; } = [];
 
    public bool IsReadonly { get; } = false;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
