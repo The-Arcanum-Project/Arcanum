@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 
 namespace Arcanum.Core.CoreSystems.Common;
 
@@ -23,5 +24,11 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
    public override string ToString()
    {
       return $"File: {Path.GetFileName(FilePath)}, Line: {LineNumber}, Column: {ColumnNumber}";
+   }
+
+   public void SetPosition(Token token)
+   {
+      LineNumber = token.Line;
+      ColumnNumber = token.Column;
    }
 }

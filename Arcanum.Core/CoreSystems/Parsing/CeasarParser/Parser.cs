@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 
@@ -9,6 +11,28 @@ public class Parser(LexerResult lexerResult)
    private readonly string _source = lexerResult.Source;
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private int _current;
+
+   public static RootNode Parse(FileObj fileObj, out string source)
+   {
+      source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
+      if (string.IsNullOrWhiteSpace(source))
+      {
+         DiagnosticException.CreateAndHandle(new(1, 1, ""),
+                                             IOError.Instance.FileReadingError,
+                                             "AST-Building",
+                                             DiagnosticSeverity.Warning,
+                                             DiagnosticReportSeverity.PopupNotify,
+                                             fileObj.Path.FullPath);
+
+         source = string.Empty;
+         return new();
+      }
+
+      var lexer = new Lexer(source);
+      var lexerResult = lexer.ScanTokens();
+      var parser = new Parser(lexerResult);
+      return parser.Parse();
+   }
 
    public RootNode Parse()
    {
@@ -49,15 +73,13 @@ public class Parser(LexerResult lexerResult)
               or TokenType.QuestionEquals:
                return ParseContentOrBlockStatement();
          }
-         
-         
+
          return new KeyOnlyNode(Advance());
       }
 
       if (Check(TokenType.AtIdentifier))
          return ParseContentOrBlockStatement();
 
-      
       DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, ""),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
@@ -125,10 +147,10 @@ public class Parser(LexerResult lexerResult)
          var op = Previous();
          // After the '-', we recursively call ParseValue to get the operand.
          // This is powerful because it could handle `-(2+3)` if you extend the grammar later.
-         var right = ParseValue(); 
+         var right = ParseValue();
          return new UnaryNode(op, right);
       }
-      
+
       // An Identifier followed by a LeftBrace is a function call.
       if (Check(TokenType.Identifier) && PeekNext().Type == TokenType.LeftBrace)
          return ParseFunctionCallNode();
@@ -297,31 +319,31 @@ public class Parser(LexerResult lexerResult)
             break;
 
          case BlockNode block:
-            var name = block.Identifier.Type == TokenType.LeftBrace
+            var name = block.KeyNode.Type == TokenType.LeftBrace
                           ? "Array Block"
-                          : block.Identifier.GetValue(source);
+                          : block.KeyNode.GetValue(source);
             sb.AppendLine($"{indent}Block: '{name}'");
             block.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
             break;
-         
+
          case UnaryNode unary:
             sb.Append($"Unary: '{unary.Operator.GetValue(source)}' on ");
             PrintValue(unary.Right, source, sb);
             break;
-         
+
          case KeyOnlyNode keyOnly:
-            sb.AppendLine($"{indent}Key: '{keyOnly.Key.GetValue(source)}'");
+            sb.AppendLine($"{indent}Key: '{keyOnly.KeyNode.GetValue(source)}'");
             break;
 
          case ScriptedStatementNode scripted:
-            var keyword = scripted.Keyword.GetValue(source);
+            var keyword = scripted.KeyNode.GetValue(source);
             var name2 = scripted.Name.GetValue(source);
             sb.AppendLine($"{indent}ScriptedStatement: '{keyword}' on '{name2}'");
             scripted.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
             break;
 
          case ContentNode content:
-            var key = content.Key.GetValue(source);
+            var key = content.KeyNode.GetValue(source);
             var sep = content.Separator.GetValue(source);
             sb.Append($"{indent}Content: '{key}' {sep} ");
             PrintValue(content.Value, source, sb);
@@ -354,6 +376,140 @@ public class Parser(LexerResult lexerResult)
             blockVal.Children.ForEach(c => PrintAst(c, sb, "  ", source));
             break;
       }
+   }
+
+   #endregion
+
+   #region Utility Methods
+
+   public static bool VerifyNodeTypes(List<AstNode> node, Type[] allowedTypes, LocationContext ctx, string actionName)
+   {
+      var allValid = true;
+      foreach (var n in node)
+      {
+         var type = n.GetType();
+         if (allowedTypes.Contains(type))
+            continue;
+
+         DiagnosticException.LogWarning(ctx,
+                                        ParsingError.Instance.InvalidBlockType,
+                                        actionName,
+                                        n.GetLocation().Item1,
+                                        n.GetLocation().Item2,
+                                        type.Name,
+                                        string.Join(", ", allowedTypes.Select(t => t.Name)));
+         allValid = false;
+      }
+
+      return allValid;
+   }
+
+   public static bool EnforceNodeType<T>(AstNode node, LocationContext ctx, string actionName, out T? result)
+      where T : AstNode
+   {
+      if (node is not T tNode)
+      {
+         result = null;
+         var location = node.GetLocation();
+         ctx.LineNumber = location.Item1;
+         ctx.ColumnNumber = location.Item2;
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        node.GetType(),
+                                        typeof(T));
+         return false;
+      }
+
+      result = tNode;
+      return true;
+   }
+   
+   public static bool EnforceNodeCountOfType<T>(List<AstNode> nodes, int expectedCount, LocationContext ctx, string actionName, out List<T> results)
+      where T : AstNode
+   {
+      results = nodes.OfType<T>().ToList();
+      var actualCount = results.Count;
+      if (actualCount != expectedCount)
+      {
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeCountOfType,
+                                        actionName,
+                                        typeof(T).Name,
+                                        expectedCount,
+                                        actualCount);
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool EnforceNodeCountOfType<T>(List<StatementNode> nodes, int expectedCount, LocationContext ctx, string actionName, out List<T> results)
+      where T : AstNode
+   {
+      results = nodes.OfType<T>().ToList();
+      if (expectedCount == -1)
+         expectedCount = nodes.Count;
+      var actualCount = results.Count;
+      if (actualCount != expectedCount)
+      {
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeCountOfType,
+                                        actionName,
+                                        typeof(T).Name,
+                                        expectedCount,
+                                        actualCount);
+         return false;
+      }
+
+      return true;
+   }
+
+
+   public static bool GetIdentifierKvp(StatementNode node,
+                                       LocationContext ctx,
+                                       string actionName,
+                                       string source,
+                                       out string key,
+                                       out string value)
+   {
+      if (node is not ContentNode cn)
+      {
+         key = string.Empty;
+         value = string.Empty;
+         var location = node.GetLocation();
+         ctx.LineNumber = location.Item1;
+         ctx.ColumnNumber = location.Item2;
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidContentKeyOrType,
+                                        actionName,
+                                        node.GetType(),
+                                        node.GetLocation().Item1,
+                                        node.GetLocation().Item2,
+                                        "a content node");
+         return false;
+      }
+
+      if (cn.Value is not LiteralValueNode lvn || lvn.Value.Type != TokenType.Identifier)
+      {
+         key = string.Empty;
+         value = string.Empty;
+
+         ctx.LineNumber = cn.KeyNode.Line;
+         ctx.ColumnNumber = cn.KeyNode.Column;
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidContentKeyOrType,
+                                        actionName,
+                                        cn.KeyNode.GetLexeme(source),
+                                        ctx.LineNumber,
+                                        ctx.ColumnNumber,
+                                        "a string value and key");
+         return false;
+      }
+
+      key = cn.KeyNode.GetLexeme(source);
+      value = lvn.Value.GetLexeme(source);
+      return true;
    }
 
    #endregion

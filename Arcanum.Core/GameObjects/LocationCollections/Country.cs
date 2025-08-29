@@ -91,4 +91,6 @@ public partial class Country : INUI, ICollectionProvider<Country>
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Country> GetGlobalItems() => Globals.Countries.Values;
+   
+   public override string ToString() => Tag.Name;
 }

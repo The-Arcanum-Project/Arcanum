@@ -248,9 +248,9 @@ public class ParsingError : ILazySingleton
                                                                           "A key-value pair was expected to have the key '{1}', but the parser encountered the key '{0}' instead.",
                                                                           DiagnosticReportSeverity.PopupNotify);
 
-    /// <param name="0">The integer value that is out of range</param>
-    /// <param name="1">The minimum allowed value</param>
-    /// <param name="2">The maximum allowed value</param>
+   /// <param name="0">The integer value that is out of range</param>
+   /// <param name="1">The minimum allowed value</param>
+   /// <param name="2">The maximum allowed value</param>
    public DiagnosticDescriptor IntOutOfRange { get; } = new(DiagnosticCategory.Parsing,
                                                             27,
                                                             "Integer Out of Range",
@@ -258,102 +258,175 @@ public class ParsingError : ILazySingleton
                                                             "The integer value '{0}' is out of the allowed range ({1} to {2}).",
                                                             "The given integer '{0}' is outside the allowed range of {1} to {2}. Please ensure the value is within this range.",
                                                             DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The float value that is out of range</param>
-    public DiagnosticDescriptor InvalidFloatMarkup { get; } = new(DiagnosticCategory.Parsing,
-                                                               28,
-                                                               "Invalid Float Markup",
+
+   /// <param name="0">The float value that is out of range</param>
+   public DiagnosticDescriptor InvalidFloatMarkup { get; } = new(DiagnosticCategory.Parsing,
+                                                                 28,
+                                                                 "Invalid Float Markup",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "Failed to parse float value from '{0}'.",
+                                                                 "The provided string '{0}' could not be parsed as a valid float value. Please ensure it is a valid float in the format '0.00'.",
+                                                                 DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The float value that is out of range</param>
+   /// <param name="1">The minimum allowed value</param>
+   /// <param name="2">The maximum allowed value</param>
+   public DiagnosticDescriptor FloatOutOfRange { get; } = new(DiagnosticCategory.Parsing,
+                                                              29,
+                                                              "Float Out of Range",
+                                                              DiagnosticSeverity.Error,
+                                                              "The float value '{0}' is out of the allowed range ({1} to {2}).",
+                                                              "The given float '{0}' is outside the allowed range of {1} to {2}. Please ensure the value is within this range.",
+                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   public DiagnosticDescriptor InvalidBoolMarkup { get; } = new(DiagnosticCategory.Parsing,
+                                                                30,
+                                                                "Invalid Boolean Markup",
+                                                                DiagnosticSeverity.Error,
+                                                                "Failed to parse boolean value from '{0}'. Expected 'yes' or 'no'.",
+                                                                "The provided string '{0}' could not be parsed as a valid boolean value. Please ensure it is either 'yes' or 'no'.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The key that is missing in the key-value pair</param>
+   public DiagnosticDescriptor MissingKeyValue { get; } = new(DiagnosticCategory.Parsing,
+                                                              31,
+                                                              "Missing Key Value",
+                                                              DiagnosticSeverity.Warning,
+                                                              "The key '{0}' is missing in the key-value pair.",
+                                                              "The key '{0}' was expected in the current content but was not found.",
+                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The pop type key that is invalid</param>
+   public DiagnosticDescriptor InvalidPopTypeKey { get; } = new(DiagnosticCategory.Parsing,
+                                                                32,
+                                                                "Invalid Pop Type Key",
+                                                                DiagnosticSeverity.Error,
+                                                                "The pop type key '{0}' is invalid.",
+                                                                "The provided pop type key does not match any known pop types. Please ensure it is a valid pop type.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The unknown key</param>
+   /// <param name="1">The value associated with the unknown key</param>
+   public DiagnosticDescriptor UnknownKey { get; } = new(DiagnosticCategory.Parsing,
+                                                         33,
+                                                         "Unknown Key",
+                                                         DiagnosticSeverity.Error,
+                                                         "The key '{0}' is unknown in the current context.",
+                                                         "The key '{0}' with the value '{1}' is not recognized in the current parsing context.",
+                                                         DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The object value that is duplicated</param>
+   /// <param name="1">The object type that is duplicated</param>
+   /// <param name="2">The property that uniquely identifies the object type</param>
+   public DiagnosticDescriptor DuplicateObjectDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                        34,
+                                                                        "Duplicate Object Definition",
+                                                                        DiagnosticSeverity.Error,
+                                                                        "Duplicate object definition found for '{0}' of type '{1}'.",
+                                                                        "Objects of type '{1}' are uniquely identified by their '{2}' property.\n'{0}' Is defined multiple times which is not allowed.",
+                                                                        DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The location name that is used for both start and end of the road</param>
+   public DiagnosticDescriptor InvalidRoadSameLocation { get; } = new(DiagnosticCategory.Parsing,
+                                                                      35,
+                                                                      "Invalid Road Definition - Same Location",
+                                                                      DiagnosticSeverity.Error,
+                                                                      "Invalid road definition: start and end locations are the same ('{0}').",
+                                                                      "A road cannot connect a location to itself. Please ensure that the start and end locations are different.",
+                                                                      DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The line number where the syntax error occurred</param>
+   /// <param name="1">The column number where the syntax error occurred</param>
+   /// <param name="2">The unexpected token that caused the syntax error</param>
+   /// <param name="3">The expected token or tokens</param>
+   public DiagnosticDescriptor SyntaxError { get; } = new(DiagnosticCategory.Parsing,
+                                                          36,
+                                                          "Syntax Error",
+                                                          DiagnosticSeverity.Error,
+                                                          "Syntax Error on line {0}:{1}: Unexpected token '{2}'.",
+                                                          "Expected {3}.",
+                                                          DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor UnexpectedToken { get; } = new(DiagnosticCategory.Parsing,
+                                                              37,
+                                                              "Unexpected Token",
+                                                              DiagnosticSeverity.Error,
+                                                              "Unexpected token '{0}' in line {1}:{2}.",
+                                                              "The parser encountered a token that was not expected in the current context. Please check the syntax and structure of the input.",
+                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The line number where the invalid block type was found</param>
+   /// <param name="1">The column number where the invalid block type was found</param>
+   /// <param name="2">The invalid block type that was found</param>
+   /// <param name="3">The expected block type or types</param>
+   public DiagnosticDescriptor InvalidBlockType { get; } = new(DiagnosticCategory.Parsing,
+                                                               38,
+                                                               "Invalid Block Type",
                                                                DiagnosticSeverity.Error,
-                                                               "Failed to parse float value from '{0}'.",
-                                                               "The provided string '{0}' could not be parsed as a valid float value. Please ensure it is a valid float in the format '0.00'.",
+                                                               "Invalid block type at line {0}:{1}: '{2}'.",
+                                                               "In this context only blocks of the type(s) '{3}' are allowed.",
                                                                DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The float value that is out of range</param>
-    /// <param name="1">The minimum allowed value</param>
-    /// <param name="2">The maximum allowed value</param>
-    public DiagnosticDescriptor FloatOutOfRange { get; } = new(DiagnosticCategory.Parsing,
-                                                                   29,
-                                                                   "Float Out of Range",
-                                                                   DiagnosticSeverity.Error,
-                                                                   "The float value '{0}' is out of the allowed range ({1} to {2}).",
-                                                                   "The given float '{0}' is outside the allowed range of {1} to {2}. Please ensure the value is within this range.",
-                                                                   DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The string that could not be parsed</param>
-    public DiagnosticDescriptor InvalidBoolMarkup { get; } = new(DiagnosticCategory.Parsing,
-                                                               30,
-                                                               "Invalid Boolean Markup",
+
+   /// <param name="0">The invalid content key or type that was found</param>
+   /// <param name="1">The line number where the invalid content key or type was found</param>
+   /// <param name="2">The column number where the invalid content key or type was found</param>
+   /// <param name="3">The expected content key or type or types</param>
+   public DiagnosticDescriptor InvalidContentKeyOrType { get; } = new(DiagnosticCategory.Parsing,
+                                                                      39,
+                                                                      "Invalid Content Key or Type",
+                                                                      DiagnosticSeverity.Error,
+                                                                      "Invalid content key or type '{0}' in line {1}:{2}.",
+                                                                      "In the current context only '{3}' is expected",
+                                                                      DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The block name that is invalid</param>
+   /// <param name="1">The expected block names</param>
+   public DiagnosticDescriptor InvalidBlockNames { get; } = new(DiagnosticCategory.Parsing,
+                                                                40,
+                                                                "Invalid Block Name",
+                                                                DiagnosticSeverity.Error,
+                                                                "The block name '{0}' is invalid in the current context.",
+                                                                "A block with (one of) the name(s) '{1}' was expected but the parser encountered a block with the name '{0}' instead.",
+                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The node type that is invalid</param>
+   /// <param name="1">The expected node type or types</param>
+   public DiagnosticDescriptor InvalidNodeType { get; } = new(DiagnosticCategory.Parsing,
+                                                              41,
+                                                              "Invalid Node Type",
+                                                              DiagnosticSeverity.Error,
+                                                              "The node type '{0}' is invalid in the current context.",
+                                                              "A node of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
+                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The node type that is invalid</param>
+   /// <param name="1">The expected node count</param>
+   /// <param name="2">The actual node count</param>
+   public DiagnosticDescriptor InvalidNodeCountOfType { get; } = new(DiagnosticCategory.Parsing,
+                                                                     42,
+                                                                     "Invalid Node Count of Type",
+                                                                     DiagnosticSeverity.Error,
+                                                                     "The node count of type '{0}' is invalid. Expected {1}, but found {2}.",
+                                                                     "This error indicates that the number of nodes of type '{0}' does not match the expected count.",
+                                                                     DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The tag that is invalid</param>
+   public DiagnosticDescriptor InvalidTagFormat { get; } = new(DiagnosticCategory.Parsing,
+                                                               43,
+                                                               "Invalid Tag Format",
                                                                DiagnosticSeverity.Error,
-                                                               "Failed to parse boolean value from '{0}'. Expected 'yes' or 'no'.",
-                                                               "The provided string '{0}' could not be parsed as a valid boolean value. Please ensure it is either 'yes' or 'no'.",
+                                                               "The tag format is invalid: '{0}'.",
+                                                               "Tags must be made of 3 alphanumeric characters. The provided tag '{0}' does not conform to this format.",
                                                                DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The key that is missing in the key-value pair</param>
-    public DiagnosticDescriptor MissingKeyValue { get; } = new(DiagnosticCategory.Parsing,
-                                                                   31,
-                                                                   "Missing Key Value",
-                                                                   DiagnosticSeverity.Warning,
-                                                                   "The key '{0}' is missing in the key-value pair.",
-                                                                   "The key '{0}' was expected in the current content but was not found.",
-                                                                   DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The pop type key that is invalid</param>
-    public DiagnosticDescriptor InvalidPopTypeKey { get; } = new(DiagnosticCategory.Parsing,
-                                                               32,
-                                                               "Invalid Pop Type Key",
+
+   /// <param name="0">The expected separator type</param>
+   /// <param name="1">The actual separator found</param>
+   public DiagnosticDescriptor InvalidSeparator { get; } = new(DiagnosticCategory.Parsing,
+                                                               44,
+                                                               "Invalid Separator",
                                                                DiagnosticSeverity.Error,
-                                                               "The pop type key '{0}' is invalid.",
-                                                               "The provided pop type key does not match any known pop types. Please ensure it is a valid pop type.",
+                                                               "The separator in the key-value pair is invalid",
+                                                               "Expected a separator of type {0} but found '{1}' instead.",
                                                                DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The unknown key</param>
-    /// <param name="1">The value associated with the unknown key</param>
-    public DiagnosticDescriptor UnknownKey { get; } = new(DiagnosticCategory.Parsing,
-                                                               33,
-                                                               "Unknown Key",
-                                                               DiagnosticSeverity.Error,
-                                                               "The key '{0}' is unknown in the current context.",
-                                                               "The key '{0}' with the value '{1}' is not recognized in the current parsing context.",
-                                                               DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The object value that is duplicated</param>
-    /// <param name="1">The object type that is duplicated</param>
-    /// <param name="2">The property that uniquely identifies the object type</param>
-    public DiagnosticDescriptor DuplicateObjectDefinition { get; } = new(DiagnosticCategory.Parsing,
-                                                                          34,
-                                                                          "Duplicate Object Definition",
-                                                                          DiagnosticSeverity.Error,
-                                                                          "Duplicate object definition found for '{0}' of type '{1}'.",
-                                                                          "Objects of type '{1}' are uniquely identified by their '{2}' property.\n'{0}' Is defined multiple times which is not allowed.",
-                                                                          DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The location name that is used for both start and end of the road</param>
-    public DiagnosticDescriptor InvalidRoadSameLocation { get; } = new(DiagnosticCategory.Parsing,
-                                                                          35,
-                                                                          "Invalid Road Definition - Same Location",
-                                                                          DiagnosticSeverity.Error,
-                                                                          "Invalid road definition: start and end locations are the same ('{0}').",
-                                                                          "A road cannot connect a location to itself. Please ensure that the start and end locations are different.",
-                                                                          DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The line number where the syntax error occurred</param>
-    /// <param name="1">The column number where the syntax error occurred</param>
-    /// <param name="2">The unexpected token that caused the syntax error</param>
-    /// <param name="3">The expected token or tokens</param>
-    public DiagnosticDescriptor SyntaxError { get; } = new(DiagnosticCategory.Parsing,
-                                                            36,
-                                                            "Syntax Error",
-                                                            DiagnosticSeverity.Error,
-                                                            "Syntax Error on line {0}:{1}: Unexpected token '{2}'.",
-                                                            "Expected {3}.",
-                                                            DiagnosticReportSeverity.PopupNotify);
-    
-    public DiagnosticDescriptor UnexpectedToken { get; } = new(DiagnosticCategory.Parsing,
-                                                            37,
-                                                            "Unexpected Token",
-                                                            DiagnosticSeverity.Error,
-                                                            "Unexpected token '{0}' in line {1}:{2}.",
-                                                            "The parser encountered a token that was not expected in the current context. Please check the syntax and structure of the input.",
-                                                            DiagnosticReportSeverity.PopupNotify);
-    
 }

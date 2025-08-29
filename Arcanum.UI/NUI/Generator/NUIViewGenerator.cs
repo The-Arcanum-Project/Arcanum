@@ -161,21 +161,21 @@ public static class NUIViewGenerator
          headerGrid.Children.Add(headerBlock);
          Grid.SetRow(headerBlock, 0);
          Grid.SetColumn(headerBlock, 0);
-         
+
          var inferActions = GenerateInferActions(parent,
                                                  navHistory,
                                                  property,
                                                  target.GetType(),
                                                  null,
                                                  null);
-         
+
          if (inferActions != null)
          {
             headerGrid.Children.Add(inferActions);
             Grid.SetRow(inferActions, 0);
             Grid.SetColumn(inferActions, 0);
          }
-         
+
          headerGrid.Children.Add(objectSelector);
          Grid.SetRow(objectSelector, 0);
          Grid.SetColumn(objectSelector, 1);
@@ -333,8 +333,7 @@ public static class NUIViewGenerator
 
       var actionsPanel = new StackPanel
       {
-         Orientation = Orientation.Horizontal,
-         HorizontalAlignment = HorizontalAlignment.Right,
+         Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right,
       };
 
       // --- Button 1: Set Map Mode ---
@@ -381,21 +380,13 @@ public static class NUIViewGenerator
             var addRangeMethod = collection.GetType().GetMethod("AddRange");
 
             if (addRangeMethod != null)
-            {
                // The fast path: The collection has an AddRange method.
                addRangeMethod.Invoke(collection, [itemsToAdd]);
-            }
             else
-            {
                // The safe fallback: Add items one by one.
                foreach (var item in itemsToAdd)
-               {
                   if (!collection.Contains(item))
-                  {
                      collection.Add(item);
-                  }
-               }
-            }
 
             GenerateAndSetView(navHistory);
          };
@@ -698,7 +689,7 @@ public static class NUIViewGenerator
       grid.Children.Add(element);
       Grid.SetRow(element, 0);
       Grid.SetColumn(element, 1);
-      
+
       if (inferActions != null)
       {
          grid.Children.Add(inferActions);
@@ -831,45 +822,58 @@ public static class NUIViewGenerator
    }
 
    /// <summary>
-   /// Determines the concrete item type of a collection, even if the collection is
-   /// declared with an abstract or base type.
+   /// Determines the concrete item type of a collection, even for empty collections where the
+   /// declared item type is abstract or a generic parameter.
    /// </summary>
    /// <param name="collection">The collection instance.</param>
-   /// <param name="ownerType">The type of the object that owns the collection property.</param>
-   /// <param name="propertyName"></param>
+   /// <param name="ownerType">The concrete type of the object that owns the collection property.</param>
+   /// <param name="propertyName">The name of the collection property on the owner.</param>
    /// <returns>The concrete type of the items, or null if it cannot be determined.</returns>
    private static Type? GetConcreteCollectionItemType(IEnumerable collection, Type ownerType, string propertyName)
    {
-      // check the first actual item.
+      // Strategy 1: The most reliable way is to check the first actual item.
       var firstItem = collection.Cast<object>().FirstOrDefault();
       if (firstItem != null)
          return firstItem.GetType();
 
-      // A reflection-based approach (expensive, but works in all cases):
-      // Map the generic parameter of the property in a generic base class
-      // to the concrete type provided by the derived class.
+      // Get the PropertyInfo for the property on the concrete owner type.
+      // This gets us the most-derived version of the property (handles overrides).
+      var propInfo = ownerType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+      if (propInfo == null)
+         return null;
+
+      // Get the item type from this property's type.
+      var itemType = GetCollectionItemType(propInfo.PropertyType);
+      if (itemType == null)
+         return null;
+
+      // If the item type is NOT a generic parameter (e.g., it's 'Location', not 'T'),
+      // we've found our concrete type! This handles overrides correctly.
+      if (!itemType.IsGenericTypeParameter)
+         return itemType;
+
+      // If we're here, the item type is a generic parameter (like 'T').
+      // We need to find out what 'T' resolves to in our 'ownerType'.
+
+      // Find the base class where this generic property was originally declared.
+      var declaringType = propInfo.DeclaringType;
+      if (declaringType is not { IsGenericType: true })
+         return null; // Should not happen if itemType is a generic parameter.
+
+      // Walk up the owner's inheritance chain to find the closed generic version of the declaring type.
       var currentType = ownerType;
       while (currentType != null && currentType != typeof(object))
       {
-         if (currentType.IsGenericType)
+         if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == declaringType)
          {
-            var genericDefinition = currentType.GetGenericTypeDefinition();
-            var propertyOnGenericDef =
-               genericDefinition.GetProperty(propertyName,
-                                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            // We found the closed type, e.g., LocationCollection<Location>.
+            // Now we map the generic parameter 'T' to its concrete type 'Location'.
+            var genericArgsOnDef = declaringType.GetGenericArguments();
+            var typeParamIndex = Array.IndexOf(genericArgsOnDef, itemType);
 
-            if (propertyOnGenericDef != null)
-            {
-               var genericItemType = GetCollectionItemType(propertyOnGenericDef.PropertyType);
-
-               if (genericItemType is { IsGenericTypeParameter: true })
-               {
-                  var typeParamIndex = Array.IndexOf(genericDefinition.GetGenericArguments(), genericItemType);
-
-                  if (typeParamIndex != -1)
-                     return currentType.GetGenericArguments()[typeParamIndex];
-               }
-            }
+            if (typeParamIndex != -1)
+               // Use the index to get the concrete type from the closed generic type.
+               return currentType.GetGenericArguments()[typeParamIndex];
          }
 
          currentType = currentType.BaseType;

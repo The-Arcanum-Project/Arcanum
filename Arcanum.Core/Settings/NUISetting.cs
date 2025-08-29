@@ -73,9 +73,14 @@ public class NUISettings
                                                       Enum.GetValues<Road.Field>().Cast<Enum>().ToArray(),
                                                       Enum.GetValues<Road.Field>().Cast<Enum>().ToArray(),
                                                       Enum.GetValues<Road.Field>().Cast<Enum>().ToArray());
-   
+
    public NUISetting CountrySettings { get; set; } = new(Country.Field.Tag,
-                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
-                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
-                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray());
+                                                         Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Country.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting TagSettings { get; set; } = new(Tag.Field.Name,
+                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray());
 }
