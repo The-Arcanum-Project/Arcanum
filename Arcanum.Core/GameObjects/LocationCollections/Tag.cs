@@ -1,4 +1,7 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
@@ -28,4 +31,18 @@ public partial class Tag(string name) : INUI, ICollectionProvider<Tag>
    public bool IsReadonly => true;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.TagSettings;
    public INUINavigation[] Navigations { get; } = [];
+
+   public bool Verify(LocationContext ctx)
+   {
+      if (!IsValid)
+      {
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidTagFormat,
+                                        "Parsing Country",
+                                        Name);
+         return false;
+      }
+      
+      return true;
+   }
 }

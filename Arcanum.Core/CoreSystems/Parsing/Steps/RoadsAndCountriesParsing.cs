@@ -6,7 +6,7 @@ using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
+using Arcanum.Core.CoreSystems.Parsing.Steps.KeyWordClasses;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -16,6 +16,26 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class RoadsAndCountriesParsing : FileLoadingService
 {
+   private delegate void CountryAttributeParser(LocationContext ctx, string source, ContentNode cn, Country country);
+
+   private static readonly Dictionary<string, CountryAttributeParser> AttributeParsers = new()
+   {
+      { CountryKeywords.INCLUDE, ParseIncludes },
+      { CountryKeywords.CAPITAL, DefaultParser },
+      { CountryKeywords.DYNASTY, DefaultParser },
+      { CountryKeywords.COUNTRY_RANK, DefaultParser },
+      { CountryKeywords.STARTING_TECHNOLOGY_LEVEL, DefaultParser },
+      { CountryKeywords.COURT_LANGUAGE, DefaultParser },
+      { CountryKeywords.LITURGICAL_LANGUAGE, DefaultParser },
+      { CountryKeywords.TYPE, DefaultParser },
+      { CountryKeywords.RELIGIOUS_SCHOOL, DefaultParser },
+      { CountryKeywords.REVOLT, DefaultParser },
+      { CountryKeywords.IS_VALID_FOR_RELEASE, DefaultParser },
+      { CountryKeywords.FLAG, DefaultParser },
+      { CountryKeywords.COUNTRY_NAME, DefaultParser },
+      { CountryKeywords.COLOR, DefaultParser },
+   };
+
    public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country), typeof(Tag)];
 
    public override string GetFileDataDebugInfo()
@@ -51,22 +71,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
          {
             case ContentNode rootCn:
             {
-               const string currentAgeKey = "current_age";
-               if (rootCn.KeyNode.GetLexeme(source).Equals(currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
-               {
-                  currentAge = lvn.Value.GetLexeme(source);
-                  continue;
-               }
-
-               ctx.LineNumber = rootCn.KeyNode.Line;
-               ctx.ColumnNumber = rootCn.KeyNode.Column;
-               DiagnosticException.LogWarning(ctx.GetInstance(),
-                                              ParsingError.Instance.InvalidContentKeyOrType,
-                                              GetActionName(),
-                                              rootCn.KeyNode.GetLexeme(source),
-                                              ctx.LineNumber,
-                                              ctx.ColumnNumber,
-                                              currentAgeKey);
+               HandleCurrentAgeParsing(rootCn, source, ctx);
                continue;
             }
 
@@ -75,54 +80,15 @@ public class RoadsAndCountriesParsing : FileLoadingService
                const string roadNetworkKey = "road_network";
                const string countriesKey = "countries";
                if (rootBn.KeyNode.GetLexeme(source).Equals(roadNetworkKey))
-                  foreach (var rdNode in rootBn.Children)
-                  {
-                     var create = true;
-                     if (!Parser.GetIdentifierKvp(rdNode, ctx, GetActionName(), source, out var key, out var value))
-                        continue;
-
-                     if (!ValuesParsing.ParseLocation(key, ctx, GetActionName(), out var start))
-                        create = false;
-                     if (!ValuesParsing.ParseLocation(value, ctx, GetActionName(), out var end))
-                        create = false;
-
-                     if (start == end)
-                     {
-                        DiagnosticException.LogWarning(ctx.GetInstance(),
-                                                       ParsingError.Instance.InvalidRoadSameLocation,
-                                                       GetActionName(),
-                                                       start.Name);
-                        create = false;
-                     }
-
-                     if (create)
-                        Globals.Roads.Add(new(start, end));
-                  }
+                  ProcessRoadNode(rootBn, ctx, source);
                else if (rootBn.KeyNode.GetLexeme(source).Equals(countriesKey))
-               {
-                  if (!Parser.EnforceNodeCountOfType(rootBn.Children,
-                                                     1,
-                                                     ctx,
-                                                     GetActionName(),
-                                                     out List<BlockNode> cn2S))
-                     continue;
-
-                  // Layered countries block
-                  var cn2 = cn2S[0];
-                  Parser.EnforceNodeCountOfType(cn2.Children, -1, ctx, GetActionName(), out List<BlockNode> cNodes);
-                  foreach (var cNode in cNodes)
-                  {
-                     ParseCountryFromNode(cNode, ctx, source);
-                  }
-               }
+                  ValidateAndParseCountries(rootBn, ctx, source);
                else
-               {
                   DiagnosticException.LogWarning(ctx.GetInstance(),
                                                  ParsingError.Instance.InvalidBlockNames,
                                                  GetActionName(),
                                                  rootBn.KeyNode.GetLexeme(source),
                                                  new[] { roadNetworkKey, countriesKey });
-               }
 
                break;
             }
@@ -132,7 +98,71 @@ public class RoadsAndCountriesParsing : FileLoadingService
       return true;
    }
 
-   private static readonly ImmutableArray<string> collectionKeys =
+   private void ValidateAndParseCountries(BlockNode rootBn, LocationContext ctx, string source)
+   {
+      if (!Parser.EnforceNodeCountOfType(rootBn.Children,
+                                         1,
+                                         ctx,
+                                         GetActionName(),
+                                         out List<BlockNode> cn2S))
+         return;
+
+      // Layered countries block
+      var cn2 = cn2S[0];
+      Parser.EnforceNodeCountOfType(cn2.Children, -1, ctx, GetActionName(), out List<BlockNode> cNodes);
+      foreach (var cNode in cNodes)
+      {
+         ParseCountryFromNode(cNode, ctx, source);
+      }
+   }
+
+   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source)
+   {
+      foreach (var rdNode in rootBn.Children)
+      {
+         var create = true;
+         if (!Parser.GetIdentifierKvp(rdNode, ctx, GetActionName(), source, out var key, out var value))
+            continue;
+
+         if (!ValuesParsing.ParseLocation(key, ctx, GetActionName(), out var start))
+            create = false;
+         if (!ValuesParsing.ParseLocation(value, ctx, GetActionName(), out var end))
+            create = false;
+
+         if (start == end)
+         {
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidRoadSameLocation,
+                                           GetActionName(),
+                                           start.Name);
+            create = false;
+         }
+
+         if (create)
+            Globals.Roads.Add(new(start, end));
+      }
+   }
+
+   private void HandleCurrentAgeParsing(ContentNode rootCn, string source, LocationContext ctx)
+   {
+      string currentAge;
+      const string currentAgeKey = "current_age";
+      if (rootCn.KeyNode.GetLexeme(source).Equals(currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
+      {
+         currentAge = lvn.Value.GetLexeme(source);
+         return;
+      }
+
+      ctx.LineNumber = rootCn.KeyNode.Line;
+      ctx.ColumnNumber = rootCn.KeyNode.Column;
+      DiagnosticException.LogWarning(ctx.GetInstance(),
+                                     ParsingError.Instance.InvalidContentKeyOrType,
+                                     GetActionName(),
+                                     rootCn.KeyNode.GetLexeme(source),
+                                     currentAgeKey);
+   }
+
+   private static readonly ImmutableArray<string> CollectionKeys =
    [
       "own_control_core", "own_control_integrated", "own_control_conquered", "own_control_colony", "own_core",
       "own_conquered", "own_integrated", "own_colony", "control_core", "control", "our_cores_conquered_by_others",
@@ -142,14 +172,8 @@ public class RoadsAndCountriesParsing : FileLoadingService
    {
       Tag tag = new(cNode.KeyNode.GetLexeme(source));
 
-      if (!tag.IsValid)
-      {
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidTagFormat,
-                                        "Parsing Country",
-                                        cNode.KeyNode.GetLexeme(source));
+      if (!tag.Verify(ctx))
          return;
-      }
 
       Country country = new(tag);
 
@@ -157,94 +181,12 @@ public class RoadsAndCountriesParsing : FileLoadingService
       {
          if (sNode is BlockNode bNode)
          {
-            var key = bNode.KeyNode.GetLexeme(source);
-            if (!collectionKeys.Contains(key))
-            {
-               // We have either a government, accepted_cultures, tolerated_cultures
-            }
-            else
-            {
-               // We have any kind of the location collections
-               country.SetCollection(key,
-                                     LUtil.LocationsFromStatementNodes(bNode.Children,
-                                                                       ctx,
-                                                                       "Country collection parsing",
-                                                                       source));
-            }
+            ParseCollectionNodes(ctx, source, bNode, country);
          }
          else if (sNode is ContentNode cn)
          {
             var cnKey = cn.KeyNode.GetLexeme(source);
-            switch (cnKey)
-            {
-               case "include":
-                  if (cn.TryGetStringContentNode(ctx, nameof(ParseCountryFromNode), source, out var include))
-                     country.Includes.Add(include);
-                  break;
-
-               case "capital":
-                  break;
-
-               case "dynasty":
-                  break;
-
-               case "country_rank":
-                  if (cn.TryGetIdentifierNode(ctx, nameof(ParseCountryFromNode), source, out var rankStr))
-                  {
-                     // if (Globals.LocationRanks.FirstOrDefault(lr => lr.Name.Equals(rankStr)) is { } rank)
-                     //    country.Rank = rank;
-                     // else
-                     // {
-                     //    ctx.SetPosition(cn.KeyNode);
-                     //    DiagnosticException.LogWarning(ctx.GetInstance(),
-                     //                                   ParsingError.Instance.InvalidLocationRank,
-                     //                                   "Parsing Country",
-                     //                                   rankStr);
-                     // }
-                  }
-                  break;
-
-               case "starting_technology_level":
-                  break;
-
-               case "court_language":
-
-                  break;
-               case "liturgical_language":
-
-                  break;
-
-               case "type":
-
-                  break;
-
-               case "religious_school":
-                  
-                  break;
-
-               case "revolt":
-                  break;
-               case "is_valid_for_release":
-                  break;
-               case "flag":
-                  break;
-               case "country_name":
-                  break;
-               case "color":
-                  break;
-
-               default:
-                  Console.WriteLine($"Unknown country property: {cnKey}");
-                  ctx.SetPosition(cn.KeyNode);
-                  DiagnosticException.LogWarning(ctx.GetInstance(),
-                                                 ParsingError.Instance.InvalidContentKeyOrType,
-                                                 "Parsing Country",
-                                                 cnKey,
-                                                 ctx.LineNumber,
-                                                 ctx.ColumnNumber,
-                                                 "capital, dynasty, country_rank, starting_technology_level, include");
-                  break;
-            }
+            ParseCountryAttributes(ctx, source, cnKey, cn, country);
          }
          else
          {
@@ -262,4 +204,62 @@ public class RoadsAndCountriesParsing : FileLoadingService
 
       Globals.Countries[tag] = country;
    }
+
+   private static void ParseCountryAttributes(LocationContext ctx,
+                                              string source,
+                                              string cnKey,
+                                              ContentNode cn,
+                                              Country country)
+   {
+      if (AttributeParsers.TryGetValue(cnKey, out var parser))
+      {
+         parser(ctx, source, cn, country);
+      }
+      else
+      {
+         // If not found, it's an unknown keyword. 
+#if DEBUG
+         Console.WriteLine($"Unknown country property: {cnKey}");
+#endif
+         ctx.SetPosition(cn.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidContentKeyOrType,
+                                        "Parsing Country attributes",
+                                        cnKey,
+                                        string.Join(", ", AttributeParsers.Keys));
+      }
+   }
+
+   private static void ParseCollectionNodes(LocationContext ctx, string source, BlockNode bNode, Country country)
+   {
+      var key = bNode.KeyNode.GetLexeme(source);
+      if (!CollectionKeys.Contains(key))
+      {
+         // We have either a government, accepted_cultures, tolerated_cultures
+      }
+      else
+      {
+         // We have any kind of the location collections
+         country.SetCollection(key,
+                               LUtil.LocationsFromStatementNodes(bNode.Children,
+                                                                 ctx,
+                                                                 "Country collection parsing",
+                                                                 source));
+      }
+   }
+
+   #region Strategy Pattern Parsers
+
+   private static void DefaultParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      // No default parsing action
+   }
+
+   private static void ParseIncludes(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      if (cn.TryGetStringContentNode(ctx, nameof(ParseCountryFromNode), source, out var include))
+         country.Includes.Add(include);
+   }
+
+   #endregion
 }

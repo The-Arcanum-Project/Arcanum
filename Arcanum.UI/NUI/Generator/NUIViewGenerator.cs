@@ -49,16 +49,14 @@ public static class NUIViewGenerator
    public static UserControl GenerateView(NUINavHistory navHistory)
    {
       var target = navHistory.Target;
-
       var baseUI = new BaseView
       {
          Name = $"{target.Settings.Title}_{_index}",
          BaseViewBorder = { BorderThickness = new(0) },
       };
-
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
-      
       var header = NavigationHeader(target.Navigations, navHistory.Root, target);
+      
       header.FontSize = 24;
       header.Height = 32;
       header.HorizontalAlignment = HorizontalAlignment.Center;
@@ -67,6 +65,15 @@ public static class NUIViewGenerator
       Grid.SetRow(header, 0);
       Grid.SetColumn(header, 0);
 
+      GenerateViewElement(navHistory, target, baseGrid);
+
+      baseUI.BaseViewBorder.Child = baseGrid;
+      _index++;
+      return baseUI;
+   }
+
+   private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
+   {
       for (var i = 0; i < target.Settings.ViewFields.Length; i++)
       {
          var nxProp = target.Settings.ViewFields[i];
@@ -82,14 +89,10 @@ public static class NUIViewGenerator
                element = GetEmbeddedView(target, nxProp, value, navHistory);
             }
             else
-            {
                element = GenerateShortInfo(target, navHistory.Root);
-            }
          }
          else
-         {
             element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp);
-         }
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -97,10 +100,6 @@ public static class NUIViewGenerator
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
       }
-
-      baseUI.BaseViewBorder.Child = baseGrid;
-      _index++;
-      return baseUI;
    }
 
    private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,
@@ -112,18 +111,15 @@ public static class NUIViewGenerator
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
 
-      // --- Logic to get all possible items for the ComboBox ---
       var itemType = target.GetType();
       var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
       IEnumerable? allItems = null;
       if (methodInfo != null)
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
-      // The clickable title, as before
       var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
-      // If the type provides a global list, create the AutoCompleteBox
       if (allItems != null)
       {
          var objectSelector = new AutoCompleteComboBox
@@ -187,14 +183,12 @@ public static class NUIViewGenerator
       }
       else
       {
-         // Fallback logic is correct
          headerBlock.Margin = new(6, 0, 0, 0);
          baseGrid.Children.Add(headerBlock);
          Grid.SetRow(headerBlock, 0);
          Grid.SetColumn(headerBlock, 0);
       }
 
-      // --- The rest of the method is identical to your original ---
       var embedMarker = GetEmbedBorder();
       embedMarker.BorderBrush = Brushes.Purple;
       baseGrid.Children.Add(embedMarker);

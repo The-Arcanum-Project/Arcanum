@@ -369,15 +369,13 @@ public class ParsingError : ILazySingleton
                                                                DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The invalid content key or type that was found</param>
-   /// <param name="1">The line number where the invalid content key or type was found</param>
-   /// <param name="2">The column number where the invalid content key or type was found</param>
-   /// <param name="3">The expected content key or type or types</param>
+   /// <param name="1">The expected content key or type or types</param>
    public DiagnosticDescriptor InvalidContentKeyOrType { get; } = new(DiagnosticCategory.Parsing,
                                                                       39,
                                                                       "Invalid Content Key or Type",
                                                                       DiagnosticSeverity.Error,
-                                                                      "Invalid content key or type '{0}' in line {1}:{2}.",
-                                                                      "In the current context only '{3}' is expected",
+                                                                      "Invalid content key or type '{0}'.",
+                                                                      "In the current context only '{1}' is expected",
                                                                       DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The block name that is invalid</param>

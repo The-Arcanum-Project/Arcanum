@@ -484,8 +484,6 @@ public class Parser(LexerResult lexerResult)
                                         ParsingError.Instance.InvalidContentKeyOrType,
                                         actionName,
                                         node.GetType(),
-                                        node.GetLocation().Item1,
-                                        node.GetLocation().Item2,
                                         "a content node");
          return false;
       }
@@ -501,8 +499,6 @@ public class Parser(LexerResult lexerResult)
                                         ParsingError.Instance.InvalidContentKeyOrType,
                                         actionName,
                                         cn.KeyNode.GetLexeme(source),
-                                        ctx.LineNumber,
-                                        ctx.ColumnNumber,
                                         "a string value and key");
          return false;
       }
