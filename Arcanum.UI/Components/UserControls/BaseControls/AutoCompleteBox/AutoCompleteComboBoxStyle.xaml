@@ -30,10 +30,20 @@
                 Value = "Auto" />
         <Setter Property = "ScrollViewer.CanContentScroll"
                 Value = "True" />
+        <Setter Property = "ScrollViewer.IsDeferredScrollingEnabled"
+                Value = "True" />
         <Setter Property = "TextElement.Foreground"
                 Value = "{StaticResource DefaultForeColorBrush}" />
         <Setter Property = "FocusVisualStyle"
                 Value = "{x:Null}" />
+        <Setter Property = "ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingStackPanel.IsVirtualizing = "True"
+                                            VirtualizingStackPanel.VirtualizationMode = "Recycling" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "ComboBox">
@@ -49,7 +59,8 @@
                                       Grid.ColumnSpan = "2"
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Focusable = "False"
-                                      ClickMode = "Press">
+                                      ClickMode = "Press"
+                                      Background = "Red">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType = "ToggleButton">
                                     <Border x:Name = "templateRoot"
@@ -114,9 +125,10 @@
                                         HorizontalAlignment = "Stretch">
                                     <ScrollViewer Margin = "3, 3, 2, 3"
                                                   SnapsToDevicePixels = "True"
-                                                  Style = "{StaticResource DarkScrollViewer}">
-                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation = "Contained"
-                                                        HorizontalAlignment = "Stretch" />
+                                                  CanContentScroll = "{TemplateBinding ScrollViewer.CanContentScroll}"
+                                                  HorizontalScrollBarVisibility = "{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                  VerticalScrollBarVisibility = "{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                        <ItemsPresenter SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}" />
                                     </ScrollViewer>
                                 </Border>
 

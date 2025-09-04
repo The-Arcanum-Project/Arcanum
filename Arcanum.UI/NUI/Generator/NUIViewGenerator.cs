@@ -52,11 +52,12 @@ public static class NUIViewGenerator
 
       var baseUI = new BaseView
       {
-         Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
+         Name = $"{target.Settings.Title}_{_index}",
+         BaseViewBorder = { BorderThickness = new(0) },
       };
 
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
-
+      
       var header = NavigationHeader(target.Navigations, navHistory.Root, target);
       header.FontSize = 24;
       header.Height = 32;
@@ -127,7 +128,7 @@ public static class NUIViewGenerator
       {
          var objectSelector = new AutoCompleteComboBox
          {
-            ItemsSource = allItems,
+            FullItemsSource = allItems,
             SelectedItem = target,
             Height = 23,
             Margin = new(1),
@@ -1064,15 +1065,15 @@ public static class NUIViewGenerator
       return checkBox;
    }
 
-   private static ComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
+   private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
-      var comboBox = new ComboBox
+      var comboBox = new AutoCompleteComboBox
       {
          Height = height,
          FontSize = fontSize,
          Margin = new(0),
          BorderThickness = new(1),
-         ItemsSource = Enum.GetValues(enumType),
+         FullItemsSource = Enum.GetValues(enumType),
       };
       comboBox.SetBinding(Selector.SelectedItemProperty, binding);
       return comboBox;

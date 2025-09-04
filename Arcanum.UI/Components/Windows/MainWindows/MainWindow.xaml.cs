@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
+using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;

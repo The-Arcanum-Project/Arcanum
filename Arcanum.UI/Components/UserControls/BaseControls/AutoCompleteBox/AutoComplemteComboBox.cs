@@ -1,9 +1,8 @@
 ﻿using System.Collections;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
+using static System.Linq.Expressions.Expression;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 {
@@ -12,11 +11,17 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
    /// </summary>
    public class AutoCompleteComboBox : ComboBox
    {
-      private readonly SerialDisposable _disposable = new();
+      // Use a CancellationTokenSource to cancel previous search tasks
+      private CancellationTokenSource _filterCancellationTokenSource = new();
+      private readonly SerialDisposable _disposable = new(); // For Debouncing
 
       private TextBox _editableTextBoxCache = null!;
+      private Func<object, string>? _textFromItemDelegate;
+      private string? _cachedTextSearchTextPath;
+      private string? _cachedDisplayMemberPath;
+      private Type? _itemType;
 
-      private Predicate<object> _defaultItemsFilter = null!;
+      private IEnumerable? _fullItemsSource;
 
       public TextBox EditableTextBox
       {
@@ -31,7 +36,13 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             return _editableTextBoxCache;
          }
       }
-      
+
+      public override void OnApplyTemplate()
+      {
+         base.OnApplyTemplate();
+         _editableTextBoxCache =
+            GetTemplateChild("PART_EditableTextBox") as TextBox ?? throw new InvalidOperationException();
+      }
 
       /// <summary>
       /// Gets text to match with the query from an item.
@@ -43,23 +54,57 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          if (item == null!)
             return string.Empty;
 
-         var d = new DependencyVariable<string>();
-         d.SetBinding(item, TextSearch.GetTextPath(this));
-         return d.Value;
+         // Lazy initialization of the delegate
+         if (_textFromItemDelegate == null ||
+             (_itemType == null && _fullItemsSource != null && _fullItemsSource.Cast<object>().Any()))
+            InitializeTextFromItemDelegate();
+
+         return _textFromItemDelegate?.Invoke(item) ?? string.Empty;
+      }
+
+      private void InitializeTextFromItemDelegate()
+      {
+         _textFromItemDelegate = null;
+         _itemType = null;
+
+         var textPath = _cachedTextSearchTextPath;
+         var memberPath = _cachedDisplayMemberPath ?? textPath;
+
+         if (_fullItemsSource != null)
+            _itemType = _fullItemsSource.Cast<object>().FirstOrDefault()?.GetType();
+
+         if (_itemType == null || string.IsNullOrEmpty(memberPath))
+         {
+            _textFromItemDelegate = item => item?.ToString() ?? string.Empty;
+            return;
+         }
+
+         var parameter = Parameter(typeof(object), "item");
+         var typedParameter = Convert(parameter, _itemType);
+         var propertyAccess = PropertyOrField(typedParameter, memberPath);
+         var nullCheck = Condition(Equal(propertyAccess, Constant(null, propertyAccess.Type)),
+                                   Constant(string.Empty),
+                                   Call(propertyAccess, typeof(object).GetMethod(nameof(object.ToString))!));
+         var nullItemCheck = Condition(Equal(parameter, Constant(null)),
+                                       Constant(string.Empty),
+                                       nullCheck);
+
+         var lambda = Lambda<Func<object, string>>(nullItemCheck, parameter);
+         _textFromItemDelegate = lambda.Compile();
       }
 
       #region ItemsSource
 
-      public new static readonly DependencyProperty ItemsSourceProperty =
-         DependencyProperty.Register(nameof(ItemsSource),
+      public static readonly DependencyProperty FullItemsSourceProperty =
+         DependencyProperty.Register(nameof(FullItemsSource),
                                      typeof(IEnumerable),
                                      typeof(AutoCompleteComboBox),
-                                     new(null, ItemsSourcePropertyChanged));
+                                     new(null, FullItemsSourcePropertyChanged));
 
-      public new IEnumerable ItemsSource
+      public IEnumerable FullItemsSource
       {
-         get => (IEnumerable)GetValue(ItemsSourceProperty);
-         init => SetValue(ItemsSourceProperty, value);
+         get => (IEnumerable)GetValue(FullItemsSourceProperty);
+         init => SetValue(FullItemsSourceProperty, value);
       }
 
       static AutoCompleteComboBox()
@@ -73,30 +118,17 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler(OnTextChanged));
       }
 
-      private static void ItemsSourcePropertyChanged(DependencyObject dependencyObject,
-                                                     DependencyPropertyChangedEventArgs dpcea)
+      private static void FullItemsSourcePropertyChanged(DependencyObject dependencyObject,
+                                                         DependencyPropertyChangedEventArgs dpcea)
       {
-         var comboBox = (ComboBox)dependencyObject;
-         var previousSelectedItem = comboBox.SelectedItem;
-
-         if (dpcea.NewValue is ICollectionView cv)
-         {
-            ((AutoCompleteComboBox)dependencyObject)._defaultItemsFilter = cv.Filter;
-            comboBox.ItemsSource = cv;
-         }
-         else
-         {
-            ((AutoCompleteComboBox)dependencyObject)._defaultItemsFilter = null!;
-            var newValue = dpcea.NewValue as IEnumerable;
-            var newCollectionViewSource = new CollectionViewSource { Source = newValue };
-            comboBox.ItemsSource = newCollectionViewSource.View;
-         }
-
-         comboBox.SelectedItem = previousSelectedItem;
-
-         // if ItemsSource doesn't contain previousSelectedItem
-         if (comboBox.SelectedItem != previousSelectedItem)
-            comboBox.SelectedItem = null;
+         var comboBox = (AutoCompleteComboBox)dependencyObject;
+         comboBox._fullItemsSource = dpcea.NewValue as IEnumerable;
+         comboBox._cachedTextSearchTextPath = TextSearch.GetTextPath(comboBox);
+         comboBox._cachedDisplayMemberPath = comboBox.DisplayMemberPath; // Call on UI thread
+         comboBox._textFromItemDelegate = null;
+         comboBox._itemType = null;
+         comboBox.InitializeTextFromItemDelegate();
+         comboBox.ApplyFilter(comboBox.Text);
       }
 
       #endregion ItemsSource
@@ -117,7 +149,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 
       #endregion
 
-      #region OnTextChanged
+      #region OnTextChanged and Filtering Logic (Modified)
 
       private long _revisionId;
       private string _previousText = null!;
@@ -135,85 +167,102 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          }
       }
 
-      private static int CountWithMax<T>(IEnumerable<T> xs, Predicate<T> predicate, int maxCount)
+      private async void ApplyFilter(string currentText)
       {
-         var count = 0;
-         foreach (var x in xs)
-            if (predicate(x))
+         var setting = SettingOrDefault;
+         var maxSuggestionCount = setting.MaxSuggestionCount;
+         var currentFilterDelegate = setting.GetFilter(currentText, TextFromItem);
+
+         await _filterCancellationTokenSource.CancelAsync();
+         _filterCancellationTokenSource = new();
+         var token = _filterCancellationTokenSource.Token;
+
+         IEnumerable<object>? filteredItems;
+
+         if (string.IsNullOrEmpty(currentText))
+            filteredItems = _fullItemsSource?.Cast<object>() ?? [];
+         else
+            filteredItems = await Task.Run(() =>
+                                           {
+                                              if (_fullItemsSource == null)
+                                                 return [];
+
+                                              var fullItems = _fullItemsSource.Cast<object>();
+
+                                              var results = new List<object>();
+                                              foreach (var item in fullItems)
+                                              {
+                                                 if (token.IsCancellationRequested) 
+                                                    return Enumerable.Empty<object>(); 
+
+                                                 if (currentFilterDelegate(item))
+                                                 {
+                                                    results.Add(item);
+                                                    if (results.Count >= maxSuggestionCount)
+                                                       break; 
+                                                 }
+                                              }
+
+                                              return results;
+                                           },
+                                           token); 
+
+         if (token.IsCancellationRequested)
+            return;
+
+         Dispatcher.Invoke(() =>
+         {
+            var itemsSource = filteredItems.ToList();
+            ItemsSource = itemsSource; 
+
+            if (string.IsNullOrEmpty(currentText))
             {
-               count++;
-               if (count > maxCount)
-                  return count;
+               IsDropDownOpen = true;
+               SelectedItem = null;
+            }
+            else
+            {
+               if (filteredItems != null && itemsSource.Count != 0)
+               {
+                  IsDropDownOpen = true;
+                  if (SelectedItem != null &&
+                      !TextFromItem(SelectedItem).Equals(currentText, StringComparison.OrdinalIgnoreCase))
+                     using (new TextBoxStatePreserver(EditableTextBox))
+                        SelectedItem = null;
+               }
+               else
+               {
+                  IsDropDownOpen = false;
+                  SelectedItem = null;
+               }
             }
 
-         return count;
+            Unselect(); 
+         });
       }
 
       private void Unselect()
       {
          var textBox = EditableTextBox;
-         textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
-      }
-
-      private void UpdateFilter(Predicate<object> filter)
-      {
-         using (new TextBoxStatePreserver(EditableTextBox))
-            using (Items.DeferRefresh())
-               // Can empty the text box. I don't why.
-               Items.Filter = filter;
-      }
-
-      private void OpenDropDown(Predicate<object> filter)
-      {
-         UpdateFilter(filter);
-         IsDropDownOpen = true;
-         Unselect();
-      }
-
-      private void UpdateSuggestionList()
-      {
-         var text = Text;
-
-         if (text == _previousText)
-            return;
-
-         _previousText = text;
-
-         if (string.IsNullOrEmpty(text))
-         {
-            IsDropDownOpen = false;
-            SelectedItem = null;
-
-            using (Items.DeferRefresh())
-               Items.Filter = _defaultItemsFilter;
-         }
-         else if (SelectedItem != null && TextFromItem(SelectedItem) == text)
-         {
-            // It seems the user selected an item.
-            // Do nothing.
-         }
-         else
-         {
-            using (new TextBoxStatePreserver(EditableTextBox))
-               SelectedItem = null;
-
-            var filter = GetFilter();
-            var maxCount = SettingOrDefault.MaxSuggestionCount;
-            var count = CountWithMax(ItemsSource.Cast<object>(), filter, maxCount);
-
-            if (0 < count && count <= maxCount)
-               OpenDropDown(filter);
-         }
+         if (textBox != null!) 
+            textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
       }
 
       private void OnTextChanged(object sender, TextChangedEventArgs e)
       {
          var id = unchecked(++_revisionId);
          var setting = SettingOrDefault;
+         var currentText = Text.Trim();
+
+         if (string.Equals(currentText, _previousText, StringComparison.Ordinal) &&
+             IsDropDownOpen) 
+            return;
+
+         _previousText = currentText; 
 
          if (setting.Delay <= TimeSpan.Zero)
          {
-            UpdateSuggestionList();
+            ApplyFilter(currentText);
             return;
          }
 
@@ -225,7 +274,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
                             if (_revisionId != id)
                                return;
 
-                            UpdateSuggestionList();
+                            ApplyFilter(currentText);
                          });
                       },
                       null,
@@ -234,14 +283,5 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       }
 
       #endregion
-
-      private Predicate<object> GetFilter()
-      {
-         var filter = SettingOrDefault.GetFilter(Text, TextFromItem);
-
-         return _defaultItemsFilter != null!
-                   ? i => _defaultItemsFilter(i) && filter(i)
-                   : filter;
-      }
    }
 }
