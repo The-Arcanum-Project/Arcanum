@@ -182,7 +182,10 @@ public partial class ParserTest : INotifyPropertyChanged
          if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
             sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
          else
+         {
             Parser.PrintAst(ast, sb, "", source);
+            OutputText = sb.ToString();
+         }
 
          Time +=
             $", Parsing {watch.ElapsedMilliseconds} ms, Total {lexTime + watch.ElapsedMilliseconds} ms";

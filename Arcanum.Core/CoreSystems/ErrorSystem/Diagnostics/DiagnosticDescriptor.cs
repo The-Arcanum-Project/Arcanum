@@ -53,7 +53,7 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
    [CustomResetMethod(nameof(ResetSettings))]
    [Description("The severity of the Diagnostic.")]
    public DiagnosticSeverity Severity { get; set; } = severity;
-   public readonly int Id = id;
+   public readonly int Id = id; 
    public string Name { get; } = name;
    public string Message { get; } = message;
    public string Description { get; } = description;

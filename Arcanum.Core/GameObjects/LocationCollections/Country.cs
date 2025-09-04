@@ -43,6 +43,8 @@ public partial class Country : INUI, ICollectionProvider<Country>
    public ObservableRangeCollection<Location> Control { get; set; } = [];
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
+   public ObservableRangeCollection<string> Includes { get; set; } = [];
+   
    #endregion
 
    public bool SetCollection(string name, IEnumerable<Location> locs)

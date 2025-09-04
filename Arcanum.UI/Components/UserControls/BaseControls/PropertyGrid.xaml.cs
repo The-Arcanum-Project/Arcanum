@@ -19,7 +19,9 @@ public partial class PropertyGrid
    // We only trigger this event after a delay to avoid flooding the UI with events
    public readonly PropGridDelayEvent PropertyValueChanged = new(250);
    public event EventHandler<SelectionChangedEventArgs>? PropertySelected = delegate { };
-   private PropertyGrid? _inlinedPropertyGrid;
+   public PropertyGrid? InlinedPropertyGrid;
+   
+   public bool HasInlinedPropertyGrid => InlinedPropertyGrid != null;
 
    public static Dictionary<Type, Func<object, string>> CustomTypeConverters { get; } = new()
    {
@@ -100,20 +102,20 @@ public partial class PropertyGrid
             throw new
                ArgumentException($"Property {item.PropertyInfo.Name} is not a class or struct and thus not valid for inline property grid.");
 
-         _inlinedPropertyGrid ??= new() { Margin = new(-1) };
-         GridEmbeddedBorder.Child = _inlinedPropertyGrid;
+         InlinedPropertyGrid ??= new() { Margin = new(-1) };
+         GridEmbeddedBorder.Child = InlinedPropertyGrid;
 
-         _inlinedPropertyGrid.SelectedObject = prop.GetValue(SelectedObject);
+         InlinedPropertyGrid.SelectedObject = prop.GetValue(SelectedObject);
          ShowGridEmbedded = true;
 
-         _inlinedPropertyGrid.Description = prop.GetCustomAttribute<DescriptionAttribute>()?.Description ??
+         InlinedPropertyGrid.Description = prop.GetCustomAttribute<DescriptionAttribute>()?.Description ??
                                             $"No description for {item.PropertyInfo.Name}";
          Description = string.Empty;
       }
       else
       {
-         if (_inlinedPropertyGrid != null)
-            _inlinedPropertyGrid.SelectedObject = null;
+         if (InlinedPropertyGrid != null)
+            InlinedPropertyGrid.SelectedObject = null;
          ShowGridEmbedded = false;
          Description = prop.GetCustomAttribute<DescriptionAttribute>()?.Description ??
                        $"No description for {item.PropertyInfo.Name}";
@@ -264,7 +266,7 @@ public partial class PropertyGrid
 
    public PropertyGrid GetActive()
    {
-      return ShowGridEmbedded ? _inlinedPropertyGrid?.GetActive() ?? this : this;
+      return ShowGridEmbedded ? InlinedPropertyGrid?.GetActive() ?? this : this;
    }
 
    public bool NavigateToProperty(string propertyName)

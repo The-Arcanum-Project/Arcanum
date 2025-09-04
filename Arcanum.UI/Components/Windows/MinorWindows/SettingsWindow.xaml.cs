@@ -153,7 +153,7 @@ public partial class SettingsWindow
             throw new
                InvalidOperationException($"Method '{customMethod.MethodName}' must have signature: object Method(PropertyInfo)");
 
-         newValue = methodInfo.Invoke(null, parameters: [info]);
+         newValue = methodInfo.Invoke(propGrid.SelectedObject, parameters: [info]);
       }
       else
       {
@@ -175,7 +175,11 @@ public partial class SettingsWindow
          var selected = rootTabControl.SelectedContent;
 
          if (selected is PropertyGrid pg)
+         {
+            if (pg.HasInlinedPropertyGrid)
+               return pg.InlinedPropertyGrid;
             return pg;
+         }
 
          if (selected is TabControl nestedTab)
          {

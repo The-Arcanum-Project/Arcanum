@@ -429,4 +429,14 @@ public class ParsingError : ILazySingleton
                                                                "The separator in the key-value pair is invalid",
                                                                "Expected a separator of type {0} but found '{1}' instead.",
                                                                DiagnosticReportSeverity.PopupNotify);
+   
+    /// <param name="0">The integer value that is invalid</param>
+   public DiagnosticDescriptor InvalidIntegerValue { get; } = new(DiagnosticCategory.Parsing,
+                                                               45,
+                                                               "Invalid Integer Value",
+                                                               DiagnosticSeverity.Error,
+                                                               "The integer value is invalid: '{0}'.",
+                                                               "The provided integer value '{0}' is not a valid integer. Please ensure it is a valid integer format.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+   
 }

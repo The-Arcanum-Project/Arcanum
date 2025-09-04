@@ -178,21 +178,61 @@ public class RoadsAndCountriesParsing : FileLoadingService
             switch (cnKey)
             {
                case "include":
-                  
+                  if (cn.TryGetStringContentNode(ctx, nameof(ParseCountryFromNode), source, out var include))
+                     country.Includes.Add(include);
                   break;
-               
+
                case "capital":
                   break;
-               
+
                case "dynasty":
                   break;
-               
+
                case "country_rank":
+                  if (cn.TryGetIdentifierNode(ctx, nameof(ParseCountryFromNode), source, out var rankStr))
+                  {
+                     // if (Globals.LocationRanks.FirstOrDefault(lr => lr.Name.Equals(rankStr)) is { } rank)
+                     //    country.Rank = rank;
+                     // else
+                     // {
+                     //    ctx.SetPosition(cn.KeyNode);
+                     //    DiagnosticException.LogWarning(ctx.GetInstance(),
+                     //                                   ParsingError.Instance.InvalidLocationRank,
+                     //                                   "Parsing Country",
+                     //                                   rankStr);
+                     // }
+                  }
                   break;
-               
+
                case "starting_technology_level":
                   break;
-               
+
+               case "court_language":
+
+                  break;
+               case "liturgical_language":
+
+                  break;
+
+               case "type":
+
+                  break;
+
+               case "religious_school":
+                  
+                  break;
+
+               case "revolt":
+                  break;
+               case "is_valid_for_release":
+                  break;
+               case "flag":
+                  break;
+               case "country_name":
+                  break;
+               case "color":
+                  break;
+
                default:
                   Console.WriteLine($"Unknown country property: {cnKey}");
                   ctx.SetPosition(cn.KeyNode);

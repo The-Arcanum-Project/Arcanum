@@ -85,13 +85,20 @@ public static class DescriptorDefinitions
                                                                      false,
                                                                      false);
    
+   public static readonly FileDescriptor CountryRankDescriptor = new([],
+                                                                     ["game", "in_game", "common", "country_ranks"],
+                                                                     ISavingService.Dummy,
+                                                                     new("country_ranks", "txt", "#"),
+                                                                     new CountryRankLoading(),
+                                                                     false);
+   
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
-         RoadsAndCountriesDescriptor,
+         RoadsAndCountriesDescriptor, CountryRankDescriptor,
       ];
    }
 }

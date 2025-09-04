@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
@@ -83,4 +84,15 @@ public class NUISettings
                                                      Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting CountryRankSettings { get; set; } = new(CountryRank.Field.Name,
+                                                             Enum.GetValues<CountryRank.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<CountryRank.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<CountryRank.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray());
 }

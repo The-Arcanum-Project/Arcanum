@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.GameObjects;
+﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing;
+using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
@@ -27,7 +29,9 @@ public static class Globals
    public static List<Adjacency> Adjacencies { get; } = [];
    public static Dictionary<string, PopType> PopTypes { get; } = [];
    public static List<LocationRank> LocationRanks { get; } = [];
+   public static List<CountryRank> CountryRanks { get; } = [];
    public static List<Road> Roads { get; set; } = [];
 
    public static Dictionary<Tag, Country> Countries { get; } = [];
+
 }
