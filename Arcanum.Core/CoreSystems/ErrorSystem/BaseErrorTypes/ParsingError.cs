@@ -427,14 +427,44 @@ public class ParsingError : ILazySingleton
                                                                "The separator in the key-value pair is invalid",
                                                                "Expected a separator of type {0} but found '{1}' instead.",
                                                                DiagnosticReportSeverity.PopupNotify);
-   
-    /// <param name="0">The integer value that is invalid</param>
+
+   /// <param name="0">The integer value that is invalid</param>
    public DiagnosticDescriptor InvalidIntegerValue { get; } = new(DiagnosticCategory.Parsing,
-                                                               45,
-                                                               "Invalid Integer Value",
-                                                               DiagnosticSeverity.Error,
-                                                               "The integer value is invalid: '{0}'.",
-                                                               "The provided integer value '{0}' is not a valid integer. Please ensure it is a valid integer format.",
-                                                               DiagnosticReportSeverity.PopupNotify);
+                                                                  45,
+                                                                  "Invalid Integer Value",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "The integer value is invalid: '{0}'.",
+                                                                  "The provided integer value '{0}' is not a valid integer. Please ensure it is a valid integer format.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The country rank key that is invalid</param>
+   /// <param name="1">A list of valid country rank keys</param>
+   public DiagnosticDescriptor InvalidCountryRankKey { get; } = new(DiagnosticCategory.Parsing,
+                                                                    46,
+                                                                    "Invalid Country Rank Key",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The country rank key '{0}' is invalid.",
+                                                                    "The provided country rank key does not match any known country ranks: '{1}'.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
    
+    /// <param name="0">The integer value that is forbidden</param>
+    /// <param name="1">The context / field in which the integer value is forbidden</param>
+   public DiagnosticDescriptor ForbiddenIntegerValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                  47,
+                                                                  "Forbidden Integer Value",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "The integer value is forbidden: '{0}'.",
+                                                                  "The provided integer value '{0}' is not allowed as a value for {1}.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The enum value that is invalid</param>
+    /// <param name="1">The expected enum type</param>
+    /// <param name="2">A list of valid enum values for the expected enum type</param>
+    public DiagnosticDescriptor InvalidEnumValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                  48,
+                                                                  "Invalid Enum Value",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "The enum value is invalid: '{0}'.",
+                                                                  "The provided enum value '{0}' does not match any known values for the expected enum type {1}:'{2}'.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
 }

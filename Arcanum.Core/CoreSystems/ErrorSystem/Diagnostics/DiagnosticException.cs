@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
@@ -37,14 +38,29 @@ public sealed class DiagnosticException : Exception
    }
 
    /// <summary>
-   /// Formats a diagnosticException message by replacing placeholders with the provided arguments, using an invariant culture.
+   /// Formats a diagnosticException message by replacing placeholders with the provided arguments, using an invariant culture. <br/>
+   /// Any provided argument of type <see cref="IEnumerable"/> (excluding strings) will be converted to a comma-separated string representation. <br/>
+   /// If no arguments are provided, the original message is returned unchanged.
    /// </summary>
    /// <param name="message">The message string containing placeholders to be replaced.</param>
    /// <param name="args">An array of arguments to replace the placeholders in the message string.</param>
    /// <returns>A formatted string with the placeholders replaced by the corresponding arguments or the original message if no arguments are provided.</returns>
    private static string FormatMessage(string message, params object[] args)
    {
-      return args.Length == 0 ? message : string.Format(CultureInfo.InvariantCulture, message, args);
+      if (args.Length == 0)
+         return message;
+
+      var processedArgs = new object[args.Length];
+      for (var i = 0; i < args.Length; i++)
+      {
+         var arg = args[i];
+         if (arg is IEnumerable collection and not string)
+            processedArgs[i] = string.Join(", ", collection.Cast<object>());
+         else
+            processedArgs[i] = arg;
+      }
+
+      return string.Format(CultureInfo.InvariantCulture, message, processedArgs);
    }
 
    // public DiagnosticException(DiagnosticException diagnosticException) : base(diagnosticException.Message)

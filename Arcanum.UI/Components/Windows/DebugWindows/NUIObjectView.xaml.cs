@@ -68,6 +68,7 @@ public partial class NUIObjectView
          {
             var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
             NUIObjects = allItems.Cast<INUI>().ToList();
+            NUIObjects.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
             ObjectListView.SelectedIndex = 0;
             return;
          }

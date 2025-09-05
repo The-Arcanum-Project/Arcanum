@@ -77,20 +77,20 @@ public static class DescriptorDefinitions
                                                                      false,
                                                                      false);
    
-   public static readonly FileDescriptor RoadsAndCountriesDescriptor = new([LocationDescriptor],
-                                                                     ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
-                                                                     ISavingService.Dummy,
-                                                                     new("10_countries_and_roads", "txt", "#"),
-                                                                     new RoadsAndCountriesParsing(),
-                                                                     false,
-                                                                     false);
-   
    public static readonly FileDescriptor CountryRankDescriptor = new([],
                                                                      ["game", "in_game", "common", "country_ranks"],
                                                                      ISavingService.Dummy,
                                                                      new("country_ranks", "txt", "#"),
                                                                      new CountryRankLoading(),
                                                                      false);
+   
+   public static readonly FileDescriptor RoadsAndCountriesDescriptor = new([LocationDescriptor, CountryRankDescriptor],
+                                                                           ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
+                                                                           ISavingService.Dummy,
+                                                                           new("10_countries_and_roads", "txt", "#"),
+                                                                           new RoadsAndCountriesParsing(),
+                                                                           false,
+                                                                           false);
    
    static DescriptorDefinitions()
    {

@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.KeyWordClasses;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
@@ -21,20 +22,21 @@ public class RoadsAndCountriesParsing : FileLoadingService
    private static readonly Dictionary<string, CountryAttributeParser> AttributeParsers = new()
    {
       { CountryKeywords.INCLUDE, ParseIncludes },
-      { CountryKeywords.CAPITAL, DefaultParser },
-      { CountryKeywords.DYNASTY, DefaultParser },
-      { CountryKeywords.COUNTRY_RANK, DefaultParser },
-      { CountryKeywords.STARTING_TECHNOLOGY_LEVEL, DefaultParser },
-      { CountryKeywords.COURT_LANGUAGE, DefaultParser },
-      { CountryKeywords.LITURGICAL_LANGUAGE, DefaultParser },
-      { CountryKeywords.TYPE, DefaultParser },
-      { CountryKeywords.RELIGIOUS_SCHOOL, DefaultParser },
-      { CountryKeywords.REVOLT, DefaultParser },
-      { CountryKeywords.IS_VALID_FOR_RELEASE, DefaultParser },
+      { CountryKeywords.CAPITAL, ParseCapital },
+      { CountryKeywords.DYNASTY, DynastyParser },
+      { CountryKeywords.COUNTRY_RANK, CountryRankParser },
+      { CountryKeywords.STARTING_TECHNOLOGY_LEVEL, StartingTechParser },
+      { CountryKeywords.COURT_LANGUAGE, CourtLanguageParser },
+      { CountryKeywords.LITURGICAL_LANGUAGE, LiturgicalLanguageParser },
+      { CountryKeywords.TYPE, CountryTypeParser },
+      { CountryKeywords.RELIGIOUS_SCHOOL, ReligiousSchoolParser },
+      { CountryKeywords.REVOLT, RevoltParser },
+      { CountryKeywords.IS_VALID_FOR_RELEASE, IsValidForReleaseParser },
       { CountryKeywords.FLAG, DefaultParser },
       { CountryKeywords.COUNTRY_NAME, DefaultParser },
-      { CountryKeywords.COLOR, DefaultParser },
+      { CountryKeywords.COLOR, ColorParser },
    };
+
 
    public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country), typeof(Tag)];
 
@@ -260,6 +262,78 @@ public class RoadsAndCountriesParsing : FileLoadingService
       if (cn.TryGetStringContentNode(ctx, nameof(ParseCountryFromNode), source, out var include))
          country.Includes.Add(include);
    }
+
+   private static void ParseCapital(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      if (cn.TryParseLocationFromCn(ctx, nameof(ParseCapital), source, out var location))
+         country.Capital = location;
+   }
+
+   private static void ColorParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIdentifierIfValid(ctx, nameof(ColorParser), source, country, Country.Field.Color);
+   }
+
+   private static void DynastyParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIdentifierIfValid(ctx, nameof(DynastyParser), source, country, Country.Field.Dynasty);
+   }
+
+   private static void CountryRankParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      if (!cn.TryGetIdentifierNode(ctx, nameof(CountryRankParser), source, out var crlName))
+         return;
+
+      var crl = Globals.CountryRanks.FirstOrDefault(cr => cr.Name.Equals(crlName));
+      if (crl == null)
+      {
+         ctx.SetPosition(cn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidCountryRankKey,
+                                        nameof(CountryRankParser),
+                                        crlName,
+                                        Globals.CountryRanks.Select(cr => cr.Name));
+         return;
+      }
+
+      country.CountryRank = crl;
+   }
+
+   private static void StartingTechParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIntegerIfNotX(ctx, nameof(StartingTechParser), source, country, Country.Field.StartingTechLevel);
+   }
+
+   private static void CourtLanguageParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIdentifierIfValid(ctx, nameof(CourtLanguageParser), source, country, Country.Field.CourtLanguage);
+   }
+
+   private static void LiturgicalLanguageParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIdentifierIfValid(ctx, nameof(LiturgicalLanguageParser), source, country, Country.Field.LiturgicalLanguage);
+   }
+
+   private static void CountryTypeParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetEnumIfValid(ctx, nameof(CountryTypeParser), source, country, Country.Field.Type, typeof(CountryType));
+   }
+   
+   private static void ReligiousSchoolParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetIdentifierIfValid(ctx, nameof(ReligiousSchoolParser), source, country, Country.Field.ReligiousSchool);
+   }
+
+   private static void RevoltParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetBoolIfValid(ctx, nameof(RevoltParser), source, country, Country.Field.Revolt);
+   }
+   
+   private static void IsValidForReleaseParser(LocationContext ctx, string source, ContentNode cn, Country country)
+   {
+      cn.SetBoolIfValid(ctx, nameof(IsValidForReleaseParser), source, country, Country.Field.IsValidForRelease);
+   }
+
 
    #endregion
 }

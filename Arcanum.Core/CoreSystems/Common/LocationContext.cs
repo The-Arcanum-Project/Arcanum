@@ -31,4 +31,10 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
       LineNumber = token.Line;
       ColumnNumber = token.Column;
    }
+   public void SetPosition(ValueNode vn)
+   {
+      var (line, column) = vn.GetLocation();
+      LineNumber = line;
+      ColumnNumber = column;
+   }
 }

@@ -13,14 +13,14 @@ public static class Nx
       [LinkedPropertyEnum(nameof(target))] Enum e,
       [PropertyValue] T value)
    {
-      target._setValue(e, value);
+      target._setValue(e, value!);
    }
    
    public static void ForceSet<T>(T value,
                                INexus target,
                                Enum e)
    {
-      target._setValue(e, value);
+      target._setValue(e, value!);
    }
 
    [PropertyGetter]

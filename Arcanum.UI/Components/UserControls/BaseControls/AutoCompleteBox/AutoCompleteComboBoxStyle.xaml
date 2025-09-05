@@ -60,7 +60,7 @@
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Focusable = "False"
                                       ClickMode = "Press"
-                                      Background = "Red">
+                                      Background = "Transparent">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType = "ToggleButton">
                                     <Border x:Name = "templateRoot"

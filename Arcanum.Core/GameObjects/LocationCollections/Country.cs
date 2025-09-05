@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
@@ -27,9 +28,25 @@ public partial class Country : INUI, ICollectionProvider<Country>
       our_cores_conquered_by_others,
    }
 
+
    #region Nexus
 
+   public Location Capital { get; set; } = (Location)Location.Empty;
    public Tag Tag { get; set; }
+   /// <summary>
+   /// If this country is a rebel faction
+   /// </summary>
+   public bool Revolt { get; set; }
+   public bool IsValidForRelease { get; set; }
+   public CountryType Type { get; set; } = CountryType.Location;
+   public string Color { get; set; } = string.Empty;
+   public string ReligiousSchool { get; set; } = string.Empty;
+   public string Dynasty { get; set; } = string.Empty;
+   public string CourtLanguage { get; set; } = string.Empty;
+   public string LiturgicalLanguage { get; set; } = string.Empty;
+   public CountryRank CountryRank { get; set; } = Globals.CountryRanks.Find(x => x.Level == 1)!;
+   
+   public int StartingTechLevel { get; set; } = 0;
 
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
    public ObservableRangeCollection<Location> OwnControlIntegrated { get; set; } = [];
@@ -44,7 +61,7 @@ public partial class Country : INUI, ICollectionProvider<Country>
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
    public ObservableRangeCollection<string> Includes { get; set; } = [];
-   
+
    #endregion
 
    public bool SetCollection(string name, IEnumerable<Location> locs)
@@ -88,11 +105,11 @@ public partial class Country : INUI, ICollectionProvider<Country>
             return false;
       }
    }
-   
+
    public bool IsReadonly => false;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Country> GetGlobalItems() => Globals.Countries.Values;
-   
+
    public override string ToString() => Tag.Name;
 }
