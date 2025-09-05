@@ -38,7 +38,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
 
    #endregion
 
-   public override string ToString() => $"{Name} (Color: {Color:X})";
+   public override string ToString() => $"{Name}";
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
 

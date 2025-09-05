@@ -120,7 +120,7 @@ public static class NUIViewGenerator
       if (methodInfo != null)
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
-      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
+      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, property.ToString());
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
       var collapseButton = GetCollapseButton(startExpaned);
@@ -778,6 +778,7 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
+         ToolTip = $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.",
       };
       if (string.IsNullOrWhiteSpace(text))
       {
