@@ -74,9 +74,13 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
+      var viewFields = target.Settings.ViewFields;
+      if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
+         viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
+      
       for (var i = 0; i < target.Settings.ViewFields.Length; i++)
       {
-         var nxProp = target.Settings.ViewFields[i];
+         var nxProp = viewFields[i];
          FrameworkElement element;
          var type = Nx.TypeOf(target, nxProp);
          if (typeof(INUI).IsAssignableFrom(type) || typeof(INUI) == type)
@@ -105,13 +109,17 @@ public static class NUIViewGenerator
    private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,
                                                       Enum property,
                                                       T target,
-                                                      NUINavHistory navHistory,
-                                                      bool startExpaned = false) where T : INUI
+                                                      NUINavHistory navHistory) where T : INUI
    {
+      var startExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
       var embeddedFields = target.Settings.EmbeddedFields;
+      
+      if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
+         embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
+      
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
-      var initialVisibility = startExpaned ? Visibility.Visible : Visibility.Collapsed;
+      var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
       var collapsibleElements = new List<FrameworkElement>();
       var itemType = target.GetType();
       var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
@@ -123,7 +131,7 @@ public static class NUIViewGenerator
       var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, property.ToString());
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
-      var collapseButton = GetCollapseButton(startExpaned);
+      var collapseButton = GetCollapseButton(startExpanded);
 
       if (allItems != null)
       {
@@ -258,7 +266,7 @@ public static class NUIViewGenerator
       Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
 
       collapseButton.Click +=
-         CollapseButtonOnClick<T>(startExpaned, collapsibleElements, collapseButton, embedMarker, baseGrid);
+         CollapseButtonOnClick<T>(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
       return baseUI;
    }
 

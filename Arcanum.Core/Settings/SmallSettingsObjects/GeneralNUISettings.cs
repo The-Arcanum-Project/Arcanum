@@ -15,4 +15,12 @@ public class GeneralNUISettings
    [Description("If true, NUI will not not generate map actions to set properties via map inference")]
    [DefaultValue(false)]
    public bool DisableNUIInferFromMapActions { get; set; } = false;
+   
+   [Description("If true, lists of views will be shown in the custom order defined in the NUI settings, otherwise alphabetically")]
+   [DefaultValue(true)]
+   public bool ListViewsInCustomOrder { get; set; } = true;
+   
+   [Description("If true, embedded fields will start collapsed by default")]
+   [DefaultValue(true)]
+   public bool StartEmbeddedFieldsCollapsed { get; set; } = true;
 }
