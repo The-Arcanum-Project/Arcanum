@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -51,12 +52,11 @@ public static class NUIViewGenerator
       var target = navHistory.Target;
       var baseUI = new BaseView
       {
-         Name = $"{target.Settings.Title}_{_index}",
-         BaseViewBorder = { BorderThickness = new(0) },
+         Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
       };
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
       var header = NavigationHeader(target.Navigations, navHistory.Root, target);
-      
+
       header.FontSize = 24;
       header.Height = 32;
       header.HorizontalAlignment = HorizontalAlignment.Center;
@@ -105,20 +105,25 @@ public static class NUIViewGenerator
    private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,
                                                       Enum property,
                                                       T target,
-                                                      NUINavHistory navHistory) where T : INUI
+                                                      NUINavHistory navHistory,
+                                                      bool startExpaned = false) where T : INUI
    {
       var embeddedFields = target.Settings.EmbeddedFields;
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
-
+      var initialVisibility = startExpaned ? Visibility.Visible : Visibility.Collapsed;
+      var collapsibleElements = new List<FrameworkElement>();
       var itemType = target.GetType();
       var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
       IEnumerable? allItems = null;
+
       if (methodInfo != null)
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
       var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, target.GetType().Name);
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
+
+      var collapseButton = GetCollapseButton(startExpaned);
 
       if (allItems != null)
       {
@@ -151,7 +156,9 @@ public static class NUIViewGenerator
          {
             ColumnDefinitions =
             {
-               new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(6, GridUnitType.Star) },
+               new() { Width = new(4, GridUnitType.Star) },
+               new() { Width = new(6, GridUnitType.Star) },
+               new() { Width = new(20, GridUnitType.Auto) },
             },
          };
 
@@ -177,16 +184,34 @@ public static class NUIViewGenerator
          Grid.SetRow(objectSelector, 0);
          Grid.SetColumn(objectSelector, 1);
 
+         headerGrid.Children.Add(collapseButton);
+         Grid.SetRow(collapseButton, 0);
+         Grid.SetColumn(collapseButton, 2);
+
          baseGrid.Children.Add(headerGrid);
          Grid.SetRow(headerGrid, 0);
          Grid.SetColumn(headerGrid, 0);
       }
       else
       {
+         var simpleHeaderGrid = new Grid
+         {
+            ColumnDefinitions =
+            {
+               new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
+            },
+         };
+
          headerBlock.Margin = new(6, 0, 0, 0);
-         baseGrid.Children.Add(headerBlock);
-         Grid.SetRow(headerBlock, 0);
+         simpleHeaderGrid.Children.Add(headerBlock);
          Grid.SetColumn(headerBlock, 0);
+
+         simpleHeaderGrid.Children.Add(collapseButton);
+         Grid.SetColumn(collapseButton, 1);
+
+         baseGrid.Children.Add(simpleHeaderGrid);
+         Grid.SetRow(simpleHeaderGrid, 0);
+         Grid.SetColumn(simpleHeaderGrid, 0);
       }
 
       var embedMarker = GetEmbedBorder();
@@ -218,11 +243,46 @@ public static class NUIViewGenerator
          baseGrid.Children.Add(element);
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
+
+         element.Visibility = initialVisibility;
+         collapsibleElements.Add(element);
       }
 
-      baseGrid.RowDefinitions.Add(new() { Height = new(4, GridUnitType.Pixel) });
+      var spacer = new Border { Height = 4 };
+      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
+      baseGrid.Children.Add(spacer);
+      Grid.SetRow(spacer, embeddedFields.Length + 1);
+      Grid.SetColumn(spacer, 0);
+      collapsibleElements.Add(spacer);
+
       Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
+
+      collapseButton.Click +=
+         CollapseButtonOnClick<T>(startExpaned, collapsibleElements, collapseButton, embedMarker, baseGrid);
       return baseUI;
+   }
+
+   private static RoutedEventHandler CollapseButtonOnClick<T>(bool startExpanded,
+                                                              List<FrameworkElement> collapsibleElements,
+                                                              BaseButton collapseButton,
+                                                              Border embedMarker,
+                                                              Grid baseGrid) where T : INUI
+   {
+      return (_, _) =>
+      {
+         startExpanded = !startExpanded;
+         var newVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
+
+         foreach (var elem in collapsibleElements)
+            elem.Visibility = newVisibility;
+
+         var path = (Path)collapseButton.Content;
+         var transform = (RotateTransform)path.LayoutTransform;
+         var duration = new Duration(TimeSpan.FromMilliseconds(200));
+         var rotationAnimation = new DoubleAnimation(startExpanded ? 180 : 0, duration);
+         Grid.SetRowSpan(embedMarker, startExpanded ? baseGrid.RowDefinitions.Count : 1);
+         transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation);
+      };
    }
 
    private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
@@ -891,6 +951,36 @@ public static class NUIViewGenerator
             Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
             Stretch = Stretch.UniformToFill,
          },
+      };
+   }
+
+   private static BaseButton GetCollapseButton(bool isExpanded)
+   {
+      const string arrowPathData = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z";
+      var path = new Path
+      {
+         Data = Geometry.Parse(arrowPathData),
+         Fill = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
+         Stretch = Stretch.None,
+         HorizontalAlignment = HorizontalAlignment.Center,
+         VerticalAlignment = VerticalAlignment.Center,
+         LayoutTransform = new RotateTransform
+         {
+            Angle = isExpanded ? 180 : 0,
+            CenterX = 4,
+            CenterY = 3,
+         },
+      };
+
+      return new()
+      {
+         Content = path,
+         ToolTip = "Collapse/Expand",
+         Margin = new(4, 0, 2, 0),
+         Width = 20,
+         Height = 20,
+         BorderThickness = new(1),
+         VerticalAlignment = VerticalAlignment.Center,
       };
    }
 
