@@ -1,7 +1,7 @@
 # The Arcanum Project
 
 This project aims to build and improve upon what its predecessor [Minnator's Modforge](https://github.com/Minnator/Minnators-Modforge) has achieved.
-The main difference is that this tool is meant for the upcoming game **Europa Universalis V**.
+The main difference is that this tool is meant for the game **Europa Universalis V** also known as Project Ceasar.
 It is being developed by [MelonCoaster](https://github.com/mel-co) and [Minnator](https://github.com/Minnator).
 We develop this in our spare freetime so the speed of progress may vary from time to time.
 
