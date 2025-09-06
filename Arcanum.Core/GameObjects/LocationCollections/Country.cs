@@ -12,22 +12,6 @@ public partial class Country : INUI, ICollectionProvider<Country>
       Tag = tag;
    }
 
-   [SuppressMessage("ReSharper", "InconsistentNaming")]
-   public enum OwnerShipType
-   {
-      own_control_core,
-      own_control_integrated,
-      own_control_conquered,
-      own_control_colony,
-      own_core,
-      own_conquered,
-      own_integrated,
-      own_colony,
-      control_core,
-      control,
-      our_cores_conquered_by_others,
-   }
-
 
    #region Nexus
 

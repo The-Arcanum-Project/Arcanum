@@ -42,6 +42,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          base.OnApplyTemplate();
          _editableTextBoxCache =
             GetTemplateChild("PART_EditableTextBox") as TextBox ?? throw new InvalidOperationException();
+         
+         ApplyFilter(Text);
       }
 
       /// <summary>
@@ -123,12 +125,16 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       {
          var comboBox = (AutoCompleteComboBox)dependencyObject;
          comboBox._fullItemsSource = dpcea.NewValue as IEnumerable;
+
          comboBox._cachedTextSearchTextPath = TextSearch.GetTextPath(comboBox);
-         comboBox._cachedDisplayMemberPath = comboBox.DisplayMemberPath; // Call on UI thread
+         comboBox._cachedDisplayMemberPath = comboBox.DisplayMemberPath;
          comboBox._textFromItemDelegate = null;
          comboBox._itemType = null;
          comboBox.InitializeTextFromItemDelegate();
-         comboBox.ApplyFilter(comboBox.Text);
+
+         
+         if (comboBox.IsLoaded == false)
+            comboBox.ItemsSource = comboBox._fullItemsSource;
       }
 
       #endregion ItemsSource
@@ -192,20 +198,20 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
                                               var results = new List<object>();
                                               foreach (var item in fullItems)
                                               {
-                                                 if (token.IsCancellationRequested) 
-                                                    return Enumerable.Empty<object>(); 
+                                                 if (token.IsCancellationRequested)
+                                                    return Enumerable.Empty<object>();
 
                                                  if (currentFilterDelegate(item))
                                                  {
                                                     results.Add(item);
                                                     if (results.Count >= maxSuggestionCount)
-                                                       break; 
+                                                       break;
                                                  }
                                               }
 
                                               return results;
                                            },
-                                           token); 
+                                           token);
 
          if (token.IsCancellationRequested)
             return;
@@ -213,18 +219,19 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          Dispatcher.Invoke(() =>
          {
             var itemsSource = filteredItems.ToList();
-            ItemsSource = itemsSource; 
+            using (new TextBoxStatePreserver(EditableTextBox))
+               ItemsSource = itemsSource;
 
             if (string.IsNullOrEmpty(currentText))
             {
-               IsDropDownOpen = true;
+               IsDropDownOpen = EditableTextBox.IsFocused;
                SelectedItem = null;
             }
             else
             {
                if (filteredItems != null && itemsSource.Count != 0)
                {
-                  IsDropDownOpen = true;
+                  IsDropDownOpen = EditableTextBox.IsFocused;
                   if (SelectedItem != null &&
                       !TextFromItem(SelectedItem).Equals(currentText, StringComparison.OrdinalIgnoreCase))
                      using (new TextBoxStatePreserver(EditableTextBox))
@@ -237,14 +244,17 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
                }
             }
 
-            Unselect(); 
+            Unselect();
          });
       }
 
       private void Unselect()
       {
+         if (!EditableTextBox.IsKeyboardFocusWithin)
+            return;
+
          var textBox = EditableTextBox;
-         if (textBox != null!) 
+         if (textBox != null!)
             textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
       }
 
@@ -255,10 +265,10 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          var currentText = Text.Trim();
 
          if (string.Equals(currentText, _previousText, StringComparison.Ordinal) &&
-             IsDropDownOpen) 
+             IsDropDownOpen)
             return;
 
-         _previousText = currentText; 
+         _previousText = currentText;
 
          if (setting.Delay <= TimeSpan.Zero)
          {
