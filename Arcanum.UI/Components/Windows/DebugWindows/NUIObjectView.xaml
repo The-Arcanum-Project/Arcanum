@@ -71,10 +71,10 @@
                 Grid.Row = "1"
                 Margin = "4"
                 BorderBrush = "{StaticResource DefaultBackColorBrush}"
-                CornerRadius="3"
+                CornerRadius = "3"
                 BorderThickness = "2">
             <ScrollViewer>
-                <ContentPresenter x:Name = "ViewPresenter"/>
+                <ContentPresenter x:Name = "ViewPresenter" />
             </ScrollViewer>
         </Border>
     </Grid>

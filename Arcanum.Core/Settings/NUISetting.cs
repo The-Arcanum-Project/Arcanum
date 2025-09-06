@@ -10,6 +10,8 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
+    public NUISettings() { }
+    
    public NUISetting PopSettings { get; set; } = new(Pop.Field.Type,
                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),

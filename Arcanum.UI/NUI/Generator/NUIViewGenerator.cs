@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -55,6 +56,7 @@ public static class NUIViewGenerator
          Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
       };
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
+
       var header = NavigationHeader(target.Navigations, navHistory.Root, target);
 
       header.FontSize = 24;
@@ -77,7 +79,7 @@ public static class NUIViewGenerator
       var viewFields = target.Settings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
-      
+
       for (var i = 0; i < target.Settings.ViewFields.Length; i++)
       {
          var nxProp = viewFields[i];
@@ -113,10 +115,10 @@ public static class NUIViewGenerator
    {
       var startExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
       var embeddedFields = target.Settings.EmbeddedFields;
-      
+
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
-      
+
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
       var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
@@ -266,15 +268,15 @@ public static class NUIViewGenerator
       Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
 
       collapseButton.Click +=
-         CollapseButtonOnClick<T>(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
+         CollapseButtonOnClick(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
       return baseUI;
    }
 
-   private static RoutedEventHandler CollapseButtonOnClick<T>(bool startExpanded,
-                                                              List<FrameworkElement> collapsibleElements,
-                                                              BaseButton collapseButton,
-                                                              Border embedMarker,
-                                                              Grid baseGrid) where T : INUI
+   private static RoutedEventHandler CollapseButtonOnClick(bool startExpanded,
+                                                           List<FrameworkElement> collapsibleElements,
+                                                           BaseButton collapseButton,
+                                                           Border embedMarker,
+                                                           Grid baseGrid)
    {
       return (_, _) =>
       {
@@ -786,7 +788,8 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
-         ToolTip = $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.",
+         ToolTip =
+            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.",
       };
       if (string.IsNullOrWhiteSpace(text))
       {
