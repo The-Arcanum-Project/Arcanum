@@ -50,14 +50,14 @@ public static class NUIViewGenerator
    /// <returns></returns>
    public static UserControl GenerateView(NUINavHistory navHistory)
    {
-      var target = navHistory.Target;
+      var target = navHistory.Targets[0];
       var baseUI = new BaseView
       {
          Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
       };
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
 
-      var header = NavigationHeader(target.Navigations, navHistory.Root, target);
+      var header = NavigationHeader(navHistory, target);
 
       header.FontSize = 24;
       header.Height = 32;
@@ -76,7 +76,7 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
-      var viewFields = target.Settings.ViewFields;
+      var viewFields = navHistory.PrimaryTarget.Settings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
 
@@ -90,15 +90,27 @@ public static class NUIViewGenerator
             // Detect if value has ref to target. --> 1 to n relationship.
             if (navHistory.GenerateSubViews)
             {
-               INUI value = null!;
-               Nx.ForceGet(target, nxProp, ref value);
-               element = GetEmbeddedView(target, nxProp, value, navHistory);
+               if (navHistory.Targets.Count > 1)
+               {
+                  element = new TextBlock 
+                  { 
+                     Text = $"- Multiple selections for '{nxProp}' not supported -", 
+                     FontStyle = FontStyles.Italic, 
+                     Margin = new (6, 4, 0, 4), 
+                  };
+               }
+               else
+               {
+                  INUI value = null!;
+                  Nx.ForceGet(target, nxProp, ref value);
+                  element = GetEmbeddedView(target, nxProp, value, navHistory);
+               }
             }
             else
-               element = GenerateShortInfo(target, navHistory.Root);
+               element = GenerateShortInfo(target, navHistory);
          }
          else
-            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp);
+            element = BuildCollectionOrDefaultView(navHistory, type, [..navHistory.Targets], nxProp);
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -130,7 +142,7 @@ public static class NUIViewGenerator
       if (methodInfo != null)
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
-      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, property.ToString());
+      var headerBlock = NavigationHeader(navHistory, target, property.ToString());
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
       var collapseButton = GetCollapseButton(startExpanded);
@@ -242,11 +254,11 @@ public static class NUIViewGenerator
             if (value == null!)
                continue;
 
-            element = GenerateShortInfo(value, navHistory.Root);
+            element = GenerateShortInfo(value, navHistory);
          }
          else
          {
-            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp, 6);
+            element = BuildCollectionOrDefaultView(navHistory, type, [target], nxProp, 6);
          }
 
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -295,7 +307,7 @@ public static class NUIViewGenerator
       };
    }
 
-   private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
+   private static StackPanel GenerateShortInfo<T>(T value, NUINavHistory navh) where T : INUI
    {
       var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20 };
       object headerValue = null!;
@@ -317,8 +329,7 @@ public static class NUIViewGenerator
       }
 
       const int fontSize = 11;
-      var headerBlock = NavigationHeader(value.Navigations,
-                                         root,
+      var headerBlock = NavigationHeader(navh,
                                          value,
                                          value.GetType().Name,
                                          fontSize,
@@ -379,7 +390,7 @@ public static class NUIViewGenerator
                           ? concreteItemType
                           : nxPropType;
 
-      Debug.Assert(targetType != null, "Target type should not be null here.");
+      Debug.Assert(targetType != null, "Targets type should not be null here.");
 
       var inferableInterfaceType = typeof(IMapInferable<>).MakeGenericType(targetType);
       if (!inferableInterfaceType.IsAssignableFrom(targetType))
@@ -518,25 +529,25 @@ public static class NUIViewGenerator
       return actionsPanel;
    }
 
-   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
+   private static Grid BuildCollectionOrDefaultView<T>(NUINavHistory navHistory,
                                                     Type type,
-                                                    INUI target,
+                                                    List<T> targets,
                                                     Enum nxProp,
-                                                    int leftMargin = 0)
+                                                    int leftMargin = 0) where T : INUI
    {
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
       if (itemType == null)
-         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
+         return GetTypeSpecificGrid(navHistory, targets.Cast<INUI>().ToList(), nxProp, leftMargin);
 
       object collectionObject = null!;
-      Nx.ForceGet(target, nxProp, ref collectionObject);
+      Nx.ForceGet(targets[0], nxProp, ref collectionObject);
 
       // We need a modifiable list (IList) for the editor to work.
       if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
+         return GetTypeSpecificGrid(navHistory, targets.Cast<INUI>().ToList(), nxProp, leftMargin);
 
       // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, target.GetType(), nxProp.ToString());
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
       if (concreteItemType != null)
          itemType = concreteItemType;
 
@@ -574,7 +585,7 @@ public static class NUIViewGenerator
                                   grid,
                                   openButton);
 
-      var inferActions = GenerateInferActions(target,
+      var inferActions = GenerateInferActions(targets[0],
                                               navHistory,
                                               nxProp,
                                               type,
@@ -683,12 +694,25 @@ public static class NUIViewGenerator
       }
    }
 
-   private static Grid GetTypeSpecificGrid(INUI target, Enum nxProp, NUINavHistory navHistory, int leftMargin = 0)
+   private static Grid GetTypeSpecificGrid(NUINavHistory navh,
+                                           List<INUI> targets,
+                                           Enum nxProp,
+                                           int leftMargin = 0)
    {
+      var target = targets[0];
       var type = Nx.TypeOf(target, nxProp);
-      var binding = GetTwoWayBinding(target, nxProp);
+
+      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp);
+
+      var binding = new Binding(nameof(propertyViewModel.Value))
+      {
+         Source = propertyViewModel,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+      };
+
       Control element;
-      // Fallback to existing logic
+      
       if (type == typeof(float))
          element = GetFloatUI(binding);
       else if (type == typeof(string))
@@ -711,7 +735,7 @@ public static class NUIViewGenerator
       desc.Margin = new(leftMargin, 0, 0, 0);
 
       var inferActions = GenerateInferActions(target,
-                                              navHistory,
+                                              navh,
                                               nxProp,
                                               type,
                                               null,
@@ -771,8 +795,7 @@ public static class NUIViewGenerator
       return textBlock;
    }
 
-   private static TextBlock NavigationHeader<T>(INUINavigation[] navigations,
-                                                ContentPresenter root,
+   private static TextBlock NavigationHeader<T>(NUINavHistory navh,
                                                 T value,
                                                 string text = null!,
                                                 int fontSize = 16,
@@ -788,9 +811,14 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
-         ToolTip =
-            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.",
       };
+
+      if (navh.Targets.Count > 1)
+         header.Text = $"{navh.Targets.Count} {value.GetType().Name}s Selected";
+      else
+         header.Text =
+            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.";
+
       if (string.IsNullOrWhiteSpace(text))
       {
          object headerValue = null!;
@@ -802,8 +830,10 @@ public static class NUIViewGenerator
 
       MouseButtonEventHandler clickHandler = (sender, e) =>
       {
+         var root = navh.Root;
          if (e.ChangedButton == MouseButton.Right)
          {
+            var navigations = navh.GetNavigations();
             if (navigations.Length == 0)
             {
                e.Handled = true;
@@ -1015,7 +1045,7 @@ public static class NUIViewGenerator
 
       foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
       {
-         var shortInfo = GenerateShortInfo(item, navHistory.Root);
+         var shortInfo = GenerateShortInfo(item, navHistory);
          grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
          grid.Children.Add(shortInfo);
          Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
