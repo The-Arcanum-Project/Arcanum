@@ -2,7 +2,7 @@
 x Checkbox \
 x String \
 x Float\
-x Integer \
-x Double 
-- List
-- Enum
+x Integer\
+x Double  
+x Enum 
+- List 

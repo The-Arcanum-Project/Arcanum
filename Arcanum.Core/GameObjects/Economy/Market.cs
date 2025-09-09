@@ -9,7 +9,12 @@ namespace Arcanum.Core.GameObjects.Economy;
 /// </summary>
 public partial class Market(Location location) : INUI, ICollectionProvider<Market>
 {
-   public Location Location { get; set; } = location;
+   private Location _location = location;
+   public Location Location
+   {
+      get => _location;
+      set => _location = value;
+   }
    public static Market Empty { get; } = new((Location)Location.Empty);
 
    public static IEnumerable<Market> GetGlobalItems() => Globals.Locations.Values.Where(loc => loc.HasMarket).Select(loc => loc.Market);
@@ -33,4 +38,6 @@ public partial class Market(Location location) : INUI, ICollectionProvider<Marke
    public bool IsReadonly { get; } = true;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations { get; } = [];
+
+   public override string ToString() => $"Market of {Location.Name}";
 }

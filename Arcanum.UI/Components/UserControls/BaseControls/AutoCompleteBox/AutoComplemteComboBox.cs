@@ -16,6 +16,9 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       private CancellationTokenSource _filterCancellationTokenSource = new();
       private readonly SerialDisposable _disposable = new(); // For Debouncing
 
+      private bool _isUpdatingText;
+      private bool _isInitialized;
+
       private TextBox _editableTextBoxCache = null!;
       private Func<object, string>? _textFromItemDelegate;
       private string? _cachedTextSearchTextPath;
@@ -77,12 +80,44 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 
       public override void OnApplyTemplate()
       {
+         if (_editableTextBoxCache != null!)
+            _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown;
+
          base.OnApplyTemplate();
          _editableTextBoxCache =
             GetTemplateChild("PART_EditableTextBox") as TextBox ?? throw new InvalidOperationException();
 
+         _editableTextBoxCache.KeyDown += OnEditableTextBoxKeyDown;
+
          if (!IsDropdownOnly)
             ApplyFilter(Text);
+         
+         _isInitialized = true; 
+      }
+
+      private void OnEditableTextBoxKeyDown(object sender, KeyEventArgs e)
+      {
+         if (e.Key == Key.Enter)
+         {
+            if (IsDropDownOpen && Items.Count > 0)
+               SelectedItem = Items[0];
+
+            IsDropDownOpen = false;
+            e.Handled = true;
+         }
+         else if (e.Key == Key.Escape)
+         {
+            IsDropDownOpen = false;
+            e.Handled = true;
+         }
+      }
+
+      private void OnUnloaded(object sender, RoutedEventArgs e)
+      {
+         if (_editableTextBoxCache != null!)
+            _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown; // Unhook keydown
+
+         Unloaded -= OnUnloaded;
       }
 
       /// <summary>
@@ -160,11 +195,6 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          Unloaded += OnUnloaded;
       }
 
-      private void OnUnloaded(object sender, RoutedEventArgs e)
-      {
-         Unloaded -= OnUnloaded;
-      }
-
       private static void FullItemsSourcePropertyChanged(DependencyObject dependencyObject,
                                                          DependencyPropertyChangedEventArgs dpcea)
       {
@@ -225,7 +255,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             ItemsSource = FullItemsSource;
             return;
          }
-         
+
          var setting = SettingOrDefault;
          var maxSuggestionCount = setting.MaxSuggestionCount;
          var currentFilterDelegate = setting.GetFilter(currentText, TextFromItem);
@@ -239,30 +269,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          if (string.IsNullOrEmpty(currentText))
             filteredItems = _fullItemsSource?.Cast<object>() ?? [];
          else
-            filteredItems = await Task.Run(() =>
-                                           {
-                                              if (_fullItemsSource == null)
-                                                 return [];
-
-                                              var fullItems = _fullItemsSource.Cast<object>();
-
-                                              var results = new List<object>();
-                                              foreach (var item in fullItems)
-                                              {
-                                                 if (token.IsCancellationRequested)
-                                                    return Enumerable.Empty<object>();
-
-                                                 if (currentFilterDelegate(item))
-                                                 {
-                                                    results.Add(item);
-                                                    if (results.Count >= maxSuggestionCount)
-                                                       break;
-                                                 }
-                                              }
-
-                                              return results;
-                                           },
-                                           token);
+            filteredItems = await Task.Run(GetFilteredItems, token);
 
          if (token.IsCancellationRequested)
             return;
@@ -273,30 +280,38 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             using (new TextBoxStatePreserver(EditableTextBox))
                ItemsSource = itemsSource;
 
-            if (string.IsNullOrEmpty(currentText))
-            {
-               IsDropDownOpen = EditableTextBox.IsFocused;
-               SelectedItem = null;
-            }
+            if (filteredItems != null && filteredItems.Any() && EditableTextBox.IsFocused)
+               IsDropDownOpen = true;
             else
-            {
-               if (filteredItems != null && itemsSource.Count != 0)
-               {
-                  IsDropDownOpen = EditableTextBox.IsFocused;
-                  if (SelectedItem != null &&
-                      !TextFromItem(SelectedItem).Equals(currentText, StringComparison.OrdinalIgnoreCase))
-                     using (new TextBoxStatePreserver(EditableTextBox))
-                        SelectedItem = null;
-               }
-               else
-               {
-                  IsDropDownOpen = false;
-                  SelectedItem = null;
-               }
-            }
+               IsDropDownOpen = false;
 
             Unselect();
          });
+         return;
+
+         IEnumerable<object> GetFilteredItems()
+         {
+            if (_fullItemsSource == null)
+               return [];
+
+            var fullItems = _fullItemsSource.Cast<object>();
+
+            var results = new List<object>();
+            foreach (var item in fullItems)
+            {
+               if (token.IsCancellationRequested)
+                  return Enumerable.Empty<object>();
+
+               if (currentFilterDelegate(item))
+               {
+                  results.Add(item);
+                  if (results.Count >= maxSuggestionCount)
+                     break;
+               }
+            }
+
+            return results;
+         }
       }
 
       private void Unselect()
@@ -309,13 +324,39 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
       }
 
+      protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+      {
+         // When our flag is set, it means we are in the middle of typing.
+         // We should NOT let the base ComboBox logic run, as it will
+         // overwrite the user's text with an empty string (from the null SelectedItem).
+         if (_isUpdatingText)
+            return;
+
+         // Use a flag to signal that the subsequent TextChanged event is from a selection, not typing.
+         _isUpdatingText = true;
+         base.OnSelectionChanged(e); // This will update the Text property
+         _isUpdatingText = false;
+      }
+
       private void OnTextChanged(object sender, TextChangedEventArgs e)
       {
+         if (!_isInitialized)
+            return;
+         
          if (IsDropdownOnly)
          {
             Unselect();
             return;
          }
+
+         if (_isUpdatingText)
+            return;
+
+         // Set SelectedItem to null to indicate that the text no longer matches a selected item.
+         // Use the flag to prevent the OnSelectionChanged handler from clearing the text.
+         _isUpdatingText = true;
+         SelectedItem = null;
+         _isUpdatingText = false;
 
          var id = unchecked(++_revisionId);
          var setting = SettingOrDefault;

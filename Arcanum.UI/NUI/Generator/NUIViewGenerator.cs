@@ -158,7 +158,9 @@ public static class NUIViewGenerator
             Margin = new(1),
             Padding = new(2, 0, 2, 0),
             FontSize = 11,
+            Name = $"AutoComplete_{target.GetType().Name}_{_index}",
          };
+         _index++;
 
          var binding = new Binding(property.ToString())
          {

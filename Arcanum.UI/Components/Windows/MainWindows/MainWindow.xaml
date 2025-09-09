@@ -124,6 +124,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.LoadingStepRunnerCommand"
                         Executed = "LoadingStepRunnerCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
+        
+        <CommandBinding Command = "mainWindow:MwCommands.OpenDebugPanel"
+                        Executed = "OpenDebugPanel_OnExecuted"
+                        CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand"
                         Executed = "UIElementsBrowserCommandCommand_OnExecuted"
@@ -321,8 +325,8 @@
                                            Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
                     <uc:SearchableMenuItem Header = "Loading Strep Runner"
                                            Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
-                    <uc:SearchableMenuItem Header = "Browse Mod Metadata"
-                                           Click = "MenuItem_OnClick" />
+                    <uc:SearchableMenuItem Header = "Debug Panel"
+                                           Command="mainWindow:MwCommands.OpenDebugPanel"/>
                     <uc:SearchableMenuItem Header = "ParsingStepBrowser"
                                            Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
                     <uc:SearchableMenuItem Header = "UI Elements Browser"
@@ -334,7 +338,7 @@
                     <uc:SearchableMenuItem Header = "View INUI Objects"
                                            Command = "mainWindow:MwCommands.ViewINUIObjectsCommand" />
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Load Locations"
+                    <uc:SearchableMenuItem Header = "Parser Test"
                                            Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
             </Menu>

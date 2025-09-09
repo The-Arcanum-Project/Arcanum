@@ -309,6 +309,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void ViewINUIObjectsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var nuiObjectView = new NUIObjectView();
-      nuiObjectView.ShowDialog();
+      nuiObjectView.Show();
+   }
+
+   private void OpenDebugPanel_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var debugPanel = new Debug_Panel();
+      debugPanel.Show();
    }
 }
