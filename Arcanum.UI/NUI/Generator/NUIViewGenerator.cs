@@ -812,8 +812,7 @@ public static class NUIViewGenerator
             PrimitiveTypeListView.ShowDialog(modifiableList, modifiableList, $"{nxProp} Editor");
          };
          
-         openButton.ToolTip =
-            $"This collection is not editable because the '{itemType.Name}' type does not provide a static GetGlobalItems() method.";
+         openButton.ToolTip = $"Open Primitive Collection Editor for {nxProp}({itemType.Name})";
       }
    }
 
