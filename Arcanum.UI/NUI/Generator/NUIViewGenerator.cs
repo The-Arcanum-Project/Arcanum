@@ -132,6 +132,8 @@ public static class NUIViewGenerator
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
 
+      var isReadonlyProp = parent.IsPropertyReadOnly(property);
+      
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
       var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
@@ -148,7 +150,7 @@ public static class NUIViewGenerator
 
       var collapseButton = GetCollapseButton(startExpanded);
 
-      if (allItems != null)
+      if (allItems != null && !isReadonlyProp)
       {
          var objectSelector = new AutoCompleteComboBox
          {
@@ -206,7 +208,7 @@ public static class NUIViewGenerator
             Grid.SetColumn(inferActions, 0);
          }
 
-         if (TryGetEmpty(itemType, out var emptyInstance))
+         if (!isReadonlyProp && TryGetEmpty(itemType, out var emptyInstance))
          {
             var setEmptyButton = GetSetEmptyButton(itemType, property, parent, navHistory, emptyInstance);
 

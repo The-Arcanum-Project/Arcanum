@@ -8,4 +8,6 @@ public interface INexus
       Enum property, object value);
    
    object this[Enum key] { get; set; }
+
+   bool IsPropertyReadOnly(Enum property);
 }

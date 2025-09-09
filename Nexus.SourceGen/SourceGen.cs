@@ -99,6 +99,8 @@ public class PropertyModifierGenerator : IIncrementalGenerator
 
    private string GeneratePartialClass(INamedTypeSymbol classSymbol, List<ISymbol> members)
    {
+      var readonlyStatuses = new List<bool>();
+
       var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
       var className = classSymbol.Name;
 
@@ -125,8 +127,15 @@ public class PropertyModifierGenerator : IIncrementalGenerator
          {
             IPropertySymbol p => p.Type,
             IFieldSymbol f => f.Type,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(),
          };
+
+         // Gather the readonly status
+         var hasReadonlyAttribute = member.GetAttributes()
+                                          .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
+                                                                   READONLY_NEXUS_ATTRIBUTE_NAME,
+                                                                   StringComparison.Ordinal));
+         readonlyStatuses.Add(hasReadonlyAttribute);
 
          // 2. Get a fully qualified name for the type
          var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -137,14 +146,40 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("    }");
       builder.AppendLine();
 
+      // ------- Readonly Array -------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array indicating whether a property is read-only.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+
+      // Convert the list of booleans to a C# array literal string
+      var arrayInitializer = string.Join(", ", readonlyStatuses.Select(s => s.ToString().ToLower()));
+      builder.AppendLine($"    private static readonly bool[] _isReadOnly = {{ {arrayInitializer} }};");
+      builder.AppendLine();
+
+      // --- Generate a public accessor method for the readonly status ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Checks if a property is marked as read-only.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public bool IsPropertyReadOnly(Enum property)");
+      builder.AppendLine("    {");
+      // Verify that the enum value is valid
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _isReadOnly[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
       // 2. Generate the SetValue method
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
+      // Check if the property is readonly
+      builder.AppendLine("        Debug.Assert(!IsPropertyReadOnly(property), \"Attempting to set a readonly property\");");
+      
       builder.AppendLine("        switch (property)");
       builder.AppendLine("        {");
       foreach (var member in members)
       {
-         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
          var typeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
          builder.AppendLine($"            case Field.{member.Name}:");
 #if DEBUG
@@ -174,7 +209,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
-      
+
       // 4. Generate the indexer
       builder.AppendLine();
       builder.AppendLine("    public object this[Enum key]");
@@ -182,7 +217,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        get => _getValue(key);");
       builder.AppendLine("        set => _setValue(key, value);");
       builder.AppendLine("    }");
-      
+
       // 5. Generate the INotifyPropertyChanged implementation
       builder.AppendLine("    public event PropertyChangedEventHandler? PropertyChanged;");
       builder.AppendLine();
@@ -206,4 +241,6 @@ public class PropertyModifierGenerator : IIncrementalGenerator
 
       return builder.ToString();
    }
+
+   private const string READONLY_NEXUS_ATTRIBUTE_NAME = "Arcanum.Core.CoreSystems.NUI.Attributes.ReadonlyNexusAttribute";
 }

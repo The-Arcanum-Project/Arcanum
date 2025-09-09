@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GlobalStates;
 
@@ -15,6 +16,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    #region Nexus
 
    public Location Capital { get; set; } = (Location)Location.Empty;
+   [ReadonlyNexus]
    public Tag Tag { get; set; }
    /// <summary>
    /// If this country is a rebel faction

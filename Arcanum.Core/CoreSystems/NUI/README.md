@@ -72,6 +72,14 @@ public sealed class ToStringArgumentsAttribute(string format) : Attribute
 The `ToStringArgumentsAttribute` can be applied to properties or fields to specify a custom format for the `ToString` method which is used by the NUI system to generate display strings.
 
 
+### ToStringArgumentsAttribute
+This attribute can be applied to properties to specify that they should be treated as read-only in the NUI system.
+
+```c#
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class ReadonlyNexus : Attribute;
+```
+
 ### DisableMapInferAttribute
 
 ```c#
