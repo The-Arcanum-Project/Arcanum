@@ -39,7 +39,7 @@
                VerticalAlignment = "Center"
                HorizontalAlignment = "Center" />
 
-        <TextBlock x:Name = "MessageText"
+        <styleClasses:CorneredTextBox x:Name = "MessageText"
                    Grid.Row = "0"
                    Grid.Column = "1"
                    TextWrapping = "Wrap"
@@ -47,7 +47,10 @@
                    HorizontalAlignment = "Stretch"
                    TextAlignment = "Left"
                    FontSize = "12"
-                   Margin = "20, 10" />
+                   Margin = "20, 10" 
+                   BorderThickness="0"
+                   IsReadOnly="True"
+                   IsReadOnlyCaretVisible="False"/>
 
         <Grid Grid.Row = "1"
               Grid.ColumnSpan = "2"
