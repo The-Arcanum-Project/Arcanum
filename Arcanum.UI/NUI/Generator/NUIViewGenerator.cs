@@ -17,6 +17,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.UserControls.BaseControls;
@@ -92,11 +93,11 @@ public static class NUIViewGenerator
             {
                if (navHistory.Targets.Count > 1)
                {
-                  element = new TextBlock 
-                  { 
-                     Text = $"- Multiple selections for '{nxProp}' not supported -", 
-                     FontStyle = FontStyles.Italic, 
-                     Margin = new (6, 4, 0, 4), 
+                  element = new TextBlock
+                  {
+                     Text = $"- Multiple selections for '{nxProp}' not supported -",
+                     FontStyle = FontStyles.Italic,
+                     Margin = new(6, 4, 0, 4),
                   };
                }
                else
@@ -110,7 +111,7 @@ public static class NUIViewGenerator
                element = GenerateShortInfo(target, navHistory);
          }
          else
-            element = BuildCollectionOrDefaultView(navHistory, type, [..navHistory.Targets], nxProp);
+            element = BuildCollectionOrDefaultView(navHistory, type, navHistory.Targets.ToList(), nxProp);
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -529,29 +530,23 @@ public static class NUIViewGenerator
       return actionsPanel;
    }
 
-   private static Grid BuildCollectionOrDefaultView<T>(NUINavHistory navHistory,
+   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
                                                     Type type,
-                                                    List<T> targets,
+                                                    List<INUI> targets,
                                                     Enum nxProp,
-                                                    int leftMargin = 0) where T : INUI
+                                                    int leftMargin = 0)
    {
+      
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
       if (itemType == null)
-         return GetTypeSpecificGrid(navHistory, targets.Cast<INUI>().ToList(), nxProp, leftMargin);
+         return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
 
       object collectionObject = null!;
       Nx.ForceGet(targets[0], nxProp, ref collectionObject);
 
       // We need a modifiable list (IList) for the editor to work.
       if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(navHistory, targets.Cast<INUI>().ToList(), nxProp, leftMargin);
-
-      // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
-      if (concreteItemType != null)
-         itemType = concreteItemType;
-
-      var inuiItems = modifiableList.OfType<INUI>().ToList();
+         return GetTypeSpecificGrid(navHistory, targets.ToList(), nxProp, leftMargin);
 
       var grid = new Grid
       {
@@ -561,6 +556,25 @@ public static class NUIViewGenerator
          },
          Margin = new(leftMargin, 0, 0, 0),
       };
+
+      if (targets.Count > 1)
+      {
+         var info = new TextBlock
+         {
+            Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
+            FontStyle = FontStyles.Italic,
+            Margin = new (leftMargin, 4, 0, 4)
+         };
+         grid.Children.Add(info);
+         return grid;
+      }
+
+      // if we have an abstract class or interface as item type, try to find the concrete type
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
+      if (concreteItemType != null)
+         itemType = concreteItemType;
+
+      var inuiItems = modifiableList.OfType<INUI>().ToList();
 
       var navHeader = new TextBlock
       {
@@ -712,7 +726,7 @@ public static class NUIViewGenerator
       };
 
       Control element;
-      
+
       if (type == typeof(float))
          element = GetFloatUI(binding);
       else if (type == typeof(string))
@@ -1147,7 +1161,8 @@ public static class NUIViewGenerator
    }
 
    #region Contorl Generators
-
+   private static readonly MultiSelectBooleanConverter _multiSelectBoolConverter = new();
+   
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
       FloatNumericUpDown numericUpDown = new()
@@ -1186,6 +1201,7 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Margin = new(0),
          VerticalAlignment = VerticalAlignment.Center,
+         IsThreeState = true,
       };
       checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
       return checkBox;
@@ -1193,6 +1209,8 @@ public static class NUIViewGenerator
 
    private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = _multiSelectBoolConverter;
+      
       var comboBox = new AutoCompleteComboBox
       {
          Height = height,
