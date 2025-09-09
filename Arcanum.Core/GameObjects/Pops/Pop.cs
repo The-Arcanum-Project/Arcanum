@@ -8,7 +8,7 @@ public partial class Pop(PopType type,
                          float size,
                          string culture,
                          string religion)
-   : INUI, ICollectionProvider<Pop>
+   : INUI, ICollectionProvider<Pop>, IEmpty<Pop>
 {
    public PopType Type { get; set; } = type;
    public float Size { get; set; } = size;
@@ -58,4 +58,5 @@ public partial class Pop(PopType type,
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.PopSettings;
 
    public INUINavigation[] Navigations { get; } = [new NUINavigation(type, "Pop Type")];
+   public static Pop Empty { get; } = new (PopType.Empty, 0f, string.Empty, string.Empty);
 }

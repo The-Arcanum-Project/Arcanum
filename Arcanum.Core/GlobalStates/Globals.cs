@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing;
-using Arcanum.Core.GameObjects;
+﻿using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;

@@ -4,7 +4,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects;
 
-public partial class Road(Location startLocation, Location endLocation) : INUI, ICollectionProvider<Road>
+public partial class Road(Location startLocation, Location endLocation) : INUI, ICollectionProvider<Road>, IEmpty<Road>
 {
    public Location StartLocation { get; set; } = startLocation;
    public Location EndLocation { get; set; } = endLocation;
@@ -17,4 +17,5 @@ public partial class Road(Location startLocation, Location endLocation) : INUI, 
       new NUINavigation(EndLocation, $"End: {EndLocation.Name}"),
    ];
    public static IEnumerable<Road> GetGlobalItems() => Globals.Roads;
+   public static Road Empty { get; } = new(Location.Empty, Location.Empty);
 }

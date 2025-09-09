@@ -6,7 +6,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Tag(string name) : INUI, ICollectionProvider<Tag>
+public partial class Tag(string name) : INUI, ICollectionProvider<Tag>, IEmpty<Tag>
 {
    public string Name { get; set; } = name;
 

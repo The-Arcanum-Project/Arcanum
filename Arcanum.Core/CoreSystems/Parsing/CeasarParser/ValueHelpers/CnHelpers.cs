@@ -209,13 +209,13 @@ public static class CnHelpers
    {
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName))
       {
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 
       if (!node.Value.IsLiteralValueNode(ctx, actionName, out var lvn))
       {
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 

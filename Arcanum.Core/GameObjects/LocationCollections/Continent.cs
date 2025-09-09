@@ -8,7 +8,7 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>
+public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>, IEmpty<Continent>
 {
    public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) : base(fileInfo, name, provinces)
    {
@@ -44,4 +44,5 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollect
                                                                              .ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public new static Continent Empty { get; } = new(FileInformation.Empty, "EmptyArcanum_Continent");
 }

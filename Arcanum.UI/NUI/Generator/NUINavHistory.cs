@@ -1,6 +1,5 @@
 ﻿using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
 

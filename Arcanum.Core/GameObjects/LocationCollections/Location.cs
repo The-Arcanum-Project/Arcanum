@@ -10,7 +10,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>
+public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>, IEmpty<Location>
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
@@ -21,7 +21,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
 
    [ToStringArguments("X")]
    public int Color { get; set; }
-   public new static LocationComposite Empty { get; } = new Location(FileInformation.Empty, 0, "EmptyArcanum");
+   public new static Location Empty { get; } = new (FileInformation.Empty, 0, "EmptyArcanum_Location");
 
    #endregion
 

@@ -53,7 +53,7 @@ public static class ValuesParsing
                                         ParsingError.Instance.InvalidLocationKey,
                                         actionName,
                                         key);
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 

@@ -11,7 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -900,17 +899,6 @@ public static class NUIViewGenerator
       }
 
       return contextMenu;
-   }
-
-   private static Binding GetTwoWayBinding<T>(T target, Enum property) where T : INUI
-   {
-      return new()
-      {
-         Source = target,
-         Path = new("Item[(0)]", property),
-         Mode = BindingMode.TwoWay,
-         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-      };
    }
 
    private static Type? GetCollectionItemType(Type collectionType)

@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
@@ -44,7 +43,7 @@ public static class LUtil
                                         ParsingError.Instance.InvalidLocationKey,
                                         actionName,
                                         key);
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 

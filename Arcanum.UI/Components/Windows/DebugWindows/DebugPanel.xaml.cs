@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 

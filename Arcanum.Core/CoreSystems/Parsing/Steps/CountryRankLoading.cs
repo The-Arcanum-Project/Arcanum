@@ -12,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class CountryRankLoading : FileLoadingService
 {
-   public override List<Type> ParsedObjects { get; }
+   public override List<Type> ParsedObjects { get; } = [typeof(CountryRank)];
    public override bool IsFullyParsed => false;
 
    public override string GetFileDataDebugInfo() => $"Country Ranks Loaded: {Globals.CountryRanks.Count}";

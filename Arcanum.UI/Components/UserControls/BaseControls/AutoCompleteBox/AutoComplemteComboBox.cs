@@ -280,7 +280,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             using (new TextBoxStatePreserver(EditableTextBox))
                ItemsSource = itemsSource;
 
-            if (filteredItems != null && filteredItems.Any() && EditableTextBox.IsFocused)
+            if (filteredItems != null && itemsSource.Count > 0 && EditableTextBox.IsFocused)
                IsDropDownOpen = true;
             else
                IsDropDownOpen = false;
@@ -300,7 +300,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             foreach (var item in fullItems)
             {
                if (token.IsCancellationRequested)
-                  return Enumerable.Empty<object>();
+                  return [];
 
                if (currentFilterDelegate(item))
                {

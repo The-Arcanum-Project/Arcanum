@@ -7,7 +7,7 @@ namespace Arcanum.Core.GameObjects.Economy;
 /// <summary>
 /// Placeholder for the market type. Not sure how to do it yet.
 /// </summary>
-public partial class Market(Location location) : INUI, ICollectionProvider<Market>
+public partial class Market(Location location) : INUI, ICollectionProvider<Market>, IEmpty<Market>
 {
    private Location _location = location;
    public Location Location

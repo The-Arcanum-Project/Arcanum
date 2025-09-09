@@ -16,7 +16,7 @@ public static class LocationChecks
                                         ParsingError.Instance.InvalidLocationKey,
                                         nameof(IsValidLocation).GetType().FullName!,
                                         str ?? "null");
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 

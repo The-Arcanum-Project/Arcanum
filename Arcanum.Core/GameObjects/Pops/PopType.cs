@@ -9,7 +9,7 @@ namespace Arcanum.Core.GameObjects.Pops;
 public partial class PopType(string name,
                              string colorKey,
                              float foodConsumption,
-                             float assimilationConversionFactor) : IParseable<PopType>, INUI, ICollectionProvider<PopType>
+                             float assimilationConversionFactor) : IParseable<PopType>, INUI, ICollectionProvider<PopType>, IEmpty<PopType>
 {
    public string Name { get; set; } = name;
    public string ColorKey { get; set; } = colorKey;

@@ -38,7 +38,7 @@ public static class LvnHelpers
                                         ParsingError.Instance.InvalidLocationKey,
                                         actionName,
                                         lexeme);
-         location = (Location)Location.Empty;
+         location = Location.Empty;
          return false;
       }
 
