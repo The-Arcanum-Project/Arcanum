@@ -80,6 +80,7 @@
                                                       VerticalAlignment = "Center"
                                                       Margin = "0, 1, 1, 1"
                                                       IsReadOnly = "{TemplateBinding IsReadOnly}"
+                                                      
                                                       Visibility = "Visible"
                                                       Focusable = "True"
                                                       Background = "Transparent"

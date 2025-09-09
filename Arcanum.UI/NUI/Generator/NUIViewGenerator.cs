@@ -1163,6 +1163,7 @@ public static class NUIViewGenerator
    #region Contorl Generators
    private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
    private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
+   private static readonly EnumConverter EnumConverter = new();
    
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
@@ -1211,7 +1212,7 @@ public static class NUIViewGenerator
 
    private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
-      binding.Converter = MultiSelectBoolConverter;
+      binding.Converter = EnumConverter;
       
       var comboBox = new AutoCompleteComboBox
       {
@@ -1220,6 +1221,8 @@ public static class NUIViewGenerator
          Margin = new(0),
          BorderThickness = new(1),
          FullItemsSource = Enum.GetValues(enumType),
+         IsDropdownOnly = true,
+         IsReadOnly = true,
       };
       comboBox.SetBinding(Selector.SelectedItemProperty, binding);
       return comboBox;

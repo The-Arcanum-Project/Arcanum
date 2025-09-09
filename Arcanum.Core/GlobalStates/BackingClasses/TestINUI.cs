@@ -14,6 +14,7 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>
          TestDouble = 1.23,
          TestFloat = 1.23f,
          TestBool = false,
+         TestEnum = Field.TestDouble,
       });
       Globals.TestNUIObjects.Add(new());
       Globals.TestNUIObjects.Add(new());
@@ -37,6 +38,7 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>
    public string TestString { get; set; } = "Hello, World!";
    public double TestDouble { get; set; } = 3.14;
    public bool TestBool { get; set; } = true;
+   public Field TestEnum { get; set; } = Field.TestBool;
    public static IEnumerable<TestINUI> GetGlobalItems() => Globals.TestNUIObjects;
 }
 #endif
