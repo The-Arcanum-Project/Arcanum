@@ -1195,6 +1195,7 @@ public static class NUIViewGenerator
 
    private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = _multiSelectBoolConverter;
       var checkBox = new CheckBox
       {
          Height = height,

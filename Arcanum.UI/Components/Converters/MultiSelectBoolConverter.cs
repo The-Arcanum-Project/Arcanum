@@ -14,9 +14,8 @@ public class MultiSelectBooleanConverter : IValueConverter
       // It can be true, false, or null. The CheckBox.IsChecked property (a bool?)
       // can handle this directly. We just need to ensure the type is correct.
       if (value is bool b)
-      {
          return b;
-      }
+
       return null; // For mixed values, display the indeterminate state.
    }
 
@@ -24,16 +23,19 @@ public class MultiSelectBooleanConverter : IValueConverter
    /// Converts the CheckBox's state back to a value for the ViewModel.
    /// This is where we prevent the user from setting a null state.
    /// </summary>
-   public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+   public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)  
    {
-      // value is the bool? from CheckBox.IsChecked
-      var isChecked = (bool?)value;
-
-      // THE CORE LOGIC:
-      // If the user cycles to the indeterminate state (null),
-      // we interpret that as wanting to set the value to 'true'.
-      // This is a common and intuitive behavior: clicking an empty box checks it,
-      // clicking a mixed-value box also checks it (sets all to true).
-      return isChecked ?? true;
+      return (bool?)value switch
+      {
+         // If the user clicked and the new state is CHECKED (true)
+         true => true,
+         // If the user clicked and the new state is UNCHECKED (false)
+         // This happens when clicking from an Indeterminate box in the standard cycle.
+         false => true,
+         // If the user clicked and the new state is INDETERMINATE (null),
+         // this means they clicked a CHECKED box. Their intent was to UNCHECK it.
+         // Therefore, we should set the value to FALSE.
+         null => false
+      };
    }
 }

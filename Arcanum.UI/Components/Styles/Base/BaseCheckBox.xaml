@@ -40,6 +40,12 @@
                                Height = "20"
                                Margin = "{TemplateBinding Margin}"
                                Visibility = "Collapsed" />
+                        <Image x:Name = "IndeterminateImage"
+                               Source = "/Assets/Icons/20x20/IndeterminateSquare20x20.png"
+                               Width = "20"
+                               Height = "20"
+                               Margin = "{TemplateBinding Margin}"
+                               Visibility = "Collapsed" />
                         <ContentPresenter VerticalAlignment = "Center" />
                     </StackPanel>
 
@@ -52,6 +58,9 @@
                             <Setter TargetName = "UncheckedImage"
                                     Property = "Visibility"
                                     Value = "Collapsed" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
                         </Trigger>
                         <Trigger Property = "IsChecked"
                                  Value = "False">
@@ -61,7 +70,23 @@
                             <Setter TargetName = "UncheckedImage"
                                     Property = "Visibility"
                                     Value = "Visible" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
                         </Trigger>
+                        <Trigger Property = "IsChecked"
+                                 Value = "{x:Null}">
+                            <Setter TargetName = "CheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "UncheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Visible" />
+                        </Trigger>
+
                         <Trigger Property = "IsEnabled"
                                  Value = "False">
                             <Setter Property = "Opacity"
