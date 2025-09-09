@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -180,8 +181,9 @@ public static class NUIViewGenerator
          {
             ColumnDefinitions =
             {
-               new() { Width = new(4, GridUnitType.Star) },
-               new() { Width = new(6, GridUnitType.Star) },
+               new() { Width = new(5, GridUnitType.Star) },
+               new() { Width = new(5, GridUnitType.Star) },
+               new() { Width = new(20, GridUnitType.Auto) },
                new() { Width = new(20, GridUnitType.Auto) },
             },
          };
@@ -204,13 +206,22 @@ public static class NUIViewGenerator
             Grid.SetColumn(inferActions, 0);
          }
 
+         if (TryGetEmpty(itemType, out var emptyInstance))
+         {
+            var setEmptyButton = GetSetEmptyButton(itemType, property, parent, navHistory, emptyInstance);
+
+            headerGrid.Children.Add(setEmptyButton);
+            Grid.SetRow(setEmptyButton, 0);
+            Grid.SetColumn(setEmptyButton, 2);
+         }
+
          headerGrid.Children.Add(objectSelector);
          Grid.SetRow(objectSelector, 0);
          Grid.SetColumn(objectSelector, 1);
 
          headerGrid.Children.Add(collapseButton);
          Grid.SetRow(collapseButton, 0);
-         Grid.SetColumn(collapseButton, 2);
+         Grid.SetColumn(collapseButton, 3);
 
          baseGrid.Children.Add(headerGrid);
          Grid.SetRow(headerGrid, 0);
@@ -218,32 +229,135 @@ public static class NUIViewGenerator
       }
       else
       {
-         var simpleHeaderGrid = new Grid
-         {
-            ColumnDefinitions =
-            {
-               new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
-            },
-         };
-
-         headerBlock.Margin = new(6, 0, 0, 0);
-         simpleHeaderGrid.Children.Add(headerBlock);
-         Grid.SetColumn(headerBlock, 0);
-
-         simpleHeaderGrid.Children.Add(collapseButton);
-         Grid.SetColumn(collapseButton, 1);
-
-         baseGrid.Children.Add(simpleHeaderGrid);
-         Grid.SetRow(simpleHeaderGrid, 0);
-         Grid.SetColumn(simpleHeaderGrid, 0);
+         CreateSimpleHeaderGrid(headerBlock, collapseButton, baseGrid);
       }
 
+      var embedMarker = EmbedMarker(baseGrid);
+
+      GenerateEmbeddedViewElements(target,
+                                   navHistory,
+                                   embeddedFields,
+                                   baseGrid,
+                                   initialVisibility,
+                                   collapsibleElements);
+
+      AddSpacerToGrid(baseGrid, embeddedFields, collapsibleElements);
+
+      Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
+
+      collapseButton.Click +=
+         CollapseButtonOnClick(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
+      return baseUI;
+   }
+
+   private static Border EmbedMarker(Grid baseGrid)
+   {
       var embedMarker = GetEmbedBorder();
       embedMarker.BorderBrush = Brushes.Purple;
       baseGrid.Children.Add(embedMarker);
       Grid.SetRow(embedMarker, 0);
       Grid.SetColumn(embedMarker, 0);
+      return embedMarker;
+   }
 
+   private static void CreateSimpleHeaderGrid(TextBlock headerBlock, BaseButton collapseButton, Grid baseGrid)
+   {
+      var simpleHeaderGrid = new Grid
+      {
+         ColumnDefinitions =
+         {
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
+         },
+      };
+
+      headerBlock.Margin = new(6, 0, 0, 0);
+      simpleHeaderGrid.Children.Add(headerBlock);
+      Grid.SetColumn(headerBlock, 0);
+
+      simpleHeaderGrid.Children.Add(collapseButton);
+      Grid.SetColumn(collapseButton, 1);
+
+      baseGrid.Children.Add(simpleHeaderGrid);
+      Grid.SetRow(simpleHeaderGrid, 0);
+      Grid.SetColumn(simpleHeaderGrid, 0);
+   }
+
+   private static void AddSpacerToGrid(Grid baseGrid, Enum[] embeddedFields, List<FrameworkElement> collapsibleElements)
+   {
+      var spacer = new Border { Height = 4 };
+      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
+      baseGrid.Children.Add(spacer);
+      Grid.SetRow(spacer, embeddedFields.Length + 1);
+      Grid.SetColumn(spacer, 0);
+      collapsibleElements.Add(spacer);
+   }
+
+   #region Empty Button
+
+   private static BaseButton GetSetEmptyButton(Type itemType,
+                                               Enum property,
+                                               INUI parent,
+                                               NUINavHistory navHistory,
+                                               object emptyInstance)
+   {
+      var setEmptyButton = new BaseButton
+      {
+         Width = 20,
+         Height = 20,
+         ToolTip = $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'",
+         Content = new Image
+         {
+            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
+            Stretch = Stretch.UniformToFill,
+         },
+         BorderThickness = new(1),
+         Margin = new(1, 1, -1, 1),
+      };
+
+      setEmptyButton.Click += (_, _) =>
+      {
+         Nx.ForceSet(emptyInstance, parent, property);
+         GenerateAndSetView(navHistory);
+      };
+
+      return setEmptyButton;
+   }
+
+   /// <summary>
+   /// Tries to get the static 'Empty' instance from any Type using reflection.
+   /// </summary>
+   /// <param name="type">The Type object to inspect.</param>
+   /// <param name="emptyInstance">When this method returns true, contains the 'Empty' instance as an object.</param>
+   /// <returns>True if the type has a public static property named 'Empty'; otherwise, false.</returns>
+   private static bool TryGetEmpty(Type type, [MaybeNullWhen(false)] out object emptyInstance)
+   {
+      var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
+
+      if (emptyProperty != null)
+         try
+         {
+            emptyInstance = emptyProperty.GetValue(null);
+            return emptyInstance != null;
+         }
+         catch
+         {
+            emptyInstance = null;
+            return false;
+         }
+
+      emptyInstance = null;
+      return false;
+   }
+
+   #endregion
+
+   private static void GenerateEmbeddedViewElements<T>(T target,
+                                                       NUINavHistory navHistory,
+                                                       Enum[] embeddedFields,
+                                                       Grid baseGrid,
+                                                       Visibility initialVisibility,
+                                                       List<FrameworkElement> collapsibleElements) where T : INUI
+   {
       for (var i = 0; i < embeddedFields.Length; i++)
       {
          var nxProp = embeddedFields[i];
@@ -271,19 +385,6 @@ public static class NUIViewGenerator
          element.Visibility = initialVisibility;
          collapsibleElements.Add(element);
       }
-
-      var spacer = new Border { Height = 4 };
-      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
-      baseGrid.Children.Add(spacer);
-      Grid.SetRow(spacer, embeddedFields.Length + 1);
-      Grid.SetColumn(spacer, 0);
-      collapsibleElements.Add(spacer);
-
-      Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
-
-      collapseButton.Click +=
-         CollapseButtonOnClick(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
-      return baseUI;
    }
 
    private static RoutedEventHandler CollapseButtonOnClick(bool startExpanded,
@@ -537,7 +638,6 @@ public static class NUIViewGenerator
                                                     Enum nxProp,
                                                     int leftMargin = 0)
    {
-      
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
       if (itemType == null)
          return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
@@ -564,7 +664,7 @@ public static class NUIViewGenerator
          {
             Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
             FontStyle = FontStyles.Italic,
-            Margin = new (leftMargin, 4, 0, 4)
+            Margin = new(leftMargin, 4, 0, 4)
          };
          grid.Children.Add(info);
          return grid;
@@ -1151,10 +1251,11 @@ public static class NUIViewGenerator
    }
 
    #region Contorl Generators
+
    private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
    private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
    private static readonly EnumConverter EnumConverter = new();
-   
+
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
       FloatNumericUpDown numericUpDown = new()
@@ -1203,7 +1304,7 @@ public static class NUIViewGenerator
    private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
       binding.Converter = EnumConverter;
-      
+
       var comboBox = new AutoCompleteComboBox
       {
          Height = height,
