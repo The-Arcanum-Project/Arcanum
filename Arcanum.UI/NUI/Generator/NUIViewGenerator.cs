@@ -20,6 +20,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Microsoft.Xaml.Behaviors.Core;
 using Nexus.Core;
@@ -805,7 +806,12 @@ public static class NUIViewGenerator
       }
       else
       {
-         openButton.IsEnabled = false;
+         openButton.IsEnabled = true;
+         openButton.Click += (_, _) =>
+         {
+            PrimitiveTypeListView.ShowDialog(modifiableList, modifiableList, $"{nxProp} Editor");
+         };
+         
          openButton.ToolTip =
             $"This collection is not editable because the '{itemType.Name}' type does not provide a static GetGlobalItems() method.";
       }

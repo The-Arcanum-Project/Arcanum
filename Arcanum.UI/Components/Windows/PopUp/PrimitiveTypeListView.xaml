@@ -1,0 +1,125 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.PopUp.PrimitiveTypeListView"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         mc:Ignorable = "d"
+                         Title = "PrimitiveTypeListView"
+                         Height = "450"
+                         Width = "800">
+    <Grid Margin = "4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "*" />
+            <RowDefinition Height = "Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row = "0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "*" />
+                <ColumnDefinition Width = "Auto" />
+                <ColumnDefinition Width = "*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Column 0: Available Items -->
+            <Grid Grid.Column = "0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "*" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Content = "Available Items:"
+                       FontWeight = "Bold"
+                       FontSize="14"
+                       Grid.Row = "0" />
+                <ListView x:Name = "AvailableItemsListBox"
+                          Grid.Row = "1"
+                          SelectionMode = "Extended"
+                          ItemsSource = "{Binding AvailableItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                          DisplayMemberPath = "Value" />
+
+                <!-- NEW: "Add New Item" section -->
+                <Grid Grid.Row = "2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "*" />
+                        <ColumnDefinition Width = "Auto" />
+                    </Grid.ColumnDefinitions>
+                    <styleClasses:CorneredTextBox x:Name = "NewItemTextBox"
+                                                  Grid.Column = "0"
+                                                  Margin = "0,2,0,2"
+                                                  VerticalContentAlignment = "Center"
+                                                  KeyDown = "NewItemTextBox_KeyDown" />
+
+                    <styleClasses:BaseButton Grid.Column = "1"
+                                             Margin = "2, 2, 0, 2"
+                                             Click = "AddNewButton_Click"
+                                             Height = "30"
+                                             Width = "30"
+                                             BorderThickness = "1">
+                        <Image Source = "../../../Assets/Icons/20x20/Add20x20.png"
+                               Stretch = "UniformToFill">
+                        </Image>
+                    </styleClasses:BaseButton>
+                </Grid>
+
+            </Grid>
+
+            <!-- Column 1: Add/Remove Buttons -->
+            <StackPanel Grid.Column = "1"
+                        VerticalAlignment = "Center"
+                        Margin = "5,0">
+                <styleClasses:BaseButton Margin = "0,5"
+                                         Width = "30"
+                                         Click = "AddButton_Click">
+                    <Image Source = "../../../Assets/Icons/20x20/ArrowRight20x20.png"
+                           Stretch = "UniformToFill" />
+                </styleClasses:BaseButton>
+
+                <styleClasses:BaseButton Margin = "0,5"
+                                         Width = "30"
+                                         Click = "RemoveButton_Click"
+                                         ToolTip = "Remove selected item(s)">
+                    <Image Source = "../../../Assets/Icons/20x20/ArrowLeft20x20.png"
+                           Stretch = "UniformToFill" />
+                </styleClasses:BaseButton>
+            </StackPanel>
+
+            <!-- Column 2: Selected Items -->
+            <Grid Grid.Column = "2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "*" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+                <Label Content = "Selected Items:"
+                       FontWeight = "Bold"
+                       FontSize="14"/>
+                <ListView x:Name = "SelectedItemsListBox"
+                          Grid.Row = "1"
+                          SelectionMode = "Extended"
+                          ItemsSource = "{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                          DisplayMemberPath = "Value" />
+
+                <StackPanel Grid.Row = "2"
+                            Orientation = "Horizontal"
+                            HorizontalAlignment = "Right">
+                    <styleClasses:BaseButton Content = "OK"
+                                             IsDefault = "True"
+                                             Width = "80"
+                                             Height = "30"
+                                             Margin = "0, 2, 0, 2"
+                                             BorderThickness = "1"
+                                             Click = "OkButton_Click" />
+                    <styleClasses:BaseButton Content = "Cancel"
+                                             IsCancel = "True"
+                                             Width = "80"
+                                             Height = "30"
+                                             BorderThickness = "1"
+                                             Margin = "2, 2, 0, 2" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</styleClasses:BaseWindow>
