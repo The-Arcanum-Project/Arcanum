@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using Common.UI.MBox;
@@ -107,11 +108,9 @@ public partial class PrimitiveTypeListView
 
    private void CreateAndAddNewItem()
    {
-      string inputText = NewItemTextBox.Text.Trim();
+      var inputText = NewItemTextBox.Text.Trim();
       if (string.IsNullOrEmpty(inputText))
-      {
          return;
-      }
 
       object newItemValue;
       try
@@ -128,6 +127,15 @@ public partial class PrimitiveTypeListView
          return;
       }
 
+      if (_itemType == typeof(string) && IdentifierValidationRegex().IsMatch(inputText))
+      {
+         MBox.Show($"The item '{inputText}' is not a valid identifier. Identifier must match the pattern:\n'^([A-z_.]+[A-z0-9_.]*)'",
+                   "Invalid Identifier",
+                   MBoxButton.OK,
+                   MessageBoxImage.Warning);
+         return;
+      }
+
       if (AvailableItems.Any(i => Equals(i.Value, newItemValue)) ||
           SelectedItems.Any(i => Equals(i.Value, newItemValue)))
       {
@@ -135,6 +143,7 @@ public partial class PrimitiveTypeListView
                    "Duplicate Item",
                    MBoxButton.OK,
                    MessageBoxImage.Warning);
+         NewItemTextBox.SelectAll();
          return;
       }
 
@@ -165,4 +174,7 @@ public partial class PrimitiveTypeListView
    #endregion
 
    public event PropertyChangedEventHandler? PropertyChanged;
+
+    [GeneratedRegex("^([A-z_.]+[A-z0-9_.]*)")]
+    private static partial Regex IdentifierValidationRegex();
 }
