@@ -8,11 +8,11 @@ namespace Arcanum.UI.Components.UserControls.BaseControls;
 
 public partial class FloatNumericUpDown
 {
+   public const string INTERMEDIATE_TEXT = "";
+
    public FloatNumericUpDown()
    {
       InitializeComponent();
-
-      NudTextBox.Text = Value.ToString(StringFormat, CultureInfo.InvariantCulture);
    }
 
    public string StringFormat
@@ -30,9 +30,9 @@ public partial class FloatNumericUpDown
 
    private static void OnStringFormatChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
-      // When the format changes, update the text
       var control = (FloatNumericUpDown)d;
-      control.NudTextBox.Text = control.Value.ToString(control.StringFormat, CultureInfo.InvariantCulture);
+      control.NudTextBox.Text = control.Value?.ToString(control.StringFormat, CultureInfo.InvariantCulture) ??
+                                INTERMEDIATE_TEXT;
    }
 
    public static readonly DependencyProperty InnerBorderThicknessProperty =
@@ -83,17 +83,17 @@ public partial class FloatNumericUpDown
                                   typeof(FloatNumericUpDown),
                                   new FrameworkPropertyMetadata(100.0f, OnMinMaxChanged));
 
-   public float Value
+   public float? Value
    {
-      get => (float)GetValue(ValueProperty);
+      get => (float?)GetValue(ValueProperty);
       set => SetValue(ValueProperty, value);
    }
 
    public static readonly DependencyProperty ValueProperty =
       DependencyProperty.Register(nameof(Value),
-                                  typeof(float),
+                                  typeof(float?),
                                   typeof(FloatNumericUpDown),
-                                  new FrameworkPropertyMetadata(10.0f,
+                                  new FrameworkPropertyMetadata(null,
                                                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                                                                 OnValueChanged, // PropertyChangedCallback
                                                                 CoerceValue)); // CoerceValueCallback
@@ -117,65 +117,84 @@ public partial class FloatNumericUpDown
       if (control.MinValue > control.MaxValue)
          control.MinValue = control.MaxValue;
 
-      if (control.Value < control.MinValue)
-         control.Value = control.MinValue;
-      else if (control.Value > control.MaxValue)
-         control.Value = control.MaxValue;
+      if (control.Value.HasValue)
+      {
+         if (control.Value < control.MinValue)
+            control.Value = control.MinValue;
+         else if (control.Value > control.MaxValue)
+            control.Value = control.MaxValue;
+      }
    }
 
    private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       var control = (FloatNumericUpDown)d;
-      var newValue = Math.Clamp((float)e.NewValue, control.MinValue, control.MaxValue);
-      //
-      // // Update TextBox text only if different
-      var newValString = newValue.ToString(CultureInfo.InvariantCulture);
-      if (!control.NudTextBox.Text.Equals(newValString))
-         control.NudTextBox.Text = newValString;
+      var newValue = (float?)e.NewValue;
+
+      var newText = newValue.HasValue
+                       ? newValue.Value.ToString(control.StringFormat, CultureInfo.InvariantCulture)
+                       : INTERMEDIATE_TEXT;
+
+      if (control.NudTextBox.Text != newText)
+         control.NudTextBox.Text = newText;
    }
 
    private void NUDButtonUP_Click(object sender, RoutedEventArgs e)
    {
-      if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) && number < MaxValue)
-         SetCurrentValue(ValueProperty, number + StepSize);
+      float currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      if (currentValue < MaxValue)
+         SetCurrentValue(ValueProperty, currentValue + StepSize);
    }
 
    private void NUDButtonDown_Click(object sender, RoutedEventArgs e)
    {
-      if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) && number > MinValue)
-         SetCurrentValue(ValueProperty, number - StepSize);
+      float currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      if (currentValue > MinValue)
+         SetCurrentValue(ValueProperty, currentValue - StepSize);
    }
 
    private void NudTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
    {
       var textBox = (TextBox)sender;
+      var proposedText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
+                                .Insert(textBox.SelectionStart, e.Text);
 
-      var fullText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
-                            .Insert(textBox.SelectionStart, e.Text);
+      if (proposedText == INTERMEDIATE_TEXT && MinValue < 0 || proposedText == "." && !textBox.Text.Contains('.'))
+      {
+         e.Handled = false;
+         return;
+      }
 
-      e.Handled = !float.TryParse(fullText,
-                                  NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
-                                  CultureInfo.InvariantCulture,
-                                  out _);
+      e.Handled = !float.TryParse(proposedText, CultureInfo.InvariantCulture, out _);
    }
 
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      if (NudTextBox.Text == string.Empty)
-         return;
-
-      if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) &&
-          number >= MinValue &&
-          number <= MaxValue)
+      if (NudTextBox.Text == INTERMEDIATE_TEXT || string.IsNullOrEmpty(NudTextBox.Text))
       {
-         SetCurrentValue(ValueProperty, number);
+         SetCurrentValue(ValueProperty, null);
+         return;
+      }
+
+      if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number))
+      {
+         if (number >= MinValue && number <= MaxValue)
+            SetCurrentValue(ValueProperty, number);
+         else
+            RevertText();
       }
       else
       {
-         // Revert text to last valid value
-         NudTextBox.Text = Value.ToString(CultureInfo.InvariantCulture);
-         NudTextBox.SelectionStart = NudTextBox.Text.Length;
+         RevertText();
       }
+   }
+
+   private void RevertText()
+   {
+      NudTextBox.Text = Value.HasValue
+                           ? Value.Value.ToString(StringFormat, CultureInfo.InvariantCulture)
+                           : INTERMEDIATE_TEXT;
+      NudTextBox.SelectionStart = NudTextBox.Text.Length;
    }
 
    private void NudTextBox_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -186,22 +205,25 @@ public partial class FloatNumericUpDown
          NUDButtonDown_Click(sender, e);
    }
 
+   private void NudTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+   {
+      NudTextBox.SelectAll();
+   }
+
    /// <summary>
    /// This callback is executed BEFORE the value is set. It ensures the value is always
    /// clamped and rounded, preventing floating point errors from being stored.
    /// </summary>
-   private static object CoerceValue(DependencyObject d, object baseValue)
+   private static object? CoerceValue(DependencyObject d, object? baseValue)
    {
+      if (baseValue == null)
+         return null;
+
       var control = (FloatNumericUpDown)d;
       var value = (float)baseValue;
 
-      // 1. Clamp the value
       value = Math.Clamp(value, control.MinValue, control.MaxValue);
-
-      // 2. Round the value to a high precision to eliminate common arithmetic errors
-      // Using decimal for rounding is more accurate for base-10 fractions.
-      value = (float)Math.Round((decimal)value, 7); // 7 decimal places is plenty for most UI floats
-
+      value = (float)Math.Round((decimal)value, 7);
       return value;
    }
 }

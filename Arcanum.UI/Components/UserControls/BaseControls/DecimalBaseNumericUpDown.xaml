@@ -27,6 +27,7 @@
                      MouseWheel = "NudTextBox_MouseWheel"
                      PreviewTextInput = "NudTextBox_PreviewTextInput"
                      TextChanged = "NUDTextBox_TextChanged"
+                     GotKeyboardFocus = "NudTextBox_GotKeyboardFocus"
                      Foreground = "{StaticResource DefaultForeColorBrush}"
                      FontFamily = "{StaticResource DefaultFont}"
                      FontSize = "{StaticResource DefaultFontSize}"

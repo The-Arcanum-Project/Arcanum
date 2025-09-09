@@ -8,6 +8,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls;
 
 public partial class DecimalBaseNumericUpDown
 {
+   public const string INTERMEDIATE_STATE_STRING = "";
+
    public DecimalBaseNumericUpDown()
    {
       InitializeComponent();
@@ -62,17 +64,17 @@ public partial class DecimalBaseNumericUpDown
                                   typeof(DecimalBaseNumericUpDown),
                                   new FrameworkPropertyMetadata(new decimal(10000), OnMinMaxChanged));
 
-   public decimal Value
+   public decimal? Value
    {
-      get => (decimal)GetValue(ValueProperty);
+      get => (decimal?)GetValue(ValueProperty);
       set => SetValue(ValueProperty, value);
    }
 
    public static readonly DependencyProperty ValueProperty =
       DependencyProperty.Register(nameof(Value),
-                                  typeof(decimal),
+                                  typeof(decimal?),
                                   typeof(DecimalBaseNumericUpDown),
-                                  new FrameworkPropertyMetadata(new decimal(10),
+                                  new FrameworkPropertyMetadata(null,
                                                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                                                                 OnValueChanged));
 
@@ -95,46 +97,64 @@ public partial class DecimalBaseNumericUpDown
       if (control.MinValue > control.MaxValue)
          control.MinValue = control.MaxValue;
 
-      if (control.Value < control.MinValue)
-         control.Value = control.MinValue;
-      else if (control.Value > control.MaxValue)
-         control.Value = control.MaxValue;
+      if (control.Value.HasValue)
+      {
+         if (control.Value < control.MinValue)
+            control.Value = control.MinValue;
+         else if (control.Value > control.MaxValue)
+            control.Value = control.MaxValue;
+      }
    }
 
    private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       var control = (DecimalBaseNumericUpDown)d;
-      var newValue = Math.Clamp((decimal)e.NewValue, control.MinValue, control.MaxValue);
-      //
-      // // Update TextBox text only if different
-      var newValString = newValue.ToString("0.##########", CultureInfo.InvariantCulture);
-      if (!control.NudTextBox.Text.Equals(newValString))
-         control.NudTextBox.Text = newValString;
+      var newValue = (decimal?)e.NewValue;
+
+      var newText = newValue.HasValue
+                       ? Math.Clamp(newValue.Value, control.MinValue, control.MaxValue)
+                             .ToString("0.##########", CultureInfo.InvariantCulture)
+                       : INTERMEDIATE_STATE_STRING;
+
+      if (control.NudTextBox.Text != newText)
+         control.NudTextBox.Text = newText;
    }
 
    private void NUDButtonUP_Click(object sender, RoutedEventArgs e)
    {
-      if (decimal.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) && number < MaxValue)
-         SetCurrentValue(ValueProperty, number + StepSize);
+      var currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      if (currentValue < MaxValue)
+         SetCurrentValue(ValueProperty, currentValue + StepSize);
    }
 
    private void NUDButtonDown_Click(object sender, RoutedEventArgs e)
    {
-      if (decimal.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) && number > MinValue)
-         SetCurrentValue(ValueProperty, number - StepSize);
+      var currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      if (currentValue > MinValue)
+         SetCurrentValue(ValueProperty, currentValue - StepSize);
    }
 
    private void NudTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
    {
       var textBox = (TextBox)sender;
-
-      var fullText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
-                            .Insert(textBox.SelectionStart, e.Text);
-
-      e.Handled = !decimal.TryParse(fullText,
-                                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
-                                    CultureInfo.InvariantCulture,
-                                    out _);
+      var proposedText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
+                                .Insert(textBox.SelectionStart, e.Text);
+        
+      // Allow a single '-' if min value is negative.
+      if (proposedText == "-" && MinValue < 0)
+      {
+         e.Handled = false;
+         return;
+      }
+        
+      // Allow a single '.' if the text doesn't already have one.
+      if (proposedText == "." && !textBox.Text.Contains('.'))
+      {
+         e.Handled = false;
+         return;
+      }
+        
+      e.Handled = !decimal.TryParse(proposedText, CultureInfo.InvariantCulture, out _);
    }
 
    private void NudTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -160,21 +180,31 @@ public partial class DecimalBaseNumericUpDown
 
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      if (NudTextBox.Text == string.Empty)
-         return;
-
-      if (decimal.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number) &&
-          number >= MinValue &&
-          number <= MaxValue)
+      if (NudTextBox.Text == INTERMEDIATE_STATE_STRING || string.IsNullOrEmpty(NudTextBox.Text))
       {
-         SetCurrentValue(ValueProperty, number);
+         SetCurrentValue(ValueProperty, null);
+         return;
+      }
+
+      if (decimal.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number))
+      {
+         if (number >= MinValue && number <= MaxValue)
+            SetCurrentValue(ValueProperty, number);
+         else
+            RevertText();
       }
       else
       {
-         // Revert text to last valid value
-         NudTextBox.Text = Value.ToString(CultureInfo.InvariantCulture);
-         NudTextBox.SelectionStart = NudTextBox.Text.Length;
+         RevertText();
       }
+   }
+
+   private void RevertText()
+   {
+      NudTextBox.Text = Value.HasValue
+                           ? Value.Value.ToString("0.##########", CultureInfo.InvariantCulture)
+                           : INTERMEDIATE_STATE_STRING;
+      NudTextBox.SelectionStart = NudTextBox.Text.Length;
    }
 
    private void NudTextBox_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -183,5 +213,10 @@ public partial class DecimalBaseNumericUpDown
          NUDButtonUP_Click(sender, e);
       else
          NUDButtonDown_Click(sender, e);
+   }
+   
+   private void NudTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+   {
+      NudTextBox.SelectAll();
    }
 }

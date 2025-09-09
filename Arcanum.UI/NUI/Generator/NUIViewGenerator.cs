@@ -1161,7 +1161,8 @@ public static class NUIViewGenerator
    }
 
    #region Contorl Generators
-   private static readonly MultiSelectBooleanConverter _multiSelectBoolConverter = new();
+   private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
+   private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
    
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
@@ -1195,7 +1196,7 @@ public static class NUIViewGenerator
 
    private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
    {
-      binding.Converter = _multiSelectBoolConverter;
+      binding.Converter = MultiSelectBoolConverter;
       var checkBox = new CheckBox
       {
          Height = height,
@@ -1210,7 +1211,7 @@ public static class NUIViewGenerator
 
    private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
-      binding.Converter = _multiSelectBoolConverter;
+      binding.Converter = MultiSelectBoolConverter;
       
       var comboBox = new AutoCompleteComboBox
       {
@@ -1242,6 +1243,7 @@ public static class NUIViewGenerator
 
    private static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = DoubleToDecimalConverter;
       DecimalBaseNumericUpDown numericUpDown = new()
       {
          Height = height,
