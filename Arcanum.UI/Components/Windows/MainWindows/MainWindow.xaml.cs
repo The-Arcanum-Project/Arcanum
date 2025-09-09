@@ -5,14 +5,11 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
-using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
-using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
@@ -190,12 +187,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       browser.ShowDialog();
    }
 
-   private void MenuItem_OnClick(object sender, RoutedEventArgs e)
-   {
-      var metadataPropGrid = new PropertyGridWindow(CoreData.ModMetadata);
-      metadataPropGrid.ShowDialog();
-   }
-
    private void OpenSearchWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       SearchWindow.ShowSearchWindow();
@@ -309,6 +300,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void ViewINUIObjectsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var nuiObjectView = new NUIObjectView();
-      nuiObjectView.ShowDialog();
+      nuiObjectView.Show();
+   }
+
+   private void OpenDebugPanel_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var debugPanel = new Debug_Panel();
+      debugPanel.Show();
    }
 }

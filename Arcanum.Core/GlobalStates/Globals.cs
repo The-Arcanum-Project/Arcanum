@@ -1,8 +1,8 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing;
-using Arcanum.Core.GameObjects;
+﻿using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.GlobalStates.BackingClasses;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
@@ -33,5 +33,9 @@ public static class Globals
    public static List<Road> Roads { get; set; } = [];
 
    public static Dictionary<Tag, Country> Countries { get; } = [];
+   
+   #if DEBUG
+   public static List<TestINUI> TestNUIObjects { get; } = [];
+   #endif
 
 }

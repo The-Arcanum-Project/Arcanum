@@ -80,11 +80,22 @@ public partial class NUIObjectView
 
    private void ObjectSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
    {
-      if (sender is not ListView { SelectedItem: INUI nuiObject })
+      if (sender is not ListView lv)
          return;
-
-      SelectedObjectName = nuiObject.ToString() ?? nuiObject.GetType().Name;
       
-      NUIViewGenerator.GenerateAndSetView(new (nuiObject, true, ViewPresenter));
+      var selectedItems  = lv.SelectedItems.Cast<INUI>().ToList();
+      if (selectedItems.Count == 0)
+      {
+         SelectedObjectName = "No object selected";
+         ViewPresenter.Content = null;
+         return;
+      }
+
+      if (selectedItems.Count == 1)
+         SelectedObjectName = selectedItems[0].ToString() ?? selectedItems[0].GetType().Name;
+      else
+         SelectedObjectName = $"{selectedItems.Count} items selected";
+
+      NUIViewGenerator.GenerateAndSetView(new (selectedItems, true, ViewPresenter));
    }
 }

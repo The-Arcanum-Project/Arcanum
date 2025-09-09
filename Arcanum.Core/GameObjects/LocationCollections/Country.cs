@@ -1,11 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Country : INUI, ICollectionProvider<Country>
+public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Country>
 {
    public Country(Tag tag)
    {
@@ -16,6 +16,7 @@ public partial class Country : INUI, ICollectionProvider<Country>
    #region Nexus
 
    public Location Capital { get; set; } = (Location)Location.Empty;
+   [ReadonlyNexus]
    public Tag Tag { get; set; }
    /// <summary>
    /// If this country is a rebel faction
@@ -96,4 +97,5 @@ public partial class Country : INUI, ICollectionProvider<Country>
    public static IEnumerable<Country> GetGlobalItems() => Globals.Countries.Values;
 
    public override string ToString() => Tag.Name;
+   public static Country Empty { get; } = new(Tag.Empty);
 }

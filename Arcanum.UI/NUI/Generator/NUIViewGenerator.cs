@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -11,12 +12,12 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.UserControls.BaseControls;
@@ -50,14 +51,14 @@ public static class NUIViewGenerator
    /// <returns></returns>
    public static UserControl GenerateView(NUINavHistory navHistory)
    {
-      var target = navHistory.Target;
+      var target = navHistory.Targets[0];
       var baseUI = new BaseView
       {
          Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
       };
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
 
-      var header = NavigationHeader(target.Navigations, navHistory.Root, target);
+      var header = NavigationHeader(navHistory, target);
 
       header.FontSize = 24;
       header.Height = 32;
@@ -76,7 +77,7 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
-      var viewFields = target.Settings.ViewFields;
+      var viewFields = navHistory.PrimaryTarget.Settings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
 
@@ -90,15 +91,27 @@ public static class NUIViewGenerator
             // Detect if value has ref to target. --> 1 to n relationship.
             if (navHistory.GenerateSubViews)
             {
-               INUI value = null!;
-               Nx.ForceGet(target, nxProp, ref value);
-               element = GetEmbeddedView(target, nxProp, value, navHistory);
+               if (navHistory.Targets.Count > 1)
+               {
+                  element = new TextBlock
+                  {
+                     Text = $"- Multiple selections for '{nxProp}' not supported -",
+                     FontStyle = FontStyles.Italic,
+                     Margin = new(6, 4, 0, 4),
+                  };
+               }
+               else
+               {
+                  INUI value = null!;
+                  Nx.ForceGet(target, nxProp, ref value);
+                  element = GetEmbeddedView(target, nxProp, value, navHistory);
+               }
             }
             else
-               element = GenerateShortInfo(target, navHistory.Root);
+               element = GenerateShortInfo(target, navHistory);
          }
          else
-            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp);
+            element = BuildCollectionOrDefaultView(navHistory, type, navHistory.Targets.ToList(), nxProp);
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -119,6 +132,8 @@ public static class NUIViewGenerator
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
 
+      var isReadonlyProp = parent.IsPropertyReadOnly(property);
+      
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
       var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
@@ -130,12 +145,12 @@ public static class NUIViewGenerator
       if (methodInfo != null)
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
-      var headerBlock = NavigationHeader(target.Navigations, navHistory.Root, target, property.ToString());
+      var headerBlock = NavigationHeader(navHistory, target, property.ToString());
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
       var collapseButton = GetCollapseButton(startExpanded);
 
-      if (allItems != null)
+      if (allItems != null && !isReadonlyProp)
       {
          var objectSelector = new AutoCompleteComboBox
          {
@@ -145,7 +160,9 @@ public static class NUIViewGenerator
             Margin = new(1),
             Padding = new(2, 0, 2, 0),
             FontSize = 11,
+            Name = $"AutoComplete_{target.GetType().Name}_{_index}",
          };
+         _index++;
 
          var binding = new Binding(property.ToString())
          {
@@ -166,8 +183,9 @@ public static class NUIViewGenerator
          {
             ColumnDefinitions =
             {
-               new() { Width = new(4, GridUnitType.Star) },
-               new() { Width = new(6, GridUnitType.Star) },
+               new() { Width = new(5, GridUnitType.Star) },
+               new() { Width = new(5, GridUnitType.Star) },
+               new() { Width = new(20, GridUnitType.Auto) },
                new() { Width = new(20, GridUnitType.Auto) },
             },
          };
@@ -190,13 +208,22 @@ public static class NUIViewGenerator
             Grid.SetColumn(inferActions, 0);
          }
 
+         if (!isReadonlyProp && TryGetEmpty(itemType, out var emptyInstance))
+         {
+            var setEmptyButton = GetSetEmptyButton(itemType, property, parent, navHistory, emptyInstance);
+
+            headerGrid.Children.Add(setEmptyButton);
+            Grid.SetRow(setEmptyButton, 0);
+            Grid.SetColumn(setEmptyButton, 2);
+         }
+
          headerGrid.Children.Add(objectSelector);
          Grid.SetRow(objectSelector, 0);
          Grid.SetColumn(objectSelector, 1);
 
          headerGrid.Children.Add(collapseButton);
          Grid.SetRow(collapseButton, 0);
-         Grid.SetColumn(collapseButton, 2);
+         Grid.SetColumn(collapseButton, 3);
 
          baseGrid.Children.Add(headerGrid);
          Grid.SetRow(headerGrid, 0);
@@ -204,32 +231,135 @@ public static class NUIViewGenerator
       }
       else
       {
-         var simpleHeaderGrid = new Grid
-         {
-            ColumnDefinitions =
-            {
-               new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
-            },
-         };
-
-         headerBlock.Margin = new(6, 0, 0, 0);
-         simpleHeaderGrid.Children.Add(headerBlock);
-         Grid.SetColumn(headerBlock, 0);
-
-         simpleHeaderGrid.Children.Add(collapseButton);
-         Grid.SetColumn(collapseButton, 1);
-
-         baseGrid.Children.Add(simpleHeaderGrid);
-         Grid.SetRow(simpleHeaderGrid, 0);
-         Grid.SetColumn(simpleHeaderGrid, 0);
+         CreateSimpleHeaderGrid(headerBlock, collapseButton, baseGrid);
       }
 
+      var embedMarker = EmbedMarker(baseGrid);
+
+      GenerateEmbeddedViewElements(target,
+                                   navHistory,
+                                   embeddedFields,
+                                   baseGrid,
+                                   initialVisibility,
+                                   collapsibleElements);
+
+      AddSpacerToGrid(baseGrid, embeddedFields, collapsibleElements);
+
+      Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
+
+      collapseButton.Click +=
+         CollapseButtonOnClick(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
+      return baseUI;
+   }
+
+   private static Border EmbedMarker(Grid baseGrid)
+   {
       var embedMarker = GetEmbedBorder();
       embedMarker.BorderBrush = Brushes.Purple;
       baseGrid.Children.Add(embedMarker);
       Grid.SetRow(embedMarker, 0);
       Grid.SetColumn(embedMarker, 0);
+      return embedMarker;
+   }
 
+   private static void CreateSimpleHeaderGrid(TextBlock headerBlock, BaseButton collapseButton, Grid baseGrid)
+   {
+      var simpleHeaderGrid = new Grid
+      {
+         ColumnDefinitions =
+         {
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
+         },
+      };
+
+      headerBlock.Margin = new(6, 0, 0, 0);
+      simpleHeaderGrid.Children.Add(headerBlock);
+      Grid.SetColumn(headerBlock, 0);
+
+      simpleHeaderGrid.Children.Add(collapseButton);
+      Grid.SetColumn(collapseButton, 1);
+
+      baseGrid.Children.Add(simpleHeaderGrid);
+      Grid.SetRow(simpleHeaderGrid, 0);
+      Grid.SetColumn(simpleHeaderGrid, 0);
+   }
+
+   private static void AddSpacerToGrid(Grid baseGrid, Enum[] embeddedFields, List<FrameworkElement> collapsibleElements)
+   {
+      var spacer = new Border { Height = 4 };
+      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
+      baseGrid.Children.Add(spacer);
+      Grid.SetRow(spacer, embeddedFields.Length + 1);
+      Grid.SetColumn(spacer, 0);
+      collapsibleElements.Add(spacer);
+   }
+
+   #region Empty Button
+
+   private static BaseButton GetSetEmptyButton(Type itemType,
+                                               Enum property,
+                                               INUI parent,
+                                               NUINavHistory navHistory,
+                                               object emptyInstance)
+   {
+      var setEmptyButton = new BaseButton
+      {
+         Width = 20,
+         Height = 20,
+         ToolTip = $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'",
+         Content = new Image
+         {
+            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
+            Stretch = Stretch.UniformToFill,
+         },
+         BorderThickness = new(1),
+         Margin = new(1, 1, -1, 1),
+      };
+
+      setEmptyButton.Click += (_, _) =>
+      {
+         Nx.ForceSet(emptyInstance, parent, property);
+         GenerateAndSetView(navHistory);
+      };
+
+      return setEmptyButton;
+   }
+
+   /// <summary>
+   /// Tries to get the static 'Empty' instance from any Type using reflection.
+   /// </summary>
+   /// <param name="type">The Type object to inspect.</param>
+   /// <param name="emptyInstance">When this method returns true, contains the 'Empty' instance as an object.</param>
+   /// <returns>True if the type has a public static property named 'Empty'; otherwise, false.</returns>
+   private static bool TryGetEmpty(Type type, [MaybeNullWhen(false)] out object emptyInstance)
+   {
+      var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
+
+      if (emptyProperty != null)
+         try
+         {
+            emptyInstance = emptyProperty.GetValue(null);
+            return emptyInstance != null;
+         }
+         catch
+         {
+            emptyInstance = null;
+            return false;
+         }
+
+      emptyInstance = null;
+      return false;
+   }
+
+   #endregion
+
+   private static void GenerateEmbeddedViewElements<T>(T target,
+                                                       NUINavHistory navHistory,
+                                                       Enum[] embeddedFields,
+                                                       Grid baseGrid,
+                                                       Visibility initialVisibility,
+                                                       List<FrameworkElement> collapsibleElements) where T : INUI
+   {
       for (var i = 0; i < embeddedFields.Length; i++)
       {
          var nxProp = embeddedFields[i];
@@ -242,11 +372,11 @@ public static class NUIViewGenerator
             if (value == null!)
                continue;
 
-            element = GenerateShortInfo(value, navHistory.Root);
+            element = GenerateShortInfo(value, navHistory);
          }
          else
          {
-            element = BuildCollectionOrDefaultView(navHistory, type, target, nxProp, 6);
+            element = BuildCollectionOrDefaultView(navHistory, type, [target], nxProp, 6);
          }
 
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -257,19 +387,6 @@ public static class NUIViewGenerator
          element.Visibility = initialVisibility;
          collapsibleElements.Add(element);
       }
-
-      var spacer = new Border { Height = 4 };
-      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
-      baseGrid.Children.Add(spacer);
-      Grid.SetRow(spacer, embeddedFields.Length + 1);
-      Grid.SetColumn(spacer, 0);
-      collapsibleElements.Add(spacer);
-
-      Grid.SetRowSpan(embedMarker, baseGrid.RowDefinitions.Count);
-
-      collapseButton.Click +=
-         CollapseButtonOnClick(startExpanded, collapsibleElements, collapseButton, embedMarker, baseGrid);
-      return baseUI;
    }
 
    private static RoutedEventHandler CollapseButtonOnClick(bool startExpanded,
@@ -295,7 +412,7 @@ public static class NUIViewGenerator
       };
    }
 
-   private static StackPanel GenerateShortInfo<T>(T value, ContentPresenter root) where T : INUI
+   private static StackPanel GenerateShortInfo<T>(T value, NUINavHistory navh) where T : INUI
    {
       var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20 };
       object headerValue = null!;
@@ -317,8 +434,7 @@ public static class NUIViewGenerator
       }
 
       const int fontSize = 11;
-      var headerBlock = NavigationHeader(value.Navigations,
-                                         root,
+      var headerBlock = NavigationHeader(navh,
                                          value,
                                          value.GetType().Name,
                                          fontSize,
@@ -379,7 +495,7 @@ public static class NUIViewGenerator
                           ? concreteItemType
                           : nxPropType;
 
-      Debug.Assert(targetType != null, "Target type should not be null here.");
+      Debug.Assert(targetType != null, "Targets type should not be null here.");
 
       var inferableInterfaceType = typeof(IMapInferable<>).MakeGenericType(targetType);
       if (!inferableInterfaceType.IsAssignableFrom(targetType))
@@ -520,27 +636,20 @@ public static class NUIViewGenerator
 
    private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
                                                     Type type,
-                                                    INUI target,
+                                                    List<INUI> targets,
                                                     Enum nxProp,
                                                     int leftMargin = 0)
    {
       var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
       if (itemType == null)
-         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
+         return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
 
       object collectionObject = null!;
-      Nx.ForceGet(target, nxProp, ref collectionObject);
+      Nx.ForceGet(targets[0], nxProp, ref collectionObject);
 
       // We need a modifiable list (IList) for the editor to work.
       if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(target, nxProp, navHistory, leftMargin);
-
-      // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, target.GetType(), nxProp.ToString());
-      if (concreteItemType != null)
-         itemType = concreteItemType;
-
-      var inuiItems = modifiableList.OfType<INUI>().ToList();
+         return GetTypeSpecificGrid(navHistory, targets.ToList(), nxProp, leftMargin);
 
       var grid = new Grid
       {
@@ -550,6 +659,25 @@ public static class NUIViewGenerator
          },
          Margin = new(leftMargin, 0, 0, 0),
       };
+
+      if (targets.Count > 1)
+      {
+         var info = new TextBlock
+         {
+            Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
+            FontStyle = FontStyles.Italic,
+            Margin = new(leftMargin, 4, 0, 4)
+         };
+         grid.Children.Add(info);
+         return grid;
+      }
+
+      // if we have an abstract class or interface as item type, try to find the concrete type
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
+      if (concreteItemType != null)
+         itemType = concreteItemType;
+
+      var inuiItems = modifiableList.OfType<INUI>().ToList();
 
       var navHeader = new TextBlock
       {
@@ -574,7 +702,7 @@ public static class NUIViewGenerator
                                   grid,
                                   openButton);
 
-      var inferActions = GenerateInferActions(target,
+      var inferActions = GenerateInferActions(targets[0],
                                               navHistory,
                                               nxProp,
                                               type,
@@ -683,12 +811,25 @@ public static class NUIViewGenerator
       }
    }
 
-   private static Grid GetTypeSpecificGrid(INUI target, Enum nxProp, NUINavHistory navHistory, int leftMargin = 0)
+   private static Grid GetTypeSpecificGrid(NUINavHistory navh,
+                                           List<INUI> targets,
+                                           Enum nxProp,
+                                           int leftMargin = 0)
    {
+      var target = targets[0];
       var type = Nx.TypeOf(target, nxProp);
-      var binding = GetTwoWayBinding(target, nxProp);
+
+      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp);
+
+      var binding = new Binding(nameof(propertyViewModel.Value))
+      {
+         Source = propertyViewModel,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+      };
+
       Control element;
-      // Fallback to existing logic
+
       if (type == typeof(float))
          element = GetFloatUI(binding);
       else if (type == typeof(string))
@@ -711,7 +852,7 @@ public static class NUIViewGenerator
       desc.Margin = new(leftMargin, 0, 0, 0);
 
       var inferActions = GenerateInferActions(target,
-                                              navHistory,
+                                              navh,
                                               nxProp,
                                               type,
                                               null,
@@ -771,8 +912,7 @@ public static class NUIViewGenerator
       return textBlock;
    }
 
-   private static TextBlock NavigationHeader<T>(INUINavigation[] navigations,
-                                                ContentPresenter root,
+   private static TextBlock NavigationHeader<T>(NUINavHistory navh,
                                                 T value,
                                                 string text = null!,
                                                 int fontSize = 16,
@@ -788,9 +928,14 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Height = height,
          Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
-         ToolTip =
-            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.",
       };
+
+      if (navh.Targets.Count > 1)
+         header.Text = $"{navh.Targets.Count} {value.GetType().Name}s Selected";
+      else
+         header.Text =
+            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.";
+
       if (string.IsNullOrWhiteSpace(text))
       {
          object headerValue = null!;
@@ -802,8 +947,10 @@ public static class NUIViewGenerator
 
       MouseButtonEventHandler clickHandler = (sender, e) =>
       {
+         var root = navh.Root;
          if (e.ChangedButton == MouseButton.Right)
          {
+            var navigations = navh.GetNavigations();
             if (navigations.Length == 0)
             {
                e.Handled = true;
@@ -854,17 +1001,6 @@ public static class NUIViewGenerator
       }
 
       return contextMenu;
-   }
-
-   private static Binding GetTwoWayBinding<T>(T target, Enum property) where T : INUI
-   {
-      return new()
-      {
-         Source = target,
-         Path = new("Item[(0)]", property),
-         Mode = BindingMode.TwoWay,
-         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-      };
    }
 
    private static Type? GetCollectionItemType(Type collectionType)
@@ -1015,7 +1151,7 @@ public static class NUIViewGenerator
 
       foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
       {
-         var shortInfo = GenerateShortInfo(item, navHistory.Root);
+         var shortInfo = GenerateShortInfo(item, navHistory);
          grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
          grid.Children.Add(shortInfo);
          Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
@@ -1118,6 +1254,10 @@ public static class NUIViewGenerator
 
    #region Contorl Generators
 
+   private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
+   private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
+   private static readonly EnumConverter EnumConverter = new();
+
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
       FloatNumericUpDown numericUpDown = new()
@@ -1150,12 +1290,14 @@ public static class NUIViewGenerator
 
    private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = MultiSelectBoolConverter;
       var checkBox = new CheckBox
       {
          Height = height,
          FontSize = fontSize,
          Margin = new(0),
          VerticalAlignment = VerticalAlignment.Center,
+         IsThreeState = true,
       };
       checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
       return checkBox;
@@ -1163,6 +1305,8 @@ public static class NUIViewGenerator
 
    private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = EnumConverter;
+
       var comboBox = new AutoCompleteComboBox
       {
          Height = height,
@@ -1170,6 +1314,8 @@ public static class NUIViewGenerator
          Margin = new(0),
          BorderThickness = new(1),
          FullItemsSource = Enum.GetValues(enumType),
+         IsDropdownOnly = true,
+         IsReadOnly = true,
       };
       comboBox.SetBinding(Selector.SelectedItemProperty, binding);
       return comboBox;
@@ -1193,6 +1339,7 @@ public static class NUIViewGenerator
 
    private static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
    {
+      binding.Converter = DoubleToDecimalConverter;
       DecimalBaseNumericUpDown numericUpDown = new()
       {
          Height = height,

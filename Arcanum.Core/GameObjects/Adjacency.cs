@@ -17,7 +17,7 @@ public partial class Adjacency(Location from,
                                int startX,
                                int startY,
                                int endX,
-                               int endY) : INUI, ICollectionProvider<Adjacency>
+                               int endY) : INUI, ICollectionProvider<Adjacency>, IEmpty<Adjacency>
 {
    public Location From { get; set; } = from;
    public Location To { get; set; } = to;
@@ -47,17 +47,26 @@ public partial class Adjacency(Location from,
    {
       if (obj is null)
          return false;
-      
+
       if (ReferenceEquals(this, obj))
          return true;
-      
+
       return obj is Adjacency other && other.Name.Equals(Name, StringComparison.Ordinal);
    }
 
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
-   public bool IsReadonly { get; } = false;
+   public bool IsReadonly => false;
    public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
    public INUINavigation[] Navigations
       => [new NUINavigation(From, $"From {From.Name}"), new NUINavigation(To, $"To {To.Name}")];
+   public static Adjacency Empty { get; } = new(Location.Empty,
+                                                Location.Empty,
+                                                AdjacencyType.Sea,
+                                                "Empty_Adjacency",
+                                                string.Empty,
+                                                0,
+                                                0,
+                                                0,
+                                                0);
 }

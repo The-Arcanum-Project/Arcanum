@@ -8,7 +8,7 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public partial class Province
-   : LocationCollection<Location>, INUI, ICollectionProvider<Province>, IMapInferable<Province>
+   : LocationCollection<Location>, INUI, ICollectionProvider<Province>, IMapInferable<Province>, IEmpty<Province>
 {
    public Province(FileInformation fileInfo, string name, ICollection<Location> provinces) :
       base(fileInfo, name, provinces)
@@ -59,4 +59,5 @@ public partial class Province
      .ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public new static Province Empty { get; } = new(FileInformation.Empty, "Empty Province");
 }

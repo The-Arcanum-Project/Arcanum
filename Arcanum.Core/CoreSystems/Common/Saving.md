@@ -1,0 +1,3 @@
+﻿- Commit message at top of file (optional)
+- change id
+- --> Generate Change log for said session

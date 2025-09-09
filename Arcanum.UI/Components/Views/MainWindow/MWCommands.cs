@@ -69,6 +69,8 @@ public static class MwCommands
    {
       InputGestures = { new KeyGesture(Key.F12) },
    };
+   
+   
 
    // Wiki Commands
    public static readonly RoutedCommand OpenEffectWikiCommand = new("OpenEffectWikiCommand", typeof(MainWindowView))
@@ -140,6 +142,12 @@ public static class MwCommands
       InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },
    };
 
+   public static readonly RoutedCommand OpenDebugPanel = new("OpenDebugPanel",
+                                                        typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.D, ModifierKeys.Control | ModifierKeys.Shift) },
+   };
+   
    public static readonly RoutedCommand OpenGlobalsBrowserCommand = new("OpenGlobalsBrowserCommand",
                                                                    typeof(MainWindowView))
    {
