@@ -39,6 +39,8 @@ internal static class Program
          app.Resources.MergedDictionaries.Add(dict);
       }
 
+
+      AppData.WindowLinker = new WindowLinkerImpl();
       var pluginHost = new PluginHost.PluginHost();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
 
@@ -47,8 +49,8 @@ internal static class Program
       app.MainWindow = mw;
       
       var tracer = new MapTracing();
-      //tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp", mw);
-      tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", mw);
+      tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp", mw);
+      //tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", mw);
       
       mw.Show();
       app.Run();

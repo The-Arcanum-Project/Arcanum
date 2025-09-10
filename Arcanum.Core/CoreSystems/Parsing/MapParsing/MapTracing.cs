@@ -191,6 +191,33 @@ public class Node : ICoordinateAdder
     public CacheNodeInfo CachedSegment1;
     public CacheNodeInfo CachedSegment2;
     public CacheNodeInfo CachedSegment3;
+    public bool Visited1 = false;
+    public bool Visited2 = false;
+    public bool Visited3 = false;
+
+    public void SetDirection(Direction dir)
+    {
+        if (CachedSegment1.Dir == dir)
+            Visited1 = true;
+        else if (CachedSegment2.Dir == dir)
+            Visited2 = true;
+        else if (CachedSegment3.Dir == dir)
+            Visited3 = true;
+        else
+            throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+    }
+
+    public bool TestDirection(Direction dir)
+    {
+        if (CachedSegment1.Dir == dir)
+            return Visited1;
+        else if (CachedSegment2.Dir == dir)
+            return Visited2;
+        else if (CachedSegment3.Dir == dir)
+            return Visited3;
+        else
+            throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+    }
 
     /// <summary>
     /// Represents a node on the border of the image.
@@ -203,6 +230,7 @@ public class Node : ICoordinateAdder
         _nodeId = _totalNodes;
         _totalNodes++;
 #endif
+        
         CachedSegment1 = cachedSegment1;
         CachedSegment2 = cachedSegment2;
         CachedSegment3 = cachedSegment3;
@@ -218,6 +246,20 @@ public class Node : ICoordinateAdder
         if (CachedSegment3.Dir == dir)
             return CachedSegment3;
         throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+    }
+    
+    public bool TryGetSegment(Direction dir, out CacheNodeInfo? segment)
+    {
+        segment = null;
+        if (CachedSegment1.Dir == dir)
+            segment = CachedSegment1;
+        else if (CachedSegment2.Dir == dir)
+            segment = CachedSegment2;
+        else if (CachedSegment3.Dir == dir)
+            segment = CachedSegment3;
+        else
+            return false;
+        return true;
     }
 
     public void Visit(ref Direction direction, Node inputNode, BorderSegmentDirectional input,
@@ -256,7 +298,7 @@ public class Node : ICoordinateAdder
             throw new InvalidOperationException($"Invalid movement from {nodepos} to ({x}, {y})");
         Visit(ref direction, out segment, out node);
     }
-
+    
     //TODO Clean up
     public void Visit(ref Direction direction, out BorderSegmentDirectional? segment, out Node? node)
     {
@@ -302,6 +344,74 @@ public class Node : ICoordinateAdder
                     $"Node was not visited in the direction {direction}. Cached segments: {CachedSegment1.Dir}, {CachedSegment2.Dir}, {CachedSegment3.Dir}");
             }
         }
+    }
+
+    /// <summary>
+    /// Checks given the direction if any segment is cached and returns it with the node it leads to.
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="segment"></param>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    public bool VisitNew(ref Direction direction, out BorderSegmentDirectional? segment, out Node? node)
+    {
+        // Not only check the right direction, since it is a T-shaped intersection a possible path is straight ahead.
+        var newDirection = direction.RotateRight();
+        if (TryGetSegment(newDirection, out var cache))
+        {
+            direction = newDirection;
+        }
+        else
+        {
+            cache = GetSegment(direction);
+        }
+
+        if (cache!.Segment.HasValue)
+        {
+            segment = cache.Segment;
+            node = cache.Node;
+            return true;
+        }
+
+        segment = null;
+        node = null;
+        return false;
+    }
+    
+    public bool VisitNew(ref Direction direction, Node inputNode, BorderSegmentDirectional input,
+        out BorderSegmentDirectional? segment, out Node? node)
+    {
+        Point point;
+        if (input.Segment.Points.Count == 0)
+        {
+            return VisitNew(ref direction, out segment, out node);
+        }
+
+        if (input.IsForward)
+            point = input.Segment.Points[^1];
+        else
+            point = input.Segment.Points[0];
+
+        return VisitNew(ref direction, (inputNode.XPos, inputNode.YPos), point.X, point.Y, out segment, out node);
+    }
+
+    public bool VisitNew(ref Direction direction, (int, int) nodepos, int x, int y, out BorderSegmentDirectional? segment,
+        out Node? node)
+    {
+        // Get direction based of the difference between the two points
+        var dx = nodepos.Item1 - x;
+        var dy = nodepos.Item2 - y;
+        if (dx > 0 && dy == 0)
+            direction = Direction.East;
+        else if (dx < 0 && dy == 0)
+            direction = Direction.West;
+        else if (dx == 0 && dy > 0)
+            direction = Direction.South;
+        else if (dx == 0 && dy < 0)
+            direction = Direction.North;
+        else
+            throw new InvalidOperationException($"Invalid movement from {nodepos} to ({x}, {y})");
+        return VisitNew(ref direction, out segment, out node);
     }
 }
 
@@ -730,18 +840,18 @@ public unsafe class MapTracing
         // TODO not finished need to rework. Logic to find start position again is not implemented yet.
     }
 
-    public (Node, Direction, bool) TraceEdgeStartNode(int startx, int starty, Node startNode,
+    public (Node, BorderSegmentDirectional, bool) TraceEdgeStartNode(int startx, int starty, Node startNode,
         Direction startDirection)
     {
         BorderSegment segment = new();
         Direction currentDirection = startDirection;
+        BorderSegmentDirectional parsedSegment;
         // Start without any node
         var (xl, yl, xr, yr) = DirectionHelper.GetStartPos(startx, starty, currentDirection);
         var node = startNode;
         var lColor = GetColorWithOutsideCheck(xl, yl);
         var rColor = GetColorWithOutsideCheck(xr, yr);
         var found = true;
-        Polygon polygon = new Polygon(rColor);
         var x = startx;
         var y = starty;
         var (dir, sign) = currentDirection.GetDeltaMove();
@@ -829,7 +939,7 @@ public unsafe class MapTracing
 
                     found = false;
 
-                    var cache1 = new CacheNodeInfo(null, new BorderSegmentDirectional(segment, false), dir1);
+                    var cache1 = new CacheNodeInfo(startNode, new BorderSegmentDirectional(segment, false), dir1);
                     var cache2 = new CacheNodeInfo(null, null, dir2);
                     var cache3 = new CacheNodeInfo(null, null, dir3);
                     node = new Node(cache1, cache2, cache3, x, y);
@@ -843,7 +953,7 @@ public unsafe class MapTracing
 
                 var cacheNodeInfoStart = startNode.GetSegment(startDirection);
                 cacheNodeInfoStart.Node = node;
-                cacheNodeInfoStart.Segment = new BorderSegmentDirectional(segment, true);
+                cacheNodeInfoStart.Segment = parsedSegment = new BorderSegmentDirectional(segment, true);
 
 #if ENABLE_VISUAL_TRACING
 
@@ -868,13 +978,14 @@ public unsafe class MapTracing
             }
             else
             {
+                throw new InvalidOperationException($"Encountered a four-edge node, which is not supported yet. ({x}, {y})");
                 // FourEdgeNode
-
+                parsedSegment = new BorderSegmentDirectional();
                 break;
             }
         }
 
-        return (node, currentDirection, found);
+        return (node, parsedSegment, found);
     }
 
 
@@ -1030,6 +1141,8 @@ public unsafe class MapTracing
                     continue;
                 }
 
+                continue;
+                // Ignore first
                 Console.WriteLine("Found node:");
 
                 Polygon polygon;
@@ -1048,7 +1161,7 @@ public unsafe class MapTracing
                     try
                     {
                         //polygon = VisitTillEnd(node.Value, node.Value.CachedSegment2.Dir.Invert());
-                        polygon = VisitTillEnd(newNode, dir);
+                       // polygon = VisitTillEnd(newNode, dir);
                     }
                     catch (Exception e)
                     {
@@ -1078,6 +1191,93 @@ public unsafe class MapTracing
             }
         }
     }
+    
+    /// <summary>
+    /// Starts at a node and walks along the border. If a cache is present in the direction it will be used. Otherwise a new edge will be traced.
+    /// At every node the visited bool is updated to prevent infinite loops. Only the outgoing direction is marked as visited, since it is the important one.
+    /// When a node has been visited three times, the node can be delted from the cache, since all edges have been traced.
+    /// </summary>
+    /// <param name="startNode"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public Polygon VisitNodes(Node startNode, Direction startDirection)
+    {
+        var polygon = new Polygon(0);
+        var currentNode = startNode;
+        var currentDirection = startDirection;
+        
+        // First need is to check if we have a cached segment in the direction
+        // If not we need to trace a new edge
+        // First visit is a special case since we know the direction to trace in
+        var firstCache = startNode.GetSegment(startDirection);
+        
+        startNode.SetDirection(currentDirection);
+        
+        BorderSegmentDirectional currentSegment;
+        if (firstCache.Segment is null)
+        {
+            // Call tracing function to next node
+            (currentNode, currentSegment, var found) =
+                TraceEdgeStartNode(startNode.XPos, startNode.YPos, startNode, startDirection);
+
+            if (!found)
+            {
+                NodeCache.Add((currentNode.XPos, currentNode.YPos), currentNode);
+            }
+
+        }
+        else
+        {
+            // We have already visited this node in the same direction, so we can continue using cache.
+            polygon.Segments.Add(currentNode);
+            polygon.Segments.Add(firstCache.Segment.Value);
+            currentNode = firstCache.Node!;
+            currentSegment = firstCache.Segment.Value;
+        }
+        
+       
+        
+        // TODO check visited state
+        while (true)
+        {
+            if(currentNode == startNode)
+                break;
+            // Now we are at a new node, so we can check if we have a cached segment in the current direction
+            if (currentNode.VisitNew(ref currentDirection, currentNode!, currentSegment, out var newSegment,
+                    out var nextNode))
+            {
+                currentNode.SetDirection(currentDirection);
+                // Found a cached segment
+                polygon.Segments.Add(currentNode);
+                polygon.Segments.Add(newSegment!.Value);
+                currentNode = nextNode!;
+                currentSegment = newSegment.Value;
+            }
+            else
+            {
+                // TODO use the found bool to skip additional checks
+                // Need to trace a new edge
+                polygon.Segments.Add(currentNode);
+                currentNode.SetDirection(currentDirection);
+                (currentNode, currentSegment, var found) =
+                    TraceEdgeStartNode(currentNode.XPos, currentNode.YPos, currentNode, currentDirection);
+                
+                if (!found)
+                {
+                    NodeCache.Add((currentNode.XPos, currentNode.YPos), currentNode);
+                }
+                
+                polygon.Segments.Add(currentSegment);
+            }
+        }
+        
+        #if ENABLE_VISUAL_TRACING
+        drawer.DrawPolygon(polygon);
+        #endif
+
+        return polygon;
+    }
+
 
     public Polygon VisitTillEnd(Node startNode, Direction startDirection)
     {
@@ -1119,6 +1319,28 @@ public unsafe class MapTracing
         }
     }
 
+    public void VisitNode(Node node)
+    {
+        Direction[] dirs = [node.CachedSegment1.Dir, node.CachedSegment2.Dir, node.CachedSegment3.Dir];
+
+        foreach (var direction in dirs)
+        {
+            //if(node.TestDirection(direction))
+             //   continue;
+            VisitNodes(node, direction);
+        }
+    }
+
+    public void ParseEverything()
+    {
+        while(NodeCache.Count > 0)
+        {
+            var node = NodeCache.First();
+            VisitNode(node.Value);
+            NodeCache.Remove(node.Key);
+        }
+    }
+
     public void LoadLocations(string filePath, IDebugDrawer mw)
     {
         var bmp = new Bitmap(filePath);
@@ -1137,6 +1359,7 @@ public unsafe class MapTracing
         sw.Restart();
         TraceEdgeStubs();
         sw.Stop();
+        ParseEverything();
         Console.WriteLine($"Traced edge stubs in {sw.ElapsedMilliseconds} ms.");
     }
 }
