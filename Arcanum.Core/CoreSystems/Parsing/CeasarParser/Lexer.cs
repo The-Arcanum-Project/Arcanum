@@ -39,7 +39,6 @@ public class Lexer
       var c = Advance();
       switch (c)
       {
-         // The logic in this switch remains largely the same, but the AddToken calls are now much cheaper.
          case '{':
             AddToken(TokenType.LeftBrace);
             break;
@@ -123,7 +122,6 @@ public class Lexer
       }
    }
 
-   // This helper replaces the Keywords dictionary for better performance.
    private static TokenType LookupIdentifierType(ReadOnlySpan<char> textSpan)
    {
       return textSpan switch
@@ -139,6 +137,14 @@ public class Lexer
       // Scan the initial integer part
       while (IsDigit(Peek()))
          Advance();
+      
+      if (IsAlpha(Peek()))
+      {
+         while (IsIdentifierContinuationChar(Peek()))
+            Advance();
+         AddToken(TokenType.Identifier);
+         return;
+      }
 
       var dotCount = 0;
 
