@@ -45,5 +45,5 @@ public interface INexus
    /// </summary>
    /// <param name="property"></param>
    /// <returns></returns>
-   string GetDescription(Enum property);
+   string? GetDescription(Enum property);
 }

@@ -35,7 +35,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    public string ReligiousSchool { get; set; } = string.Empty;
    [Description("The ruling dynasty of this country.")]
    public string Dynasty { get; set; } = string.Empty;
-   [Description("The coutr language of this country.")]
+   [Description("The court language of this country.")]
    public string CourtLanguage { get; set; } = string.Empty;
    [Description("The liturgical language of this country.")]
    public string LiturgicalLanguage { get; set; } = string.Empty;
@@ -43,7 +43,8 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    public CountryRank CountryRank { get; set; } = Globals.CountryRanks.Find(x => x.Level == 1)!;
    [Description("The technology level this country starts with.")]
    public int StartingTechLevel { get; set; }
-
+   
+   
    [Description("The owned and controlled locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
    [Description("The owned and controlled locations that are integrated of this country.")]
