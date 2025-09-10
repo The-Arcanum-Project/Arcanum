@@ -10,8 +10,13 @@ namespace Arcanum.Core.CoreSystems.Queastor;
 
 public class Queastor : IQueastor
 {
-   private readonly Dictionary<string, List<ISearchable>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
+   private readonly Dictionary<string, List<ISearchable>> _invertedIndex =
+      new(40_000, StringComparer.OrdinalIgnoreCase);
+
    private readonly BkTree _bkTree = new();
+
+   public bool IsInitializing { get; set; } = true;
+   public readonly HashSet<string> BkTreeTerms = new(40_000, StringComparer.OrdinalIgnoreCase);
 
    public int SearchIndexSize { get; private set; }
 
@@ -40,7 +45,8 @@ public class Queastor : IQueastor
       }
 
       list.Add(item);
-      _bkTree.Add(lowerTerm);
+      if (IsInitializing)
+         BkTreeTerms.Add(lowerTerm.ToLowerInvariant());
       SearchIndexSize++;
    }
 
@@ -57,6 +63,19 @@ public class Queastor : IQueastor
                _invertedIndex.Remove(lowerTerm);
          }
       }
+   }
+
+   /// <summary>
+   /// Build the BK-Tree from the collected terms. This should be called after all initial indexing is done.
+   /// This is separated from the indexing process to optimize performance during bulk additions.
+   /// </summary>
+   public void RebuildBkTree()
+   {
+      _bkTree.Clear();
+      _bkTree.BuildFrom(BkTreeTerms);
+      IsInitializing = false;
+      BkTreeTerms.Clear();
+      BkTreeTerms.TrimExcess();
    }
 
    public void ModifyInIndex(ISearchable item, IReadOnlyList<string> oldTerms)
@@ -211,21 +230,40 @@ public class Queastor : IQueastor
 
    public static int LevinsteinDistance(string a, string b)
    {
-      var dp = new int[a.Length + 1, b.Length + 1];
-      for (var i = 0; i <= a.Length; i++)
-         dp[i, 0] = i;
-      for (var j = 0; j <= b.Length; j++)
-         dp[0, j] = j;
+      if (a.Length > b.Length)
+         (a, b) = (b, a);
 
-      for (var i = 1; i <= a.Length; i++)
-         for (var j = 1; j <= b.Length; j++)
+      var n = a.Length;
+      var m = b.Length;
+
+      // If one string is empty, the distance is the length of the other
+      if (n == 0)
+         return m;
+
+      // Use a single array for the previous row of distances. This is the key optimization.
+      var previousRow = new int[n + 1];
+
+      for (var i = 0; i <= n; i++)
+         previousRow[i] = i;
+
+      for (var j = 1; j <= m; j++)
+      {
+         var previousDiagonal = previousRow[0];
+         previousRow[0]++;
+
+         for (var i = 1; i <= n; i++)
          {
+            var oldDiagonal = previousRow[i];
             var cost = a[i - 1] == b[j - 1] ? 0 : 1;
-            dp[i, j] = Math.Min(Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1),
-                                dp[i - 1, j - 1] + cost);
-         }
 
-      return dp[a.Length, b.Length];
+            previousRow[i] = Math.Min(Math.Min(previousRow[i] + 1, // Deletion
+                                               previousRow[i - 1] + 1), // Insertion
+                                      previousDiagonal + cost); // Substitution
+            previousDiagonal = oldDiagonal;
+         }
+      }
+
+      return previousRow[n];
    }
 
    public Dictionary<IQueastorSearchSettings.Category, int> GetEntriesPerCategory()

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Sorting;
@@ -109,6 +110,12 @@ public class ParsingMaster
       if (ParsingSteps != ParsingStepsDone)
          return Task.FromResult(false);
 
+      var sw = Stopwatch.StartNew();
+      var items = Queastor.Queastor.GlobalInstance.BkTreeTerms.Count;
+      Queastor.Queastor.GlobalInstance.RebuildBkTree();
+      sw.Stop();
+      Debug.WriteLine($"[Queastor] Rebuilt BK-Tree in {sw.ElapsedMilliseconds} ms for {items} words.");
+      
       return Task.FromResult(true); 
    }
 }
