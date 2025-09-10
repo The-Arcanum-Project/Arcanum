@@ -39,4 +39,11 @@ public interface INexus
    /// <param name="property"></param>
    /// <returns></returns>
    bool AllowsEmptyValue(Enum property);
+   
+   /// <summary>
+   /// Returns a description of the given property, if any.
+   /// </summary>
+   /// <param name="property"></param>
+   /// <returns></returns>
+   string GetDescription(Enum property);
 }

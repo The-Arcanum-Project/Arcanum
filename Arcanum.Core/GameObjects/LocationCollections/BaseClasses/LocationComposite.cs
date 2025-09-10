@@ -1,4 +1,5 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem;
@@ -21,8 +22,10 @@ public abstract class LocationComposite : ISaveable, ISearchable // TODO: @Melco
    }
 
    [AddModifiable]
+   [Description("The name of this location composite.")]
    public string Name { get; set; }
    [AddModifiable]
+   [Description("A list of all parent location composites of this location composite.")]
    public ObservableRangeCollection<LocationComposite> Parents { get; set; } = [];
    public abstract ICollection<Location> GetLocations();
    public abstract LocationCollectionType LCType { get; }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -102,6 +101,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
    {
       var readonlyStatuses = new List<bool>();
       var allowsEmpty = new List<bool>();
+      var descriptions = new List<string?>();
 
       var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
       var className = classSymbol.Name;
@@ -143,6 +143,20 @@ public class PropertyModifierGenerator : IIncrementalGenerator
                                                          NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE,
                                                          StringComparison.Ordinal)));
 
+         // Gather the description (if any)
+         var descriptionAttribute = member.GetAttributes()
+                                          .FirstOrDefault(ad =>
+                                                             string.Equals(ad.AttributeClass?.ToDisplayString(),
+                                                                           DESCRIPTION_ATTRIBUTE_NAME,
+                                                                           StringComparison.Ordinal));
+         // ReSharper disable once MergeIntoPattern
+         descriptions.Add(descriptionAttribute is null
+                               ? null
+                               : descriptionAttribute.ConstructorArguments.Length == 1 &&
+                                 descriptionAttribute.ConstructorArguments[0].Value is string desc
+                                  ? desc
+                                  : null);
+
          // 2. Get a fully qualified name for the type
          var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
          builder.AppendLine($"        [ExpectedType(typeof({memberTypeName}))]");
@@ -152,6 +166,9 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("    }");
       builder.AppendLine();
 
+      builder.AppendLine("#region Property Modifier Backing Fields");
+      builder.AppendLine();
+      
       // ------- Readonly Array -------
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// A pre-generated array indicating whether a property is read-only.");
@@ -168,35 +185,63 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("    /// A pre-generated array indicating whether a property allows empty values.");
       builder.AppendLine("    /// Accessed via the 'Field' enum index.");
       builder.AppendLine("    /// </summary>");
-      
+
       var allowsEmptyInitializer = string.Join(", ", allowsEmpty.Select(s => s.ToString().ToLower()));
       builder.AppendLine($"    private static readonly bool[] _allowsEmpty = {{ {allowsEmptyInitializer} }};");
       builder.AppendLine();
+      
+      // -------- Description Array --------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array containing the description of each property, if any.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+      
+      var descriptionInitializer = string.Join(", ", descriptions.Select(s => s is null ? "null" : SymbolDisplay.FormatLiteral(s, true) ));
+      builder.AppendLine($"    private static readonly string?[] _descriptions = {{ {descriptionInitializer} }};");
+      builder.AppendLine();
+      
+      builder.AppendLine("#endregion");
+      builder.AppendLine();
 
+      builder.AppendLine("#region Property Modifier Methods");
+      builder.AppendLine();
+      
       // --- Generate a public accessor method for the readonly status ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Checks if a property is marked as read-only.");
       builder.AppendLine("    /// </summary>");
       builder.AppendLine("    public bool IsPropertyReadOnly(Enum property)");
       builder.AppendLine("    {");
-      // Verify that the enum value is valid
       builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
       builder.AppendLine("        return _isReadOnly[(int)((Field)property)];");
       builder.AppendLine("    }");
       builder.AppendLine();
-      
+
       // --- Generate a public accessor method for the AllowsEmpty status ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Checks if a property allows empty values.");
       builder.AppendLine("    /// </summary>");
       builder.AppendLine("    public bool AllowsEmptyValue(Enum property)");
       builder.AppendLine("    {");
-      // Verify that the enum value is valid
       builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
       builder.AppendLine("        return _allowsEmpty[(int)((Field)property)];");
       builder.AppendLine("    }");
       builder.AppendLine();
-
+      
+      // --- Generate a public accessor method for the Description ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Gets the description of a property, if any.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public string? GetDescription(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _descriptions[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+      
+      builder.AppendLine("#endregion");
+      builder.AppendLine();
+      
       // 2. Generate the SetValue method
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
@@ -275,4 +320,6 @@ public class PropertyModifierGenerator : IIncrementalGenerator
 
    private const string NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE =
       "Arcanum.Core.CoreSystems.NUI.Attributes.BlockEmptyAttribute";
+
+   private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
 }

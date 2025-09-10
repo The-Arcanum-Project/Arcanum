@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
@@ -8,6 +9,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public partial class Tag(string name) : INUI, ICollectionProvider<Tag>, IEmpty<Tag>
 {
+   [Description("A tag consists of three uppercase letters or numbers but cannot start with a number.")]
    public string Name { get; set; } = name;
 
    public static Tag Empty { get; } = new(string.Empty);

@@ -153,6 +153,16 @@ public static class NUIViewGenerator
          allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
 
       var headerBlock = NavigationHeader(navHistory, target, property.ToString());
+
+      var descriptionText = parent.GetDescription(property);
+      if (!string.IsNullOrWhiteSpace(descriptionText))
+      {
+         var existingToolTip = headerBlock.ToolTip as string ?? string.Empty;
+         headerBlock.ToolTip = string.IsNullOrWhiteSpace(existingToolTip)
+                                  ? descriptionText
+                                  : $"{existingToolTip}\n\nDescription: {descriptionText}";
+      }
+
       baseGrid.RowDefinitions.Add(new() { Height = new(27, GridUnitType.Pixel) });
 
       var collapseButton = GetCollapseButton(startExpanded);
@@ -309,13 +319,15 @@ public static class NUIViewGenerator
 
       var inuiItems = modifiableList.OfType<INUI>().ToList();
 
-      var navHeader = new TextBlock
+      var textBlock = new TextBlock
       {
          Text = $"{nxProp}: {modifiableList.Count} Items",
          FontWeight = FontWeights.Bold,
          VerticalAlignment = VerticalAlignment.Center,
          FontSize = 14,
       };
+
+      SetTooltipIsAny(targets[0], nxProp, textBlock);
 
       grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
       GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
@@ -328,7 +340,7 @@ public static class NUIViewGenerator
                                   providerInterfaceType,
                                   itemType,
                                   modifiableList,
-                                  navHeader,
+                                  textBlock,
                                   grid,
                                   openButton);
 
@@ -345,7 +357,7 @@ public static class NUIViewGenerator
          HorizontalAlignment = HorizontalAlignment.Stretch,
          VerticalAlignment = VerticalAlignment.Center,
       };
-      headerStack.Children.Add(navHeader);
+      headerStack.Children.Add(textBlock);
       headerStack.Children.Add(openButton);
       FrameworkElement header;
 
@@ -441,8 +453,12 @@ public static class NUIViewGenerator
       element.IsEnabled = !target.IsReadonly;
       element.VerticalAlignment = VerticalAlignment.Stretch;
 
+      SetTooltipIsAny(target, nxProp, element);
+
       var desc = DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
+
+      SetTooltipIsAny(target, nxProp, desc);
 
       var inferActions = GenerateInferActions(target,
                                               navh,
@@ -826,6 +842,15 @@ public static class NUIViewGenerator
 
    #region Feature-Specific Logic (e.g., Infer Actions, Collections)
 
+   private static void SetTooltipIsAny(INUI target, Enum property, FrameworkElement element)
+   {
+      var tt = target.GetDescription(property);
+      if (string.IsNullOrWhiteSpace(tt))
+         return;
+
+      element.ToolTip = tt;
+   }
+
    /// <summary>
    /// Dynamically generates a StackPanel with map inference action buttons if the property's
    /// item type supports the IMapInferable contract.
@@ -1102,6 +1127,8 @@ public static class NUIViewGenerator
 
    #endregion
 
+   #region Reflection & Type Helpers
+
    private static Border EmbedMarker(Grid baseGrid)
    {
       var embedMarker = GetEmbedBorder();
@@ -1143,8 +1170,6 @@ public static class NUIViewGenerator
       Grid.SetColumn(spacer, 0);
       collapsibleElements.Add(spacer);
    }
-
-   #region Reflection & Type Helpers
 
    /// <summary>
    /// Tries to get the static 'Empty' instance from any Type using reflection.

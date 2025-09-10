@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -20,6 +21,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
    #region game/in_game/map_data/named_locations.txt
 
    [ToStringArguments("X")]
+   [Description("The color of the location in the map data.")]
    public int Color { get; set; }
    public new static Location Empty { get; } = new (FileInformation.Empty, 0, "EmptyArcanum_Location");
 
@@ -27,6 +29,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
 
    #region Market: game/main_menu/setup/start
 
+   [Description("The market associated with this location, if any.")]
    public Market Market { get; set; } = Market.Empty;
    public bool HasMarket => Market != Market.Empty;
 
@@ -34,6 +37,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
 
    #region Pops: game/main_menu/setup/start/06_pops.txt
 
+   [Description("The pops residing in this location.")]
    public ObservableRangeCollection<Pop> Pops { get; set; } = [];
 
    #endregion
