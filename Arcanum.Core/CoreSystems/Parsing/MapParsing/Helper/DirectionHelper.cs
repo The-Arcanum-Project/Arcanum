@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
 public static class DirectionHelper
 {
@@ -17,6 +17,7 @@ public static class DirectionHelper
         return (Direction)(((int)d - 1) & 3);
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Direction Invert(this Direction d)
     {
         return (Direction)(((int)d + 2) & 3);
