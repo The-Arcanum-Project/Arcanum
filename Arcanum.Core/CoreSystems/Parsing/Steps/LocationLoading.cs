@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
@@ -14,62 +13,32 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
 public class LocationFileLoading : FileLoadingService
 {
-   private const string DEFAULT_LOCATION_FILE_NAME = "00_default.txt";
-
    public override List<Type> ParsedObjects => [typeof(Location)];
    public override string GetFileDataDebugInfo() => $"Loaded '{Globals.Locations.Count}'.";
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
-      Dictionary<string, Location> locations =
-         new(fileObj.Path.Filename.Equals(DEFAULT_LOCATION_FILE_NAME) ? 29_000 : 100);
-
       var fInformation = new FileInformation(fileObj.Path.Filename, true, descriptor);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
       var isFlawless = true;
 
-      var sw = System.Diagnostics.Stopwatch.StartNew();
       var rns = Parser.Parse(fileObj, out var source);
-      sw.Stop();
-      Debug.WriteLine($"[Parsing] Parsed '{fileObj.Path.Filename}' in {sw.ElapsedMilliseconds} ms.");
-
       rns.IsNodeEmptyDiagnostic(ctx, ref isFlawless);
-
-      long nodeTicks = 0;
-      long identifierTicks = 0;
-      long hexParseTicks = 0;
-      long addTicks = 0;
-
-      sw.Restart(); // Start timing the whole loop
-      var sw2 = new Stopwatch();
 
       foreach (var statement in rns.Statements)
       {
-         sw2.Restart();
          if (!statement.IsContentNode(ctx, nameof(LocationFileLoading), source, ref isFlawless, out var cn))
-         {
-            nodeTicks += sw2.ElapsedTicks;
             continue;
-         }
 
-         nodeTicks += sw2.ElapsedTicks;
-
-         sw2.Restart();
          if (!cn.GetBothIdentifiers(ctx,
                                     nameof(LocationFileLoading),
                                     source,
                                     ref isFlawless,
                                     out var left,
                                     out var right))
-         {
-            identifierTicks += sw2.ElapsedTicks;
             continue;
-         }
 
-         identifierTicks += sw2.ElapsedTicks;
-
-         sw2.Restart();
          if (!TryParseHexInt(right, out var color))
          {
             ctx.SetPosition(cn.Value);
@@ -78,40 +47,19 @@ public class LocationFileLoading : FileLoadingService
                                            GetActionName(),
                                            right);
             isFlawless = false;
-            hexParseTicks += sw2.ElapsedTicks;
             continue;
          }
 
-         hexParseTicks += sw2.ElapsedTicks;
-
-         sw2.Restart();
-         if (!Globals.Locations.TryAdd(left, new (fInformation, color, left)))
+         if (!Globals.Locations.TryAdd(left, new(fInformation, color, left)))
          {
             ctx.SetPosition(cn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),
                                            ParsingError.Instance.DuplicateLocationDefinition,
                                            GetActionName(),
                                            left);
-            isFlawless = false; 
+            isFlawless = false;
          }
-
-         addTicks += sw2.ElapsedTicks;
       }
-
-      sw.Stop(); // Stop main timer
-
-      // --- Convert total Ticks to Milliseconds for display ---
-      // (ticks * 1000) / Stopwatch.Frequency = milliseconds
-      var nodeTime = (double)nodeTicks * 1000 / Stopwatch.Frequency;
-      var identifierTime = (double)identifierTicks * 1000 / Stopwatch.Frequency;
-      var hexParseTime = (double)hexParseTicks * 1000 / Stopwatch.Frequency;
-      var addTime = (double)addTicks * 1000 / Stopwatch.Frequency;
-
-      Debug.WriteLine($"[Processing] Processed '{fileObj.Path.Filename}' in {sw.ElapsedMilliseconds} ms.");
-      Debug.WriteLine($" - Nodes: {nodeTime:F2} ms.");
-      Debug.WriteLine($" - Identifiers: {identifierTime:F2} ms.");
-      Debug.WriteLine($" - HexParse: {hexParseTime:F2} ms.");
-      Debug.WriteLine($" - Add: {addTime:F2} ms.");
 
       return isFlawless;
    }
@@ -165,19 +113,5 @@ public class LocationFileLoading : FileLoadingService
 
       value = result;
       return true;
-   }
-
-   private static int GetLeadingSpacesCount(ReadOnlySpan<char> span)
-   {
-      var count = 0;
-      foreach (var c in span)
-      {
-         if (!char.IsWhiteSpace(c))
-            break;
-
-         count++;
-      }
-
-      return count;
    }
 }

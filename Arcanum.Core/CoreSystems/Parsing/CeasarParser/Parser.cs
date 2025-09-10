@@ -12,6 +12,12 @@ public class Parser(LexerResult lexerResult)
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private int _current;
 
+   public static RootNode Parse(FileObj fileObj, out string source, out LocationContext ctx)
+   {
+      ctx = LocationContext.GetNew(fileObj);
+      return Parse(fileObj, out source);
+   }
+
    public static RootNode Parse(FileObj fileObj, out string source)
    {
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
@@ -45,6 +51,8 @@ public class Parser(LexerResult lexerResult)
 
    private StatementNode ParseStatement()
    {
+      const string scriptedTrigger = "scripted_trigger";
+      const string scriptedEffect = "scripted_effect";
       // Case: Array block `{ ... }`
       if (Check(TokenType.LeftBrace))
          return ParseAnonymousBlock();
@@ -58,7 +66,7 @@ public class Parser(LexerResult lexerResult)
          if (Check(TokenType.Identifier) && CheckNext(TokenType.Identifier) && CheckAt(2, TokenType.Equals))
          {
             var keyword = Peek().GetValue(_source);
-            if (keyword is "scripted_trigger" or "scripted_effect")
+            if (keyword is scriptedTrigger or scriptedEffect)
                return ParseScriptedStatement();
          }
 
@@ -68,6 +76,8 @@ public class Parser(LexerResult lexerResult)
             case TokenType.LeftBrace:
                return ParseBlockStatement();
             case TokenType.Equals
+              or TokenType.Less
+              or TokenType.Greater
               or TokenType.LessOrEqual
               or TokenType.GreaterOrEqual
               or TokenType.QuestionEquals:
@@ -425,8 +435,12 @@ public class Parser(LexerResult lexerResult)
       result = tNode;
       return true;
    }
-   
-   public static bool EnforceNodeCountOfType<T>(List<AstNode> nodes, int expectedCount, LocationContext ctx, string actionName, out List<T> results)
+
+   public static bool EnforceNodeCountOfType<T>(List<AstNode> nodes,
+                                                int expectedCount,
+                                                LocationContext ctx,
+                                                string actionName,
+                                                out List<T> results)
       where T : AstNode
    {
       results = nodes.OfType<T>().ToList();
@@ -445,7 +459,11 @@ public class Parser(LexerResult lexerResult)
       return true;
    }
 
-   public static bool EnforceNodeCountOfType<T>(List<StatementNode> nodes, int expectedCount, LocationContext ctx, string actionName, out List<T> results)
+   public static bool EnforceNodeCountOfType<T>(List<StatementNode> nodes,
+                                                int expectedCount,
+                                                LocationContext ctx,
+                                                string actionName,
+                                                out List<T> results)
       where T : AstNode
    {
       results = nodes.OfType<T>().ToList();
@@ -465,7 +483,6 @@ public class Parser(LexerResult lexerResult)
 
       return true;
    }
-
 
    public static bool GetIdentifierKvp(StatementNode node,
                                        LocationContext ctx,

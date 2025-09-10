@@ -1,19 +1,21 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.GameObjects.Religion;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
-    public NUISetting PopSettings { get; set; } = new(Pop.Field.Type,
-                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
-                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
-                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray());
+   public NUISetting PopSettings { get; set; } = new(Pop.Field.Type,
+                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray());
    public NUISetting PopTypeSettings { get; set; } = new(PopType.Field.Name,
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
@@ -95,4 +97,26 @@ public class NUISettings
                                                              Enum.GetValues<CountryRank.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray());
+
+   public NUISetting InstitutionSettings { get; set; } = new(Institution.Field.Name,
+                                                             Enum.GetValues<Institution.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<Institution.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<Institution.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray());
+
+   public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.Name,
+                                                                 Enum.GetValues<ReligiousSchool.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<ReligiousSchool.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<ReligiousSchool.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray());
 }

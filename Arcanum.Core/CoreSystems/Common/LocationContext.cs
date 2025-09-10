@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Common;
 
@@ -31,10 +32,13 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
       LineNumber = token.Line;
       ColumnNumber = token.Column;
    }
+
    public void SetPosition(ValueNode vn)
    {
       var (line, column) = vn.GetLocation();
       LineNumber = line;
       ColumnNumber = column;
    }
+
+   public static LocationContext GetNew(FileObj fileObj) => new(0, 0, fileObj.Path.FullPath);
 }

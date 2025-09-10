@@ -34,6 +34,7 @@ public class Lexer
       return new(_source, _tokens);
    }
 
+   // ReSharper disable once CyclomaticComplexity
    private void ScanToken()
    {
       var c = Advance();
@@ -61,10 +62,10 @@ public class Lexer
             AddToken(TokenType.Equals);
             break;
          case '<':
-            AddToken(Match('=') ? TokenType.LessOrEqual : TokenType.Unexpected);
+            AddToken(Match('=') ? TokenType.LessOrEqual : TokenType.Less);
             break;
          case '>':
-            AddToken(Match('=') ? TokenType.GreaterOrEqual : TokenType.Unexpected);
+            AddToken(Match('=') ? TokenType.GreaterOrEqual : TokenType.Greater);
             break;
          case '?':
             AddToken(Match('=') ? TokenType.QuestionEquals : TokenType.Unexpected);
@@ -137,7 +138,7 @@ public class Lexer
       // Scan the initial integer part
       while (IsDigit(Peek()))
          Advance();
-      
+
       if (IsAlpha(Peek()))
       {
          while (IsIdentifierContinuationChar(Peek()))
@@ -232,7 +233,9 @@ public class Lexer
    private static bool IsDigit(char c) => char.IsDigit(c);
    private static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';
    private static bool IsAlphaNumeric(char c) => IsAlpha(c) || IsDigit(c);
-   private static bool IsIdentifierContinuationChar(char c) => IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
+
+   private static bool IsIdentifierContinuationChar(char c)
+      => IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
 
    #endregion
 }

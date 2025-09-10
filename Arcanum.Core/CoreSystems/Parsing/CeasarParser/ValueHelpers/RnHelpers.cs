@@ -63,8 +63,10 @@ public static class RnHelpers
    /// <param name="count">The expected number of <see cref="StatementNode"/>s</param>
    /// <param name="success">The bool the result is written to</param>
    /// <returns></returns>
-   public static void HasXStatements(this RootNode rn, LocationContext ctx, int count, ref bool success)
+   public static bool HasXStatements(this RootNode rn, LocationContext ctx, int count, ref bool success)
    {
-      success &= HasXStatements(rn, ctx, count);
+      var retVal = HasXStatements(rn, ctx, count);
+      success &= retVal;
+      return retVal;
    }
 }

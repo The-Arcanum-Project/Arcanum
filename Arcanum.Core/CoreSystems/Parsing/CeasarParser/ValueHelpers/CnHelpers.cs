@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
@@ -52,7 +54,7 @@ public static class CnHelpers
                                 source,
                                 out rightId,
                                 ref validationResult);
-      
+
       return internalValidationResult;
    }
 
@@ -85,7 +87,25 @@ public static class CnHelpers
          return false;
       }
 
-      value = lvn!.Value.GetLexeme(source);
+      value = lvn.Value.GetLexeme(source);
+      return true;
+   }
+
+   public static bool GetString(this ContentNode node,
+                                LocationContext ctx,
+                                string actionName,
+                                string source,
+                                ref bool validationResult,
+                                [MaybeNullWhen(false)] out string value)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult) ||
+          !node.Value.IsLiteralValueNode(ctx, actionName, ref validationResult, out var lvn))
+      {
+         value = string.Empty;
+         return false;
+      }
+
+      value = lvn.Value.GetLexeme(source);
       return true;
    }
 
@@ -279,7 +299,51 @@ public static class CnHelpers
          return false;
       }
 
-      return lvn!.TryParseLocationFromLvn(ctx, actionName, source, out location);
+      return lvn.TryParseLocationFromLvn(ctx, actionName, source, out location);
+   }
+
+   /// <summary>
+   /// Tries to get a Location from a ContentNode. <br/>
+   /// The ContentNode must have an Equals separator and a LiteralValueNode as value. <br/>
+   /// The string content of the LiteralValueNode is parsed to a Location. <br/>
+   /// <c>Logs warnings</c> if any of the checks fail or if the parsing fails. <br/>
+   /// The <paramref name="validationValue"/> is updated to false if any of the checks fail.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="validationValue"></param>
+   /// <param name="location"></param>
+   /// <returns></returns>
+   public static bool TryGetLocation(this ContentNode node,
+                                     LocationContext ctx,
+                                     string actionName,
+                                     string source,
+                                     ref bool validationValue,
+                                     [MaybeNullWhen(false)] out Location location)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(TryGetLocation)}",
+                                             ref validationValue))
+      {
+         location = Location.Empty;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validationValue, out var lvn))
+      {
+         location = Location.Empty;
+         return false;
+      }
+
+      if (lvn.GetLocation(ctx, $"{actionName}.{nameof(TryGetLocation)}", source, ref validationValue, out location))
+         return true;
+
+      location = Location.Empty;
+      return false;
    }
 
    public static bool TryGetBoolFromCn(this ContentNode node,
@@ -289,6 +353,8 @@ public static class CnHelpers
                                        out bool boolValue,
                                        bool defaultValue = false)
    {
+      SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName);
+
       if (!node.TryGetStringContentNode(ctx, actionName, source, out var strValue))
       {
          boolValue = defaultValue;
@@ -302,6 +368,28 @@ public static class CnHelpers
       return false;
    }
 
+   public static bool TryGetBool(this ContentNode node,
+                                 LocationContext ctx,
+                                 string actionName,
+                                 string source,
+                                 ref bool validationValue,
+                                 out bool value,
+                                 bool defaultValue = false)
+   {
+      SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationValue);
+
+      if (node.TryGetStringContentNode(ctx, actionName, source, out var strValue))
+         if (NumberParsing.TryParseBool(strValue, ctx, out var boolValue))
+         {
+            value = boolValue;
+            return true;
+         }
+
+      value = defaultValue;
+      validationValue = false;
+      return false;
+   }
+
    public static void SetBoolIfValid(this ContentNode node,
                                      LocationContext ctx,
                                      string actionName,
@@ -312,5 +400,66 @@ public static class CnHelpers
    {
       if (node.TryGetBoolFromCn(ctx, actionName, source, out var boolValue, defaultValue))
          Nx.ForceSet(boolValue, target, nxProp);
+   }
+
+   /// <summary>
+   /// Sets a bool value if the ContentNode is valid. <br/>
+   /// If the ContentNode is not valid, the <paramref name="validationResult"/> is set to false. <br/>
+   /// The bool is parsed from the ContentNode. If parsing fails, the <paramref name="validationResult"/> is set to false. <br/>
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="target"></param>
+   /// <param name="nxProp"></param>
+   /// <param name="validationResult"></param>
+   /// <param name="defaultValue"></param>
+   public static void SetBoolIfValid(this ContentNode node,
+                                     LocationContext ctx,
+                                     string actionName,
+                                     string source,
+                                     INexus target,
+                                     Enum nxProp,
+                                     ref bool validationResult,
+                                     bool defaultValue = false)
+   {
+      if (node.TryGetBool(ctx, actionName, source, ref validationResult, out var boolValue, defaultValue))
+         Nx.ForceSet(boolValue, target, nxProp);
+      else
+         validationResult = false;
+   }
+
+   /// <summary>
+   /// Sets a Location if the ContentNode is valid. <br/>
+   /// If the ContentNode is not valid, the <paramref name="validationResult"/> is set to false. <br/>
+   /// The Location is parsed from the ContentNode. If parsing fails, the <paramref name="validationResult"/> is set to false. <br/>
+   /// Logs warnings if parsing fails.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="target"></param>
+   /// <param name="nxProp"></param>
+   /// <param name="validationResult"></param>
+   public static void SetLocationIfValid(this ContentNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         INexus target,
+                                         Enum nxProp,
+                                         ref bool validationResult)
+   {
+      Debug.Assert(Nx.TypeOf(target, nxProp) == typeof(Location),
+                   $"{nameof(SetLocationIfValid)} should only be used for Location properties.");
+      if (node.TryGetLocation(ctx,
+                              $"{actionName}.{nameof(SetLocationIfValid)}",
+                              source,
+                              ref validationResult,
+                              out var location))
+         Nx.ForceSet(location, target, nxProp);
+      else
+         validationResult = false;
    }
 }

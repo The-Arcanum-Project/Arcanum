@@ -30,7 +30,18 @@ public static class SeparatorHelper
                                      type.ToString());
       return false;
    }
-   
+
+   public static bool IsSeparatorOfType(Token token,
+                                        TokenType type,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        ref bool validationResult)
+   {
+      var returnVal = IsSeparatorOfType(token, type, ctx, actionName);
+      validationResult &= returnVal;
+      return returnVal;
+   }
+
    /// <summary>
    /// Returns true if the token is of any of the supported types. <br/>
    /// Logs a warning if it is not.
@@ -41,19 +52,19 @@ public static class SeparatorHelper
    /// <param name="supportedTypes"></param>
    /// <returns></returns>
    public static bool IsAnySupportedSeparator(Token token,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         params TokenType[] supportedTypes)
+                                              LocationContext ctx,
+                                              string actionName,
+                                              params TokenType[] supportedTypes)
    {
       if (supportedTypes.Contains(token.Type))
          return true;
-      
+
       DiagnosticException.LogWarning(ctx,
                                      ParsingError.Instance.InvalidSeparator,
                                      actionName,
                                      token.Type.ToString(),
                                      string.Join(" or ", supportedTypes.Select(t => t.ToString())));
-      
+
       return false;
    }
 }

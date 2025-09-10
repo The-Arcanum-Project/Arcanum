@@ -469,7 +469,7 @@ public class ParsingError : ILazySingleton
                                                                "The provided enum value '{0}' does not match any known values for the expected enum type {1}:'{2}'.",
                                                                DiagnosticReportSeverity.PopupNotify);
 
-    /// <param name="0">The file path that was parsed</param>
+   /// <param name="0">The file path that was parsed</param>
    public DiagnosticDescriptor EmptyRootNode { get; } = new(DiagnosticCategory.Parsing,
                                                             49,
                                                             "Empty Root Node",
@@ -477,24 +477,53 @@ public class ParsingError : ILazySingleton
                                                             "The root node is empty.",
                                                             "The root node of the parsed content from file {0} is empty. It is either an empty file and can be discarded or the file is corrupted and needs to be fixed.",
                                                             DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The expected statement count</param>
-    /// <param name="1">The actual statement count</param>
-    public DiagnosticDescriptor InvalidStatementCount { get; } = new(DiagnosticCategory.Parsing,
-                                                            50,
-                                                            "Invalid Statement Count",
-                                                            DiagnosticSeverity.Error,
-                                                            "The statement count is invalid. Expected {0}, but found {1}.",
-                                                            "The root node must contain exactly {0} statements. The current count is {1}.",
-                                                            DiagnosticReportSeverity.PopupNotify);
-    
-    /// <param name="0">The unexpected token that was found instead of an identifier</param>
-    /// <param name="1">The type of the unexpected token</param>
-    public DiagnosticDescriptor ExpectedIdentifier { get; } = new(DiagnosticCategory.Parsing,
-                                                            51,
-                                                            "Expected Identifier",
-                                                            DiagnosticSeverity.Error,
-                                                            "Expected an identifier on the left side but found '{0}'.",
-                                                            "An identifier is required in this context, but the parser encountered '{0}' of type '{1}' instead.",
-                                                            DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The expected statement count</param>
+   /// <param name="1">The actual statement count</param>
+   public DiagnosticDescriptor InvalidStatementCount { get; } = new(DiagnosticCategory.Parsing,
+                                                                    50,
+                                                                    "Invalid Statement Count",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The statement count is invalid. Expected {0}, but found {1}.",
+                                                                    "The root node must contain exactly {0} statements. The current count is {1}.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The unexpected token that was found instead of an identifier</param>
+   /// <param name="1">The type of the unexpected token</param>
+   public DiagnosticDescriptor ExpectedIdentifier { get; } = new(DiagnosticCategory.Parsing,
+                                                                 51,
+                                                                 "Expected Identifier",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "Expected an identifier on the left side but found '{0}'.",
+                                                                 "An identifier is required in this context, but the parser encountered '{0}' of type '{1}' instead.",
+                                                                 DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The file path that could not be parsed</param>
+   public DiagnosticDescriptor UnsuccessfulFileParse { get; } = new(DiagnosticCategory.Parsing,
+                                                                    52,
+                                                                    "Unsuccessful File Parse",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The file {0} could not be parsed successfully.",
+                                                                    "The parser encountered errors while processing the file. Please review the diagnostics for details.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The unknown object key.</param>
+   /// <param name="1">The expected object type for which the key is unknown.</param>
+   public DiagnosticDescriptor UnknownObjectKey { get; } = new(DiagnosticCategory.Parsing,
+                                                               53,
+                                                               "Unknown Object Key",
+                                                               DiagnosticSeverity.Error,
+                                                               "The object key '{0}' is unknown in the current context.",
+                                                               "Expected a key for an object of type '{1}', but found the unknown key '{0}' instead.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   /// <param name="1">The expected enum type</param>
+   public DiagnosticDescriptor EnumParseError { get; } = new(DiagnosticCategory.Parsing,
+                                                             54,
+                                                             "Enum Parse Error",
+                                                             DiagnosticSeverity.Error,
+                                                             "Failed to parse enum of type '{1}' value from '{0}'.",
+                                                             "The provided string '{0}' could not be parsed to the target enum type '{1}'. Please ensure it is a valid enum value.",
+                                                             DiagnosticReportSeverity.PopupNotify);
 }

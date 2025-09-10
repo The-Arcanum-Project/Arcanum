@@ -18,7 +18,11 @@ public static class SnNodesHelpers
    /// <param name="actionName"></param>
    /// <param name="value"></param>
    /// <returns></returns>
-   public static bool IsBlockNode(this StatementNode node, LocationContext ctx, string source, string actionName, out BlockNode? value)
+   public static bool IsBlockNode(this StatementNode node,
+                                  LocationContext ctx,
+                                  string source,
+                                  string actionName,
+                                  out BlockNode? value)
    {
       if (node is not BlockNode bn)
       {
@@ -34,6 +38,29 @@ public static class SnNodesHelpers
 
       value = bn;
       return true;
+   }
+
+   /// <summary>
+   /// Logs a warning if the StatementNode is not a BlockNode. <br/>
+   /// Updates the <paramref name="validationResult"/> with the result of the check.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="source"></param>
+   /// <param name="className"></param>
+   /// <param name="validationResult"></param>
+   /// <param name="value"></param>
+   /// <returns></returns>
+   public static bool IsBlockNode(this StatementNode node,
+                                  LocationContext ctx,
+                                  string source,
+                                  string className,
+                                  ref bool validationResult,
+                                  [MaybeNullWhen(false)] out BlockNode value)
+   {
+      var returnVal = node.IsBlockNode(ctx, source, className + ".StatementNode.IsBlockNode", out value);
+      validationResult &= returnVal;
+      return returnVal;
    }
 
    /// <summary>

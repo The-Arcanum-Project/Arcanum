@@ -92,6 +92,30 @@ DiagnosticSeverity.$Severity$,
 "$Message$",
 "$Description$",
 DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/@KeyIndexDefined">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Applicability/=Surround/@EntryIndexedValue">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Description/@EntryValue">Inserts a nexus region</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Reformat/@EntryValue">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Shortcut/@EntryValue">nexus</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C9C57A9868E36C4BB9600A8AAB81C28E/Text/@EntryValue"># region Nexus Properties
+    $SELECTION$$END$
+# endregion</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CB2061BC97C3DE4AAC4AADA060D8E711/Field/=name/@KeyIndexDefined">True</s:Boolean>

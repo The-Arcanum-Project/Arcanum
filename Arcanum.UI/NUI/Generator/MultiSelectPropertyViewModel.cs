@@ -34,6 +34,9 @@ public class MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum prop
       }
       set
       {
+         if (targets[0].IsPropertyReadOnly(property))
+            return;
+
          // Apply the new value to every selected object.
          foreach (var target in targets)
             Nx.ForceSet(value, target, property);
@@ -52,6 +55,6 @@ public class MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum prop
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new (propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 }

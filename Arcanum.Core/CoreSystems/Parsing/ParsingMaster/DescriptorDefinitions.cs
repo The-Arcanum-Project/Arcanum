@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -45,60 +46,96 @@ public static class DescriptorDefinitions
                                                                      new AdjacencyFileLoading(),
                                                                      false,
                                                                      false);
-   
+
    public static readonly FileDescriptor MarketDescriptor = new([LocationDescriptor],
-                                                                     ["game", "main_menu", "setup", "start", "03_markets.txt"],
-                                                                     ISavingService.Dummy,
-                                                                     new("03_markets", "txt", "#"),
-                                                                     new MarketParsing(),
-                                                                     false,
-                                                                     false);
-   
+                                                                [
+                                                                   "game", "main_menu", "setup", "start",
+                                                                   "03_markets.txt",
+                                                                ],
+                                                                ISavingService.Dummy,
+                                                                new("03_markets", "txt", "#"),
+                                                                new MarketParsing(),
+                                                                false,
+                                                                false);
+
    public static readonly FileDescriptor PopTypeDescriptor = new([],
-                                                                     ["game", "in_game", "common", "pop_types"],
-                                                                     ISavingService.Dummy,
-                                                                     new("01_pop_types", "txt", "#"),
-                                                                     new PopTypeParsing(),
-                                                                     false);
-   
+                                                                 ["game", "in_game", "common", "pop_types"],
+                                                                 ISavingService.Dummy,
+                                                                 new("01_pop_types", "txt", "#"),
+                                                                 new PopTypeParsing(),
+                                                                 false);
+
    public static readonly FileDescriptor PopDescriptor = new([PopTypeDescriptor, LocationDescriptor],
-                                                                     ["game", "main_menu", "setup", "start", "06_pops.txt"],
-                                                                     ISavingService.Dummy,
-                                                                     new("06_pops", "txt", "#"),
-                                                                     new PopsParsing(),
-                                                                     false,
-                                                                     false);
+                                                             ["game", "main_menu", "setup", "start", "06_pops.txt"],
+                                                             ISavingService.Dummy,
+                                                             new("06_pops", "txt", "#"),
+                                                             new PopsParsing(),
+                                                             false,
+                                                             false);
 
    public static readonly FileDescriptor LocationRankDescriptor = new([],
-                                                                     ["game", "in_game", "common", "location_ranks"],
-                                                                     ISavingService.Dummy,
-                                                                     new("location_ranks", "txt", "#"),
-                                                                     new LocationRankLoading(),
-                                                                     false,
-                                                                     false);
-   
+                                                                      ["game", "in_game", "common", "location_ranks"],
+                                                                      ISavingService.Dummy,
+                                                                      new("location_ranks", "txt", "#"),
+                                                                      new LocationRankLoading(),
+                                                                      false,
+                                                                      false);
+
    public static readonly FileDescriptor CountryRankDescriptor = new([],
                                                                      ["game", "in_game", "common", "country_ranks"],
                                                                      ISavingService.Dummy,
                                                                      new("country_ranks", "txt", "#"),
                                                                      new CountryRankLoading(),
                                                                      false);
-   
+
    public static readonly FileDescriptor RoadsAndCountriesDescriptor = new([LocationDescriptor, CountryRankDescriptor],
-                                                                           ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
+                                                                           [
+                                                                              "game", "main_menu", "setup", "start",
+                                                                              "10_countries_and_roads.txt",
+                                                                           ],
                                                                            ISavingService.Dummy,
                                                                            new("10_countries_and_roads", "txt", "#"),
                                                                            new RoadsAndCountriesParsing(),
                                                                            false,
                                                                            false);
-   
+
+   public static readonly FileDescriptor ReligiousSchoolsDescriptor = new([],
+                                                                          [
+                                                                             "game", "in_game", "common",
+                                                                             "religious_schools",
+                                                                          ],
+                                                                          ISavingService.Dummy,
+                                                                          new("religious_schools", "txt", "#"),
+                                                                          new ReligiousSchoolsParsing(),
+                                                                          false,
+                                                                          false);
+
+   public static readonly FileDescriptor InstitutionsDescriptor = new([],
+                                                                      ["game", "in_game", "common", "institution",],
+                                                                      ISavingService.Dummy,
+                                                                      new("age_x_institutions", "txt", "#"),
+                                                                      new InstitutionParsing(),
+                                                                      false,
+                                                                      false);
+
+   public static readonly FileDescriptor InstitutionsAndReligiousSchools =
+      new([LocationDescriptor, ReligiousSchoolsDescriptor, InstitutionsDescriptor],
+          ["game", "main_menu", "setup", "start", "02_core.txt",],
+          ISavingService.Dummy,
+          new("02_core", "txt", "#"),
+          new
+             InstitutionAndReligiousSchoolsParsing(),
+          false,
+          false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
-         RoadsAndCountriesDescriptor, CountryRankDescriptor,
+         RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
+         ReligiousSchoolsDescriptor, InstitutionsDescriptor,
       ];
    }
 }
