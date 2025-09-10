@@ -516,15 +516,15 @@ public unsafe class MapTracing
             if (currentNode == startNode)
                 break;
             // Now we are at a new node, so we can check if we have a cached segment in the current direction
-            if (currentNode.VisitNew(ref currentDirection, currentNode!, currentSegment, out var newSegment,
+            if (currentNode.Visit(ref currentDirection, currentNode!, currentSegment, out var newSegment,
                     out var nextNode))
             {
                 currentNode.SetDirection(currentDirection);
                 // Found a cached segment
                 polygon.Segments.Add(currentNode);
-                polygon.Segments.Add(newSegment!.Value);
-                currentNode = nextNode!;
-                currentSegment = newSegment.Value;
+                polygon.Segments.Add(newSegment);
+                currentNode = nextNode;
+                currentSegment = newSegment;
             }
             else
             {
