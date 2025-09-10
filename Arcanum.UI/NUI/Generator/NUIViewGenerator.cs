@@ -134,7 +134,7 @@ public static class NUIViewGenerator
          embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
 
       var isReadonlyProp = parent.IsPropertyReadOnly(property);
-      
+
       var baseUI = new BaseEmbeddedView();
       var baseGrid = baseUI.ContentGrid;
       var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
@@ -211,7 +211,12 @@ public static class NUIViewGenerator
 
          if (!isReadonlyProp && TryGetEmpty(itemType, out var emptyInstance))
          {
-            var setEmptyButton = GetSetEmptyButton(itemType, property, parent, navHistory, emptyInstance);
+            var setEmptyButton = GetSetEmptyButton(itemType,
+                                                   property,
+                                                   parent,
+                                                   navHistory,
+                                                   emptyInstance,
+                                                   parent.AllowsEmptyValue(property));
 
             headerGrid.Children.Add(setEmptyButton);
             Grid.SetRow(setEmptyButton, 0);
@@ -301,13 +306,17 @@ public static class NUIViewGenerator
                                                Enum property,
                                                INUI parent,
                                                NUINavHistory navHistory,
-                                               object emptyInstance)
+                                               object emptyInstance,
+                                               bool enabled)
    {
       var setEmptyButton = new BaseButton
       {
          Width = 20,
          Height = 20,
-         ToolTip = $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'",
+         ToolTip =
+            enabled
+               ? $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'"
+               : $"{property} cannot be set to empty",
          Content = new Image
          {
             Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
@@ -315,13 +324,15 @@ public static class NUIViewGenerator
          },
          BorderThickness = new(1),
          Margin = new(1, 1, -1, 1),
+         Background = enabled ? Brushes.Transparent : (Brush)Application.Current.FindResource("DimErrorRedColorBrush")!,
       };
 
-      setEmptyButton.Click += (_, _) =>
-      {
-         Nx.ForceSet(emptyInstance, parent, property);
-         GenerateAndSetView(navHistory);
-      };
+      if (enabled)
+         setEmptyButton.Click += (_, _) =>
+         {
+            Nx.ForceSet(emptyInstance, parent, property);
+            GenerateAndSetView(navHistory);
+         };
 
       return setEmptyButton;
    }
@@ -811,7 +822,7 @@ public static class NUIViewGenerator
          {
             PrimitiveTypeListView.ShowDialog(modifiableList, modifiableList, $"{nxProp} Editor");
          };
-         
+
          openButton.ToolTip = $"Open Primitive Collection Editor for {nxProp}({itemType.Name})";
       }
    }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -100,6 +101,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
    private string GeneratePartialClass(INamedTypeSymbol classSymbol, List<ISymbol> members)
    {
       var readonlyStatuses = new List<bool>();
+      var allowsEmpty = new List<bool>();
 
       var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
       var className = classSymbol.Name;
@@ -131,11 +133,15 @@ public class PropertyModifierGenerator : IIncrementalGenerator
          };
 
          // Gather the readonly status
-         var hasReadonlyAttribute = member.GetAttributes()
-                                          .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                                   READONLY_NEXUS_ATTRIBUTE_NAME,
-                                                                   StringComparison.Ordinal));
-         readonlyStatuses.Add(hasReadonlyAttribute);
+         readonlyStatuses.Add(member.GetAttributes()
+                                    .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
+                                                             READONLY_NEXUS_ATTRIBUTE_NAME,
+                                                             StringComparison.Ordinal)));
+         // Gather the AllowsEmpty status
+         allowsEmpty.Add(!member.GetAttributes()
+                                .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
+                                                         NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE,
+                                                         StringComparison.Ordinal)));
 
          // 2. Get a fully qualified name for the type
          var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -157,6 +163,16 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine($"    private static readonly bool[] _isReadOnly = {{ {arrayInitializer} }};");
       builder.AppendLine();
 
+      // -------- Allows Empty Value Array --------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array indicating whether a property allows empty values.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+      
+      var allowsEmptyInitializer = string.Join(", ", allowsEmpty.Select(s => s.ToString().ToLower()));
+      builder.AppendLine($"    private static readonly bool[] _allowsEmpty = {{ {allowsEmptyInitializer} }};");
+      builder.AppendLine();
+
       // --- Generate a public accessor method for the readonly status ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Checks if a property is marked as read-only.");
@@ -168,13 +184,25 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        return _isReadOnly[(int)((Field)property)];");
       builder.AppendLine("    }");
       builder.AppendLine();
+      
+      // --- Generate a public accessor method for the AllowsEmpty status ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Checks if a property allows empty values.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public bool AllowsEmptyValue(Enum property)");
+      builder.AppendLine("    {");
+      // Verify that the enum value is valid
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _allowsEmpty[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
 
       // 2. Generate the SetValue method
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
       // Check if the property is readonly
       builder.AppendLine("        Debug.Assert(!IsPropertyReadOnly(property), \"Attempting to set a readonly property\");");
-      
+
       builder.AppendLine("        switch (property)");
       builder.AppendLine("        {");
       foreach (var member in members)
@@ -242,5 +270,9 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       return builder.ToString();
    }
 
-   private const string READONLY_NEXUS_ATTRIBUTE_NAME = "Arcanum.Core.CoreSystems.NUI.Attributes.ReadonlyNexusAttribute";
+   private const string READONLY_NEXUS_ATTRIBUTE_NAME =
+      "Arcanum.Core.CoreSystems.NUI.Attributes.ReadonlyNexusAttribute";
+
+   private const string NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE =
+      "Arcanum.Core.CoreSystems.NUI.Attributes.BlockEmptyAttribute";
 }
