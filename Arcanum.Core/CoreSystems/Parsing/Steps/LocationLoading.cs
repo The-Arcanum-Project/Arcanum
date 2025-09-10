@@ -85,15 +85,14 @@ public class LocationFileLoading : FileLoadingService
          hexParseTicks += sw2.ElapsedTicks;
 
          sw2.Restart();
-         var location = new Location(fInformation, color, left);
-         if (!Globals.Locations.TryAdd(left, location))
+         if (!Globals.Locations.TryAdd(left, new (fInformation, color, left)))
          {
             ctx.SetPosition(cn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),
                                            ParsingError.Instance.DuplicateLocationDefinition,
                                            GetActionName(),
                                            left);
-            isFlawless = false;
+            isFlawless = false; 
          }
 
          addTicks += sw2.ElapsedTicks;
