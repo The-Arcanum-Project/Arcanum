@@ -102,9 +102,11 @@ public unsafe class MapTracing
             if (lastNode != null)
             {
                 node = new(
-                    [new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
+                [
+                    new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateRight(), visited:true)], x, y);
+                    new CacheNodeInfo(null, null, d.RotateRight(), visited: true)
+                ], x, y);
                 lastNode.Segments[2].Node = node;
                 lastNode.Segments[2].Segment = new(currentSegment, true);
             }
@@ -113,7 +115,8 @@ public unsafe class MapTracing
                 node = new([
                     new CacheNodeInfo(null, null, d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateRight())], x, y);
+                    new CacheNodeInfo(null, null, d.RotateRight())
+                ], x, y);
                 firstNode = node;
             }
 
@@ -423,7 +426,7 @@ public unsafe class MapTracing
                     //drawer.DrawLine(segment.Points[^1].X, segment.Points[^1].Y, x, y);
                 }
                 //else
-                    //drawer.DrawLine(startx, starty, x, y);
+                //drawer.DrawLine(startx, starty, x, y);
 
                 //drawer.DrawNode(x, y);
 #endif
@@ -514,7 +517,7 @@ public unsafe class MapTracing
             if (currentNode == startNode)
                 break;
             // Now we are at a new node, so we can check if we have a cached segment in the current direction
-            if (currentNode.Visit(ref currentDirection, currentNode!, currentSegment, out var newSegment,
+            if (currentNode.Visit(ref currentDirection, currentSegment, out var newSegment,
                     out var nextNode))
             {
                 currentNode.SetDirection(currentDirection);
