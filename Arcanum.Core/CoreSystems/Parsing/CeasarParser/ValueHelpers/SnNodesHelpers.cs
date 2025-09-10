@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -12,10 +14,11 @@ public static class SnNodesHelpers
    /// </summary>
    /// <param name="node"></param>
    /// <param name="ctx"></param>
+   /// <param name="source"></param>
    /// <param name="actionName"></param>
    /// <param name="value"></param>
    /// <returns></returns>
-   public static bool IsBlockNode(this StatementNode node, LocationContext ctx, string actionName, out BlockNode? value)
+   public static bool IsBlockNode(this StatementNode node, LocationContext ctx, string source, string actionName, out BlockNode? value)
    {
       if (node is not BlockNode bn)
       {
@@ -23,35 +26,47 @@ public static class SnNodesHelpers
                                         ParsingError.Instance.InvalidNodeType,
                                         actionName,
                                         node.GetType().Name,
-                                        nameof(BlockNode));
+                                        nameof(BlockNode),
+                                        node.KeyNode.GetLexeme(source));
          value = null!;
          return false;
       }
+
       value = bn;
       return true;
    }
-   
+
    /// <summary>
    /// Verifies if the StatementNode is a ContentNode. <br/>
    /// If not, logs a warning.
    /// </summary>
    /// <param name="node"></param>
    /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="className"></param>
+   /// <param name="validationResult"></param>
    /// <param name="value"></param>
    /// <returns></returns>
-   public static bool IsContentNode(this StatementNode node, LocationContext ctx, string actionName, out ContentNode? value)
+   public static bool IsContentNode(this StatementNode node,
+                                    LocationContext ctx,
+                                    string source,
+                                    string className,
+                                    ref bool validationResult,
+                                    [MaybeNullWhen(false)] out ContentNode value)
    {
       if (node is not ContentNode cn)
       {
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
+                                        $"{className}.StatementNode.IsContentNode",
                                         node.GetType().Name,
-                                        nameof(ContentNode));
+                                        nameof(ContentNode),
+                                        node.KeyNode.GetLexeme(source));
          value = null!;
+         validationResult = false;
          return false;
       }
+
       value = cn;
       return true;
    }

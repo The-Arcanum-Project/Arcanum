@@ -24,7 +24,7 @@ public class CountryRankLoading : FileLoadingService
 
       foreach (var rn in rns.Statements)
       {
-         if (!rn.IsBlockNode(ctx, GetActionName(), out var bNode))
+         if (!rn.IsBlockNode(ctx, source, GetActionName(), out var bNode))
             continue;
          
          var crlName = bNode!.KeyNode.GetLexeme(source);

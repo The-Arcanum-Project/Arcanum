@@ -10,6 +10,53 @@ namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
 public static class CnHelpers
 {
    /// <summary>
+   /// Returns the left identifier (key) and right identifier (value) from a <see cref="ContentNode"/>. <br/>
+   /// Logs warnings if the key is not an identifier or if the value is not a valid identifier. <br/>
+   /// The <paramref name="validationResult"/> is updated to false if any of the checks fail.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="callerClassName"></param>
+   /// <param name="source"></param>
+   /// <param name="validationResult"></param>
+   /// <param name="leftId"></param>
+   /// <param name="rightId"></param>
+   public static bool GetBothIdentifiers(this ContentNode node,
+                                         LocationContext ctx,
+                                         string callerClassName,
+                                         string source,
+                                         ref bool validationResult,
+                                         out string leftId,
+                                         out string rightId)
+   {
+      leftId = string.Empty;
+      rightId = string.Empty;
+      var internalValidationResult = true;
+
+      if (node.KeyNode.Type != TokenType.Identifier)
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.ExpectedIdentifier,
+                                        callerClassName,
+                                        node.KeyNode.GetLexeme(source),
+                                        node.KeyNode.Type);
+         validationResult = false;
+         internalValidationResult = false;
+      }
+      else
+         leftId = node.KeyNode.GetLexeme(source);
+
+      node.TryGetIdentifierNode(ctx,
+                                $"{callerClassName}.{nameof(TryGetIdentifierNode)}",
+                                source,
+                                out rightId,
+                                ref validationResult);
+      
+      return internalValidationResult;
+   }
+
+   /// <summary>
    /// Checks if the ContentNode has an Equals separator and a LiteralValueNode as value.
    /// If so, it extracts the string content from the LiteralValueNode.
    /// Logs warnings if the checks fail.
@@ -101,13 +148,16 @@ public static class CnHelpers
                                            string source,
                                            out string identifier)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName))
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(TryGetIdentifierNode)}"))
       {
          identifier = string.Empty;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ctx, $"{actionName}.{nameof(TryGetIdentifierNode)}", out var lvn))
       {
          identifier = string.Empty;
          return false;
@@ -115,6 +165,16 @@ public static class CnHelpers
 
       identifier = lvn!.Value.GetLexeme(source);
       return true;
+   }
+
+   public static void TryGetIdentifierNode(this ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           out string identifier,
+                                           ref bool validationResult)
+   {
+      validationResult &= node.TryGetIdentifierNode(ctx, actionName, source, out identifier);
    }
 
    /// <summary>
@@ -237,11 +297,11 @@ public static class CnHelpers
 
       if (NumberParsing.TryParseBool(strValue, ctx, out boolValue, defaultValue))
          return true;
-      
+
       boolValue = defaultValue;
       return false;
    }
-   
+
    public static void SetBoolIfValid(this ContentNode node,
                                      LocationContext ctx,
                                      string actionName,

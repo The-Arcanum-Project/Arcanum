@@ -390,12 +390,13 @@ public class ParsingError : ILazySingleton
 
    /// <param name="0">The node type that is invalid</param>
    /// <param name="1">The expected node type or types</param>
+   /// <param name="2">The actual node or it's name that was found</param>
    public DiagnosticDescriptor InvalidNodeType { get; } = new(DiagnosticCategory.Parsing,
                                                               41,
                                                               "Invalid Node Type",
                                                               DiagnosticSeverity.Error,
                                                               "The node type '{0}' is invalid in the current context.",
-                                                              "A node of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
+                                                              "The node ('{2}') of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
                                                               DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The node type that is invalid</param>
@@ -446,25 +447,54 @@ public class ParsingError : ILazySingleton
                                                                     "The country rank key '{0}' is invalid.",
                                                                     "The provided country rank key does not match any known country ranks: '{1}'.",
                                                                     DiagnosticReportSeverity.PopupNotify);
-   
-    /// <param name="0">The integer value that is forbidden</param>
-    /// <param name="1">The context / field in which the integer value is forbidden</param>
+
+   /// <param name="0">The integer value that is forbidden</param>
+   /// <param name="1">The context / field in which the integer value is forbidden</param>
    public DiagnosticDescriptor ForbiddenIntegerValue { get; } = new(DiagnosticCategory.Parsing,
-                                                                  47,
-                                                                  "Forbidden Integer Value",
-                                                                  DiagnosticSeverity.Error,
-                                                                  "The integer value is forbidden: '{0}'.",
-                                                                  "The provided integer value '{0}' is not allowed as a value for {1}.",
-                                                                  DiagnosticReportSeverity.PopupNotify);
+                                                                    47,
+                                                                    "Forbidden Integer Value",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The integer value is forbidden: '{0}'.",
+                                                                    "The provided integer value '{0}' is not allowed as a value for {1}.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The enum value that is invalid</param>
+   /// <param name="1">The expected enum type</param>
+   /// <param name="2">A list of valid enum values for the expected enum type</param>
+   public DiagnosticDescriptor InvalidEnumValue { get; } = new(DiagnosticCategory.Parsing,
+                                                               48,
+                                                               "Invalid Enum Value",
+                                                               DiagnosticSeverity.Error,
+                                                               "The enum value is invalid: '{0}'.",
+                                                               "The provided enum value '{0}' does not match any known values for the expected enum type {1}:'{2}'.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+
+    /// <param name="0">The file path that was parsed</param>
+   public DiagnosticDescriptor EmptyRootNode { get; } = new(DiagnosticCategory.Parsing,
+                                                            49,
+                                                            "Empty Root Node",
+                                                            DiagnosticSeverity.Warning,
+                                                            "The root node is empty.",
+                                                            "The root node of the parsed content from file {0} is empty. It is either an empty file and can be discarded or the file is corrupted and needs to be fixed.",
+                                                            DiagnosticReportSeverity.PopupNotify);
     
-    /// <param name="0">The enum value that is invalid</param>
-    /// <param name="1">The expected enum type</param>
-    /// <param name="2">A list of valid enum values for the expected enum type</param>
-    public DiagnosticDescriptor InvalidEnumValue { get; } = new(DiagnosticCategory.Parsing,
-                                                                  48,
-                                                                  "Invalid Enum Value",
-                                                                  DiagnosticSeverity.Error,
-                                                                  "The enum value is invalid: '{0}'.",
-                                                                  "The provided enum value '{0}' does not match any known values for the expected enum type {1}:'{2}'.",
-                                                                  DiagnosticReportSeverity.PopupNotify);
+    /// <param name="0">The expected statement count</param>
+    /// <param name="1">The actual statement count</param>
+    public DiagnosticDescriptor InvalidStatementCount { get; } = new(DiagnosticCategory.Parsing,
+                                                            50,
+                                                            "Invalid Statement Count",
+                                                            DiagnosticSeverity.Error,
+                                                            "The statement count is invalid. Expected {0}, but found {1}.",
+                                                            "The root node must contain exactly {0} statements. The current count is {1}.",
+                                                            DiagnosticReportSeverity.PopupNotify);
+    
+    /// <param name="0">The unexpected token that was found instead of an identifier</param>
+    /// <param name="1">The type of the unexpected token</param>
+    public DiagnosticDescriptor ExpectedIdentifier { get; } = new(DiagnosticCategory.Parsing,
+                                                            51,
+                                                            "Expected Identifier",
+                                                            DiagnosticSeverity.Error,
+                                                            "Expected an identifier on the left side but found '{0}'.",
+                                                            "An identifier is required in this context, but the parser encountered '{0}' of type '{1}' instead.",
+                                                            DiagnosticReportSeverity.PopupNotify);
 }

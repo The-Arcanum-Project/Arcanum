@@ -417,7 +417,8 @@ public class Parser(LexerResult lexerResult)
                                         ParsingError.Instance.InvalidNodeType,
                                         actionName,
                                         node.GetType(),
-                                        typeof(T));
+                                        typeof(T),
+                                        "N/A");
          return false;
       }
 

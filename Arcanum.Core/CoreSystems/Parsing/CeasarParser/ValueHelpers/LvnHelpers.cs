@@ -16,7 +16,8 @@ public static class LvnHelpers
                                         ParsingError.Instance.InvalidNodeType,
                                         actionName,
                                         node.GetType().Name,
-                                        nameof(LiteralValueNode));
+                                        nameof(LiteralValueNode),
+                                        "N/A");
          value = null!;
          return false;
       }

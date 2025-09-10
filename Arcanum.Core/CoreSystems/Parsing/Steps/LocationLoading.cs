@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
@@ -22,86 +24,95 @@ public class LocationFileLoading : FileLoadingService
       Dictionary<string, Location> locations =
          new(fileObj.Path.Filename.Equals(DEFAULT_LOCATION_FILE_NAME) ? 29_000 : 100);
 
-      var context = new LocationContext(0, 0, fileObj.Path.FullPath);
-
-      if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var reader) || reader is null)
-      {
-         DiagnosticException ex = new(IOError.Instance.FileReadingError, fileObj.Path.FullPath);
-         ex.HandleDiagnostic(context, GetActionName());
-         return false;
-      }
+      var fInformation = new FileInformation(fileObj.Path.Filename, true, descriptor);
+      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
       var isFlawless = true;
-      var fInformation = new FileInformation(fileObj.Path.Filename, true, descriptor);
 
-      using (reader)
-         while (reader.ReadLine() is { } line)
+      var sw = System.Diagnostics.Stopwatch.StartNew();
+      var rns = Parser.Parse(fileObj, out var source);
+      sw.Stop();
+      Debug.WriteLine($"[Parsing] Parsed '{fileObj.Path.Filename}' in {sw.ElapsedMilliseconds} ms.");
+
+      rns.IsNodeEmptyDiagnostic(ctx, ref isFlawless);
+
+      long nodeTicks = 0;
+      long identifierTicks = 0;
+      long hexParseTicks = 0;
+      long addTicks = 0;
+
+      sw.Restart(); // Start timing the whole loop
+      var sw2 = new Stopwatch();
+
+      foreach (var statement in rns.Statements)
+      {
+         sw2.Restart();
+         if (!statement.IsContentNode(ctx, nameof(LocationFileLoading), source, ref isFlawless, out var cn))
          {
-            context.LineNumber++;
-
-            var span = line.AsSpan().TrimStart();
-            if (span.Length == 0 || span[0] == '#')
-               continue;
-
-            var equalIndex = span.IndexOf('=');
-            if (equalIndex <= 0 || equalIndex == span.Length - 1)
-            {
-               DiagnosticException.LogWarning(context.GetInstance(),
-                                              ParsingError.Instance.InvalidKeyValuePair,
-                                              GetActionName(),
-                                              line);
-               isFlawless = false;
-               continue;
-            }
-
-            var keySpan = span[..equalIndex].Trim();
-            var endIndex = span.IndexOf('#');
-            endIndex = endIndex == -1 ? span.Length - 1 : endIndex;
-            var valueSpan = span[(equalIndex + 1)..endIndex].Trim();
-
-            if (keySpan.IsEmpty || valueSpan.IsEmpty)
-            {
-               DiagnosticException.LogWarning(context.GetInstance(),
-                                              ParsingError.Instance.InvalidKeyValuePair,
-                                              GetActionName(),
-                                              line);
-               isFlawless = false;
-               continue;
-            }
-
-            if (!TryParseHexInt(valueSpan, out var colorInt))
-            {
-               context.ColumnNumber = equalIndex + 1 + GetLeadingSpacesCount(valueSpan);
-               DiagnosticException.LogWarning(context.GetInstance(),
-                                              ParsingError.Instance.HexToIntConversionError,
-                                              GetActionName(),
-                                              valueSpan.ToString());
-               isFlawless = false;
-               continue;
-            }
-
-            var key = keySpan.ToString();
-            context.ColumnNumber = line.IndexOf(key, StringComparison.Ordinal);
-
-            var newLocation = new Location(fInformation, colorInt, key);
-            if (!locations.TryAdd(key, newLocation))
-            {
-               DiagnosticException.LogWarning(context.GetInstance(),
-                                              ParsingError.Instance.DuplicateLocationDefinition,
-                                              GetActionName(),
-                                              key);
-               isFlawless = false;
-            }
+            nodeTicks += sw2.ElapsedTicks;
+            continue;
          }
 
-      // if it is null we are not in a multithreaded context
-      if (lockObject is not null)
-         lock (lockObject)
-            foreach (var location in locations)
-               Globals.Locations[location.Key] = location.Value;
-      else
-         foreach (var location in locations)
-            Globals.Locations[location.Key] = location.Value;
+         nodeTicks += sw2.ElapsedTicks;
+
+         sw2.Restart();
+         if (!cn.GetBothIdentifiers(ctx,
+                                    nameof(LocationFileLoading),
+                                    source,
+                                    ref isFlawless,
+                                    out var left,
+                                    out var right))
+         {
+            identifierTicks += sw2.ElapsedTicks;
+            continue;
+         }
+
+         identifierTicks += sw2.ElapsedTicks;
+
+         sw2.Restart();
+         if (!TryParseHexInt(right, out var color))
+         {
+            ctx.SetPosition(cn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.HexToIntConversionError,
+                                           GetActionName(),
+                                           right);
+            isFlawless = false;
+            hexParseTicks += sw2.ElapsedTicks;
+            continue;
+         }
+
+         hexParseTicks += sw2.ElapsedTicks;
+
+         sw2.Restart();
+         var location = new Location(fInformation, color, left);
+         if (!Globals.Locations.TryAdd(left, location))
+         {
+            ctx.SetPosition(cn.KeyNode);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.DuplicateLocationDefinition,
+                                           GetActionName(),
+                                           left);
+            isFlawless = false;
+         }
+
+         addTicks += sw2.ElapsedTicks;
+      }
+
+      sw.Stop(); // Stop main timer
+
+      // --- Convert total Ticks to Milliseconds for display ---
+      // (ticks * 1000) / Stopwatch.Frequency = milliseconds
+      var nodeTime = (double)nodeTicks * 1000 / Stopwatch.Frequency;
+      var identifierTime = (double)identifierTicks * 1000 / Stopwatch.Frequency;
+      var hexParseTime = (double)hexParseTicks * 1000 / Stopwatch.Frequency;
+      var addTime = (double)addTicks * 1000 / Stopwatch.Frequency;
+
+      Debug.WriteLine($"[Processing] Processed '{fileObj.Path.Filename}' in {sw.ElapsedMilliseconds} ms.");
+      Debug.WriteLine($" - Nodes: {nodeTime:F2} ms.");
+      Debug.WriteLine($" - Identifiers: {identifierTime:F2} ms.");
+      Debug.WriteLine($" - HexParse: {hexParseTime:F2} ms.");
+      Debug.WriteLine($" - Add: {addTime:F2} ms.");
 
       return isFlawless;
    }
@@ -120,7 +131,7 @@ public class LocationFileLoading : FileLoadingService
 
       foreach (var locToRemove in locationsToRemove)
          Globals.Locations.Remove(locToRemove.Name);
-      
+
       Globals.Locations.TrimExcess();
       return true;
    }
