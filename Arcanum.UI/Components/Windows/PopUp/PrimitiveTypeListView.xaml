@@ -30,16 +30,14 @@
                     <RowDefinition Height = "Auto" />
                 </Grid.RowDefinitions>
 
-                <Label Content = "Available Items:"
+                <Label Content = "Selected Items:"
                        FontWeight = "Bold"
-                       FontSize="14"
-                       Grid.Row = "0" />
-                <ListView x:Name = "AvailableItemsListBox"
+                       FontSize = "14" />
+                <ListView x:Name = "SelectedItemsListBox"
                           Grid.Row = "1"
                           SelectionMode = "Extended"
-                          ItemsSource = "{Binding AvailableItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                          ItemsSource = "{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                           DisplayMemberPath = "Value" />
-
                 <!-- NEW: "Add New Item" section -->
                 <Grid Grid.Row = "2">
                     <Grid.ColumnDefinitions>
@@ -73,7 +71,7 @@
                 <styleClasses:BaseButton Margin = "0,5"
                                          Width = "30"
                                          Click = "AddButton_Click">
-                    <Image Source = "../../../Assets/Icons/20x20/ArrowRight20x20.png"
+                    <Image Source = "../../../Assets/Icons/20x20/ArrowLeft20x20.png"
                            Stretch = "UniformToFill" />
                 </styleClasses:BaseButton>
 
@@ -81,7 +79,7 @@
                                          Width = "30"
                                          Click = "RemoveButton_Click"
                                          ToolTip = "Remove selected item(s)">
-                    <Image Source = "../../../Assets/Icons/20x20/ArrowLeft20x20.png"
+                    <Image Source = "../../../Assets/Icons/20x20/ArrowRight20x20.png"
                            Stretch = "UniformToFill" />
                 </styleClasses:BaseButton>
             </StackPanel>
@@ -93,14 +91,16 @@
                     <RowDefinition Height = "*" />
                     <RowDefinition Height = "Auto" />
                 </Grid.RowDefinitions>
-                <Label Content = "Selected Items:"
+                <Label Content = "Available Items:"
                        FontWeight = "Bold"
-                       FontSize="14"/>
-                <ListView x:Name = "SelectedItemsListBox"
+                       FontSize = "14"
+                       Grid.Row = "0" />
+                <ListView x:Name = "AvailableItemsListBox"
                           Grid.Row = "1"
                           SelectionMode = "Extended"
-                          ItemsSource = "{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                          ItemsSource = "{Binding AvailableItems, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                           DisplayMemberPath = "Value" />
+
 
                 <StackPanel Grid.Row = "2"
                             Orientation = "Horizontal"
