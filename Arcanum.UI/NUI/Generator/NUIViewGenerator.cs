@@ -32,6 +32,8 @@ public static class NUIViewGenerator
 {
    private static int _index;
 
+   #region Public API
+
    /// <summary>
    /// Generates a view for the given <see cref="NUINavHistory"/> and sets it as the content of the root ContentPresenter.
    /// This method is a convenience wrapper around <see cref="GenerateView(NUINavHistory)"/> that directly updates the UI.
@@ -75,6 +77,10 @@ public static class NUIViewGenerator
       _index++;
       return baseUI;
    }
+
+   #endregion
+
+   #region View Generation (High-Level Builders)
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
@@ -258,171 +264,349 @@ public static class NUIViewGenerator
       return baseUI;
    }
 
-   private static Border EmbedMarker(Grid baseGrid)
+   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
+                                                    Type type,
+                                                    List<INUI> targets,
+                                                    Enum nxProp,
+                                                    int leftMargin = 0)
    {
-      var embedMarker = GetEmbedBorder();
-      embedMarker.BorderBrush = Brushes.Purple;
-      baseGrid.Children.Add(embedMarker);
-      Grid.SetRow(embedMarker, 0);
-      Grid.SetColumn(embedMarker, 0);
-      return embedMarker;
-   }
+      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
+      if (itemType == null)
+         return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
 
-   private static void CreateSimpleHeaderGrid(TextBlock headerBlock, BaseButton collapseButton, Grid baseGrid)
-   {
-      var simpleHeaderGrid = new Grid
+      object collectionObject = null!;
+      Nx.ForceGet(targets[0], nxProp, ref collectionObject);
+
+      // We need a modifiable list (IList) for the editor to work.
+      if (collectionObject is not IList modifiableList)
+         return GetTypeSpecificGrid(navHistory, targets.ToList(), nxProp, leftMargin);
+
+      var grid = new Grid
       {
          ColumnDefinitions =
          {
-            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
          },
+         Margin = new(leftMargin, 0, 0, 0),
       };
 
-      headerBlock.Margin = new(6, 0, 0, 0);
-      simpleHeaderGrid.Children.Add(headerBlock);
-      Grid.SetColumn(headerBlock, 0);
-
-      simpleHeaderGrid.Children.Add(collapseButton);
-      Grid.SetColumn(collapseButton, 1);
-
-      baseGrid.Children.Add(simpleHeaderGrid);
-      Grid.SetRow(simpleHeaderGrid, 0);
-      Grid.SetColumn(simpleHeaderGrid, 0);
-   }
-
-   private static void AddSpacerToGrid(Grid baseGrid, Enum[] embeddedFields, List<FrameworkElement> collapsibleElements)
-   {
-      var spacer = new Border { Height = 4 };
-      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
-      baseGrid.Children.Add(spacer);
-      Grid.SetRow(spacer, embeddedFields.Length + 1);
-      Grid.SetColumn(spacer, 0);
-      collapsibleElements.Add(spacer);
-   }
-
-   #region Empty Button
-
-   private static BaseButton GetSetEmptyButton(Type itemType,
-                                               Enum property,
-                                               INUI parent,
-                                               NUINavHistory navHistory,
-                                               object emptyInstance,
-                                               bool enabled)
-   {
-      var setEmptyButton = new BaseButton
+      if (targets.Count > 1)
       {
-         Width = 20,
-         Height = 20,
-         ToolTip =
-            enabled
-               ? $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'"
-               : $"{property} cannot be set to empty",
-         Content = new Image
+         var info = new TextBlock
          {
-            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
-            Stretch = Stretch.UniformToFill,
-         },
-         BorderThickness = new(1),
-         Margin = new(1, 1, -1, 1),
-         Background = enabled ? Brushes.Transparent : (Brush)Application.Current.FindResource("DimErrorRedColorBrush")!,
+            Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
+            FontStyle = FontStyles.Italic,
+            Margin = new(leftMargin, 4, 0, 4)
+         };
+         grid.Children.Add(info);
+         return grid;
+      }
+
+      // if we have an abstract class or interface as item type, try to find the concrete type
+      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
+      if (concreteItemType != null)
+         itemType = concreteItemType;
+
+      var inuiItems = modifiableList.OfType<INUI>().ToList();
+
+      var navHeader = new TextBlock
+      {
+         Text = $"{nxProp}: {modifiableList.Count} Items",
+         FontWeight = FontWeights.Bold,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontSize = 14,
       };
 
-      if (enabled)
-         setEmptyButton.Click += (_, _) =>
+      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
+      GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
+      var openButton = GetEyeButton();
+      openButton.Margin = new(4, 0, 0, 0);
+
+      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
+      SetupCollectionEditorButton(navHistory,
+                                  nxProp,
+                                  providerInterfaceType,
+                                  itemType,
+                                  modifiableList,
+                                  navHeader,
+                                  grid,
+                                  openButton);
+
+      var inferActions = GenerateInferActions(targets[0],
+                                              navHistory,
+                                              nxProp,
+                                              type,
+                                              concreteItemType,
+                                              modifiableList);
+
+      var headerStack = new StackPanel
+      {
+         Orientation = Orientation.Horizontal,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+      headerStack.Children.Add(navHeader);
+      headerStack.Children.Add(openButton);
+      FrameworkElement header;
+
+      if (inferActions != null)
+      {
+         var headerGrid = new Grid
          {
-            Nx.ForceSet(emptyInstance, parent, property);
-            GenerateAndSetView(navHistory);
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            ColumnDefinitions =
+            {
+               new() { Width = new(7, GridUnitType.Star) }, new() { Width = new(3, GridUnitType.Star) },
+            },
          };
 
-      return setEmptyButton;
+         headerGrid.Children.Add(headerStack);
+         Grid.SetRow(headerStack, 0);
+         Grid.SetColumn(headerStack, 0);
+
+         headerGrid.Children.Add(inferActions);
+         Grid.SetRow(inferActions, 0);
+         Grid.SetColumn(inferActions, 1);
+         header = headerGrid;
+      }
+      else
+      {
+         header = headerStack;
+      }
+
+      grid.Children.Add(header);
+      Grid.SetRow(header, 0);
+      Grid.SetColumn(header, 0);
+      Grid.SetColumnSpan(header, 2);
+
+      // --- Decorative Border ---
+      if (grid.RowDefinitions.Count > 1)
+      {
+         var rect = new Rectangle
+         {
+            Width = 1,
+            Fill = Brushes.Transparent,
+            Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+            StrokeThickness = 2,
+            StrokeDashArray = new([4, 6]),
+            StrokeDashCap = PenLineCap.Flat,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            SnapsToDevicePixels = true,
+         };
+         grid.Children.Add(rect);
+         Grid.SetRow(rect, 1);
+         Grid.SetColumn(rect, 0);
+         Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
+      }
+
+      return grid;
    }
 
-   /// <summary>
-   /// Tries to get the static 'Empty' instance from any Type using reflection.
-   /// </summary>
-   /// <param name="type">The Type object to inspect.</param>
-   /// <param name="emptyInstance">When this method returns true, contains the 'Empty' instance as an object.</param>
-   /// <returns>True if the type has a public static property named 'Empty'; otherwise, false.</returns>
-   private static bool TryGetEmpty(Type type, [MaybeNullWhen(false)] out object emptyInstance)
+   private static Grid GetTypeSpecificGrid(NUINavHistory navh,
+                                           List<INUI> targets,
+                                           Enum nxProp,
+                                           int leftMargin = 0)
    {
-      var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
+      var target = targets[0];
+      var type = Nx.TypeOf(target, nxProp);
 
-      if (emptyProperty != null)
-         try
-         {
-            emptyInstance = emptyProperty.GetValue(null);
-            return emptyInstance != null;
-         }
-         catch
-         {
-            emptyInstance = null;
-            return false;
-         }
+      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp);
 
-      emptyInstance = null;
-      return false;
+      var binding = new Binding(nameof(propertyViewModel.Value))
+      {
+         Source = propertyViewModel,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+      };
+
+      Control element;
+
+      if (type == typeof(float))
+         element = GetFloatUI(binding);
+      else if (type == typeof(string))
+         element = GetStringUI(binding);
+      else if (type == typeof(bool))
+         element = GetBoolUI(binding);
+      else if (type.IsEnum)
+         element = GetEnumUI(type, binding);
+      else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
+         element = GetIntUI(binding);
+      else if (type == typeof(double) || type == typeof(decimal))
+         element = GetDoubleUI(binding);
+      else
+         throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+
+      element.IsEnabled = !target.IsReadonly;
+      element.VerticalAlignment = VerticalAlignment.Stretch;
+
+      var desc = DescriptorBlock(nxProp);
+      desc.Margin = new(leftMargin, 0, 0, 0);
+
+      var inferActions = GenerateInferActions(target,
+                                              navh,
+                                              nxProp,
+                                              type,
+                                              null,
+                                              null);
+
+      var line = new Rectangle
+      {
+         Height = 1,
+         Fill = Brushes.Transparent,
+         Stroke = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+         StrokeThickness = 1,
+         StrokeDashArray = new([4, 6]),
+         StrokeDashCap = PenLineCap.Flat,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Bottom,
+         SnapsToDevicePixels = true,
+         Margin = new(leftMargin, 0, 5, 3),
+      };
+      RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
+
+      var grid = new Grid
+      {
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Top,
+         RowDefinitions = { new() { Height = new(25, GridUnitType.Pixel) } },
+         ColumnDefinitions =
+         {
+            new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(6, GridUnitType.Star) },
+         },
+      };
+
+      grid.Children.Add(desc);
+      Grid.SetRow(desc, 0);
+      Grid.SetColumn(desc, 0);
+
+      grid.Children.Add(line);
+      Grid.SetRow(line, 0);
+      Grid.SetColumn(line, 0);
+
+      grid.Children.Add(element);
+      Grid.SetRow(element, 0);
+      Grid.SetColumn(element, 1);
+
+      if (inferActions != null)
+      {
+         grid.Children.Add(inferActions);
+         Grid.SetRow(inferActions, 0);
+         Grid.SetColumn(inferActions, 0);
+      }
+
+      return grid;
    }
 
    #endregion
 
-   private static void GenerateEmbeddedViewElements<T>(T target,
-                                                       NUINavHistory navHistory,
-                                                       Enum[] embeddedFields,
-                                                       Grid baseGrid,
-                                                       Visibility initialVisibility,
-                                                       List<FrameworkElement> collapsibleElements) where T : INUI
+   #region UI Element Generation (Low-Level Controls)
+
+   private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
+   private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
+   private static readonly EnumConverter EnumConverter = new();
+
+   private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
-      for (var i = 0; i < embeddedFields.Length; i++)
+      FloatNumericUpDown numericUpDown = new()
       {
-         var nxProp = embeddedFields[i];
-         FrameworkElement element;
-         var type = Nx.TypeOf(target, nxProp);
-         if (typeof(INUI).IsAssignableFrom(type))
-         {
-            INUI value = null!;
-            Nx.ForceGet(target, nxProp, ref value);
-            if (value == null!)
-               continue;
-
-            element = GenerateShortInfo(value, navHistory);
-         }
-         else
-         {
-            element = BuildCollectionOrDefaultView(navHistory, type, [target], nxProp, 6);
-         }
-
-         baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
-         baseGrid.Children.Add(element);
-         Grid.SetRow(element, i + 1);
-         Grid.SetColumn(element, 0);
-
-         element.Visibility = initialVisibility;
-         collapsibleElements.Add(element);
-      }
-   }
-
-   private static RoutedEventHandler CollapseButtonOnClick(bool startExpanded,
-                                                           List<FrameworkElement> collapsibleElements,
-                                                           BaseButton collapseButton,
-                                                           Border embedMarker,
-                                                           Grid baseGrid)
-   {
-      return (_, _) =>
-      {
-         startExpanded = !startExpanded;
-         var newVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
-
-         foreach (var elem in collapsibleElements)
-            elem.Visibility = newVisibility;
-
-         var path = (Path)collapseButton.Content;
-         var transform = (RotateTransform)path.LayoutTransform;
-         var duration = new Duration(TimeSpan.FromMilliseconds(200));
-         var rotationAnimation = new DoubleAnimation(startExpanded ? 180 : 0, duration);
-         Grid.SetRowSpan(embedMarker, startExpanded ? baseGrid.RowDefinitions.Count : 1);
-         transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation);
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = float.MinValue,
+         MaxValue = float.MaxValue,
+         StepSize = 0.1f,
       };
+      numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
    }
+
+   private static CorneredTextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      var textBox = new CorneredTextBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         BorderThickness = new(1, 1, 1, 1),
+      };
+      textBox.SetBinding(TextBox.TextProperty, binding);
+      return textBox;
+   }
+
+   private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      binding.Converter = MultiSelectBoolConverter;
+      var checkBox = new CheckBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         VerticalAlignment = VerticalAlignment.Center,
+         IsThreeState = true,
+      };
+      checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
+      return checkBox;
+   }
+
+   private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
+   {
+      binding.Converter = EnumConverter;
+
+      var comboBox = new AutoCompleteComboBox
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         BorderThickness = new(1),
+         FullItemsSource = Enum.GetValues(enumType),
+         IsDropdownOnly = true,
+         IsReadOnly = true,
+      };
+      comboBox.SetBinding(Selector.SelectedItemProperty, binding);
+      return comboBox;
+   }
+
+   private static BaseNumericUpDown GetIntUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      BaseNumericUpDown numericUpDown = new()
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1, 1, 1, 1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = int.MinValue,
+         MaxValue = int.MaxValue,
+      };
+      numericUpDown.SetBinding(BaseNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
+   }
+
+   private static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
+   {
+      binding.Converter = DoubleToDecimalConverter;
+      DecimalBaseNumericUpDown numericUpDown = new()
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+         InnerBorderThickness = new(1, 1, 1, 1),
+         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         MinValue = decimal.MinValue,
+         MaxValue = decimal.MaxValue,
+         StepSize = new(0.1),
+      };
+      numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
+      return numericUpDown;
+   }
+
+   #endregion
+
+   #region UI Component Helpers
 
    private static StackPanel GenerateShortInfo<T>(T value, NUINavHistory navh) where T : INUI
    {
@@ -475,9 +659,172 @@ public static class NUIViewGenerator
       return stackPanel;
    }
 
-   // #########################################################
-   // ###################### Helpers ##########################
-   // #########################################################
+   private static TextBlock NavigationHeader<T>(NUINavHistory navh,
+                                                T value,
+                                                string text = null!,
+                                                int fontSize = 16,
+                                                FontWeight? fontWeight = null) where T : INUI
+   {
+      var height = fontSize + 4;
+      var header = new TextBlock
+      {
+         Background = Brushes.Transparent,
+         VerticalAlignment = VerticalAlignment.Center,
+         FontWeight = fontWeight ?? FontWeights.Bold,
+         Margin = new(4, 0, 0, 0),
+         FontSize = fontSize,
+         Height = height,
+         Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
+      };
+
+      if (navh.Targets.Count > 1)
+         header.Text = $"{navh.Targets.Count} {value.GetType().Name}s Selected";
+      else
+         header.Text =
+            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.";
+
+      if (string.IsNullOrWhiteSpace(text))
+      {
+         object headerValue = null!;
+         Nx.ForceGet(value, value.Settings.Title, ref headerValue);
+         text = GetFormattedDisplayString(headerValue, value, value.Settings.Title);
+      }
+
+      header.Text = text;
+
+      MouseButtonEventHandler clickHandler = (sender, e) =>
+      {
+         var root = navh.Root;
+         if (e.ChangedButton == MouseButton.Right)
+         {
+            var navigations = navh.GetNavigations();
+            if (navigations.Length == 0)
+            {
+               e.Handled = true;
+               return;
+            }
+
+            var contextMenu = GetContextMenu(navigations, root);
+            contextMenu.PlacementTarget = sender as UIElement ?? header;
+            contextMenu.IsOpen = true;
+            e.Handled = true;
+         }
+         else if (e.ChangedButton == MouseButton.Left)
+            root.Content = GenerateView(new(value, true, root));
+      };
+      header.MouseUp += clickHandler;
+      header.Unloaded += (_, _) => { header.MouseUp -= clickHandler; };
+      header.Cursor = Cursors.Hand;
+
+      return header;
+   }
+
+   private static TextBlock DescriptorBlock(Enum nxProp)
+   {
+      var textBlock = new TextBlock { Text = $"{nxProp}: ", VerticalAlignment = VerticalAlignment.Center };
+      return textBlock;
+   }
+
+   private static BaseButton GetEyeButton()
+   {
+      return new()
+      {
+         Margin = new(2),
+         Height = 20,
+         Width = 20,
+         HorizontalAlignment = HorizontalAlignment.Left,
+         BorderThickness = new(1),
+         Content = new Image
+         {
+            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
+            Stretch = Stretch.UniformToFill,
+         },
+      };
+   }
+
+   private static BaseButton GetCollapseButton(bool isExpanded)
+   {
+      const string arrowPathData = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z";
+      var path = new Path
+      {
+         Data = Geometry.Parse(arrowPathData),
+         Fill = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
+         Stretch = Stretch.None,
+         HorizontalAlignment = HorizontalAlignment.Center,
+         VerticalAlignment = VerticalAlignment.Center,
+         LayoutTransform = new RotateTransform
+         {
+            Angle = isExpanded ? 180 : 0,
+            CenterX = 4,
+            CenterY = 3,
+         },
+      };
+
+      return new()
+      {
+         Content = path,
+         ToolTip = "Collapse/Expand",
+         Margin = new(4, 0, 2, 0),
+         Width = 20,
+         Height = 20,
+         BorderThickness = new(1),
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+   }
+
+   private static BaseButton GetSetEmptyButton(Type itemType,
+                                               Enum property,
+                                               INUI parent,
+                                               NUINavHistory navHistory,
+                                               object emptyInstance,
+                                               bool enabled)
+   {
+      var setEmptyButton = new BaseButton
+      {
+         Width = 20,
+         Height = 20,
+         ToolTip =
+            enabled
+               ? $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'"
+               : $"{property} cannot be set to empty",
+         Content = new Image
+         {
+            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
+            Stretch = Stretch.UniformToFill,
+         },
+         BorderThickness = new(1),
+         Margin = new(1, 1, -1, 1),
+         Background = enabled ? Brushes.Transparent : (Brush)Application.Current.FindResource("DimErrorRedColorBrush")!,
+      };
+
+      if (enabled)
+         setEmptyButton.Click += (_, _) =>
+         {
+            Nx.ForceSet(emptyInstance, parent, property);
+            GenerateAndSetView(navHistory);
+         };
+
+      return setEmptyButton;
+   }
+
+   private static Border GetEmbedBorder()
+   {
+      return new()
+      {
+         Name = "EmbedMarker",
+         Background = Brushes.Transparent,
+         BorderBrush = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+         BorderThickness = new(1, 1, 0, 1),
+         CornerRadius = new(3, 0, 0, 3),
+         Margin = new(0, 0, 2, 0),
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         IsHitTestVisible = false,
+      };
+   }
+
+   #endregion
+
+   #region Feature-Specific Logic (e.g., Infer Actions, Collections)
 
    /// <summary>
    /// Dynamically generates a StackPanel with map inference action buttons if the property's
@@ -646,146 +993,6 @@ public static class NUIViewGenerator
       return actionsPanel;
    }
 
-   private static Grid BuildCollectionOrDefaultView(NUINavHistory navHistory,
-                                                    Type type,
-                                                    List<INUI> targets,
-                                                    Enum nxProp,
-                                                    int leftMargin = 0)
-   {
-      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
-      if (itemType == null)
-         return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
-
-      object collectionObject = null!;
-      Nx.ForceGet(targets[0], nxProp, ref collectionObject);
-
-      // We need a modifiable list (IList) for the editor to work.
-      if (collectionObject is not IList modifiableList)
-         return GetTypeSpecificGrid(navHistory, targets.ToList(), nxProp, leftMargin);
-
-      var grid = new Grid
-      {
-         ColumnDefinitions =
-         {
-            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
-         },
-         Margin = new(leftMargin, 0, 0, 0),
-      };
-
-      if (targets.Count > 1)
-      {
-         var info = new TextBlock
-         {
-            Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
-            FontStyle = FontStyles.Italic,
-            Margin = new(leftMargin, 4, 0, 4)
-         };
-         grid.Children.Add(info);
-         return grid;
-      }
-
-      // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
-      if (concreteItemType != null)
-         itemType = concreteItemType;
-
-      var inuiItems = modifiableList.OfType<INUI>().ToList();
-
-      var navHeader = new TextBlock
-      {
-         Text = $"{nxProp}: {modifiableList.Count} Items",
-         FontWeight = FontWeights.Bold,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = 14,
-      };
-
-      grid.RowDefinitions.Add(new() { Height = new(25, GridUnitType.Pixel) });
-      GenerateCollectionItemPreview(navHistory, inuiItems, grid, modifiableList);
-      var openButton = GetEyeButton();
-      openButton.Margin = new(4, 0, 0, 0);
-
-      var providerInterfaceType = typeof(ICollectionProvider<>).MakeGenericType(itemType);
-      SetupCollectionEditorButton(navHistory,
-                                  nxProp,
-                                  providerInterfaceType,
-                                  itemType,
-                                  modifiableList,
-                                  navHeader,
-                                  grid,
-                                  openButton);
-
-      var inferActions = GenerateInferActions(targets[0],
-                                              navHistory,
-                                              nxProp,
-                                              type,
-                                              concreteItemType,
-                                              modifiableList);
-
-      var headerStack = new StackPanel
-      {
-         Orientation = Orientation.Horizontal,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Center,
-      };
-      headerStack.Children.Add(navHeader);
-      headerStack.Children.Add(openButton);
-      FrameworkElement header;
-
-      if (inferActions != null)
-      {
-         var headerGrid = new Grid
-         {
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
-            ColumnDefinitions =
-            {
-               new() { Width = new(7, GridUnitType.Star) }, new() { Width = new(3, GridUnitType.Star) },
-            },
-         };
-
-         headerGrid.Children.Add(headerStack);
-         Grid.SetRow(headerStack, 0);
-         Grid.SetColumn(headerStack, 0);
-
-         headerGrid.Children.Add(inferActions);
-         Grid.SetRow(inferActions, 0);
-         Grid.SetColumn(inferActions, 1);
-         header = headerGrid;
-      }
-      else
-      {
-         header = headerStack;
-      }
-
-      grid.Children.Add(header);
-      Grid.SetRow(header, 0);
-      Grid.SetColumn(header, 0);
-      Grid.SetColumnSpan(header, 2);
-
-      // --- Decorative Border ---
-      if (grid.RowDefinitions.Count > 1)
-      {
-         var rect = new Rectangle
-         {
-            Width = 1,
-            Fill = Brushes.Transparent,
-            Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-            StrokeThickness = 2,
-            StrokeDashArray = new([4, 6]),
-            StrokeDashCap = PenLineCap.Flat,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            SnapsToDevicePixels = true,
-         };
-         grid.Children.Add(rect);
-         Grid.SetRow(rect, 1);
-         Grid.SetColumn(rect, 0);
-         Grid.SetRowSpan(rect, grid.RowDefinitions.Count - 1);
-      }
-
-      return grid;
-   }
-
    private static void SetupCollectionEditorButton(NUINavHistory navHistory,
                                                    Enum nxProp,
                                                    Type providerInterfaceType,
@@ -827,165 +1034,178 @@ public static class NUIViewGenerator
       }
    }
 
-   private static Grid GetTypeSpecificGrid(NUINavHistory navh,
-                                           List<INUI> targets,
-                                           Enum nxProp,
-                                           int leftMargin = 0)
+   private static void GenerateCollectionItemPreview(NUINavHistory navHistory,
+                                                     IEnumerable<INUI> inuiItems,
+                                                     Grid grid,
+                                                     IList modifiableList)
    {
-      var target = targets[0];
-      var type = Nx.TypeOf(target, nxProp);
-
-      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp);
-
-      var binding = new Binding(nameof(propertyViewModel.Value))
+      for (var i = grid.Children.Count - 1; i >= 0; i--)
       {
-         Source = propertyViewModel,
-         Mode = BindingMode.TwoWay,
-         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+         var child = grid.Children[i];
+         if (Grid.GetRow(child) > 0 &&
+             child.GetType() != typeof(Rectangle)) // Only remove children that are not in the header row
+            grid.Children.RemoveAt(i);
+      }
+
+      // Clear all row definitions except the one for the header
+      while (grid.RowDefinitions.Count > 1)
+         grid.RowDefinitions.RemoveAt(1);
+
+      foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
+      {
+         var shortInfo = GenerateShortInfo(item, navHistory);
+         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
+         grid.Children.Add(shortInfo);
+         Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
+         Grid.SetColumn(shortInfo, 0);
+         Grid.SetColumnSpan(shortInfo, 2);
+      }
+
+      if (modifiableList.Count > Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
+      {
+         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
+         grid.Children.Add(new TextBlock
+         {
+            Text = $"... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more items",
+            FontStyle = FontStyles.Italic,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new(6, 0, 0, 0),
+         });
+         Grid.SetRow(grid.Children[^1], grid.RowDefinitions.Count - 1);
+         Grid.SetColumn(grid.Children[^1], 0);
+         Grid.SetColumnSpan(grid.Children[^1], 2);
+      }
+   }
+
+   private static RoutedEventHandler CollapseButtonOnClick(bool startExpanded,
+                                                           List<FrameworkElement> collapsibleElements,
+                                                           BaseButton collapseButton,
+                                                           Border embedMarker,
+                                                           Grid baseGrid)
+   {
+      return (_, _) =>
+      {
+         startExpanded = !startExpanded;
+         var newVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
+
+         foreach (var elem in collapsibleElements)
+            elem.Visibility = newVisibility;
+
+         var path = (Path)collapseButton.Content;
+         var transform = (RotateTransform)path.LayoutTransform;
+         var duration = new Duration(TimeSpan.FromMilliseconds(200));
+         var rotationAnimation = new DoubleAnimation(startExpanded ? 180 : 0, duration);
+         Grid.SetRowSpan(embedMarker, startExpanded ? baseGrid.RowDefinitions.Count : 1);
+         transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation);
       };
+   }
 
-      Control element;
+   #endregion
 
-      if (type == typeof(float))
-         element = GetFloatUI(binding);
-      else if (type == typeof(string))
-         element = GetStringUI(binding);
-      else if (type == typeof(bool))
-         element = GetBoolUI(binding);
-      else if (type.IsEnum)
-         element = GetEnumUI(type, binding);
-      else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
-         element = GetIntUI(binding);
-      else if (type == typeof(double) || type == typeof(decimal))
-         element = GetDoubleUI(binding);
-      else
-         throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+   private static Border EmbedMarker(Grid baseGrid)
+   {
+      var embedMarker = GetEmbedBorder();
+      embedMarker.BorderBrush = Brushes.Purple;
+      baseGrid.Children.Add(embedMarker);
+      Grid.SetRow(embedMarker, 0);
+      Grid.SetColumn(embedMarker, 0);
+      return embedMarker;
+   }
 
-      element.IsEnabled = !target.IsReadonly;
-      element.VerticalAlignment = VerticalAlignment.Stretch;
-
-      var desc = DescriptorBlock(nxProp);
-      desc.Margin = new(leftMargin, 0, 0, 0);
-
-      var inferActions = GenerateInferActions(target,
-                                              navh,
-                                              nxProp,
-                                              type,
-                                              null,
-                                              null);
-
-      var line = new Rectangle
+   private static void CreateSimpleHeaderGrid(TextBlock headerBlock, BaseButton collapseButton, Grid baseGrid)
+   {
+      var simpleHeaderGrid = new Grid
       {
-         Height = 1,
-         Fill = Brushes.Transparent,
-         Stroke = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
-         StrokeThickness = 1,
-         StrokeDashArray = new([4, 6]),
-         StrokeDashCap = PenLineCap.Flat,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Bottom,
-         SnapsToDevicePixels = true,
-         Margin = new(leftMargin, 0, 5, 3),
-      };
-      RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
-
-      var grid = new Grid
-      {
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Top,
-         RowDefinitions = { new() { Height = new(25, GridUnitType.Pixel) } },
          ColumnDefinitions =
          {
-            new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(6, GridUnitType.Star) },
+            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
          },
       };
 
-      grid.Children.Add(desc);
-      Grid.SetRow(desc, 0);
-      Grid.SetColumn(desc, 0);
+      headerBlock.Margin = new(6, 0, 0, 0);
+      simpleHeaderGrid.Children.Add(headerBlock);
+      Grid.SetColumn(headerBlock, 0);
 
-      grid.Children.Add(line);
-      Grid.SetRow(line, 0);
-      Grid.SetColumn(line, 0);
+      simpleHeaderGrid.Children.Add(collapseButton);
+      Grid.SetColumn(collapseButton, 1);
 
-      grid.Children.Add(element);
-      Grid.SetRow(element, 0);
-      Grid.SetColumn(element, 1);
-
-      if (inferActions != null)
-      {
-         grid.Children.Add(inferActions);
-         Grid.SetRow(inferActions, 0);
-         Grid.SetColumn(inferActions, 0);
-      }
-
-      return grid;
+      baseGrid.Children.Add(simpleHeaderGrid);
+      Grid.SetRow(simpleHeaderGrid, 0);
+      Grid.SetColumn(simpleHeaderGrid, 0);
    }
 
-   private static TextBlock DescriptorBlock(Enum nxProp)
+   private static void AddSpacerToGrid(Grid baseGrid, Enum[] embeddedFields, List<FrameworkElement> collapsibleElements)
    {
-      var textBlock = new TextBlock { Text = $"{nxProp}: ", VerticalAlignment = VerticalAlignment.Center };
-      return textBlock;
+      var spacer = new Border { Height = 4 };
+      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
+      baseGrid.Children.Add(spacer);
+      Grid.SetRow(spacer, embeddedFields.Length + 1);
+      Grid.SetColumn(spacer, 0);
+      collapsibleElements.Add(spacer);
    }
 
-   private static TextBlock NavigationHeader<T>(NUINavHistory navh,
-                                                T value,
-                                                string text = null!,
-                                                int fontSize = 16,
-                                                FontWeight? fontWeight = null) where T : INUI
+   #region Reflection & Type Helpers
+
+   /// <summary>
+   /// Tries to get the static 'Empty' instance from any Type using reflection.
+   /// </summary>
+   /// <param name="type">The Type object to inspect.</param>
+   /// <param name="emptyInstance">When this method returns true, contains the 'Empty' instance as an object.</param>
+   /// <returns>True if the type has a public static property named 'Empty'; otherwise, false.</returns>
+   private static bool TryGetEmpty(Type type, [MaybeNullWhen(false)] out object emptyInstance)
    {
-      var height = fontSize + 4;
-      var header = new TextBlock
-      {
-         Background = Brushes.Transparent,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontWeight = fontWeight ?? FontWeights.Bold,
-         Margin = new(4, 0, 0, 0),
-         FontSize = fontSize,
-         Height = height,
-         Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
-      };
+      var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
 
-      if (navh.Targets.Count > 1)
-         header.Text = $"{navh.Targets.Count} {value.GetType().Name}s Selected";
-      else
-         header.Text =
-            $"Left-Click to navigate to this object '{value.ToString()}' ({value.GetType().Name})\nRight-click for navigation options.";
-
-      if (string.IsNullOrWhiteSpace(text))
-      {
-         object headerValue = null!;
-         Nx.ForceGet(value, value.Settings.Title, ref headerValue);
-         text = GetFormattedDisplayString(headerValue, value, value.Settings.Title);
-      }
-
-      header.Text = text;
-
-      MouseButtonEventHandler clickHandler = (sender, e) =>
-      {
-         var root = navh.Root;
-         if (e.ChangedButton == MouseButton.Right)
+      if (emptyProperty != null)
+         try
          {
-            var navigations = navh.GetNavigations();
-            if (navigations.Length == 0)
-            {
-               e.Handled = true;
-               return;
-            }
-
-            var contextMenu = GetContextMenu(navigations, root);
-            contextMenu.PlacementTarget = sender as UIElement ?? header;
-            contextMenu.IsOpen = true;
-            e.Handled = true;
+            emptyInstance = emptyProperty.GetValue(null);
+            return emptyInstance != null;
          }
-         else if (e.ChangedButton == MouseButton.Left)
-            root.Content = GenerateView(new(value, true, root));
-      };
-      header.MouseUp += clickHandler;
-      header.Unloaded += (_, _) => { header.MouseUp -= clickHandler; };
-      header.Cursor = Cursors.Hand;
+         catch
+         {
+            emptyInstance = null;
+            return false;
+         }
 
-      return header;
+      emptyInstance = null;
+      return false;
+   }
+
+   private static void GenerateEmbeddedViewElements<T>(T target,
+                                                       NUINavHistory navHistory,
+                                                       Enum[] embeddedFields,
+                                                       Grid baseGrid,
+                                                       Visibility initialVisibility,
+                                                       List<FrameworkElement> collapsibleElements) where T : INUI
+   {
+      for (var i = 0; i < embeddedFields.Length; i++)
+      {
+         var nxProp = embeddedFields[i];
+         FrameworkElement element;
+         var type = Nx.TypeOf(target, nxProp);
+         if (typeof(INUI).IsAssignableFrom(type))
+         {
+            INUI value = null!;
+            Nx.ForceGet(target, nxProp, ref value);
+            if (value == null!)
+               continue;
+
+            element = GenerateShortInfo(value, navHistory);
+         }
+         else
+         {
+            element = BuildCollectionOrDefaultView(navHistory, type, [target], nxProp, 6);
+         }
+
+         baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
+         baseGrid.Children.Add(element);
+         Grid.SetRow(element, i + 1);
+         Grid.SetColumn(element, 0);
+
+         element.Visibility = initialVisibility;
+         collapsibleElements.Add(element);
+      }
    }
 
    /// <summary>
@@ -1101,111 +1321,6 @@ public static class NUIViewGenerator
       return null;
    }
 
-   private static BaseButton GetEyeButton()
-   {
-      return new()
-      {
-         Margin = new(2),
-         Height = 20,
-         Width = 20,
-         HorizontalAlignment = HorizontalAlignment.Left,
-         BorderThickness = new(1),
-         Content = new Image
-         {
-            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
-            Stretch = Stretch.UniformToFill,
-         },
-      };
-   }
-
-   private static BaseButton GetCollapseButton(bool isExpanded)
-   {
-      const string arrowPathData = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z";
-      var path = new Path
-      {
-         Data = Geometry.Parse(arrowPathData),
-         Fill = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
-         Stretch = Stretch.None,
-         HorizontalAlignment = HorizontalAlignment.Center,
-         VerticalAlignment = VerticalAlignment.Center,
-         LayoutTransform = new RotateTransform
-         {
-            Angle = isExpanded ? 180 : 0,
-            CenterX = 4,
-            CenterY = 3,
-         },
-      };
-
-      return new()
-      {
-         Content = path,
-         ToolTip = "Collapse/Expand",
-         Margin = new(4, 0, 2, 0),
-         Width = 20,
-         Height = 20,
-         BorderThickness = new(1),
-         VerticalAlignment = VerticalAlignment.Center,
-      };
-   }
-
-   private static void GenerateCollectionItemPreview(NUINavHistory navHistory,
-                                                     IEnumerable<INUI> inuiItems,
-                                                     Grid grid,
-                                                     IList modifiableList)
-   {
-      for (var i = grid.Children.Count - 1; i >= 0; i--)
-      {
-         var child = grid.Children[i];
-         if (Grid.GetRow(child) > 0 &&
-             child.GetType() != typeof(Rectangle)) // Only remove children that are not in the header row
-            grid.Children.RemoveAt(i);
-      }
-
-      // Clear all row definitions except the one for the header
-      while (grid.RowDefinitions.Count > 1)
-         grid.RowDefinitions.RemoveAt(1);
-
-      foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
-      {
-         var shortInfo = GenerateShortInfo(item, navHistory);
-         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
-         grid.Children.Add(shortInfo);
-         Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);
-         Grid.SetColumn(shortInfo, 0);
-         Grid.SetColumnSpan(shortInfo, 2);
-      }
-
-      if (modifiableList.Count > Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
-      {
-         grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
-         grid.Children.Add(new TextBlock
-         {
-            Text = $"... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more items",
-            FontStyle = FontStyles.Italic,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new(6, 0, 0, 0),
-         });
-         Grid.SetRow(grid.Children[^1], grid.RowDefinitions.Count - 1);
-         Grid.SetColumn(grid.Children[^1], 0);
-         Grid.SetColumnSpan(grid.Children[^1], 2);
-      }
-   }
-
-   private static Border GetEmbedBorder()
-   {
-      return new()
-      {
-         Name = "EmbedMarker",
-         Background = Brushes.Transparent,
-         BorderBrush = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
-         BorderThickness = new(1, 1, 0, 1),
-         CornerRadius = new(3, 0, 0, 3),
-         Margin = new(0, 0, 2, 0),
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         IsHitTestVisible = false,
-      };
-   }
-
    /// <summary>
    /// Formats the display string for a property value based on any <see cref="ToStringArgumentsAttribute"/>
    /// applied to the corresponding property in the INUI target. If no such attribute exists,
@@ -1266,109 +1381,6 @@ public static class NUIViewGenerator
          return obj.ToString() ?? string.Empty;
 
       return $"<{type.Name}>";
-   }
-
-   #region Contorl Generators
-
-   private static readonly MultiSelectBooleanConverter MultiSelectBoolConverter = new();
-   private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
-   private static readonly EnumConverter EnumConverter = new();
-
-   private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
-   {
-      FloatNumericUpDown numericUpDown = new()
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         InnerBorderThickness = new(1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-         MinValue = float.MinValue,
-         MaxValue = float.MaxValue,
-         StepSize = 0.1f,
-      };
-      numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
-      return numericUpDown;
-   }
-
-   private static CorneredTextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
-   {
-      var textBox = new CorneredTextBox
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         BorderThickness = new(1, 1, 1, 1),
-      };
-      textBox.SetBinding(TextBox.TextProperty, binding);
-      return textBox;
-   }
-
-   private static CheckBox GetBoolUI(Binding binding, int height = 23, int fontSize = 12)
-   {
-      binding.Converter = MultiSelectBoolConverter;
-      var checkBox = new CheckBox
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         VerticalAlignment = VerticalAlignment.Center,
-         IsThreeState = true,
-      };
-      checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
-      return checkBox;
-   }
-
-   private static AutoCompleteComboBox GetEnumUI(Type enumType, Binding binding, int height = 23, int fontSize = 12)
-   {
-      binding.Converter = EnumConverter;
-
-      var comboBox = new AutoCompleteComboBox
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         BorderThickness = new(1),
-         FullItemsSource = Enum.GetValues(enumType),
-         IsDropdownOnly = true,
-         IsReadOnly = true,
-      };
-      comboBox.SetBinding(Selector.SelectedItemProperty, binding);
-      return comboBox;
-   }
-
-   private static BaseNumericUpDown GetIntUI(Binding binding, int height = 23, int fontSize = 12)
-   {
-      BaseNumericUpDown numericUpDown = new()
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         InnerBorderThickness = new(1, 1, 1, 1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-         MinValue = int.MinValue,
-         MaxValue = int.MaxValue,
-      };
-      numericUpDown.SetBinding(BaseNumericUpDown.ValueProperty, binding);
-      return numericUpDown;
-   }
-
-   private static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
-   {
-      binding.Converter = DoubleToDecimalConverter;
-      DecimalBaseNumericUpDown numericUpDown = new()
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         InnerBorderThickness = new(1, 1, 1, 1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-         MinValue = decimal.MinValue,
-         MaxValue = decimal.MaxValue,
-         StepSize = new(0.1),
-      };
-      numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
-      return numericUpDown;
    }
 
    #endregion
