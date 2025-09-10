@@ -102,20 +102,18 @@ public unsafe class MapTracing
             if (lastNode != null)
             {
                 node = new(
-                    new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
+                    [new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateRight()), x, y);
-                node.Visited3 = true;
-                lastNode.CachedSegment3.Node = node;
-                lastNode.CachedSegment3.Segment = new(currentSegment, true);
+                    new CacheNodeInfo(null, null, d.RotateRight(), visited:true)], x, y);
+                lastNode.Segments[2].Node = node;
+                lastNode.Segments[2].Segment = new(currentSegment, true);
             }
             else
             {
-                node = new(
+                node = new([
                     new CacheNodeInfo(null, null, d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateRight()), x, y);
-                node.Visited3 = true;
+                    new CacheNodeInfo(null, null, d.RotateRight())], x, y);
                 firstNode = node;
             }
 
@@ -187,10 +185,10 @@ public unsafe class MapTracing
                 "No nodes were on the border of the image. We currently do not support maps without nodes on the border.");
         }
 
-        lastNode.CachedSegment3.Node = firstNode;
-        lastNode.CachedSegment3.Segment = new(currentSegment, true);
-        firstNode!.CachedSegment1.Node = lastNode;
-        firstNode.CachedSegment1.Segment = new(currentSegment, false);
+        lastNode.Segments[2].Node = firstNode;
+        lastNode.Segments[2].Segment = new(currentSegment, true);
+        firstNode!.Segments[0].Node = lastNode;
+        firstNode.Segments[0].Segment = new(currentSegment, false);
 #if ENABLE_VISUAL_TRACING
         // Draw the complete path of the segment that just ended.
         for (var i = 0; i < currentSegment.Points.Count - 1; i++)
@@ -397,7 +395,7 @@ public unsafe class MapTracing
                     var cache1 = new CacheNodeInfo(startNode, new BorderSegmentDirectional(segment, false), dir1);
                     var cache2 = new CacheNodeInfo(null, null, dir2);
                     var cache3 = new CacheNodeInfo(null, null, dir3);
-                    node = new Node(cache1, cache2, cache3, x, y);
+                    node = new Node([cache1, cache2, cache3], x, y);
                 }
                 else
                 {
@@ -452,9 +450,9 @@ public unsafe class MapTracing
         for (var i = 0; i < nodeList.Count; i++)
         {
             var node = nodeList[i];
-            if (node.Value.CachedSegment2.Node == null)
+            if (node.Value.Segments[1].Node == null)
             {
-                var direction = node.Value.CachedSegment2.Dir;
+                var direction = node.Value.Segments[1].Dir;
                 var (newNode, dir, found) =
                     TraceEdgeStartNode(node.Key.Item1, node.Key.Item2, node.Value, direction);
                 var x = newNode.XPos;
@@ -556,7 +554,7 @@ public unsafe class MapTracing
 
     public void VisitNode(Node node)
     {
-        Direction[] dirs = [node.CachedSegment1.Dir, node.CachedSegment2.Dir, node.CachedSegment3.Dir];
+        var dirs = node.Segments.Select(s => s.Dir);
 
         foreach (var direction in dirs)
         {

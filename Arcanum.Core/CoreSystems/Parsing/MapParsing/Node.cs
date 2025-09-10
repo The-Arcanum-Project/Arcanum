@@ -3,9 +3,10 @@ using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
 
-public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direction dir)
+public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direction dir, bool visited = false)
 {
     public Direction Dir = dir;
+    public bool Visited = visited;
     public BorderSegmentDirectional? Segment = segment;
     public Node? Node = node;
 }
@@ -36,43 +37,24 @@ public class Node : ICoordinateAdder
     public int XPos => Position.X;
     public int YPos => Position.Y;
 
-    //public CacheNodeInfo[]
-
-    public CacheNodeInfo CachedSegment1;
-    public CacheNodeInfo CachedSegment2;
-    public CacheNodeInfo CachedSegment3;
-    public bool Visited1 = false;
-    public bool Visited2 = false;
-    public bool Visited3 = false;
+    public CacheNodeInfo[] Segments;
+    
 
     public void SetDirection(Direction dir)
     {
-        if (CachedSegment1.Dir == dir)
-            Visited1 = true;
-        else if (CachedSegment2.Dir == dir)
-            Visited2 = true;
-        else if (CachedSegment3.Dir == dir)
-            Visited3 = true;
-        else
-            throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+        GetSegment(dir).Visited = true;
     }
 
     public bool TestDirection(Direction dir)
     {
-        if (CachedSegment1.Dir == dir)
-            return Visited1;
-        if (CachedSegment2.Dir == dir)
-            return Visited2;
-        if (CachedSegment3.Dir == dir)
-            return Visited3;
-        throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+        return GetSegment(dir).Visited;
     }
 
     /// <summary>
     /// Represents a node on the border of the image.
     /// Caches the segment used to approach the node and the segment parsed from it.
     /// </summary>
-    public Node(CacheNodeInfo cachedSegment1, CacheNodeInfo cachedSegment2, CacheNodeInfo cachedSegment3, int xPos,
+    public Node(CacheNodeInfo[] Segments, int xPos,
         int yPos)
     {
 #if DEBUG
@@ -80,35 +62,30 @@ public class Node : ICoordinateAdder
         _totalNodes++;
 #endif
 
-        CachedSegment1 = cachedSegment1;
-        CachedSegment2 = cachedSegment2;
-        CachedSegment3 = cachedSegment3;
+        this.Segments = Segments;
         Position = new(xPos, yPos);
     }
 
     public CacheNodeInfo GetSegment(Direction dir)
     {
-        if (CachedSegment1.Dir == dir)
-            return CachedSegment1;
-        if (CachedSegment2.Dir == dir)
-            return CachedSegment2;
-        if (CachedSegment3.Dir == dir)
-            return CachedSegment3;
+        foreach (var segment in Segments)
+        {
+            if (segment.Dir == dir)
+                return segment;
+        }
         throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
     }
 
-    public bool TryGetSegment(Direction dir, out CacheNodeInfo? segment)
+    public bool TryGetSegment(Direction dir, [MaybeNullWhen(false)]out CacheNodeInfo segment)
     {
+        foreach (var cache in Segments)
+        {
+            if (cache.Dir != dir) continue;
+            segment = cache;
+            return true;
+        }
         segment = null;
-        if (CachedSegment1.Dir == dir)
-            segment = CachedSegment1;
-        else if (CachedSegment2.Dir == dir)
-            segment = CachedSegment2;
-        else if (CachedSegment3.Dir == dir)
-            segment = CachedSegment3;
-        else
-            return false;
-        return true;
+        return false;
     }
 
     /// <summary>
