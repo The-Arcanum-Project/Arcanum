@@ -513,6 +513,7 @@ public unsafe class MapTracing
                     new CacheNodeInfo(lastNode, new BorderSegmentDirectional(currentSegment, false), d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
                     new CacheNodeInfo(null, null, d.RotateRight()), x, y);
+                node.Visited3 = true;
                 lastNode.CachedSegment3.Node = node;
                 lastNode.CachedSegment3.Segment = new(currentSegment, true);
             }
@@ -522,6 +523,7 @@ public unsafe class MapTracing
                     new CacheNodeInfo(null, null, d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
                     new CacheNodeInfo(null, null, d.RotateRight()), x, y);
+                node.Visited3 = true;
                 firstNode = node;
             }
 
@@ -1325,8 +1327,8 @@ public unsafe class MapTracing
 
         foreach (var direction in dirs)
         {
-            //if(node.TestDirection(direction))
-             //   continue;
+            if(node.TestDirection(direction))
+                continue;
             VisitNodes(node, direction);
         }
     }
@@ -1359,7 +1361,10 @@ public unsafe class MapTracing
         sw.Restart();
         TraceEdgeStubs();
         sw.Stop();
-        ParseEverything();
         Console.WriteLine($"Traced edge stubs in {sw.ElapsedMilliseconds} ms.");
+        sw.Restart();
+        ParseEverything();
+        sw.Stop();
+        Console.WriteLine($"Traced all polygons in {sw.ElapsedMilliseconds} ms.");
     }
 }
