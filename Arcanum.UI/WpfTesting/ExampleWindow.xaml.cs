@@ -12,14 +12,49 @@ using Polygon = Arcanum.Core.CoreSystems.Parsing.MapParsing.Polygon;
 
 namespace Arcanum.UI.WpfTesting;
 
+public class VisualHost : FrameworkElement
+{
+   private readonly VisualCollection _visuals;
+
+   public VisualHost()
+   {
+      _visuals = new VisualCollection(this);
+   }
+
+   public void AddVisual(DrawingVisual visual)
+   {
+      _visuals.Add(visual);
+   }
+
+   public void ClearVisuals()
+   {
+      _visuals.Clear();
+   }
+
+   protected override int VisualChildrenCount => _visuals.Count;
+
+   protected override Visual GetVisualChild(int index)
+   {
+      if (index < 0 || index >= _visuals.Count)
+      {
+         throw new ArgumentOutOfRangeException(nameof(index));
+      }
+      return _visuals[index];
+   }
+}
+
 public partial class ExampleWindow : IDebugDrawer
 {
    public UserSettings CurrentSettings { get; } = new();
    private double _currentScale = 1.0;
    private const double ZoomFactor = 1.1;
+   private readonly VisualHost _polygonHost;
+   
    public ExampleWindow()
    {
       InitializeComponent();
+      _polygonHost = new VisualHost();
+      drawingCanvas.Children.Add(_polygonHost);
       LoadMap();
       
    }
@@ -117,8 +152,12 @@ public partial class ExampleWindow : IDebugDrawer
       byte[] pixels = new byte[height * stride];
       formattedBitmap.CopyPixels(pixels, stride, 0);
 
-      drawingCanvas.Children.Clear();
-
+      _polygonHost.ClearVisuals();
+      var childrenToRemove = drawingCanvas.Children.OfType<UIElement>().Where(c => c != _polygonHost).ToList();
+      foreach (var child in childrenToRemove)
+      {
+         drawingCanvas.Children.Remove(child);
+      }
       int pixelSize = 2;
       int margin = 1;
       int step = pixelSize + margin;
@@ -183,19 +222,86 @@ public partial class ExampleWindow : IDebugDrawer
       Panel.SetZIndex(line,1);
    }
 
+   /*public void DrawPolygon(Polygon polygon)
+   {
+      var points = polygon.GetAllPoints().Select(p => ConvertCoordinates(p.X, p.Y)).ToList();
+      if (points.Count < 2) return;
+
+      // Create a lightweight DrawingVisual to hold the polygon's rendering.
+      var drawingVisual = new DrawingVisual();
+
+      // Obtain the DrawingContext to issue drawing commands.
+      using (DrawingContext dc = drawingVisual.RenderOpen())
+      {
+         // Use StreamGeometry for the most efficient geometry representation.
+         var streamGeometry = new StreamGeometry();
+         using (StreamGeometryContext sgc = streamGeometry.Open())
+         {
+            sgc.BeginFigure(points[0], true, true); // isFilled, isClosed
+            sgc.PolyLineTo(points.Skip(1).ToList(), true, false); // isStroked, isSmoothJoin
+         }
+
+         // Freeze resources for a significant performance boost.
+         streamGeometry.Freeze();
+         var fillBrush = GetRandomBrush();
+         fillBrush.Freeze();
+         var strokePen = new Pen(Brushes.Black, 1);
+         strokePen.Freeze();
+
+         // Draw the geometry onto the visual.
+         dc.DrawGeometry(fillBrush, strokePen, streamGeometry);
+      }
+
+      // Add the finished visual to our host control.
+      _polygonHost.AddVisual(drawingVisual);
+   }*/
+
+   private int count = 0;
+   
    public void DrawPolygon(Polygon polygon)
    {
-      var points = new PointCollection(polygon.GetAllPoints().Select(p => ConvertCoordinates(p.X, p.Y)));
-      var poly = new System.Windows.Shapes.Polygon
+      // 1. Tesselate the polygon to get vertices and triangle indices.
+      var (vertices, indices) = polygon.Tesselate();
+
+      if (vertices.Count == 0 || indices.Count == 0) return;
+
+      // Convert all vertex coordinates at once.
+      var points = vertices.Select(p => ConvertCoordinates(p.X, p.Y)).ToList();
+
+      // Create a lightweight DrawingVisual to hold the polygon's rendering.
+      var drawingVisual = new DrawingVisual();
+
+      // Obtain the DrawingContext to issue drawing commands.
+      using (DrawingContext dc = drawingVisual.RenderOpen())
       {
-         Points = points,
-         Stroke = Brushes.Black,
-         StrokeThickness = 1,
-         Fill = GetRandomBrush()
-      };
-      
-      drawingCanvas.Children.Add(poly);
-      Panel.SetZIndex(poly,-1);
+         // Use StreamGeometry for the most efficient geometry representation. [8]
+         var streamGeometry = new StreamGeometry();
+         using (StreamGeometryContext sgc = streamGeometry.Open())
+         {
+            // 2. Iterate through the indices to define each triangle.
+            for (int i = 0; i < indices.Count; i += 3)
+            {
+               count++;
+               sgc.BeginFigure(points[indices[i]], true, true); // Start the first vertex of the triangle
+               sgc.LineTo(points[indices[i + 1]], true, false); // Draw a line to the second vertex
+               sgc.LineTo(points[indices[i + 2]], true, false); // Draw a line to the third vertex
+            }
+         }
+
+         // Freeze resources for a significant performance boost.
+         streamGeometry.Freeze();
+         var fillBrush = GetRandomBrush();
+         fillBrush.Freeze();
+         var strokePen = new Pen(Brushes.Black, 1);
+         strokePen.Freeze();
+
+         // Draw the geometry onto the visual.
+         dc.DrawGeometry(fillBrush, strokePen, streamGeometry);
+      }
+
+      // Add the finished visual to our host control.
+      _polygonHost.AddVisual(drawingVisual);
+      Console.WriteLine($"Drew polygon with {vertices.Count} vertices and {indices.Count / 3} triangles. Total triangles drawn: {count}");
    }
 
    public void DrawNode(int x, int y, int color = unchecked((int)0xFFFF0000))

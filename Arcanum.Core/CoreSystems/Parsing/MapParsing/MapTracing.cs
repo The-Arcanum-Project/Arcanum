@@ -115,7 +115,7 @@ public unsafe class MapTracing
                 node = new([
                     new CacheNodeInfo(null, null, d.RotateLeft()),
                     new CacheNodeInfo(null, null, d),
-                    new CacheNodeInfo(null, null, d.RotateRight())
+                    new CacheNodeInfo(null, null, d.RotateRight(), visited: true)
                 ], x, y);
                 firstNode = node;
             }
@@ -268,7 +268,7 @@ public unsafe class MapTracing
         yr = yl;
     }
 
-    private void MoveGridPoint(bool dir, bool sign, ref int x, ref int y)
+    private static void MoveGridPoint(bool dir, bool sign, ref int x, ref int y)
     {
         if (dir)
         {
@@ -296,20 +296,21 @@ public unsafe class MapTracing
         }
     }
 
-    public (Node, BorderSegmentDirectional, bool) TraceEdgeStartNode(int startx, int starty, Node startNode,
+    private (Node, BorderSegmentDirectional, bool) TraceEdgeStartNode(int startX, int startY, Node startNode,
         Direction startDirection)
     {
         BorderSegment segment = new();
         Direction currentDirection = startDirection;
         BorderSegmentDirectional parsedSegment;
         // Start without any node
-        var (xl, yl, xr, yr) = DirectionHelper.GetStartPos(startx, starty, currentDirection);
-        var node = startNode;
+        var (xl, yl, xr, yr) = DirectionHelper.GetStartPos(startX, startY, currentDirection);
+        Node node;
+        // TODO remove the outside check. Either bool or different method without check.
         var lColor = GetColorWithOutsideCheck(xl, yl);
         var rColor = GetColorWithOutsideCheck(xr, yr);
         var found = true;
-        var x = startx;
-        var y = starty;
+        var x = startX;
+        var y = startY;
         var (dir, sign) = currentDirection.GetDeltaMove();
         while (true)
         {
@@ -410,43 +411,50 @@ public unsafe class MapTracing
                 var cacheNodeInfoStart = startNode.GetSegment(startDirection);
                 cacheNodeInfoStart.Node = node;
                 cacheNodeInfoStart.Segment = parsedSegment = new BorderSegmentDirectional(segment, true);
-
-#if ENABLE_VISUAL_TRACING
-
-                for (var i = 0; i < segment.Points.Count - 1; i++)
-                {
-                    var p1 = segment.Points[i];
-                    var p2 = segment.Points[i + 1];
-                    //drawer.DrawLine(p1.X, p1.Y, p2.X, p2.Y);
-                }
-
-                if (segment.Points.Count > 0)
-                {
-                    //drawer.DrawLine(startx, starty, segment.Points[0].X, segment.Points[0].Y);
-                    //drawer.DrawLine(segment.Points[^1].X, segment.Points[^1].Y, x, y);
-                }
-                //else
-                //drawer.DrawLine(startx, starty, x, y);
-
-                //drawer.DrawNode(x, y);
-#endif
+                
                 break;
             }
             else
             {
-                throw new InvalidOperationException(
-                    $"Encountered a four-edge node, which is not supported yet. ({x}, {y})");
                 // FourEdgeNode
-                parsedSegment = new BorderSegmentDirectional();
+                // There are some different ways this can happen
+                // 1. Checkerboard pattern 2 colors
+                // 2. Four different colors meeting
+                // 3. Three colors meeting with one color on a diagonal
+
+                if (!NodeCache.TryGetValue((x, y), out node))
+                {
+                    found = false;
+                    // TODO determine directions
+                    var dir1 = currentDirection.Invert();
+                    var dir2 = currentDirection.RotateRight();
+                    var dir3 = currentDirection.RotateLeft();
+
+                    var cache1 = new CacheNodeInfo(startNode, new BorderSegmentDirectional(segment, false), dir1);
+                    var cache2 = new CacheNodeInfo(null, null, dir2);
+                    var cache3 = new CacheNodeInfo(null, null, dir3);
+                    var cache4 = new CacheNodeInfo(null, null, currentDirection);
+                    node = new Node([cache1, cache2, cache3, cache4], x, y);
+                }
+                else
+                {
+                    var cacheNodeInfo = node.GetSegment(currentDirection.Invert());
+                    cacheNodeInfo.Node = startNode;
+                    cacheNodeInfo.Segment = new BorderSegmentDirectional(segment, false);
+                }
+                
+                var cacheNodeInfoStart = startNode.GetSegment(startDirection);
+                cacheNodeInfoStart.Node = node;
+                cacheNodeInfoStart.Segment = parsedSegment = new BorderSegmentDirectional(segment, true);
+                
                 break;
+
             }
         }
 
         return (node, parsedSegment, found);
     }
 
-
-    // TODO: needs to be counter clockwise
     public void TraceEdgeStubs()
     {
         var nodeList = NodeCache.ToList();
@@ -555,6 +563,7 @@ public unsafe class MapTracing
         return polygon;
     }
 
+    private List<Polygon> _polygons = new List<Polygon>();
     public void VisitNode(Node node)
     {
         var dirs = node.Segments.Select(s => s.Dir);
@@ -563,7 +572,8 @@ public unsafe class MapTracing
         {
             if (node.TestDirection(direction))
                 continue;
-            VisitNodes(node, direction);
+            var polygon = VisitNodes(node, direction);
+            _polygons.Add(polygon);
         }
     }
 
@@ -588,6 +598,8 @@ public unsafe class MapTracing
         scan0 = bmpData.Scan0;
         drawer = mw;
         var sw = new Stopwatch();
+        //TODO remove sleep
+        Thread.Sleep(2000);
         sw.Start();
         TraceImageEdge();
         sw.Stop();
@@ -599,6 +611,6 @@ public unsafe class MapTracing
         sw.Restart();
         ParseEverything();
         sw.Stop();
-        Console.WriteLine($"Traced all polygons in {sw.ElapsedMilliseconds} ms.");
+        Console.WriteLine($"Traced all ({_polygons.Count}) polygons in {sw.ElapsedMilliseconds} ms.");
     }
 }

@@ -49,7 +49,8 @@ internal static class Program
       app.MainWindow = mw;
       
       var tracer = new MapTracing();
-      Task.Run(() => tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp", mw));
+      //Task.Run(() => tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp", mw));
+      Task.Run(() => tracer.LoadLocations("D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\locations.png", mw));
       /*tracer.LoadLocations(
          "D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp",
          mw);*/
