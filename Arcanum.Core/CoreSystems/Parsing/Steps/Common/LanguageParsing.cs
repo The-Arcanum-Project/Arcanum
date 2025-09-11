@@ -1,0 +1,91 @@
+﻿using System.Collections.ObjectModel;
+using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.GlobalStates;
+
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+
+[ParserFor(typeof(Language))]
+public partial class LanguageParsing : FileLoadingService
+{
+   public override List<Type> ParsedObjects { get; } = [typeof(Language)];
+   public override string GetFileDataDebugInfo() => $"Parsed Languages: {Globals.Languages.Count}";
+
+   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   {
+      const string actionStack = nameof(LanguageParsing);
+      var rn = Parser.Parse(fileObj, out var source, out var ctx);
+      var validation = true;
+
+      foreach (var sn in rn.Statements)
+      {
+         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+            continue;
+
+         var langKey = bn.KeyNode.GetLexeme(source);
+         var language = new Language(langKey);
+
+         var unhandledNodes = ParseProperties(bn, language, ctx, source, ref validation);
+         if (!Globals.Languages.TryAdd(langKey, language))
+         {
+            ctx.SetPosition(bn.KeyNode);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.DuplicateObjectDefinition,
+                                           actionStack,
+                                           langKey,
+                                           typeof(Language),
+                                           Language.Field.Name);
+         }
+
+         foreach (var node in unhandledNodes)
+         {
+            var lexme = node.KeyNode.GetLexeme(source);
+            if (!node.IsBlockNode(ctx, source, actionStack, ref validation, out var dn))
+               continue;
+
+            var blockKey = dn.KeyNode.GetLexeme(source);
+            const string dialects = "dialects";
+            if (string.Equals(blockKey, dialects, StringComparison.Ordinal))
+            {
+               ParseDialects(dn, language, source, ctx, ref validation);
+            }
+            else
+            {
+               ctx.SetPosition(dn.KeyNode);
+               DiagnosticException.LogWarning(ctx.GetInstance(),
+                                              ParsingError.Instance.InvalidBlockName,
+                                              actionStack,
+                                              blockKey,
+                                              dialects);
+            }
+         }
+      }
+
+      return validation;
+   }
+
+   private static void ParseDialects(BlockNode dialectsBlock,
+                                     Language parentLanguage,
+                                     string source,
+                                     LocationContext ctx,
+                                     ref bool validation)
+   {
+      foreach (var statement in dialectsBlock.Children)
+         if (statement is BlockNode dbn)
+         {
+            var dialect = new Language(dbn.KeyNode.GetLexeme(source));
+            ParseProperties(dbn, dialect, ctx, source, ref validation);
+            parentLanguage.Dialects.Add(dialect);
+         }
+   }
+
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+      => throw new NotImplementedException();
+}

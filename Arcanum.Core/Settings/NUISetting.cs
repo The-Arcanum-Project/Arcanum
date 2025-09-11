@@ -130,4 +130,15 @@ public class NUISettings
                                                          Enum.GetValues<Culture.Field>()
                                                              .Cast<Enum>()
                                                              .ToArray());
+
+   public NUISetting LanguageNUI { get; set; } = new(Language.Field.Name,
+                                                     Enum.GetValues<Language.Field>()
+                                                         .Cast<Enum>()
+                                                         .ToArray(),
+                                                     Enum.GetValues<Language.Field>()
+                                                         .Cast<Enum>()
+                                                         .ToArray(),
+                                                     Enum.GetValues<Language.Field>()
+                                                         .Cast<Enum>()
+                                                         .ToArray());
 }

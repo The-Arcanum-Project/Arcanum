@@ -141,6 +141,13 @@ public static class DescriptorDefinitions
                                                                              false,
                                                                              uniqueId: 'B');
 
+   public static readonly FileDescriptor LanguageDescriptor = new([],
+                                                                  ["game", "in_game", "common", "languages"],
+                                                                  ISavingService.Dummy,
+                                                                  new("languages", "txt", "#"),
+                                                                  new LanguageParsing(),
+                                                                  false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -149,6 +156,7 @@ public static class DescriptorDefinitions
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, CultureAfterParsingDescriptor,
+         LanguageDescriptor,
       ];
    }
 }

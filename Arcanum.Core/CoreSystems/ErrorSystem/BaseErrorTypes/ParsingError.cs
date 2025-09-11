@@ -570,4 +570,14 @@ public class ParsingError : ILazySingleton
                                                                "Failed to parse byte value from '{0}'.",
                                                                "The provided string '{0}' could not be parsed as a valid byte value. Please ensure it is a valid byte in the range 0-255.",
                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   /// <param name="1">The expected color formats</param>
+   public DiagnosticDescriptor InvalidColorMarkUp { get; } = new(DiagnosticCategory.Parsing,
+                                                                 59,
+                                                                 "Invalid Color Markup",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "Failed to parse color value from '{0}'.",
+                                                                 "The provided string '{0}' could not be parsed as a valid color value. Please ensure it is a valid color in the format {1}.",
+                                                                 DiagnosticReportSeverity.PopupNotify);
 }

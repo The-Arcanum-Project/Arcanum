@@ -8,10 +8,18 @@ namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
 
 public static class Pdh
 {
-   public delegate bool ContentParser<in TTarget>(ContentNode cn, TTarget target, LocationContext ctx, string source)
+   public delegate bool ContentParser<in TTarget>(ContentNode cn,
+                                                  TTarget target,
+                                                  LocationContext ctx,
+                                                  string source,
+                                                  ref bool validation)
       where TTarget : INexus;
 
-   public delegate bool BlockParser<in TTarget>(BlockNode bn, TTarget target, LocationContext ctx, string source)
+   public delegate bool BlockParser<in TTarget>(BlockNode bn,
+                                                TTarget target,
+                                                LocationContext ctx,
+                                                string source,
+                                                ref bool validation)
       where TTarget : INexus;
 
    /// <summary>
@@ -22,6 +30,7 @@ public static class Pdh
    /// <param name="ctx"></param>
    /// <param name="source"></param>
    /// <param name="actionName"></param>
+   /// <param name="validation"></param>
    /// <param name="parsers"></param>
    /// <typeparam name="TTarget"></typeparam>
    public static void DispatchContentNode<TTarget>(
@@ -30,12 +39,13 @@ public static class Pdh
       LocationContext ctx,
       string source,
       string actionName,
-      IReadOnlyDictionary<string, ContentParser<TTarget>> parsers) where TTarget : INexus
+      Dictionary<string, ContentParser<TTarget>> parsers,
+      ref bool validation) where TTarget : INexus
    {
       var key = cn.KeyNode.GetLexeme(source);
       if (parsers.TryGetValue(key, out var parser))
       {
-         parser(cn, target, ctx, source);
+         parser(cn, target, ctx, source, ref validation);
       }
       else
       {
@@ -56,6 +66,7 @@ public static class Pdh
    /// <param name="ctx"></param>
    /// <param name="source"></param>
    /// <param name="actionName"></param>
+   /// <param name="validation"></param>
    /// <param name="parsers"></param>
    /// <typeparam name="TTarget"></typeparam>
    public static void DispatchBlockNode<TTarget>(
@@ -64,12 +75,13 @@ public static class Pdh
       LocationContext ctx,
       string source,
       string actionName,
-      IReadOnlyDictionary<string, BlockParser<TTarget>> parsers) where TTarget : INexus
+      Dictionary<string, BlockParser<TTarget>> parsers,
+      ref bool validation) where TTarget : INexus
    {
       var key = bn.KeyNode.GetLexeme(source);
       if (parsers.TryGetValue(key, out var parser))
       {
-         parser(bn, target, ctx, source);
+         parser(bn, target, ctx, source, ref validation);
       }
       else
       {
@@ -79,6 +91,33 @@ public static class Pdh
                                         actionName,
                                         key,
                                         string.Join(", ", parsers.Keys));
+      }
+   }
+
+   public static void DispatchStatementNode<TTarget>(
+      StatementNode sn,
+      TTarget target,
+      LocationContext ctx,
+      string source,
+      string actionName,
+      Dictionary<string, ContentParser<TTarget>> contentParsers,
+      Dictionary<string, BlockParser<TTarget>> blockParsers,
+      ref bool validation) where TTarget : INexus
+   {
+      if (sn is ContentNode cn)
+         DispatchContentNode(cn, target, ctx, source, actionName, contentParsers, ref validation);
+      else if (sn is BlockNode bn)
+         DispatchBlockNode(bn, target, ctx, source, actionName, blockParsers, ref validation);
+      else
+      {
+         validation = false;
+         ctx.SetPosition(sn.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        sn.GetType().Name,
+                                        "ContentNode or BlockNode",
+                                        sn.KeyNode.GetLexeme(source));
       }
    }
 }

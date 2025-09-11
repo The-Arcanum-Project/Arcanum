@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -26,11 +25,12 @@ public static class SnNodesHelpers
    {
       if (node is not BlockNode bn)
       {
+         ctx.SetPosition(node.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
                                         actionName,
-                                        node.GetType().Name,
-                                        nameof(BlockNode),
+                                        $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
+                                        $"{nameof(BlockNode)}",
                                         node.KeyNode.GetLexeme(source));
          value = null!;
          return false;
@@ -83,10 +83,11 @@ public static class SnNodesHelpers
    {
       if (node is not ContentNode cn)
       {
+         ctx.SetPosition(node.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
                                         $"{className}.StatementNode.IsContentNode",
-                                        node.GetType().Name,
+                                        $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
                                         nameof(ContentNode),
                                         node.KeyNode.GetLexeme(source));
          value = null!;
@@ -121,7 +122,7 @@ public static class SnNodesHelpers
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
                                         $"{className}.StatementNode.IsKeyOnlyNode",
-                                        node.GetType().Name,
+                                        $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
                                         nameof(KeyOnlyNode),
                                         node.KeyNode.GetLexeme(source));
          value = null!;

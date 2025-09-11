@@ -153,6 +153,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("using Arcanum.Core.CoreSystems.Common;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.ToolBox;");
+      sb.AppendLine("using System.Collections.ObjectModel;");
       sb.AppendLine($"using {targetTypeSymbol.ContainingNamespace.ToDisplayString()};");
 
       // This makes the calls to the toolbox methods clean.
@@ -162,13 +164,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine($"public partial class {parserSymbol.Name}");
       sb.AppendLine("{");
 
-      // --- Delegates ---
-      sb.AppendLine($"    private delegate bool ContentParser(ContentNode cn, {targetTypeName} target, LocationContext ctx, string source);");
-      sb.AppendLine($"    private delegate bool BlockParser(BlockNode bn, {targetTypeName} target, LocationContext ctx, string source);");
-      sb.AppendLine();
-
       // --- Dictionaries ---
-      sb.AppendLine("    private static readonly Dictionary<string, ContentParser> _contentParsers = new()");
+      sb.AppendLine($"    private static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
       sb.AppendLine("    {");
       // MODIFIED: Use the consistent name for the dictionary value
       foreach (var prop in contentNodeProps)
@@ -176,55 +173,59 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       sb.AppendLine("    };");
       sb.AppendLine();
-      sb.AppendLine("    private static readonly Dictionary<string, BlockParser> _blockParsers = new()");
+      sb.AppendLine($"    private static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
       sb.AppendLine("    {");
       foreach (var prop in blockNodeProps)
          sb.AppendLine($"        {{ {fullyQualifiedKeywordClassName}.{prop.KeywordConstantName}, {arcParsePrefix}{prop.PropertyName} }},");
       sb.AppendLine("    };");
       sb.AppendLine();
 
-      // --- Dispatch Methods ---
-      // (This part is correct and unchanged)
-      sb.AppendLine("    private static void DispatchContentNode(ContentNode cn, " +
-                    targetTypeName +
-                    " target, LocationContext ctx, string source, string actionName, object validContentNames)");
+      // --- THE NEWLY PLACED HELPER METHOD ---
+      // This is now part of the generated parser class itself.
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Parses all properties of a " +
+                    targetTypeSymbol.Name +
+                    " object marked with [ParseAs] from a BlockNode.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
+      sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
-      sb.AppendLine("        var key = cn.KeyNode.GetLexeme(source);");
-      sb.AppendLine("        if (_contentParsers.TryGetValue(key, out var parser)) { parser(cn, target, ctx, source); }");
-      sb.AppendLine("        else");
+      sb.AppendLine("        var unhandledNodes = new List<StatementNode>();");
+      sb.AppendLine("        foreach (var propertyNode in block.Children)");
       sb.AppendLine("        {");
-      sb.AppendLine("        ctx.SetPosition(cn.KeyNode);");
-      sb.AppendLine("        DiagnosticException.LogWarning(ctx.GetInstance(),");
-      sb.AppendLine("                                       ParsingError.Instance.InvalidContentKeyOrType,");
-      sb.AppendLine("                                       $\"{actionName}.{target.GetType().Name}Parser\",");
-      sb.AppendLine("                                       cn.KeyNode.GetLexeme(source),");
-      sb.AppendLine("                                       validContentNames);");
+      sb.AppendLine("            bool wasHandled = false;");
+      sb.AppendLine("            if (propertyNode is ContentNode cn)");
+      sb.AppendLine("            {");
+      sb.AppendLine("                var key = cn.KeyNode.GetLexeme(source);");
+      sb.AppendLine("                if (_contentParsers.TryGetValue(key, out var parser))");
+      sb.AppendLine("                {");
+      sb.AppendLine("                    parser(cn, target, ctx, source, ref validation);");
+      sb.AppendLine("                    wasHandled = true;");
+      sb.AppendLine("                }");
+      sb.AppendLine("            }");
+      sb.AppendLine("            else if (propertyNode is BlockNode bn)");
+      sb.AppendLine("            {");
+      sb.AppendLine("                var key = bn.KeyNode.GetLexeme(source);");
+      sb.AppendLine("                if (_blockParsers.TryGetValue(key, out var parser))");
+      sb.AppendLine("                {");
+      sb.AppendLine("                    parser(bn, target, ctx, source, ref validation);");
+      sb.AppendLine("                    wasHandled = true;");
+      sb.AppendLine("                }");
+      sb.AppendLine("            }");
+      sb.AppendLine();
+      sb.AppendLine("            if (!wasHandled)");
+      sb.AppendLine("            {");
+      sb.AppendLine("                unhandledNodes.Add(propertyNode);");
+      sb.AppendLine("            }");
       sb.AppendLine("        }");
+      sb.AppendLine("        return unhandledNodes;");
       sb.AppendLine("    }");
       sb.AppendLine();
 
-      sb.AppendLine("    private static void DispatchBlockNode(BlockNode bn, " +
-                    targetTypeName +
-                    " target, LocationContext ctx, string source, string actionName, object validBlockNames)");
-      sb.AppendLine("    {");
-      sb.AppendLine("        var key = bn.KeyNode.GetLexeme(source);");
-      sb.AppendLine("        if (_blockParsers.TryGetValue(key, out var parser)) { parser(bn, target, ctx, source); }");
-      sb.AppendLine("        else");
-      sb.AppendLine("        {");
-      sb.AppendLine("        ctx.SetPosition(bn.KeyNode);");
-      sb.AppendLine("        DiagnosticException.LogWarning(ctx.GetInstance(),");
-      sb.AppendLine("                                       ParsingError.Instance.InvalidBlockName,");
-      sb.AppendLine("                                       $\"{actionName}.{target.GetType().Name}Parser\",");
-      sb.AppendLine("                                       key,");
-      sb.AppendLine("                                       validBlockNames);");
-      sb.AppendLine("        }");
-      sb.AppendLine("    }");
-      sb.AppendLine();
-
-      // --- Generated Wrapper Methods (partial signatures) ---
+      //--- Generated Wrapper Methods (partial signatures) ---
       sb.AppendLine("    #region Parser Method Signatures");
       foreach (var prop in properties)
-         sb.AppendLine($"    private static partial bool {arcParsePrefix}{prop.PropertyName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source);");
+         sb.AppendLine($"    private static partial bool {arcParsePrefix}{prop.PropertyName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
       sb.AppendLine("    #endregion");
       sb.AppendLine();
 
@@ -245,9 +246,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
             var actionName = $"\"{parserSymbol.Name}.{wrapperMethodName}\"";
 
             // Generate the IMPLEMENTING partial method
-            sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source)");
+            sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
             sb.AppendLine("    {");
-            sb.AppendLine($"        if ({toolMethod.Name}(node, ctx, {actionName}, source, out {propTypeName} value))");
+            sb.AppendLine($"        if ({toolMethod.Name}(node, ctx, {actionName}, source, out {propTypeName} value, ref validation))");
             sb.AppendLine("        {");
             sb.AppendLine($"            target.{prop.PropertyName} = value;");
             sb.AppendLine("            return true;");
@@ -265,31 +266,57 @@ public class ParserSourceGenerator : IIncrementalGenerator
       return (hintName, sb.ToString());
    }
 
+   private const string TOOL_METHOD_PREFIX = "ArcTryParse";
+   private const string SECONDARY_TOOL_METHOD_PREFIX = "TryParse";
+
    private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
                                                   string astNodeType,
                                                   ITypeSymbol propertyType)
    {
-      // We expect tool names like "TryParseInt32", "TryParseString", etc.
-      var expectedToolName = $"ArcTryParse{propertyType.Name}";
-      var methods = toolboxSymbol.GetMembers(expectedToolName).OfType<IMethodSymbol>();
+      // --- First, try to find the method WITH the prefix ---
+      var prefixedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
+      var toolMethod = FindToolByName(toolboxSymbol, prefixedToolName, astNodeType, propertyType);
 
-      foreach (var member in methods)
+      if (toolMethod != null)
+         return toolMethod;
+
+      // --- If that fails, try to find the method WITHOUT the prefix ---
+      var unprefixedToolName = GetExpectedToolName(propertyType, SECONDARY_TOOL_METHOD_PREFIX);
+      return FindToolByName(toolboxSymbol, unprefixedToolName, astNodeType, propertyType);
+   }
+
+   // Extracted the search logic to a reusable method
+   private static IMethodSymbol? FindToolByName(INamedTypeSymbol toolboxSymbol,
+                                                string toolName,
+                                                string astNodeType,
+                                                ITypeSymbol propertyType)
+   {
+      foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
       {
-         // Basic validation of the tool method's signature
          if (!member.IsStatic || member.Parameters.Length < 4)
             continue;
 
-         // 1. Check if the first parameter is the correct AST node type (e.g., ContentNode)
          if (member.Parameters[0].Type.Name == astNodeType)
          {
-            // 2. Check if the last 'out' parameter's type matches the property's type
             var outParam = member.Parameters.LastOrDefault(p => p.RefKind == RefKind.Out);
             if (outParam != null && SymbolEqualityComparer.Default.Equals(outParam.Type, propertyType))
-               return member; // We found a perfect match!
+               return member;
          }
       }
 
-      return null; // No suitable tool was found
+      return null;
+   }
+
+   private static string GetExpectedToolName(ITypeSymbol type, string prefix)
+   {
+      if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+      {
+         var genericTypeName = namedType.Name;
+         var itemTypeName = namedType.TypeArguments.FirstOrDefault()?.Name ?? "Object";
+         return $"{prefix}_{genericTypeName}{itemTypeName}";
+      }
+
+      return $"{prefix}_{type.Name}";
    }
 
    private static (string HintName, string Source) GenerateKeywordsClass(

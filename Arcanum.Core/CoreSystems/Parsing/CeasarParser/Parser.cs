@@ -11,11 +11,15 @@ public class Parser(LexerResult lexerResult)
    private readonly string _source = lexerResult.Source;
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private int _current;
+   private static FileObj _fileObj = null!;
 
    public static RootNode Parse(FileObj fileObj, out string source, out LocationContext ctx)
    {
+      _fileObj = fileObj;
       ctx = LocationContext.GetNew(fileObj);
-      return Parse(fileObj, out source);
+      var rn = Parse(fileObj, out source);
+      _fileObj = null!;
+      return rn;
    }
 
    public static RootNode Parse(FileObj fileObj, out string source)
@@ -23,7 +27,7 @@ public class Parser(LexerResult lexerResult)
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
       if (string.IsNullOrWhiteSpace(source))
       {
-         DiagnosticException.CreateAndHandle(new(1, 1, ""),
+         DiagnosticException.CreateAndHandle(new(1, 1, _fileObj.Path.FullPath),
                                              IOError.Instance.FileReadingError,
                                              "AST-Building",
                                              DiagnosticSeverity.Warning,
@@ -57,10 +61,11 @@ public class Parser(LexerResult lexerResult)
       if (Check(TokenType.LeftBrace))
          return ParseAnonymousBlock();
 
-      // Allow statements to begin with an Identifier, Date, or Number
+      // Allow statements to begin with an Identifier, Date, Number or Quoted String
       if (Check(TokenType.Identifier) ||
           Check(TokenType.Date) ||
-          Check(TokenType.Number))
+          Check(TokenType.Number) ||
+          Check(TokenType.String))
       {
          // Check for scripted_trigger/effect pattern...
          if (Check(TokenType.Identifier) && CheckNext(TokenType.Identifier) && CheckAt(2, TokenType.Equals))
@@ -90,7 +95,7 @@ public class Parser(LexerResult lexerResult)
       if (Check(TokenType.AtIdentifier))
          return ParseContentOrBlockStatement();
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, ""),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -192,7 +197,7 @@ public class Parser(LexerResult lexerResult)
       if (Match(TokenType.Number, TokenType.String, TokenType.Yes, TokenType.No, TokenType.Identifier, TokenType.Date))
          return new LiteralValueNode(Previous());
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, ""),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -241,7 +246,7 @@ public class Parser(LexerResult lexerResult)
       if (Check(type))
          return Advance();
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, ""),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
