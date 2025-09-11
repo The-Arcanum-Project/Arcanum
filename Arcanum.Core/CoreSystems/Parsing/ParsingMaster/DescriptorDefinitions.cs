@@ -15,7 +15,7 @@ public static class DescriptorDefinitions
                                                            ISavingService.Dummy,
                                                            new("colors", "txt", "#"),
                                                            new ColorParser(),
-                                                           true);
+                                                           false);
 
    public static readonly FileDescriptor DefaultMapPreDescriptor = new([],
                                                                        ["game", "in_game", "map_data", "default.map"],
@@ -85,7 +85,7 @@ public static class DescriptorDefinitions
                                                                       ["game", "in_game", "common", "location_ranks"],
                                                                       ISavingService.Dummy,
                                                                       new("location_ranks", "txt", "#"),
-                                                                      new LocationRankLoading(),
+                                                                      new LocationRankParsing(),
                                                                       false,
                                                                       false);
 

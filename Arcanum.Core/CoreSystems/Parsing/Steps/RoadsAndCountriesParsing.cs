@@ -271,7 +271,8 @@ public class RoadsAndCountriesParsing : FileLoadingService
 
    private static void ColorParser(LocationContext ctx, string source, ContentNode cn, Country country)
    {
-      cn.SetIdentifierIfValid(ctx, nameof(ColorParser), source, country, Country.Field.Color);
+      var validation = true;
+      cn.SetColorIfValid(ctx, nameof(ColorParser), source, ref validation, country, Country.Field.Color);
    }
 
    private static void DynastyParser(LocationContext ctx, string source, ContentNode cn, Country country)

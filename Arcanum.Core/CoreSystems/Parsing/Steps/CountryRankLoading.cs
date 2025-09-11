@@ -26,17 +26,20 @@ public class CountryRankLoading : FileLoadingService
       {
          if (!rn.IsBlockNode(ctx, source, GetActionName(), out var bNode))
             continue;
-         
+
          var crlName = bNode!.KeyNode.GetLexeme(source);
          var crl = new CountryRank(crlName);
 
          foreach (var cn in bNode.Children)
          {
-            if (cn is ContentNode { Value: LiteralValueNode lvn })
+            if (cn is ContentNode { Value: LiteralValueNode lvn } cnn)
             {
                var lvnKey = cn.KeyNode.GetLexeme(source);
                if (lvnKey.Equals("color"))
-                  crl.Color = lvn.Value.GetLexeme(source);
+               {
+                  var validation = true;
+                  cnn.SetColorIfValid(ctx, GetActionName(), source, ref validation, crl, CountryRank.Field.Color);
+               }
                else if (lvnKey.Equals("level"))
                {
                   if (int.TryParse(lvn.Value.GetLexeme(source), out var level))
@@ -49,11 +52,10 @@ public class CountryRankLoading : FileLoadingService
                }
             }
          }
-         
+
          Globals.CountryRanks.Add(crl);
-         
       }
-      
+
       return true;
    }
 

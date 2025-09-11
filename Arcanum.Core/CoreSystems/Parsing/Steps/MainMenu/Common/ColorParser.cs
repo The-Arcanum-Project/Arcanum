@@ -53,11 +53,10 @@ public class ColorParser : FileLoadingService
 
             ctx.SetPosition(scn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.DuplicateObjectDefinition,
+                                           ParsingError.Instance.DuplicateColorDefinition,
                                            actionStack,
                                            colorName,
-                                           nameof(JominiColor),
-                                           "Name");
+                                           nameof(JominiColor));
             validation = false;
          }
       }

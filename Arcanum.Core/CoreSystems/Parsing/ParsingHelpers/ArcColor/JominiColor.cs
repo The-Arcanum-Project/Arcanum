@@ -56,5 +56,5 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override string ToString() => $"hsv360 {{ {H:F0} {S:F0} {V:F0} }}";
    }
 
-   public static JominiColor Empty { get; } = new Rgb(140, 140, 0);
+   public static JominiColor Empty { get; } = new Hsv(1, 0, 1);
 }

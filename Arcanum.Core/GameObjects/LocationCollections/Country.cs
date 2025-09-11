@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
@@ -30,7 +31,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    [Description("The type of this country.\nValid types: Location, Army, Pop, Building")]
    public CountryType Type { get; set; } = CountryType.Location;
    [Description("The color key of this country")]
-   public string Color { get; set; } = string.Empty;
+   public JominiColor Color { get; set; } = JominiColor.Empty;
    [Description("The religious school of this country.")]
    public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
    [Description("The ruling dynasty of this country.")]

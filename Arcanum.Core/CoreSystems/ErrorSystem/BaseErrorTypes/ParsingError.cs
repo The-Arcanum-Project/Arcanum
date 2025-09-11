@@ -589,4 +589,14 @@ public class ParsingError : ILazySingleton
                                                                 "The float value is invalid: '{0}'.",
                                                                 "The provided float value '{0}' is not a valid float. Please ensure it is a valid float format.",
                                                                 DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The color name that is duplicated</param>
+   /// <param name="1">The object type that is duplicated</param>
+   public DiagnosticDescriptor DuplicateColorDefinition { get; } = new(DiagnosticCategory.Parsing,
+                                                                       61,
+                                                                       "Duplicate Color Definition",
+                                                                       DiagnosticSeverity.Error,
+                                                                       "Duplicate color definition found for '{0}'.",
+                                                                       "{1} are uniquely identified by their name.\n'{0}' Is defined multiple times which is not allowed.",
+                                                                       DiagnosticReportSeverity.PopupNotify);
 }

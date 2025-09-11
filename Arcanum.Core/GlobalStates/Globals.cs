@@ -6,6 +6,7 @@ using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates.BackingClasses;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
+using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.GlobalStates;

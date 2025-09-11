@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
@@ -206,6 +207,48 @@ public static class ParsingToolBox
                                         actionName,
                                         lexeme);
          value = 0;
+         return false;
+      }
+
+      return true;
+   }
+
+   /// <summary>
+   /// Parses a ContentNode containing a literal boolean value into a bool.
+   /// Validates that the ContentNode's separator is an equals sign.
+   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="value"></param>
+   /// <param name="validation"></param>
+   /// <returns></returns>
+   public static bool ArcTryParse_Boolean(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          out bool value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Boolean)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = false;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!NumberParsing.TryParseBool(lexeme, ctx, out value))
+      {
+         value = false;
+         validation = false;
          return false;
       }
 
