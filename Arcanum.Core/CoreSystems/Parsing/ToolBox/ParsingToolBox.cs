@@ -254,4 +254,139 @@ public static class ParsingToolBox
 
       return true;
    }
+
+   public static bool ArcTryParse_Double(ContentNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         out double value,
+                                         ref bool validation)
+   {
+      if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
+                                                   ctx,
+                                                   actionName,
+                                                   TokenType.Equals,
+                                                   TokenType.GreaterOrEqual,
+                                                   TokenType.LessOrEqual,
+                                                   TokenType.Greater,
+                                                   TokenType.Less))
+      {
+         value = 0;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = 0;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!double.TryParse(lexeme, out value))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidDoubleValue,
+                                        actionName,
+                                        lexeme);
+         value = 0;
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool ArcTryParse_Single(ContentNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         out float value,
+                                         ref bool validation)
+   {
+      if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
+                                                   ctx,
+                                                   actionName,
+                                                   TokenType.Equals,
+                                                   TokenType.GreaterOrEqual,
+                                                   TokenType.LessOrEqual,
+                                                   TokenType.Greater,
+                                                   TokenType.Less))
+      {
+         value = 0;
+         return false;
+      }
+
+      if (node.Value is LiteralValueNode lvn)
+      {
+         var lexeme = lvn.Value.GetLexeme(source);
+         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         {
+            ctx.SetPosition(lvn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidFloatValue,
+                                           actionName,
+                                           lexeme);
+            value = 0;
+            validation = false;
+            return false;
+         }
+      }
+      else if (node.Value is UnaryNode un)
+      {
+         if (un.Operator.Type != TokenType.Minus)
+         {
+            ctx.SetPosition(un.Operator);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidFloatOperator,
+                                           actionName,
+                                           un.Operator.GetLexeme(source),
+                                           nameof(TokenType.Minus));
+            value = 0;
+            return false;
+         }
+
+         if (un.Value is not LiteralValueNode lvn2)
+         {
+            ctx.SetPosition(un.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidNodeType,
+                                           actionName,
+                                           un.Value.GetType().Name,
+                                           nameof(LiteralValueNode),
+                                           node.KeyNode.GetLexeme(source));
+            value = 0;
+            validation = false;
+            return false;
+         }
+
+         var lexeme = lvn2.Value.GetLexeme(source);
+         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         {
+            ctx.SetPosition(lvn2.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidFloatValue,
+                                           actionName,
+                                           lexeme);
+            value = 0;
+            return false;
+         }
+
+         value = -value;
+      }
+      else
+      {
+         ctx.SetPosition(node.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        node.Value.GetType().Name,
+                                        $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
+                                        node.KeyNode.GetLexeme(source));
+         value = 0;
+         validation = false;
+         return false;
+      }
+
+      return true;
+   }
 }

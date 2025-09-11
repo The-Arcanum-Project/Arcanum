@@ -343,7 +343,7 @@ public class Parser(LexerResult lexerResult)
 
          case UnaryNode unary:
             sb.Append($"Unary: '{unary.Operator.GetValue(source)}' on ");
-            PrintValue(unary.Right, source, sb);
+            PrintValue(unary.Value, source, sb);
             break;
 
          case KeyOnlyNode keyOnly:

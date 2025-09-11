@@ -150,9 +150,9 @@ public class KeyOnlyNode : StatementNode
 /// Represents a unary expression, like a negative number.
 /// e.g., the "-10" in `offset = -10`
 /// </summary>
-public class UnaryNode(Token op, ValueNode right) : ValueNode
+public class UnaryNode(Token op, ValueNode value) : ValueNode
 {
    public Token Operator { get; } = op; // The operator token (e.g., '-')
-   public ValueNode Right { get; } = right; // The value being operated on
+   public ValueNode Value { get; } = value; // The value being operated on
    public override (int, int) GetLocation() => (Operator.Line, Operator.Column);
 }

@@ -160,7 +160,7 @@ public static class DescriptorDefinitions
                                                                   false);
 
    public static readonly FileDescriptor AgeDescriptor = new([],
-                                                             ["game", "in_game", "common", "ages"],
+                                                             ["game", "in_game", "common", "age"],
                                                              ISavingService.Dummy,
                                                              new("ages", "txt", "#"),
                                                              new AgeParsing(),

@@ -600,4 +600,23 @@ public class ParsingError : ILazySingleton
                                                                        "Duplicate color definition found for '{0}'.",
                                                                        "{1} are uniquely identified by their name.\n'{0}' Is defined multiple times which is not allowed.",
                                                                        DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The double value that is invalid</param>
+   public DiagnosticDescriptor InvalidDoubleValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                 62,
+                                                                 "Invalid Double Value",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "The double value is invalid: '{0}'.",
+                                                                 "The provided double value '{0}' is not a valid double. Please ensure it is a valid double format.",
+                                                                 DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The float operator that is invalid</param>
+   /// <param name="1">A list of valid float operators</param>
+   public DiagnosticDescriptor InvalidFloatOperator { get; } = new(DiagnosticCategory.Parsing,
+                                                                   63,
+                                                                   "Invalid Float Operator",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "The float operator is invalid: '{0}'.",
+                                                                   "The provided float operator '{0}' is not valid in the context. Valid operators are: {1}",
+                                                                   DiagnosticReportSeverity.PopupNotify);
 }

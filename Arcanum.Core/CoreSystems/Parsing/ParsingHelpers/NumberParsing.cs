@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Globalization;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
@@ -46,7 +47,8 @@ public static class NumberParsing
                                     float fallback = 0f,
                                     int precision = 2)
    {
-      if (string.IsNullOrWhiteSpace(input) || !float.TryParse(input, out result))
+      if (string.IsNullOrWhiteSpace(input) ||
+          !float.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
       {
          result = fallback;
          DiagnosticException.LogWarning(context,

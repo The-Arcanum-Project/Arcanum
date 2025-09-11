@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -44,6 +45,7 @@ public static class Globals
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
 
+   public static List<Age> Ages { get; set; } = [];
 #if DEBUG
    public static List<TestINUI> TestNUIObjects { get; } = [];
 #endif

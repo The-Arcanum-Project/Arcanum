@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
@@ -143,4 +144,9 @@ public class NUISettings
                                                      Enum.GetValues<Language.Field>()
                                                          .Cast<Enum>()
                                                          .ToArray());
+
+   public NUISetting AgeSettings { get; set; } = new(Age.Field.Name,
+                                                     Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
+                                                     Enum.GetValues<Age.Field>().Cast<Enum>().ToArray());
 }
