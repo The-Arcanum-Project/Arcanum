@@ -158,20 +158,46 @@ public static class LvnHelpers
    /// <param name="source"></param>
    /// <param name="validationResult"></param>
    /// <param name="value"></param>
+   /// <param name="complainOnError"></param>
    /// <returns></returns>
    public static bool TryParseByte(this LiteralValueNode lvn,
                                    LocationContext ctx,
                                    string actionName,
                                    string source,
                                    ref bool validationResult,
-                                   out byte value)
+                                   out byte value,
+                                   bool complainOnError = true)
    {
       var lexeme = lvn.Value.GetLexeme(source);
-      if (!byte.TryParse(lexeme, out value))
+      if (!byte.TryParse(lexeme, out value) && complainOnError)
       {
          ctx.SetPosition(lvn.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidByteValue,
+                                        actionName,
+                                        lexeme);
+         value = 0;
+         validationResult = false;
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool TryParseFloat(this LiteralValueNode lvn,
+                                    LocationContext ctx,
+                                    string actionName,
+                                    string source,
+                                    ref bool validationResult,
+                                    out float value,
+                                    bool complainOnError = true)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!float.TryParse(lexeme, out value) && complainOnError)
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidFloatValue,
                                         actionName,
                                         lexeme);
          value = 0;

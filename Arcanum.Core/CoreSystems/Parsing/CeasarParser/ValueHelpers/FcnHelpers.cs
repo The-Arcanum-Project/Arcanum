@@ -101,8 +101,35 @@ public static class FcnHelpers
             var rgb = new byte[3];
             for (var i = 0; i < args.Count; i++)
                if (!args[i]
-                     .TryParseByte(ctx, callStack + $".{fcnKey}.ParseByte", source, ref validationResult, out rgb[i]))
+                     .TryParseByte(ctx,
+                                   callStack + $".{fcnKey}.ParseByte",
+                                   source,
+                                   ref validationResult,
+                                   out rgb[i],
+                                   false))
                {
+                  if (!args[i]
+                        .TryParseFloat(ctx,
+                                       callStack + $".{fcnKey}.ParseFloat",
+                                       source,
+                                       ref validationResult,
+                                       out var f,
+                                       false))
+                  {
+                     if (args[i]
+                        .TryParseByte(ctx,
+                                      callStack + $".{fcnKey}.ParseByte",
+                                      source,
+                                      ref validationResult,
+                                      out rgb[i]))
+                        continue;
+                  }
+                  else
+                  {
+                     rgb[i] = (byte)(f * 255f);
+                     continue;
+                  }
+
                   color = null;
                   return false;
                }

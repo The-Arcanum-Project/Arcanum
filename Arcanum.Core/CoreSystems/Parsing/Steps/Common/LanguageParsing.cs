@@ -46,7 +46,6 @@ public partial class LanguageParsing : FileLoadingService
 
          foreach (var node in unhandledNodes)
          {
-            var lexme = node.KeyNode.GetLexeme(source);
             if (!node.IsBlockNode(ctx, source, actionStack, ref validation, out var dn))
                continue;
 

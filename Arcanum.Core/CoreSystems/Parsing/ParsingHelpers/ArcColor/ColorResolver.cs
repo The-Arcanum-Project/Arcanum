@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 
 public class ColorResolver
 {
-   private readonly Dictionary<string, System.Windows.Media.Color> _colorMap = new();
+   public readonly Dictionary<string, JominiColor> ColorMap = new();
 
    private static readonly Lazy<ColorResolver> LazyInstance = new(() => new());
 
@@ -15,28 +15,24 @@ public class ColorResolver
    {
    }
 
-   public void AddColor(string key, Color color)
+   public bool TryAddColor(string key, JominiColor color)
    {
-      var mediaColor = System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
-      _colorMap[key] = mediaColor;
+      return ColorMap.TryAdd(key, color);
    }
 
-   public void ModifyColor(string key, Color color)
+   public void ModifyColor(string key, JominiColor color)
    {
-      if (_colorMap.ContainsKey(key))
-      {
-         var mediaColor = System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
-         _colorMap[key] = mediaColor;
-      }
+      if (ColorMap.ContainsKey(key))
+         ColorMap[key] = color;
    }
 
    public void RemoveColor(string key)
    {
-      _colorMap.Remove(key);
+      ColorMap.Remove(key);
    }
 
-   public System.Windows.Media.Color Resolve(string key)
+   public JominiColor Resolve(string key)
    {
-      return _colorMap.TryGetValue(key, out var color) ? color : Colors.Magenta;
+      return ColorMap.TryGetValue(key, out var color) ? color : JominiColor.Empty;
    }
 }

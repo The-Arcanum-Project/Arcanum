@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -8,6 +9,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 public static class DescriptorDefinitions
 {
    public static List<FileDescriptor> FileDescriptors { get; }
+
+   public static readonly FileDescriptor ColorParser = new([],
+                                                           ["game", "main_menu", "common", "named_colors"],
+                                                           ISavingService.Dummy,
+                                                           new("colors", "txt", "#"),
+                                                           new ColorParser(),
+                                                           true);
 
    public static readonly FileDescriptor DefaultMapPreDescriptor = new([],
                                                                        ["game", "in_game", "map_data", "default.map"],
@@ -24,7 +32,7 @@ public static class DescriptorDefinitions
                                                                     new DefaultMapParsing(),
                                                                     false);
 
-   public static readonly FileDescriptor LocationDescriptor = new([DefaultMapPreDescriptor],
+   public static readonly FileDescriptor LocationDescriptor = new([DefaultMapPreDescriptor, ColorParser],
                                                                   ["game", "in_game", "map_data", "named_locations"],
                                                                   ISavingService.Dummy,
                                                                   new("LocationsDefinition", "txt", "#"),
@@ -58,14 +66,14 @@ public static class DescriptorDefinitions
                                                                 false,
                                                                 false);
 
-   public static readonly FileDescriptor PopTypeDescriptor = new([],
+   public static readonly FileDescriptor PopTypeDescriptor = new([ColorParser],
                                                                  ["game", "in_game", "common", "pop_types"],
                                                                  ISavingService.Dummy,
                                                                  new("01_pop_types", "txt", "#"),
                                                                  new PopTypeParsing(),
                                                                  false);
 
-   public static readonly FileDescriptor PopDescriptor = new([PopTypeDescriptor, LocationDescriptor],
+   public static readonly FileDescriptor PopDescriptor = new([PopTypeDescriptor, LocationDescriptor, ColorParser],
                                                              ["game", "main_menu", "setup", "start", "06_pops.txt"],
                                                              ISavingService.Dummy,
                                                              new("06_pops", "txt", "#"),
@@ -73,7 +81,7 @@ public static class DescriptorDefinitions
                                                              false,
                                                              false);
 
-   public static readonly FileDescriptor LocationRankDescriptor = new([],
+   public static readonly FileDescriptor LocationRankDescriptor = new([ColorParser],
                                                                       ["game", "in_game", "common", "location_ranks"],
                                                                       ISavingService.Dummy,
                                                                       new("location_ranks", "txt", "#"),
@@ -81,14 +89,14 @@ public static class DescriptorDefinitions
                                                                       false,
                                                                       false);
 
-   public static readonly FileDescriptor CountryRankDescriptor = new([],
+   public static readonly FileDescriptor CountryRankDescriptor = new([ColorParser],
                                                                      ["game", "in_game", "common", "country_ranks"],
                                                                      ISavingService.Dummy,
                                                                      new("country_ranks", "txt", "#"),
                                                                      new CountryRankLoading(),
                                                                      false);
 
-   public static readonly FileDescriptor ReligiousSchoolsDescriptor = new([],
+   public static readonly FileDescriptor ReligiousSchoolsDescriptor = new([ColorParser],
                                                                           [
                                                                              "game", "in_game", "common",
                                                                              "religious_schools",
@@ -118,22 +126,22 @@ public static class DescriptorDefinitions
           false);
 
    public static readonly FileDescriptor RoadsAndCountriesDescriptor =
-      new([LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor],
-          ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt",],
+      new([LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor, ColorParser],
+          ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
           ISavingService.Dummy,
           new("10_countries_and_roads", "txt", "#"),
           new RoadsAndCountriesParsing(),
           false,
           false);
 
-   public static readonly FileDescriptor CultureDescriptor = new([],
+   public static readonly FileDescriptor CultureDescriptor = new([ColorParser],
                                                                  ["game", "in_game", "common", "cultures"],
                                                                  ISavingService.Dummy,
                                                                  new("cultures", "txt", "#"),
                                                                  new CultureParsing(),
                                                                  false);
 
-   public static readonly FileDescriptor CultureAfterParsingDescriptor = new([CultureDescriptor],
+   public static readonly FileDescriptor CultureAfterParsingDescriptor = new([CultureDescriptor, ColorParser],
                                                                              ["game", "in_game", "common", "cultures"],
                                                                              ISavingService.Dummy,
                                                                              new("cultures", "txt", "#"),
@@ -141,7 +149,7 @@ public static class DescriptorDefinitions
                                                                              false,
                                                                              uniqueId: 'B');
 
-   public static readonly FileDescriptor LanguageDescriptor = new([],
+   public static readonly FileDescriptor LanguageDescriptor = new([ColorParser],
                                                                   ["game", "in_game", "common", "languages"],
                                                                   ISavingService.Dummy,
                                                                   new("languages", "txt", "#"),
@@ -155,8 +163,8 @@ public static class DescriptorDefinitions
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
-         ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, CultureAfterParsingDescriptor,
-         LanguageDescriptor,
+         ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
+         CultureAfterParsingDescriptor, LanguageDescriptor,
       ];
    }
 }

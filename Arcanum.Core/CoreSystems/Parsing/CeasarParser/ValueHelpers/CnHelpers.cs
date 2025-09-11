@@ -531,4 +531,34 @@ public static class CnHelpers
       else
          validationResult = false;
    }
+
+   public static bool HasFunctionNode(this ContentNode node,
+                                      LocationContext ctx,
+                                      string source,
+                                      string className,
+                                      ref bool validationResult,
+                                      [MaybeNullWhen(false)] out FunctionCallNode value)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, className, ref validationResult))
+      {
+         value = null;
+         return false;
+      }
+
+      if (node.Value is not FunctionCallNode fcn)
+      {
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"{className}.StatementNode.IsFunctionNode",
+                                        $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
+                                        nameof(FunctionCallNode),
+                                        node.KeyNode.GetLexeme(source));
+         value = null!;
+         validationResult = false;
+         return false;
+      }
+
+      value = fcn;
+      return true;
+   }
 }

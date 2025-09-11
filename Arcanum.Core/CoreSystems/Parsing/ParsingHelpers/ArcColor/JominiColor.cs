@@ -22,7 +22,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
 
    public sealed record ColorKey(string Key) : JominiColor
    {
-      public override Color ToMediaColor() => ColorResolver.Instance.Resolve(Key);
+      public override Color ToMediaColor() => ColorResolver.Instance.Resolve(Key).ToMediaColor();
       public override JominiColorType Type => JominiColorType.Key;
       public override string ToString() => $"{Key}";
    }
@@ -56,5 +56,5 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override string ToString() => $"hsv360 {{ {H:F0} {S:F0} {V:F0} }}";
    }
 
-   public static JominiColor Empty { get; } = new ColorKey("ARCANUM_EMPTY_COLOR");
+   public static JominiColor Empty { get; } = new Rgb(140, 140, 0);
 }

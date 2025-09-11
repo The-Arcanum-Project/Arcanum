@@ -580,4 +580,13 @@ public class ParsingError : ILazySingleton
                                                                  "Failed to parse color value from '{0}'.",
                                                                  "The provided string '{0}' could not be parsed as a valid color value. Please ensure it is a valid color in the format {1}.",
                                                                  DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The float value that is invalid</param>
+   public DiagnosticDescriptor InvalidFloatValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                60,
+                                                                "Invalid Float Value",
+                                                                DiagnosticSeverity.Error,
+                                                                "The float value is invalid: '{0}'.",
+                                                                "The provided float value '{0}' is not a valid float. Please ensure it is a valid float format.",
+                                                                DiagnosticReportSeverity.PopupNotify);
 }
