@@ -8,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class PopTypeParsing : FileLoadingService
 {

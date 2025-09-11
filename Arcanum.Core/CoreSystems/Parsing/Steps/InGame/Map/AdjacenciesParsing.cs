@@ -3,10 +3,11 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GlobalStates;
+using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 public class AdjacencyFileLoading : FileLoadingService
 {
@@ -14,7 +15,7 @@ public class AdjacencyFileLoading : FileLoadingService
 
    public override string GetFileDataDebugInfo()
    {
-      return $"Loaded '{Globals.Adjacencies.Count}' adjacencies.\n" + 
+      return $"Loaded '{Globals.Adjacencies.Count}' adjacencies.\n" +
              $"\tLongest: \t{Globals.Adjacencies.Max(adj => adj.GetLength())}\n" +
              $"\tShortest: \t{Globals.Adjacencies.Min(adj => adj.GetLength())}\n";
    }
@@ -39,7 +40,7 @@ public class AdjacencyFileLoading : FileLoadingService
             lineNumber++;
             continue;
          }
-         
+
          if (string.IsNullOrWhiteSpace(line))
             continue;
 

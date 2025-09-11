@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -10,7 +9,7 @@ using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GlobalStates;
 using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class CultureAfterParsing : AfterLoadingService
 {

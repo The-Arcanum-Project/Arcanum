@@ -5,12 +5,12 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.Steps.Common.KeyWordClasses;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.KeyWordClasses;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class CultureParsing : FileLoadingService
 {

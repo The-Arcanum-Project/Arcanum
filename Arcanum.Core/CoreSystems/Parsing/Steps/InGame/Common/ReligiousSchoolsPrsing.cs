@@ -7,7 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class ReligiousSchoolsParsing : FileLoadingService
 {

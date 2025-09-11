@@ -5,10 +5,10 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 /// <summary>
 /// This class loads the header of the default.map file and provides fields to get the parsed data.

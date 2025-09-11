@@ -3,7 +3,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.GameObjects;
+namespace Arcanum.Core.GameObjects.Map;
 
 public enum AdjacencyType
 {

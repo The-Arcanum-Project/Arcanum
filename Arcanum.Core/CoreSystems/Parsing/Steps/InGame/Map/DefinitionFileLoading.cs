@@ -10,7 +10,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 public class DefinitionFileLoading : FileLoadingService
 {
@@ -101,7 +101,8 @@ public class DefinitionFileLoading : FileLoadingService
          ctxInstance.LineNumber = block.ContentElements[0].StartLine;
          DiagnosticException.LogWarning(ctxInstance,
                                         ParsingError.Instance.InvalidContentElementCount,
-                                        GetActionName(),0,
+                                        GetActionName(),
+                                        0,
                                         block.ContentElements.Count,
                                         block.ContentElements[0].ToString());
       }

@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.Steps.Common.KeyWordClasses;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.KeyWordClasses;
 
 public static class CultureKeywords
 {

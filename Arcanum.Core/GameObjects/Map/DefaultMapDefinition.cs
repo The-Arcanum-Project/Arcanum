@@ -5,7 +5,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.PropertyHelpers;
 
-namespace Arcanum.Core.GameObjects;
+namespace Arcanum.Core.GameObjects.Map;
 
 public class DefaultMapDefinition
 {

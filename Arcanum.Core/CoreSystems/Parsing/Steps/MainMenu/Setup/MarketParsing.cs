@@ -7,7 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 public class MarketParsing : FileLoadingService
 {
@@ -22,7 +22,7 @@ public class MarketParsing : FileLoadingService
    {
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
-      
+
       if (blocks.Count != 1)
       {
          DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -33,7 +33,7 @@ public class MarketParsing : FileLoadingService
                                         blocks.Count);
          return false;
       }
-      
+
       if (contents.Count != 0)
       {
          DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -44,7 +44,7 @@ public class MarketParsing : FileLoadingService
                                         fileObj.Path.FullPath);
          return false;
       }
-      
+
       var block = blocks[0];
       ctx.LineNumber = block.StartLine;
 
@@ -57,7 +57,7 @@ public class MarketParsing : FileLoadingService
                                         "market_manager");
          return false;
       }
-      
+
       if (block.SubBlocks.Count != 0)
       {
          DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -68,7 +68,7 @@ public class MarketParsing : FileLoadingService
                                         block.SubBlocks.Count);
          return false;
       }
-      
+
       if (block.ContentElements.Count != 1)
       {
          DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -79,7 +79,7 @@ public class MarketParsing : FileLoadingService
                                         block.Name);
          return false;
       }
-      
+
       var flawless = true;
       foreach (var kvp in block.ContentElements[0].GetLineKvpEnumerator(fileObj.Path))
       {
@@ -94,20 +94,20 @@ public class MarketParsing : FileLoadingService
             flawless = false;
             continue;
          }
-         
+
          if (Globals.Locations.TryGetValue(kvp.Value, out var location))
-            location.Market = new (location);
+            location.Market = new(location);
          else
          {
             ctx.ColumnNumber = kvp.Line;
             DiagnosticException.LogWarning(ctx.GetInstance(),
-                                         ParsingError.Instance.InvalidLocationKey,
-                                         GetActionName(),
-                                         kvp.Key);
+                                           ParsingError.Instance.InvalidLocationKey,
+                                           GetActionName(),
+                                           kvp.Key);
             flawless = false;
          }
       }
-      
+
       return flawless;
    }
 

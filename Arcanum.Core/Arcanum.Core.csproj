@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="CoreSystems\Parsing\Steps\InGame\"/>
         <Folder Include="CoreSystems\SavingSystem\Test\"/>
         <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
         <Folder Include="Utils\SearchingAlgorithms\"/>

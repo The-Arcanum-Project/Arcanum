@@ -9,7 +9,7 @@ using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 public class InstitutionAndReligiousSchoolsParsing : FileLoadingService
 {

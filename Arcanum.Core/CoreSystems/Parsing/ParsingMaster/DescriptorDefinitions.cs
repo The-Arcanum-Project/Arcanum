@@ -1,8 +1,11 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.Steps;
-using Arcanum.Core.CoreSystems.Parsing.Steps.Common;
+﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
+using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
@@ -156,6 +159,13 @@ public static class DescriptorDefinitions
                                                                   new LanguageParsing(),
                                                                   false);
 
+   public static readonly FileDescriptor AgeDescriptor = new([],
+                                                             ["game", "in_game", "common", "ages"],
+                                                             ISavingService.Dummy,
+                                                             new("ages", "txt", "#"),
+                                                             new AgeParsing(),
+                                                             false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -164,7 +174,7 @@ public static class DescriptorDefinitions
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
-         CultureAfterParsingDescriptor, LanguageDescriptor,
+         CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor,
       ];
    }
 }

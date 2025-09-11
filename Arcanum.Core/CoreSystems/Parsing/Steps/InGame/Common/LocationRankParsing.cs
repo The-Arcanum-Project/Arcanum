@@ -8,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps;
+namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(LocationRank))]
 public partial class LocationRankParsing : FileLoadingService
