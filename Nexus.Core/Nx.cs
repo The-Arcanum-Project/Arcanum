@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace Nexus.Core;
 
@@ -15,10 +16,10 @@ public static class Nx
    {
       target._setValue(e, value!);
    }
-   
+
    public static void ForceSet<T>(T value,
-                               INexus target,
-                               Enum e)
+                                  INexus target,
+                                  Enum e)
    {
       target._setValue(e, value!);
    }
@@ -74,5 +75,29 @@ public static class Nx
 
       var genericArgs = collectionType.GetGenericArguments();
       return genericArgs.Length == 1 ? genericArgs[0] : collectionType;
+   }
+
+   public static void AddToCollection<T>(
+      INexus target,
+      [LinkedPropertyEnum(nameof(target))] Enum e,
+      T value)
+   {
+      Debug.Assert(value != null, nameof(value) + " != null");
+      target._addToCollection(e, value!);
+   }
+
+   public static void RemoveFromCollection<T>(
+      INexus target,
+      [LinkedPropertyEnum(nameof(target))] Enum e,
+      T value)
+   {
+      Debug.Assert(value != null, nameof(value) + " != null");
+      target._removeFromCollection(e, value!);
+   }
+
+   public static void ClearCollection(INexus target,
+                                      [LinkedPropertyEnum(nameof(target))] Enum e)
+   {
+      target._clearCollection(e);
    }
 }

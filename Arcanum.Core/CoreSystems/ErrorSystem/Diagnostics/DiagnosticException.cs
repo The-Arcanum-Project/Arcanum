@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Common.UI;
 using Common.UI.MBox;
 
@@ -92,21 +93,30 @@ public sealed class DiagnosticException : Exception
          case DiagnosticReportSeverity.Silent:
             break;
          case DiagnosticReportSeverity.PopupNotify:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
-                                                                  "Error Encountered",
-                                                                  icon: GetMessageBoxIconForSeverity(Severity)));
+            ohNoWhatShouldWeDoNow =
+               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                              "Error Encountered",
+                                                              icon: GetMessageBoxIconForSeverity(Severity),
+                                                              height: 450));
             break;
          case DiagnosticReportSeverity.PopupWarning:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
-                                                                  "Error Encountered",
-                                                                  MBoxButton.OKRetryCancel,
-                                                                  GetMessageBoxIconForSeverity(Severity)));
+            ohNoWhatShouldWeDoNow =
+               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                              "Error Encountered",
+                                                              MBoxButton.OKRetryCancel,
+                                                              GetMessageBoxIconForSeverity(Severity),
+                                                              height: 450));
             break;
          case DiagnosticReportSeverity.PopupError:
-            ohNoWhatShouldWeDoNow = MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle.ShowMBox(ToString(),
-                                                                  "Error Encountered",
-                                                                  MBoxButton.RetryCancel,
-                                                                  GetMessageBoxIconForSeverity(Severity)));
+            ohNoWhatShouldWeDoNow =
+               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                              "Error Encountered",
+                                                              MBoxButton.RetryCancel,
+                                                              GetMessageBoxIconForSeverity(Severity),
+                                                              height: 450));
             break;
          case DiagnosticReportSeverity.Suppressed:
             // TODO @Minnator: Write to the Debug log of Arcanum

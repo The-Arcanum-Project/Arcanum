@@ -1,5 +1,8 @@
 ﻿// Ast.cs
 
+using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.GameObjects.Culture;
+
 namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
 
 /// <summary>
@@ -39,6 +42,7 @@ public class BlockNode : StatementNode
    {
       KeyNode = identifier;
    }
+
    public List<StatementNode> Children { get; } = [];
    public override (int, int) GetLocation() => (KeyNode.Line, KeyNode.Column);
 }
@@ -138,6 +142,7 @@ public class KeyOnlyNode : StatementNode
    {
       KeyNode = key;
    }
+
    public override (int, int) GetLocation() => (KeyNode.Line, KeyNode.Column);
 }
 

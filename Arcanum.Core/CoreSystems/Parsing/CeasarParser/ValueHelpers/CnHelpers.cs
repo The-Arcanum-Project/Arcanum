@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Nexus.Core;
 
@@ -166,7 +167,7 @@ public static class CnHelpers
                                            LocationContext ctx,
                                            string actionName,
                                            string source,
-                                           out string identifier)
+                                           [MaybeNullWhen(false)] out string identifier)
    {
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
@@ -183,18 +184,20 @@ public static class CnHelpers
          return false;
       }
 
-      identifier = lvn!.Value.GetLexeme(source);
+      identifier = lvn.Value.GetLexeme(source);
       return true;
    }
 
-   public static void TryGetIdentifierNode(this ContentNode node,
+   public static bool TryGetIdentifierNode(this ContentNode node,
                                            LocationContext ctx,
                                            string actionName,
                                            string source,
                                            out string identifier,
                                            ref bool validationResult)
    {
-      validationResult &= node.TryGetIdentifierNode(ctx, actionName, source, out identifier);
+      var result = node.TryGetIdentifierNode(ctx, actionName, source, out identifier);
+      validationResult &= result;
+      return result;
    }
 
    /// <summary>
@@ -216,6 +219,72 @@ public static class CnHelpers
    {
       if (node.TryGetIdentifierNode(ctx, actionName, source, out var id) && !string.IsNullOrEmpty(id))
          Nx.ForceSet(id, target, nxProp);
+   }
+
+   /// <summary>
+   /// Sets an identifier without validation for the identifier. Only use temporary until full validation is possible. <br/>
+   /// If the ContentNode is not valid, nothing happens. <br/>
+   /// </summary>
+   public static void SetIdentifierIfValid(this ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           ref bool validationResult,
+                                           INexus target,
+                                           Enum nxProp)
+   {
+      if (node.TryGetIdentifierNode(ctx, actionName, source, out var id, ref validationResult) &&
+          !string.IsNullOrEmpty(id))
+         Nx.ForceSet(id, target, nxProp);
+   }
+
+   /// <summary>
+   /// Validates and sets a color value from a ContentNode. <br/>
+   /// If the ContentNode is not valid, the <paramref name="validation"/> is set to false. <br/>
+   /// The color is parsed from the ContentNode. If parsing fails, the <paramref name="validation"/> is set to false. <br/>
+   /// Logs warnings if parsing fails.
+   /// </summary>
+   /// <param name="cn"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="validation"></param>
+   /// <param name="target"></param>
+   /// <param name="nxProp"></param>
+   public static void SetColorIfValid(this ContentNode cn,
+                                      LocationContext ctx,
+                                      string actionName,
+                                      string source,
+                                      ref bool validation,
+                                      INexus target,
+                                      Enum nxProp)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(cn.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(TryGetIdentifierNode)}"))
+         validation = false;
+
+      if (cn.Value is LiteralValueNode lvn)
+      {
+         Nx.ForceSet(new JominiColor.ColorKey(lvn.Value.GetLexeme(source)), target, nxProp);
+         return;
+      }
+
+      if (cn.Value is FunctionCallNode fcn)
+      {
+         if (!fcn.GetColorDefinition(ctx,
+                                     source,
+                                     actionName,
+                                     ref validation,
+                                     out var color))
+         {
+            validation = false;
+            return;
+         }
+
+         Nx.ForceSet(color, target, nxProp);
+      }
    }
 
    public static bool TryGetIntegerContentNode(this ContentNode node,

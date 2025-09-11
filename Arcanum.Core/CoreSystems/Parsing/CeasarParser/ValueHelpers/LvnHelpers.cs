@@ -18,6 +18,7 @@ public static class LvnHelpers
    {
       if (node is not LiteralValueNode lvn)
       {
+         ctx.SetPosition(node);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
                                         actionName,
@@ -145,5 +146,39 @@ public static class LvnHelpers
    {
       if (lvn.GetEnum(ctx, actionName, source, nxProp.GetType(), ref validationResult, out var enumObj))
          Nx.ForceSet(enumObj, target, nxProp);
+   }
+
+   /// <summary>
+   /// Tries to parse a byte from the LiteralValueNode. <br/>
+   /// Logs a warning if the value could not be parsed to a byte.
+   /// </summary>
+   /// <param name="lvn"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="validationResult"></param>
+   /// <param name="value"></param>
+   /// <returns></returns>
+   public static bool TryParseByte(this LiteralValueNode lvn,
+                                   LocationContext ctx,
+                                   string actionName,
+                                   string source,
+                                   ref bool validationResult,
+                                   out byte value)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!byte.TryParse(lexeme, out value))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidByteValue,
+                                        actionName,
+                                        lexeme);
+         value = 0;
+         validationResult = false;
+         return false;
+      }
+
+      return true;
    }
 }

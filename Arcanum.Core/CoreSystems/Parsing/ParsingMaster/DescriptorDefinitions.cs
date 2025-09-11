@@ -88,17 +88,6 @@ public static class DescriptorDefinitions
                                                                      new CountryRankLoading(),
                                                                      false);
 
-   public static readonly FileDescriptor RoadsAndCountriesDescriptor = new([LocationDescriptor, CountryRankDescriptor],
-                                                                           [
-                                                                              "game", "main_menu", "setup", "start",
-                                                                              "10_countries_and_roads.txt",
-                                                                           ],
-                                                                           ISavingService.Dummy,
-                                                                           new("10_countries_and_roads", "txt", "#"),
-                                                                           new RoadsAndCountriesParsing(),
-                                                                           false,
-                                                                           false);
-
    public static readonly FileDescriptor ReligiousSchoolsDescriptor = new([],
                                                                           [
                                                                              "game", "in_game", "common",
@@ -128,6 +117,30 @@ public static class DescriptorDefinitions
           false,
           false);
 
+   public static readonly FileDescriptor RoadsAndCountriesDescriptor =
+      new([LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor],
+          ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt",],
+          ISavingService.Dummy,
+          new("10_countries_and_roads", "txt", "#"),
+          new RoadsAndCountriesParsing(),
+          false,
+          false);
+
+   public static readonly FileDescriptor CultureDescriptor = new([],
+                                                                 ["game", "in_game", "common", "cultures"],
+                                                                 ISavingService.Dummy,
+                                                                 new("cultures", "txt", "#"),
+                                                                 new CultureParsing(),
+                                                                 false);
+
+   public static readonly FileDescriptor CultureAfterParsingDescriptor = new([CultureDescriptor],
+                                                                             ["game", "in_game", "common", "cultures"],
+                                                                             ISavingService.Dummy,
+                                                                             new("cultures", "txt", "#"),
+                                                                             new CultureAfterParsing(),
+                                                                             false,
+                                                                             uniqueId: 'B');
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -135,7 +148,7 @@ public static class DescriptorDefinitions
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
-         ReligiousSchoolsDescriptor, InstitutionsDescriptor,
+         ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, CultureAfterParsingDescriptor,
       ];
    }
 }

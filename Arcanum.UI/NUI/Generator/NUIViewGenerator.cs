@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Converters;
@@ -447,6 +448,12 @@ public static class NUIViewGenerator
          element = GetIntUI(binding);
       else if (type == typeof(double) || type == typeof(decimal))
          element = GetDoubleUI(binding);
+      else if (type == typeof(JominiColor))
+      {
+         var temp = JominiColor.Empty;
+         Nx.ForceGet(targets[0], nxProp, ref temp);
+         element = GetJominiColorUI(binding, temp);
+      }
       else
          throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
 
@@ -618,6 +625,18 @@ public static class NUIViewGenerator
       };
       numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
       return numericUpDown;
+   }
+
+   private static JominiColorView GetJominiColorUI(Binding binding,
+                                                   JominiColor color,
+                                                   int height = 23,
+                                                   int fontSize = 12)
+   {
+      var jomColView = new JominiColorView(color) { ColorTextBlock = { FontSize = fontSize } };
+      jomColView.ColorTextBlock.SetBinding(TextBlock.TextProperty, binding);
+      jomColView.Height = height;
+      jomColView.Margin = new(0);
+      return jomColView;
    }
 
    #endregion

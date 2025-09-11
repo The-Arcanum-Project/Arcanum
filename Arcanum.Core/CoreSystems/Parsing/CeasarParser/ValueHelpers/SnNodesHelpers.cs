@@ -97,4 +97,39 @@ public static class SnNodesHelpers
       value = cn;
       return true;
    }
+
+   /// <summary>
+   /// Returns true if the StatementNode is a KeyOnlyNode. <br/>
+   /// Logs a warning if it is not.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="source"></param>
+   /// <param name="className"></param>
+   /// <param name="validationResult"></param>
+   /// <param name="value"></param>
+   /// <returns></returns>
+   public static bool IsKeyOnlyNode(this StatementNode node,
+                                    LocationContext ctx,
+                                    string source,
+                                    string className,
+                                    ref bool validationResult,
+                                    [MaybeNullWhen(false)] out KeyOnlyNode value)
+   {
+      if (node is not KeyOnlyNode kon)
+      {
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"{className}.StatementNode.IsKeyOnlyNode",
+                                        node.GetType().Name,
+                                        nameof(KeyOnlyNode),
+                                        node.KeyNode.GetLexeme(source));
+         value = null!;
+         validationResult = false;
+         return false;
+      }
+
+      value = kon;
+      return true;
+   }
 }

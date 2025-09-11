@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
 
 namespace Arcanum.Core.CoreSystems.GFX;
 
@@ -7,7 +8,7 @@ public class GFXObject(IconType iconType, string filePath)
    private Bitmap? _icon;
    public IconType IconType { get; } = iconType;
    public string FilePath { get; } = filePath;
-   
+
    public Bitmap? Icon
    {
       get
@@ -23,11 +24,11 @@ public class GFXObject(IconType iconType, string filePath)
                break;
             case IconType.PNG:
             case IconType.TIFF:
-               return new (FilePath);
+               return new(FilePath);
             default:
                throw new ArgumentOutOfRangeException();
          }
-         
+
          return _icon;
       }
    }
@@ -36,7 +37,7 @@ public class GFXObject(IconType iconType, string filePath)
    {
       if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
          throw new FileNotFoundException("The specified file does not exist.", filePath);
-      
+
       var extension = Path.GetExtension(filePath).ToLowerInvariant();
       var iconType = extension switch
       {
@@ -48,6 +49,6 @@ public class GFXObject(IconType iconType, string filePath)
          _ => throw new NotSupportedException($"Unsupported file type: {extension}")
       };
 
-      return new (iconType, filePath);
+      return new(iconType, filePath);
    }
 }

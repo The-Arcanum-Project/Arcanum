@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
@@ -13,10 +14,9 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
       Tag = tag;
    }
 
-
    #region Nexus
 
-   public Location Capital { get; set; } = (Location)Location.Empty;
+   public Location Capital { get; set; } = Location.Empty;
    [ReadonlyNexus]
    [Description("The unique tag for this country.")]
    public Tag Tag { get; set; }
@@ -32,7 +32,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    [Description("The color key of this country")]
    public string Color { get; set; } = string.Empty;
    [Description("The religious school of this country.")]
-   public string ReligiousSchool { get; set; } = string.Empty;
+   public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
    [Description("The ruling dynasty of this country.")]
    public string Dynasty { get; set; } = string.Empty;
    [Description("The court language of this country.")]
@@ -43,8 +43,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    public CountryRank CountryRank { get; set; } = Globals.CountryRanks.Find(x => x.Level == 1)!;
    [Description("The technology level this country starts with.")]
    public int StartingTechLevel { get; set; }
-   
-   
+
    [Description("The owned and controlled locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
    [Description("The owned and controlled locations that are integrated of this country.")]

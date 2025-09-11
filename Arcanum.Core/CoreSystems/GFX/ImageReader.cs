@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using Pfim;
@@ -16,7 +17,8 @@ public static class ImageReader
    public static Bitmap ReadImage(string filePath)
    {
       if (!File.Exists(filePath))
-         return new (1, 1);
+         return new(1, 1);
+
       using var image = Pfimage.FromFile(filePath);
       PixelFormat format;
 
@@ -44,7 +46,7 @@ public static class ImageReader
       {
          var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
          var bitmap = new Bitmap(image.Width, image.Height, image.Stride, format, data);
-         return new (bitmap);
+         return new(bitmap);
       }
       finally
       {

@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps;
@@ -36,7 +37,6 @@ public class RoadsAndCountriesParsing : FileLoadingService
       { CountryKeywords.COUNTRY_NAME, DefaultParser },
       { CountryKeywords.COLOR, ColorParser },
    };
-
 
    public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country), typeof(Tag)];
 
@@ -318,22 +318,35 @@ public class RoadsAndCountriesParsing : FileLoadingService
    {
       cn.SetEnumIfValid(ctx, nameof(CountryTypeParser), source, country, Country.Field.Type, typeof(CountryType));
    }
-   
+
    private static void ReligiousSchoolParser(LocationContext ctx, string source, ContentNode cn, Country country)
    {
-      cn.SetIdentifierIfValid(ctx, nameof(ReligiousSchoolParser), source, country, Country.Field.ReligiousSchool);
+      if (cn.TryGetIdentifierNode(ctx, nameof(ReligiousSchoolParser), source, out var rsName))
+      {
+         if (!Globals.ReligiousSchools.TryGetValue(rsName, out var rs))
+         {
+            ctx.SetPosition(cn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.UnknownObjectKey,
+                                           nameof(ReligiousSchoolParser),
+                                           rsName,
+                                           nameof(ReligiousSchool));
+            return;
+         }
+
+         country.ReligiousSchool = rs;
+      }
    }
 
    private static void RevoltParser(LocationContext ctx, string source, ContentNode cn, Country country)
    {
       cn.SetBoolIfValid(ctx, nameof(RevoltParser), source, country, Country.Field.Revolt);
    }
-   
+
    private static void IsValidForReleaseParser(LocationContext ctx, string source, ContentNode cn, Country country)
    {
       cn.SetBoolIfValid(ctx, nameof(IsValidForReleaseParser), source, country, Country.Field.IsValidForRelease);
    }
-
 
    #endregion
 }

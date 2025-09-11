@@ -103,6 +103,9 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       var allowsEmpty = new List<bool>();
       var descriptions = new List<string?>();
 
+      // List of all members that are a collection
+      var collectionMembers = new List<ISymbol>();
+
       var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
       var className = classSymbol.Name;
 
@@ -151,11 +154,16 @@ public class PropertyModifierGenerator : IIncrementalGenerator
                                                                            StringComparison.Ordinal));
          // ReSharper disable once MergeIntoPattern
          descriptions.Add(descriptionAttribute is null
-                               ? null
-                               : descriptionAttribute.ConstructorArguments.Length == 1 &&
-                                 descriptionAttribute.ConstructorArguments[0].Value is string desc
-                                  ? desc
-                                  : null);
+                             ? null
+                             : descriptionAttribute.ConstructorArguments.Length == 1 &&
+                               descriptionAttribute.ConstructorArguments[0].Value is string desc
+                                ? desc
+                                : null);
+
+         if (memberType.AllInterfaces.Any(i => string.Equals(i.ToDisplayString(),
+                                                             "System.Collections.IList",
+                                                             StringComparison.Ordinal)))
+            collectionMembers.Add(member);
 
          // 2. Get a fully qualified name for the type
          var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -166,9 +174,11 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("    }");
       builder.AppendLine();
 
+      #region Property Modifiers and acessors
+
       builder.AppendLine("#region Property Modifier Backing Fields");
       builder.AppendLine();
-      
+
       // ------- Readonly Array -------
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// A pre-generated array indicating whether a property is read-only.");
@@ -189,23 +199,26 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       var allowsEmptyInitializer = string.Join(", ", allowsEmpty.Select(s => s.ToString().ToLower()));
       builder.AppendLine($"    private static readonly bool[] _allowsEmpty = {{ {allowsEmptyInitializer} }};");
       builder.AppendLine();
-      
+
       // -------- Description Array --------
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// A pre-generated array containing the description of each property, if any.");
       builder.AppendLine("    /// Accessed via the 'Field' enum index.");
       builder.AppendLine("    /// </summary>");
-      
-      var descriptionInitializer = string.Join(", ", descriptions.Select(s => s is null ? "null" : SymbolDisplay.FormatLiteral(s, true) ));
+
+      var descriptionInitializer = string.Join(", ",
+                                               descriptions.Select(s => s is null
+                                                                           ? "null"
+                                                                           : SymbolDisplay.FormatLiteral(s, true)));
       builder.AppendLine($"    private static readonly string?[] _descriptions = {{ {descriptionInitializer} }};");
       builder.AppendLine();
-      
+
       builder.AppendLine("#endregion");
       builder.AppendLine();
 
       builder.AppendLine("#region Property Modifier Methods");
       builder.AppendLine();
-      
+
       // --- Generate a public accessor method for the readonly status ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Checks if a property is marked as read-only.");
@@ -227,7 +240,7 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        return _allowsEmpty[(int)((Field)property)];");
       builder.AppendLine("    }");
       builder.AppendLine();
-      
+
       // --- Generate a public accessor method for the Description ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Gets the description of a property, if any.");
@@ -238,10 +251,14 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        return _descriptions[(int)((Field)property)];");
       builder.AppendLine("    }");
       builder.AppendLine();
-      
+
       builder.AppendLine("#endregion");
       builder.AppendLine();
-      
+
+      #endregion
+
+      #region Get and Set Value methods
+
       // 2. Generate the SetValue method
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
@@ -283,6 +300,96 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        }");
       builder.AppendLine("    }");
 
+      #endregion
+
+      #region Collection Manipulation Methods
+
+      builder.AppendLine();
+      builder.AppendLine("#region Collection Manipulation Methods");
+      builder.AppendLine();
+
+      // --- AddToCollection ---
+      builder.AppendLine("    public void _addToCollection(Enum property, object item)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in collectionMembers)
+      {
+         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
+         // Get the collection's item type, e.g., 'string' from 'ObservableRangeCollection<string>'
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item needs to be a {itemTypeName}\");");
+         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll && item is {itemTypeName} {member.Name}_typedItem)");
+         builder.AppendLine($"                    {member.Name}_coll.Add({member.Name}_typedItem);");
+         builder.AppendLine("                break;");
+      }
+
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // --- RemoveFromCollection ---
+      builder.AppendLine("    public void _removeFromCollection(Enum property, object item)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in collectionMembers)
+      {
+         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item needs to be a {itemTypeName}\");");
+         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll && item is {itemTypeName} {member.Name}_typedItem)");
+         builder.AppendLine($"                    {member.Name}_coll.Remove({member.Name}_typedItem);");
+         builder.AppendLine("                break;");
+      }
+
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // --- ClearCollection ---
+      builder.AppendLine("    public void _clearCollection(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in collectionMembers)
+      {
+         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll)");
+         builder.AppendLine($"                    {member.Name}_coll.Clear();");
+         builder.AppendLine("                break;");
+      }
+
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      builder.AppendLine("#endregion");
+      builder.AppendLine();
+
+      #endregion
+
+      #region Indexer
+
       // 4. Generate the indexer
       builder.AppendLine();
       builder.AppendLine("    public object this[Enum key]");
@@ -290,6 +397,10 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        get => _getValue(key);");
       builder.AppendLine("        set => _setValue(key, value);");
       builder.AppendLine("    }");
+
+      #endregion
+
+      #region Property Changed
 
       // 5. Generate the INotifyPropertyChanged implementation
       builder.AppendLine("    public event PropertyChangedEventHandler? PropertyChanged;");
@@ -309,6 +420,8 @@ public class PropertyModifierGenerator : IIncrementalGenerator
       builder.AppendLine("        return true;");
       builder.AppendLine("    }");
       builder.AppendLine();
+
+      #endregion
 
       builder.AppendLine("}"); // Close class
 

@@ -119,4 +119,15 @@ public class NUISettings
                                                                  Enum.GetValues<ReligiousSchool.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray());
+
+   public NUISetting CultureSettings { get; set; } = new(Culture.Field.Name,
+                                                         Enum.GetValues<Culture.Field>()
+                                                             .Cast<Enum>()
+                                                             .ToArray(),
+                                                         Enum.GetValues<Culture.Field>()
+                                                             .Cast<Enum>()
+                                                             .ToArray(),
+                                                         Enum.GetValues<Culture.Field>()
+                                                             .Cast<Enum>()
+                                                             .ToArray());
 }

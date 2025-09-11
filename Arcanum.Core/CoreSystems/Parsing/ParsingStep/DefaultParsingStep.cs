@@ -27,7 +27,7 @@ public class DefaultParsingStep
    public bool IsSuccessful
    {
       get => _isSuccessful;
-      private set => _isSuccessful = value;
+      protected set => _isSuccessful = value;
    }
    public string Name { get; }
 
@@ -93,27 +93,12 @@ public class DefaultParsingStep
    /// <returns></returns>
    public virtual bool Execute()
    {
-      IsSuccessful = true;
-      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
-         throw
-            new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
-
-      StepWeights = GetFileWeights();
-
-      _stopwatch.Restart();
-      _doneSteps = 0;
-      _accumulatedWeightDone = 0.0;
-      _lastReportedPercentage = 0.0;
-      Duration = TimeSpan.Zero;
-      _smoothedDurationMs = null;
-      _durations.Clear();
-      SubPercentageCompleted = 0.0;
-      SubStepsDone = 0;
+      SetupExecutionContext();
 
       if (IsMultithreadable)
       {
          var files = Descriptor.Files;
-         var totalSize = StepWeights.Sum(f => f > 0 ? f : 1);
+         var totalSize = StepWeights!.Sum(f => f > 0 ? f : 1);
          var avgSize = totalSize / files.Count;
 
          // Large file threshold for determining degree of parallelism
@@ -130,12 +115,11 @@ public class DefaultParsingStep
          else
             maxThreads = Math.Min(Environment.ProcessorCount * 4, files.Count);
 
-         
          try
          {
             CancellationTokenSource cts = new();
             var cancellationToken = cts.Token;
-            
+
             Parallel.For(0,
                          files.Count,
                          new() { MaxDegreeOfParallelism = maxThreads, CancellationToken = cancellationToken },
@@ -161,7 +145,6 @@ public class DefaultParsingStep
                             var weight = StepWeights[i];
                             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
                          });
-            
          }
          catch (OperationCanceledException)
          {
@@ -194,9 +177,34 @@ public class DefaultParsingStep
          Debug.WriteLine($"Single-threaded parsing step {Name} took {swInner.Elapsed.TotalMilliseconds:#####.0} ms to complete.");
       }
 
+      FinalizeExecutionContext();
+      return IsSuccessful;
+   }
+
+   protected void FinalizeExecutionContext()
+   {
       _stopwatch.Stop();
       Duration = _stopwatch.Elapsed;
-      return IsSuccessful;
+   }
+
+   protected void SetupExecutionContext()
+   {
+      IsSuccessful = true;
+      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
+         throw
+            new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
+
+      StepWeights = GetFileWeights();
+
+      _stopwatch.Restart();
+      _doneSteps = 0;
+      _accumulatedWeightDone = 0.0;
+      _lastReportedPercentage = 0.0;
+      Duration = TimeSpan.Zero;
+      _smoothedDurationMs = null;
+      _durations.Clear();
+      SubPercentageCompleted = 0.0;
+      SubStepsDone = 0;
    }
 
    public bool UnloadAllFiles()
@@ -218,7 +226,7 @@ public class DefaultParsingStep
    /// <param name="duration"></param>
    /// <param name="weight"></param>
    /// <param name="stepIndex"></param>
-   private void ReportSubStepCompletion(TimeSpan duration, double weight, int stepIndex)
+   protected void ReportSubStepCompletion(TimeSpan duration, double weight, int stepIndex)
    {
       lock (_lock)
       {

@@ -38,6 +38,8 @@ public static class Globals
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
 
+   public static Dictionary<string, Culture> Cultures { get; } = [];
+
 #if DEBUG
    public static List<TestINUI> TestNUIObjects { get; } = [];
 #endif

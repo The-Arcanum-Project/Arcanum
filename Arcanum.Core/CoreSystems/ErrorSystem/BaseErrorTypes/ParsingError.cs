@@ -526,4 +526,48 @@ public class ParsingError : ILazySingleton
                                                              "Failed to parse enum of type '{1}' value from '{0}'.",
                                                              "The provided string '{0}' could not be parsed to the target enum type '{1}'. Please ensure it is a valid enum value.",
                                                              DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The expected function argument count</param>
+   /// <param name="1">The actual function argument count</param>
+   /// <param name="2">The function name</param>
+   /// <param name="3">The function arguments that were found</param>
+   public DiagnosticDescriptor InvalidFunctionArgumentCount { get; } = new(DiagnosticCategory.Parsing,
+                                                                           55,
+                                                                           "Invalid Function Argument Count",
+                                                                           DiagnosticSeverity.Error,
+                                                                           "Expected {0}, but found {1} function arguments.",
+                                                                           "The function '{2}' requires exactly {0} arguments. The current count is {1}: '{3}'.",
+                                                                           DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The expected function argument type</param>
+   /// <param name="1">The actual function argument type</param>
+   /// <param name="2">The position of the function argument that is invalid (1-based)</param>
+   /// <param name="3">The function argument that was found</param>
+   /// <param name="4">The function name</param>
+   public DiagnosticDescriptor InvalidFunctionArgumentType { get; } = new(DiagnosticCategory.Parsing,
+                                                                          56,
+                                                                          "Invalid Function Argument Type",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "Function '{4}' expected an argument of type '{0}' but was {1}.",
+                                                                          "At position {2} the function argument was expected to be of type '{0}' but the parser encountered a value of type '{1}' ('{3}') instead.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The function name that is invalid</param>
+   /// <param name="1">A list of valid function names</param>
+   public DiagnosticDescriptor InvalidFunctionName { get; } = new(DiagnosticCategory.Parsing,
+                                                                  57,
+                                                                  "Invalid Function Name",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "Invalid function name '{0}'.",
+                                                                  "The function name '{0}' is not recognized in the current context. Valid options are {1}.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that could not be parsed</param>
+   public DiagnosticDescriptor InvalidByteValue { get; } = new(DiagnosticCategory.Parsing,
+                                                               58,
+                                                               "Invalid Byte Value",
+                                                               DiagnosticSeverity.Error,
+                                                               "Failed to parse byte value from '{0}'.",
+                                                               "The provided string '{0}' could not be parsed as a valid byte value. Please ensure it is a valid byte in the range 0-255.",
+                                                               DiagnosticReportSeverity.PopupNotify);
 }
