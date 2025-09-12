@@ -1,6 +1,6 @@
 ﻿// namespace Arcanum.Core.CoreSystems.Parsing.Steps;
 
-// Requires xregions, xareas, xprovinces, xlocations, xlocation_ranks, climate, topography, vegetation, coastal, river to be loaded first
+// Requires xregions, xareas, xprovinces, xlocations, xlocation_ranks, xclimate, topography, vegetation, coastal, river to be loaded first
 
 // Climate, topographyvegetation, requires new Parser
 // public class DevelopmentParsing : FileLoadingService

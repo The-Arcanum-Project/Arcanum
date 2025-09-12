@@ -43,6 +43,7 @@ public static class Globals
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
    public static Dictionary<string, Language> Languages { get; set; } = [];
    public static Dictionary<string, Climate> Climates { get; set; } = [];
+   public static Dictionary<string, Vegetation> Vegetations { get; set; } = [];
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
 

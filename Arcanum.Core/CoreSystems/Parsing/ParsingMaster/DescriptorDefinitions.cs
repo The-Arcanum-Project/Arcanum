@@ -173,6 +173,13 @@ public static class DescriptorDefinitions
                                                                  new ClimateParsing(),
                                                                  false);
 
+   public static readonly FileDescriptor VegetationDescriptor = new([],
+                                                                    ["game", "in_game", "common", "vegetation"],
+                                                                    ISavingService.Dummy,
+                                                                    new("vegetation", "txt", "#"),
+                                                                    new VegetationParsing(),
+                                                                    false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -181,7 +188,7 @@ public static class DescriptorDefinitions
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
-         CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor,
+         CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
       ];
    }
 }

@@ -155,4 +155,9 @@ public class NUISettings
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting VegetationSettings { get; set; } = new(Vegetation.Field.Name,
+                                                            Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray());
 }
