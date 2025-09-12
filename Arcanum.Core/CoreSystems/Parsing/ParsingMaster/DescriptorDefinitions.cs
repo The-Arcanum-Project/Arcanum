@@ -180,6 +180,16 @@ public static class DescriptorDefinitions
                                                                     new VegetationParsing(),
                                                                     false);
 
+   public static readonly FileDescriptor ModifierDefinitionDescriptor = new([],
+                                                                            [
+                                                                               "game", "main_menu", "common",
+                                                                               "modifier_type_definitions"
+                                                                            ],
+                                                                            ISavingService.Dummy,
+                                                                            new("modifiers", "txt", "#"),
+                                                                            new Steps.MainMenu.Common.ModifierParsing(),
+                                                                            false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -189,6 +199,7 @@ public static class DescriptorDefinitions
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
          CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
+         ModifierDefinitionDescriptor,
       ];
    }
 }

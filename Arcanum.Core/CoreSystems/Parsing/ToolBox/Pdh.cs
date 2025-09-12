@@ -127,4 +127,57 @@ public static class Pdh
                                         sn.KeyNode.GetLexeme(source));
       }
    }
+
+   /// <summary>
+   /// Parses all properties of a target object by iterating through the children of a BlockNode
+   /// and dispatching them to the appropriate parsers.
+   /// </summary>
+   /// <typeparam name="TTarget">The type of the object being populated.</typeparam>
+   /// <param name="block">The BlockNode containing the properties to parse.</param>
+   /// <param name="target">The target object instance to populate.</param>
+   /// <param name="ctx">The location context for error reporting.</param>
+   /// <param name="source">The source code string.</param>
+   /// <param name="validation">A reference to the overall validation flag.</param>
+   /// <param name="contentParsers">The dictionary of parsers for ContentNodes.</param>
+   /// <param name="blockParsers">The dictionary of parsers for BlockNodes.</param>
+   /// <returns>A list of all child StatementNodes that were not handled by any parser.</returns>
+   public static List<StatementNode> ParseProperties<TTarget>(
+      BlockNode block,
+      TTarget target,
+      LocationContext ctx,
+      string source,
+      ref bool validation,
+      IReadOnlyDictionary<string, ContentParser<TTarget>> contentParsers,
+      IReadOnlyDictionary<string, BlockParser<TTarget>> blockParsers) where TTarget : INexus
+   {
+      var unhandledNodes = new List<StatementNode>();
+
+      foreach (var propertyNode in block.Children)
+      {
+         var wasHandled = false;
+         if (propertyNode is ContentNode cn)
+         {
+            var key = cn.KeyNode.GetLexeme(source);
+            if (contentParsers.TryGetValue(key, out var parser))
+            {
+               parser(cn, target, ctx, source, ref validation);
+               wasHandled = true;
+            }
+         }
+         else if (propertyNode is BlockNode bn)
+         {
+            var key = bn.KeyNode.GetLexeme(source);
+            if (blockParsers.TryGetValue(key, out var parser))
+            {
+               parser(bn, target, ctx, source, ref validation);
+               wasHandled = true;
+            }
+         }
+
+         if (!wasHandled)
+            unhandledNodes.Add(propertyNode);
+      }
+
+      return unhandledNodes;
+   }
 }

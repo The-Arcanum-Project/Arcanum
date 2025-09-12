@@ -192,21 +192,74 @@ public static class ParsingToolBox
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (node.Value is LiteralValueNode lvn)
       {
-         value = 0;
-         return false;
+         var lexeme = lvn.Value.GetLexeme(source);
+         if (!int.TryParse(lexeme, out value))
+         {
+            ctx.SetPosition(lvn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidIntegerValue,
+                                           actionName,
+                                           lexeme);
+            value = 0;
+            validation = false;
+            return false;
+         }
       }
-
-      var lexeme = lvn.Value.GetLexeme(source);
-      if (!int.TryParse(lexeme, out value))
+      else if (node.Value is UnaryNode un)
       {
-         ctx.SetPosition(lvn.Value);
+         if (un.Operator.Type != TokenType.Minus)
+         {
+            ctx.SetPosition(un.Operator);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidFloatOperator,
+                                           actionName,
+                                           un.Operator.GetLexeme(source),
+                                           nameof(TokenType.Minus));
+            value = 0;
+            return false;
+         }
+
+         if (un.Value is not LiteralValueNode lvn2)
+         {
+            ctx.SetPosition(un.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidNodeType,
+                                           actionName,
+                                           un.Value.GetType().Name,
+                                           nameof(LiteralValueNode),
+                                           node.KeyNode.GetLexeme(source));
+            value = 0;
+            validation = false;
+            return false;
+         }
+
+         var lexeme = lvn2.Value.GetLexeme(source);
+         if (!int.TryParse(lexeme, out value))
+         {
+            ctx.SetPosition(lvn2.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidIntegerValue,
+                                           actionName,
+                                           lexeme);
+            value = 0;
+            return false;
+         }
+
+         value = -value;
+      }
+      else
+      {
+         ctx.SetPosition(node.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidIntegerValue,
+                                        ParsingError.Instance.InvalidNodeType,
                                         actionName,
-                                        lexeme);
+                                        node.Value.GetType().Name,
+                                        $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
+                                        node.KeyNode.GetLexeme(source));
          value = 0;
+         validation = false;
          return false;
       }
 

@@ -172,4 +172,15 @@ public class NUISettings
                                                                     Enum.GetValues<ModifierDefinition.Field>()
                                                                         .Cast<Enum>()
                                                                         .ToArray());
+
+   public NUISetting ModifierGameDataSettings { get; set; } = new(ModifierGameData.Field.Category,
+                                                                  Enum.GetValues<ModifierGameData.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<ModifierGameData.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<ModifierGameData.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray());
 }
