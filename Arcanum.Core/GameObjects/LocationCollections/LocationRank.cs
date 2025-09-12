@@ -41,4 +41,10 @@ public partial class LocationRank(string name, int order)
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<LocationRank> GetGlobalItems() => Globals.LocationRanks;
    public static LocationRank Empty { get; } = new("empty", int.MinValue);
+
+   #region ISearchable
+
+   public override string GetNamespace => nameof(LocationRank);
+
+   #endregion
 }

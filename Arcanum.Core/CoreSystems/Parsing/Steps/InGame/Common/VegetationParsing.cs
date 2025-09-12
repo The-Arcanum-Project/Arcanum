@@ -15,11 +15,11 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 public partial class VegetationParsing : ParserValidationLoadingService
 {
    public override List<Type> ParsedObjects { get; } = [typeof(Vegetation)];
-   public override string GetFileDataDebugInfo() => $"Parsed Vegetations: {Globals.Vegetations.Count}";
+   public override string GetFileDataDebugInfo() => $"Parsed Vegetation: {Globals.Vegetation.Count}";
 
    public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
    {
-      Globals.Vegetations.Clear();
+      Globals.Vegetation.Clear();
       return true;
    }
 
@@ -38,7 +38,7 @@ public partial class VegetationParsing : ParserValidationLoadingService
          var vegetation = new Vegetation(key);
 
          var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation);
-         if (!Globals.Vegetations.TryAdd(key, vegetation))
+         if (!Globals.Vegetation.TryAdd(key, vegetation))
          {
             ctx.SetPosition(bn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),

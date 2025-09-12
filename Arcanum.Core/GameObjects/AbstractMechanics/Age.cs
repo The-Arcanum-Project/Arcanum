@@ -48,4 +48,10 @@ public partial class Age(string name) : NameKeyDefined(name), INUI, IEmpty<Age>,
    public static IEnumerable<Age> GetGlobalItems() => Globals.Ages;
 
    #endregion
+
+   #region ISearchable
+
+   public override string GetNamespace => nameof(Age);
+
+   #endregion
 }

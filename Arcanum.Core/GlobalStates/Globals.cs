@@ -26,14 +26,7 @@ public enum AppState
 
 public static class Globals
 {
-   public static Dictionary<string, Location> Locations { get; } = [];
-   public static Dictionary<string, Province> Provinces { get; } = [];
-   public static Dictionary<string, Area> Areas { get; } = [];
-   public static Dictionary<string, Region> Regions { get; } = [];
-   public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
-   public static Dictionary<string, Continent> Continents { get; } = [];
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
-   public static List<Adjacency> Adjacencies { get; } = [];
    public static Dictionary<string, PopType> PopTypes { get; } = [];
    public static List<LocationRank> LocationRanks { get; } = [];
    public static List<CountryRank> CountryRanks { get; } = [];
@@ -43,10 +36,23 @@ public static class Globals
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
    public static Dictionary<string, Language> Languages { get; set; } = [];
-   public static Dictionary<string, Climate> Climates { get; set; } = [];
-   public static Dictionary<string, Vegetation> Vegetations { get; set; } = [];
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
+
+   #region Map
+
+   public static Dictionary<string, Climate> Climates { get; set; } = [];
+   public static Dictionary<string, Vegetation> Vegetation { get; set; } = [];
+   public static Dictionary<string, Topography> Topography { get; set; } = [];
+   public static Dictionary<string, Location> Locations { get; } = [];
+   public static Dictionary<string, Province> Provinces { get; } = [];
+   public static Dictionary<string, Area> Areas { get; } = [];
+   public static Dictionary<string, Region> Regions { get; } = [];
+   public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
+   public static Dictionary<string, Continent> Continents { get; } = [];
+   public static List<Adjacency> Adjacencies { get; } = [];
+
+   #endregion
 
    #region Common
 

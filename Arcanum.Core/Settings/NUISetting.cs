@@ -183,4 +183,9 @@ public class NUISettings
                                                                   Enum.GetValues<ModifierGameData.Field>()
                                                                       .Cast<Enum>()
                                                                       .ToArray());
+
+   public NUISetting TopographySettings { get; set; } = new(Topography.Field.Name,
+                                                            Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray());
 }

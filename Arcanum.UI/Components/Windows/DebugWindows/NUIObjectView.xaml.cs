@@ -40,19 +40,20 @@ public partial class NUIObjectView
       get => (List<INUI>)GetValue(NUIObjectsProperty);
       set => SetValue(NUIObjectsProperty, value);
    }
+
    public static readonly DependencyProperty NUIObjectsProperty =
       DependencyProperty.Register(nameof(NUIObjects),
                                   typeof(List<INUI>),
                                   typeof(NUIObjectView),
                                   new(default(List<INUI>)));
 
-
    public NUIObjectView()
    {
       InitializeComponent();
 
-      NUIObjectTypes = NUITypeRegistry.GetAllNUITypes().ToList();
-
+      var types = NUITypeRegistry.GetAllNUITypes().ToList();
+      types.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+      NUIObjectTypes = types;
    }
 
    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -73,6 +74,7 @@ public partial class NUIObjectView
             return;
          }
       }
+
       SelectedObjectName = "No objects found";
       NUIObjects = [];
       ViewPresenter.Content = null;
@@ -82,8 +84,8 @@ public partial class NUIObjectView
    {
       if (sender is not ListView lv)
          return;
-      
-      var selectedItems  = lv.SelectedItems.Cast<INUI>().ToList();
+
+      var selectedItems = lv.SelectedItems.Cast<INUI>().ToList();
       if (selectedItems.Count == 0)
       {
          SelectedObjectName = "No object selected";
@@ -96,6 +98,6 @@ public partial class NUIObjectView
       else
          SelectedObjectName = $"{selectedItems.Count} items selected";
 
-      NUIViewGenerator.GenerateAndSetView(new (selectedItems, true, ViewPresenter));
+      NUIViewGenerator.GenerateAndSetView(new(selectedItems, true, ViewPresenter));
    }
 }

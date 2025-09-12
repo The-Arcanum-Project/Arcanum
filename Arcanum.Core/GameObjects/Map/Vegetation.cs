@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
@@ -39,7 +40,15 @@ public partial
    public NUISetting Settings => Config.Settings.NUIObjectSettings.VegetationSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Vegetation Empty { get; } = new("Arcanum_Empty_Vegetation");
-   public static IEnumerable<Vegetation> GetGlobalItems() => Globals.Vegetations.Values;
+   public static IEnumerable<Vegetation> GetGlobalItems() => Globals.Vegetation.Values;
+
+   #endregion
+
+   #region ISearchable
+
+   public override string GetNamespace => nameof(Vegetation);
+   public override IQueastorSearchSettings.Category SearchCategory
+      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
 
    #endregion
 }

@@ -57,6 +57,12 @@
     <s:String
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=13FD46670AB6BB4D85C92B5375DCCA1E/Text/@EntryValue">public partial class $NxClassName$(string name) : NameKeyDefined(name), INUI, IEmpty&lt;$NxClassName$&gt;, ICollectionProvider&lt;$NxClassName$&gt;
 {
+# region Nexus Properties
+
+   
+
+# endregion
+
 #region Interface Properties
    public bool IsReadonly =&gt; $isReadonly$;
    public NUISetting Settings =&gt; Config.Settings.NUIObjectSettings.$NxClassName$Settings;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.GlobalStates;
@@ -82,6 +83,13 @@ public partial class ModifierDefinition(string name) : NameKeyDefined(name),
    public INUINavigation[] Navigations { get; } = [];
    public static ModifierDefinition Empty { get; } = new("Arcanum_Empty_ModifierDefinition");
    public static IEnumerable<ModifierDefinition> GetGlobalItems() => Globals.ModifierDefinitions.Values;
+
+   #endregion
+
+   #region ISearchable
+
+   public override string GetNamespace => nameof(ModifierDefinition);
+   public override IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
 
    #endregion
 }

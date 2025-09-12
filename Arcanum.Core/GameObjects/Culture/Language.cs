@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+﻿using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
@@ -77,4 +78,10 @@ public partial class Language(string name) : NameKeyDefined(name), INUI, ICollec
    public static IEnumerable<Language> GetGlobalItems() => Globals.Languages.Values;
 
    public static Language Empty { get; } = new("Arcanum_Language_Empty");
+
+   #region ISearchable
+
+   public override string GetNamespace => nameof(Language);
+
+   #endregion
 }

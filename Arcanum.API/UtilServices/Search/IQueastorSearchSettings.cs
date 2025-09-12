@@ -16,20 +16,22 @@ public class IQueastorSearchSettings
       //EndsWith,
       ExactMatch,
       Fuzzy,
+
       //Regex,
       Default, // Fuzzy, Exact
    }
 
-      [Flags]
-      public enum Category
-      {
-         None = 0,
-         Settings = 1 << 0,      // 1
-         UiElements = 1 << 1,    // 2
-         GameObjects = 1 << 2,   // 4
-         MapObjects = 1 << 3,    // 8
-         All = Settings | UiElements | GameObjects | MapObjects,
-      }
+   [Flags]
+   public enum Category
+   {
+      None = 0,
+      Settings = 1 << 0, // 1
+      UiElements = 1 << 1, // 2
+      GameObjects = 1 << 2, // 4
+      MapObjects = 1 << 3, // 8
+      AbstractObjects = 1 << 4, // 16
+      All = Settings | UiElements | GameObjects | MapObjects | AbstractObjects, // 31,
+   }
 
    public SearchModes SearchMode { get; set; } = SearchModes.Default;
    public SortingOptions SortingOption { get; set; } = SortingOptions.Relevance;

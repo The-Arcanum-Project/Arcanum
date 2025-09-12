@@ -180,7 +180,7 @@ public static class DescriptorDefinitions
                                                                     new VegetationParsing(),
                                                                     false);
 
-   public static readonly FileDescriptor ModifierDefinitionDescriptor = new([],
+   public static readonly FileDescriptor ModifierDefinitionDescriptor = new([ColorParser],
                                                                             [
                                                                                "game", "main_menu", "common",
                                                                                "modifier_type_definitions"
@@ -189,6 +189,13 @@ public static class DescriptorDefinitions
                                                                             new("modifiers", "txt", "#"),
                                                                             new Steps.MainMenu.Common.ModifierParsing(),
                                                                             false);
+
+   public static readonly FileDescriptor TopographyDescriptor = new([],
+                                                                    ["game", "in_game", "common", "topography"],
+                                                                    ISavingService.Dummy,
+                                                                    new("topography", "txt", "#"),
+                                                                    new TopographyParsing(),
+                                                                    false);
 
    static DescriptorDefinitions()
    {
@@ -199,7 +206,7 @@ public static class DescriptorDefinitions
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
          CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
-         ModifierDefinitionDescriptor,
+         ModifierDefinitionDescriptor, TopographyDescriptor,
       ];
    }
 }
