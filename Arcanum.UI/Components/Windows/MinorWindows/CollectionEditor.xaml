@@ -26,21 +26,21 @@
             <sc:BaseButton Margin = "3"
                            HorizontalAlignment = "Stretch"
                            VerticalAlignment = "Top"
-                           Click="MoveLeftButton_OnClick"
+                           Click = "MoveLeftButton_OnClick"
                            x:Name = "MoveLeftButton"
                            ToolTip = "Move selected items to the left"
                            Height = "34">
-                <Image Source = "../../../Assets/Icons/30x30/ArrowLeft30x30.png"> </Image>
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/ArrowLeft30x30.png"> </Image>
             </sc:BaseButton>
 
             <sc:BaseButton Margin = "3"
                            HorizontalAlignment = "Stretch"
                            VerticalAlignment = "Top"
-                           Click="MoveRightButton_OnClick"
+                           Click = "MoveRightButton_OnClick"
                            x:Name = "MoveRightButton"
                            ToolTip = "Move selected items to the right"
                            Height = "34">
-                <Image Source = "../../../Assets/Icons/30x30/ArrowRight30x30.png"> </Image>
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/ArrowRight30x30.png"> </Image>
             </sc:BaseButton>
         </StackPanel>
 

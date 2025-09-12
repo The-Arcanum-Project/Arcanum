@@ -13,13 +13,15 @@
         WindowStyle = "None"
         ResizeMode = "NoResize"
         WindowStartupLocation = "CenterScreen"
-        Icon = "/Assets/Logo/ArcanumSimplified.ico"
-        Activated="MainMenuScreen_OnActivated">
+        Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
+        Activated = "MainMenuScreen_OnActivated">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Base/BaseMenuButtonTheme.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseMenuButtonTheme.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -53,7 +55,7 @@
             </TextBlock>
 
             <StackPanel x:Name = "MenuBarStackPanel"
-                Grid.Row = "1"
+                        Grid.Row = "1"
                         Grid.Column = "0">
                 <RadioButton IsChecked = "True"
                              Margin = "40,0,40,10"
@@ -95,7 +97,7 @@
                              FontSize = "14"
                              Command = "{Binding AttributionsVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
-                <Image Source = "/Assets/Logo/ArcanumForeColor.png"
+                <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
                        Margin = "40, 73, 40, 40" />
             </StackPanel>
 
@@ -135,11 +137,10 @@
                                                  Click = "CreateNewProjectButton_Click"
                                                  Background = "{StaticResource GreenColorBrush}"
                                                  ToolTip = "Create a new Arcanum configuration for a mod">
-                            <Image Source = "/Assets/Icons/30x30/AddBordered30x30.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png" />
 
                         </styleClasses:BaseButton>
-                        <TextBlock
-                                    Text="{Binding LaunchButtonText}"
+                        <TextBlock Text = "{Binding LaunchButtonText}"
                                    VerticalAlignment = "Center"
                                    Margin = "10, 4, 4,4"
                                    FontSize = "14">
@@ -154,7 +155,7 @@
                                                  Click = "LoadLastConfigButton_Click"
                                                  MouseEnter = "LoadLastConfigButton_MouseEnter"
                                                  Background = "{StaticResource GreenColorBrush}">
-                            <Image Source = "/Assets/Icons/30x30/Play30x30.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/Play30x30.png" />
                         </styleClasses:BaseButton>
                     </StackPanel>
                 </Border>
@@ -166,8 +167,9 @@
                                          Margin = "0"
                                          Padding = "23"
                                          Background = "Transparent"
-                                         Click = "CloseButton_Click">
-                    <Image Source = "/Assets/Icons/40x40/Close40x40.png"
+                                         Click = "CloseButton_Click"
+                                         BorderThickness = "0">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Close40x40.png"
                            Stretch = "None"
                            Margin = "0"
                            VerticalAlignment = "Center"

@@ -1,7 +1,4 @@
-﻿using System.Windows.Media;
-using Color = System.Drawing.Color;
-
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 
 public class ColorResolver
 {

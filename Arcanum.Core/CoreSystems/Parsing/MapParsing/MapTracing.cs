@@ -1,7 +1,6 @@
 ﻿#define ENABLE_VISUAL_TRACING
 
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;

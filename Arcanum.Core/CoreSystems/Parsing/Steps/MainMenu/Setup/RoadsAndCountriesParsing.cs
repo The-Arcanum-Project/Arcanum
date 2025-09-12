@@ -63,7 +63,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
       var rn = Parser.Parse(fileObj, out var source);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
-      Parser.VerifyNodeTypes([..rn.Statements.Cast<AstNode>()],
+      Parser.VerifyNodeTypes([..rn.Statements],
                              [typeof(BlockNode), typeof(ContentNode)],
                              ctx,
                              GetActionName());

@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Arcanum.Core.CoreSystems.Map;
+﻿namespace Arcanum.Core.CoreSystems.Map;
 
 public sealed class Polygon
 {

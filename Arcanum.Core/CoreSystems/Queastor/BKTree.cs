@@ -6,7 +6,6 @@ namespace Arcanum.Core.CoreSystems.Queastor;
 public class BkTree
 {
    private Node? _root;
-   private const int MAX_EXPECTED_WORD_LENGTH = 64;
 
    private class Node(string term)
    {
@@ -68,7 +67,7 @@ public class BkTree
       // Early exit if there are no children to process.
       if (remainingTerms.IsEmpty)
          return node;
-      
+
       var groupsByDistance = new Dictionary<int, List<string>>();
       foreach (var term in remainingTerms)
       {

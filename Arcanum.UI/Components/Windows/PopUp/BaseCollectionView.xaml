@@ -12,8 +12,14 @@
                          Width = "600">
 
     <styleClasses:BaseWindow.Resources>
-        <converters:ComplexTypeVisibilityConverter x:Key = "ComplexTypeVisibilityConverter" />
-        <converters:IsListTypeVisibilityConverter x:Key = "IsListTypeVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:ComplexTypeVisibilityConverter x:Key = "ComplexTypeVisibilityConverter" />
+            <converters:IsListTypeVisibilityConverter x:Key = "IsListTypeVisibilityConverter" />
+        </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
 
@@ -70,7 +76,7 @@
                                                      Click = "ViewCollection_Button_Click"
                                                      HorizontalAlignment = "Right"
                                                      Visibility = "{Binding Converter={StaticResource IsListTypeVisibilityConverter}}">
-                                <Image Source = "/Assets/Icons/20x20/Eye20x20.png"
+                                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Eye20x20.png"
                                        VerticalAlignment = "Center"
                                        HorizontalAlignment = "Center"
                                        Stretch = "UniformToFill"

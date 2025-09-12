@@ -12,7 +12,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Specific/PresentationCard.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Specific/PresentationCard.xaml" />
                 <ResourceDictionary>
 
                     <Style x:Key = "SocialCardBorderStyle"
@@ -135,7 +135,7 @@
                     </StackPanel>
                     <Image Width = "120"
                            Height = "120"
-                           Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                           Source = "/Arcanum_UI;component/Assets/Images/ProvinceFileCreator1024x1024.png"
                            Margin = "270,10,10,10" />
                 </Grid>
             </Border>
@@ -202,7 +202,7 @@
                     <Border Style = "{StaticResource SocialCardBorderStyle}">
                         <StackPanel>
                             <StackPanel Orientation = "Horizontal">
-                                <Image Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                <Image Source = "/Arcanum_UI;component/Assets/Images/ProvinceFileCreator1024x1024.png"
                                        Style = "{StaticResource SocialIconStyle}" />
                                 <TextBlock Style = "{StaticResource SocialHeaderText}"
                                            PreviewMouseUp = "DiscordTextBlock_PreviewMouseUp">
@@ -219,7 +219,7 @@
                             Margin = "15,0,0,0">
                         <StackPanel>
                             <StackPanel Orientation = "Horizontal">
-                                <Image Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                <Image Source = "/Arcanum_UI;component/Assets/Images/ProvinceFileCreator1024x1024.png"
                                        Style = "{StaticResource SocialIconStyle}" />
                                 <TextBlock Style = "{StaticResource SocialHeaderText}"
                                            PreviewMouseUp = "GitHubTextBlock_PreviewMouseUp">

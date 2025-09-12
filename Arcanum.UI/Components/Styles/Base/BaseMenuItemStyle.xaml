@@ -2,6 +2,12 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseScrollbar.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <MenuScrollingVisibilityConverter x:Key = "MenuScrollingVisibilityConverter" />
     <Geometry x:Key = "DownArrow"> M 0,0 L 3.5,4 L 7,0 Z </Geometry>
     <Geometry x:Key = "UpArrow"> M 0,4 L 3.5,0 L 7,4 Z </Geometry>
@@ -158,7 +164,7 @@
                                   Margin = "{TemplateBinding Padding}"
                                   RecognizesAccessKey = "True"
                                   SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
-                                  HorizontalAlignment = "Left"/>
+                                  HorizontalAlignment = "Left" />
                 <Popup Grid.Column = "0"
                        x:Name = "PART_Popup"
                        AllowsTransparency = "true"
@@ -264,7 +270,7 @@
                 Height = "22"
                 CornerRadius = "3"
                 SnapsToDevicePixels = "true"
-                Margin="0,0,0,1">
+                Margin = "0,0,0,1">
             <Grid Margin = "-1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MinWidth = "24"
@@ -591,16 +597,19 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
-    
-    <Style x:Key="ImageMenuItemStyle"
-           TargetType="userControls:SearchableMenuItem"
-           BasedOn="{StaticResource BaseMenuItemStyle}">
+
+
+    <Style x:Key = "ImageMenuItemStyle"
+           TargetType = "userControls:SearchableMenuItem"
+           BasedOn = "{StaticResource BaseMenuItemStyle}">
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
+            <Trigger Property = "IsMouseOver"
+                     Value = "True">
                 <!-- Example: hover background -->
-                <Setter Property="Background" Value="LightGray"/>
-                <Setter Property="BorderBrush" Value="DarkGray"/>
+                <Setter Property = "Background"
+                        Value = "LightGray" />
+                <Setter Property = "BorderBrush"
+                        Value = "DarkGray" />
             </Trigger>
         </Style.Triggers>
     </Style>

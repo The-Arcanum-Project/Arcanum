@@ -4,8 +4,8 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:behaviors="clr-namespace:Arcanum.UI.Components.Behaviors"
+             xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
              xmlns:mainMenuScreen = "clr-namespace:Arcanum.UI.Components.Views.MainMenuScreen"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              mc:Ignorable = "d"
@@ -19,7 +19,7 @@
             <mainMenuScreen:ZeroToVisibilityConverter x:Key = "ZeroToVisibilityConverter" />
 
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Base/BaseModBoxItem.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseModBoxItem.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -45,7 +45,7 @@
                                  x:Name = "VanillaFolderButton"
                                  BorderThickness = "1"
                                  Click = "VanillaFolderButton_Click">
-            <Image Source = "/Assets/Icons/20x20/Folder20x20.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Folder20x20.png"
                    Stretch = "None" />
         </styleClasses:BaseButton>
 
@@ -54,8 +54,8 @@
                                       Margin = "3"
                                       FontSize = "14"
                                       x:Name = "VanillaFolderTextBox"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      TextWrapping="NoWrap">
+                                      VerticalScrollBarVisibility = "Disabled"
+                                      TextWrapping = "NoWrap">
         </styleClasses:CorneredTextBox>
 
 
@@ -67,7 +67,7 @@
                 Margin = "3"
                 ClipToBounds = "True">
 
-            <Image Source = "/Assets/Icons/20x20/Box20x20.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Box20x20.png"
                    Stretch = "None"
                    ToolTip = "Vanilla Game Folder">
 
@@ -87,7 +87,7 @@
                                  x:Name = "ModFolderButton"
                                  BorderThickness = "1"
                                  Click = "ModFolderButton_Click">
-            <Image Source = "/Assets/Icons/20x20/Folder20x20.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Folder20x20.png"
                    Stretch = "None" />
         </styleClasses:BaseButton>
 
@@ -96,8 +96,8 @@
                                       Margin = "3"
                                       FontSize = "14"
                                       x:Name = "ModFolderTextBox"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      TextWrapping="NoWrap">
+                                      VerticalScrollBarVisibility = "Disabled"
+                                      TextWrapping = "NoWrap">
         </styleClasses:CorneredTextBox>
 
         <Border Grid.Column = "2"
@@ -108,7 +108,7 @@
                 Margin = "3"
                 ClipToBounds = "True">
 
-            <Image Source = "/Assets/Icons/20x20/ModAdd20x20.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ModAdd20x20.png"
                    Stretch = "None"
                    ToolTip = "The folder of the mod you want to edit">
 
@@ -156,7 +156,7 @@
                                          Background = "{StaticResource GreenColorBrush}"
                                          Click = "AddBaseModButton_Click"
                                          ToolTip = "Add a new base mod declaration">
-                    <Image Source = "../../../../Assets/Icons/20x20/AddFolder20x20.png"
+                    <Image Source = "Arcanum_UI;component/Assets/Icons/20x20/AddFolder20x20.png"
                            Stretch = "None">
                         <Image.Clip>
                             <RectangleGeometry RadiusX = "3"
@@ -186,12 +186,11 @@
                              ItemTemplate = "{StaticResource BaseModDataTemplate}"
                              ItemContainerStyle = "{StaticResource BaseModItemStyle}"
                              BorderThickness = "0">
-                            <b:Interaction.Behaviors>
-                                <behaviors:ListBoxDragDropBehavior 
-                                    DragHandleExclusionType="{x:Type styleClasses:BaseButton}"
-                                    ScrollAreaHeight="10"
-                                    />
-                            </b:Interaction.Behaviors>
+                        <b:Interaction.Behaviors>
+                            <behaviors:ListBoxDragDropBehavior
+                                DragHandleExclusionType = "{x:Type styleClasses:BaseButton}"
+                                ScrollAreaHeight = "10" />
+                        </b:Interaction.Behaviors>
 
                     </ListBox>
 

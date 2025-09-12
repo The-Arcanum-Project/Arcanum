@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using Arcanum.Core.CoreSystems.SavingSystem;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;

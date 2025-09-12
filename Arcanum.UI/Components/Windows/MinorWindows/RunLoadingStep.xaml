@@ -9,6 +9,17 @@
                          Height = "450"
                          Width = "1000"
                          Background = "{StaticResource DarkerSelectedBackColorBrush}">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
     <Grid Margin = "5">
         <Grid.RowDefinitions>
             <RowDefinition Height = "30" />
@@ -39,7 +50,7 @@
         <styleClasses:CorneredTextBox Grid.Row = "1"
                                       Grid.Column = "1"
                                       x:Name = "StepResultsTextBox"
-                                      FontFamily="{StaticResource DefaultMonospacedFont}">
+                                      FontFamily = "{StaticResource DefaultMonospacedFont}">
         </styleClasses:CorneredTextBox>
 
         <ListView Grid.Row = "1"
@@ -50,7 +61,7 @@
                   ItemsSource = "{Binding Steps, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="20">
+                    <Grid Height = "20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width = "*" />
                             <ColumnDefinition Width = "22" />
@@ -66,8 +77,8 @@
                                                  Tag = "{Binding}"
                                                  BorderThickness = "0"
                                                  Background = "Transparent"
-                                                 HorizontalAlignment="Center">
-                            <Image Source = "../../../Assets/Icons/30x30/DoublePlay30x30.png"
+                                                 HorizontalAlignment = "Center">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/DoublePlay30x30.png"
                                    Stretch = "Uniform">
                             </Image>
                         </styleClasses:BaseButton>
@@ -76,8 +87,8 @@
                                                  Tag = "{Binding}"
                                                  BorderThickness = "0"
                                                  Background = "Transparent"
-                                                 HorizontalAlignment="Center">
-                            <Image Source = "../../../Assets/Icons/30x30/Play30x30.png"
+                                                 HorizontalAlignment = "Center">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/Play30x30.png"
                                    Stretch = "Uniform">
                             </Image>
                         </styleClasses:BaseButton>

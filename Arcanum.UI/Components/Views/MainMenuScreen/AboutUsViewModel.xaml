@@ -12,7 +12,10 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "../../Styles/Specific/TransparentButtonStyle.xaml" />
+                <ResourceDictionary
+                    Source = "/Arcanum_UI;component/Components/Styles/Specific/TransparentButtonStyle.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -98,7 +101,7 @@
                     FontSize = "16"
                     Click = "OpenPatreonButton_Click">
 
-                <Image Source = "/Assets/Images/PATREON_SYMBOL_1_WHITE_RGB.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Images/PATREON_SYMBOL_1_WHITE_RGB.png" />
 
             </Button>
             <styleClasses:BaseButton x:Name = "OpenDiscordButton"
@@ -116,6 +119,9 @@
                                 Value = "Transparent" />
                         <Setter Property = "HoverBackground"
                                 Value = "Transparent" />
+                        <Setter Property = "BorderThickness"
+                                Value = "0">
+                        </Setter>
                         <Style.Triggers>
                             <Trigger Property = "IsMouseOver"
                                      Value = "True">
@@ -125,7 +131,7 @@
                         </Style.Triggers>
                     </Style>
                 </styleClasses:BaseButton.Style>
-                <Image Source = "/Assets/Images/github_mark_white.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Images/github_mark_white.png" />
             </styleClasses:BaseButton>
             <styleClasses:BaseButton x:Name = "OpenGithubButton"
                                      Grid.Column = "2"
@@ -142,6 +148,9 @@
                                 Value = "Transparent" />
                         <Setter Property = "Background"
                                 Value = "Transparent" />
+                        <Setter Property = "BorderThickness"
+                                Value = "0">
+                        </Setter>
                         <Style.Triggers>
                             <Trigger Property = "IsMouseOver"
                                      Value = "True">
@@ -151,7 +160,7 @@
                         </Style.Triggers>
                     </Style>
                 </styleClasses:BaseButton.Style>
-                <Image Source = "/Assets/Images/Discord-Symbol-White.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Images/Discord-Symbol-White.png" />
             </styleClasses:BaseButton>
         </Grid>
     </Grid>

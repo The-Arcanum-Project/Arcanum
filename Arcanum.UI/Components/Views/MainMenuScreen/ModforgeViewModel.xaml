@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Specific/PresentationCard.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Specific/PresentationCard.xaml" />
                 <ResourceDictionary>
 
                     <Style x:Key = "SocialCardBorderStyle"
@@ -197,7 +197,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Image Grid.Column = "0"
-                                   Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                   Source = "/Arcanum_UI;component/Assets/Images/ProvinceFileCreator1024x1024.png"
                                    Style = "{StaticResource SocialIconStyle}" />
                             <TextBlock Grid.Column = "0"
                                        Grid.ColumnSpan = "2"
@@ -224,7 +224,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Image Grid.Column = "0"
-                                   Source = "../../../../Assets/Images/ProvinceFileCreator1024x1024.png"
+                                   Source = "/Arcanum_UI;component/Assets/Images/ProvinceFileCreator1024x1024.png"
                                    Style = "{StaticResource SocialIconStyle}" />
                             <TextBlock Grid.Column = "0"
                                        Grid.ColumnSpan = "2"
@@ -236,7 +236,7 @@
                         </Grid>
                         <TextBlock Text = "Explore the Wiki,&#x0a; Report Issues"
                                    Style = "{StaticResource SocialBodyText}"
-                                   Margin="0, 5, 0, 0"/>
+                                   Margin = "0, 5, 0, 0" />
                     </StackPanel>
                 </Border>
             </Grid>

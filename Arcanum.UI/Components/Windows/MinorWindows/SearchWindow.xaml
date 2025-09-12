@@ -21,8 +21,10 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Specific/SearchResultListView.xaml"> </ResourceDictionary>
-                <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary
+                    Source = "/Arcanum_UI;component/Components/Styles/Specific/SearchResultListView.xaml">
+                </ResourceDictionary>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
         </ResourceDictionary>
@@ -105,7 +107,7 @@
                                         x:Name = "SearchTextBox"
                                         BorderThickness = "0"
                                         Margin = "0, 4, 0, 0"
-                                        KeyUp="SearchTextBox_OnKeyUp">
+                                        KeyUp = "SearchTextBox_OnKeyUp">
             </userControls:SearchTextBox>
 
 

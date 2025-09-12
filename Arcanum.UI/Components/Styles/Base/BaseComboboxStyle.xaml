@@ -3,8 +3,10 @@
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source = "/Components/Styles/Base/BaseScrollbar.xaml"> </ResourceDictionary>
-        <ResourceDictionary Source = "BaseComboBoxItem.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseComboBoxItem.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseScrollbar.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <ControlTemplate TargetType = "ToggleButton"
@@ -214,10 +216,11 @@
                                     TargetName = "ContentSite"
                                     Value = "Hidden" />
                         </Trigger>
-                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="ToggleButton"
-                                    Property="BorderBrush"
-                                    Value="{StaticResource BlueSelectionBackColorBrush}" />
+                        <Trigger Property = "IsKeyboardFocusWithin"
+                                 Value = "True">
+                            <Setter TargetName = "ToggleButton"
+                                    Property = "BorderBrush"
+                                    Value = "{StaticResource BlueSelectionBackColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

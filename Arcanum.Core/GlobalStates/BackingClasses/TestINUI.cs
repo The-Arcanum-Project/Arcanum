@@ -1,9 +1,10 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects;
 
 namespace Arcanum.Core.GlobalStates.BackingClasses;
 
 #if DEBUG
-public partial class TestINUI : INUI, ICollectionProvider<TestINUI>
+public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<TestINUI>
 {
    public static ObservableRangeCollection<EmbeddedObject> EmbeddedObjects { get; } =
    [
@@ -52,9 +53,10 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>
    public bool TestBool { get; set; } = true;
    public Field TestEnum { get; set; } = Field.TestBool;
    public static IEnumerable<TestINUI> GetGlobalItems() => Globals.TestNUIObjects;
+   public static TestINUI Empty { get; } = new();
 }
 
-public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>
+public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>, IEmpty<EmbeddedObject>
 {
    public int SomeInt { get; set; } = 42;
    public string SomeString { get; set; } = "The answer";
@@ -66,7 +68,8 @@ public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>
                                              Enum.GetValues<Field>().Cast<Enum>().ToArray());
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<EmbeddedObject> GetGlobalItems() => TestINUI.EmbeddedObjects;
-   
+
    public override string ToString() => string.Empty;
+   public static EmbeddedObject Empty { get; } = new();
 }
 #endif

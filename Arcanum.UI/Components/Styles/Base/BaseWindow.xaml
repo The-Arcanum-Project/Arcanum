@@ -7,8 +7,8 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
-        <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
-        <ResourceDictionary Source = "/Components/Styles/Base/BaseTextBoxStyle.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTextBoxStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
@@ -42,7 +42,7 @@
             <Setter Property = "BorderBrush"
                     Value = "{StaticResource DefaultBorderColorBrush}" />
             <Setter Property = "Icon"
-                    Value = "/Assets/Logo/ArcanumSimplified.ico" />
+                    Value = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico" />
             <Setter Property = "WindowChrome.WindowChrome">
                 <Setter.Value>
                     <WindowChrome CaptionHeight = "0"
@@ -94,7 +94,7 @@
                                         <behaviors:Interaction.Behaviors>
                                             <customBehaviors:WindowDrag />
                                         </behaviors:Interaction.Behaviors>
-                                        <Image Source = "/Assets/Logo/ArcanumSimplified.png"
+                                        <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.png"
                                                DockPanel.Dock = "Left"
                                                Stretch = "Uniform"
                                                Margin = "6,2,2,2"
@@ -132,7 +132,7 @@
                                                          Command = "{Binding CloseCommand,
                                                      RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
                                                          BorderThickness = "0">
-                                            <Image Source = "/Assets/Icons/20x20/Close20x20.png"
+                                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Close20x20.png"
                                                    Stretch = "None" />
                                         </base:BaseButton>
 
@@ -141,7 +141,7 @@
                                                          Visibility = "{Binding ShowMaximizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
                                                          BorderThickness = "0">
                                             <Image x:Name = "StateImage"
-                                                   Source = "/Assets/Icons/20x20/FullScreen20x20.png"
+                                                   Source = "/Arcanum_UI;component/Assets/Icons/20x20/FullScreen20x20.png"
                                                    Stretch = "None" />
                                         </base:BaseButton>
 
@@ -149,8 +149,9 @@
                                                          Command = "{Binding MinimizeCommand, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
                                                          Visibility = "{Binding ShowMinimizeButton, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=base:BaseWindow}}"
                                                          BorderThickness = "0">
-                                            <Image Source = "/Assets/Icons/20x20/Minimize20x20.png"
-                                                   Stretch = "None" />
+                                            <Image
+                                                Source = "/Arcanum_UI;component/Assets/Icons/20x20/Minimize20x20.png"
+                                                Stretch = "None" />
                                         </base:BaseButton>
 
                                     </DockPanel>

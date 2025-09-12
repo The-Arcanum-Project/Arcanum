@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico">
+            <Link>ArcanumSimplified.ico</Link>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj"/>
+        <ProjectReference Include="..\Arcanum.UI\Arcanum.UI.csproj"/>
+    </ItemGroup>
+
+</Project>

@@ -373,29 +373,29 @@ internal class SettingsStore : ISettingsStore
    {
       // TODO: Implement a proper way to serialize settings which are interfaces without creating a security risk.
       return false; // For now until we have a proper way to serialize settings which are interfaces
-      var ioService = _host.GetService<IFileOperations>();
-      var jsonProcessor = _host.GetService<IJsonProcessor>();
-
-      if (jsonProcessor == null || ioService == null)
-         throw new InvalidOperationException("Required services are not available: IJsonProcessor or IFileOperations.");
-
-      var path = Path.Combine(ioService.GetArcanumDataPath, PLUGIN_SETTINGS_FILE);
-      var settingsToSave = _settings.ToDictionary(pair => pair.Key,
-                                                  pair => (pair.GetType(), (object)pair.Value));
-      var jsonContent = jsonProcessor.Serialize(settingsToSave);
-      if (string.IsNullOrWhiteSpace(jsonContent))
-      {
-         Log($"Failed to serialize settings to JSON for file '{PLUGIN_SETTINGS_FILE}'.", LoggingVerbosity.Error);
-         return false;
-      }
-
-      if (!ioService.WriteAllTextUtf8(path, jsonContent))
-      {
-         Log($"Failed to write settings to file '{PLUGIN_SETTINGS_FILE}' at path '{path}'.", LoggingVerbosity.Error);
-         return false;
-      }
-
-      return true;
+      // var ioService = _host.GetService<IFileOperations>();
+      // var jsonProcessor = _host.GetService<IJsonProcessor>();
+      //
+      // if (jsonProcessor == null || ioService == null)
+      //    throw new InvalidOperationException("Required services are not available: IJsonProcessor or IFileOperations.");
+      //
+      // var path = Path.Combine(ioService.GetArcanumDataPath, PLUGIN_SETTINGS_FILE);
+      // var settingsToSave = _settings.ToDictionary(pair => pair.Key,
+      //                                             pair => (pair.GetType(), (object)pair.Value));
+      // var jsonContent = jsonProcessor.Serialize(settingsToSave);
+      // if (string.IsNullOrWhiteSpace(jsonContent))
+      // {
+      //    Log($"Failed to serialize settings to JSON for file '{PLUGIN_SETTINGS_FILE}'.", LoggingVerbosity.Error);
+      //    return false;
+      // }
+      //
+      // if (!ioService.WriteAllTextUtf8(path, jsonContent))
+      // {
+      //    Log($"Failed to write settings to file '{PLUGIN_SETTINGS_FILE}' at path '{path}'.", LoggingVerbosity.Error);
+      //    return false;
+      // }
+      //
+      // return true;
    }
 
    private void RaiseEvent(IPluginSetting setting,

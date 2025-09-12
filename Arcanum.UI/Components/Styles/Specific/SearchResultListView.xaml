@@ -2,6 +2,11 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:search = "clr-namespace:Arcanum.API.UtilServices.Search;assembly=Arcanum.API">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <DataTemplate DataType = "{x:Type search:ISearchable}"
                   x:Key = "SearchResultDataTemplate">
         <Grid Margin = "5,0">

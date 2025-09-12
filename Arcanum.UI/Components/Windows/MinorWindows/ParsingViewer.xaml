@@ -13,6 +13,17 @@
                          Background = "{StaticResource LightBackColorBrush}"
                          WindowStartupLocation = "CenterScreen">
 
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "2*" />
@@ -45,7 +56,8 @@
                     <Border Margin = "2">
                         <StackPanel Orientation = "Horizontal">
                             <CheckBox IsChecked = "{Binding LoadingService.IsFullyParsed, Mode=OneWay}"
-                                      IsEnabled="False"> </CheckBox>
+                                      IsEnabled = "False">
+                            </CheckBox>
                             <TextBlock Text = "{Binding FilePath}"
                                        VerticalAlignment = "Center" />
                         </StackPanel>

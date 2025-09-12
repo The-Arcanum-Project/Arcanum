@@ -5,6 +5,6 @@
 /// </summary>
 public enum ReligiousSchoolRelationType
 {
-   kindred,
-   enemy,
+   Kindred,
+   Enemy,
 }

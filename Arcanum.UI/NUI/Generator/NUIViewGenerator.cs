@@ -771,7 +771,8 @@ public static class NUIViewGenerator
          BorderThickness = new(1),
          Content = new Image
          {
-            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Eye20x20.png")),
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Eye20x20.png",
+                                         UriKind.RelativeOrAbsolute)),
             Stretch = Stretch.UniformToFill,
          },
       };
@@ -824,7 +825,8 @@ public static class NUIViewGenerator
                : $"{property} cannot be set to empty",
          Content = new Image
          {
-            Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Close20x20.png")),
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Close20x20.png",
+                                         UriKind.RelativeOrAbsolute)),
             Stretch = Stretch.UniformToFill,
          },
          BorderThickness = new(1),
@@ -942,7 +944,8 @@ public static class NUIViewGenerator
          {
             Content = new Image
             {
-               Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Add20x20.png")),
+               Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png",
+                                            UriKind.RelativeOrAbsolute)),
                Stretch = Stretch.UniformToFill,
             },
             ToolTip = "Add inferred items from map selection",
@@ -980,7 +983,8 @@ public static class NUIViewGenerator
          {
             Content = new Image
             {
-               Source = new BitmapImage(new("pack://application:,,,/Assets/Icons/20x20/Minimize20x20.png")),
+               Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Minimize20x20.png",
+                                            UriKind.RelativeOrAbsolute)),
                Stretch = Stretch.UniformToFill,
             },
             ToolTip = "Remove inferred items from map selection",

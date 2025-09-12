@@ -196,7 +196,7 @@ public static class CnHelpers
                                            out string identifier,
                                            ref bool validationResult)
    {
-      var result = node.TryGetIdentifierNode(ctx, actionName, source, out identifier);
+      var result = node.TryGetIdentifierNode(ctx, actionName, source, out identifier!);
       validationResult &= result;
       return result;
    }
@@ -311,7 +311,7 @@ public static class CnHelpers
          return false;
       }
 
-      var lexeme = lvn!.Value.GetLexeme(source);
+      var lexeme = lvn.Value.GetLexeme(source);
       if (!int.TryParse(lexeme, out value))
       {
          ctx.SetPosition(lvn.Value);
