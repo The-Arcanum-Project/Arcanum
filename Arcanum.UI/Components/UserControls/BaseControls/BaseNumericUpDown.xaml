@@ -8,27 +8,35 @@
              d:DesignWidth = "50">
 
     <UserControl.Resources>
-        <Style TargetType = "TextBox"
-               BasedOn = "{x:Null}">
-            <Setter Property = "Background"
-                    Value = "{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Setter Property = "BorderThickness"
-                    Value = "0" />
-        </Style>
+        <ResourceDictionary>
+            <Style TargetType = "TextBox"
+                   BasedOn = "{x:Null}">
+                <Setter Property = "Background"
+                        Value = "{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <Setter Property = "BorderThickness"
+                        Value = "0" />
+            </Style>
 
-        <Style TargetType = "RepeatButton"
-               BasedOn = "{x:Null}">
-            <Setter Property = "Background"
-                    Value = "{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Setter Property = "BorderThickness"
-                    Value = "0" />
-        </Style>
+            <Style TargetType = "RepeatButton"
+                   BasedOn = "{x:Null}">
+                <Setter Property = "Background"
+                        Value = "{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <Setter Property = "BorderThickness"
+                        Value = "0" />
+            </Style>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CornerRadius = "2"
-            Background = "Transparent">
+    <Border
+        BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        CornerRadius = "2"
+        Background = "Transparent">
         <Grid Background = "Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
@@ -45,9 +53,9 @@
                      Grid.RowSpan = "2"
                      TextAlignment = "Left"
                      TextChanged = "NUDTextBox_TextChanged"
-                     MouseWheel="NudTextBox_MouseWheel"
+                     MouseWheel = "NudTextBox_MouseWheel"
                      PreviewTextInput = "NudTextBox_PreviewTextInput"
-                     GotKeyboardFocus="NudTextBox_GotKeyboardFocus"
+                     GotKeyboardFocus = "NudTextBox_GotKeyboardFocus"
                      Foreground = "{StaticResource DefaultForeColorBrush}"
                      FontFamily = "{StaticResource DefaultFont}"
                      FontSize = "{StaticResource DefaultFontSize}"
@@ -107,7 +115,7 @@
                     </Style>
                 </RepeatButton.Style>
 
-                <Image Source = "/Assets/Icons/Tiny/ArrowUp.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/Tiny/ArrowUp.png" />
             </RepeatButton>
             <RepeatButton Name = "NudButtonDown"
                           Grid.Column = "2"
@@ -147,7 +155,7 @@
                     </Style>
                 </RepeatButton.Style>
 
-                <Image Source = "/Assets/Icons/Tiny/ArrowDown.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/Tiny/ArrowDown.png" />
             </RepeatButton>
         </Grid>
     </Border>

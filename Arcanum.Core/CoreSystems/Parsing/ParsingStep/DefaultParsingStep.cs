@@ -142,7 +142,7 @@ public class DefaultParsingStep
                                cts.Cancel();
 
                             var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
-                            var weight = StepWeights[i];
+                            var weight = StepWeights![i];
                             ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
                          });
          }
@@ -169,7 +169,7 @@ public class DefaultParsingStep
                return false;
 
             if (TotalSteps > 1)
-               ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights[_doneSteps], _doneSteps);
+               ReportSubStepCompletion(_stopwatch.Elapsed - startTime, StepWeights![_doneSteps], _doneSteps);
             _doneSteps++;
          }
 

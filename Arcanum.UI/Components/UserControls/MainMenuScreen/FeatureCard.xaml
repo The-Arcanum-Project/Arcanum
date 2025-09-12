@@ -1,6 +1,18 @@
 ﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.MainMenuScreen.FeatureCard"
              xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
     <Border Margin = "0,0,0,0"
             Padding = "5"
             Background = "{StaticResource OrangeAccentGradientBrush}"
@@ -17,14 +29,13 @@
                            FontSize = "16"
                            FontWeight = "Bold"
                            Margin = "0,0,10,0"
-                           TextWrapping="Wrap"/>
+                           TextWrapping = "Wrap" />
             </StackPanel>
 
             <!-- Description -->
             <TextBlock Text = "{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
                        FontSize = "14"
-                       TextWrapping="Wrap"
-                       />
+                       TextWrapping = "Wrap" />
         </StackPanel>
     </Border>
 </UserControl>

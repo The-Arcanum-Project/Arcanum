@@ -10,28 +10,35 @@
              Height = "166">
 
     <UserControl.Resources>
-        <Style x:Key = "HoverBorderStyle"
-               TargetType = "Border">
-            <Setter Property = "BorderBrush"
-                    Value = "{StaticResource DefaultBorderColorBrush}" />
-            <Setter Property = "Background"
-                    Value = "Transparent" />
-            <Style.Triggers>
-                <Trigger Property = "IsMouseOver"
-                         Value = "True">
-                    <Setter Property = "BorderBrush"
-                            Value = "{StaticResource BlueSelectionBackColorBrush}" />
-                    <Setter Property = "Cursor"
-                            Value = "Hand">
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key = "HoverBorderStyle"
+                   TargetType = "Border">
+                <Setter Property = "BorderBrush"
+                        Value = "{StaticResource DefaultBorderColorBrush}" />
+                <Setter Property = "Background"
+                        Value = "Transparent" />
+                <Style.Triggers>
+                    <Trigger Property = "IsMouseOver"
+                             Value = "True">
+                        <Setter Property = "BorderBrush"
+                                Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                        <Setter Property = "Cursor"
+                                Value = "Hand">
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header = "Remove From List" Click="MenuItem_OnClick"/>
+            <MenuItem Header = "Remove From List"
+                      Click = "MenuItem_OnClick" />
         </ContextMenu>
     </UserControl.ContextMenu>
 

@@ -11,6 +11,15 @@
                          Background = "{StaticResource DefaultBackColorBrush}"
                          WindowStartupLocation = "CenterScreen">
 
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height = "*" />
@@ -31,21 +40,21 @@
 
             <styleClasses:BaseButton x:Name = "ResetAllSettings"
                                      Content = "Reset All"
-                                     Margin="2, 2, 0, 0"
+                                     Margin = "2, 2, 0, 0"
                                      Width = "120"
                                      BorderThickness = "1"
                                      Click = "ResetAllSettings_OnClick" />
 
             <styleClasses:BaseButton x:Name = "ResetSelectedTabItem"
                                      Content = "Reset Selected Tab"
-                                     Margin="2, 2, 0, 0"
+                                     Margin = "2, 2, 0, 0"
                                      Width = "120"
                                      BorderThickness = "1"
                                      Click = "ResetSelectedTabItem_OnClick" />
 
             <styleClasses:BaseButton x:Name = "ResetSelected"
                                      Content = "Reset Selected"
-                                     Margin="2, 2, 0, 0"
+                                     Margin = "2, 2, 0, 0"
                                      Width = "120"
                                      BorderThickness = "1"
                                      Click = "ResetSelected_OnClick" />

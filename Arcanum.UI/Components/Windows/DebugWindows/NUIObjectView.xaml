@@ -9,6 +9,17 @@
                          Height = "600"
                          Width = "1000"
                          WindowStartupLocation = "CenterScreen">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
     <Grid Margin = "2">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "2*" />

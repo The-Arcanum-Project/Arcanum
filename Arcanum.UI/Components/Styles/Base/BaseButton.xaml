@@ -4,7 +4,7 @@
 
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source = "../../../Assets/ArcanumShared/DefaultPalette.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml"> </ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
 
 

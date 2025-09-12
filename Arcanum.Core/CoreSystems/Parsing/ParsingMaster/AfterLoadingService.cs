@@ -1,6 +1,4 @@
-﻿using System.Text;
-using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+﻿using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;

@@ -11,13 +11,13 @@
         WindowStyle = "None"
         ResizeMode = "NoResize"
         WindowStartupLocation = "CenterScreen"
-        Icon = "/Assets/Logo/ArcanumSimplified.ico">
+        Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico">
 
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Specific/DarkProgressbar.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Specific/DarkProgressbar.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -61,7 +61,7 @@
                 HorizontalAlignment = "Stretch"
                 VerticalAlignment = "Stretch">
 
-            <Image Source = "/Assets/Logo/ArcanumForeColor.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
                    HorizontalAlignment = "Center"
                    VerticalAlignment = "Center"
                    Stretch = "Uniform"
@@ -70,7 +70,7 @@
 
         <TextBlock Grid.Column = "0"
                    Grid.Row = "2"
-                   Margin="10, 0"
+                   Margin = "10, 0"
                    Text = "{Binding LoadingText}"
                    TextAlignment = "Center"
                    VerticalAlignment = "Center"

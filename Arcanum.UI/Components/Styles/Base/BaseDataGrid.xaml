@@ -1,5 +1,12 @@
 ﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <BooleanToVisibilityConverter x:Key = "BooleanToVisibilityConverter" />
 
     <!--Style and template for the button in the upper left corner of the DataGrid.-->
@@ -642,12 +649,12 @@
                 <ControlTemplate TargetType = "{x:Type DataGridColumnHeader}">
                     <Grid>
                         <Border x:Name = "columnHeaderBorder"
-                                Margin=" 0, 2"
+                                Margin = " 0, 2"
                                 BorderThickness = "1, 0, 1,1"
                                 Padding = "3,0,3,0"
-                                BorderBrush="{StaticResource RowAlternatingColorColorBrush}">
+                                BorderBrush = "{StaticResource RowAlternatingColorColorBrush}">
                             <Border.Background>
-                                <SolidColorBrush Color="{StaticResource InlineBackColor}"></SolidColorBrush>
+                                <SolidColorBrush Color = "{StaticResource InlineBackColor}"> </SolidColorBrush>
                             </Border.Background>
                             <ContentPresenter HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}"
                                               SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}"
@@ -666,7 +673,7 @@
         </Setter>
         <Setter Property = "Background">
             <Setter.Value>
-                <SolidColorBrush Color="{StaticResource LightBackColor}"></SolidColorBrush>
+                <SolidColorBrush Color = "{StaticResource LightBackColor}"> </SolidColorBrush>
             </Setter.Value>
         </Setter>
     </Style>

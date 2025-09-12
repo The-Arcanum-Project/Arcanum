@@ -3,6 +3,12 @@
                     xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseComboBoxItem.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <!-- 1. Make sure your base ComboBox style has a key -->
     <Style x:Key = "BaseComboBoxStyle"
            TargetType = "ComboBox">
@@ -80,7 +86,6 @@
                                                       VerticalAlignment = "Center"
                                                       Margin = "0, 1, 1, 1"
                                                       IsReadOnly = "{TemplateBinding IsReadOnly}"
-                                                      
                                                       Visibility = "Visible"
                                                       Focusable = "True"
                                                       Background = "Transparent"

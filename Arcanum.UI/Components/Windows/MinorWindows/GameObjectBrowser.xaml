@@ -11,15 +11,26 @@
                          Width = "800"
                          WindowStartupLocation = "CenterScreen"
                          FooterHeight = "0"
-                         Background="{StaticResource DarkerSelectedBackColorBrush}">
-    <Grid Margin="4">
+                         Background = "{StaticResource DarkerSelectedBackColorBrush}">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
+    <Grid Margin = "4">
         <Grid.RowDefinitions>
             <RowDefinition Height = "40" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row = "0"
-                   Margin="5, 0, 0, 0"
+                   Margin = "5, 0, 0, 0"
                    FontWeight = "Bold"
                    FontSize = "25"
                    FontFamily = "{StaticResource DefaultMonospacedFont}"

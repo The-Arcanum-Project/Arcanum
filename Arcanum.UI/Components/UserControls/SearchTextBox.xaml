@@ -9,11 +9,11 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Base/BaseScrollbar.xaml" />
-                <ResourceDictionary Source = "/Components/Styles/Base/BaseButton.xaml" />
-            </ResourceDictionary.MergedDictionaries>
             <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -27,7 +27,7 @@
         <DockPanel LastChildFill = "True">
 
             <!-- Left Icon -->
-            <Image Source = "/Assets/Icons/16x16/Magnifer16x16.png"
+            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Magnifer16x16.png"
                    Width = "16"
                    Height = "16"
                    Margin = "4,0"
@@ -45,7 +45,7 @@
                                      DockPanel.Dock = "Right"
                                      Click = "ButtonBase_OnClick"
                                      BorderThickness = "0">
-                <Image Source = "/Assets/Icons/20x20/Settings20x20.png"
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Settings20x20.png"
                        Stretch = "None" />
             </styleClasses:BaseButton>
 

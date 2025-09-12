@@ -7,6 +7,17 @@
              Background = "Transparent"
              d:DesignHeight = "450"
              d:DesignWidth = "800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height = "40" />
@@ -20,7 +31,7 @@
                    FontWeight = "Bold"
                    Margin = "10,0,0,0"
                    VerticalAlignment = "Bottom"
-                   HorizontalAlignment = "Left"/>
+                   HorizontalAlignment = "Left" />
 
         <Rectangle Grid.Row = "1"
                    Fill = "{StaticResource DefaultBorderColorBrush}"
@@ -33,7 +44,7 @@
         <TextBlock Grid.Row = "2"
                    Margin = "10,10,10,10"
                    IsEnabled = "True"
-                   Focusable="True">
+                   Focusable = "True">
             <Run TextDecorations = "Underline"
                  Text = "Icons: "
                  FontSize = "16" />

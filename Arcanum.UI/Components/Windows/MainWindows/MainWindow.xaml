@@ -20,6 +20,11 @@
 
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
             <Style x:Key = "HeaderButtonStyle"
                    TargetType = "styleClasses:BaseButton"
                    BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
@@ -124,7 +129,7 @@
         <CommandBinding Command = "mainWindow:MwCommands.LoadingStepRunnerCommand"
                         Executed = "LoadingStepRunnerCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
-        
+
         <CommandBinding Command = "mainWindow:MwCommands.OpenDebugPanel"
                         Executed = "OpenDebugPanel_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
@@ -175,13 +180,13 @@
                                      ToolTip = "Go Back to previous object view"
                                      Command = "mainWindow:MwCommands.GoToPreviousINUICommand"
                                      behaviors:WindowDrag.IsDoubleClickExclusionZone = "True">
-                <Image Source = "../../../Assets/Icons/20x20/GoBack20x20.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/GoBack20x20.png" />
             </styleClasses:BaseButton>
             <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}"
                                      ToolTip = "Go Forward to next object view"
                                      Command = "mainWindow:MwCommands.GoToNextINUICommand"
                                      behaviors:WindowDrag.IsDoubleClickExclusionZone = "True">
-                <Image Source = "../../../Assets/Icons/20x20/GoForward20x20.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/GoForward20x20.png" />
             </styleClasses:BaseButton>
 
             <Menu>
@@ -189,59 +194,59 @@
                     <uc:SearchableMenuItem Header = "Create new Project"
                                            Command = "mainWindow:MwCommands.NewProjectFileCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Plus16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Plus16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Open Project"
                                            Command = "mainWindow:MwCommands.OpenProjectFileCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/OpenFolder16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/OpenFolder16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Close current Project"
                                            Command = "mainWindow:MwCommands.CloseProjectFileCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Close16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Close16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
                     <uc:SearchableMenuItem Header = "Save All Modifications"
                                            Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Save16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Save16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
 
                     <uc:SearchableMenuItem Header = "Custom Saving Selector"
                                            Command = "mainWindow:MwCommands.OpenSaveSelectorCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/SaveSelector16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/SaveSelector16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
                     <uc:SearchableMenuItem Header = "Reload File"
                                            Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/ReloadFile16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFile16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Reload Folder"
                                            Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/ReloadFolder16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFolder16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
                     <uc:SearchableMenuItem Header = "Settings"
                                            Command = "mainWindow:MwCommands.OpenSettingsCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Settings16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Settings16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Plugin Settings"
                                            Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/PluginSettings16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/PluginSettings16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
@@ -258,31 +263,31 @@
                     <uc:SearchableMenuItem Header = "Undo: 'description'"
                                            Command = "mainWindow:MwCommands.UndoCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Undo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Step Undo: 'description'"
                                            Command = "mainWindow:MwCommands.StepUndoCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Undo16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Undo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Redo: 'description'"
                                            Command = "mainWindow:MwCommands.RedoCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Redo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "Step Redo: 'description'"
                                            Command = "mainWindow:MwCommands.StepRedoCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Redo16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Redo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "View History"
                                            Command = "mainWindow:MwCommands.OpenHistoryWindowCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/History16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/History16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
 
@@ -291,7 +296,7 @@
                     <uc:SearchableMenuItem Header = "Queastor (Find)"
                                            Command = "mainWindow:MwCommands.OpenSearchWindowCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/Magnifer16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Magnifer16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
 
@@ -326,13 +331,13 @@
                     <uc:SearchableMenuItem Header = "Loading Strep Runner"
                                            Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
                     <uc:SearchableMenuItem Header = "Debug Panel"
-                                           Command="mainWindow:MwCommands.OpenDebugPanel"/>
+                                           Command = "mainWindow:MwCommands.OpenDebugPanel" />
                     <uc:SearchableMenuItem Header = "ParsingStepBrowser"
                                            Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
                     <uc:SearchableMenuItem Header = "UI Elements Browser"
                                            Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand">
                         <uc:SearchableMenuItem.Icon>
-                            <Image Source = "../../../Assets/Icons/16x16/WindowFrame16x16.png" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/WindowFrame16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <uc:SearchableMenuItem Header = "View INUI Objects"
@@ -352,8 +357,8 @@
                 Margin = "0"
                 Padding = "0">
             <StackPanel Orientation = "Horizontal"
-                        Height="19"
-                        Margin="0"
+                        Height = "19"
+                        Margin = "0"
                         VerticalAlignment = "Bottom">
                 <TextBlock
                     Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
@@ -402,7 +407,7 @@
         </GridSplitter>
 
         <Image Grid.Column = "2"
-               Source = "../../../Assets/Icons/Huge/MapFiller.png" />
+               Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapFiller.png" />
 
         <GridSplitter Grid.Column = "3"
                       Width = "4"
@@ -411,7 +416,7 @@
         </GridSplitter>
 
         <Image Grid.Column = "4"
-               Source = "../../../Assets/Icons/Huge/MapInteractionFiller.png" />
+               Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapInteractionFiller.png" />
     </Grid>
 
 

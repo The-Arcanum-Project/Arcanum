@@ -15,9 +15,10 @@ public partial class Market(Location location) : INUI, ICollectionProvider<Marke
       get => _location;
       set => _location = value;
    }
-   public static Market Empty { get; } = new((Location)Location.Empty);
+   public static Market Empty { get; } = new(Location.Empty);
 
-   public static IEnumerable<Market> GetGlobalItems() => Globals.Locations.Values.Where(loc => loc.HasMarket).Select(loc => loc.Market);
+   public static IEnumerable<Market> GetGlobalItems()
+      => Globals.Locations.Values.Where(loc => loc.HasMarket).Select(loc => loc.Market);
 
    public override bool Equals(object? obj) => obj is Market market && Location == market.Location;
 

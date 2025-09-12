@@ -12,6 +12,15 @@
                          Width = "800"
                          Background = "{StaticResource DefaultBackColorBrush}">
 
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
     <ScrollViewer HorizontalScrollBarVisibility = "Auto"
                   VerticalScrollBarVisibility = "Auto"
                   Padding = "3">
@@ -379,8 +388,8 @@
                        VerticalAlignment = "Center" />
 
             <styleClasses:CorneredTextBox Grid.Row = "16"
-                             Grid.Column = "1"
-                             Text = "This is a TextBox. You can type here." />
+                                          Grid.Column = "1"
+                                          Text = "This is a TextBox. You can type here." />
 
             <TextBlock Grid.Row = "17"
                        Grid.Column = "0"
@@ -463,7 +472,7 @@
                                          Click = "ShowMessageBoxOk_Click">
                 </styleClasses:BaseButton>
             </StackPanel>
-            
+
             <TextBlock Grid.Row = "22"
                        Grid.Column = "0"
                        Text = "PropertyGrid"
@@ -474,41 +483,41 @@
                                        Grid.Column = "1"
                                        SelectedObject = "{Binding SelectedObject, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
             </baseControls:PropertyGrid>
-            
+
             <TextBlock Grid.Row = "23"
                        Grid.Column = "0"
                        Text = "Int NumericUpDown"
                        FontFamily = "{StaticResource DefaultMonospacedFont}"
                        VerticalAlignment = "Center" />
-            
+
             <baseControls:BaseNumericUpDown Grid.Row = "23"
-                                         Grid.Column = "1"
-                                         Value = "{Binding IntValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+                                            Grid.Column = "1"
+                                            Value = "{Binding IntValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
             </baseControls:BaseNumericUpDown>
-            
+
             <TextBlock Grid.Row = "24"
                        Grid.Column = "0"
                        Text = "Decimal NumericUpDown"
                        FontFamily = "{StaticResource DefaultMonospacedFont}"
                        VerticalAlignment = "Center" />
-            
+
             <baseControls:DecimalBaseNumericUpDown Grid.Row = "24"
-                                         Grid.Column = "1"
-                                         Value = "{Binding DecimalValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+                                                   Grid.Column = "1"
+                                                   Value = "{Binding DecimalValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
             </baseControls:DecimalBaseNumericUpDown>
-            
+
             <TextBlock Grid.Row = "25"
                        Grid.Column = "0"
                        Text = "Float NumericUpDown"
                        FontFamily = "{StaticResource DefaultMonospacedFont}"
                        VerticalAlignment = "Center" />
-            
+
             <baseControls:FloatNumericUpDown Grid.Row = "25"
-                                         Grid.Column = "1"
-                                         Value = "{Binding FloatValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
+                                             Grid.Column = "1"
+                                             Value = "{Binding FloatValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:UIElementsBrowser}}">
             </baseControls:FloatNumericUpDown>
-            
-            
+
+
         </Grid>
     </ScrollViewer>
 

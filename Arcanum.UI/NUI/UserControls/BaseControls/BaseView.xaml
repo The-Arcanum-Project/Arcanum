@@ -6,10 +6,21 @@
              mc:Ignorable = "d"
              d:DesignHeight = "300"
              d:DesignWidth = "300">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
     <Border x:Name = "BaseViewBorder"
             BorderThickness = "2"
             BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-            Margin="2">
-        
+            Margin = "2">
+
     </Border>
 </UserControl>

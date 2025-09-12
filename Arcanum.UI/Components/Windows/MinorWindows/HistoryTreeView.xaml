@@ -13,6 +13,17 @@
                          FooterHeight = "0"
                          Background = "{StaticResource DefaultBackColorBrush}">
 
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height = "*" />
@@ -38,17 +49,17 @@
                             <Image.Style>
                                 <Style TargetType = "Image">
                                     <Setter Property = "Source"
-                                            Value = "../../../Assets/Icons/16x16/Uncompacted16x16.png" />
+                                            Value = "/Arcanum_UI;component/Assets/Icons/16x16/Uncompacted16x16.png" />
                                     <Style.Triggers>
                                         <DataTrigger Binding = "{Binding EntryType}"
                                                      Value = "Normal">
                                             <Setter Property = "Source"
-                                                    Value = "../../../Assets/Icons/16x16/Uncompacted16x16.png" />
+                                                    Value = "/Arcanum_UI;component/Assets/Icons/16x16/Uncompacted16x16.png" />
                                         </DataTrigger>
                                         <DataTrigger Binding = "{Binding EntryType}"
                                                      Value = "Compacted">
                                             <Setter Property = "Source"
-                                                    Value = "../../../Assets/Icons/16x16/Compacted16x16.png" />
+                                                    Value = "/Arcanum_UI;component/Assets/Icons/16x16/Compacted16x16.png" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

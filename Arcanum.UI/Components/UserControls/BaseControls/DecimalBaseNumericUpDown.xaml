@@ -5,10 +5,20 @@
              MinHeight = "22"
              MinWidth = "60">
 
-    <Border BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CornerRadius = "2"
-            Background = "Transparent">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border
+        BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        CornerRadius = "2"
+        Background = "Transparent">
         <Grid Background = "Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
@@ -87,7 +97,7 @@
                     </Style>
                 </RepeatButton.Style>
 
-                <Image Source = "/Assets/Icons/Tiny/ArrowUp.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/Tiny/ArrowUp.png" />
             </RepeatButton>
             <RepeatButton Name = "NudButtonDown"
                           Grid.Column = "2"
@@ -127,7 +137,7 @@
                     </Style>
                 </RepeatButton.Style>
 
-                <Image Source = "/Assets/Icons/Tiny/ArrowDown.png" />
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/Tiny/ArrowDown.png" />
             </RepeatButton>
         </Grid>
     </Border>

@@ -2,6 +2,11 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <DataTemplate x:Key = "BaseModDataTemplate"
                   DataType = "{x:Type styleClasses:BaseModItem}">
 
@@ -27,19 +32,19 @@
                        VerticalAlignment = "Center"
                        HorizontalAlignment = "Stretch"
                        FontSize = "12"
-                       Margin="5, 0, 0, 0"
+                       Margin = "5, 0, 0, 0"
                        Text = "{Binding DataSpace}">
             </TextBlock>
-            
+
             <styleClasses:BaseButton Grid.Column = "1"
-                           Grid.Row = "0"
-                           Background = "{StaticResource AggressiveRedBackColorBrush}"
-                           HoverBackground = "{StaticResource BlueSelectionBackColorBrush}"
-                           Margin = "3"
-                           Command = "{Binding RemoveCommand}"
-                           CornerRadius = "3">
-                
-                <Image Source = "/Assets/Icons/20x20/Close20x20.png"
+                                     Grid.Row = "0"
+                                     Background = "{StaticResource AggressiveRedBackColorBrush}"
+                                     HoverBackground = "{StaticResource BlueSelectionBackColorBrush}"
+                                     Margin = "3"
+                                     Command = "{Binding RemoveCommand}"
+                                     CornerRadius = "3">
+
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Close20x20.png"
                        Stretch = "Uniform"
                        ToolTip = "Remove this base mod declaration">
                     <Image.Clip>

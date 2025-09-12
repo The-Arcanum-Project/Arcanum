@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFixers", "CodeFixers\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGens", "SourceGens\SourceGens.csproj", "{C2946F5C-39A5-4620-8225-AFF9C5911645}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.App", "Arcanum.App\Arcanum.App.csproj", "{AAAABB66-8409-459A-85E6-B8DADD221C6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,10 @@ Global
 		{C2946F5C-39A5-4620-8225-AFF9C5911645}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2946F5C-39A5-4620-8225-AFF9C5911645}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2946F5C-39A5-4620-8225-AFF9C5911645}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAAABB66-8409-459A-85E6-B8DADD221C6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAAABB66-8409-459A-85E6-B8DADD221C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAAABB66-8409-459A-85E6-B8DADD221C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAAABB66-8409-459A-85E6-B8DADD221C6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

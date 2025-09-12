@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <UseWindowsForms>false</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
-        <OutputType>WinExe</OutputType>
+        <OutputType>Library</OutputType>
         <UseWPF>true</UseWPF>
         <LangVersion>12</LangVersion>
         <AssemblyName>Arcanum_UI</AssemblyName>

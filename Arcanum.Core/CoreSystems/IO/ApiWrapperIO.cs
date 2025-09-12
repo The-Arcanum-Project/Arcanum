@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.Text;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;

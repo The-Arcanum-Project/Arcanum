@@ -18,6 +18,14 @@
                          AllowsTransparency = "True"
                          Background = "{StaticResource DefaultBackColorBrush}">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
 
     <Grid Margin = "5">
         <Grid.ColumnDefinitions>
@@ -40,17 +48,17 @@
                HorizontalAlignment = "Center" />
 
         <styleClasses:CorneredTextBox x:Name = "MessageText"
-                   Grid.Row = "0"
-                   Grid.Column = "1"
-                   TextWrapping = "Wrap"
-                   VerticalAlignment = "Center"
-                   HorizontalAlignment = "Stretch"
-                   TextAlignment = "Left"
-                   FontSize = "12"
-                   Margin = "20, 10" 
-                   BorderThickness="0"
-                   IsReadOnly="True"
-                   IsReadOnlyCaretVisible="False"/>
+                                      Grid.Row = "0"
+                                      Grid.Column = "1"
+                                      TextWrapping = "Wrap"
+                                      VerticalAlignment = "Center"
+                                      HorizontalAlignment = "Stretch"
+                                      TextAlignment = "Left"
+                                      FontSize = "12"
+                                      Margin = "20, 10"
+                                      BorderThickness = "0"
+                                      IsReadOnly = "True"
+                                      IsReadOnlyCaretVisible = "False" />
 
         <Grid Grid.Row = "1"
               Grid.ColumnSpan = "2"

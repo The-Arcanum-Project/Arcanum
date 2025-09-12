@@ -2,6 +2,11 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters">
 
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <converters:WidthMinusConverter x:Key = "DropdownWidthMinusConverter"
                                     Subtract = "28" />
 
@@ -17,7 +22,7 @@
                             SnapsToDevicePixels = "True"
                             MinWidth = "{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}, Converter={StaticResource DropdownWidthMinusConverter}}"
                             Padding = "4,2, 0, 2"
-                            Margin="0, 0, 1, 0"
+                            Margin = "0, 0, 1, 0"
                             CornerRadius = "2">
                         <ContentPresenter HorizontalAlignment = "Stretch" />
                     </Border>

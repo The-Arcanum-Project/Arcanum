@@ -5,6 +5,7 @@ using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
+// ReSharper disable once InconsistentNaming
 public partial class Debug_Panel
 {
    public Debug_Panel()
@@ -30,7 +31,7 @@ public partial class Debug_Panel
             count++;
          }
       }
-      
+
       DebugView.Content = new TextBlock { Text = $"Found {count} locations with null markets: {str}" };
    }
 
@@ -47,7 +48,7 @@ public partial class Debug_Panel
             count++;
          }
       }
-      
+
       DebugView.Content = new TextBlock { Text = $"Found {count} markets with null locations: {str}" };
    }
 }

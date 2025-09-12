@@ -2,8 +2,9 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source = "/Components/Styles/Base/BaseScrollbar.xaml"> </ResourceDictionary>
-        <ResourceDictionary Source = "/Components/Styles/Base/BaseComboBoxItem.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseComboboxStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <ControlTemplate TargetType = "ToggleButton"
@@ -18,14 +19,14 @@
                     BorderBrush = "{TemplateBinding BorderBrush}"
                     CornerRadius = "2"
                     BorderThickness = "0"
-                    Background="Transparent" />
+                    Background = "Transparent" />
             <Border Grid.Column = "1"
                     Margin = "1, 1, 1, 1"
                     BorderBrush = "{TemplateBinding BorderBrush}"
                     Name = "ButtonBorder"
                     CornerRadius = "2"
                     BorderThickness = "0"
-                    Background="Transparent" />
+                    Background = "Transparent" />
 
             <Path Name = "Arrow"
                   Grid.Column = "1"
@@ -119,10 +120,10 @@
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "ComboBox">
-                    <Grid Background="Transparent">
+                    <Grid Background = "Transparent">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="22"/>
+                            <ColumnDefinition Width = "*" />
+                            <ColumnDefinition Width = "22" />
                         </Grid.ColumnDefinitions>
                         <ToggleButton Name = "ToggleButton"
                                       Grid.Column = "1"
@@ -130,7 +131,7 @@
                                       Focusable = "False"
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Template = "{StaticResource BorderlessComboBoxToggleButtonTemplate}" />
-                        
+
                         <ContentPresenter Grid.Column = "0"
                                           Name = "ContentSite"
                                           Margin = "5, 1, 3, 3"
@@ -141,8 +142,9 @@
                                           ContentTemplate = "{TemplateBinding ComboBox.SelectionBoxItemTemplate}"
                                           ContentTemplateSelector = "{TemplateBinding ItemTemplateSelector}">
                         </ContentPresenter>
-                        
-                        <TextBox Grid.Column="0" Name = "PART_EditableTextBox"
+
+                        <TextBox Grid.Column = "0"
+                                 Name = "PART_EditableTextBox"
                                  Margin = "3, 3, 3, 3"
                                  IsReadOnly = "{TemplateBinding IsReadOnly}"
                                  Visibility = "Hidden"
@@ -164,12 +166,13 @@
                             </TextBox.Template>
                         </TextBox>
                         <!-- Popup showing items -->
-                        <Popup  Grid.Column="0" Name = "Popup"
-                                Placement = "Bottom"
-                                Focusable = "False"
-                                AllowsTransparency = "True"
-                                IsOpen = "{TemplateBinding ComboBox.IsDropDownOpen}"
-                                PopupAnimation = "Slide">
+                        <Popup Grid.Column = "0"
+                               Name = "Popup"
+                               Placement = "Bottom"
+                               Focusable = "False"
+                               AllowsTransparency = "True"
+                               IsOpen = "{TemplateBinding ComboBox.IsDropDownOpen}"
+                               PopupAnimation = "Slide">
                             <Grid Name = "DropDown"
                                   SnapsToDevicePixels = "True"
                                   MinWidth = "{TemplateBinding FrameworkElement.ActualWidth}"

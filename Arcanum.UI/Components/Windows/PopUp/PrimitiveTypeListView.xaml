@@ -56,7 +56,7 @@
                                              Height = "30"
                                              Width = "30"
                                              BorderThickness = "1">
-                        <Image Source = "../../../Assets/Icons/20x20/Add20x20.png"
+                        <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png"
                                Stretch = "UniformToFill">
                         </Image>
                     </styleClasses:BaseButton>
@@ -71,7 +71,7 @@
                 <styleClasses:BaseButton Margin = "0,5"
                                          Width = "30"
                                          Click = "AddButton_Click">
-                    <Image Source = "../../../Assets/Icons/20x20/ArrowLeft20x20.png"
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ArrowLeft20x20.png"
                            Stretch = "UniformToFill" />
                 </styleClasses:BaseButton>
 
@@ -79,7 +79,7 @@
                                          Width = "30"
                                          Click = "RemoveButton_Click"
                                          ToolTip = "Remove selected item(s)">
-                    <Image Source = "../../../Assets/Icons/20x20/ArrowRight20x20.png"
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ArrowRight20x20.png"
                            Stretch = "UniformToFill" />
                 </styleClasses:BaseButton>
             </StackPanel>

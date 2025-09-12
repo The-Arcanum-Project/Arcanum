@@ -2,6 +2,11 @@
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <Style TargetType = "styleClasses:CorneredTextBox">
         <Setter Property = "FontSize"
                 Value = "{StaticResource DefaultFontSize}" />

@@ -173,8 +173,6 @@ public partial class PrimitiveTypeListView
 
    #endregion
 
-   public event PropertyChangedEventHandler? PropertyChanged;
-
-    [GeneratedRegex("^([A-z_.]+[A-z0-9_.]*)")]
-    private static partial Regex IdentifierValidationRegex();
+   [GeneratedRegex("^([A-z_.]+[A-z0-9_.]*)")]
+   private static partial Regex IdentifierValidationRegex();
 }
