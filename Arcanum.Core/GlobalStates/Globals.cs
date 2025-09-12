@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.AbstractMechanics;
+using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -46,6 +47,12 @@ public static class Globals
    public static Dictionary<string, Vegetation> Vegetations { get; set; } = [];
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
+
+   #region Common
+
+   public static Dictionary<string, ModifierDefinition> ModifierDefinitions { get; set; } = [];
+
+   #endregion
 
    public static List<Age> Ages { get; set; } = [];
 #if DEBUG

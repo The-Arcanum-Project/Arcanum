@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.AbstractMechanics;
+using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
@@ -160,4 +161,15 @@ public class NUISettings
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ModifierDefinitionSettings { get; set; } = new(ModifierDefinition.Field.Name,
+                                                                    Enum.GetValues<ModifierDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<ModifierDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<ModifierDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray());
 }

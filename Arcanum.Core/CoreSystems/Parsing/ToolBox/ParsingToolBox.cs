@@ -426,4 +426,41 @@ public static class ParsingToolBox
 
       return true;
    }
+
+   public static bool ArcTryParse_FlagsEnum<TEnum>(ContentNode node,
+                                                   LocationContext ctx,
+                                                   string actionName,
+                                                   string source,
+                                                   out TEnum value,
+                                                   ref bool validation) where TEnum : struct, Enum
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_FlagsEnum)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = default;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!Enum.TryParse(lexeme, true, out value))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidEnumValue,
+                                        actionName,
+                                        lexeme,
+                                        typeof(TEnum).Name,
+                                        Enum.GetNames(typeof(TEnum)));
+         value = default;
+         validation = false;
+         return false;
+      }
+
+      return true;
+   }
 }

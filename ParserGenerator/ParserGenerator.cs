@@ -10,30 +10,20 @@ namespace ParserGenerator;
 [Generator]
 public class ParserSourceGenerator : IIncrementalGenerator
 {
-   // The fully qualified name of the attribute we are looking for.
-   // This is the "entry point" for our generator.
    private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParserForAttribute";
    private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsAttribute";
    private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParsingToolBox";
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
-      // --- Step 1: The Provider Pipeline ---
-      // This is the modern, efficient way to set up a source generator.
-
-      // 1a. Find all classes that *could* be our parsers. We are looking for
-      //     any class that has at least one attribute. This is a fast syntax-only filter.
       var provider = context.SyntaxProvider
                             .CreateSyntaxProvider(predicate: (node, _)
                                                      => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 },
                                                   transform: GetParserClassSymbol)
                             .Where(s => s is not null); // Filter out classes that don't match our criteria
 
-      // 1b. Collect all the found symbols into a list for the final generation step.
-      var compilation = context.CompilationProvider.Combine(provider.Collect());
-
-      // 1c. Register the final "Execute" step.
-      context.RegisterSourceOutput(compilation, (spc, source) => { Generate(source.Left, source.Right, spc); });
+      context.RegisterSourceOutput(context.CompilationProvider.Combine(provider.Collect()),
+                                   (spc, source) => { Generate(source.Left, source.Right, spc); });
    }
 
    /// <summary>
@@ -62,7 +52,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
    /// For now, it will just prove that we've found the right classes.
    /// </summary>
    private static void Generate(Compilation compilation,
-                                System.Collections.Immutable.ImmutableArray<INamedTypeSymbol> parsers,
+                                ImmutableArray<INamedTypeSymbol> parsers,
                                 SourceProductionContext context)
    {
       if (parsers.IsDefaultOrEmpty)
@@ -71,15 +61,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       var toolboxSymbol = compilation.GetTypeByMetadataName(PARSING_TOOLBOX_CLASS);
       if (toolboxSymbol == null)
       {
-         // Report a diagnostic that the ParsingToolBox class is missing
-         context.ReportDiagnostic(Diagnostic.Create(new(id: "PARSERGEN001",
-                                                        title: "Missing Dependency",
-                                                        messageFormat:
-                                                        $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
-                                                        category: "ParserGenerator",
-                                                        DiagnosticSeverity.Warning,
-                                                        isEnabledByDefault: true),
-                                                    Location.None));
+         ReportMissingDependency(context);
          return;
       }
 
@@ -120,6 +102,20 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                   $"{parserSymbol.ContainingNamespace}.{targetTypeSymbol.Name}Keywords");
          context.AddSource(parserHintName, parserSource);
       }
+   }
+
+   private static void ReportMissingDependency(SourceProductionContext context)
+   {
+      // Report a diagnostic that the ParsingToolBox class is missing
+      context.ReportDiagnostic(Diagnostic.Create(new(id: "PARSERGEN001",
+                                                     title: "Missing Dependency",
+                                                     messageFormat:
+                                                     $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
+                                                     category: "ParserGenerator",
+                                                     DiagnosticSeverity.Warning,
+                                                     isEnabledByDefault: true),
+                                                 Location.None));
+      return;
    }
 
    private static (string HintName, string Source) GenerateParserClass(
@@ -167,16 +163,27 @@ public class ParserSourceGenerator : IIncrementalGenerator
       // --- Dictionaries ---
       sb.AppendLine($"    private static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
       sb.AppendLine("    {");
-      // MODIFIED: Use the consistent name for the dictionary value
+
       foreach (var prop in contentNodeProps)
-         sb.AppendLine($"        {{ {fullyQualifiedKeywordClassName}.{prop.KeywordConstantName}, {arcParsePrefix}{prop.PropertyName} }},");
+      {
+         var isFlagsEnum = prop.PropertyType.GetAttributes()
+                               .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+         var flagsPrefix = isFlagsEnum ? "Flags" : string.Empty;
+
+         var parserMethodName = prop.CustomParserMethodName ?? $"{arcParsePrefix}{flagsPrefix}{prop.PropertyName}";
+         sb.AppendLine($"        {{ {fullyQualifiedKeywordClassName}.{prop.KeywordConstantName}, {parserMethodName} }},");
+      }
 
       sb.AppendLine("    };");
       sb.AppendLine();
       sb.AppendLine($"    private static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
       sb.AppendLine("    {");
       foreach (var prop in blockNodeProps)
-         sb.AppendLine($"        {{ {fullyQualifiedKeywordClassName}.{prop.KeywordConstantName}, {arcParsePrefix}{prop.PropertyName} }},");
+      {
+         var parserMethodName = prop.CustomParserMethodName ?? $"{arcParsePrefix}{prop.PropertyName}";
+         sb.AppendLine($"        {{ {fullyQualifiedKeywordClassName}.{prop.KeywordConstantName}, {parserMethodName} }},");
+      }
+
       sb.AppendLine("    };");
       sb.AppendLine();
 
@@ -225,7 +232,24 @@ public class ParserSourceGenerator : IIncrementalGenerator
       //--- Generated Wrapper Methods (partial signatures) ---
       sb.AppendLine("    #region Parser Method Signatures");
       foreach (var prop in properties)
-         sb.AppendLine($"    private static partial bool {arcParsePrefix}{prop.PropertyName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
+      {
+         var isFlagsEnumProperty = prop.PropertyType.BaseType != null &&
+                                   prop.PropertyType.BaseType.ToDisplayString() == "System.Enum" &&
+                                   prop.PropertyType.GetAttributes()
+                                       .Any(a => a.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+
+         var flagsPrefix = isFlagsEnumProperty ? "Flags" : string.Empty;
+         // If a custom parser is specified, we DO NOT generate a signature for it.
+         // We assume the user has written it completely.
+         if (prop.CustomParserMethodName != null)
+         {
+            sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{prop.CustomParserMethodName}'.");
+            continue;
+         }
+
+         sb.AppendLine($"    private static partial bool {arcParsePrefix}{flagsPrefix}{prop.PropertyName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
+      }
+
       sb.AppendLine("    #endregion");
       sb.AppendLine();
 
@@ -233,7 +257,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    #region Auto-Implemented Parsers");
       foreach (var prop in properties)
       {
-         var wrapperMethodName = $"{arcParsePrefix}{prop.PropertyName}";
+         // If a custom parser is specified, we DO NOT generate an implementation.
+         if (prop.CustomParserMethodName != null)
+            continue;
+
+         var isFlagsEnumProperty = prop.PropertyType.BaseType != null &&
+                                   prop.PropertyType.BaseType.ToDisplayString() == "System.Enum" &&
+                                   prop.PropertyType.GetAttributes()
+                                       .Any(a => a.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+
+         var flagsPrefix = isFlagsEnumProperty ? "Flags" : string.Empty;
+         var wrapperMethodName = $"{arcParsePrefix}{flagsPrefix}{prop.PropertyName}";
 
          // If the user has provided their own implementation, skip generation.
          if (handwrittenMethods.Contains(wrapperMethodName))
@@ -258,7 +292,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
          sb.AppendLine("    {");
          sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {propTypeName} value, ref validation))");
          sb.AppendLine("        {");
-         sb.AppendLine($"            target.{prop.PropertyName} = value;");
+         if (isFlagsEnumProperty)
+            sb.AppendLine($"            target.{prop.PropertyName} |= value;");
+         else
+            sb.AppendLine($"            target.{prop.PropertyName} = value;");
          sb.AppendLine("            return true;");
          sb.AppendLine("        }");
          sb.AppendLine("        return false;");
@@ -281,8 +318,13 @@ public class ParserSourceGenerator : IIncrementalGenerator
    {
       if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
       {
-         // The tool we are looking for is the generic "ArcTryParse_Enum"
-         const string genericToolName = $"{TOOL_METHOD_PREFIX}_Enum";
+         var isFlagsEnum = propertyType.GetAttributes()
+                                       .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+
+         var genericToolName = isFlagsEnum
+                                  ? $"{TOOL_METHOD_PREFIX}_FlagsEnum"
+                                  : $"{TOOL_METHOD_PREFIX}_Enum";
+
          var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
 
          foreach (var member in methods)
@@ -377,6 +419,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       public string Keyword { get; }
       public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
       public string AstNodeType { get; }
+      public string? CustomParserMethodName { get; }
 
       public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
       {
@@ -391,6 +434,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                               .OfType<IFieldSymbol>()
                                               .FirstOrDefault(f => f.ConstantValue != null &&
                                                                    f.ConstantValue.Equals(astNodeTypeArg.Value));
+
+         CustomParserMethodName = attribute.NamedArguments
+                                           .FirstOrDefault(arg => arg.Key == "CustomParser")
+                                           .Value.Value as string;
 
          // The name of that symbol is what we want (e.g., "ContentNode").
          // We provide a fallback just in case.
