@@ -1,9 +1,6 @@
 ﻿// Ast.cs
 
-using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.Culture;
-
-namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 /// <summary>
 /// base class for all AST nodes

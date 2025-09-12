@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 public enum FilesToTest
 {
@@ -18,7 +18,6 @@ public enum FilesToTest
 
 public static class ParserTesting
 {
-
    public static string GetFilePath(FilesToTest file)
    {
       const string location =

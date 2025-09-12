@@ -1,9 +1,11 @@
-﻿using Nexus.Core;
+﻿using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects;
 
 public abstract class NameKeyDefined(string name)
 {
+   [ReadonlyNexus]
    [AddModifiable]
    public string Name { get; set; } = name;
 

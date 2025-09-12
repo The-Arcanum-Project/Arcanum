@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 /// <summary>
 /// Scans a source code string and produces a sequence of tokens. This implementation

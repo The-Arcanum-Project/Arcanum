@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 

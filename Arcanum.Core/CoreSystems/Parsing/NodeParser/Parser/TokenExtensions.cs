@@ -1,5 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
-
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 public static class TokenExtensions
 {
@@ -15,7 +14,7 @@ public static class TokenExtensions
       // We can simply call the existing GetLexeme method, or reimplement the logic.
       // Calling the existing method is cleaner.
       return token.GetLexeme(source);
-        
+
       /* Or, the direct implementation:
       if (token.Length == 0 || token.Start + token.Length > source.Length)
       {

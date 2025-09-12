@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
 
@@ -177,7 +177,7 @@ public partial class ParserTest : INotifyPropertyChanged
          var parser = new Parser(result);
          var ast = parser.Parse();
          watch.Stop();
-         
+
          var sb = new System.Text.StringBuilder();
          if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
             sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");

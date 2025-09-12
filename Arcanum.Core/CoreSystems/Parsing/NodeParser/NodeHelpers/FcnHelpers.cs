@@ -2,10 +2,11 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 
-namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
 public static class FcnHelpers
 {

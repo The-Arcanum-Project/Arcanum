@@ -1,8 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -31,42 +29,6 @@ public partial class ClimateParsing : ParserValidationLoadingService
                                           string source,
                                           ref bool validation)
    {
-      foreach (var sn in rn.Statements)
-      {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
-            continue;
-
-         var climateKey = bn.KeyNode.GetLexeme(source);
-         var climate = new Climate(climateKey);
-
-         var unhandledNodes = ParseProperties(bn, climate, ctx, source, ref validation);
-         if (!Globals.Climates.TryAdd(climateKey, climate))
-         {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.DuplicateObjectDefinition,
-                                           actionStack,
-                                           climateKey,
-                                           typeof(Climate),
-                                           Climate.Field.Name);
-         }
-
-         foreach (var node in unhandledNodes)
-         {
-            if (node.IsBlockNode(ctx, source, actionStack, ref validation, out _))
-               continue;
-
-            ctx.SetPosition(node.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.InvalidBlockName,
-                                           actionStack,
-                                           node.KeyNode.GetLexeme(source),
-                                           new[]
-                                           {
-                                              ClimateKeywords.COLOR, ClimateKeywords.DEBUG_COLOR,
-                                              ClimateKeywords.HAS_PRECIPITATION, ClimateKeywords.WINTER,
-                                           });
-         }
-      }
+      SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Climates);
    }
 }

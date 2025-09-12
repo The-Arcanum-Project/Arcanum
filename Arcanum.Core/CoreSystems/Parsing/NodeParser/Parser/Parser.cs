@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 public class Parser(LexerResult lexerResult)
 {

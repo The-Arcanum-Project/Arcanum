@@ -149,7 +149,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       // --- MODIFICATION 2: Add using statements ---
       sb.AppendLine("using System.Collections.Generic;");
-      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.CeasarParser;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.Common;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;");

@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 /// <summary>
 /// Defines the different types of tokens that the Lexer can recognize.

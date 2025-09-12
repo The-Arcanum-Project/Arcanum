@@ -2,9 +2,10 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser.ValueHelpers;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
 public static class BnHelpers
 {

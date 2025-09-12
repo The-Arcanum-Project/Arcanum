@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
@@ -20,6 +20,13 @@ public static class Pdh
                                                 LocationContext ctx,
                                                 string source,
                                                 ref bool validation)
+      where TTarget : INexus;
+
+   public delegate List<StatementNode> PropertyParser<in TTarget>(BlockNode block,
+                                                                  TTarget target,
+                                                                  LocationContext ctx,
+                                                                  string source,
+                                                                  ref bool validation)
       where TTarget : INexus;
 
    /// <summary>

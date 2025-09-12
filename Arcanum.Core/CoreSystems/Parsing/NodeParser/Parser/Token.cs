@@ -1,10 +1,10 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.CeasarParser;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 public readonly struct Token
 {
    public TokenType Type { get; }
-   public int Start { get; }    // The starting index in the source string
-   public int Length { get; }   // The length of the lexeme
+   public int Start { get; } // The starting index in the source string
+   public int Length { get; } // The length of the lexeme
    public int Line { get; }
    public int Column { get; }
 
@@ -23,7 +23,9 @@ public readonly struct Token
    /// </summary>
    public string GetLexeme(string source)
    {
-      if (Length == 0 || Start + Length > source.Length) return "";
+      if (Length == 0 || Start + Length > source.Length)
+         return "";
+
       return source.Substring(Start, Length);
    }
 
