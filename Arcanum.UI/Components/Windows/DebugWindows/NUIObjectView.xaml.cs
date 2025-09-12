@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.DebugTools;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Debug;
 using Arcanum.UI.NUI.Generator;
 
@@ -51,7 +51,7 @@ public partial class NUIObjectView
    {
       InitializeComponent();
 
-      var types = NUITypeRegistry.GetAllNUITypes().ToList();
+      var types = NUITypeRegistry.NUIType.ToList();
       types.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
       NUIObjectTypes = types;
    }

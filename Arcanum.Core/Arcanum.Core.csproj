@@ -34,12 +34,7 @@
         <ProjectReference Include="..\CodeFixers\CodeFixers.csproj"
                           OutputItemType="Analyzer" 
                           ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\NUITypeRegistryGenerator\NUITypeRegistryGenerator.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\ParserGenerator\ParserGenerator.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\SourceGens\SourceGens.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup>

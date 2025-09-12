@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace NUITypeRegistryGenerator;
+namespace ParserGenerator;
 
 [Generator]
 public class MapModeGenerator : IIncrementalGenerator
@@ -57,8 +57,6 @@ public class MapModeGenerator : IIncrementalGenerator
          {
             // Find the 'Name' property
             var nameProperty = classSymbol.GetMembers("Name").OfType<IPropertySymbol>().FirstOrDefault();
-
-            // To get the value, we must inspect the syntax. This works for simple initializers.
             var propertySyntax =
                nameProperty?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
 

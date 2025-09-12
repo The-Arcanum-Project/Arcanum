@@ -286,7 +286,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                         title: "Missing Parser for Embedded Type",
                                                         messageFormat:
                                                         $"No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}' in parser '{parserSymbol.Name}'.",
-                                                        category: "ParserGenerator",
+                                                        category: "SourceGens",
                                                         DiagnosticSeverity.Error,
                                                         isEnabledByDefault: true),
                                                     Location.None));
@@ -618,7 +618,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                      title: "Missing Dependency",
                                                      messageFormat:
                                                      $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
-                                                     category: "ParserGenerator",
+                                                     category: "SourceGens",
                                                      DiagnosticSeverity.Warning,
                                                      isEnabledByDefault: true),
                                                  Location.None));

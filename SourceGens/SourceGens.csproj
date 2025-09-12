@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <RootNamespace>ParserGenerator</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
