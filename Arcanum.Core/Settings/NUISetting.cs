@@ -5,6 +5,7 @@ using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
@@ -149,4 +150,9 @@ public class NUISettings
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ClimateSettings { get; set; } = new(Climate.Field.Name,
+                                                         Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray());
 }

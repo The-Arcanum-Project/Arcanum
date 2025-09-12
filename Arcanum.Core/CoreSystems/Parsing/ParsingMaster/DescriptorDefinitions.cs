@@ -166,6 +166,13 @@ public static class DescriptorDefinitions
                                                              new AgeParsing(),
                                                              false);
 
+   public static readonly FileDescriptor ClimateDescriptor = new([],
+                                                                 ["game", "in_game", "common", "climates"],
+                                                                 ISavingService.Dummy,
+                                                                 new("climates", "txt", "#"),
+                                                                 new ClimateParsing(),
+                                                                 false);
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -174,7 +181,7 @@ public static class DescriptorDefinitions
          AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
-         CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor,
+         CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor,
       ];
    }
 }

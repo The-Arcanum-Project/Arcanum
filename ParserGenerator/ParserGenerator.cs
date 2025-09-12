@@ -240,23 +240,30 @@ public class ParserSourceGenerator : IIncrementalGenerator
             continue;
 
          var toolMethod = FindMatchingTool(toolboxSymbol, prop.AstNodeType, prop.PropertyType);
-         if (toolMethod != null)
-         {
-            var propTypeName = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var actionName = $"\"{parserSymbol.Name}.{wrapperMethodName}\"";
+         if (toolMethod == null)
+            continue;
 
-            // Generate the IMPLEMENTING partial method
-            sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
-            sb.AppendLine("    {");
-            sb.AppendLine($"        if ({toolMethod.Name}(node, ctx, {actionName}, source, out {propTypeName} value, ref validation))");
-            sb.AppendLine("        {");
-            sb.AppendLine($"            target.{prop.PropertyName} = value;");
-            sb.AppendLine("            return true;");
-            sb.AppendLine("        }");
-            sb.AppendLine("        return false;");
-            sb.AppendLine("    }");
-            sb.AppendLine();
-         }
+         var propTypeName = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+         var actionName = $"\"{parserSymbol.Name}.{wrapperMethodName}\"";
+
+         string toolMethodCall;
+         if (toolMethod.IsGenericMethod)
+            // For a generic tool, we need to specify the type argument, e.g., "ArcTryParse_Enum<MyEnum>"
+            toolMethodCall = $"{toolMethod.Name}<{propTypeName}>";
+         else
+            // For non-generic tools, it's just the name.
+            toolMethodCall = toolMethod.Name;
+
+         sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+         sb.AppendLine("    {");
+         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {propTypeName} value, ref validation))");
+         sb.AppendLine("        {");
+         sb.AppendLine($"            target.{prop.PropertyName} = value;");
+         sb.AppendLine("            return true;");
+         sb.AppendLine("        }");
+         sb.AppendLine("        return false;");
+         sb.AppendLine("    }");
+         sb.AppendLine();
       }
 
       sb.AppendLine("    #endregion");
@@ -267,22 +274,38 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    private const string TOOL_METHOD_PREFIX = "ArcTryParse";
-   private const string SECONDARY_TOOL_METHOD_PREFIX = "TryParse";
 
    private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
                                                   string astNodeType,
                                                   ITypeSymbol propertyType)
    {
-      // --- First, try to find the method WITH the prefix ---
-      var prefixedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
-      var toolMethod = FindToolByName(toolboxSymbol, prefixedToolName, astNodeType, propertyType);
+      if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
+      {
+         // The tool we are looking for is the generic "ArcTryParse_Enum"
+         const string genericToolName = $"{TOOL_METHOD_PREFIX}_Enum";
+         var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
 
-      if (toolMethod != null)
-         return toolMethod;
+         foreach (var member in methods)
+         {
+            // A valid tool must be static, generic, and have the right number of parameters.
+            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length < 5)
+               continue;
 
-      // --- If that fails, try to find the method WITHOUT the prefix ---
-      var unprefixedToolName = GetExpectedToolName(propertyType, SECONDARY_TOOL_METHOD_PREFIX);
-      return FindToolByName(toolboxSymbol, unprefixedToolName, astNodeType, propertyType);
+            if (member.Parameters[0].Type.Name != astNodeType)
+               continue;
+
+            var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
+            if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
+               continue;
+
+            return member;
+         }
+
+         return null;
+      }
+
+      var expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
+      return FindToolByName(toolboxSymbol, expectedToolName, astNodeType, propertyType);
    }
 
    // Extracted the search logic to a reusable method
