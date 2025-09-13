@@ -283,11 +283,11 @@ public class BaseWindow : Window
 
       var imagePath = WindowState switch
       {
-         WindowState.Maximized => "pack://application:,,,/Assets/Icons/20x20/RestoreWindow20x20.png",
-         _ => "pack://application:,,,/Assets/Icons/20x20/FullScreen20x20.png",
+         WindowState.Maximized => "/Arcanum_UI;component/Assets/Icons/20x20/RestoreWindow20x20.png",
+         _ => "/Arcanum_UI;component/Assets/Icons/20x20/FullScreen20x20.png",
       };
 
-      image.Source = new BitmapImage(new(imagePath));
+      image.Source = new BitmapImage(new(imagePath, UriKind.RelativeOrAbsolute));
    }
 
    private void OnSourceInitialized(object? sender, EventArgs e)
