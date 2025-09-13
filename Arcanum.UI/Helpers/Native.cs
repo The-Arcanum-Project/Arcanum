@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -21,17 +22,18 @@ public static class NativeMethods
    }
    
    [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Auto, Pack=4)]
+   [SuppressMessage("ReSharper", "UnusedMember.Local")]
    private class MonitorInfoEx { 
-/*
       public int     cbSize = Marshal.SizeOf(typeof(MonitorInfoEx));
-*/
-      public Rect    rcMonitor = new(); 
-      public Rect    rcWork = new(); 
-      // public int     dwFlags = 0;
-/*
+
+      public readonly Rect    rcMonitor = new(); 
+      public readonly Rect    rcWork = new(); 
+#pragma warning disable CS0414 // Field is assigned but its value is never used
+      public int     dwFlags = 0;
+#pragma warning restore CS0414 // Field is assigned but its value is never used
+
       [MarshalAs(UnmanagedType.ByValArray, SizeConst=32)] 
       public char[]  szDevice = new char[32];
-*/
    }
    
    [DllImport("user32.dll")]
@@ -50,7 +52,7 @@ public static class NativeMethods
       
       if (monitor == IntPtr.Zero) return mmi;
       var monitorInfo = new MonitorInfoEx();
-      GetMonitorInfo(new(null, monitor), monitorInfo); 
+      GetMonitorInfo(new (null, monitor), monitorInfo); 
       var rcWorkArea = monitorInfo.rcWork;
       var rcMonitorArea = monitorInfo.rcMonitor;
       mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.Left - rcMonitorArea.Left);
