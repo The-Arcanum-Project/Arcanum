@@ -12,14 +12,16 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 /// <param name="savingMethod">What custom method to use to save. Must be located in <see cref="SavingActionProvider"/></param>
 /// <param name="commentMethod">What method should be used to generate a saving comment from the value and name. Must be located in <see cref="SavingCommentProvider"/></param>
 [AttributeUsage(AttributeTargets.Class)]
-public class ObjectSaveAsAttribute(string keyWord,
-                                   TokenType separator = TokenType.Equals,
-                                   TokenType openingToken = TokenType.LeftBrace,
-                                   TokenType closingToken = TokenType.RightBrace,
-                                   string? savingMethod = null,
-                                   string? commentMethod = null) : Attribute
+public class ObjectSaveAsAttribute<TEnum>(TEnum keyWord,
+                                          TokenType separator = TokenType.Equals,
+                                          TokenType openingToken = TokenType.LeftBrace,
+                                          TokenType closingToken = TokenType.RightBrace,
+                                          string? savingMethod = null,
+                                          string? commentMethod = null)
+   : Attribute
+   where TEnum : Enum
 {
-   public string KeyWord { get; } = keyWord;
+   public TEnum KeyWord { get; } = keyWord;
    public TokenType Separator { get; } = separator;
    public TokenType OpeningToken { get; } = openingToken;
    public TokenType ClosingToken { get; } = closingToken;

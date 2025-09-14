@@ -45,6 +45,11 @@ public class AgsObjectSavingContext
 
    public void BuildContext(IndentedStringBuilder sb)
    {
+      // using (sb.BlockWithName())
+      // {
+      //    
+      // }
+
       foreach (var prop in OrderedProperties)
       {
       }

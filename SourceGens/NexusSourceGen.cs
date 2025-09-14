@@ -81,18 +81,23 @@ public class PropertyModifierGenerator : IIncrementalGenerator
             continue;
 
          // Find all eligible properties and fields
-         var members = Helpers.FindModifiableMembers(classSymbol, context);
-
-         // Generate the code for this class
-         var sourceCode = GeneratePartialClass(classSymbol, members);
-
-         // Add the generated source file to the compilation
-         var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
-         context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
+         RunNexusGenerator(context, classSymbol);
       }
    }
 
-   private string GeneratePartialClass(INamedTypeSymbol classSymbol, List<ISymbol> members)
+   public static void RunNexusGenerator(SourceProductionContext context, INamedTypeSymbol classSymbol)
+   {
+      var members = Helpers.FindModifiableMembers(classSymbol, context);
+
+      // Generate the code for this class
+      var sourceCode = GeneratePartialClass(classSymbol, members);
+
+      // Add the generated source file to the compilation
+      var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
+      context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
+   }
+
+   private static string GeneratePartialClass(INamedTypeSymbol classSymbol, List<ISymbol> members)
    {
       var readonlyStatuses = new List<bool>();
       var allowsEmpty = new List<bool>();

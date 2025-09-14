@@ -18,25 +18,41 @@ public class SavingGenerator : IIncrementalGenerator
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
 
-   private const string OBJECT_SAVE_AS_ATTRIBUTE =
-      "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.ObjectSaveAsAttribute";
+   private const string OBJECT_SAVE_AS_ATTRIBUTE_NAME = "ObjectSaveAsAttribute";
 
    private static readonly DiagnosticDescriptor MissingSaveAsAttributeWarning = new(id: "AGS004",
-    title: "Missing [SaveAs] attribute",
-    messageFormat:
-    "Property '{0}' will not be saved because it is missing a [SaveAs] attribute. Add the attribute to include it in serialization, or add [SuppressAgs] to explicitly ignore it.",
-    category: "SavingGenerator",
-    DiagnosticSeverity.Warning, // This is a warning, not an error.
-    isEnabledByDefault: true);
+       title: "Missing [SaveAs] attribute",
+       messageFormat:
+       "Property '{0}' will not be saved because it is missing a [SaveAs] attribute. Add the attribute to include it in serialization, or add [SuppressAgs] to explicitly ignore it.",
+       category: "SavingGenerator",
+       DiagnosticSeverity.Warning, // This is a warning, not an error.
+       isEnabledByDefault: true);
 
    // An error for a missing keyword, which is unrecoverable.
    private static readonly DiagnosticDescriptor MissingParseAsKeywordError = new(id: "AGS002",
-    title: "Invalid or Missing ParseAs Keyword",
-    messageFormat:
-    "Property '{0}' cannot be saved because it is missing a [ParseAs] attribute with a valid keyword.",
-    category: "SavingGenerator",
-    DiagnosticSeverity.Error,
-    isEnabledByDefault: true);
+       title: "Invalid or Missing ParseAs Keyword",
+       messageFormat:
+       "Property '{0}' cannot be saved because it is missing a [ParseAs] attribute with a valid keyword.",
+       category: "SavingGenerator",
+       DiagnosticSeverity.Error,
+       isEnabledByDefault: true);
+
+   private static readonly DiagnosticDescriptor MissingNexusEnumPropertyKey = new(id: "AGS006",
+       title:
+       "Missing Nexus Enum Property Key",
+       messageFormat:
+       "The property '{0}' corresponding to enum field '{1}' was not found in class '{2}'. Ensure that the property exists and matches the enum field name.",
+       category: "SavingGenerator",
+       DiagnosticSeverity
+         .Error, // This should be a build-breaking error.
+       isEnabledByDefault: true);
+
+   private static readonly DiagnosticDescriptor InvalidNexusKeyPropType = new("AGS010",
+                                                                              "Incorrect Key Property Type",
+                                                                              "The key-defining property '{0}' specified in [ObjectSaveAs] must be of type 'string', but was found to be of type '{1}'.",
+                                                                              "SavingGenerator",
+                                                                              DiagnosticSeverity.Error,
+                                                                              true);
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
@@ -71,9 +87,21 @@ public class SavingGenerator : IIncrementalGenerator
 
       foreach (var agsClassSymbol in agsClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
       {
-         var objectSaveAsAttr = agsClassSymbol.GetAttributes()
-                                              .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                                    OBJECT_SAVE_AS_ATTRIBUTE);
+         AttributeData? objectSaveAsAttr = null;
+
+         foreach (var attribute in agsClassSymbol.GetAttributes())
+         {
+            // Get the symbol for the attribute class
+            if (attribute.AttributeClass is not { } attributeSymbol)
+               continue;
+
+            // Check if it's a generic type and its name matches
+            if (attributeSymbol is { IsGenericType: true, Name: OBJECT_SAVE_AS_ATTRIBUTE_NAME })
+            {
+               objectSaveAsAttr = attribute;
+               break;
+            }
+         }
 
          // If the attribute is MISSING, report a diagnostic and skip this class.
          if (objectSaveAsAttr == null)
@@ -81,6 +109,31 @@ public class SavingGenerator : IIncrementalGenerator
             context.ReportDiagnostic(Diagnostic.Create(MissingParseAsKeywordError,
                                                        agsClassSymbol.Locations.FirstOrDefault(),
                                                        agsClassSymbol.Name));
+            continue;
+         }
+
+         var keyWordArg = objectSaveAsAttr.ConstructorArguments[0];
+         var keyDefiningPropertyName = Helpers.GetEnumMemberName(keyWordArg);
+         var propertySymbol = agsClassSymbol.GetMembers(keyDefiningPropertyName!)
+                                            .OfType<IPropertySymbol>()
+                                            .FirstOrDefault();
+
+         if (propertySymbol == null)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(MissingNexusEnumPropertyKey,
+                                                       agsClassSymbol.Locations.FirstOrDefault(),
+                                                       keyDefiningPropertyName,
+                                                       keyDefiningPropertyName,
+                                                       agsClassSymbol.Name));
+            continue;
+         }
+
+         if (propertySymbol.Type.SpecialType != SpecialType.System_String)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(InvalidNexusKeyPropType,
+                                                       propertySymbol.Locations.FirstOrDefault(),
+                                                       propertySymbol.Name,
+                                                       propertySymbol.Type.Name));
             continue;
          }
 
@@ -115,20 +168,6 @@ public class SavingGenerator : IIncrementalGenerator
          if (saveAsAttr == null)
          {
             context.ReportDiagnostic(Diagnostic.Create(MissingSaveAsAttributeWarning,
-                                                       member.Locations.FirstOrDefault(),
-                                                       member.Name));
-            continue;
-         }
-
-         // The [ParseAs] attribute (for the keyword) is also required.
-         var parseAsAttr = member.GetAttributes()
-                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
-         if (parseAsAttr == null ||
-             parseAsAttr.ConstructorArguments.Length < 2 ||
-             string.IsNullOrEmpty(parseAsAttr.ConstructorArguments[1].Value as string))
-         {
-            // If it's missing, report an ERROR and skip this property.
-            context.ReportDiagnostic(Diagnostic.Create(MissingParseAsKeywordError,
                                                        member.Locations.FirstOrDefault(),
                                                        member.Name));
             continue;
