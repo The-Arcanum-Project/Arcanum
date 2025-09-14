@@ -23,16 +23,21 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "BrowseProvincesButton_Click" />
-            
+
             <styleClasses:BaseButton Content = "FindNullMarkets"
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "FindNullMarketsButton_Click" />
-            
+
             <styleClasses:BaseButton Content = "Null location in Market"
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "FindNullLocationInMarketButton_Click" />
+
+            <styleClasses:BaseButton Content = "Saving Window"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "OpenSavingWindowButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

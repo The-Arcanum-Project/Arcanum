@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Nexus.SourceGen;
+namespace ParserGenerator;
 
 [Generator]
 public class PropertyModifierGenerator : IIncrementalGenerator

@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
+using Arcanum.UI.Components.Windows.MinorWindows;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
@@ -50,5 +51,11 @@ public partial class Debug_Panel
       }
 
       DebugView.Content = new TextBlock { Text = $"Found {count} markets with null locations: {str}" };
+   }
+
+   private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
+   {
+      var sw = new SaveWindow();
+      sw.Show();
    }
 }

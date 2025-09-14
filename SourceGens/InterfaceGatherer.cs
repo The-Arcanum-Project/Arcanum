@@ -16,6 +16,7 @@ public class InterfaceGatherer : IIncrementalGenerator
       { "Arcanum.API.UtilServices.Search.ISearchable", "AllSearchableTypes" },
       { "Arcanum.Core.CoreSystems.NUI.IHasMapMode", "MapModeProvider" },
       { "Arcanum.Core.CoreSystems.NUI.INUI", "NUIType" },
+      { "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs", "Ags" },
    };
 
    public void Initialize(IncrementalGeneratorInitializationContext context)

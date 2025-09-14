@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Nexus.SourceGen;
+namespace ParserGenerator;
 
 public static class Helpers
 {
@@ -139,5 +139,18 @@ public static class Helpers
          default:
             return false;
       }
+   }
+
+   public static string? GetEnumMemberName(TypedConstant enumTypedConstant)
+   {
+      if (enumTypedConstant.Type is not INamedTypeSymbol enumTypeSymbol)
+         return null;
+
+      var enumMemberSymbol = enumTypeSymbol.GetMembers()
+                                           .OfType<IFieldSymbol>()
+                                           .FirstOrDefault(f => f.ConstantValue != null &&
+                                                                f.ConstantValue.Equals(enumTypedConstant.Value));
+
+      return enumMemberSymbol?.Name;
    }
 }

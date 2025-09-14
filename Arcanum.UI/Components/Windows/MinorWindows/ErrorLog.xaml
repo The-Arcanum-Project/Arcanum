@@ -16,7 +16,8 @@
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source = "/Components/Styles/Specific/DataTemplate/DiagnosticTemplate.xaml" />
+                <ResourceDictionary
+                    Source = "/Arcanum_UI;component/Components/Styles/Specific/DataTemplate/DiagnosticTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
@@ -141,22 +142,22 @@
                                     <Image.Style>
                                         <Style TargetType = "Image">
                                             <Setter Property = "Source"
-                                                    Value = "pack://application:,,,/Assets/Icons/16x16/InfoCircle16x16.png" />
+                                                    Value = "/Arcanum_UI;component/Assets/Icons/16x16/InfoCircle16x16.png" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding = "{Binding Severity}"
                                                              Value = "Error">
                                                     <Setter Property = "Source"
-                                                            Value = "pack://application:,,,/Assets/Icons/16x16/CloseCircle16x16.png" />
+                                                            Value = "/Arcanum_UI;component/Assets/Icons/16x16/CloseCircle16x16.png" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding = "{Binding Severity}"
                                                              Value = "Warning">
                                                     <Setter Property = "Source"
-                                                            Value = "pack://application:,,,/Assets/Icons/16x16/DangerCircle16x16.png" />
+                                                            Value = "/Arcanum_UI;component/Assets/Icons/16x16/DangerCircle16x16.png" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding = "{Binding Severity}"
                                                              Value = "Information">
                                                     <Setter Property = "Source"
-                                                            Value = "pack://application:,,,/Assets/Icons/16x16/InfoCircle16x16.png" />
+                                                            Value = "/Arcanum_UI;component/Assets/Icons/16x16/InfoCircle16x16.png" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -248,25 +249,25 @@
                         <Image.Style>
                             <Style TargetType = "Image">
                                 <Setter Property = "Source"
-                                        Value = "pack://application:,,,/Assets/Icons/16x16/InfoCircle16x16.png" />
+                                        Value = "/Arcanum_UI;component/Assets/Icons/16x16/InfoCircle16x16.png" />
                                 <Style.Triggers>
                                     <DataTrigger
                                         Binding = "{Binding SelectedSeverity, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                                         Value = "Error">
                                         <Setter Property = "Source"
-                                                Value = "pack://application:,,,/Assets/Icons/40x40/CloseCircle40x40.png" />
+                                                Value = "/Arcanum_UI;component/Assets/Icons/40x40/CloseCircle40x40.png" />
                                     </DataTrigger>
                                     <DataTrigger
                                         Binding = "{Binding SelectedSeverity, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                                         Value = "Warning">
                                         <Setter Property = "Source"
-                                                Value = "pack://application:,,,/Assets/Icons/40x40/DangerCircle40x40.png" />
+                                                Value = "/Arcanum_UI;component/Assets/Icons/40x40/DangerCircle40x40.png" />
                                     </DataTrigger>
                                     <DataTrigger
                                         Binding = "{Binding SelectedSeverity, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                                         Value = "Information">
                                         <Setter Property = "Source"
-                                                Value = "pack://application:,,,/Assets/Icons/40x40/InfoCircle40x40.png" />
+                                                Value = "/Arcanum_UI;component/Assets/Icons/40x40/InfoCircle40x40.png" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
