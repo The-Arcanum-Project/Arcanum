@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 /// <summary>
 /// Describes how to save an object using AGS (Automatic Generative Saving).
 /// </summary>
-/// <param name="keyWord">The keyword or identifier of this object</param>
+/// <param name="keyWord">Name of the INexus property which should be used as key</param>
 /// <param name="separator">The separator between keyword and opening token. By default '='</param>
 /// <param name="openingToken">The token that opens the object. By default '{'</param>
 /// <param name="closingToken">The token that closes the object. By default '}'</param>

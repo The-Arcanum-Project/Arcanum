@@ -7,7 +7,7 @@ using Nexus.Core;
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Dev;
 
 [ObjectSaveAs(nameof(Key))]
-public partial class Tes2tObj : IAgs
+public partial class TestObj : IAgs
 {
    [SaveAs(SavingValueType.Bool, TokenType.LessOrEqual)]
    [ParseAs(AstNodeType.ContentNode, "is_prop")]
@@ -15,13 +15,7 @@ public partial class Tes2tObj : IAgs
    public bool IsProp { get; set; } = true;
 
    [SuppressAgs]
-   [ParseAs(AstNodeType.ContentNode, "is_prop")]
    [Description("Hello there I am a property")]
    public string Key { get; set; } = "TestObj";
    public AgsSettings Settings { get; } = new();
-
-   public static void Test()
-   {
-      var key = Field.Key;
-   }
 }

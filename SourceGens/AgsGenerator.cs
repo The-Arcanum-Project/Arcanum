@@ -21,6 +21,23 @@ public class SavingGenerator : IIncrementalGenerator
    private const string OBJECT_SAVE_AS_ATTRIBUTE =
       "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.ObjectSaveAsAttribute";
 
+   private static readonly DiagnosticDescriptor MissingSaveAsAttributeWarning = new(id: "AGS004",
+    title: "Missing [SaveAs] attribute",
+    messageFormat:
+    "Property '{0}' will not be saved because it is missing a [SaveAs] attribute. Add the attribute to include it in serialization, or add [SuppressAgs] to explicitly ignore it.",
+    category: "SavingGenerator",
+    DiagnosticSeverity.Warning, // This is a warning, not an error.
+    isEnabledByDefault: true);
+
+   // An error for a missing keyword, which is unrecoverable.
+   private static readonly DiagnosticDescriptor MissingParseAsKeywordError = new(id: "AGS002",
+    title: "Invalid or Missing ParseAs Keyword",
+    messageFormat:
+    "Property '{0}' cannot be saved because it is missing a [ParseAs] attribute with a valid keyword.",
+    category: "SavingGenerator",
+    DiagnosticSeverity.Error,
+    isEnabledByDefault: true);
+
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
       // The pipeline to find all classes that implement our target IAgs interface.
@@ -61,13 +78,7 @@ public class SavingGenerator : IIncrementalGenerator
          // If the attribute is MISSING, report a diagnostic and skip this class.
          if (objectSaveAsAttr == null)
          {
-            context.ReportDiagnostic(Diagnostic.Create(new(id: "AGS003",
-                                                           title: "Missing ObjectSaveAs Attribute",
-                                                           messageFormat:
-                                                           "Class '{0}' is missing the required [ObjectSaveAs] attribute.",
-                                                           category: "SavingGenerator",
-                                                           DiagnosticSeverity.Error,
-                                                           isEnabledByDefault: true),
+            context.ReportDiagnostic(Diagnostic.Create(MissingParseAsKeywordError,
                                                        agsClassSymbol.Locations.FirstOrDefault(),
                                                        agsClassSymbol.Name));
             continue;
@@ -75,10 +86,55 @@ public class SavingGenerator : IIncrementalGenerator
 
          var nexusMembers = Helpers.FindModifiableMembers(agsClassSymbol, context);
          var nexusProperties = nexusMembers.OfType<IPropertySymbol>().ToList();
+         var saveAsProps = new List<IPropertySymbol>();
+
+         GetValidProperties(context, nexusProperties, saveAsProps);
 
          var (saverHintName, saverSource) =
-            GenerateSaverClass(agsClassSymbol, objectSaveAsAttr, nexusProperties, context);
+            GenerateSaverClass(agsClassSymbol, objectSaveAsAttr, saveAsProps, context);
          context.AddSource(saverHintName, saverSource);
+      }
+   }
+
+   private static void GetValidProperties(SourceProductionContext context,
+                                          List<IPropertySymbol> nexusProperties,
+                                          List<IPropertySymbol> saveAsProps)
+   {
+      foreach (var member in nexusProperties)
+      {
+         if (member is null)
+            continue;
+
+         // If [SuppressAgs] is present, silently skip this property.
+         if (member.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == SUPPRESS_AGS_ATTRIBUTE))
+            continue;
+
+         // The [SaveAs] attribute is required.
+         var saveAsAttr = member.GetAttributes()
+                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE);
+         if (saveAsAttr == null)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(MissingSaveAsAttributeWarning,
+                                                       member.Locations.FirstOrDefault(),
+                                                       member.Name));
+            continue;
+         }
+
+         // The [ParseAs] attribute (for the keyword) is also required.
+         var parseAsAttr = member.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
+         if (parseAsAttr == null ||
+             parseAsAttr.ConstructorArguments.Length < 2 ||
+             string.IsNullOrEmpty(parseAsAttr.ConstructorArguments[1].Value as string))
+         {
+            // If it's missing, report an ERROR and skip this property.
+            context.ReportDiagnostic(Diagnostic.Create(MissingParseAsKeywordError,
+                                                       member.Locations.FirstOrDefault(),
+                                                       member.Name));
+            continue;
+         }
+
+         saveAsProps.Add(member);
       }
    }
 
@@ -123,7 +179,7 @@ public class SavingGenerator : IIncrementalGenerator
       // --- The private static fields ---
       sb.AppendLine("        // Pre-built metadata for the class itself.");
       sb.AppendLine("        private static readonly ClassSavingMetadata _classMetadata = new(");
-      sb.AppendLine($"            Field.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
+      sb.AppendLine($"            {namespaceName}.{className}.Field.{objectSaveAsAttr.ConstructorArguments[0].Value},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[3])},");
@@ -170,7 +226,7 @@ public class SavingGenerator : IIncrementalGenerator
                                                     prop.Locations.FirstOrDefault(),
                                                     prop.Name,
                                                     prop.ContainingType.Name));
-         //return;
+         return;
       }
 
       sb.AppendLine("                new()");
