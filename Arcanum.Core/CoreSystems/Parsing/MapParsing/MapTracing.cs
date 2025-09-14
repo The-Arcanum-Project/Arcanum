@@ -1,4 +1,4 @@
-﻿#define ENABLE_VISUAL_TRACING
+﻿//#define ENABLE_VISUAL_TRACING
 
 using System.Diagnostics;
 using System.Drawing.Imaging;
@@ -24,6 +24,8 @@ public unsafe class MapTracing
 
     public const int OUTSIDE_COLOR = 0x000000;
 
+    public (int,int) ImageSize => (width, height);
+    
     private int width;
     private int height;
     private int stride;
@@ -563,7 +565,7 @@ public unsafe class MapTracing
         return polygon;
     }
 
-    private List<Polygon> _polygons = new List<Polygon>();
+    private List<Polygon> _polygons = [];
     public void VisitNode(Node node)
     {
         var dirs = node.Segments.Select(s => s.Dir);
@@ -587,7 +589,7 @@ public unsafe class MapTracing
         }
     }
 
-    public void LoadLocations(string filePath, IDebugDrawer mw)
+    public List<Polygon> LoadLocations(string filePath, IDebugDrawer mw)
     {
         var bmp = new Bitmap(filePath);
         var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly,
@@ -612,5 +614,6 @@ public unsafe class MapTracing
         ParseEverything();
         sw.Stop();
         Console.WriteLine($"Traced all ({_polygons.Count}) polygons in {sw.ElapsedMilliseconds} ms.");
+        return _polygons;
     }
 }

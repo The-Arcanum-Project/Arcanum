@@ -1,0 +1,19 @@
+﻿<styleClasses:BaseWindow x:Class="RenderingPain.TestGraphic"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RenderingPain"
+        xmlns:wpf="http://schemas.vortice.windows.io"
+        xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <wpf:DrawingSurface Grid.Row="1"
+                        LoadContent="DrawingSurface_LoadContent"
+                        UnloadContent="DrawingSurface_UnloadContent"
+                        Draw="DrawingSurface_Draw"
+                        MouseWheel="DrawingSurface_MouseWheel"
+                        MouseLeftButtonDown="DrawingSurface_MouseLeftButtonDown"
+                        MouseLeftButtonUp="DrawingSurface_MouseLeftButtonUp"
+                        MouseMove="DrawingSurface_MouseMove" />
+</styleClasses:BaseWindow>
