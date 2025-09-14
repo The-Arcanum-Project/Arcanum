@@ -1,0 +1,116 @@
+﻿<styleClasses:BaseWindow x:Class="Arcanum.UI.TutorialSystem.UI.TutorialWindow"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:local="clr-namespace:Arcanum.UI.TutorialSystem.UI"
+                         xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         mc:Ignorable="d"
+                         Title="Tutorial"
+                         Height="450"
+                         Width="500"
+                         WindowStyle="ToolWindow"
+                         ShowInTaskbar="False"
+                         Topmost="True"
+                         WindowStartupLocation="CenterOwner"
+                         ResizeMode="NoResize">
+    <!-- View 1: The Start Screen -->
+    <Grid>
+        <Grid x:Name="StartViewGrid"
+              Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="SequenceTitleTextBlock"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Text="Tutorial Title" />
+            <TextBlock x:Name="SequenceDescriptionTextBlock"
+                       Grid.Row="1"
+                       Margin="0,5,0,15"
+                       TextWrapping="Wrap"
+                       Text="Tutorial Description..." />
+
+            <GroupBox Grid.Row="2"
+                      Header="Chapters">
+                <ListBox x:Name="ChaptersListBox"
+                         BorderThickness="0" />
+            </GroupBox>
+
+            <StackPanel Grid.Row="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,15,0,0">
+                <styleClasses:BaseButton x:Name="StartButton"
+                        Content="Start"
+                        Width="100"
+                        IsDefault="True"
+                        Click="StartButton_Click" />
+                <styleClasses:BaseButton x:Name="CancelButton"
+                                         Content="Cancel"
+                                         Width="100"
+                                         Margin="10,0,0,0"
+                                         IsCancel="True"
+                                         Click="CancelButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <!-- View 2: The Step-by-Step Guide -->
+        <Grid x:Name="StepViewGrid"
+              Margin="15"
+              Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="ChapterTitleTextBlock"
+                       FontWeight="Bold"
+                       FontSize="14"
+                       Text="Chapter Title" />
+            <TextBlock x:Name="StepTitleTextBlock"
+                       Grid.Row="1"
+                       FontStyle="Italic"
+                       Margin="0,5,0,0"
+                       Text="Step Title" />
+
+            <ScrollViewer Grid.Row="2"
+                          Margin="0,10"
+                          VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="StepDescriptionTextBlock"
+                           TextWrapping="Wrap"
+                           Text="Step Description..." />
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <styleClasses:BaseButton x:Name="SkipChapterButton"
+                                         Content="Skip Chapter"
+                                         Margin="0,0,20,0"
+                                         Click="SkipChapterButton_Click" />
+                <styleClasses:BaseButton x:Name="PreviousButton"
+                                         Content="Previous"
+                                         Width="70"
+                                         Click="PreviousButton_Click" />
+                <styleClasses:BaseButton x:Name="NextButton"
+                                         Content="Next"
+                                         Width="70"
+                                         Margin="5,0,0,0"
+                                         IsDefault="True"
+                                         Click="NextButton_Click" />
+                <styleClasses:BaseButton x:Name="FinishButton"
+                                         Content="Finish"
+                                         Width="70"
+                                         Margin="5,0,0,0"
+                                         Click="FinishButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</styleClasses:BaseWindow>

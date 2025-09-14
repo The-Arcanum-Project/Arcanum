@@ -137,7 +137,8 @@ public class LifecycleManager
    {
       ArcanumDataHandler.LoadDefaultDescriptor(new());
       MainMenuScreenDescriptor.LoadData();
-      EffectsAndTriggersDocsParser.LoadDocs();
+      // TODO @Minnator Do not let the app crash if docs are missing
+      //EffectsAndTriggersDocsParser.LoadDocs();
    }
 
    private static void InitializeCoreServices(IPluginHost host)

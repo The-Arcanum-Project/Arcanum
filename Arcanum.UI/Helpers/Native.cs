@@ -13,8 +13,8 @@ public static class NativeMethods
    private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
    
    
-   [StructLayout(LayoutKind.Sequential)] 
-   public struct Rect {
+   [StructLayout(LayoutKind.Sequential)]
+   private struct Rect {
       public int Left; 
       public int Top; 
       public int Right;

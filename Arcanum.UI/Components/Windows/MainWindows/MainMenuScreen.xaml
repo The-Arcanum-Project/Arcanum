@@ -31,7 +31,7 @@
     </Window.DataContext>
     <!-- #272537 -->
     <Border Background = "{StaticResource AccentGradientBrush}"
-            CornerRadius = "0">
+            CornerRadius = "0" Name="LayoutRoot">
         <b:Interaction.Behaviors>
             <behaviors:WindowDrag EnableDoubleClickMaximize = "False" />
         </b:Interaction.Behaviors>
@@ -111,6 +111,7 @@
 
                 <Border Grid.Column = "0"
                         Grid.Row = "0"
+                        Name="TopBarBorder"
                         CornerRadius = "10"
                         BorderThickness = "2"
                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
