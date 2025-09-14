@@ -72,7 +72,7 @@ public class Lexer
             break;
          case '@':
             if (Match('['))
-               AddToken(TokenType.AtLeftBracket);
+               AddToken(TokenType.LeftBracket);
             else
                ScanIdentifier(isAtIdentifier: true);
             break;

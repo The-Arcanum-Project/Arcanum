@@ -23,7 +23,7 @@ public enum TokenType
    LessOrEqual, // <=
    GreaterOrEqual, // >=
    QuestionEquals, // ?=
-   AtLeftBracket, // @[
+   LeftBracket, // @[
 
    // Literals
    Identifier, // my_variable, width, rgb

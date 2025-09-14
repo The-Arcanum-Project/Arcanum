@@ -7,18 +7,6 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SavingUtil
 {
-   public static void SaveContentNxProperty(INexus target,
-                                            Enum nxProp,
-                                            string key,
-                                            SavingValueType svl,
-                                            ref IndentedStringBuilder sb)
-   {
-      object value = null!;
-      Nx.ForceGet(target, nxProp, ref value);
-
-      AppendFormattedObject(svl, value, ref sb);
-   }
-
    public static void AppendFormattedObject(SavingValueType svl, object value, ref IndentedStringBuilder sb)
    {
       switch (svl)
@@ -61,7 +49,7 @@ public static class SavingUtil
          or TokenType.Multiply
          or TokenType.Divide
          or TokenType.Less
-         or TokenType.AtLeftBracket
+         or TokenType.LeftBracket
          or TokenType.Identifier
          or TokenType.AtIdentifier
          or TokenType.String
@@ -77,7 +65,19 @@ public static class SavingUtil
          TokenType.GreaterOrEqual => ">=",
          TokenType.QuestionEquals => "?=",
          TokenType.LessOrEqual => "<=",
-         _ => throw new ArgumentOutOfRangeException(nameof(separator), separator, null)
+         _ => throw new ArgumentOutOfRangeException(nameof(separator), separator, null),
+      };
+   }
+
+   public static string GetBrace(TokenType separator)
+   {
+      return separator switch
+      {
+         TokenType.LeftBrace => "{",
+         TokenType.RightBrace => "}",
+         TokenType.LeftBracket => "[",
+         TokenType.RightBracket => "]",
+         _ => throw new ArgumentOutOfRangeException(nameof(separator), separator, null),
       };
    }
 }

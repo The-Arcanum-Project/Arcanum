@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SavingActionProvider
 {
-   public static void ExampleCustomSavingMethod(IAgs target, SavingMetaData metaData, IndentedStringBuilder sb)
+   public static void ExampleCustomSavingMethod(IAgs target, PropertySavingMetaData metaData, IndentedStringBuilder sb)
    {
       object value = null!;
       Nx.ForceGet(target, metaData.NxProp, ref value);
@@ -17,7 +17,7 @@ public static class SavingActionProvider
       }
    }
 
-   public static void DefaultContentSaver(IAgs target, SavingMetaData metaData, IndentedStringBuilder sb)
+   public static void DefaultContentSaver(IAgs target, PropertySavingMetaData metaData, IndentedStringBuilder sb)
    {
       object value = null!;
       Nx.ForceGet(target, metaData.NxProp, ref value);

@@ -11,9 +11,14 @@ public static class Helpers
    public const string MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.AddModifiableAttribute";
 
    public static List<ISymbol> FindModifiableMembers(INamedTypeSymbol classSymbol,
-                                                     bool inclusive,
                                                      SourceProductionContext context)
    {
+      // --- Use the SHARED helper to get the list of properties ---
+      var inclusive = classSymbol.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                       EXPLICIT_PROPERTIES_ATTRIBUTE_STRING) ==
+                      null;
+
       var finalMembers = new List<ISymbol>();
       var potentialMembers = new Dictionary<string, ISymbol>();
 

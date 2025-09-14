@@ -24,9 +24,7 @@ public class RangeCollectionAnalyzer : DiagnosticAnalyzer
       if (context.Symbol is not IPropertySymbol propertySymbol)
          return;
 
-      var nexusInterfaceSymbol = context.Compilation.GetTypeByMetadataName("Nexus.Core.INexus");
-      if (nexusInterfaceSymbol == null ||
-          !propertySymbol.ContainingType.AllInterfaces.Contains(nexusInterfaceSymbol, SymbolEqualityComparer.Default))
+      if (IsNexusProperty(context, propertySymbol))
          return;
 
       var expectedValueType = propertySymbol.Type;
@@ -70,5 +68,24 @@ public class RangeCollectionAnalyzer : DiagnosticAnalyzer
                                                           "T"));
             }
       }
+   }
+
+   private static bool IsNexusProperty(SymbolAnalysisContext context, IPropertySymbol propertySymbol)
+   {
+      var nexusInterfaceSymbol = context.Compilation.GetTypeByMetadataName("Nexus.Core.INexus");
+      if (nexusInterfaceSymbol == null ||
+          !propertySymbol.ContainingType.AllInterfaces.Contains(nexusInterfaceSymbol, SymbolEqualityComparer.Default))
+         return true;
+
+      var fieldEnumSymbol = propertySymbol.ContainingType.GetTypeMembers("Field")
+                                          .FirstOrDefault(m => m.TypeKind == TypeKind.Enum);
+
+      if (fieldEnumSymbol == null)
+         // The INexus object doesn't have the generated 'Field' enum.
+         // This could be a temporary state during typing, or the generator hasn't run.
+         // It's safest to do nothing in this case.
+         return true;
+
+      return new HashSet<string>(fieldEnumSymbol.GetMembers().Select(m => m.Name)).Contains(propertySymbol.Name);
    }
 }

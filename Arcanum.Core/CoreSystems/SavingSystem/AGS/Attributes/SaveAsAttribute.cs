@@ -3,8 +3,12 @@
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 
 /// <summary>
-/// What type of value is being saved. Mostly used to mark identifiers instead of strings.
+/// Attribute to define how a property should be saved using AGS (Automatic Generative Saving).
 /// </summary>
+/// <param name="valueType">What kind of data is represented</param>
+/// <param name="separator">The separator between token and value</param>
+/// <param name="savingMethod">What custom method to use to save. Must be located in <see cref="SavingActionProvider"/></param>
+/// <param name="commentMethod">What method should be used to generate a saving comment from the value and name. Must be located in <see cref="SavingCommentProvider"/></param>
 [AttributeUsage(AttributeTargets.Property)]
 public class SaveAsAttribute(SavingValueType valueType,
                              TokenType separator = TokenType.Equals,

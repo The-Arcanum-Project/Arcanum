@@ -182,7 +182,7 @@ public class Parser(LexerResult lexerResult)
       }
 
       // @[ ... ] math expression
-      if (Match(TokenType.AtLeftBracket))
+      if (Match(TokenType.LeftBracket))
       {
          var mathTokens = new List<Token>();
          while (!Check(TokenType.RightBracket) && !IsAtEnd())

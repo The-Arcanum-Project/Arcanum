@@ -18,6 +18,9 @@ public class SavingGenerator : IIncrementalGenerator
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
 
+   private const string OBJECT_SAVE_AS_ATTRIBUTE =
+      "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.ObjectSaveAsAttribute";
+
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
       // The pipeline to find all classes that implement our target IAgs interface.
@@ -51,28 +54,41 @@ public class SavingGenerator : IIncrementalGenerator
 
       foreach (var agsClassSymbol in agsClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
       {
-         // --- Use the SHARED helper to get the list of properties ---
-         var explicitAttr = agsClassSymbol.GetAttributes()
-                                          .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                                Helpers.EXPLICIT_PROPERTIES_ATTRIBUTE_STRING);
+         var objectSaveAsAttr = agsClassSymbol.GetAttributes()
+                                              .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                                    OBJECT_SAVE_AS_ATTRIBUTE);
 
-         var nexusMembers = Helpers.FindModifiableMembers(agsClassSymbol, inclusive: explicitAttr == null, context);
+         // If the attribute is MISSING, report a diagnostic and skip this class.
+         if (objectSaveAsAttr == null)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(new(id: "AGS003",
+                                                           title: "Missing ObjectSaveAs Attribute",
+                                                           messageFormat:
+                                                           "Class '{0}' is missing the required [ObjectSaveAs] attribute.",
+                                                           category: "SavingGenerator",
+                                                           DiagnosticSeverity.Error,
+                                                           isEnabledByDefault: true),
+                                                       agsClassSymbol.Locations.FirstOrDefault(),
+                                                       agsClassSymbol.Name));
+            continue;
+         }
+
+         var nexusMembers = Helpers.FindModifiableMembers(agsClassSymbol, context);
          var nexusProperties = nexusMembers.OfType<IPropertySymbol>().ToList();
 
-         if (!nexusProperties.Any())
-            continue;
-
-         var (saverHintName, saverSource) = GenerateSaverClass(agsClassSymbol, nexusProperties, context);
+         var (saverHintName, saverSource) =
+            GenerateSaverClass(agsClassSymbol, objectSaveAsAttr, nexusProperties, context);
          context.AddSource(saverHintName, saverSource);
       }
    }
 
    private (string HintName, string Source) GenerateSaverClass(INamedTypeSymbol agsClassSymbol,
+                                                               AttributeData objectSaveAsAttr,
                                                                List<IPropertySymbol> nexusProperties,
                                                                SourceProductionContext context)
    {
       var className = agsClassSymbol.Name;
-      var hintName = $"{agsClassSymbol.ContainingNamespace}.{className}Saver.g.cs";
+      var hintName = $"{agsClassSymbol.ContainingNamespace}.{className}Ags.g.cs";
       var namespaceName = agsClassSymbol.ContainingNamespace.ToDisplayString();
 
       var sb = new StringBuilder();
@@ -91,11 +107,11 @@ public class SavingGenerator : IIncrementalGenerator
       sb.AppendLine("{");
       sb.AppendLine($"    public partial class {className}");
       sb.AppendLine("    {");
-      sb.AppendLine("        private static readonly IReadOnlyList<SavingMetaData> _allProperties;");
+      sb.AppendLine("        private static readonly IReadOnlyList<PropertySavingMetaData> _allProperties;");
       sb.AppendLine();
       sb.AppendLine($"        static {className}()");
       sb.AppendLine("        {");
-      sb.AppendLine("            _allProperties = new List<SavingMetaData>");
+      sb.AppendLine("            _allProperties = new List<PropertySavingMetaData>");
       sb.AppendLine("            {");
 
       foreach (var prop in nexusProperties)
@@ -103,19 +119,35 @@ public class SavingGenerator : IIncrementalGenerator
 
       sb.AppendLine("            };");
       sb.AppendLine("        }");
+
+      // --- The private static fields ---
+      sb.AppendLine("        // Pre-built metadata for the class itself.");
+      sb.AppendLine("        private static readonly ClassSavingMetadata _classMetadata = new(");
+      sb.AppendLine($"            Field.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
+      sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
+      sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
+      sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[3])},");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], CUSTOM_SAVING_PROVIDER)},");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[5], SAVING_COMMENT_PROVIDER)}");
+      sb.AppendLine($"        );");
+      sb.AppendLine();
+
+      sb.AppendLine("        public static ClassSavingMetadata ClassMetadata => _classMetadata;");
+      sb.AppendLine();
+
       // --- The public accessor to the list ---
       sb.AppendLine();
-      sb.AppendLine("        public static IReadOnlyList<SavingMetaData> SaveableProps => _allProperties;");
+      sb.AppendLine("        public IReadOnlyList<PropertySavingMetaData> SaveableProps => _allProperties;");
       sb.AppendLine("    }");
       sb.AppendLine("}");
 
       return (hintName, sb.ToString());
    }
 
-   private void GenerateMetadataEntry(StringBuilder sb,
-                                      IPropertySymbol prop,
-                                      SourceProductionContext context,
-                                      string namespaceName)
+   private static void GenerateMetadataEntry(StringBuilder sb,
+                                             IPropertySymbol prop,
+                                             SourceProductionContext context,
+                                             string namespaceName)
    {
       var keyword = GetPropertyMetadata(prop, context);
 
@@ -138,7 +170,7 @@ public class SavingGenerator : IIncrementalGenerator
                                                     prop.Locations.FirstOrDefault(),
                                                     prop.Name,
                                                     prop.ContainingType.Name));
-         return;
+         //return;
       }
 
       sb.AppendLine("                new()");

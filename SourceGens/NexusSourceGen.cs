@@ -80,13 +80,8 @@ public class PropertyModifierGenerator : IIncrementalGenerator
          if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol classSymbol)
             continue;
 
-         var attributeData = classSymbol.GetAttributes()
-                                        .FirstOrDefault(ad =>
-                                                           ad.AttributeClass?.ToDisplayString() ==
-                                                           Helpers.EXPLICIT_PROPERTIES_ATTRIBUTE_STRING);
-
          // Find all eligible properties and fields
-         var members = Helpers.FindModifiableMembers(classSymbol, attributeData is null, context);
+         var members = Helpers.FindModifiableMembers(classSymbol, context);
 
          // Generate the code for this class
          var sourceCode = GeneratePartialClass(classSymbol, members);
