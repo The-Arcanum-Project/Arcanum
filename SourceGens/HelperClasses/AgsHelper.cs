@@ -32,39 +32,6 @@ public static class AgsHelper
          return;
       }
 
-      if (objectSaveAsAttr.ConstructorArguments.Length < 1 ||
-          objectSaveAsAttr.ConstructorArguments[0].Value is not string keyDefiningPropertyName)
-      {
-         var diagnostic = Diagnostic.Create(DefinedDiagnostics.InvalidObjectSaveAsAttribute,
-                                            classSymbol.Locations.FirstOrDefault(),
-                                            classSymbol.Name);
-         context.ReportDiagnostic(diagnostic);
-         return;
-      }
-
-      var propertySymbol = classSymbol.GetMembers(keyDefiningPropertyName)
-                                      .OfType<IPropertySymbol>()
-                                      .FirstOrDefault();
-
-      if (propertySymbol == null)
-      {
-         var diagnostic = Diagnostic.Create(DefinedDiagnostics.InvalidKeyTargetProperty,
-                                            classSymbol.Locations.FirstOrDefault(),
-                                            classSymbol.Name);
-         context.ReportDiagnostic(diagnostic);
-         return;
-      }
-
-      if (propertySymbol.Type.SpecialType != SpecialType.System_String)
-      {
-         var diagnostic = Diagnostic.Create(DefinedDiagnostics.InvalidKeyTargetPropertyType,
-                                            propertySymbol.Locations.FirstOrDefault(),
-                                            propertySymbol.Name,
-                                            classSymbol.Name);
-         context.ReportDiagnostic(diagnostic);
-         return;
-      }
-
       var saveAsProps = new List<IPropertySymbol>();
 
       GetValidProperties(context, nexusProperties, saveAsProps);
@@ -142,12 +109,11 @@ public static class AgsHelper
       // --- The private static fields ---
       sb.AppendLine("        // Pre-built metadata for the class itself.");
       sb.AppendLine("        private static readonly ClassSavingMetadata _classMetadata = new(");
-      sb.AppendLine($"            {namespaceName}.{className}.Field.{objectSaveAsAttr.ConstructorArguments[0].Value},");
+      sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
-      sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[3])},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], CUSTOM_SAVING_PROVIDER)},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[5], SAVING_COMMENT_PROVIDER)}");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)},");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], SAVING_COMMENT_PROVIDER)}");
       sb.AppendLine($"        );");
       sb.AppendLine();
 

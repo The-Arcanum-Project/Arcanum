@@ -66,7 +66,7 @@ public static class DefinedDiagnostics
    public static readonly DiagnosticDescriptor InvalidKeyTargetProperty = new(id: "AGS005",
                                                                               title: "Invalid Key Target Property",
                                                                               messageFormat:
-                                                                              "The property '{0}' specified in [ObjectSaveAs] on class '{1}' must exist and be of type 'string'",
+                                                                              "The property '{0}' specified in [ObjectSaveAs] on class '{1}' must be an INexus property and be of type 'string'",
                                                                               category: "SavingGenerator",
                                                                               DiagnosticSeverity.Error,
                                                                               isEnabledByDefault: true);

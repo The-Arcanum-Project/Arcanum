@@ -3,14 +3,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
-public class ClassSavingMetadata(Enum keyword,
-                                 TokenType separator,
+public class ClassSavingMetadata(TokenType separator,
                                  TokenType openingToken,
                                  TokenType closingToken,
                                  Func<IAgs, Enum, string>? commentProvider = null,
                                  Action<IAgs, PropertySavingMetaData, IndentedStringBuilder>? savingMethod = null)
 {
-   public Enum Keyword { get; } = keyword;
    public TokenType Separator { get; } = separator;
    public TokenType OpeningToken { get; } = openingToken;
    public TokenType ClosingToken { get; } = closingToken;

@@ -2,10 +2,12 @@
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Dev;
 
-[ObjectSaveAs(nameof(Key))]
+[ObjectSaveAs]
+//[ObjectSaveAs("game_data", isDynamicKey: false)]
 public partial class TestObj : IAgs
 {
    [SaveAs(SavingValueType.Bool, TokenType.LessOrEqual)]
@@ -13,8 +15,10 @@ public partial class TestObj : IAgs
    [Description("Hello there I am a property")]
    public bool IsProp { get; set; } = true;
 
-   [SuppressAgs]
+   [SaveAs(SavingValueType.String)]
+   [ParseAs(AstNodeType.ContentNode, "key")]
    [Description("Hello there I am a property")]
-   public string Key { get; set; } = "TestObj";
+   public string Key { get; set; } = "boh_hussite_king";
    public AgsSettings Settings { get; } = new();
+   public string SavingKey => "test_obj";
 }

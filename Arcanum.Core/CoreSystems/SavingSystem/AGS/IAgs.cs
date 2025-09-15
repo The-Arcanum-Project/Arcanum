@@ -21,4 +21,11 @@ public interface IAgs : INexus
    /// </summary>
    /// <returns></returns>
    public AgsObjectSavingContext ToAgsContext() => new(this);
+
+   /// <summary>
+   /// The key used to identify this object in the saved file. <br/>
+   /// Typically corresponds to the object's type name or a unique identifier. <br/>
+   /// Example: "Player", "Enemy", "InventoryItem"
+   /// </summary>
+   public string SavingKey { get; }
 }
