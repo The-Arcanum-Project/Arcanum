@@ -1,438 +1,104 @@
-﻿using System.Collections.Immutable;
-using System.Text;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
+﻿// using System.Collections.Immutable;
+// using System.Text;
+// using Microsoft.CodeAnalysis;
+// using Microsoft.CodeAnalysis.CSharp;
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
+// using Microsoft.CodeAnalysis.Text;
+//
+// namespace ParserGenerator;
+//
+// [Generator]
+// public class PropertyModifierGenerator : IIncrementalGenerator
+// {
+//    public void Initialize(IncrementalGeneratorInitializationContext context)
+//    {
+//       const string targetInterfaceName = "Nexus.Core.INexus";
+//
+//       var classDeclarations = context.SyntaxProvider
+//                                      .CreateSyntaxProvider(predicate: Predicate,
+//                                                            transform: Transform)
+//                                      .Where(x => x is not null); // Filter out the nulls
+//
+//       // Combine them with the compilation
+//       var compilationAndClasses
+//          = context.CompilationProvider.Combine(classDeclarations.Collect());
+//
+//       // Generate the source
+//       context.RegisterSourceOutput(compilationAndClasses,
+//                                    (spc, source) => Execute(source.Left, source.Right!, spc));
+//       return;
+//
+//       ClassDeclarationSyntax? Transform(GeneratorSyntaxContext genSyntaxCtx, CancellationToken cancellationToken)
+//       {
+//          var classDeclaration = (ClassDeclarationSyntax)genSyntaxCtx.Node;
+//          var semanticModel = genSyntaxCtx.SemanticModel;
+//
+//          // Get the symbol for the interface we're looking for
+//          var interfaceSymbol = semanticModel.Compilation.GetTypeByMetadataName(targetInterfaceName);
+//          if (interfaceSymbol is null)
+//             // The interface isn't defined in this compilation, so no classes can implement it.
+//             return null;
+//
+//          // Get the symbol for the class we're inspecting. 
+//          // GetDeclaredSymbol returns ISymbol, so we must safely cast it to INamedTypeSymbol.
+//
+//          // Check if the class implements the interface, using the SymbolEqualityComparer for a robust check
+//          if (genSyntaxCtx.SemanticModel.GetDeclaredSymbol(classDeclaration,
+//                                                           cancellationToken) is { } classSymbol &&
+//              classSymbol.AllInterfaces.Contains(interfaceSymbol,
+//                                                 SymbolEqualityComparer.Default))
+//             return classDeclaration;
+//
+//          return null;
+//       }
+//    }
+//
+//    private bool Predicate(SyntaxNode node, CancellationToken _)
+//    {
+//       if (node is ClassDeclarationSyntax cds &&
+//           cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+//          return true;
+//
+//       return false;
+//    }
+//
+//    private void Execute(Compilation compilation,
+//                         ImmutableArray<ClassDeclarationSyntax> classes,
+//                         SourceProductionContext context)
+//    {
+//       if (classes.IsDefaultOrEmpty)
+//          return;
+//
+//       var distinctClasses = classes.Distinct();
+//
+//       foreach (var classSyntax in distinctClasses)
+//       {
+//          context.CancellationToken.ThrowIfCancellationRequested();
+//
+//          var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
+//
+//          if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol classSymbol)
+//             continue;
+//
+//          // Find all eligible properties and fields
+//          RunNexusGenerator(context, classSymbol);
+//       }
+//    }
+//
+//    public static void RunNexusGenerator(SourceProductionContext context, INamedTypeSymbol classSymbol)
+//    {
+//       var members = Helpers.FindModifiableMembers(classSymbol, context);
+//
+//       // Generate the code for this class
+//       var sourceCode = GeneratePartialClass(classSymbol, members);
+//
+//       // Add the generated source file to the compilation
+//       
+//       context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
+//    }
+//
+//    
+//
+//    
+// }
 
-namespace ParserGenerator;
-
-[Generator]
-public class PropertyModifierGenerator : IIncrementalGenerator
-{
-   public void Initialize(IncrementalGeneratorInitializationContext context)
-   {
-      const string targetInterfaceName = "Nexus.Core.INexus";
-
-      var classDeclarations = context.SyntaxProvider
-                                     .CreateSyntaxProvider(predicate: Predicate,
-                                                           transform: Transform)
-                                     .Where(x => x is not null); // Filter out the nulls
-
-      // Combine them with the compilation
-      var compilationAndClasses
-         = context.CompilationProvider.Combine(classDeclarations.Collect());
-
-      // Generate the source
-      context.RegisterSourceOutput(compilationAndClasses,
-                                   (spc, source) => Execute(source.Left, source.Right!, spc));
-      return;
-
-      ClassDeclarationSyntax? Transform(GeneratorSyntaxContext genSyntaxCtx, CancellationToken cancellationToken)
-      {
-         var classDeclaration = (ClassDeclarationSyntax)genSyntaxCtx.Node;
-         var semanticModel = genSyntaxCtx.SemanticModel;
-
-         // Get the symbol for the interface we're looking for
-         var interfaceSymbol = semanticModel.Compilation.GetTypeByMetadataName(targetInterfaceName);
-         if (interfaceSymbol is null)
-            // The interface isn't defined in this compilation, so no classes can implement it.
-            return null;
-
-         // Get the symbol for the class we're inspecting. 
-         // GetDeclaredSymbol returns ISymbol, so we must safely cast it to INamedTypeSymbol.
-
-         // Check if the class implements the interface, using the SymbolEqualityComparer for a robust check
-         if (genSyntaxCtx.SemanticModel.GetDeclaredSymbol(classDeclaration,
-                                                          cancellationToken) is { } classSymbol &&
-             classSymbol.AllInterfaces.Contains(interfaceSymbol,
-                                                SymbolEqualityComparer.Default))
-            return classDeclaration;
-
-         return null;
-      }
-   }
-
-   private bool Predicate(SyntaxNode node, CancellationToken _)
-   {
-      if (node is ClassDeclarationSyntax cds &&
-          cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
-         return true;
-
-      return false;
-   }
-
-   private void Execute(Compilation compilation,
-                        ImmutableArray<ClassDeclarationSyntax> classes,
-                        SourceProductionContext context)
-   {
-      if (classes.IsDefaultOrEmpty)
-         return;
-
-      var distinctClasses = classes.Distinct();
-
-      foreach (var classSyntax in distinctClasses)
-      {
-         context.CancellationToken.ThrowIfCancellationRequested();
-
-         var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
-
-         if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol classSymbol)
-            continue;
-
-         // Find all eligible properties and fields
-         RunNexusGenerator(context, classSymbol);
-      }
-   }
-
-   public static void RunNexusGenerator(SourceProductionContext context, INamedTypeSymbol classSymbol)
-   {
-      var members = Helpers.FindModifiableMembers(classSymbol, context);
-
-      // Generate the code for this class
-      var sourceCode = GeneratePartialClass(classSymbol, members);
-
-      // Add the generated source file to the compilation
-      var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
-      context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
-   }
-
-   private static string GeneratePartialClass(INamedTypeSymbol classSymbol, List<ISymbol> members)
-   {
-      var readonlyStatuses = new List<bool>();
-      var allowsEmpty = new List<bool>();
-      var descriptions = new List<string?>();
-
-      // List of all members that are a collection
-      var collectionMembers = new List<ISymbol>();
-
-      var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
-      var className = classSymbol.Name;
-
-      var builder = new StringBuilder();
-      builder.AppendLine("// <auto-generated/>");
-      builder.AppendLine("#nullable enable");
-      builder.AppendLine("using Nexus.Core;");
-      builder.AppendLine("using System.Runtime.CompilerServices;");
-      builder.AppendLine("using System.ComponentModel;");
-#if DEBUG
-      builder.AppendLine("using System.Diagnostics;");
-#endif
-      builder.AppendLine($"namespace {namespaceName};");
-      builder.AppendLine();
-      builder.AppendLine($"public partial class {className}");
-      builder.AppendLine("{");
-
-      // 1. Generate the Enum
-      builder.AppendLine("    public enum Field");
-      builder.AppendLine("    {");
-      foreach (var member in members)
-      {
-         var memberType = member switch
-         {
-            IPropertySymbol p => p.Type,
-            IFieldSymbol f => f.Type,
-            _ => throw new ArgumentOutOfRangeException(),
-         };
-
-         // Gather the readonly status
-         readonlyStatuses.Add(member.GetAttributes()
-                                    .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                             READONLY_NEXUS_ATTRIBUTE_NAME,
-                                                             StringComparison.Ordinal)));
-         // Gather the AllowsEmpty status
-         allowsEmpty.Add(!member.GetAttributes()
-                                .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                         NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE,
-                                                         StringComparison.Ordinal)));
-
-         // Gather the description (if any)
-         var descriptionAttribute = member.GetAttributes()
-                                          .FirstOrDefault(ad =>
-                                                             string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                                           DESCRIPTION_ATTRIBUTE_NAME,
-                                                                           StringComparison.Ordinal));
-         // ReSharper disable once MergeIntoPattern
-         descriptions.Add(descriptionAttribute is null
-                             ? null
-                             : descriptionAttribute.ConstructorArguments.Length == 1 &&
-                               descriptionAttribute.ConstructorArguments[0].Value is string desc
-                                ? desc
-                                : null);
-
-         if (memberType.AllInterfaces.Any(i => string.Equals(i.ToDisplayString(),
-                                                             "System.Collections.IList",
-                                                             StringComparison.Ordinal)))
-            collectionMembers.Add(member);
-
-         // 2. Get a fully qualified name for the type
-         var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-         builder.AppendLine($"        [ExpectedType(typeof({memberTypeName}))]");
-         builder.AppendLine($"        {member.Name},");
-      }
-
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      #region Property Modifiers and acessors
-
-      builder.AppendLine("#region Property Modifier Backing Fields");
-      builder.AppendLine();
-
-      // ------- Readonly Array -------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array indicating whether a property is read-only.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      // Convert the list of booleans to a C# array literal string
-      var arrayInitializer = string.Join(", ", readonlyStatuses.Select(s => s.ToString().ToLower()));
-      builder.AppendLine($"    private static readonly bool[] _isReadOnly = {{ {arrayInitializer} }};");
-      builder.AppendLine();
-
-      // -------- Allows Empty Value Array --------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array indicating whether a property allows empty values.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      var allowsEmptyInitializer = string.Join(", ", allowsEmpty.Select(s => s.ToString().ToLower()));
-      builder.AppendLine($"    private static readonly bool[] _allowsEmpty = {{ {allowsEmptyInitializer} }};");
-      builder.AppendLine();
-
-      // -------- Description Array --------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array containing the description of each property, if any.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      var descriptionInitializer = string.Join(", ",
-                                               descriptions.Select(s => s is null
-                                                                           ? "null"
-                                                                           : SymbolDisplay.FormatLiteral(s, true)));
-      builder.AppendLine($"    private static readonly string?[] _descriptions = {{ {descriptionInitializer} }};");
-      builder.AppendLine();
-
-      builder.AppendLine("#endregion");
-      builder.AppendLine();
-
-      builder.AppendLine("#region Property Modifier Methods");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the readonly status ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Checks if a property is marked as read-only.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public bool IsPropertyReadOnly(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _isReadOnly[(int)((Field)property)];");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the AllowsEmpty status ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Checks if a property allows empty values.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public bool AllowsEmptyValue(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _allowsEmpty[(int)((Field)property)];");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the Description ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Gets the description of a property, if any.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public string? GetDescription(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _descriptions[(int)((Field)property)];");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      builder.AppendLine("#endregion");
-      builder.AppendLine();
-
-      #endregion
-
-      #region Get and Set Value methods
-
-      // 2. Generate the SetValue method
-      builder.AppendLine("    public void _setValue(Enum property, object value)");
-      builder.AppendLine("    {");
-      // Check if the property is readonly
-      builder.AppendLine("        Debug.Assert(!IsPropertyReadOnly(property), \"Attempting to set a readonly property\");");
-
-      builder.AppendLine("        switch (property)");
-      builder.AppendLine("        {");
-      foreach (var member in members)
-      {
-         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
-         var typeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-         builder.AppendLine($"            case Field.{member.Name}:");
-#if DEBUG
-         builder.AppendLine($"                Debug.Assert(value is {typeName}, \"{member.Name} needs to be a {typeName}\");");
-#endif
-         builder.AppendLine($"                this.{member.Name} = ({typeName})value;");
-         builder.AppendLine("                break;");
-      }
-
-      builder.AppendLine("        }");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // 3. Generate the GetValue method
-      //builder.AppendLine("    [PropertyGetter]");
-      builder.AppendLine("    public object _getValue(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        switch (property)");
-      builder.AppendLine("        {");
-      foreach (var member in members)
-      {
-         builder.AppendLine($"            case Field.{member.Name}:");
-         builder.AppendLine($"                return this.{member.Name};");
-      }
-
-      builder.AppendLine("            default:");
-      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
-      builder.AppendLine("        }");
-      builder.AppendLine("    }");
-
-      #endregion
-
-      #region Collection Manipulation Methods
-
-      builder.AppendLine();
-      builder.AppendLine("#region Collection Manipulation Methods");
-      builder.AppendLine();
-
-      // --- AddToCollection ---
-      builder.AppendLine("    public void _addToCollection(Enum property, object item)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        switch (property)");
-      builder.AppendLine("        {");
-      foreach (var member in collectionMembers)
-      {
-         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
-         // Get the collection's item type, e.g., 'string' from 'ObservableRangeCollection<string>'
-         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-
-         builder.AppendLine($"            case Field.{member.Name}:");
-         builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item needs to be a {itemTypeName}\");");
-         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
-         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll && item is {itemTypeName} {member.Name}_typedItem)");
-         builder.AppendLine($"                    {member.Name}_coll.Add({member.Name}_typedItem);");
-         builder.AppendLine("                break;");
-      }
-
-      builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
-      builder.AppendLine("        }");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // --- RemoveFromCollection ---
-      builder.AppendLine("    public void _removeFromCollection(Enum property, object item)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        switch (property)");
-      builder.AppendLine("        {");
-      foreach (var member in collectionMembers)
-      {
-         var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
-         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-
-         builder.AppendLine($"            case Field.{member.Name}:");
-         builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item needs to be a {itemTypeName}\");");
-         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
-         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll && item is {itemTypeName} {member.Name}_typedItem)");
-         builder.AppendLine($"                    {member.Name}_coll.Remove({member.Name}_typedItem);");
-         builder.AppendLine("                break;");
-      }
-
-      builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
-      builder.AppendLine("        }");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // --- ClearCollection ---
-      builder.AppendLine("    public void _clearCollection(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        switch (property)");
-      builder.AppendLine("        {");
-      foreach (var member in collectionMembers)
-      {
-         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
-         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-
-         builder.AppendLine($"            case Field.{member.Name}:");
-         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}>, \"Property '{member.Name}' is not a collection.\");");
-         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll)");
-         builder.AppendLine($"                    {member.Name}_coll.Clear();");
-         builder.AppendLine("                break;");
-      }
-
-      builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
-      builder.AppendLine("        }");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      builder.AppendLine("#endregion");
-      builder.AppendLine();
-
-      #endregion
-
-      #region Indexer
-
-      // 4. Generate the indexer
-      builder.AppendLine();
-      builder.AppendLine("    public object this[Enum key]");
-      builder.AppendLine("    {");
-      builder.AppendLine("        get => _getValue(key);");
-      builder.AppendLine("        set => _setValue(key, value);");
-      builder.AppendLine("    }");
-
-      #endregion
-
-      #region Property Changed
-
-      // 5. Generate the INotifyPropertyChanged implementation
-      builder.AppendLine("    public event PropertyChangedEventHandler? PropertyChanged;");
-      builder.AppendLine();
-      builder.AppendLine("    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        PropertyChanged?.Invoke(this, new(propertyName));");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-      builder.AppendLine("    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        if (EqualityComparer<T>.Default.Equals(field, value))");
-      builder.AppendLine("            return false;");
-      builder.AppendLine();
-      builder.AppendLine("        field = value;");
-      builder.AppendLine("        OnPropertyChanged(propertyName);");
-      builder.AppendLine("        return true;");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      #endregion
-
-      builder.AppendLine("}"); // Close class
-
-      return builder.ToString();
-   }
-
-   private const string READONLY_NEXUS_ATTRIBUTE_NAME =
-      "Arcanum.Core.CoreSystems.NUI.Attributes.ReadonlyNexusAttribute";
-
-   private const string NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE =
-      "Arcanum.Core.CoreSystems.NUI.Attributes.BlockEmptyAttribute";
-
-   private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
-}
