@@ -14,10 +14,16 @@ public class IndentedStringBuilder(string indentString = "\t")
 {
    private readonly StringBuilder _builder = new();
    private int _indentLevel;
-   private string _cachedIndent = string.Empty; // Performance: cache the full indent string
+   private string _cachedIndent = "    "; // Performance: cache the full indent string
    private bool _isAtStartOfLine = true;
 
    // default 4 spaces
+
+   public int MaxItemsInCollectionLine { get; init; } = 10;
+   public bool OneItemPerLine { get; init; } = true;
+   public bool PadCollectionItems { get; set; } = false;
+   public int CollectionItemPadding { get; set; } = 5;
+   public bool AutoCollectionPadding { get; set; } = true;
 
    /// <summary>
    /// Gets the current indentation level.
@@ -67,6 +73,15 @@ public class IndentedStringBuilder(string indentString = "\t")
       PrependIndentIfNecessary();
       _builder.AppendLine(text);
       _isAtStartOfLine = true;
+      return this;
+   }
+
+   public IndentedStringBuilder AppendComment(string commentChar, string comment)
+   {
+      if (string.IsNullOrEmpty(comment))
+         return this;
+
+      AppendLine($"{commentChar} {comment}");
       return this;
    }
 
@@ -125,7 +140,7 @@ public class IndentedStringBuilder(string indentString = "\t")
    }
 
    public IDisposable BlockWithName(string blockName,
-                                    string separator,
+                                    string separator = "=",
                                     string openingBrace = "{",
                                     string closingBrace = "}")
    {
@@ -210,6 +225,47 @@ public class IndentedStringBuilder(string indentString = "\t")
       {
          _builder.DecreaseIndent();
          _builder.AppendLine(_closingBrace);
+      }
+   }
+
+   public void AppendList(List<string> items)
+   {
+      if (OneItemPerLine)
+      {
+         foreach (var item in items)
+            AppendLine(item);
+      }
+      else
+      {
+         var itemCount = 0;
+         var line = new StringBuilder();
+
+         if (PadCollectionItems && AutoCollectionPadding)
+         {
+            var maxLength = 0;
+            foreach (var item in items)
+               if (item.Length > maxLength)
+                  maxLength = item.Length;
+            CollectionItemPadding = maxLength + 1;
+         }
+
+         foreach (var item in items)
+         {
+            if (itemCount > 0)
+               line.Append(", ");
+            if (PadCollectionItems)
+               line.Append(item.PadRight(CollectionItemPadding));
+            else
+               line.Append(item);
+            itemCount++;
+
+            if (itemCount >= MaxItemsInCollectionLine)
+            {
+               AppendLine(line.ToString());
+               line.Clear();
+               itemCount = 0;
+            }
+         }
       }
    }
 }

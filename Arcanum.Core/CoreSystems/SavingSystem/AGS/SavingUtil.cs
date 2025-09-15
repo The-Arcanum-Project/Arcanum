@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using System.Collections;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Nexus.Core;
 
@@ -93,5 +94,15 @@ public static class SavingUtil
          return SavingValueType.Color;
 
       throw new NotSupportedException($"Type {type} is not supported as item key type.");
+   }
+
+   public static SavingValueType GetSavingValueTypeForCollection(IEnumerable enumerable)
+   {
+      var enumerator = enumerable.GetEnumerator();
+      using var enumerator1 = enumerator as IDisposable;
+      if (!enumerator.MoveNext() || enumerator.Current == null)
+         return SavingValueType.Auto;
+
+      return GetSavingValueType(enumerator.Current);
    }
 }

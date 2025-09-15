@@ -58,4 +58,9 @@ public partial class Debug_Panel
       var sw = new SaveWindow();
       sw.Show();
    }
+
+   private void OpenSavingWindowExporterButton_Click(object sender, RoutedEventArgs e)
+   {
+      new AgsWindow().Show();
+   }
 }

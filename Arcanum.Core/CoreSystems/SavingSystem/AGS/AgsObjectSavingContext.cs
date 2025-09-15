@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -53,8 +52,6 @@ public class AgsObjectSavingContext
 
       using (sb.BlockWithName(Ags))
          foreach (var prop in OrderedProperties)
-         {
             prop.Format(Ags, sb, CommentChar);
-         }
    }
 }

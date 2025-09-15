@@ -1,4 +1,5 @@
-﻿using Nexus.Core;
+﻿using Arcanum.Core.CoreSystems.NUI;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -20,7 +21,7 @@ public interface IAgs : INexus
    /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
    /// </summary>
    /// <returns></returns>
-   public AgsObjectSavingContext ToAgsContext() => new(this);
+   public AgsObjectSavingContext ToAgsContext(string commentChar = "#") => new(this, commentChar);
 
    /// <summary>
    /// Returns the metadata for the class implementing this IAgs instance. <br/>
