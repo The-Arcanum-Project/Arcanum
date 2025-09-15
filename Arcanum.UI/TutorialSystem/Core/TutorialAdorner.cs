@@ -1,61 +1,92 @@
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using Pen = System.Windows.Media.Pen;
+using Point = System.Windows.Point;
 
 namespace Arcanum.UI.TutorialSystem.Core;
 
 public class TutorialAdorner : Adorner
 {
-    private readonly FrameworkElement? _targetControl;
-    public bool BlockTargetInteraction = false;
-    private readonly bool _disableInteraction;
+    private readonly FrameworkElement? _interactiveTarget;
+    private readonly List<FrameworkElement> _highlightTargets;
     
+    private static readonly Brush OverlayBrush = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0));
+    private static readonly Brush NonInteractiveBrush = new SolidColorBrush(Colors.Transparent);
     
-    
-    public TutorialAdorner(UIElement adornedElement, FrameworkElement targetControl, bool isInteractive) : base(adornedElement)
+    public TutorialAdorner(UIElement adornedElement, List<FrameworkElement> highlightTargets,
+        FrameworkElement? targetControl) : base(adornedElement)
     {
-        _targetControl = targetControl;
-        // Make the adorner visible and able to receive mouse events.
-        IsHitTestVisible = true;
-        _disableInteraction = !isInteractive;
+        _highlightTargets = highlightTargets;
+        _interactiveTarget = targetControl;
+    }
+
+    public TutorialAdorner(UIElement adornedElement, List<FrameworkElement> highlightTargets) : this(adornedElement, highlightTargets, null)
+    { }
+    
+    public TutorialAdorner(UIElement adornedElement, FrameworkElement interactiveTarget) : this(adornedElement, [], interactiveTarget)
+    { }
+    
+    
+    private Geometry GetControlGeometry(UIElement control)
+    {
+        var position = control.TranslatePoint(new Point(0, 0), AdornedElement);
+        var targetRect = new Rect(position, control.RenderSize);
+        if (control is Border border)
+        {
+            return new RectangleGeometry(targetRect, border.CornerRadius.TopLeft, border.CornerRadius.TopRight);
+        }
+        if (VisualTreeHelper.GetChild(control, 0) is Border { Parent: null } child)
+        {
+            return new RectangleGeometry(targetRect, child.CornerRadius.TopLeft, child.CornerRadius.TopRight);
+        }
+        
+        
+        return new RectangleGeometry(targetRect);
     }
 
     protected override void OnRender(DrawingContext drawingContext)
     {
         base.OnRender(drawingContext);
-
-        if (_targetControl is null) return;
-
-        // Get the position of the control to highlight, relative to the adorned element.
-        var position = _targetControl.TranslatePoint(new Point(0, 0), AdornedElement);
-        var targetRect = new Rect(position, _targetControl.RenderSize);
-
-        // Create a geometry for the overlay (a full rectangle with a cutout for the target).
-        var fullRectGeometry = new RectangleGeometry(new Rect(AdornedElement.RenderSize));
-        Geometry cutoutGeometry;
-        if (_targetControl is Border border)
-        {
-            cutoutGeometry = new RectangleGeometry(targetRect, border.CornerRadius.TopLeft, border.CornerRadius.TopRight);
-        }else
-            cutoutGeometry = new RectangleGeometry(targetRect);
         
-        var overlayGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, fullRectGeometry, cutoutGeometry);
+        var controlGeometry = GetControlGeometry(AdornedElement);
+        Geometry? blockoutGeometry = null;
+        foreach (var cutoutGeometry in _highlightTargets.Select(GetControlGeometry))
+        {
+            controlGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, controlGeometry, cutoutGeometry);
+            blockoutGeometry = blockoutGeometry is null ? cutoutGeometry : new CombinedGeometry(GeometryCombineMode.Union, blockoutGeometry, cutoutGeometry);
+        }
+        
+        Geometry? interactiveGeometry = null;
+        
+        if (_interactiveTarget is not null)
+        {
+            interactiveGeometry = GetControlGeometry(_interactiveTarget);
+            controlGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, controlGeometry, interactiveGeometry);
+            blockoutGeometry = blockoutGeometry is null ? null : new CombinedGeometry(GeometryCombineMode.Exclude, blockoutGeometry, interactiveGeometry);
+        }
 
         // Draw the semi-transparent black overlay.
-        drawingContext.DrawGeometry(new SolidColorBrush(Color.FromArgb(180, 0, 0,0)), null, overlayGeometry);
-        if (_disableInteraction)
-            drawingContext.DrawGeometry(new SolidColorBrush(Color.FromArgb(20, 0x0c, 0x2e,0x31)), null, cutoutGeometry);
+        drawingContext.DrawGeometry(OverlayBrush, null, controlGeometry);
+        if (blockoutGeometry is not null)
+            drawingContext.DrawGeometry(NonInteractiveBrush, null, blockoutGeometry);
+        if (interactiveGeometry is not null)
+            drawingContext.DrawGeometry(null, new(Brushes.Red, 2), interactiveGeometry);
     }
 
     // Block mouse clicks outside the highlighted area.
     protected override void OnMouseUp(MouseButtonEventArgs e)
     {
-        if (_targetControl == null) return;
+        if (_interactiveTarget is null) return;
         var pt = e.GetPosition(this);
-        var position = _targetControl.TranslatePoint(new Point(0, 0), AdornedElement);
-        var targetRect = new Rect(position, _targetControl.RenderSize);
+        var position = _interactiveTarget.TranslatePoint(new Point(0, 0), AdornedElement);
+        var targetRect = new Rect(position, _interactiveTarget.RenderSize);
 
         // If the click is outside the target rectangle, handle the event
         // to prevent it from reaching the UI underneath.

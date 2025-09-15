@@ -197,10 +197,14 @@ public partial class MainMenuScreen
             "Welcome to Arcanum, thank you for giving the tool a try. Let's get you up to the basics of the launcher view." +
             "If you want to skip to any chapter just click it in the chapter selection.",
             [
-                new Chapter("Home Screen", "This is the default launch screen of the app where you can see current releases, feature spotlights and Socials, where you can ask questions about Arcanum and get support.", [
-                    new InfoStep("See a highlighted button",
-                        "This is the close button. Click it to close the main menu screen.", TopBarBorder)
-                ], [])
+                new StructureChapter([
+                        new InteractiveChapter("Press this button", "Just do it.", [
+                            new ButtonStep("Pressing the close button", "You can do it!", () => [TopBarBorder], () => CreatNewProjectButton)
+                        ])
+                    ],
+                    new("Home Screen",
+                        "This is the default launch screen of the app where you can see current releases, feature spotlights and Socials, where you can ask questions about Arcanum and get support.",
+                        () => [ContentControl, TopBarBorder]))
             ]
         );
     }

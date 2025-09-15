@@ -26,9 +26,7 @@ public class TutorialManager
     {
         _mainWindow = mainWindow;
         _adornedElement = elementToAdorn;
-        _adornerLayer = AdornerLayer.GetAdornerLayer(_adornedElement) ?? throw new InvalidOperationException();
-        if (_adornerLayer == null)
-            throw new InvalidOperationException("Could not find AdornerLayer.");
+        _adornerLayer = AdornerLayer.GetAdornerLayer(_adornedElement) ?? throw new InvalidOperationException("Could not find AdornerLayer on the specified element.");
     }
 
     public void Start(Sequence sequence)
@@ -79,18 +77,14 @@ public class TutorialManager
         _currentStepIndex = index;
         var currentStep = _flatSteps[_currentStepIndex];
 
-        // Find the target control by its name at runtime
-        currentStep.TargetControl ??= FindControlByName(_adornedElement, currentStep.TargetControlName);
-
         _tutorialWindow?.ShowStepView(currentStep, _currentStepIndex + 1, _flatSteps.Count);
-
-        if (currentStep.TargetControl == null) return;
-        // Add new adorner
-        _currentAdorner = new TutorialAdorner(_adornedElement, currentStep.TargetControl, currentStep.IsInteractive);
+    
+        _currentAdorner = new (_adornedElement, currentStep.GetHighlightElements(), currentStep.GetInteractiveElement());
+        
         _adornerLayer.Add(_currentAdorner);
 
         // Start listening for the required action
-        currentStep.Execute(GoToNextStep);
+        currentStep.SetUp(GoToNextStep);
     }
 
     private void GoToNextStep() => Dispatcher.CurrentDispatcher.Invoke(() =>
@@ -164,12 +158,18 @@ public class TutorialManager
 
     private void AddChapterSteps(Chapter chapter, List<Step> steps)
     {
-        foreach (var step in chapter.Steps)
+        if (chapter is InteractiveChapter interactiveChapter)
         {
-            step.ParentChapter = chapter;
-            steps.Add(step);
+            foreach (var step in interactiveChapter.Steps)
+            {
+                steps.Add(step);
+            }
         }
-
+        else if (chapter is StructureChapter structureChapter)
+        {
+            steps.Add(structureChapter.HighlightStep);
+            
+        }
         foreach (var subChapter in chapter.SubChapters)
         {
             AddChapterSteps(subChapter, steps);
