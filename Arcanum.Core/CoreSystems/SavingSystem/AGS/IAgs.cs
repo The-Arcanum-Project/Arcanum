@@ -14,13 +14,19 @@ public interface IAgs : INexus
    /// A list of properties that can be saved for this IAgs instance.
    /// </summary>
    [IgnoreModifiable]
-   public IReadOnlyList<PropertySavingMetaData> SaveableProps { get; }
+   public IReadOnlyList<PropertySavingMetadata> SaveableProps { get; }
 
    /// <summary>
    /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
    /// </summary>
    /// <returns></returns>
    public AgsObjectSavingContext ToAgsContext() => new(this);
+
+   /// <summary>
+   /// Returns the metadata for the class implementing this IAgs instance. <br/>
+   /// This includes information such as the class name, namespace, and any relevant attributes.
+   /// </summary>
+   public ClassSavingMetadata ClassMetadata { get; }
 
    /// <summary>
    /// The key used to identify this object in the saved file. <br/>

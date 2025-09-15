@@ -15,6 +15,7 @@ public static class AgsHelper
 
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
+   private const string CUSTOM_ITEM_KEY_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.CustomItemKeyProvider";
 
    public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
    {
@@ -93,15 +94,15 @@ public static class AgsHelper
       sb.AppendLine("{");
       sb.AppendLine($"    public partial class {className}");
       sb.AppendLine("    {");
-      sb.AppendLine("        private static readonly IReadOnlyList<PropertySavingMetaData> _allProperties;");
+      sb.AppendLine("        private static readonly IReadOnlyList<PropertySavingMetadata> _allProperties;");
       sb.AppendLine();
       sb.AppendLine($"        static {className}()");
       sb.AppendLine("        {");
-      sb.AppendLine("            _allProperties = new List<PropertySavingMetaData>");
+      sb.AppendLine("            _allProperties = new List<PropertySavingMetadata>");
       sb.AppendLine("            {");
 
       foreach (var prop in nexusProperties)
-         GenerateMetadataEntry(sb, prop, context, namespaceName);
+         GenerateMetadataEntry(sb, prop, context, namespaceName, Helpers.IsPropertySymbolACollection(prop));
 
       sb.AppendLine("            };");
       sb.AppendLine("        }");
@@ -117,12 +118,12 @@ public static class AgsHelper
       sb.AppendLine($"        );");
       sb.AppendLine();
 
-      sb.AppendLine("        public static ClassSavingMetadata ClassMetadata => _classMetadata;");
+      sb.AppendLine("        public ClassSavingMetadata ClassMetadata => _classMetadata;");
       sb.AppendLine();
 
       // --- The public accessor to the list ---
       sb.AppendLine();
-      sb.AppendLine("        public IReadOnlyList<PropertySavingMetaData> SaveableProps => _allProperties;");
+      sb.AppendLine("        public IReadOnlyList<PropertySavingMetadata> SaveableProps => _allProperties;");
       sb.AppendLine("    }");
       sb.AppendLine("}");
 
@@ -132,7 +133,8 @@ public static class AgsHelper
    private static void GenerateMetadataEntry(StringBuilder sb,
                                              IPropertySymbol prop,
                                              SourceProductionContext context,
-                                             string namespaceName)
+                                             string namespaceName,
+                                             bool isCollection)
    {
       var keyword = GetPropertyMetadata(prop, context);
 
@@ -149,7 +151,7 @@ public static class AgsHelper
                                                         title: "Missing SaveAs Attribute",
                                                         messageFormat:
                                                         "Property '{0}' in class '{1}' is missing the required [SaveAs] attribute.",
-                                                        category: "SavingGenerator",
+                                                        category: "UniGen",
                                                         DiagnosticSeverity.Error,
                                                         isEnabledByDefault: true),
                                                     prop.Locations.FirstOrDefault(),
@@ -158,15 +160,18 @@ public static class AgsHelper
          return;
       }
 
+      var collVal = isCollection ? "true" : saveAs.ConstructorArguments[5].Value!.ToString().ToLower();
+
       sb.AppendLine("                new()");
       sb.AppendLine("                {");
       sb.AppendLine($"                    NxProp = {namespaceName}.{prop.ContainingType.Name}.Field.{prop.Name},");
       sb.AppendLine($"                    Keyword = \"{keyword}\",");
-      sb.AppendLine($"                    CommentProvider = {GetNullOrString(saveAs.ConstructorArguments[2], SAVING_COMMENT_PROVIDER)},");
-      sb.AppendLine($"                    SavingMethod = {GetNullOrString(saveAs.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)},");
+      sb.AppendLine($"                    CommentProvider = {GetNullOrString(saveAs.ConstructorArguments[3], SAVING_COMMENT_PROVIDER)},");
+      sb.AppendLine($"                    SavingMethod = {GetNullOrString(saveAs.ConstructorArguments[2], CUSTOM_SAVING_PROVIDER)},");
       sb.AppendLine($"                    ValueType = SavingValueType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[0])},");
       sb.AppendLine($"                    Separator = TokenType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[1])},");
-
+      sb.AppendLine($"                    CollectionItemKeyProvider = {GetNullOrString(saveAs.ConstructorArguments[4], CUSTOM_ITEM_KEY_PROVIDER)},");
+      sb.AppendLine($"                    IsCollection = {collVal},");
       sb.AppendLine("                },");
    }
 

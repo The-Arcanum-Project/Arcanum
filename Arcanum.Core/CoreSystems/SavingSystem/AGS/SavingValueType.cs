@@ -2,6 +2,7 @@
 
 public enum SavingValueType
 {
+   Auto,
    String,
    Int,
    Float,

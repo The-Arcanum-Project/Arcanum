@@ -158,4 +158,27 @@ public static class Helpers
 
       return enumMemberSymbol?.Name;
    }
+
+   public static bool IsPropertySymbolACollection(IPropertySymbol? propertySymbol)
+   {
+      if (propertySymbol == null)
+         return false;
+
+      if (propertySymbol.Type.SpecialType == SpecialType.System_String)
+         return false;
+
+      var type = propertySymbol.Type;
+
+      // Check if the type is an array
+      if (type.TypeKind == TypeKind.Array)
+         return true;
+
+      // Check if the type implements IEnumerable<T> or IEnumerable
+      foreach (var @interface in type.AllInterfaces)
+         if (@interface.SpecialType == SpecialType.System_Collections_IEnumerable ||
+             @interface.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>")
+            return true;
+
+      return false;
+   }
 }

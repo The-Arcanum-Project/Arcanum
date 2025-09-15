@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,7 +7,7 @@ using ParserGenerator.HelperClasses;
 namespace ParserGenerator;
 
 [Generator]
-public class SavingGenerator : IIncrementalGenerator
+public class UniGen : IIncrementalGenerator
 {
    private const string IAGS_INTERFACE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs";
 

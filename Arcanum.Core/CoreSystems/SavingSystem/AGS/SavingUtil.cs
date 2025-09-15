@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Nexus.Core;
 
@@ -7,34 +6,30 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SavingUtil
 {
-   public static void AppendFormattedObject(SavingValueType svl, object value, ref IndentedStringBuilder sb)
+   public static string FormatValue(SavingValueType svl, object value)
    {
-      switch (svl)
+      if (svl == SavingValueType.Auto)
+         svl = GetSavingValueType(value);
+
+      return svl switch
       {
-         case SavingValueType.String:
-            sb.Append($"\"{value}\"");
-            break;
-         case SavingValueType.Int:
-            sb.Append(((int)value).ToString());
-            break;
-         case SavingValueType.Float:
-            sb.Append(((float)value).ToString("0.##"));
-            break;
-         case SavingValueType.Bool:
-            sb.Append((bool)value ? "yes" : "no");
-            break;
-         case SavingValueType.Double:
-            sb.Append(((double)value).ToString("0.##"));
-            break;
-         case SavingValueType.Identifier:
-            sb.Append($"{value}");
-            break;
-         case SavingValueType.Color:
-            sb.Append(((JominiColor)value).ToString());
-            break;
-         default:
-            throw new ArgumentOutOfRangeException(nameof(svl), svl, null);
-      }
+         SavingValueType.String => $"\"{value}\"",
+         SavingValueType.Int => ((int)value).ToString(),
+         SavingValueType.Float => ((float)value).ToString("0.##"),
+         SavingValueType.Bool => (bool)value ? "yes" : "no",
+         SavingValueType.Double => ((double)value).ToString("0.##"),
+         SavingValueType.Identifier => $"{value}",
+         SavingValueType.Color => ((JominiColor)value).ToString(),
+         SavingValueType.Auto => throw new InvalidOperationException("SavingValueType cannot be Auto at this point."),
+         _ => throw new ArgumentOutOfRangeException(nameof(svl), svl, null),
+      };
+   }
+
+   public static string FormatObjectValue(SavingValueType svl, INexus target, Enum nxProp)
+   {
+      object value = null!;
+      Nx.ForceGet(target, nxProp, ref value);
+      return FormatValue(svl, value);
    }
 
    public static string GetSeparator(TokenType separator)
@@ -79,5 +74,24 @@ public static class SavingUtil
          TokenType.RightBracket => "]",
          _ => throw new ArgumentOutOfRangeException(nameof(separator), separator, null),
       };
+   }
+
+   public static SavingValueType GetSavingValueType(object item)
+   {
+      var type = item.GetType();
+      if (type == typeof(string))
+         return SavingValueType.String;
+      if (type == typeof(int))
+         return SavingValueType.Int;
+      if (type == typeof(float))
+         return SavingValueType.Float;
+      if (type == typeof(double))
+         return SavingValueType.Double;
+      if (type == typeof(bool))
+         return SavingValueType.Bool;
+      if (type == typeof(JominiColor))
+         return SavingValueType.Color;
+
+      throw new NotSupportedException($"Type {type} is not supported as item key type.");
    }
 }

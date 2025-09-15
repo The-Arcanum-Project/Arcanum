@@ -1,4 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+
+namespace Arcanum.Core.CoreSystems.Common;
 
 using System;
 using System.Collections.Generic;
@@ -129,6 +131,14 @@ public class IndentedStringBuilder(string indentString = "\t")
    {
       AppendLine($"{blockName} {separator} {openingBrace}");
       return new BlockScope(this, closingBrace);
+   }
+
+   public IDisposable BlockWithName(IAgs ags)
+   {
+      return BlockWithName(ags.SavingKey,
+                           SavingUtil.GetSeparator(ags.ClassMetadata.Separator),
+                           SavingUtil.GetBrace(ags.ClassMetadata.OpeningToken),
+                           SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken));
    }
 
    /// <summary>

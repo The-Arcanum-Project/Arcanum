@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -7,6 +8,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// </summary>
 public class AgsObjectSavingContext
 {
+   public string CommentChar { get; init; }
    /// <summary>
    /// The AGS instance being saved.
    /// </summary>
@@ -18,21 +20,22 @@ public class AgsObjectSavingContext
    /// <summary>
    /// The string builder used to construct the saved output.
    /// </summary>
-   public List<PropertySavingMetaData> OrderedProperties { get; init; }
+   public List<PropertySavingMetadata> OrderedProperties { get; init; }
 
-   public AgsObjectSavingContext(IAgs ags)
+   public AgsObjectSavingContext(IAgs ags, string commentChar = "#")
    {
       Ags = ags;
       Settings = ags.Settings;
       OrderedProperties = Settings.CustomSaveOrder
                              ? SortBySettings(ags.SaveableProps, Settings.SaveOrder)
                              : ags.SaveableProps.OrderBy(p => p.Keyword).ToList();
+      CommentChar = commentChar;
    }
 
-   private static List<PropertySavingMetaData> SortBySettings(IReadOnlyList<PropertySavingMetaData> propertiesToSave,
+   private static List<PropertySavingMetadata> SortBySettings(IReadOnlyList<PropertySavingMetadata> propertiesToSave,
                                                               List<Enum> saveOrder)
    {
-      var sortedList = new List<PropertySavingMetaData>();
+      var sortedList = new List<PropertySavingMetadata>();
       foreach (var enumValue in saveOrder)
       {
          var prop = propertiesToSave.FirstOrDefault(p => p.ValueType.Equals(enumValue));
@@ -45,13 +48,13 @@ public class AgsObjectSavingContext
 
    public void BuildContext(IndentedStringBuilder sb)
    {
-      // using (sb.BlockWithName())
-      // {
-      //    
-      // }
+      if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
+         Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
 
-      foreach (var prop in OrderedProperties)
-      {
-      }
+      using (sb.BlockWithName(Ags))
+         foreach (var prop in OrderedProperties)
+         {
+            prop.Format(Ags, sb, CommentChar);
+         }
    }
 }

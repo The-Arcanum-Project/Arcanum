@@ -8,7 +8,7 @@ public static class DefinedDiagnostics
        title: "Missing [SaveAs] attribute",
        messageFormat:
        "Property '{0}' will not be saved because it is missing a [SaveAs] attribute. Add the attribute to include it in serialization, or add [SuppressAgs] to explicitly ignore it.",
-       category: "SavingGenerator",
+       category: "UniGen",
        DiagnosticSeverity.Warning, // This is a warning, not an error.
        isEnabledByDefault: true);
 
@@ -18,7 +18,7 @@ public static class DefinedDiagnostics
                                                                                 "Invalid or Missing ParseAs Keyword",
                                                                                 messageFormat:
                                                                                 "Property '{0}' cannot be saved because it is missing a [ParseAs] attribute with a valid keyword",
-                                                                                category: "SavingGenerator",
+                                                                                category: "UniGen",
                                                                                 DiagnosticSeverity.Error,
                                                                                 isEnabledByDefault: true);
 
@@ -27,7 +27,7 @@ public static class DefinedDiagnostics
        "Missing Nexus Enum Property Key",
        messageFormat:
        "The property '{0}' corresponding to enum field '{1}' was not found in class '{2}'. Ensure that the property exists and matches the enum field name.",
-       category: "SavingGenerator",
+       category: "UniGen",
        DiagnosticSeverity
          .Error, // This should be a build-breaking error.
        isEnabledByDefault: true);
@@ -35,7 +35,7 @@ public static class DefinedDiagnostics
    public static readonly DiagnosticDescriptor InvalidNexusKeyPropType = new("AGS010",
                                                                              "Incorrect Key Property Type",
                                                                              "The key-defining property '{0}' specified in [ObjectSaveAs] must be of type 'string', but was found to be of type '{1}'",
-                                                                             "SavingGenerator",
+                                                                             "UniGen",
                                                                              DiagnosticSeverity.Error,
                                                                              true);
 
@@ -51,7 +51,7 @@ public static class DefinedDiagnostics
        title: "Invalid ParseAs Keyword",
        messageFormat:
        "Property '{0}' in class '{1}' has an invalid or empty keyword in its [ParseAs] attribute",
-       category: "SavingGenerator",
+       category: "UniGen",
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
 
@@ -59,7 +59,7 @@ public static class DefinedDiagnostics
        title: "Invalid ObjectSaveAs Attribute",
        messageFormat:
        "The [ObjectSaveAs] attribute on class '{0}' must specify a non-empty string key corresponding to a string property in the class",
-       category: "SavingGenerator",
+       category: "UniGen",
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
 
@@ -67,7 +67,7 @@ public static class DefinedDiagnostics
                                                                               title: "Invalid Key Target Property",
                                                                               messageFormat:
                                                                               "The property '{0}' specified in [ObjectSaveAs] on class '{1}' must be an INexus property and be of type 'string'",
-                                                                              category: "SavingGenerator",
+                                                                              category: "UniGen",
                                                                               DiagnosticSeverity.Error,
                                                                               isEnabledByDefault: true);
 
@@ -75,7 +75,7 @@ public static class DefinedDiagnostics
        title: "Invalid Key Target Property Type",
        messageFormat:
        "The property '{0}' specified in [ObjectSaveAs] on class '{1}' must be of type 'string', but is of type '{2}'",
-       category: "SavingGenerator",
+       category: "UniGen",
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
 }
