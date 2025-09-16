@@ -347,9 +347,21 @@ public static class NexusHelpers
 
       #endregion
 
+      #region GetAllProperties
+
+      builder.AppendLine();
+      builder.AppendLine("    public List<Enum> GetAllProperties()");
+      builder.AppendLine("    {");
+      builder.AppendLine("        return Enum.GetValues(typeof(Field)).Cast<Enum>().ToList();");
+      builder.AppendLine("    }");
+
+      #endregion
+
       #region Property Changed
 
-      // 5. Generate the INotifyPropertyChanged implementation
+      builder.AppendLine();
+      builder.AppendLine("#region INotifyPropertyChanged Implementation");
+      builder.AppendLine();
       builder.AppendLine("    public event PropertyChangedEventHandler? PropertyChanged;");
       builder.AppendLine();
       builder.AppendLine("    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)");
@@ -366,6 +378,8 @@ public static class NexusHelpers
       builder.AppendLine("        OnPropertyChanged(propertyName);");
       builder.AppendLine("        return true;");
       builder.AppendLine("    }");
+      builder.AppendLine();
+      builder.AppendLine("#endregion");
       builder.AppendLine();
 
       #endregion

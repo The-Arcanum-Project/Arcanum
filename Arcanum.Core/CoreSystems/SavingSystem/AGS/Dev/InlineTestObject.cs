@@ -27,9 +27,6 @@ public partial class InlineTestObject : IAgs, ICollectionProvider<IAgs>
    [SaveAs(separator: TokenType.Greater, valueType: SavingValueType.Identifier)]
    [ParseAs(AstNodeType.BlockNode, "some_strings")]
    public List<string> SomeStrings { get; set; } = ["One", "Two", "Three"];
-   [SaveAs(separator: TokenType.Equals)]
-   [ParseAs(AstNodeType.ContentNode, "formation")]
-   public SavingFormat Format { get; set; } = SavingFormat.Spacious;
 
    public AgsSettings AgsSettings { get; } = new();
    public string SavingKey => "inline_this";

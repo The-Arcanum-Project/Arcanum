@@ -10,8 +10,13 @@ public class MainSettingsObj
 {
    public GeneralNUISettings NUIConfig { get; set; } = new();
 
-   [IsSubMenu("NUI AgsSettings")]
+   [IsSubMenu("NUI Settings")]
    public NUISettings NUIObjectSettings { get; set; } = new();
+
+   [IsSubMenu("AGS Settings")]
+   public AGSSettings AgsSettings { get; set; } = new();
+
+   public AgsConfig AgsConfig { get; set; } = new();
 
    [JsonIgnore]
    [IsSubMenu("Error Handling")]

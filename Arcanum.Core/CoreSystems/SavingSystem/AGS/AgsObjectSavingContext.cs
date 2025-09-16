@@ -59,7 +59,7 @@ public class AgsObjectSavingContext
          {
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
-            OrderedProperties[i].Format(Ags, sb, CommentChar, Settings.Format);
+            OrderedProperties[i].Format(Ags, sb, CommentChar, Settings);
          }
    }
 }

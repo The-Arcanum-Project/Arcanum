@@ -22,34 +22,42 @@ public partial class ModifierGameData
    [ParseAs(AstNodeType.ContentNode, "max")]
    [Description("The maximum value the modifier can have.")]
    [SaveAs]
+   [DefaultValue(0)]
    public int Max { get; set; }
    [ParseAs(AstNodeType.ContentNode, "category")]
    [Description("The categories this modifier can apply to.")]
    [SaveAs(SavingValueType.FlagsEnum)]
+   [DefaultValue((ModifierCategory)0)]
    public ModifierCategory Category { get; set; } = ModifierCategory.All;
    [ParseAs(AstNodeType.ContentNode, "ai")]
    [Description("Whether the ai should use this modifier in its calculations.")]
    [SaveAs]
+   [DefaultValue(false)]
    public bool Ai { get; set; }
    [ParseAs(AstNodeType.ContentNode, "should_show_in_modifier_tab")]
    [Description("Whether this modifier should be shown in the country modifier tab of the UI.")]
    [SaveAs]
+   [DefaultValue(true)]
    public bool ShouldShowInModifierTab { get; set; } = true;
    [ParseAs(AstNodeType.ContentNode, "scale_with_pop")]
    [Description("Whether this modifier scales with the pop size.")]
    [SaveAs]
+   [DefaultValue(false)]
    public bool ScaleWithPop { get; set; }
    [ParseAs(AstNodeType.ContentNode, "cap_zero_to_one")]
    [Description("Whether this modifier is capped between 0 and 1.")]
    [SaveAs]
+   [DefaultValue(false)]
    public bool CapZeroToOne { get; set; }
    [ParseAs(AstNodeType.ContentNode, "format")]
    [Description("The format to display the modifier in.")]
    [SaveAs]
+   [DefaultValue(ModifierFormat.Default)]
    public ModifierFormat Format { get; set; } = ModifierFormat.Default;
    [ParseAs(AstNodeType.ContentNode, "bias_type")]
    [Description("The type of bias this modifier applies to.")]
    [SaveAs(SavingValueType.FlagsEnum)]
+   [DefaultValue(BiasType.None)]
    public BiasType Bias { get; set; } = BiasType.None;
 
    # endregion
@@ -103,6 +111,6 @@ public partial class ModifierGameData
              Bias == other.Bias;
    }
 
-   public AgsSettings AgsSettings { get; } = new();
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierDataSettings;
    public string SavingKey => "game_data";
 }

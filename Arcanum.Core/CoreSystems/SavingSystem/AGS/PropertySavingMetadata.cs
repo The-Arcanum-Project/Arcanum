@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -26,6 +28,11 @@ public class PropertySavingMetadata
    /// If set to Auto, the type will be determined at runtime based on the actual value.
    /// </summary>
    public SavingValueType ValueType { get; set; }
+   /// <summary>
+   /// The default value for this property. <br/>
+   /// Used to determine if the property should be saved or omitted (if it matches the default value).
+   /// </summary>
+   public required object? DefaultValue { get; set; }
    /// <summary>
    /// A delegate to provide a comment for this property when saving. <br/>
    /// If null, no comment will be added. 
@@ -53,8 +60,8 @@ public class PropertySavingMetadata
    /// <param name="ags"></param>
    /// <param name="sb"></param>
    /// <param name="commentChar"></param>
-   /// <param name="format"></param>
-   public void Format(IAgs ags, IndentedStringBuilder sb, string commentChar, SavingFormat format)
+   /// <param name="settings"></param>
+   public void Format(IAgs ags, IndentedStringBuilder sb, string commentChar, AgsSettings settings)
    {
       if (CommentProvider != null)
          CommentProvider(ags, commentChar, sb);
@@ -63,6 +70,8 @@ public class PropertySavingMetadata
          ValueType = SavingUtil.GetSavingValueType(ags[NxProp]);
 
       var value = ags[NxProp];
+      if (ShouldSkipValueProcessing(settings, value))
+         return;
 
       if (SavingMethod == null)
       {
@@ -73,9 +82,9 @@ public class PropertySavingMetadata
          }
 
          if (IsCollection)
-            HandleCollection(ags, sb, commentChar, format);
-         else if (ValueType == SavingValueType.FlagsEnum)
-            HandleFlagsEnumProperty(ags, sb, value);
+            HandleCollection(ags, sb, commentChar, settings.Format);
+         else if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
+            HandleEnumProperty(ags, sb, value);
          else
             HandlePrimitiveProperty(ags, sb);
       }
@@ -83,12 +92,56 @@ public class PropertySavingMetadata
          SavingMethod(ags, this, sb);
    }
 
-   private void HandleFlagsEnumProperty(IAgs ags, IndentedStringBuilder sb, object value)
+   private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
+   {
+      if (Config.Settings.AgsConfig.WriteAllDefaultValues)
+         return false;
+
+      if (!settings.SkipDefaultValues)
+         return false;
+
+      if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
+      {
+         if (DefaultValue != null && Convert.ToInt64(DefaultValue).Equals(Convert.ToInt64(value)))
+            return true;
+      }
+      else
+      {
+         if (DefaultValue == null && value == null!)
+            return true;
+         if (DefaultValue != null && DefaultValue.Equals(value))
+            return true;
+      }
+
+      return false;
+   }
+
+   private void HandleEnumProperty(IAgs ags, IndentedStringBuilder sb, object value)
    {
       Debug.Assert(value is Enum, "Property is not an Enum");
 
-      foreach (var sv in ((Enum)value).GetSetAtomicFlagNames())
-         sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {sv}");
+      if (!EnumAgsRegistry.Registry.TryGetValue(value.GetType(), out var data))
+         throw
+            new InvalidOperationException($"Enum type '{value.GetType()}' is not registered in the EnumAgsRegistry.");
+
+      if (data.IsFlags)
+      {
+         foreach (var sv in ((Enum)value).GetSetAtomicFlagNames())
+         {
+            if (!data.Mapping.TryGetValue(sv, out var stringRep))
+               return;
+
+            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {stringRep}");
+         }
+      }
+      else
+      {
+         // If it is not contained in the mapping it is meant to be ignored as it is a default or code-only value
+         if (!data.Mapping.TryGetValue(value.ToString()!, out var stringRep))
+            return;
+
+         sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {stringRep}");
+      }
    }
 
    private static void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)

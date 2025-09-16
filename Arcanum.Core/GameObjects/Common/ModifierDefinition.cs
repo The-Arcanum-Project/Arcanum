@@ -10,41 +10,81 @@ namespace Arcanum.Core.GameObjects.Common;
 
 public enum IsModifierGood
 {
+   [EnumAgsData("good")]
    Good,
+
+   [EnumAgsData("bad")]
    Bad,
+
+   [EnumAgsData("neutral")]
    Neutral,
 }
 
 [Flags]
 public enum BiasType
 {
+   [EnumAgsData("none")]
    None,
+
+   [EnumAgsData("opinion")]
    Opinion,
+
+   [EnumAgsData("trust")]
    Trust,
+
+   [EnumAgsData("voting")]
    Voting,
 }
 
 [Flags]
 public enum ModifierCategory
 {
+   [EnumAgsData("all", true)]
    All,
+
+   [EnumAgsData("none", true)]
    None,
+
+   [EnumAgsData("country")]
    Country,
+
+   [EnumAgsData("location")]
    Location,
+
+   [EnumAgsData("province")]
    Province,
+
+   [EnumAgsData("character")]
    Character,
+
+   [EnumAgsData("unit")]
    Unit,
+
+   [EnumAgsData("mercenary")]
    Mercenary,
+
+   [EnumAgsData("religion")]
    Religion,
+
+   [EnumAgsData("internationalorganization")]
    InternationalOrganization,
+
+   [EnumAgsData("rebel")]
    Rebel,
 }
 
 public enum ModifierFormat
 {
+   [EnumAgsData("default", true)]
    Default,
+
+   [EnumAgsData("FormatPopCaps")]
    FormatPopCaps,
+
+   [EnumAgsData("FormatManPower")]
    FormatManPower,
+
+   [EnumAgsData("FormatGold")]
    FormatGold,
 }
 
@@ -58,24 +98,29 @@ public partial class ModifierDefinition(string name) : NameKeyDefined(name),
    # region Nexus Properties
 
    [SaveAs]
+   [DefaultValue(IsModifierGood.Good)]
    [ParseAs(AstNodeType.ContentNode, "color")]
    [Description("The color to display the modifier in.")]
    public IsModifierGood IsGood { get; set; } = IsModifierGood.Good;
 
    [SaveAs]
+   [DefaultValue(2)]
    [ParseAs(AstNodeType.ContentNode, "decimals")]
    [Description("The number of decimal places to display the modifier with.")]
    public int NumDecimals { get; set; } = 2;
 
    [SaveAs]
+   [DefaultValue(false)]
    [ParseAs(AstNodeType.ContentNode, "boolean")]
    [Description("Whether this modifier is a boolean (yes/no) value.")]
    public bool IsBoolean { get; set; }
    [SaveAs]
+   [DefaultValue(false)]
    [ParseAs(AstNodeType.ContentNode, "percent")]
    [Description("Whether this modifier is a percentage value.")]
    public bool IsPercentage { get; set; }
    [SaveAs]
+   [DefaultValue(false)]
    [ParseAs(AstNodeType.ContentNode, "already_percent")]
    [Description("Whether this modifier is already in percent form (i.e., 10 for 10%).")]
    public bool IsAlreadyPercent { get; set; }

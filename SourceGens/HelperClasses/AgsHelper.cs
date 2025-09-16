@@ -15,10 +15,15 @@ public static class AgsHelper
 
    private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SaveAsAttribute";
    private const string SUPPRESS_AGS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SuppressAgs";
+   private const string ENUM_AGS_DATA_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.EnumAgsData";
 
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
    private const string CUSTOM_ITEM_KEY_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.CustomItemKeyProvider";
+
+   private const string DEFAULT_VALUE_ATTRIBUTE = "System.ComponentModel.DefaultValueAttribute";
+
+   public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
 
    public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
    {
@@ -41,6 +46,9 @@ public static class AgsHelper
       GetValidProperties(context, nexusProperties, saveAsProps);
       var (saverHintName, saverSource) =
          GenerateSaverClass(classSymbol, objectSaveAsAttr, saveAsProps, context);
+
+      AnalyzeAndFilterProperties(nexusProperties, context);
+
       context.AddSource(saverHintName, saverSource);
    }
 
@@ -88,6 +96,7 @@ public static class AgsHelper
       sb.AppendLine("using System.Collections.Generic;");
       sb.AppendLine("using System.Linq;");
       sb.AppendLine("using System.Collections;");
+      sb.AppendLine("using System.ComponentModel;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.SavingSystem.AGS;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.Common;");
@@ -157,6 +166,17 @@ public static class AgsHelper
          return;
       }
 
+      var defaultValueAttr = prop.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == DEFAULT_VALUE_ATTRIBUTE);
+
+      if (defaultValueAttr == null &&
+          !prop.Type.AllInterfaces.Any(i => i.ToDisplayString() == UniGen.IAGS_INTERFACE) &&
+          !isCollection)
+         context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingDefaultValueAttributeWarning,
+                                                    prop.Locations.FirstOrDefault(),
+                                                    prop.Name,
+                                                    prop.ContainingType.Name));
+
       var collVal = isCollection ? "true" : saveAs.ConstructorArguments[5].Value!.ToString().ToLower();
 
       sb.AppendLine("                new()");
@@ -166,6 +186,7 @@ public static class AgsHelper
       sb.AppendLine($"                    CommentProvider = {GetNullOrString(saveAs.ConstructorArguments[3], SAVING_COMMENT_PROVIDER)},");
       sb.AppendLine($"                    SavingMethod = {GetNullOrString(saveAs.ConstructorArguments[2], CUSTOM_SAVING_PROVIDER)},");
       sb.AppendLine($"                    ValueType = SavingValueType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[0])},");
+      sb.AppendLine($"                    DefaultValue = {(defaultValueAttr != null ? $"(object?){defaultValueAttr.ConstructorArguments[0].Value!.ToString().ToLower()}" : "null")},");
       sb.AppendLine($"                    Separator = TokenType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[1])},");
       sb.AppendLine($"                    CollectionItemKeyProvider = {GetNullOrString(saveAs.ConstructorArguments[4], CUSTOM_ITEM_KEY_PROVIDER)},");
       sb.AppendLine($"                    IsCollection = {collVal},");
@@ -213,5 +234,72 @@ public static class AgsHelper
       }
 
       return keyword;
+   }
+
+   // This method is now called PER-CLASS, and it manages its own state.
+   private static void AnalyzeAndFilterProperties(List<IPropertySymbol> allProperties, SourceProductionContext context)
+   {
+      // Create a temporary cache that ONLY lives for the analysis of this one class.
+      var analysisCacheForThisClass = new Dictionary<string, EnumAnalysisResult>();
+
+      foreach (var prop in allProperties)
+      {
+         if (prop is null || prop.Type.TypeKind != TypeKind.Enum)
+         {
+            continue;
+         }
+
+         var enumTypeSymbol = (INamedTypeSymbol)prop.Type;
+         var enumFullName = enumTypeSymbol.ToDisplayString();
+
+         // Use the temporary, per-class cache.
+         if (analysisCacheForThisClass.ContainsKey(enumFullName))
+         {
+            continue;
+         }
+
+         // --- This is a new enum for this class, analyze it fully. ---
+         var fieldResults = new List<EnumFieldAnalysisResult>();
+         var isEnumOverallValid = true;
+
+         var enumFields = enumTypeSymbol.GetMembers().OfType<IFieldSymbol>().ToList();
+
+         foreach (var fieldSymbol in enumFields)
+         {
+            var enumAgsDataAttr = fieldSymbol.GetAttributeForKey(ENUM_AGS_DATA_ATTRIBUTE);
+
+            if (enumAgsDataAttr == null)
+            {
+               isEnumOverallValid = false; // Mark the whole enum as invalid.
+               fieldResults.Add(new(fieldSymbol, false, "INVALID", false));
+            }
+            else
+            {
+               var key = enumAgsDataAttr.ConstructorArguments[0].Value as string ?? fieldSymbol.Name.ToSnakeCase();
+               var isIgnored = (bool)(enumAgsDataAttr.ConstructorArguments[1].Value ?? false);
+               fieldResults.Add(new(fieldSymbol, true, key, isIgnored));
+            }
+         }
+
+         var analysisResult = new EnumAnalysisResult(enumTypeSymbol, isEnumOverallValid, fieldResults);
+         analysisCacheForThisClass[enumFullName] = analysisResult;
+
+         // --- After a full analysis, if the enum is invalid, report ALL its errors at once. ---
+         if (!analysisResult.IsValid)
+         {
+            foreach (var fieldResult in analysisResult.FieldResults.Where(fr => !fr.IsValid))
+            {
+               context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingEnumAgsDataAttribute,
+                                                          fieldResult.FieldSymbol.Locations.FirstOrDefault(),
+                                                          enumTypeSymbol.Name,
+                                                          fieldResult.FieldSymbol.Name));
+            }
+         }
+         else
+         {
+            if (!EnumAnalysisCache.ContainsKey(enumFullName))
+               EnumAnalysisCache[enumFullName] = analysisResult;
+         }
+      }
    }
 }

@@ -72,4 +72,10 @@ public interface INexus
    /// <param name="property"></param>
    /// <returns></returns>
    string? GetDescription(Enum property);
+
+   /// <summary>
+   /// Returns all properties defined in the Nexus as a list of enum values.
+   /// </summary>
+   /// <returns></returns>
+   List<Enum> GetAllProperties();
 }

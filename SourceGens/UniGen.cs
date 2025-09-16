@@ -9,7 +9,7 @@ namespace ParserGenerator;
 [Generator]
 public class UniGen : IIncrementalGenerator
 {
-   private const string IAGS_INTERFACE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs";
+   public const string IAGS_INTERFACE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs";
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
@@ -31,6 +31,8 @@ public class UniGen : IIncrementalGenerator
       if (nexusClasses.IsDefaultOrEmpty)
          return;
 
+      AgsHelper.EnumAnalysisCache = [];
+
       foreach (var nexusClassSymbol in nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
          try
          {
@@ -50,5 +52,7 @@ public class UniGen : IIncrementalGenerator
             var diagnostic = Diagnostic.Create(descriptor, Location.None, ex.Message);
             context.ReportDiagnostic(diagnostic);
          }
+
+      EnumIndexGenerator.RunEnumIndexGenerator(context, AgsHelper.EnumAnalysisCache);
    }
 }
