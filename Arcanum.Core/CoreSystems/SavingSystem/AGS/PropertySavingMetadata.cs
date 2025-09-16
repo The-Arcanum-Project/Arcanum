@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.Utils;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -60,21 +62,33 @@ public class PropertySavingMetadata
       if (ValueType == SavingValueType.Auto)
          ValueType = SavingUtil.GetSavingValueType(ags[NxProp]);
 
+      var value = ags[NxProp];
+
       if (SavingMethod == null)
       {
          if (ValueType == SavingValueType.IAgs)
          {
-            HandleIAgsProperty((IAgs)ags[NxProp], sb, commentChar);
+            HandleIAgsProperty((IAgs)value, sb, commentChar);
             return;
          }
 
          if (IsCollection)
             HandleCollection(ags, sb, commentChar, format);
+         else if (ValueType == SavingValueType.FlagsEnum)
+            HandleFlagsEnumProperty(ags, sb, value);
          else
             HandlePrimitiveProperty(ags, sb);
       }
       else
          SavingMethod(ags, this, sb);
+   }
+
+   private void HandleFlagsEnumProperty(IAgs ags, IndentedStringBuilder sb, object value)
+   {
+      Debug.Assert(value is Enum, "Property is not an Enum");
+
+      foreach (var sv in ((Enum)value).GetSetAtomicFlagNames())
+         sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {sv}");
    }
 
    private static void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)

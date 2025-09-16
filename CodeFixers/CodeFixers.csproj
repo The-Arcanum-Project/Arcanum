@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj" />
+        <ProjectReference Include="..\SourceGens\SourceGens.csproj"/>
     </ItemGroup>
 
 </Project>

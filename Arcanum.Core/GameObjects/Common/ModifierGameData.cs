@@ -12,34 +12,44 @@ namespace Arcanum.Core.GameObjects.Common;
 public partial class ModifierGameData
    : INUI, IEmpty<ModifierGameData>, ICollectionProvider<ModifierGameData>, IAgs
 {
-   # region Nexus Properties
+   #region Nexus Properties
 
+   [DefaultValue(0)]
    [ParseAs(AstNodeType.ContentNode, "min")]
    [Description("The minimum value the modifier can have.")]
+   [SaveAs]
    public int Min { get; set; }
    [ParseAs(AstNodeType.ContentNode, "max")]
    [Description("The maximum value the modifier can have.")]
+   [SaveAs]
    public int Max { get; set; }
    [ParseAs(AstNodeType.ContentNode, "category")]
    [Description("The categories this modifier can apply to.")]
+   [SaveAs(SavingValueType.FlagsEnum)]
    public ModifierCategory Category { get; set; } = ModifierCategory.All;
    [ParseAs(AstNodeType.ContentNode, "ai")]
    [Description("Whether the ai should use this modifier in its calculations.")]
+   [SaveAs]
    public bool Ai { get; set; }
    [ParseAs(AstNodeType.ContentNode, "should_show_in_modifier_tab")]
    [Description("Whether this modifier should be shown in the country modifier tab of the UI.")]
+   [SaveAs]
    public bool ShouldShowInModifierTab { get; set; } = true;
    [ParseAs(AstNodeType.ContentNode, "scale_with_pop")]
    [Description("Whether this modifier scales with the pop size.")]
+   [SaveAs]
    public bool ScaleWithPop { get; set; }
    [ParseAs(AstNodeType.ContentNode, "cap_zero_to_one")]
    [Description("Whether this modifier is capped between 0 and 1.")]
+   [SaveAs]
    public bool CapZeroToOne { get; set; }
    [ParseAs(AstNodeType.ContentNode, "format")]
    [Description("The format to display the modifier in.")]
+   [SaveAs]
    public ModifierFormat Format { get; set; } = ModifierFormat.Default;
    [ParseAs(AstNodeType.ContentNode, "bias_type")]
    [Description("The type of bias this modifier applies to.")]
+   [SaveAs(SavingValueType.FlagsEnum)]
    public BiasType Bias { get; set; } = BiasType.None;
 
    # endregion
