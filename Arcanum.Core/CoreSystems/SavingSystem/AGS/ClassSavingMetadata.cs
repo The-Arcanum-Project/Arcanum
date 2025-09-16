@@ -18,6 +18,6 @@ public class ClassSavingMetadata(TokenType separator,
 
    public override string ToString()
    {
-      return $"Cm with {SavingMethod?.Method.Name ?? "no"}";
+      return $"Cm with saving method:{SavingMethod?.Method.Name ?? "no"}";
    }
 }

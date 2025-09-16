@@ -3,6 +3,10 @@ using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
+/// <summary>
+/// The class provides saving methods for AGS properties. <br/>
+/// Custom saving methods can be defined here and referenced in <see cref="PropertySavingMetadata.SavingMethod"/>.
+/// </summary>
 public static class SavingActionProvider
 {
    public static void ExampleCustomSavingMethod(IAgs target, PropertySavingMetadata metadata, IndentedStringBuilder sb)

@@ -45,6 +45,10 @@ public class AgsObjectSavingContext
       return sortedList;
    }
 
+   /// <summary>
+   /// Uses the context to generate the AGS formatted string for the object and appends it to the provided StringBuilder.
+   /// </summary>
+   /// <param name="sb"></param>
    public void BuildContext(IndentedStringBuilder sb)
    {
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)

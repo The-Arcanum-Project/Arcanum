@@ -1,5 +1,9 @@
 ﻿namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
+/// <summary>
+/// Provides methods to generate comments during the saving process. <br/>
+/// Custom methods can be define here and referenced in <see cref="PropertySavingMetadata.SavingMethod"/>.
+/// </summary>
 public static class SavingCommentProvider
 {
    /// <summary>

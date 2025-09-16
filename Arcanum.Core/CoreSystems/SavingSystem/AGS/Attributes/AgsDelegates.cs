@@ -21,5 +21,8 @@ public static class AgsDelegates
    /// <param name="sb">An <see cref="IndentedStringBuilder"/></param>
    public delegate void AgsSavingAction(IAgs target, PropertySavingMetadata metadata, IndentedStringBuilder sb);
 
+   /// <summary>
+   /// Represents a method that generates a unique key for an item in a collection.
+   /// </summary>
    public delegate string GetCollectionItemKey(object item);
 }

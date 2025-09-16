@@ -7,6 +7,14 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SavingUtil
 {
+   /// <summary>
+   /// Formats a value according to the specified SavingValueType.
+   /// </summary>
+   /// <param name="svl"></param>
+   /// <param name="value"></param>
+   /// <returns></returns>
+   /// <exception cref="InvalidOperationException"></exception>
+   /// <exception cref="ArgumentOutOfRangeException"></exception>
    public static string FormatValue(SavingValueType svl, object value)
    {
       if (svl == SavingValueType.Auto)
@@ -28,6 +36,13 @@ public static class SavingUtil
       };
    }
 
+   /// <summary>
+   /// Formats a property value from a Nexus object according to the specified SavingValueType.
+   /// </summary>
+   /// <param name="svl"></param>
+   /// <param name="target"></param>
+   /// <param name="nxProp"></param>
+   /// <returns></returns>
    public static string FormatObjectValue(SavingValueType svl, INexus target, Enum nxProp)
    {
       object value = null!;
@@ -35,6 +50,12 @@ public static class SavingUtil
       return FormatValue(svl, value);
    }
 
+   /// <summary>
+   /// Gets the string representation of a separator token.
+   /// </summary>
+   /// <param name="separator"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentOutOfRangeException"></exception>
    public static string GetSeparator(TokenType separator)
    {
       return separator switch
@@ -67,6 +88,12 @@ public static class SavingUtil
       };
    }
 
+   /// <summary>
+   /// Gets the string representation of a brace token.
+   /// </summary>
+   /// <param name="separator"></param>
+   /// <returns></returns>
+   /// <exception cref="ArgumentOutOfRangeException"></exception>
    public static string GetBrace(TokenType separator)
    {
       return separator switch
@@ -79,6 +106,12 @@ public static class SavingUtil
       };
    }
 
+   /// <summary>
+   /// Determines the SavingValueType for a given object instance.
+   /// </summary>
+   /// <param name="item"></param>
+   /// <returns></returns>
+   /// <exception cref="NotSupportedException"></exception>
    public static SavingValueType GetSavingValueType(object item)
    {
       var type = item.GetType();
@@ -104,6 +137,13 @@ public static class SavingUtil
       throw new NotSupportedException($"Type {type} is not supported as item key type.");
    }
 
+   /// <summary>
+   /// Determines the SavingValueType for the first non-null item in a collection. <br/>
+   /// If the collection is empty or all items are null, returns SavingValueType.Auto.
+   /// As if a collection is empty we do not necessarily need to know the type of its items.
+   /// </summary>
+   /// <param name="enumerable"></param>
+   /// <returns></returns>
    public static SavingValueType GetSavingValueTypeForCollection(IEnumerable enumerable)
    {
       var enumerator = enumerable.GetEnumerator();

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿#if DEBUG
+using System.ComponentModel;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
@@ -27,3 +28,4 @@ public partial class TestOb2j : IAgs, ICollectionProvider<IAgs>
    public string SavingKey => "test_obj";
    public static IEnumerable<IAgs> GetGlobalItems() => new TestOb2j[] { new(), new() { Key = "second" } };
 }
+#endif

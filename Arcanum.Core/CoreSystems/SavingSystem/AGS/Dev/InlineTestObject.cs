@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿#if DEBUG
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -34,3 +35,4 @@ public partial class InlineTestObject : IAgs, ICollectionProvider<IAgs>
    public string SavingKey => "inline_this";
    public static IEnumerable<IAgs> GetGlobalItems() => [new InlineTestObject()];
 }
+#endif

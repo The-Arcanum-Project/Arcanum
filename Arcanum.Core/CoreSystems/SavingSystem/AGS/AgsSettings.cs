@@ -25,7 +25,7 @@ public class AgsSettings
    /// The order in which properties will be saved if CustomSaveOrder is true. <br/>
    /// The list should contain Enum values corresponding to the properties to be saved. 
    /// </summary>
-   public List<Enum> SaveOrder { get; set; }
+   public List<Enum> SaveOrder { get; set; } = [];
 
    /// <summary>
    /// The format to use when saving. <br/>
