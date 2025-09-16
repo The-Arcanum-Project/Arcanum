@@ -15,4 +15,9 @@ public class ClassSavingMetadata(TokenType separator,
    public Func<IAgs, string, IndentedStringBuilder, string>? CommentProvider { get; set; } = commentProvider;
    public Action<IAgs, PropertySavingMetadata, IndentedStringBuilder>? SavingMethod { get; set; } =
       savingMethod;
+
+   public override string ToString()
+   {
+      return $"Cm with {SavingMethod?.Method.Name ?? "no"}";
+   }
 }

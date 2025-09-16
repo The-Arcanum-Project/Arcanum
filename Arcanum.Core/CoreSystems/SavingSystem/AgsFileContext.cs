@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -17,12 +18,17 @@ public class AgsFileContext
    /// A list of AGS objects to be saved. All must be of the same type as specified in <see cref="AgsType"/>.
    /// </summary>
    public List<IAgs> AgsObjects { get; }
+   /// <summary>
+   /// The character(s) used to denote comments in the AGS format (e.g., "#").
+   /// </summary>
+   public string CommentChar { get; }
 
-   private AgsFileContext(Type agsType, List<IAgs> agsObjects)
+   private AgsFileContext(Type agsType, List<IAgs> agsObjects, string commentChar = "#")
    {
       Sb = new();
       AgsType = agsType;
       AgsObjects = agsObjects;
+      CommentChar = commentChar;
    }
 
    /// <summary>
@@ -55,7 +61,7 @@ public class AgsFileContext
 
          using (Sb.Indent())
          {
-            var agsContext = ags.ToAgsContext();
+            var agsContext = ags.ToAgsContext(CommentChar);
             agsContext.BuildContext(Sb);
             Sb.AppendLine();
          }

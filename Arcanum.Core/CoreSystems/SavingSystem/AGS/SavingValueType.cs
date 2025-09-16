@@ -2,6 +2,7 @@
 
 public enum SavingValueType
 {
+   IAgs,
    Auto,
    String,
    Int,
@@ -10,4 +11,5 @@ public enum SavingValueType
    Double,
    Identifier,
    Color,
+   Enum,
 }

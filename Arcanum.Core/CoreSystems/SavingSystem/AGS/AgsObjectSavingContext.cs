@@ -50,8 +50,12 @@ public class AgsObjectSavingContext
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
          Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
 
-      using (sb.BlockWithName(Ags))
-         foreach (var prop in OrderedProperties)
-            prop.Format(Ags, sb, CommentChar);
+      using (sb.BlockWithName(Ags, Settings.Format))
+         for (var i = 0; i < OrderedProperties.Count; i++)
+         {
+            if (Settings.Format == SavingFormat.Spacious && i > 0)
+               sb.AppendLine();
+            OrderedProperties[i].Format(Ags, sb, CommentChar, Settings.Format);
+         }
    }
 }

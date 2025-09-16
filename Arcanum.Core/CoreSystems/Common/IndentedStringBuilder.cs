@@ -14,7 +14,7 @@ public class IndentedStringBuilder(string indentString = "\t")
 {
    private readonly StringBuilder _builder = new();
    private int _indentLevel;
-   private string _cachedIndent = "    "; // Performance: cache the full indent string
+   private string _cachedIndent = ""; // Performance: cache the full indent string
    private bool _isAtStartOfLine = true;
 
    // default 4 spaces
@@ -78,9 +78,6 @@ public class IndentedStringBuilder(string indentString = "\t")
 
    public IndentedStringBuilder AppendComment(string commentChar, string comment)
    {
-      if (string.IsNullOrEmpty(comment))
-         return this;
-
       AppendLine($"{commentChar} {comment}");
       return this;
    }
@@ -142,18 +139,35 @@ public class IndentedStringBuilder(string indentString = "\t")
    public IDisposable BlockWithName(string blockName,
                                     string separator = "=",
                                     string openingBrace = "{",
-                                    string closingBrace = "}")
+                                    string closingBrace = "}",
+                                    bool addNewLineBeforeClosing = false)
    {
       AppendLine($"{blockName} {separator} {openingBrace}");
-      return new BlockScope(this, closingBrace);
+      return new BlockScope(this, closingBrace, addNewLineBeforeClosing);
    }
 
-   public IDisposable BlockWithName(IAgs ags)
+   private IDisposable BlockWithName(IAgs ags, bool addNewLineBeforeClosing)
    {
       return BlockWithName(ags.SavingKey,
                            SavingUtil.GetSeparator(ags.ClassMetadata.Separator),
                            SavingUtil.GetBrace(ags.ClassMetadata.OpeningToken),
-                           SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken));
+                           SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken),
+                           addNewLineBeforeClosing);
+   }
+
+   public IDisposable BlockWithName(IAgs ags, SavingFormat format)
+   {
+      switch (format)
+      {
+         case SavingFormat.Compact:
+         case SavingFormat.Default:
+            return BlockWithName(ags, false);
+         case SavingFormat.Spacious:
+            AppendLine();
+            return BlockWithName(ags, true);
+         default:
+            throw new ArgumentOutOfRangeException(nameof(format), format, null);
+      }
    }
 
    /// <summary>
@@ -213,17 +227,21 @@ public class IndentedStringBuilder(string indentString = "\t")
    {
       private readonly IndentedStringBuilder _builder;
       private readonly string _closingBrace;
+      private readonly bool _addNewLineBeforeClosing;
 
-      public BlockScope(IndentedStringBuilder builder, string closingBrace)
+      public BlockScope(IndentedStringBuilder builder, string closingBrace, bool addNewLineBeforeClosing = false)
       {
          _builder = builder;
          _closingBrace = closingBrace;
+         _addNewLineBeforeClosing = addNewLineBeforeClosing;
          _builder.IncreaseIndent();
       }
 
       public void Dispose()
       {
          _builder.DecreaseIndent();
+         if (_addNewLineBeforeClosing)
+            _builder.AppendLine();
          _builder.AppendLine(_closingBrace);
       }
    }

@@ -26,4 +26,10 @@ public class AgsSettings
    /// The list should contain Enum values corresponding to the properties to be saved. 
    /// </summary>
    public List<Enum> SaveOrder { get; set; }
+
+   /// <summary>
+   /// The format to use when saving. <br/>
+   /// Default is <see cref="SavingFormat.Default"/>
+   /// </summary>
+   public SavingFormat Format { get; set; } = SavingFormat.Default;
 }

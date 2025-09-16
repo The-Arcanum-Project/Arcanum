@@ -21,7 +21,8 @@ public interface IAgs : INexus
    /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
    /// </summary>
    /// <returns></returns>
-   public AgsObjectSavingContext ToAgsContext(string commentChar = "#") => new(this, commentChar);
+   public AgsObjectSavingContext ToAgsContext(string commentChar = "#")
+      => new(this, commentChar); //TODO fix this by using FileInformation
 
    /// <summary>
    /// Returns the metadata for the class implementing this IAgs instance. <br/>

@@ -18,6 +18,11 @@ public partial class TestOb2j : IAgs, ICollectionProvider<IAgs>
    [ParseAs(AstNodeType.ContentNode, "key")]
    [Description("Hello there I am a property")]
    public string Key { get; set; } = "boh_hussite_king";
+
+   [SaveAs]
+   [ParseAs(AstNodeType.BlockNode, "inline")]
+   public InlineTestObject Inline { get; set; } = new();
+
    public AgsSettings Settings { get; } = new();
    public string SavingKey => "test_obj";
    public static IEnumerable<IAgs> GetGlobalItems() => new TestOb2j[] { new(), new() { Key = "second" } };

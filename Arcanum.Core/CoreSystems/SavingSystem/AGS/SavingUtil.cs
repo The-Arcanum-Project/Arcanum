@@ -16,12 +16,14 @@ public static class SavingUtil
       {
          SavingValueType.String => $"\"{value}\"",
          SavingValueType.Int => ((int)value).ToString(),
-         SavingValueType.Float => ((float)value).ToString("0.##"),
+         SavingValueType.Float => ((float)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
          SavingValueType.Bool => (bool)value ? "yes" : "no",
-         SavingValueType.Double => ((double)value).ToString("0.##"),
+         SavingValueType.Double => ((double)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
          SavingValueType.Identifier => $"{value}",
          SavingValueType.Color => ((JominiColor)value).ToString(),
          SavingValueType.Auto => throw new InvalidOperationException("SavingValueType cannot be Auto at this point."),
+         SavingValueType.Enum => value.ToString()!,
+         SavingValueType.IAgs => throw new InvalidOperationException("IAgs type needs to be handled in advance"),
          _ => throw new ArgumentOutOfRangeException(nameof(svl), svl, null),
       };
    }
@@ -92,6 +94,12 @@ public static class SavingUtil
          return SavingValueType.Bool;
       if (type == typeof(JominiColor))
          return SavingValueType.Color;
+      if (type.IsEnum)
+         return SavingValueType.Enum;
+      if (typeof(IAgs).IsAssignableFrom(type))
+         return SavingValueType.IAgs;
+      if (item is IEnumerable enumerable)
+         return GetSavingValueTypeForCollection(enumerable);
 
       throw new NotSupportedException($"Type {type} is not supported as item key type.");
    }
