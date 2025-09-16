@@ -57,9 +57,6 @@ public partial class MainMenuScreen
          }
       };
 #endif
-      UIHandle.Instance.UIUtils = new UIUtilsImpl();
-      UIHandle.Instance.PopUpHandle = new PopUpHandleImpl();
-      UIHandle.Instance.MainWindowsHandle = new MainWindowHandleImpl();
    }
 
    private void OnClosed(object? sender, EventArgs? e)

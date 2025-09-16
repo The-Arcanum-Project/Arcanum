@@ -1,5 +1,6 @@
 using System.Windows;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.UI;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
 
@@ -51,6 +52,8 @@ internal static class Program
       }
 
       var pluginHost = new PluginHost.PluginHost();
+
+      UiHandlesInjector.InjectUiHandles();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
 
       var mw = new MainMenuScreen();
