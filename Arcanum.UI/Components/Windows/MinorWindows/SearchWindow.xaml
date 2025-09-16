@@ -78,7 +78,7 @@
                               Click = "SettingsToggleButton_OnClick">
                     <TextBlock FontSize = "15"
                                Margin = "2">
-                        Settings
+                        AgsSettings
                     </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "3"

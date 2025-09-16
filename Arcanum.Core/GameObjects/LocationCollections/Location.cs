@@ -11,7 +11,8 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Location : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>, IEmpty<Location>
+public partial class Location
+   : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>, IEmpty<Location>
 {
    public Location(FileInformation information, int color, string name) : base(name, information)
    {
@@ -23,7 +24,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
    [ToStringArguments("X")]
    [Description("The color of the location in the map data.")]
    public int Color { get; set; }
-   public new static Location Empty { get; } = new (FileInformation.Empty, 0, "EmptyArcanum_Location");
+   public new static Location Empty { get; } = new(FileInformation.Empty, 0, "EmptyArcanum_Location");
 
    #endregion
 
@@ -43,6 +44,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
    #endregion
 
    public override string ToString() => $"{Name}";
+
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
 
@@ -74,7 +76,7 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
    public static bool operator !=(Location? left, Location? right) => !(left == right);
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.LocationSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.LocationSettings;
    public INUINavigation[] Navigations
    {
       get
@@ -85,7 +87,8 @@ public partial class Location : LocationComposite, INUI, ICollectionProvider<Loc
             navigations.Add(new NUINavigation((INUI)parent, $"Province: {parent.Name}"));
 
          navigations.Add(null);
-         navigations.AddRange(Pops.Select(pop => new NUINavigation(pop, $"Pop: {pop.Type} ({pop.Culture}, {pop.Religion})")));
+         navigations.AddRange(Pops.Select(pop => new NUINavigation(pop,
+                                                                   $"Pop: {pop.Type} ({pop.Culture}, {pop.Religion})")));
 
          if (HasMarket)
          {

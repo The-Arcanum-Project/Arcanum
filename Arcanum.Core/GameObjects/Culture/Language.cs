@@ -72,7 +72,7 @@ public partial class Language(string name) : NameKeyDefined(name), INUI, ICollec
    # endregion
 
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.LanguageNUI;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.LanguageNUI;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Language> GetGlobalItems() => Globals.Languages.Values;
 

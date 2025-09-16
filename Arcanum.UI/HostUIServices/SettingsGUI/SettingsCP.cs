@@ -4,7 +4,7 @@
 // namespace Arcanum.UI.HostUIServices.SettingsGUI;
 //
 // /// <summary>
-// /// Provides methods for creating any control used in the plugin Settings UI.
+// /// Provides methods for creating any control used in the plugin AgsSettings UI.
 // /// </summary>
 // public static class SettingsCP
 // {
@@ -15,7 +15,7 @@
 //             Name = $"Settings_{pluginName}",
 //             Text = pluginName,
 //             Tag = pluginName,
-//             ToolTipText = $"Settings for {pluginName}",
+//             ToolTipText = $"AgsSettings for {pluginName}",
 //             BackColor = Acnc.DefaultBackground,
 //             ForeColor = Acnc.DefaultText,
 //             BorderStyle = BorderStyle.FixedSingle,
@@ -141,3 +141,4 @@
 //     }
 // }
 //
+

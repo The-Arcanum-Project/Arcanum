@@ -13,7 +13,7 @@ public partial class Road(Location startLocation, Location endLocation) : INUI, 
    public Location EndLocation { get; set; } = endLocation;
 
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.RoadSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RoadSettings;
    public INUINavigation[] Navigations =>
    [
       new NUINavigation(StartLocation, $"Start: {StartLocation.Name}"),

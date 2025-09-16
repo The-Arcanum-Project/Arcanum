@@ -67,7 +67,7 @@ public partial class Adjacency(Location from,
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
    public INUINavigation[] Navigations
       => [new NUINavigation(From, $"From {From.Name}"), new NUINavigation(To, $"To {To.Name}")];
    public static Adjacency Empty { get; } = new(Location.Empty,

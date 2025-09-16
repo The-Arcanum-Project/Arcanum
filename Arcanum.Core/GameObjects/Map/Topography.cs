@@ -61,7 +61,7 @@ public partial
    #region Interface Properties
 
    public bool IsReadonly => false;
-   public NUISetting Settings => Config.Settings.NUIObjectSettings.TopographySettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TopographySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Topography Empty { get; } = new("Arcanum_Empty_Topography");
    public static IEnumerable<Topography> GetGlobalItems() => Globals.Topography.Values;

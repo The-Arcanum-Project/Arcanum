@@ -44,7 +44,7 @@ public partial class ModifierGameData
    #region Interface Properties
 
    public bool IsReadonly => false;
-   public NUISetting Settings => Config.Settings.NUIObjectSettings.ModifierGameDataSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ModifierGameDataSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static ModifierGameData Empty { get; } = new();
 

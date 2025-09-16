@@ -237,13 +237,13 @@
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Settings"
+                    <uc:SearchableMenuItem Header = "AgsSettings"
                                            Command = "mainWindow:MwCommands.OpenSettingsCommand">
                         <uc:SearchableMenuItem.Icon>
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Settings16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
-                    <uc:SearchableMenuItem Header = "Plugin Settings"
+                    <uc:SearchableMenuItem Header = "Plugin AgsSettings"
                                            Command = "mainWindow:MwCommands.OpenPluginSettingsCommand">
                         <uc:SearchableMenuItem.Icon>
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/PluginSettings16x16.png" />

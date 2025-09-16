@@ -31,7 +31,7 @@ public partial class InlineTestObject : IAgs, ICollectionProvider<IAgs>
    [ParseAs(AstNodeType.ContentNode, "formation")]
    public SavingFormat Format { get; set; } = SavingFormat.Spacious;
 
-   public AgsSettings Settings { get; } = new();
+   public AgsSettings AgsSettings { get; } = new();
    public string SavingKey => "inline_this";
    public static IEnumerable<IAgs> GetGlobalItems() => [new InlineTestObject()];
 }

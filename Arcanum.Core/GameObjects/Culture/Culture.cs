@@ -37,7 +37,7 @@ public partial class Culture(string name) : INUI, IEmpty<Culture>, ICollectionPr
    # endregion
 
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.CultureSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CultureSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Culture Empty { get; } = new("Arcanum_Empty_Culture");
    public static IEnumerable<Culture> GetGlobalItems() => Globals.Cultures.Values;

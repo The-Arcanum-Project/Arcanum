@@ -49,7 +49,7 @@ public partial
    #region Interface Properties
 
    public bool IsReadonly => false;
-   public NUISetting Settings => Config.Settings.NUIObjectSettings.ClimateSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ClimateSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Climate Empty { get; } = new("Arcanum_Empty_Climate");
    public static IEnumerable<Climate> GetGlobalItems() => Globals.Climates.Values;

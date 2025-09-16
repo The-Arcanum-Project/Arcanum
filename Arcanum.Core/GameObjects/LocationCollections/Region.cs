@@ -7,7 +7,8 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Region : LocationCollection<Area>, INUI, ICollectionProvider<Region>, IMapInferable<Region>, IEmpty<Region>
+public partial class Region
+   : LocationCollection<Area>, INUI, ICollectionProvider<Region>, IMapInferable<Region>, IEmpty<Region>
 {
    public Region(FileInformation fileInfo, string name, ICollection<Area> provinces) : base(fileInfo, name, provinces)
    {
@@ -30,7 +31,7 @@ public partial class Region : LocationCollection<Area>, INUI, ICollectionProvide
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
    public INUINavigation[] Navigations
    {
       get
@@ -53,8 +54,8 @@ public partial class Region : LocationCollection<Area>, INUI, ICollectionProvide
 
    public static List<Region> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                              .Select(loc => (Region)loc
-                                                                                    .GetFirstParentOfType(LocationCollectionType
-                                                                                           .Area))
+                                                                                .GetFirstParentOfType(LocationCollectionType
+                                                                                   .Area))
                                                                              .Distinct()
                                                                              .ToList();
 

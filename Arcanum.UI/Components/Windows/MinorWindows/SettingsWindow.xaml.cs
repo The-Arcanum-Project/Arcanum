@@ -17,7 +17,7 @@ public partial class SettingsWindow
    {
       InitializeComponent();
    }
-   
+
    public static SettingsWindow ShowSettingsWindow()
    {
       var settingsWindow = new SettingsWindow();
@@ -83,8 +83,7 @@ public partial class SettingsWindow
 
                if (item.Content is TabControl nestedTabControl)
                   tabControl = nestedTabControl;
-               
-               
+
                if (i < path.Length - 1 && item.Content is PropertyGrid pg && pg.NavigateToProperty(path[i + 1]))
                   return; // We found the property grid, no need to continue
 
@@ -178,6 +177,7 @@ public partial class SettingsWindow
          {
             if (pg.HasInlinedPropertyGrid)
                return pg.InlinedPropertyGrid;
+
             return pg;
          }
 
@@ -207,7 +207,7 @@ public partial class SettingsWindow
    private void ResetAllSettings_OnClick(object sender, RoutedEventArgs e)
    {
       var result = MessageBox.Show("Are you sure you want to reset all settings to default?",
-                                   "Reset Settings",
+                                   "Reset AgsSettings",
                                    MessageBoxButton.YesNo,
                                    MessageBoxImage.Warning);
       if (result != MessageBoxResult.Yes)

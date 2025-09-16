@@ -24,7 +24,7 @@ public class AgsObjectSavingContext
    public AgsObjectSavingContext(IAgs ags, string commentChar = "#")
    {
       Ags = ags;
-      Settings = ags.Settings;
+      Settings = ags.AgsSettings;
       OrderedProperties = Settings.CustomSaveOrder
                              ? SortBySettings(ags.SaveableProps, Settings.SaveOrder)
                              : ags.SaveableProps.OrderBy(p => p.Keyword).ToList();

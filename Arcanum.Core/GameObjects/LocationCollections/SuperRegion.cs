@@ -7,9 +7,11 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class SuperRegion : LocationCollection<Region>, INUI, ICollectionProvider<SuperRegion>, IMapInferable<SuperRegion>, IEmpty<SuperRegion>
+public partial class SuperRegion
+   : LocationCollection<Region>, INUI, ICollectionProvider<SuperRegion>, IMapInferable<SuperRegion>, IEmpty<SuperRegion>
 {
-   public SuperRegion(FileInformation fileInfo, string name, ICollection<Region> provinces) : base(fileInfo, name, provinces)
+   public SuperRegion(FileInformation fileInfo, string name, ICollection<Region> provinces) :
+      base(fileInfo, name, provinces)
    {
    }
 
@@ -30,8 +32,8 @@ public partial class SuperRegion : LocationCollection<Region>, INUI, ICollection
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
-   public INUINavigation[] Navigations 
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
+   public INUINavigation[] Navigations
    {
       get
       {
@@ -39,23 +41,24 @@ public partial class SuperRegion : LocationCollection<Region>, INUI, ICollection
          var parent = GetFirstParentOfType(LocationCollectionType.Continent);
          if (parent != Empty)
             navigations.Add(new NUINavigation((INUI)parent, $"Continent: {parent.Name}"));
-         
+
          if (SubCollection.Count > 0)
             navigations.Add(null);
-         
+
          foreach (var location in SubCollection)
             navigations.Add(new NUINavigation(location, $"Location: {location.Name}"));
-         
+
          return navigations.ToArray()!;
       }
    }
    public static IEnumerable<SuperRegion> GetGlobalItems() => Globals.SuperRegions.Values;
+
    public static List<SuperRegion> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                             .Select(loc => (SuperRegion)loc
-                                                                                .GetFirstParentOfType(LocationCollectionType
-                                                                                   .Area))
-                                                                             .Distinct()
-                                                                             .ToList();
+     .Select(loc => (SuperRegion)loc
+               .GetFirstParentOfType(LocationCollectionType
+                                       .Area))
+     .Distinct()
+     .ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
    public new static SuperRegion Empty { get; } = new(FileInformation.Empty, "EmptyArcanum_SuperRegion");

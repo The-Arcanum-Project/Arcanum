@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GlobalStates;
+
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -55,8 +56,8 @@ public partial class Pop(PopType type,
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.PopSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.PopSettings;
 
    public INUINavigation[] Navigations { get; } = [new NUINavigation(type, "Pop Type")];
-   public static Pop Empty { get; } = new (PopType.Empty, 0f, string.Empty, string.Empty);
+   public static Pop Empty { get; } = new(PopType.Empty, 0f, string.Empty, string.Empty);
 }

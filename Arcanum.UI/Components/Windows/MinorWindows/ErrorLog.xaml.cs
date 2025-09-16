@@ -196,7 +196,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          var settingsPropWindow =
             new PropertyGridWindow(SearchSettings)
             {
-               Title = "Search Settings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
+               Title = "Search AgsSettings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
             };
          settingsPropWindow.ShowDialog();
          QuerySearch(SearchTextBox.SearchInputTextBox.Text);

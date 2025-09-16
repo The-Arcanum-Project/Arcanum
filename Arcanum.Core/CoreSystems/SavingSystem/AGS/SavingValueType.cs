@@ -64,4 +64,12 @@ public enum SavingValueType
    /// Example: high
    /// </summary>
    Enum,
+
+   /// <summary>
+   /// A flags enumeration value represented by a combination of names. <br/>
+   /// Example: key = flag1 <br/>
+   ///          key = flag2 <br/>
+   ///          key = flag3 
+   /// </summary>
+   FlagsEnum,
 }

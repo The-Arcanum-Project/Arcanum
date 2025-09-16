@@ -37,7 +37,7 @@ public partial class Market(Location location) : INUI, ICollectionProvider<Marke
 
    public static bool operator !=(Market? left, Market? right) => !(left == right);
    public bool IsReadonly { get; } = true;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations { get; } = [];
 
    public override string ToString() => $"Market of {Location.Name}";

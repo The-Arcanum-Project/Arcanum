@@ -19,12 +19,12 @@ public interface INUI : INexus, INotifyPropertyChanged
    /// </summary>
    [IgnoreModifiable]
    public bool IsReadonly { get; }
-   
+
    /// <summary>
    /// The settings defining how this object should be displayed in the different NUI states.
    /// </summary>
    [IgnoreModifiable]
-   public NUISetting Settings { get; }
+   public NUISetting NUISettings { get; }
 
    /// <summary>
    /// An optional list of elements that can be navigated to from this MainItems RMB

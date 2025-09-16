@@ -115,7 +115,7 @@ public partial class Country : INUI, ICollectionProvider<Country>, IEmpty<Countr
    }
 
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Country> GetGlobalItems() => Globals.Countries.Values;
 

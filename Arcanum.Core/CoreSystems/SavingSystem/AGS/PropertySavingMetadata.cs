@@ -90,7 +90,7 @@ public class PropertySavingMetadata
       using (sb.BlockWithName(Keyword))
       {
          // ValueType is only auto if the property is null or an empty collection
-         if (ags.Settings.WriteEmptyCollectionHeader && ValueType == SavingValueType.Auto)
+         if (ags.AgsSettings.WriteEmptyCollectionHeader && ValueType == SavingValueType.Auto)
             sb.AppendComment(commentChar, "Empty Collection");
          else
          {

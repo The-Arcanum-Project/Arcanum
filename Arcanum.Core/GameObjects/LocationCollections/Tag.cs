@@ -28,10 +28,10 @@ public partial class Tag(string name) : INUI, ICollectionProvider<Tag>, IEmpty<T
 
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() => Name.GetHashCode();
-   
+
    public bool IsValid => Name.Length == 3;
    public bool IsReadonly => true;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.TagSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.TagSettings;
    public INUINavigation[] Navigations { get; } = [];
 
    public bool Verify(LocationContext ctx)
@@ -44,7 +44,7 @@ public partial class Tag(string name) : INUI, ICollectionProvider<Tag>, IEmpty<T
                                         Name);
          return false;
       }
-      
+
       return true;
    }
 }

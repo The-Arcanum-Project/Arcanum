@@ -11,7 +11,7 @@ public partial class CountryRank(string name) : INUI, ICollectionProvider<Countr
    public JominiColor Color { get; set; } = JominiColor.Empty;
 
    public bool IsReadonly { get; } = true;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.CountryRankSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CountryRankSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<CountryRank> GetGlobalItems() => Globals.CountryRanks;
 

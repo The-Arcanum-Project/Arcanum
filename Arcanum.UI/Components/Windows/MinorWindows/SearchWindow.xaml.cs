@@ -240,7 +240,7 @@ public partial class SearchWindow : INotifyPropertyChanged
       var settingsPropWindow =
          new PropertyGridWindow(QueryQueastor.Settings)
          {
-            Title = "Search Settings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Title = "Search AgsSettings", WindowStartupLocation = WindowStartupLocation.CenterScreen,
          };
       settingsPropWindow.ShowDialog();
    }
@@ -282,6 +282,7 @@ public partial class SearchWindow : INotifyPropertyChanged
 
                SearchResultsListBox.ScrollIntoView(SearchResultsListBox.SelectedItem);
             }
+
             e.Handled = true;
             break;
          case Key.Up:
@@ -294,6 +295,7 @@ public partial class SearchWindow : INotifyPropertyChanged
 
                SearchResultsListBox.ScrollIntoView(SearchResultsListBox.SelectedItem);
             }
+
             e.Handled = true;
             break;
       }

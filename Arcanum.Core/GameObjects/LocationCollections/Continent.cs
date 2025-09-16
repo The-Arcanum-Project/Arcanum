@@ -8,15 +8,18 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>, IEmpty<Continent>
+public partial class Continent
+   : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>, IEmpty<Continent>
 {
-   public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) : base(fileInfo, name, provinces)
+   public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) :
+      base(fileInfo, name, provinces)
    {
    }
 
    public Continent(FileInformation fileInfo, string name) : base(fileInfo, name)
    {
    }
+
    public override LocationCollectionType LCType => LocationCollectionType.Continent;
 
    public override void RemoveGlobal()
@@ -33,15 +36,16 @@ public partial class Continent : LocationCollection<SuperRegion>, INUI, ICollect
    public new ObservableRangeCollection<LocationComposite> Parents { get; set; } = [];
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<Continent> GetGlobalItems() => Globals.Continents.Values;
+
    public static List<Continent> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                             .Select(loc => (Continent)loc
-                                                                                .GetFirstParentOfType(LocationCollectionType
-                                                                                   .Area))
-                                                                             .Distinct()
-                                                                             .ToList();
+     .Select(loc => (Continent)loc
+               .GetFirstParentOfType(LocationCollectionType
+                                       .Area))
+     .Distinct()
+     .ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
    public new static Continent Empty { get; } = new(FileInformation.Empty, "EmptyArcanum_Continent");

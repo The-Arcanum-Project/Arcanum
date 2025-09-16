@@ -23,7 +23,7 @@ public partial class Institution(string name) : INUI, IEmpty<Institution>, IColl
    # endregion
 
    public bool IsReadonly => false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.InstitutionSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.InstitutionSettings;
    public INUINavigation[] Navigations => [new NUINavigation(BirthPlace, "Go to Birth Place")];
    public static Institution Empty { get; } = new("Arcanum_Empty_Institution");
    public static IEnumerable<Institution> GetGlobalItems() => Globals.Institutions.Values;

@@ -7,26 +7,27 @@ namespace Arcanum.UI.WpfTesting;
 public class ExamplePluginSettings : IPluginSetting
 {
    public Guid OwnerGuid { get; } = Guid.NewGuid();
-   
-   public string Name { get; set; } = "Example Plugin Settings";
-   public string Description { get; set; } = "Settings for the Example Plugin";
+
+   public string Name { get; set; } = "Example Plugin AgsSettings";
+   public string Description { get; set; } = "AgsSettings for the Example Plugin";
    public string Version { get; set; } = "1.0.0";
    public string Author { get; set; } = "Example Author";
    public string AssemblyPath { get; set; } = "path/to/assembly.dll";
-   
+
    [DefaultValue(22)]
    public int Order { get; set; } = 1;
 }
+
 public class ExamplePluginSettings2 : IPluginSetting
 {
    public Guid OwnerGuid { get; } = Guid.NewGuid();
-   
-   public string Name { get; set; } = "Example Plugin Settings";
-   public string Description { get; set; } = "Settings for the Example Plugin";
+
+   public string Name { get; set; } = "Example Plugin AgsSettings";
+   public string Description { get; set; } = "AgsSettings for the Example Plugin";
    public string Version { get; set; } = "1.0.0";
    public string Author { get; set; } = "Example Author";
    public string AssemblyPath { get; set; } = "path/to/assembly.dll";
-   
+
    [DefaultValue(22)]
    public int Order { get; set; } = 1;
    [DefaultValue(2)]
@@ -47,6 +48,7 @@ public class ExamplePlugin : IPlugin
    public string Name { get; } = "Example Plugin";
    public string Author { get; } = null!;
    public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; } = null!;
+
    public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
    {
       throw new NotImplementedException();
@@ -82,6 +84,7 @@ public class TheMotherOfAllPluginNamesIsHere : IPlugin
    public string Name { get; } = "TheMotherOfAllPlugins";
    public string Author { get; } = null!;
    public IEnumerable<IPluginMetadata.PluginDependency> Dependencies { get; } = null!;
+
    public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
    {
       throw new NotImplementedException();
@@ -108,5 +111,3 @@ public class TheMotherOfAllPluginNamesIsHere : IPlugin
       throw new NotImplementedException();
    }
 }
-
-

@@ -78,4 +78,12 @@ public static class DefinedDiagnostics
        category: "UniGen",
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
+
+   public static readonly DiagnosticDescriptor MissingParseAsAttribute = new(id: "AGS008",
+                                                                             title: "Missing ParseAs Attribute",
+                                                                             messageFormat:
+                                                                             "Property '{0}' in class '{1}' is missing a [ParseAs] attribute, which is required for AGS serialization",
+                                                                             category: "UniGen",
+                                                                             DiagnosticSeverity.Error,
+                                                                             isEnabledByDefault: true);
 }

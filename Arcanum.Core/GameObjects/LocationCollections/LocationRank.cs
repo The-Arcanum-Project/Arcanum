@@ -37,7 +37,7 @@ public partial class LocationRank(string name, int order)
    public int Order { get; set; } = order;
 
    public bool IsReadonly => true;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.LocationRankSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.LocationRankSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<LocationRank> GetGlobalItems() => Globals.LocationRanks;
    public static LocationRank Empty { get; } = new("empty", int.MinValue);

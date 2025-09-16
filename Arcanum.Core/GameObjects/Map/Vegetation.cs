@@ -37,7 +37,7 @@ public partial
    #region Interface Properties
 
    public bool IsReadonly => false;
-   public NUISetting Settings => Config.Settings.NUIObjectSettings.VegetationSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.VegetationSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Vegetation Empty { get; } = new("Arcanum_Empty_Vegetation");
    public static IEnumerable<Vegetation> GetGlobalItems() => Globals.Vegetation.Values;

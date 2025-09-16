@@ -10,6 +10,9 @@ public static class AgsHelper
 
    private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsAttribute";
 
+   private const string PARSE_AS_EMBEDDED_ATTRIBUTE =
+      "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsEmbeddedAttribute";
+
    private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SaveAsAttribute";
    private const string SUPPRESS_AGS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SuppressAgs";
 
@@ -183,8 +186,28 @@ public static class AgsHelper
 
    private static string GetPropertyMetadata(IPropertySymbol prop, SourceProductionContext context)
    {
-      var parseAsAttr = prop.GetAttributes().First(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
-      var keyword = parseAsAttr.ConstructorArguments[1].Value as string;
+      var parseAsAttr = prop.GetAttributes()
+                            .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
+      string keyword;
+      if (parseAsAttr == null)
+      {
+         var parseEmbeddedAttr = prop.GetAttributes()
+                                     .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                           PARSE_AS_EMBEDDED_ATTRIBUTE);
+         if (parseEmbeddedAttr == null)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingParseAsAttribute,
+                                                       prop.Locations.FirstOrDefault(),
+                                                       prop.Name,
+                                                       prop.ContainingType.Name));
+            return "undefined_keyword";
+         }
+
+         keyword = parseEmbeddedAttr.ConstructorArguments[0].Value as string ?? "undefined_keyword";
+      }
+      else
+         keyword = (parseAsAttr.ConstructorArguments[1].Value as string)!;
+
       // Report diagnostics if keyword is null or empty
       if (string.IsNullOrEmpty(keyword))
       {
@@ -195,6 +218,6 @@ public static class AgsHelper
          return "undefined_keyword";
       }
 
-      return keyword!;
+      return keyword;
    }
 }

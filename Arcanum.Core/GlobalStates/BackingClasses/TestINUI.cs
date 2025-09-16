@@ -39,10 +39,10 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<Test
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = new(Field.TestInt,
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray(),
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray(),
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray());
+   public NUISetting NUISettings { get; } = new(Field.TestInt,
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray(),
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray(),
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray());
    public INUINavigation[] Navigations { get; } = [];
 
    public EmbeddedObject Embedded { get; set; } = EmbeddedObjects[0];
@@ -62,10 +62,10 @@ public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>,
    public string SomeString { get; set; } = "The answer";
    public double SomeDouble { get; set; } = 2.71828;
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = new(Field.SomeInt,
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray(),
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray(),
-                                             Enum.GetValues<Field>().Cast<Enum>().ToArray());
+   public NUISetting NUISettings { get; } = new(Field.SomeInt,
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray(),
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray(),
+                                                Enum.GetValues<Field>().Cast<Enum>().ToArray());
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<EmbeddedObject> GetGlobalItems() => TestINUI.EmbeddedObjects;
 

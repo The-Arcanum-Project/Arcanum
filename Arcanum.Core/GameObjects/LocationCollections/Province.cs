@@ -32,7 +32,7 @@ public partial class Province
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
    public INUINavigation[] Navigations
    {
       get

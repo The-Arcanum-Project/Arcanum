@@ -9,7 +9,8 @@ namespace Arcanum.Core.GameObjects.Pops;
 public partial class PopType(string name,
                              string colorKey,
                              float foodConsumption,
-                             float assimilationConversionFactor) : IParseable<PopType>, INUI, ICollectionProvider<PopType>, IEmpty<PopType>
+                             float assimilationConversionFactor)
+   : IParseable<PopType>, INUI, ICollectionProvider<PopType>, IEmpty<PopType>
 {
    public string Name { get; set; } = name;
    public string ColorKey { get; set; } = colorKey;
@@ -32,7 +33,7 @@ public partial class PopType(string name,
                                      ParsingError.Instance.InvalidPopTypeKey,
                                      nameof(Parse).GetType().FullName!,
                                      str ?? "null");
-      
+
       result = Empty;
       return false;
    }
@@ -70,6 +71,6 @@ public partial class PopType(string name,
    }
 
    public bool IsReadonly { get; } = false;
-   public NUISetting Settings { get; } = Config.Settings.NUIObjectSettings.PopTypeSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.PopTypeSettings;
    public INUINavigation[] Navigations { get; } = [];
 }

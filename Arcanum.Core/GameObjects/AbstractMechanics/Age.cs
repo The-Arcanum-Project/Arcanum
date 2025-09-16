@@ -42,7 +42,7 @@ public partial class Age(string name) : NameKeyDefined(name), INUI, IEmpty<Age>,
    #region Interface Properties
 
    public bool IsReadonly => true;
-   public NUISetting Settings => Config.Settings.NUIObjectSettings.AgeSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.AgeSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Age Empty { get; } = new("Arcanum_Empty_Age");
    public static IEnumerable<Age> GetGlobalItems() => Globals.Ages;

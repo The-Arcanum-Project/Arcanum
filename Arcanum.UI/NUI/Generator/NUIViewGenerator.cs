@@ -58,7 +58,7 @@ public static class NUIViewGenerator
       var target = navHistory.Targets[0];
       var baseUI = new BaseView
       {
-         Name = $"{target.Settings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
+         Name = $"{target.NUISettings.Title}_{_index}", BaseViewBorder = { BorderThickness = new(0) },
       };
       var baseGrid = new Grid { RowDefinitions = { new() { Height = new(40, GridUnitType.Pixel) } }, Margin = new(4) };
 
@@ -85,11 +85,11 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
-      var viewFields = navHistory.PrimaryTarget.Settings.ViewFields;
+      var viewFields = navHistory.PrimaryTarget.NUISettings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
 
-      for (var i = 0; i < target.Settings.ViewFields.Length; i++)
+      for (var i = 0; i < target.NUISettings.ViewFields.Length; i++)
       {
          var nxProp = viewFields[i];
          FrameworkElement element;
@@ -135,7 +135,7 @@ public static class NUIViewGenerator
                                                       NUINavHistory navHistory) where T : INUI
    {
       var startExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
-      var embeddedFields = target.Settings.EmbeddedFields;
+      var embeddedFields = target.NUISettings.EmbeddedFields;
 
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          embeddedFields = embeddedFields.OrderBy(f => f.ToString()).ToArray();
@@ -647,9 +647,9 @@ public static class NUIViewGenerator
    {
       var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, MinHeight = 20 };
       object headerValue = null!;
-      Nx.ForceGet(value, value.Settings.Title, ref headerValue);
+      Nx.ForceGet(value, value.NUISettings.Title, ref headerValue);
       var shortInfoParts = new List<string>();
-      foreach (var nxProp in value.Settings.ShortInfoFields)
+      foreach (var nxProp in value.NUISettings.ShortInfoFields)
       {
          object pVal = null!;
          Nx.ForceGet(value, nxProp, ref pVal);
@@ -721,8 +721,8 @@ public static class NUIViewGenerator
       if (string.IsNullOrWhiteSpace(text))
       {
          object headerValue = null!;
-         Nx.ForceGet(value, value.Settings.Title, ref headerValue);
-         text = GetFormattedDisplayString(headerValue, value, value.Settings.Title);
+         Nx.ForceGet(value, value.NUISettings.Title, ref headerValue);
+         text = GetFormattedDisplayString(headerValue, value, value.NUISettings.Title);
       }
 
       header.Text = text;

@@ -1,7 +1,7 @@
 ﻿// using System.ComponentModel;
 // using Arcanum.API;
 // using Arcanum.API.Events;
-// using Arcanum.API.Settings;
+// using Arcanum.API.AgsSettings;
 // using Arcanum.UI.GeneralUiElements.DarkUiElements;
 //
 // namespace Arcanum.UI.HostUIServices.SettingsGUI;
@@ -175,3 +175,4 @@
 //          SettingsTab.SelectedIndex = 0;
 //    }
 // }
+

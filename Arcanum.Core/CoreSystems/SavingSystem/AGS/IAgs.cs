@@ -6,9 +6,9 @@ public interface IAgs : INexus
 {
    /// <summary>
    /// The settings that control how this IAgs instance is saved. <br/>
-   /// Should ling to a settings object in <c>Config.Settings.Ags.'objectName'AgsSettings</c>/>
+   /// Should ling to a settings object in <c>Config.AgsSettings.Ags.'objectName'AgsSettings</c>/>
    /// </summary>
-   public AgsSettings Settings { get; }
+   public AgsSettings AgsSettings { get; }
 
    /// <summary>
    /// A list of properties that can be saved for this IAgs instance.
