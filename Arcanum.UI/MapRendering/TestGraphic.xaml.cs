@@ -104,12 +104,12 @@ public partial class TestGraphic
                 var v0 = triangleVertices[indices[i]];
                 var v1 = triangleVertices[indices[i + 1]];
                 var v2 = triangleVertices[indices[i + 2]];
-                //vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color));
-                //vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color));
-                //vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color));
-                vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color0));
-                vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color1));
-                vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color2));
+                vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color));
+                vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color));
+                vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color));
+                //vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color0));
+                //vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color1));
+                //vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color2));
             }
         }
 

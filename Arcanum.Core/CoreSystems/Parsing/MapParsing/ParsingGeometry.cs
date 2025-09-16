@@ -8,6 +8,16 @@ public class BorderSegment()
     public List<Point> Points = [];
     private PointF[]? _smoothedPoints = null;
 
+    public PointF[] SmoothedPoints {
+        set
+        {
+            if (_smoothedPoints != null)
+                throw new InvalidOperationException("Smoothed points have already been set.");
+            _smoothedPoints = value;
+        }
+        get => _smoothedPoints ?? throw new InvalidOperationException("Smoothed points have not been set.");
+    }
+
     public PointF[] GetSmoothedPoints(Node start, Node end)
     {
         _smoothedPoints ??= Smoothing.SmoothSegment(Points, start, end);

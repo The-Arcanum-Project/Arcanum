@@ -35,6 +35,7 @@
     <PackageReference Include="LibTessDotNet" Version="1.1.15" />
     <PackageReference Include="Octokit" Version="14.0.0" />
     <PackageReference Include="Pfim" Version="0.11.3" />
+    <PackageReference Include="Vortice.Mathematics" Version="1.9.3" />
   </ItemGroup>
 
 </Project>

@@ -45,9 +45,9 @@ public readonly record struct PointF(float X, float Y)
         return p1.X * p2.X + p1.Y * p2.Y;
     }
     
-    public double Magnitude()
+    public float Magnitude()
     {
-        return Math.Sqrt(X * X + Y * Y);
+        return MathF.Sqrt(X * X + Y * Y);
     }
 
     public override int GetHashCode()

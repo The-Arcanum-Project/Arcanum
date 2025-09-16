@@ -1,4 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
+﻿using System.Numerics;
+
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
 
 public static class Smoothing
 {
@@ -20,7 +22,7 @@ public static class Smoothing
             resultPoints.Add(q);
             resultPoints.Add(r);
         }
-        
+
         if (points.Count > 1) resultPoints.Add(resultPoints[^1]);
 
         for (int i = 1; i < iterations; i++)
@@ -41,7 +43,7 @@ public static class Smoothing
                 newPoints.Add(q);
                 newPoints.Add(r);
             }
-            
+
             if (resultPoints.Count > 1) newPoints.Add(resultPoints[resultPoints.Count - 1]);
             resultPoints = newPoints;
         }
@@ -71,7 +73,7 @@ public static class Smoothing
                 newPoints.Add(q);
                 newPoints.Add(r);
             }
-            
+
             if (points.Count > 1) newPoints.Add(points[points.Count - 1]);
             points = newPoints;
         }
@@ -88,21 +90,23 @@ public static class Smoothing
         {
             return (point - lineStart).Magnitude();
         }
-        return Math.Abs((lineEnd.X - lineStart.X) * (lineStart.Y - point.Y) - (lineStart.X - point.X) * (lineEnd.Y - lineStart.Y)) /
+
+        return Math.Abs((lineEnd.X - lineStart.X) * (lineStart.Y - point.Y) -
+                        (lineStart.X - point.X) * (lineEnd.Y - lineStart.Y)) /
                (lineEnd - lineStart).Magnitude();
     }
-    
+
     /// <summary>
     /// Simplifies a polyline using the Ramer-Douglas-Peucker algorithm.
     /// </summary>
     public static List<PointF> RamerDouglasPeucker(List<PointF> points, double epsilon)
     {
         if (points == null || points.Count < 2) return points;
-    
+
         double dmax = 0.0;
         int index = 0;
         int end = points.Count - 1;
-    
+
         for (int i = 1; i < end; i++)
         {
             double d = PerpendicularDistance(points[i], points[0], points[end]);
@@ -112,12 +116,12 @@ public static class Smoothing
                 dmax = d;
             }
         }
-    
+
         if (dmax > epsilon)
         {
             List<PointF> recResults1 = RamerDouglasPeucker(points.GetRange(0, index + 1), epsilon);
             List<PointF> recResults2 = RamerDouglasPeucker(points.GetRange(index, points.Count - index), epsilon);
-    
+
             var result = new List<PointF>(recResults1.Take(recResults1.Count - 1));
             result.AddRange(recResults2);
             return result;
@@ -127,18 +131,49 @@ public static class Smoothing
             return new List<PointF> { points[0], points[end] };
         }
     }
-    
+
     public static PointF[] SmoothSegment(List<Point> segment, Node start, Node end)
     {
         segment.Insert(0, start.Position);
         segment.Add(end.Position);
-        var simplified = ChaikinSmooth(segment, 2);
+
+        List<Vector2> vectors = [];
+        
+        var currentPoint = segment[0];
+        for (var index = 1; index < segment.Count; index++)
+        {
+            var point = segment[index];
+            
+            for (int i = currentPoint.X; i < point.X; i++)
+            {
+                vectors.Add(new Vector2(i, point.Y));
+            }
+            for (int i = currentPoint.X; i > point.X; i--)
+            {
+                vectors.Add(new Vector2(i, point.Y));
+            }
+            for (int i = currentPoint.Y; i < point.Y; i++)
+            {
+                vectors.Add(new Vector2(point.X, i));
+            }
+            for (int i = currentPoint.Y; i > point.Y; i--)
+            {
+                vectors.Add(new Vector2(point.X, i));
+            }
+            currentPoint = point;
+        }
+        
+        vectors.Add(new Vector2(currentPoint.X, currentPoint.Y));
+        
+        //vectors = segment.Select(p => new Vector2(p.X, p.Y)).ToList();
+        var simplified = SchneidersFitterVortice.FitAndSimplify(vectors, 0.1f,0.1f);
+        /*var simplified = ChaikinSmooth(segment, 2);
         simplified = RamerDouglasPeucker( simplified,1);
         simplified = ChaikinSmooth(simplified, 6);
         simplified = RamerDouglasPeucker(simplified, 0.1);
         simplified.RemoveAt(0);
         simplified.RemoveAt(simplified.Count - 1);
-        return simplified.ToArray();
-        return segment.Select(p => new PointF(p.X, p.Y)).ToArray();
+        return simplified.ToArray();*/
+        return simplified.Select(p => new PointF(p.X, p.Y)).ToArray();
     }
 }

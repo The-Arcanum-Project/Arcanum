@@ -122,7 +122,7 @@ public unsafe class MapTracing
                 firstNode = node;
             }
 
-
+            currentSegment.SmoothedPoints = currentSegment.Points.Select(p => new PointF(p.X, p.Y)).ToArray();
             NodeCache.Add((x, y), node);
             lastSegment = currentSegment;
             lastNode = node;
@@ -194,6 +194,9 @@ public unsafe class MapTracing
         lastNode.Segments[2].Segment = new(currentSegment, true);
         firstNode!.Segments[0].Node = lastNode;
         firstNode.Segments[0].Segment = new(currentSegment, false);
+        
+        currentSegment.SmoothedPoints = currentSegment.Points.Select(p => new PointF(p.X, p.Y)).ToArray();
+        
 #if ENABLE_VISUAL_TRACING
         // Draw the complete path of the segment that just ended.
         for (var i = 0; i < currentSegment.Points.Count - 1; i++)
