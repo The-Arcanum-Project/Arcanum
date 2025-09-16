@@ -55,13 +55,13 @@ public static class DefinedDiagnostics
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
 
-   public static readonly DiagnosticDescriptor InvalidObjectSaveAsAttribute = new(id: "AGS003",
-       title: "Invalid ObjectSaveAs Attribute",
-       messageFormat:
-       "The [ObjectSaveAs] attribute on class '{0}' must specify a non-empty string key corresponding to a string property in the class",
-       category: "UniGen",
-       DiagnosticSeverity.Error,
-       isEnabledByDefault: true);
+   public static readonly DiagnosticDescriptor MissingSaveAsAttribute = new(id: "AGS003",
+                                                                            title: "Missing SaveAs Attribute",
+                                                                            messageFormat:
+                                                                            "Property '{0}' in class '{1}' is missing the required [SaveAs] attribute",
+                                                                            category: "UniGen",
+                                                                            DiagnosticSeverity.Error,
+                                                                            isEnabledByDefault: true);
 
    public static readonly DiagnosticDescriptor InvalidKeyTargetProperty = new(id: "AGS005",
                                                                               title: "Invalid Key Target Property",

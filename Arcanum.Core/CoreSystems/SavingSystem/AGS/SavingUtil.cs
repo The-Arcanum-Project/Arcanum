@@ -129,7 +129,7 @@ public static class SavingUtil
          return SavingValueType.Color;
       if (type.IsEnum)
          return SavingValueType.Enum;
-      if (typeof(IAgs).IsAssignableFrom(type))
+      if (item is IAgs)
          return SavingValueType.IAgs;
       if (item is IEnumerable enumerable)
          return GetSavingValueTypeForCollection(enumerable);

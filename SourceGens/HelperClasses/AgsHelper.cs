@@ -150,13 +150,7 @@ public static class AgsHelper
       // Report diagnostics if SaveAs is missing
       if (saveAs == null)
       {
-         context.ReportDiagnostic(Diagnostic.Create(new(id: "AGS001",
-                                                        title: "Missing SaveAs Attribute",
-                                                        messageFormat:
-                                                        "Property '{0}' in class '{1}' is missing the required [SaveAs] attribute.",
-                                                        category: "UniGen",
-                                                        DiagnosticSeverity.Error,
-                                                        isEnabledByDefault: true),
+         context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingSaveAsAttribute,
                                                     prop.Locations.FirstOrDefault(),
                                                     prop.Name,
                                                     prop.ContainingType.Name));

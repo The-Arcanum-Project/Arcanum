@@ -2,12 +2,15 @@
 using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Common;
 
+[ObjectSaveAs]
 public partial class ModifierGameData
-   : INUI, IEmpty<ModifierGameData>, ICollectionProvider<ModifierGameData>
+   : INUI, IEmpty<ModifierGameData>, ICollectionProvider<ModifierGameData>, IAgs
 {
    # region Nexus Properties
 
@@ -89,4 +92,7 @@ public partial class ModifierGameData
              Format == other.Format &&
              Bias == other.Bias;
    }
+
+   public AgsSettings AgsSettings { get; } = new();
+   public string SavingKey => "game_data";
 }
