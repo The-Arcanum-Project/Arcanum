@@ -260,14 +260,15 @@ public partial class ExampleWindow : IDebugDrawer
    
    public void DrawPolygon(Polygon polygon)
    {
+      throw new NotImplementedException();
       // 1. Tesselate the polygon to get vertices and triangle indices.
       var (vertices, indices) = polygon.Tesselate();
 
       if (vertices.Count == 0 || indices.Count == 0) return;
-
+      
       // Convert all vertex coordinates at once.
-      var points = vertices.Select(p => ConvertCoordinates(p.X, p.Y)).ToList();
-
+      //var points = vertices.Select(p => ConvertCoordinates(p.X, p.Y)).ToList();
+      var points = new List<Point>(vertices.Count);
       // Create a lightweight DrawingVisual to hold the polygon's rendering.
       var drawingVisual = new DrawingVisual();
 

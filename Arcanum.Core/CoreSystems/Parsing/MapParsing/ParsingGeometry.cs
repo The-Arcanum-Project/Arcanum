@@ -3,9 +3,16 @@ using LibTessDotNet;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
 
-public class BorderSegment
+public class BorderSegment()
 {
-    public List<Point> Points { get; } = [];
+    public List<Point> Points = [];
+    private PointF[]? _smoothedPoints = null;
+
+    public PointF[] GetSmoothedPoints(Node start, Node end)
+    {
+        _smoothedPoints ??= Smoothing.SmoothSegment(Points, start, end);
+        return _smoothedPoints!;
+    }
 }
 
 public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isForward) : ICoordinateAdder
@@ -27,7 +34,24 @@ public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isFo
             }
         }
     }
-
+    
+    public void AddTo(List<PointF> points, Node start, Node end)
+    {
+        if (IsForward)
+        {
+            var smoothedPoints = segment.GetSmoothedPoints(start, end);
+            points.AddRange(smoothedPoints);
+        }
+        else
+        {
+            var smoothedPoints = segment.GetSmoothedPoints(end, start);
+            for (var i = smoothedPoints.Length - 1; i >= 0; i--)
+            {
+                points.Add(smoothedPoints[i]);
+            }
+        }
+    }
+    
     public BorderSegmentDirectional Invert()
     {
         return new(Segment, !IsForward);
@@ -42,6 +66,7 @@ public class Polygon(int color)
     
     public Point GetCentroid()
     {
+        throw new NotImplementedException();
         var points = GetAllPoints();
         if (points.Count == 0) return Point.Empty;
 
@@ -88,6 +113,8 @@ public class Polygon(int color)
         return (maxX - minX + 1, maxY - minY + 1);
     }
     
+    
+    
     public List<Point> GetAllPoints()
     {
         var points = new List<Point>();
@@ -97,10 +124,32 @@ public class Polygon(int color)
         return points;
     }
     
-    public (List<Point> vertices, List<int> indices) Tesselate()
+    
+    public List<PointF> GetAllSmoothedPoints()
+    {
+        var points = new List<PointF>();
+        var verticies = Segments.Where(p => p is Node).Cast<Node>().ToList();
+        var segments = Segments.Where(p => p is BorderSegmentDirectional).Cast<BorderSegmentDirectional>().ToList();
+        
+        var sIndex = 0;
+
+        while (sIndex < segments.Count)
+        {
+            var previous = verticies[sIndex];
+            var next = verticies[(sIndex + 1) % verticies.Count];
+            var segment = segments[sIndex];
+            points.Add(new (previous.XPos, previous.YPos));
+            segment.AddTo(points, previous, next);
+            sIndex++;
+        }
+        
+        return points;
+    }
+    
+    public (List<PointF> vertices, List<int> indices) Tesselate()
     {
         var tess = new Tess();
-        var points = GetAllPoints();
+        var points = GetAllSmoothedPoints();
         var contour = new ContourVertex[points.Count];
 
         for (var i = 0; i < points.Count; i++)
@@ -116,11 +165,11 @@ public class Polygon(int color)
 
         tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
 
-        var vertices = new List<Point>();
+        var vertices = new List<PointF>();
         for (int i = 0; i < tess.VertexCount; i++)
         {
             var pos = tess.Vertices[i].Position;
-            vertices.Add(new Point((int)pos.X, (int)pos.Y));
+            vertices.Add(new PointF(pos.X, pos.Y));
         }
 
         var indices = new List<int>();

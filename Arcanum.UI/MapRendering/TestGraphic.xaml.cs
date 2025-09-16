@@ -78,6 +78,8 @@ public partial class TestGraphic
         _vertices = SetVertices(polygons);
         InitializeComponent();
     }
+    
+    private int triangleCounter = 0;
 
     public List<VertexPositionColor> SetVertices(List<Polygon> polygons)
     {
@@ -91,17 +93,23 @@ public partial class TestGraphic
             byte b = (byte)_rand.Next(0, 256);
             
             var color = new Color4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-            
+            var color1 = new Color4(1, 0, 0, 1);
+            var color2 = new Color4(0, 1, 0, 1);
+            var color0 = new Color4(0, 0, 1, 1);
             var (triangleVertices, indices) = polygon.Tesselate();
             // Create vertex buffer
             for (var i = 0; i < indices.Count; i += 3)
             {
+                triangleCounter++;
                 var v0 = triangleVertices[indices[i]];
                 var v1 = triangleVertices[indices[i + 1]];
                 var v2 = triangleVertices[indices[i + 2]];
-                vertices.Add(new VertexPositionColor(new Vector3(v0.X/(float)imageSize.Item1, aspectRatio*(1-v0.Y/(float)imageSize.Item2), 0.0f), color));
-                vertices.Add(new VertexPositionColor(new Vector3(v1.X/(float)imageSize.Item1, aspectRatio*(1-v1.Y/(float)imageSize.Item2), 0.0f), color));
-                vertices.Add(new VertexPositionColor(new Vector3(v2.X/(float)imageSize.Item1, aspectRatio*(1- v2.Y/(float)imageSize.Item2), 0.0f), color));
+                //vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color));
+                //vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color));
+                //vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color));
+                vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color0));
+                vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color1));
+                vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color2));
             }
         }
 
@@ -166,7 +174,7 @@ public partial class TestGraphic
             {
                 double fps = _frameCount / (totalSeconds - _elapsedSeconds);
                 double frameTime = ((totalSeconds - _elapsedSeconds) * 1000.0) / _frameCount;
-                Console.WriteLine($"FPS: {fps:F2}, Frame Time: {frameTime:F3} ms");
+                Console.WriteLine($"FPS: {fps:F2}, Frame Time: {frameTime:F3} ms, Triangles: {triangleCounter}");
 
                 _frameCount = 0;
                 _elapsedSeconds = totalSeconds;
