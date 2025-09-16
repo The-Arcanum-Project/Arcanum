@@ -117,7 +117,7 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       var metadata = ExistingModsLoader.ParseModMetadata(ModPath.FullPath);
       var thumbnailPath = Path.Combine(ModPath.FullPath, ".metadata", metadata?.ThumbnailPath ?? string.Empty);
       if (!File.Exists(thumbnailPath))
-         return new BitmapImage(new("pack://application:,,,/Assets/Logo/ArcanumForeColor.png", UriKind.Absolute));
+         return new BitmapImage(new("/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png", UriKind.RelativeOrAbsolute));
 
       return new BitmapImage(new(thumbnailPath, UriKind.Absolute));
    }

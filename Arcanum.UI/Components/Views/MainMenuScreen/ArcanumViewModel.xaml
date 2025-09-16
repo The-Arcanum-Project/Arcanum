@@ -156,14 +156,8 @@
                                          Background = "{StaticResource GreenColorBrush}"
                                          Click = "AddBaseModButton_Click"
                                          ToolTip = "Add a new base mod declaration">
-                    <Image Source = "Arcanum_UI;component/Assets/Icons/20x20/AddFolder20x20.png"
-                           Stretch = "None">
-                        <Image.Clip>
-                            <RectangleGeometry RadiusX = "3"
-                                               RadiusY = "3"
-                                               Rect = "0,0,26,26" />
-                        </Image.Clip>
-                    </Image>
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/AddFolder20x20.png"
+                           Stretch = "None"/>
                 </styleClasses:BaseButton>
 
                 <Rectangle Grid.Column = "0"
