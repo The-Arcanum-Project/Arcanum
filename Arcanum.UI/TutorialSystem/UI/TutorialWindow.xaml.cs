@@ -1,6 +1,7 @@
 // Tutorial/UI/TutorialWindow.xaml.cs
 
 using System.Windows;
+using System.Windows.Input;
 using Arcanum.UI.TutorialSystem.Data;
 
 namespace Arcanum.UI.TutorialSystem.UI;
@@ -17,19 +18,39 @@ public partial class TutorialWindow
     public TutorialWindow()
     {
         InitializeComponent();
+#if DEBUG
+        // Define a simple command
+        var myCommand = new RoutedUICommand();
+
+        // Add the InputBinding (Ctrl+M for example)
+        InputBindings.Add(
+            new KeyBinding(myCommand, new KeyGesture(Key.E, ModifierKeys.Control))
+        );
+
+        // Attach the command handler
+        CommandBindings.Add(
+            new(myCommand, (_, _) => OpenEditor())
+        );
+#endif
     }
+
+#if DEBUG
+    private void OpenEditor()
+    {
+    }
+#endif
 
     /// <summary>
     /// Configures the window to show the initial tutorial overview.
     /// </summary>
-    public void ShowStartView(Sequence sequence)
+    public void ShowStartView(Chapter parentChapter)
     {
         // Set content
-        Title = sequence.Title;
-        SequenceTitleTextBlock.Text = sequence.Title;
-        SequenceDescriptionTextBlock.Text = sequence.Description;
+        Title = parentChapter.Title;
+        SequenceTitleTextBlock.Text = parentChapter.Title;
+        SequenceDescriptionTextBlock.Text = parentChapter.Description;
         ChaptersListBox.Items.Clear();
-        foreach (var chapter in sequence.Chapters)
+        foreach (var chapter in parentChapter.SubChapters)
         {
             ChaptersListBox.Items.Add(chapter.Title);
         }

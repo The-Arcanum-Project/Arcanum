@@ -15,7 +15,7 @@ public class TutorialManager
     private readonly FrameworkElement _adornedElement;
     private readonly AdornerLayer _adornerLayer;
 
-    private Sequence? _currentSequence;
+    private Chapter? _parentChapter;
     private List<Step>? _flatSteps;
     private int _currentStepIndex = -1;
 
@@ -29,11 +29,11 @@ public class TutorialManager
         _adornerLayer = AdornerLayer.GetAdornerLayer(_adornedElement) ?? throw new InvalidOperationException("Could not find AdornerLayer on the specified element.");
     }
 
-    public void Start(Sequence sequence)
+    public void Start(Chapter parentChapter)
     {
         if (_tutorialWindow != null && _tutorialWindow.IsLoaded) return;
 
-        _currentSequence = sequence;
+        _parentChapter = parentChapter;
 
         _tutorialWindow = new TutorialWindow { Owner = _mainWindow };
 
@@ -46,14 +46,14 @@ public class TutorialManager
         _tutorialWindow.Closed += (s, e) => Finish(); // Ensure cleanup if user closes window with 'X'
 
         // Tell the window to display the initial start view
-        _tutorialWindow.ShowStartView(sequence);
+        _tutorialWindow.ShowStartView(parentChapter);
         _tutorialWindow.Show();
     }
 
     private void OnTutorialStarted()
     {
-        if (_currentSequence == null) return;
-        _flatSteps = FlattenChapters(_currentSequence.Chapters);
+        if (_parentChapter == null) return;
+        _flatSteps = FlattenChapters(_parentChapter.SubChapters);
         if (_flatSteps.Count == 0)
         {
             Finish();

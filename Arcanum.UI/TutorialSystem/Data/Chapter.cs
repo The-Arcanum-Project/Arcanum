@@ -27,9 +27,8 @@ public class StructureChapter : Chapter
 {
     public readonly Step HighlightStep;
     
-    public StructureChapter(string title, string description, List<IGeometryProvider> highlightElements,
-        List<Chapter> subChapters)
-        : this([], new (title, description, () => highlightElements))
+    public StructureChapter(string title, string description, List<IGeometryProvider> highlightElements, List<Chapter> subChapters)
+        : this(subChapters, new (title, description, () => highlightElements))
     {
         
     }

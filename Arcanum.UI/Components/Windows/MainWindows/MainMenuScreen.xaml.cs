@@ -188,14 +188,14 @@ public partial class MainMenuScreen
 
     //TODO remove this later:
 
-    private Sequence _sequence;
+    private Chapter _sequence;
 
     private void DefineTutorialSequence()
     {
-        _sequence = new Sequence(
+        _sequence = new StructureChapter(
             "Arcanum Welcome Tour",
             "Welcome to Arcanum, thank you for giving the tool a try. Let's get you up to the basics of the launcher view." +
-            "If you want to skip to any chapter just click it in the chapter selection.",
+            "If you want to skip to any chapter just click it in the chapter selection.",[],
             [
                 new StructureChapter([
                         new InteractiveChapter("Press this button", "Just do it.", [
