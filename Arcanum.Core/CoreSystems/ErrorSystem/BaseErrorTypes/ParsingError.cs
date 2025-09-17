@@ -618,4 +618,41 @@ public class ParsingError : ILazySingleton
                                                                    "The float operator is invalid: '{0}'.",
                                                                    "The provided float operator '{0}' is not valid in the context. Valid operators are: {1}",
                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The modifier name for which the type could not be determined</param>
+   /// <param name="1">A list of type definitions or a reason why it is not valid</param>
+   public DiagnosticDescriptor InconclusiveModifierTypeDefinition { get; } = new(DiagnosticCategory.Parsing,
+       64,
+       "Inconclusive Modifier Type Definition",
+       DiagnosticSeverity.Warning,
+       "The modifier type for {0} could not be conclusively determined.",
+       "The modifier {0} has to be uniquely inferable as one of the types: Integer, Boolean, Floating, Identifier, or Percentage. But inconsistent or insufficient data was found to make a clear determination: {1}.",
+       DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The modifier key that is undefined</param>
+   public DiagnosticDescriptor UndefinedModifierKey { get; } = new(DiagnosticCategory.Parsing,
+                                                                   65,
+                                                                   "Undefined Modifier Key",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "The modifier key '{0}' is not defined.",
+                                                                   "The modifier key '{0}' was referenced but does not exist in the current context. Please ensure it is defined before use.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The modifier key that has an invalid value type</param>
+   /// <param name="1">The actual type of the value that was provided</param>
+   public DiagnosticDescriptor InvalidModifierValueType { get; } = new(DiagnosticCategory.Parsing,
+                                                                       66,
+                                                                       "Invalid Modifier Value Type",
+                                                                       DiagnosticSeverity.Error,
+                                                                       "The value type '{1}' for modifier '{0}' is invalid.",
+                                                                       "The value provided for modifier '{0}' does not match the expected type. Please ensure the value is of the correct type.",
+                                                                       DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor ImpossibleModifierTypeInferring { get; } = new(DiagnosticCategory.Parsing,
+                                                                              67,
+                                                                              "Impossible Modifier Type Inferring",
+                                                                              DiagnosticSeverity.Error,
+                                                                              "The modifier type for '{0}' could not be inferred: {1}.",
+                                                                              "The properties of the modifier definition are conflicting or insufficient to determine a valid type. Please review the definition for inconsistencies.",
+                                                                              DiagnosticReportSeverity.PopupNotify);
 }
