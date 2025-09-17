@@ -199,12 +199,12 @@ public partial class MainMenuScreen
             [
                 new StructureChapter([
                         new InteractiveChapter("Press this button", "Just do it.", [
-                            new ButtonStep("Pressing the close button", "You can do it!", () => [TopBarBorder], () => CreatNewProjectButton)
+                            new ButtonStep("Pressing the close button", "You can do it!", () => [new ElementGeometryProvider(TopBarBorder, new(10))], () => CreatNewProjectButton)
                         ])
                     ],
                     new("Home Screen",
                         "This is the default launch screen of the app where you can see current releases, feature spotlights and Socials, where you can ask questions about Arcanum and get support.",
-                        () => [ContentControl, TopBarBorder]))
+                        () => [new ElementGeometryProvider(ContentControl, new(5,0,-50,0)), new ElementGeometryProvider(TopBarBorder)]))
             ]
         );
     }

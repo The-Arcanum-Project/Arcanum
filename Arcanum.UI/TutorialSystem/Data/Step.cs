@@ -2,20 +2,21 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Arcanum.UI.TutorialSystem.Core;
 
 namespace Arcanum.UI.TutorialSystem.Data;
 
 public class Step(
     string title,
     string description,
-    Func<List<FrameworkElement>> getHighlightElements)
+    Func<List<IGeometryProvider>> getHighlightElements)
 {
     public readonly string Title = title;
     public readonly string Description = description;
     public bool IsCompleted { get; set; } = false;
     public Chapter? ParentChapter { get; set; } = null;
 
-    public readonly Func<List<FrameworkElement>> GetHighlightElements = getHighlightElements;
+    public readonly Func<List<IGeometryProvider>> GetHighlightElements = getHighlightElements;
 
     public virtual FrameworkElement? GetInteractiveElement() => null;
     
@@ -37,7 +38,7 @@ public class Step(
 public abstract class InteractiveStep<T>(
     string title,
     string description,
-    Func<List<FrameworkElement>> getHighlightElements,
+    Func<List<IGeometryProvider>> getHighlightElements,
     Func<T> getInteractiveElement)
     : Step(title, description, getHighlightElements) where T : FrameworkElement
 {
@@ -56,7 +57,7 @@ public abstract class InteractiveStep<T>(
 public class ButtonStep(
     string title,
     string description,
-    Func<List<FrameworkElement>> getHighlightElements,
+    Func<List<IGeometryProvider>> getHighlightElements,
     Func<Button> getInteractiveElement)
     : InteractiveStep<Button>(title, description, getHighlightElements, getInteractiveElement)
 {
@@ -90,7 +91,7 @@ public class TextBoxStep : InteractiveStep<TextBox>
 
     public TextBoxStep(string title,
         string description,
-        Func<List<FrameworkElement>> getHighlightElements,
+        Func<List<IGeometryProvider>> getHighlightElements,
         Func<TextBox> getInteractiveElement,
         Predicate<string> verifyText, string exampleValidText) : base(title, description, getHighlightElements,
         getInteractiveElement)
@@ -135,7 +136,7 @@ public class TextBoxStep : InteractiveStep<TextBox>
 public class ComboBoxStep(
     string title,
     string description,
-    Func<List<FrameworkElement>> getHighlightElements,
+    Func<List<IGeometryProvider>> getHighlightElements,
     Func<ComboBox> getInteractiveElement,
     int expectedItem = -1)
     : InteractiveStep<ComboBox>(title, description, getHighlightElements, getInteractiveElement)
@@ -173,7 +174,7 @@ public class ComboBoxStep(
 public class CheckBoxStep(
     string title,
     string description,
-    Func<List<FrameworkElement>> getHighlightElements,
+    Func<List<IGeometryProvider>> getHighlightElements,
     Func<CheckBox> getInteractiveElement,
     bool expectedState)
     : InteractiveStep<CheckBox>(title, description, getHighlightElements, getInteractiveElement)

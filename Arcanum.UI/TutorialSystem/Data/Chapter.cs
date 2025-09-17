@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Forms;
+using Arcanum.UI.TutorialSystem.Core;
 
 namespace Arcanum.UI.TutorialSystem.Data;
 
@@ -26,7 +27,8 @@ public class StructureChapter : Chapter
 {
     public readonly Step HighlightStep;
     
-    public StructureChapter(List<Chapter> subChapters, string title, string description, List<FrameworkElement> highlightElements)
+    public StructureChapter(string title, string description, List<IGeometryProvider> highlightElements,
+        List<Chapter> subChapters)
         : this([], new (title, description, () => highlightElements))
     {
         
