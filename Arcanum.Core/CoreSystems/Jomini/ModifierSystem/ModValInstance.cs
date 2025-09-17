@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.GameObjects.Common;
 
-namespace Arcanum.Core.CoreSystems.ModifierSystem;
+namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 
 /// <summary>
 /// An instance of a modifier definition with an associated value.

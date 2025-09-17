@@ -6,7 +6,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.ModifierSystem;
+namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 
 public static class ModifierManager
 {

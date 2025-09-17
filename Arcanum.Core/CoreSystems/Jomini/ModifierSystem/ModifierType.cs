@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.ModifierSystem;
+﻿namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 
 /// <summary>
 /// A type assigned to a modifier to determine how its value should be interpreted.

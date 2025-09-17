@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
+using Arcanum.Core.CoreSystems.Jomini.Scopes;
 using Arcanum.Core.GlobalStates;
 using Timer = System.Timers.Timer;
 
@@ -22,8 +22,7 @@ public partial class DocsObjBrowser
    public DocsObjBrowser()
    {
       InitializeComponent();
-      var exampleDocObj = new DocsObj("example");
-      var docObjPublicProperties = exampleDocObj.GetType().GetProperties().Where(p => p.GetGetMethod() != null);
+      var docObjPublicProperties = typeof(ETDefinition).GetProperties().Where(p => p.GetGetMethod() != null);
       foreach (var property in docObjPublicProperties)
          PropertyFilterComboBox.Items.Add(property.Name);
 
@@ -43,7 +42,7 @@ public partial class DocsObjBrowser
 
    public static DocsObjBrowser ShowDocsObjBrowser(DocsObjBrowserType type)
    {
-      List<DocsObj> data;
+      List<ETDefinition> data;
       if (type == DocsObjBrowserType.Effects)
          data = [.. StaticData.DocsEffects];
       else if (type == DocsObjBrowserType.Triggers)
@@ -71,7 +70,7 @@ public partial class DocsObjBrowser
 
       view.Filter = item =>
       {
-         if (item is not DocsObj docObj)
+         if (item is not ETDefinition docObj)
             return false;
 
          // if the value is an array search through each element
@@ -98,8 +97,7 @@ public partial class DocsObjBrowser
       if (PropertyFilterComboBox.SelectedItem is not string selectedProperty)
          return null!;
 
-      var exampleDocObj = new DocsObj("example");
-      var propertyInfo = exampleDocObj.GetType().GetProperty(selectedProperty);
+      var propertyInfo = typeof(ETDefinition).GetProperty(selectedProperty);
       if (propertyInfo == null)
          throw new InvalidOperationException($"Property '{selectedProperty}' not found on DocsObj.");
 

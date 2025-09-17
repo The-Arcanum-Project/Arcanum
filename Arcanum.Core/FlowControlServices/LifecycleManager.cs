@@ -5,7 +5,6 @@ using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.CoreSystems.Parsing.DocsParsing;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.GlobalStates;
@@ -105,7 +104,7 @@ public class LifecycleManager
 #if DEBUG
       SaveDebugElements();
 #endif
-      
+
       // Step 4: Notify that the application has shut down
       OnApplicationShutDownCompleted?.Invoke(this, EventArgs.Empty);
    }
@@ -137,7 +136,6 @@ public class LifecycleManager
    {
       ArcanumDataHandler.LoadDefaultDescriptor(new());
       MainMenuScreenDescriptor.LoadData();
-      EffectsAndTriggersDocsParser.LoadDocs();
    }
 
    private static void InitializeCoreServices(IPluginHost host)
