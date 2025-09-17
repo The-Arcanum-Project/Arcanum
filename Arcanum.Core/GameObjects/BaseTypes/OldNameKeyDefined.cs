@@ -2,9 +2,9 @@
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Nexus.Core;
 
-namespace Arcanum.Core.GameObjects;
+namespace Arcanum.Core.GameObjects.BaseTypes;
 
-public abstract class NameKeyDefined(string name) : ISearchable
+public abstract class OldNameKeyDefined(string name) : ISearchable
 {
    [ReadonlyNexus]
    [AddModifiable]
@@ -17,7 +17,7 @@ public abstract class NameKeyDefined(string name) : ISearchable
 
    public override bool Equals(object? obj)
    {
-      if (obj is not NameKeyDefined other)
+      if (obj is not OldNameKeyDefined other)
          return false;
 
       return string.Equals(Name, other.Name, StringComparison.Ordinal);

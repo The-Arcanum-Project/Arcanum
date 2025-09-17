@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.CountryLevel;

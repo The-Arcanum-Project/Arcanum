@@ -2,6 +2,7 @@
 using System.Reflection;
 using Arcanum.API.Attributes;
 using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;

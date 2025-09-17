@@ -3,12 +3,13 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Map;
 
 public partial
-   class Vegetation(string name) : NameKeyDefined(name), INUI, IEmpty<Vegetation>, ICollectionProvider<Vegetation>
+   class Vegetation(string name) : OldNameKeyDefined(name), INUI, IEmpty<Vegetation>, ICollectionProvider<Vegetation>
 {
    # region Nexus Properties
 

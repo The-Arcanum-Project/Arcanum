@@ -13,6 +13,7 @@ using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
+using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

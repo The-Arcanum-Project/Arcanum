@@ -3,12 +3,13 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Map;
 
 public partial
-   class Climate(string name) : NameKeyDefined(name), INUI, IEmpty<Climate>, ICollectionProvider<Climate>
+   class Climate(string name) : OldNameKeyDefined(name), INUI, IEmpty<Climate>, ICollectionProvider<Climate>
 {
    #region Enums
 

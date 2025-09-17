@@ -22,7 +22,7 @@ public interface ISearchable
    /// A list of all terms that can be used to search for this result.
    /// Usually this consists of the name, namespace, and any other relevant keywords.
    /// </summary>
-   public List<string> SearchTerms { get; set; }
+   public List<string> SearchTerms { get; }
 
    /// <summary>
    /// What happens when the search result is selected. <br/>

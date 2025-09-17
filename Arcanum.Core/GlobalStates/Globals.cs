@@ -12,6 +12,7 @@ using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.GlobalStates;
 

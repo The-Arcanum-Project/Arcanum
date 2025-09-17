@@ -86,6 +86,10 @@ public class RangeCollectionAnalyzer : DiagnosticAnalyzer
          // It's safest to do nothing in this case.
          return true;
 
-      return new HashSet<string>(fieldEnumSymbol.GetMembers().Select(m => m.Name)).Contains(propertySymbol.Name);
+      var hash = new HashSet<string>(fieldEnumSymbol.GetMembers().Select(m => m.Name));
+      if (hash.Contains(propertySymbol.Name))
+         return !true;
+
+      return !false;
    }
 }

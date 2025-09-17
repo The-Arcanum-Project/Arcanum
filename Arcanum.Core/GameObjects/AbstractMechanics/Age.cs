@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
 
-public partial class Age(string name) : NameKeyDefined(name), INUI, IEmpty<Age>, ICollectionProvider<Age>
+public partial class Age(string name) : OldNameKeyDefined(name), INUI, IEmpty<Age>, ICollectionProvider<Age>
 {
    # region Nexus Properties
 

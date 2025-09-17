@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Common;
@@ -89,7 +90,7 @@ public enum ModifierFormat
 }
 
 [ObjectSaveAs]
-public partial class ModifierDefinition(string name) : NameKeyDefined(name),
+public partial class ModifierDefinition(string name) : OldNameKeyDefined(name),
                                                        IAgs,
                                                        INUI,
                                                        IEmpty<ModifierDefinition>,

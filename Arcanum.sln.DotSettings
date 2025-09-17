@@ -107,6 +107,100 @@
    {
    }
 }</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/@KeyIndexDefined">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Description/@EntryValue">Create the base implementation for an IEu5BaseObject</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=ClassName/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=ClassName/Order/@EntryValue">0</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=DefaultValue/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=DefaultValue/Order/@EntryValue">3</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Description/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Description/Order/@EntryValue">5</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=JominiKey/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=JominiKey/Order/@EntryValue">2</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Key/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Key/Order/@EntryValue">1</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=NameSpace/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=NameSpace/Order/@EntryValue">4</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Reformat/@EntryValue">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Shortcut/@EntryValue">eu5BaseObject</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Text/@EntryValue">[ObjectSaveAs]
+public partial class $ClassName$(string key) : IBaseEu5Object&lt;$ClassName$&gt;
+{
+   [ReadonlyNexus]
+   [SaveAs]
+   [ParseAs(AstNodeType.ContentNode, "$JominiKey$")]
+   [DefaultValue("$DefaultValue$")]
+   [Description("$Description$")]
+   public string $Key$ { get; set; } = key;
+
+   #region IBaseEu5Object Implementation
+
+   public string GetNamespace =&gt; "$NameSpace$.$ClassName$";
+   public string ResultName =&gt; $Key$;
+
+   public List&lt;string&gt; SearchTerms =&gt; [$Key$];
+
+   public void OnSearchSelected()
+   {
+   }
+
+   public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, $Key$, "$Description$");
+   public IQueastorSearchSettings.Category SearchCategory =&gt; IQueastorSearchSettings.Category.GameObjects;
+   public bool IsReadonly =&gt; false;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.$ClassName$NUISettings;
+   public INUINavigation[] Navigations { get; } = [];
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.$ClassName$AgsSettings;
+   public string SavingKey =&gt; $Key$;
+   public static IEnumerable&lt;$ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s.Values;
+
+   public static $ClassName$ Empty { get; } = new() { $Key$ = "$ClassName$_ARCANUM_EMPTY" };
+
+   private bool Equals($ClassName$ other) =&gt; $Key$ == other.$Key$;
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != typeof($ClassName$))
+         return false;
+
+      return Equals((TestObj)obj);
+   }
+
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
+   public override int GetHashCode() =&gt; $Key$.GetHashCode();
+
+   #endregion
+}</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Description/@EntryValue">Diagnostic Descriptor Template</s:String>

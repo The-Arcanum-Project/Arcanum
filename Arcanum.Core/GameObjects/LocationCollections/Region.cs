@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
 
@@ -54,8 +55,8 @@ public partial class Region
 
    public static List<Region> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                              .Select(loc => (Region)loc
-                                                                                .GetFirstParentOfType(LocationCollectionType
-                                                                                   .Area))
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                           .Area))
                                                                              .Distinct()
                                                                              .ToList();
 

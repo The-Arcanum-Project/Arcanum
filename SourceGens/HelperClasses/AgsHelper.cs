@@ -178,6 +178,8 @@ public static class AgsHelper
                                                     prop.ContainingType.Name));
 
       var collVal = isCollection ? "true" : saveAs.ConstructorArguments[5].Value!.ToString().ToLower();
+      var defaultValueIsString = defaultValueAttr?.ConstructorArguments[0].Value is string;
+      var defaultString = defaultValueIsString ? $"\"{defaultValueAttr?.ConstructorArguments[0].Value}\"" : null;
 
       sb.AppendLine("                new()");
       sb.AppendLine("                {");
@@ -186,7 +188,7 @@ public static class AgsHelper
       sb.AppendLine($"                    CommentProvider = {GetNullOrString(saveAs.ConstructorArguments[3], SAVING_COMMENT_PROVIDER)},");
       sb.AppendLine($"                    SavingMethod = {GetNullOrString(saveAs.ConstructorArguments[2], CUSTOM_SAVING_PROVIDER)},");
       sb.AppendLine($"                    ValueType = SavingValueType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[0])},");
-      sb.AppendLine($"                    DefaultValue = {(defaultValueAttr != null ? $"(object?){defaultValueAttr.ConstructorArguments[0].Value!.ToString().ToLower()}" : "null")},");
+      sb.AppendLine($"                    DefaultValue = {(defaultValueAttr != null ? defaultString : "null")},");
       sb.AppendLine($"                    Separator = TokenType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[1])},");
       sb.AppendLine($"                    CollectionItemKeyProvider = {GetNullOrString(saveAs.ConstructorArguments[4], CUSTOM_ITEM_KEY_PROVIDER)},");
       sb.AppendLine($"                    IsCollection = {collVal},");

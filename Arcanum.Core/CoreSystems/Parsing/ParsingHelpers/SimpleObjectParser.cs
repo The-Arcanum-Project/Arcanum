@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.GameObjects;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
@@ -18,7 +19,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      List<TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : NameKeyDefined, INexus
+                                     bool allowUnknownBlocks = true) where TTarget : OldNameKeyDefined, INexus
    {
       foreach (var sn in rn.Statements)
       {
@@ -64,7 +65,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : NameKeyDefined, INexus
+                                     bool allowUnknownBlocks = true) where TTarget : OldNameKeyDefined, INexus
    {
       foreach (var sn in rn.Statements)
       {
@@ -109,7 +110,7 @@ public static class SimpleObjectParser
                                                         Pdh.PropertyParser<TTarget> propsParser,
                                                         bool allowUnknownBlocks,
                                                         BlockNode? bn,
-                                                        TTarget age) where TTarget : NameKeyDefined, INexus
+                                                        TTarget age) where TTarget : OldNameKeyDefined, INexus
    {
       var unknownNodes = propsParser(bn!, age, ctx, source, ref validation);
 
@@ -139,7 +140,7 @@ public static class SimpleObjectParser
                                                           StatementNode sn,
                                                           out BlockNode? bn,
                                                           out TTarget? nameKeyDefined)
-      where TTarget : NameKeyDefined, INexus
+      where TTarget : OldNameKeyDefined, INexus
    {
       if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out bn))
       {

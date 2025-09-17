@@ -2,12 +2,13 @@
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 public partial class LocationRank(string name, int order)
-   : NameKeyDefined(name), INUI, ICollectionProvider<LocationRank>, IEmpty<LocationRank>
+   : OldNameKeyDefined(name), INUI, ICollectionProvider<LocationRank>, IEmpty<LocationRank>
 {
    [Description("The color associated with this location rank, often used in the UI.")]
    [ParseAs(AstNodeType.ContentNode, "color")]

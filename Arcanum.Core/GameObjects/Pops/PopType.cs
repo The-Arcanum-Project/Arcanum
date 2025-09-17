@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -10,7 +11,7 @@ public partial class PopType(string name,
                              string colorKey,
                              float foodConsumption,
                              float assimilationConversionFactor)
-   : IParseable<PopType>, INUI, ICollectionProvider<PopType>, IEmpty<PopType>
+   : INUI, ICollectionProvider<PopType>, IEmpty<PopType>
 {
    public string Name { get; set; } = name;
    public string ColorKey { get; set; } = colorKey;

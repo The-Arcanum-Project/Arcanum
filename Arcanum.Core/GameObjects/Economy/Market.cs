@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 

@@ -1,11 +1,15 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Culture;
 
-public partial class Language(string name) : NameKeyDefined(name), INUI, ICollectionProvider<Language>, IEmpty<Language>
+public partial class Language(string name) : OldNameKeyDefined(name),
+                                             INUI,
+                                             ICollectionProvider<Language>,
+                                             IEmpty<Language>
 {
    # region Nexus Properties
 
