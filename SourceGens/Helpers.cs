@@ -10,6 +10,26 @@ public static class Helpers
    public const string IGNORE_MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.IgnoreModifiableAttribute";
    public const string MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.AddModifiableAttribute";
 
+   /// <summary>
+   /// Formats an object from an attribute argument into its C# source code literal representation.
+   /// </summary>
+   public static string FormatDefaultValueLiteral(object? value)
+   {
+      if (value is null)
+         return "null";
+
+      if (value is string stringValue)
+         return $"@\"{stringValue.Replace("\"", "\"\"")}\"";
+
+      if (value is bool boolValue)
+         return boolValue ? "true" : "false";
+
+      if (value.GetType().IsPrimitive || value is decimal)
+         return value.ToString();
+
+      return $"\"{value}\"";
+   }
+
    public static List<ISymbol> FindModifiableMembers(INamedTypeSymbol classSymbol,
                                                      SourceProductionContext context)
    {

@@ -11,25 +11,25 @@ public partial class LocationRank(string name, int order)
    : OldNameKeyDefined(name), INUI, ICollectionProvider<LocationRank>, IEmpty<LocationRank>
 {
    [Description("The color associated with this location rank, often used in the UI.")]
-   [ParseAs(AstNodeType.ContentNode, "color")]
+   [ParseAs("color", AstNodeType.ContentNode)]
    public JominiColor ColorKey { get; set; } = JominiColor.Empty;
    [Description("The rank of the location rank.")]
-   [ParseAs(AstNodeType.ContentNode, "max_rank")]
+   [ParseAs("max_rank", AstNodeType.ContentNode)]
    public bool IsMaxRank { get; set; }
    [Description("Whether this location rank is considered an established city.")]
-   [ParseAs(AstNodeType.ContentNode, "is_established_city")]
+   [ParseAs("is_established_city", AstNodeType.ContentNode)]
    public bool IsEstablishedCity { get; set; }
    [Description("Whether this location rank should be shown in labels.")]
-   [ParseAs(AstNodeType.ContentNode, "show_in_label")]
+   [ParseAs("show_in_label", AstNodeType.ContentNode)]
    public bool ShowInLabel { get; set; }
    [Description("The number of days it takes to build this location rank.")]
-   [ParseAs(AstNodeType.ContentNode, "build_time")]
+   [ParseAs("build_time", AstNodeType.ContentNode)]
    public int BuildTime { get; set; }
    [Description("The tier of the frame used for this location rank.")]
-   [ParseAs(AstNodeType.ContentNode, "frame_tier")]
+   [ParseAs("frame_tier", AstNodeType.ContentNode)]
    public int FrameTier { get; set; }
    [Description("What type of construction is required to build this location rank.")]
-   [ParseAs(AstNodeType.ContentNode, "construction_demand")]
+   [ParseAs("construction_demand", AstNodeType.ContentNode)]
    public string ConstructionDemand { get; set; } = string.Empty;
 
    /// <summary>

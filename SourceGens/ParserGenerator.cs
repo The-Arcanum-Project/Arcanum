@@ -538,29 +538,42 @@ public class ParserSourceGenerator : IIncrementalGenerator
          Symbol = symbol;
          Attribute = attribute;
 
-         var astNodeTypeArg = attribute.ConstructorArguments[0];
-
-         // Find the symbol for the enum member that this constant represents.
-         // For 'AstNodeType.ContentNode', this will find the 'ContentNode' field symbol.
-         var enumMemberSymbol = astNodeTypeArg.Type?.GetMembers()
-                                              .OfType<IFieldSymbol>()
-                                              .FirstOrDefault(f => f.ConstantValue != null &&
-                                                                   f.ConstantValue.Equals(astNodeTypeArg.Value));
-
          CustomParserMethodName = attribute.NamedArguments
                                            .FirstOrDefault(arg => arg.Key == "CustomParser")
                                            .Value.Value as string;
 
          if (isEmbedded)
          {
-            AstNodeType = "BlockNode"; // Embedded objects are always in blocks
-            Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
+            // For embedded types, the rule is simple.
+            AstNodeType = "BlockNode";
          }
          else
          {
-            AstNodeType = enumMemberSymbol?.Name ?? "Unknown";
-            Keyword = attribute.ConstructorArguments[1].Value as string ?? ToSnakeCase(PropertyName);
+            // For non-embedded types, we need to parse the enum from the attribute.
+            var constructor = attribute.AttributeConstructor;
+            var nodeTypeParameter = constructor?.Parameters.FirstOrDefault(p => p.Name == "nodeType");
+
+            var astNodeTypeEnumValue = attribute.ConstructorArguments.Length > 1
+                                          ? attribute.ConstructorArguments[1].Value
+                                          : nodeTypeParameter?.ExplicitDefaultValue;
+
+            if (astNodeTypeEnumValue != null)
+            {
+               var enumTypeSymbol = nodeTypeParameter?.Type;
+               var enumMemberSymbol = enumTypeSymbol?.GetMembers()
+                                                     .OfType<IFieldSymbol>()
+                                                     .FirstOrDefault(f => f.ConstantValue != null &&
+                                                                          f.ConstantValue.Equals(astNodeTypeEnumValue));
+
+               AstNodeType = enumMemberSymbol?.Name ?? "ERROR_EnumMemberNotFound";
+            }
+            else
+            {
+               AstNodeType = "ERROR_CouldNotDetermineNodeType";
+            }
          }
+
+         Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
       }
 
       private static string ToSnakeCase(string text)

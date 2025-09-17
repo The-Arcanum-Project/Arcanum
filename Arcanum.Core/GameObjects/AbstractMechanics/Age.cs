@@ -10,31 +10,31 @@ public partial class Age(string name) : OldNameKeyDefined(name), INUI, IEmpty<Ag
 {
    # region Nexus Properties
 
-   [ParseAs(AstNodeType.ContentNode, "year")]
+   [ParseAs("year", AstNodeType.ContentNode)]
    [Description("What year the age starts in.")]
    public int Year { get; set; }
 
-   [ParseAs(AstNodeType.ContentNode, "max_price")]
+   [ParseAs("max_price", AstNodeType.ContentNode)]
    [Description("The maximum price for goods during this age.")]
    public int MaxPrice { get; set; }
 
-   [ParseAs(AstNodeType.ContentNode, "price_stability")]
+   [ParseAs("price_stability", AstNodeType.ContentNode)]
    [Description("A modifier to price stability during this age.")]
    public float PriceStability { get; set; }
 
-   [ParseAs(AstNodeType.ContentNode, "mercenaries")]
+   [ParseAs("mercenaries", AstNodeType.ContentNode)]
    [Description("The factor for the size of mercenary armies during this age.")]
    public float Mercenaries { get; set; } = 1f;
 
-   [ParseAs(AstNodeType.ContentNode, "hegemons_allowed")]
+   [ParseAs("hegemons_allowed", AstNodeType.ContentNode)]
    [Description("Whether hegemons are allowed to be formed during this age.")]
    public bool AllowHegemons { get; set; } = false;
 
-   [ParseAs(AstNodeType.ContentNode, "efficiency")]
+   [ParseAs("efficiency", AstNodeType.ContentNode)]
    [Description("Some economic efficiency modifier during this age.")]
    public float Efficiency { get; set; } = 1f;
 
-   [ParseAs(AstNodeType.ContentNode, "war_score_from_battles")]
+   [ParseAs("war_score_from_battles", AstNodeType.ContentNode)]
    [Description("The factor for war score gained from battles during this age.")]
    public float WarScoreFromBattles { get; set; } = 1f;
 

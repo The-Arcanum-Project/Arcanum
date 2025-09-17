@@ -163,7 +163,7 @@ public class NUISettings
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting ModifierDefinitionSettings { get; set; } = new(ModifierDefinition.Field.Name,
+   public NUISetting ModifierDefinitionSettings { get; set; } = new(ModifierDefinition.Field.UniqueKey,
                                                                     Enum.GetValues<ModifierDefinition.Field>()
                                                                         .Cast<Enum>()
                                                                         .ToArray(),

@@ -29,6 +29,6 @@ public partial class ClimateParsing : ParserValidationLoadingService
                                           string source,
                                           ref bool validation)
    {
-      SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Climates);
+      // TODO: @Minnator SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Climates);
    }
 }

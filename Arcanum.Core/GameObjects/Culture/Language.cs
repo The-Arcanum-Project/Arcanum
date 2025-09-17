@@ -13,61 +13,61 @@ public partial class Language(string name) : OldNameKeyDefined(name),
 {
    # region Nexus Properties
 
-   [ParseAs(AstNodeType.ContentNode, "first_name_conjoiner")]
+   [ParseAs("first_name_conjoiner")]
    public string FirstNameConjoiner { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "family")]
+   [ParseAs("family")]
    public string Family { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_suffix")]
+   [ParseAs("descendant_suffix")]
    public string DescendantSuffix { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_prefix")]
+   [ParseAs("descendant_prefix")]
    public string DescendantPrefix { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_prefix_male")]
+   [ParseAs("descendant_prefix_male")]
    public string DescendantPrefixMale { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_prefix_female")]
+   [ParseAs("descendant_prefix_female")]
    public string DescendantPrefixFemale { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_suffix")]
+   [ParseAs("patronym_suffix")]
    public string PatronymSuffix { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_suffix_son")]
+   [ParseAs("patronym_suffix_son")]
    public string PatronymSuffixSon { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_suffix_daughter")]
+   [ParseAs("patronym_suffix_daughter")]
    public string PatronymSuffixDaughter { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_prefix_son")]
+   [ParseAs("patronym_prefix_son")]
    public string PatronymPrefixSon { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_prefix_son_vowel")]
+   [ParseAs("patronym_prefix_son_vowel")]
    public string PatronymPrefixSonVowel { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_prefix_daughter")]
+   [ParseAs("patronym_prefix_daughter")]
    public string PatronymPrefixDaughter { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "patronym_prefix_daughter_vowel")]
+   [ParseAs("patronym_prefix_daughter_vowel")]
    public string PatronymPrefixDaughterVowel { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_suffix_male")]
+   [ParseAs("descendant_suffix_male")]
    public string DescendantSuffixMale { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "descendant_suffix_female")]
+   [ParseAs("descendant_suffix_female")]
    public string DescendantSuffixFemale { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "character_name_short_regnal_number")]
+   [ParseAs("character_name_short_regnal_number")]
    public string CharacterNameShortRegnalNumber { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "character_name_order")]
+   [ParseAs("character_name_order")]
    public string CharacterNameOrder { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "location_prefix")]
+   [ParseAs("location_prefix")]
    public string LocationPrefix { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "location_prefix_vowel")]
+   [ParseAs("location_prefix_vowel")]
    public string LocationPrefixVowel { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "location_suffix")]
+   [ParseAs("location_suffix")]
    public string LocationSuffix { get; set; } = string.Empty;
-   [ParseAs(AstNodeType.ContentNode, "color")]
+   [ParseAs("color")]
    public JominiColor Color { get; set; } = JominiColor.Empty;
-   [ParseAs(AstNodeType.BlockNode, "location_prefix_elision")]
+   [ParseAs("location_prefix_elision", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> LocationPrefixElision { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "male_names")]
+   [ParseAs("male_names", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> MaleNames { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "female_names")]
+   [ParseAs("female_names", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> FemaleNames { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "dynasty_names")]
+   [ParseAs("dynasty_names", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> DynastyNames { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "lowborn")]
+   [ParseAs("lowborn", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> LowbornNames { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "ship_names")]
+   [ParseAs("ship_names", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> ShipNames { get; set; } = [];
-   [ParseAs(AstNodeType.BlockNode, "dynasty_template_keys")]
+   [ParseAs("dynasty_template_keys", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> DynastyTemplateKeys { get; set; } = [];
 
    // This one is manually parsed.

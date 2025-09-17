@@ -140,7 +140,7 @@ public static class ModifierManager
             $"{Convert.ToSingle(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}",
          ModifierType.Integer => Convert.ToInt32(instance.Value).ToString(),
          _ => throw new
-                 ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.Definition.Name}"),
+                 ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.Definition.UniqueKey}"),
       };
    }
 
@@ -158,7 +158,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsBooleanModifier)}",
-                                     definition.Name,
+                                     definition.UniqueKey,
                                      "A boolean modifier cannot be a percentage or already percent.");
       return false;
    }
@@ -174,7 +174,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsIntegerModifier)}",
-                                     definition.Name,
+                                     definition.UniqueKey,
                                      "An integer modifier cannot be a percentage, already_percent, or boolean.");
       return false;
    }
@@ -190,7 +190,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsFloatingModifier)}",
-                                     definition.Name,
+                                     definition.UniqueKey,
                                      "A floating modifier cannot be a percentage, already_percent, or boolean.");
       return false;
    }
@@ -206,7 +206,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsPercentageModifier)}",
-                                     definition.Name,
+                                     definition.UniqueKey,
                                      "A percentage modifier cannot be boolean.");
       return false;
    }
@@ -219,7 +219,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsIdentifierModifier)}",
-                                     definition.Name,
+                                     definition.UniqueKey,
                                      "An identifier modifier cannot be boolean, percentage, or already_percent, and must have 0 decimals.");
       return false;
    }

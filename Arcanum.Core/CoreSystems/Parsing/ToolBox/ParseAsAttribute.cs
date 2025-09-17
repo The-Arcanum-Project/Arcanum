@@ -4,11 +4,12 @@ public enum AstNodeType
 {
    ContentNode,
    BlockNode,
-   KeyOnlyNode,
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-public class ParseAsAttribute(AstNodeType nodeType, string? key, string? customParser = null) : Attribute
+public class ParseAsAttribute(string? key,
+                              AstNodeType nodeType = AstNodeType.ContentNode,
+                              string? customParser = null) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 

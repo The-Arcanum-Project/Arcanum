@@ -27,6 +27,6 @@ public partial class TopographyParsing : ParserValidationLoadingService
                                           string source,
                                           ref bool validation)
    {
-      SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Topography);
+      // TODO: @Minnator SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Topography);
    }
 }

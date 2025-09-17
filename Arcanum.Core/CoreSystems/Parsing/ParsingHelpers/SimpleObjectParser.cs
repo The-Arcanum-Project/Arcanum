@@ -4,7 +4,6 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
-using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
@@ -19,7 +18,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      List<TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : OldNameKeyDefined, INexus
+                                     bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
    {
       foreach (var sn in rn.Statements)
       {
@@ -39,9 +38,9 @@ public static class SimpleObjectParser
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
-                                           instance.Name,
+                                           instance.UniqueKey,
                                            typeof(TTarget),
-                                           "Name");
+                                           "UniqueKey");
             validation = false;
             continue;
          }
@@ -65,7 +64,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : OldNameKeyDefined, INexus
+                                     bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
    {
       foreach (var sn in rn.Statements)
       {
@@ -79,15 +78,15 @@ public static class SimpleObjectParser
              instance == null)
             continue;
 
-         if (!globals.TryAdd(instance.Name, instance))
+         if (!globals.TryAdd(instance.UniqueKey, instance))
          {
             ctx.SetPosition(bn!.KeyNode);
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
-                                           instance.Name,
+                                           instance.UniqueKey,
                                            typeof(TTarget),
-                                           "Name");
+                                           "UniqueKey");
             validation = false;
             continue;
          }
@@ -110,9 +109,9 @@ public static class SimpleObjectParser
                                                         Pdh.PropertyParser<TTarget> propsParser,
                                                         bool allowUnknownBlocks,
                                                         BlockNode? bn,
-                                                        TTarget age) where TTarget : OldNameKeyDefined, INexus
+                                                        TTarget eu5Obj) where TTarget : IEu5Object<TTarget>, new()
    {
-      var unknownNodes = propsParser(bn!, age, ctx, source, ref validation);
+      var unknownNodes = propsParser(bn!, eu5Obj, ctx, source, ref validation);
 
       if (allowUnknownBlocks)
          foreach (var ukn in unknownNodes)
@@ -139,21 +138,16 @@ public static class SimpleObjectParser
                                                           ref bool validation,
                                                           StatementNode sn,
                                                           out BlockNode? bn,
-                                                          out TTarget? nameKeyDefined)
-      where TTarget : OldNameKeyDefined, INexus
+                                                          out TTarget? eu5Obj)
+      where TTarget : IEu5Object<TTarget>, new()
    {
       if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out bn))
       {
-         nameKeyDefined = null;
+         eu5Obj = default;
          return false;
       }
 
-      var ageName = bn.KeyNode.GetLexeme(source);
-      if (Activator.CreateInstance(typeof(TTarget), ageName) is not TTarget age)
-         throw new
-            InvalidOperationException($"Failed to create instance of type {typeof(TTarget)} with name key {ageName}");
-
-      nameKeyDefined = age;
+      eu5Obj = new() { UniqueKey = bn.KeyNode.GetLexeme(source) };
       return true;
    }
 }
