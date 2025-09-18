@@ -79,15 +79,15 @@ public partial class Climate : IEu5Object<Climate>
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("location_modifier", AstNodeType.BlockNode)]
-   [Description("The location modifier applied to provinces with this climate.")]
-   public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
-
-   [SaveAs]
-   [DefaultValue(null)]
    [ParseAs("unit_modifier", AstNodeType.BlockNode)]
    [Description("The unit modifier applied to units in provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> UnitModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("location_modifier", AstNodeType.BlockNode)]
+   [Description("The location modifier applied to provinces with this climate.")]
+   public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]

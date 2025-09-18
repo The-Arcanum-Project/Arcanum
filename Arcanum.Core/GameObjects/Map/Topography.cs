@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.AudioTags;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -112,6 +114,18 @@ public partial class Topography : IEu5Object<Topography>
    [ParseAs("is_lake")]
    [Description("Whether this topography is a lake.")]
    public bool IsLake { get; set; }
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("location_modifier", AstNodeType.BlockNode)]
+   [Description("The location modifier applied to provinces with this climate.")]
+   public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("audio_tags", AstNodeType.BlockNode)]
+   [Description("The audio tags associated with this climate.")]
+   public ObservableRangeCollection<AudioTag> AudioTags { get; set; } = [];
 
    # endregion
 
