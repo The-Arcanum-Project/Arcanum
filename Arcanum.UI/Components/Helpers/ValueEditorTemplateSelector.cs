@@ -19,7 +19,7 @@ public class ValueEditorTemplateSelector : DataTemplateSelector
       return viewModel.Type switch
       {
          ModifierType.Integer => IntegerTemplate ?? DefaultTemplate,
-         ModifierType.Floating or ModifierType.Percentage => FloatTemplate ?? DefaultTemplate,
+         ModifierType.Float or ModifierType.Percentage => FloatTemplate ?? DefaultTemplate,
          ModifierType.Boolean => BooleanTemplate ?? DefaultTemplate,
          _ => DefaultTemplate,
       };

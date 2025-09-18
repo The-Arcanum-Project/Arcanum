@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+﻿using Arcanum.Core.CoreSystems.Jomini.AudioTags;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
@@ -200,4 +201,9 @@ public class NUISettings
                                                                 Enum.GetValues<ModValInstance.Field>()
                                                                     .Cast<Enum>()
                                                                     .ToArray());
+
+   public NUISetting AudioTagSettings { get; set; } = new(AudioTag.Field.UniqueId,
+                                                          Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray());
 }

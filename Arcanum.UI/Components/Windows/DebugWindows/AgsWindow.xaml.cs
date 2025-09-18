@@ -46,7 +46,7 @@ public partial class AgsWindow
                                   typeof(AgsWindow),
                                   new(new List<IAgs>()));
 
-   public List<string> SeparatorChars { get; } = ["=", "<=", "=>", "<", ">", "?=", "!?"];
+   public List<string> SeparatorChars { get; } = ["=", "<=", "=>", "<", ">", "?=", "!?", "!="];
 
    private void AgsItemsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
    {
@@ -54,6 +54,8 @@ public partial class AgsWindow
          return;
 
       if (type.ImplementsGenericInterface(typeof(ICollectionProvider<>), out var implementedType) &&
+          implementedType != null ||
+          type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out implementedType) &&
           implementedType != null)
       {
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);

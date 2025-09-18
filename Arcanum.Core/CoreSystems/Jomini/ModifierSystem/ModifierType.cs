@@ -7,7 +7,7 @@ public enum ModifierType
 {
    Integer,
    Boolean,
-   Floating,
+   Float,
    Percentage,
    ScriptedValue,
 }

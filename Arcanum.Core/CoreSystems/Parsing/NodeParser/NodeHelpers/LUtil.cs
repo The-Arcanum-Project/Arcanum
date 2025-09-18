@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -47,6 +48,30 @@ public static class LUtil
          location = Location.Empty;
          return false;
       }
+
+      return true;
+   }
+
+   public static bool ValidateNodeSeparatorAndNumberValue(ContentNode node,
+                                                          LocationContext ctx,
+                                                          string actionName,
+                                                          string source,
+                                                          ref bool validationResult,
+                                                          [MaybeNullWhen(false)] out string value)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult))
+      {
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNodeOptionalUnary(ctx,
+                                                      actionName,
+                                                      source,
+                                                      ref validationResult,
+                                                      out value,
+                                                      out _))
+         return false;
 
       return true;
    }

@@ -44,8 +44,8 @@ public static class SavingUtil
          case SavingValueType.IAgs:
             throw new InvalidOperationException("IAgs type needs to be handled in advance");
          case SavingValueType.Modifier:
-            var instance = (ModValInstance)value;
-            return $"{instance.Definition.UniqueKey} = {instance.FormatModifierToCode()}";
+            var instance = (IModifierPattern)value;
+            return $"{instance.UniqueId} = {instance.FormatModifierPatternToCode()}";
          default:
             throw new ArgumentOutOfRangeException(nameof(svl), svl, null);
       }
@@ -148,7 +148,7 @@ public static class SavingUtil
          return SavingValueType.IAgs;
       if (item is IEnumerable enumerable)
          return GetSavingValueTypeForCollection(enumerable);
-      if (item is ModValInstance)
+      if (item is IModifierPattern)
          return SavingValueType.Modifier;
 
       throw new NotSupportedException($"Type {type} is not supported as item key type.");

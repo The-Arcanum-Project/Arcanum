@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class RangeCollectionAnalyzer : DiagnosticAnalyzer
 {
-   public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Diagnostics.IncorrectCollectionType,];
+   public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Diagnostics.IncorrectCollectionType];
 
    public override void Initialize(AnalysisContext context)
    {

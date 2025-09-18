@@ -38,7 +38,7 @@ public class INUIAnalyzer : DiagnosticAnalyzer
       // Get the symbols for the interfaces we care about.
       var inuiInterfaceSymbol = context.Compilation.GetTypeByMetadataName("Arcanum.Core.CoreSystems.NUI.INUI");
       var collectionProviderInterfaceSymbol =
-         context.Compilation.GetTypeByMetadataName("Arcanum.Core.CoreSystems.NUI.ICollectionProvider`1");
+         context.Compilation.GetTypeByMetadataName("Arcanum.Core.CoreSystems.NUI.IEu5ObjectProvider`1");
 
       if (inuiInterfaceSymbol == null || collectionProviderInterfaceSymbol == null)
          return;

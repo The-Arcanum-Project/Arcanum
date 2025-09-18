@@ -51,6 +51,15 @@ public class AgsSettings
    public List<Enum> SaveOrder { get; set; } = [];
 
    /// <summary>
+   /// If true, first properties and then collections will appear in alphabetical order. <br/>
+   /// If false, everything will be sorted alphabetically together. <br/>
+   /// Default is true.
+   /// </summary>
+   [Description("If true, first properties and then collections will appear in alphabetical order. If false, everything will be sorted alphabetically together.")]
+   [DefaultValue(true)]
+   public bool SortCollectionsAndPropertiesSeparately { get; set; } = true;
+
+   /// <summary>
    /// The format to use when saving. <br/>
    /// Default is <see cref="SavingFormat.Default"/>
    /// </summary>

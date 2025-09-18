@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -549,6 +550,43 @@ public static class ParsingToolBox
             continue;
 
          results.Add(mvi);
+      }
+
+      value = results;
+      return true;
+   }
+
+   /// <summary>
+   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of AudioTag.
+   /// Each ContentNode is expected to define an AudioTag.
+   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="value"></param>
+   /// <param name="validation"></param>
+   /// <returns></returns>
+   public static bool ArcTryParse_ObservableRangeCollection_AudioTag(
+      BlockNode node,
+      LocationContext ctx,
+      string actionName,
+      string source,
+      [MaybeNullWhen(false)] out ObservableRangeCollection<AudioTag> value,
+      ref bool validation)
+   {
+      var results = new ObservableRangeCollection<AudioTag>();
+
+      foreach (var statement in node.Children)
+      {
+         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
+            continue;
+
+         if (!cn.TryParseAudioTagInstance(ctx, actionName, source, ref validation, out var tag))
+            continue;
+
+         results.Add(tag);
       }
 
       value = results;

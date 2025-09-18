@@ -626,7 +626,7 @@ public class ParsingError : ILazySingleton
        "Inconclusive Modifier Type Definition",
        DiagnosticSeverity.Warning,
        "The modifier type for {0} could not be conclusively determined.",
-       "The modifier {0} has to be uniquely inferable as one of the types: Integer, Boolean, Floating, Identifier, or Percentage. But inconsistent or insufficient data was found to make a clear determination: {1}.",
+       "The modifier {0} has to be uniquely inferable as one of the types: Integer, Boolean, Float, Identifier, or Percentage. But inconsistent or insufficient data was found to make a clear determination: {1}.",
        DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The modifier key that is undefined</param>
@@ -656,4 +656,13 @@ public class ParsingError : ILazySingleton
                                                                               "The modifier type for '{0}' could not be inferred: {1}.",
                                                                               "The properties of the modifier definition are conflicting or insufficient to determine a valid type. Please review the definition for inconsistencies.",
                                                                               DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The audio tag value that is invalid</param>
+   public DiagnosticDescriptor InvalidAudioTagValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                   68,
+                                                                   "Invalid Audio Tag Value",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "The audio tag value '{0}' is invalid.",
+                                                                   "The provided audio tag value does not conform to the expected float format or range. Please ensure it is a valid audio tag.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
 }

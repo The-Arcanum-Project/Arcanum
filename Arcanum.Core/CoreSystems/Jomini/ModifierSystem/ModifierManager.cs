@@ -3,6 +3,7 @@ using System.Globalization;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
 
@@ -15,42 +16,55 @@ public static class ModifierManager
    /// the value is validated against that type, and instance is created and returned. <br/>
    /// If any of these steps fail, a diagnostic warning is logged and false is returned.
    /// </summary>
-   /// <param name="key"></param>
+   /// <param name="ctx"></param>
+   /// <param name="nodeKeyNode"></param>
+   /// <param name="source"></param>
    /// <param name="value"></param>
+   /// <param name="validation"></param>
    /// <param name="instance"></param>
    /// <returns></returns>
-   public static bool TryCreateModifierInstance(string key,
-                                                object value,
+   public static bool TryCreateModifierInstance(LocationContext ctx,
+                                                Token nodeKeyNode,
+                                                string source,
+                                                string value,
+                                                ref bool validation,
                                                 [MaybeNullWhen(false)] out ModValInstance instance)
    {
+      var key = nodeKeyNode.GetLexeme(source);
       instance = null;
       if (!Globals.ModifierDefinitions.TryGetValue(key, out var definition))
       {
-         DiagnosticException.LogWarning(LocationContext.Empty,
+         ctx.SetPosition(nodeKeyNode);
+         DiagnosticException.LogWarning(ctx,
                                         ParsingError.Instance.UndefinedModifierKey,
                                         nameof(ModifierManager),
                                         key,
                                         value);
+         validation = false;
          return false;
       }
 
       if (!InferModifierType(definition, out var inferredType) && inferredType is not null)
       {
-         DiagnosticException.LogWarning(LocationContext.Empty,
+         ctx.SetPosition(nodeKeyNode);
+         DiagnosticException.LogWarning(ctx,
                                         ParsingError.Instance.ImpossibleModifierTypeInferring,
                                         nameof(ModifierManager),
                                         key,
                                         "Could not infer modifier type from definition.");
+         validation = false;
          return false;
       }
 
       if (!TryConvertValueToType(value, inferredType!.Value, out var convertedValue))
       {
-         DiagnosticException.LogWarning(LocationContext.Empty,
+         ctx.SetPosition(nodeKeyNode);
+         DiagnosticException.LogWarning(ctx,
                                         ParsingError.Instance.InvalidModifierValueType,
                                         nameof(ModifierManager),
                                         key,
                                         value.GetType().Name);
+         validation = false;
          return false;
       }
 
@@ -70,10 +84,10 @@ public static class ModifierManager
       {
          convertedValue = type switch
          {
-            ModifierType.Boolean => Convert.ToBoolean(value, CultureInfo.InvariantCulture),
+            ModifierType.Boolean => value.Equals("yes") || value.Equals("no"),
             ModifierType.ScriptedValue => Convert.ToString(value, CultureInfo.InvariantCulture),
             ModifierType.Percentage => Convert.ToDouble(value, CultureInfo.InvariantCulture),
-            ModifierType.Floating => Convert.ToSingle(value, CultureInfo.InvariantCulture),
+            ModifierType.Float => Convert.ToSingle(value, CultureInfo.InvariantCulture),
             ModifierType.Integer => Convert.ToInt32(value, CultureInfo.InvariantCulture),
             _ => null,
          };
@@ -92,7 +106,7 @@ public static class ModifierManager
          ModifierType.Boolean => value is bool,
          ModifierType.ScriptedValue => value is string,
          ModifierType.Percentage => value is float or double or int,
-         ModifierType.Floating => value is float or double,
+         ModifierType.Float => value is float or double,
          ModifierType.Integer => value is int,
          _ => false,
       };
@@ -131,7 +145,7 @@ public static class ModifierManager
 
       if (IsFloatingModifier(definition))
       {
-         type = ModifierType.Floating;
+         type = ModifierType.Float;
          return true;
       }
 
@@ -152,7 +166,7 @@ public static class ModifierManager
    /// <returns></returns>
    /// <exception cref="InvalidOperationException"></exception>
    /// <exception cref="ArgumentOutOfRangeException"></exception>
-   public static string FormatModifierInstance(this ModValInstance instance)
+   public static string FormatModifierPattern(this IModifierPattern instance)
    {
       return instance.Type switch
       {
@@ -161,11 +175,11 @@ public static class ModifierManager
                                        throw new InvalidOperationException("Identifier modifier value cannot be null"),
          ModifierType.Percentage =>
             $"{Convert.ToDouble(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}%",
-         ModifierType.Floating =>
+         ModifierType.Float =>
             $"{Convert.ToSingle(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}",
          ModifierType.Integer => Convert.ToInt32(instance.Value).ToString(),
          _ => throw new
-                 ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.Definition.UniqueKey}"),
+                 ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.UniqueId}"),
       };
    }
 
@@ -176,24 +190,24 @@ public static class ModifierManager
    /// <returns></returns>
    /// <exception cref="InvalidOperationException"></exception>
    /// <exception cref="ArgumentOutOfRangeException"></exception>
-   public static string FormatModifierToCode(this ModValInstance instance)
+   public static string FormatModifierPatternToCode(this IModifierPattern instance)
    {
       switch (instance.Type)
       {
          case ModifierType.Boolean:
-            return (bool)instance.Value ? "true" : "false";
+            return (bool)instance.Value ? "yes" : "no";
          case ModifierType.ScriptedValue:
             return instance.Value.ToString() ??
                    throw new InvalidOperationException("Identifier modifier value cannot be null");
          case ModifierType.Percentage:
-         case ModifierType.Floating:
+         case ModifierType.Float:
             return
                $"{Convert.ToDouble(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}";
          case ModifierType.Integer:
             return Convert.ToInt32(instance.Value).ToString();
          default:
             throw new
-               ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.Definition.UniqueKey}");
+               ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.UniqueId}");
       }
    }
 

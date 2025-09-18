@@ -25,10 +25,34 @@ public class AgsObjectSavingContext
    {
       Ags = ags;
       Settings = ags.AgsSettings;
-      OrderedProperties = Settings.CustomSaveOrder
-                             ? SortBySettings(ags.SaveableProps, Settings.SaveOrder)
-                             : ags.SaveableProps.OrderBy(p => p.Keyword).ToList();
+      OrderedProperties = SortSaveableProperties(ags);
       CommentChar = commentChar;
+   }
+
+   private List<PropertySavingMetadata> SortSaveableProperties(IAgs ags)
+   {
+      if (Settings.CustomSaveOrder)
+         return SortBySettings(ags.SaveableProps, Settings.SaveOrder);
+
+      if (Settings.SortCollectionsAndPropertiesSeparately)
+      {
+         List<PropertySavingMetadata> collections = [];
+         List<PropertySavingMetadata> properties = [];
+
+         foreach (var property in ags.SaveableProps)
+            if (property.IsCollection)
+               collections.Add(property);
+            else
+               properties.Add(property);
+
+         collections = collections.OrderBy(p => p.Keyword).ToList();
+         properties = properties.OrderBy(p => p.Keyword).ToList();
+
+         properties.AddRange(collections);
+         return properties;
+      }
+
+      return ags.SaveableProps.OrderBy(p => p.Keyword).ToList();
    }
 
    private static List<PropertySavingMetadata> SortBySettings(IReadOnlyList<PropertySavingMetadata> propertiesToSave,
@@ -54,12 +78,21 @@ public class AgsObjectSavingContext
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
          Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
 
+      var isInCollections = false;
+
       using (sb.BlockWithName(Ags, Settings.Format))
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
+            var prop = OrderedProperties[i];
+            if (prop.IsCollection && !isInCollections)
+            {
+               sb.AppendLine();
+               isInCollections = true;
+            }
+
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
-            OrderedProperties[i].Format(Ags, sb, CommentChar, Settings);
+            prop.Format(Ags, sb, CommentChar, Settings);
          }
    }
 }

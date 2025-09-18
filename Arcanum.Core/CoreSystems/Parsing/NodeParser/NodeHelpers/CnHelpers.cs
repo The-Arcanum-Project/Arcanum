@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
@@ -573,23 +574,44 @@ public static class CnHelpers
    {
       modValInstance = null;
 
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult))
+      if (!LUtil.ValidateNodeSeparatorAndNumberValue(node,
+                                                     ctx,
+                                                     actionName,
+                                                     source,
+                                                     ref validationResult,
+                                                     out var value))
          return false;
 
-      if (!node.Value.IsLiteralValueNodeOptionalUnary(ctx,
-                                                      actionName,
-                                                      source,
-                                                      ref validationResult,
-                                                      out var value,
-                                                      out _))
+      return ModifierManager.TryCreateModifierInstance(ctx,
+                                                       node.KeyNode,
+                                                       source,
+                                                       value,
+                                                       ref validationResult,
+                                                       out modValInstance);
+   }
+
+   public static bool TryParseAudioTagInstance(this ContentNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               ref bool validationResult,
+                                               [MaybeNullWhen(false)] out AudioTag audioTagInstance)
+   {
+      audioTagInstance = null;
+
+      if (!LUtil.ValidateNodeSeparatorAndNumberValue(node,
+                                                     ctx,
+                                                     actionName,
+                                                     source,
+                                                     ref validationResult,
+                                                     out var value))
          return false;
 
-      if (!ModifierManager.TryCreateModifierInstance(node.KeyNode.GetLexeme(source), value, out modValInstance))
-      {
-         validationResult = false;
-         return false;
-      }
-
-      return true;
+      return AudioTagsManager.TryCreateModifierInstance(ctx,
+                                                        node.KeyNode,
+                                                        source,
+                                                        value,
+                                                        ref validationResult,
+                                                        out audioTagInstance);
    }
 }
