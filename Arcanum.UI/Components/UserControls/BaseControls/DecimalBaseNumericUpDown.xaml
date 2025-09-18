@@ -39,14 +39,17 @@
                      TextChanged = "NUDTextBox_TextChanged"
                      GotKeyboardFocus = "NudTextBox_GotKeyboardFocus"
                      Foreground = "{StaticResource DefaultForeColorBrush}"
-                     FontFamily = "{StaticResource DefaultFont}"
+                     FontFamily = "{Binding FontFamily, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      FontSize = "{StaticResource DefaultFontSize}"
                      FontWeight = "{StaticResource DefaultFontWeight}"
                      CaretBrush = "{StaticResource DefaultForeColorBrush}"
+                     VerticalContentAlignment = "Center"
                      Background = "Transparent"
                      BorderThickness = "0"
                      VerticalAlignment = "Stretch"
                      HorizontalAlignment = "Stretch"
+                     VerticalScrollBarVisibility = "Disabled"
+                     TextWrapping = "NoWrap"
                      Margin = "1"
                      Padding = "0">
             </TextBox>

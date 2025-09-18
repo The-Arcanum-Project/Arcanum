@@ -62,7 +62,8 @@ public partial class NUIObjectView
          return;
 
       if (type.ImplementsGenericInterface(typeof(ICollectionProvider<>), out var implementedType) &&
-          implementedType != null)
+          implementedType != null ||
+          type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out implementedType) && implementedType != null)
       {
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
          if (methodInfo != null)

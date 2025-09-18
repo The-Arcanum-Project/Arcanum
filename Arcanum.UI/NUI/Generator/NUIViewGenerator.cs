@@ -547,6 +547,7 @@ public static class NUIViewGenerator
          MinValue = float.MinValue,
          MaxValue = float.MaxValue,
          StepSize = 0.1f,
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -559,6 +560,7 @@ public static class NUIViewGenerator
          Height = height,
          FontSize = fontSize,
          Margin = new(0),
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       return viewer;
    }
@@ -571,6 +573,9 @@ public static class NUIViewGenerator
          FontSize = fontSize,
          Margin = new(0),
          BorderThickness = new(1, 1, 1, 1),
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+         TextWrapping = TextWrapping.NoWrap,
       };
       textBox.SetBinding(TextBox.TextProperty, binding);
       return textBox;
@@ -586,6 +591,7 @@ public static class NUIViewGenerator
          Margin = new(0),
          VerticalAlignment = VerticalAlignment.Center,
          IsThreeState = true,
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
       return checkBox;
@@ -604,6 +610,7 @@ public static class NUIViewGenerator
          FullItemsSource = Enum.GetValues(enumType),
          IsDropdownOnly = true,
          IsReadOnly = true,
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       comboBox.SetBinding(Selector.SelectedItemProperty, binding);
       return comboBox;
@@ -620,6 +627,7 @@ public static class NUIViewGenerator
          InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
          MinValue = int.MinValue,
          MaxValue = int.MaxValue,
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       numericUpDown.SetBinding(BaseNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -638,6 +646,7 @@ public static class NUIViewGenerator
          MinValue = decimal.MinValue,
          MaxValue = decimal.MaxValue,
          StepSize = new(0.1),
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };
       numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -648,7 +657,13 @@ public static class NUIViewGenerator
                                                    int height = 23,
                                                    int fontSize = 12)
    {
-      var jomColView = new JominiColorView(color) { ColorTextBlock = { FontSize = fontSize } };
+      var jomColView = new JominiColorView(color)
+      {
+         ColorTextBlock =
+         {
+            FontSize = fontSize, FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         },
+      };
       jomColView.ColorTextBlock.SetBinding(TextBlock.TextProperty, binding);
       jomColView.Height = height;
       jomColView.Margin = new(0);

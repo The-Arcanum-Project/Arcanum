@@ -84,7 +84,7 @@
                                                       Grid.Column = "0"
                                                       HorizontalAlignment = "Stretch"
                                                       VerticalAlignment = "Center"
-                                                      Margin = "0, 1, 1, 1"
+                                                      Margin = "2, 1, 1, 1"
                                                       IsReadOnly = "{TemplateBinding IsReadOnly}"
                                                       Visibility = "Visible"
                                                       Focusable = "True"
@@ -93,7 +93,9 @@
                                                       Foreground = "{TemplateBinding Foreground}"
                                                       CaretBrush = "{TemplateBinding Foreground}"
                                                       Padding = "{TemplateBinding Padding}"
-                                                      VerticalContentAlignment = "{TemplateBinding VerticalContentAlignment}" />
+                                                      VerticalContentAlignment = "{TemplateBinding VerticalContentAlignment}"
+                                                      VerticalScrollBarVisibility = "Disabled"
+                                                      TextWrapping = "NoWrap" />
 
                         <!-- ADDED BACK: The arrow Path, now in the second column -->
                         <Path Name = "Arrow"

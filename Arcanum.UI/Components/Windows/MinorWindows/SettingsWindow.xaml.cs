@@ -28,20 +28,8 @@ public partial class SettingsWindow
 
    private void InitTabs(TabControl tc, object obj)
    {
-#if DEBUG_OBJ
-      // _allOptionsTestObject = new();
-      // var item = new TabItem
-      // {
-      //    Header = "PropGirdDebug",
-      //    Content = new PropertyGrid
-      //    {
-      //       SelectedObject = _allOptionsTestObject, Name = _allOptionsTestObject.GetType().Name,
-      //    },
-      // };
-      // tc.Items.Add(item);
-#endif
-
       var settingsProperties = GetPublicProperties(obj);
+      settingsProperties.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
 
       foreach (var property in settingsProperties)
       {
@@ -54,6 +42,7 @@ public partial class SettingsWindow
                          ? GenerateSubMenu(property.GetValue(obj)!)
                          : new PropertyGrid
                          {
+                            LabelWidth = subMenuName != null ? 100 : 250,
                             SelectedObject = property.GetValue(obj),
                             Name = property.Name,
                             Margin = new(0),
@@ -64,6 +53,19 @@ public partial class SettingsWindow
          };
          tc.Items.Add(tabItem);
       }
+   }
+
+   private TabControl GenerateSubMenu(object subMenuObject)
+   {
+      TabControl tc = new()
+      {
+         Margin = new(0),
+         Padding = new(0),
+         TabStripPlacement = Dock.Left,
+      };
+
+      InitTabs(tc, subMenuObject);
+      return tc;
    }
 
    public void NavigateToSetting(string[] path)
@@ -92,19 +94,6 @@ public partial class SettingsWindow
 
          i++;
       }
-   }
-
-   private TabControl GenerateSubMenu(object subMenuObject)
-   {
-      TabControl tc = new()
-      {
-         Margin = new(0),
-         Padding = new(0),
-         TabStripPlacement = Dock.Left,
-      };
-
-      InitTabs(tc, subMenuObject);
-      return tc;
    }
 
    private static List<PropertyInfo> GetPublicProperties(object obj)
