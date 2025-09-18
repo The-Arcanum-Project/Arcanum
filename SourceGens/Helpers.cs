@@ -39,7 +39,14 @@ public static class Helpers
                                                        EXPLICIT_PROPERTIES_ATTRIBUTE_STRING) ==
                       null;
 
-      var finalMembers = new List<ISymbol>();
+      List<string> checkedMembers = [];
+      List<ISymbol> finalMembers = [];
+
+      var interfaceMembers = classSymbol.AllInterfaces
+                                        .SelectMany(i => i.GetMembers())
+                                        .ToDictionary(m => m.Name, m => m);
+      FilterModifiableMembers(classSymbol, context, interfaceMembers, inclusive, finalMembers, checkedMembers, true);
+
       var potentialMembers = new Dictionary<string, ISymbol>();
 
       // --- Gather all potential members from the entire inheritance hierarchy ---
@@ -50,7 +57,7 @@ public static class Helpers
          {
             // Prioritize members from the most derived class.
             // If a member with the same name exists (due to 'new'), it's already been added.
-            if (potentialMembers.ContainsKey(member.Name))
+            if (potentialMembers.ContainsKey(member.Name) || checkedMembers.Contains(member.Name))
                continue;
 
             potentialMembers.Add(member.Name, member);
@@ -59,9 +66,23 @@ public static class Helpers
          currentType = currentType.BaseType;
       }
 
+      FilterModifiableMembers(classSymbol, context, potentialMembers, inclusive, finalMembers, checkedMembers);
+
+      return finalMembers;
+   }
+
+   private static void FilterModifiableMembers(INamedTypeSymbol classSymbol,
+                                               SourceProductionContext context,
+                                               Dictionary<string, ISymbol> potentialMembers,
+                                               bool inclusive,
+                                               List<ISymbol> finalMembers,
+                                               List<string> checkedMembers,
+                                               bool isInterface = false)
+   {
       // --- Iterate through the potential members and apply the rules ---
       foreach (var member in potentialMembers.Values)
       {
+         checkedMembers.Add(member.Name);
          // Must not be static
          if (member.IsStatic)
             continue;
@@ -79,14 +100,20 @@ public static class Helpers
             if (property.SetMethod == null || !IsAccessibleFrom(property.SetMethod, classSymbol))
                continue;
 
-         // --- Check for Ignore attribute anywhere in the hierarchy ---
-         // Find the member in the most-derived class that might be hiding the base member.
-         var mostDerivedMember = classSymbol.FindImplementationForInterfaceMember(member) ??
-                                 classSymbol.GetMembers(member.Name).FirstOrDefault() ?? member;
+         var addAttr = member.GetAttributes()
+                             .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                   MODIFIABLE_ATTRIBUTE_STRING);
 
-         var ignoreAttr = mostDerivedMember.GetAttributes()
-                                           .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                                 IGNORE_MODIFIABLE_ATTRIBUTE_STRING);
+         if (isInterface && addAttr == null)
+            continue; // Require [AddModifiable] on interface members.
+
+         if (member.Name.Equals("Source"))
+         {
+         }
+
+         var ignoreAttr = member.GetAttributes()
+                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                      IGNORE_MODIFIABLE_ATTRIBUTE_STRING);
 
          if (ignoreAttr != null)
          {
@@ -104,11 +131,6 @@ public static class Helpers
             continue;
          }
 
-         // --- Check for Add attribute on the most relevant member ---
-         var addAttr = mostDerivedMember.GetAttributes()
-                                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                              MODIFIABLE_ATTRIBUTE_STRING);
-
          if (!inclusive) // Explicit Mode
          {
             // Must have [AddModifiable] to be included.
@@ -117,11 +139,17 @@ public static class Helpers
          }
          else // Implicit Mode
          {
-            if (addAttr != null)
+            var isOriginallyFromInterface = member.ContainingType.TypeKind == TypeKind.Interface;
+            if (isOriginallyFromInterface)
             {
-               // [AddModifiable] is redundant in implicit mode unless it's on an inherited member
-               // that is NOT from the class itself.
-               if (SymbolEqualityComparer.Default.Equals(mostDerivedMember.ContainingType, classSymbol))
+               // It's from an interface. The implementation must have [AddModifiable].
+               if (addAttr == null)
+                  continue;
+            }
+            else
+            {
+               if (addAttr != null &&
+                   SymbolEqualityComparer.Default.Equals(member.ContainingType, classSymbol))
                {
                   var location = addAttr.ApplicationSyntaxReference?.GetSyntax().GetLocation();
                   if (location != null)
@@ -131,18 +159,10 @@ public static class Helpers
                   }
                }
             }
-            else if (!SymbolEqualityComparer.Default.Equals(member.ContainingType, classSymbol))
-            {
-               // In implicit mode, inherited members MUST be opted-in with [AddModifiable].
-               // Since addAttr is null, we skip this inherited member.
-               continue;
-            }
          }
 
          finalMembers.Add(member);
       }
-
-      return finalMembers;
    }
 
    private static bool IsAccessibleFrom(ISymbol member, INamedTypeSymbol accessingType)
