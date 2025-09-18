@@ -195,7 +195,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    private static string PropCustomParserMethodName(PropertyMetadata prop)
-      => prop.CustomParserMethodName ?? $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}";
+   {
+      if (prop.CustomParserMethodName != null)
+         return prop.CustomParserMethodName;
+
+      return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}";
+   }
 
    private static string FlagsPrefix(PropertyMetadata prop) => IsFlagsEnum(prop) ? "Flags" : string.Empty;
 
@@ -249,7 +254,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     out var propTypeName,
                                     out var actionName,
                                     out var toolMethodCall))
+         {
+            sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{toolMethodCall}'.");
             continue;
+         }
 
          sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
          sb.AppendLine("    {");
@@ -324,7 +332,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
          wrapperMethodName = null!;
          propTypeName = null!;
          actionName = null!;
-         toolMethodCall = null!;
+         toolMethodCall = prop.CustomParserMethodName;
          return true;
       }
 
@@ -335,16 +343,16 @@ public class ParserSourceGenerator : IIncrementalGenerator
       {
          propTypeName = null!;
          actionName = null!;
-         toolMethodCall = null!;
+         toolMethodCall = wrapperMethodName;
          return true;
       }
 
-      var toolMethod = FindMatchingTool(toolboxSymbol, prop.AstNodeType, prop.PropertyType);
+      var toolMethod = FindMatchingTool(toolboxSymbol, prop, out toolMethodCall, out var message);
       if (toolMethod == null)
       {
          propTypeName = null!;
          actionName = null!;
-         toolMethodCall = null!;
+         toolMethodCall = message;
          return true;
       }
 
@@ -423,9 +431,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
    private const string TOOL_METHOD_PREFIX = "ArcTryParse";
 
    private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
-                                                  string astNodeType,
-                                                  ITypeSymbol propertyType)
+                                                  PropertyMetadata prop,
+                                                  out string expectedToolName,
+                                                  out string message)
    {
+      message = string.Empty;
+      var propertyType = prop.PropertyType;
       if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
       {
          var isFlagsEnum = propertyType.GetAttributes()
@@ -435,6 +446,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                   ? $"{TOOL_METHOD_PREFIX}_FlagsEnum"
                                   : $"{TOOL_METHOD_PREFIX}_Enum";
 
+         expectedToolName = genericToolName;
+
          var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
 
          foreach (var member in methods)
@@ -443,7 +456,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
             if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length < 5)
                continue;
 
-            if (member.Parameters[0].Type.Name != astNodeType)
+            if (member.Parameters[0].Type.Name != prop.AstNodeType)
                continue;
 
             var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
@@ -456,15 +469,16 @@ public class ParserSourceGenerator : IIncrementalGenerator
          return null;
       }
 
-      var expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
-      return FindToolByName(toolboxSymbol, expectedToolName, astNodeType, propertyType);
+      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
+      return FindToolByName(toolboxSymbol, expectedToolName, prop.AstNodeType, propertyType, out message);
    }
 
    // Extracted the search logic to a reusable method
    private static IMethodSymbol? FindToolByName(INamedTypeSymbol toolboxSymbol,
                                                 string toolName,
                                                 string astNodeType,
-                                                ITypeSymbol propertyType)
+                                                ITypeSymbol propertyType,
+                                                out string message)
    {
       foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
       {
@@ -475,10 +489,19 @@ public class ParserSourceGenerator : IIncrementalGenerator
          {
             var outParam = member.Parameters.LastOrDefault(p => p.RefKind == RefKind.Out);
             if (outParam != null && SymbolEqualityComparer.Default.Equals(outParam.Type, propertyType))
+            {
+               message = string.Empty;
                return member;
+            }
+
+            message =
+               $"Found method '{toolName}' but its 'out' parameter type '{outParam?.Type.Name}' does not match the property type '{propertyType.Name}'.";
+            return null;
          }
       }
 
+      message =
+         $"No matching method '{toolName}' found in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
       return null;
    }
 
@@ -488,7 +511,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       {
          var genericTypeName = namedType.Name;
          var itemTypeName = namedType.TypeArguments.FirstOrDefault()?.Name ?? "Object";
-         return $"{prefix}_{genericTypeName}{itemTypeName}";
+         return $"{prefix}_{genericTypeName}_{itemTypeName}";
       }
 
       return $"{prefix}_{type.Name}";

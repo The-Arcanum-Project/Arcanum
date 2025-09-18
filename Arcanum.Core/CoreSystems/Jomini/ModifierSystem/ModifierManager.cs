@@ -29,7 +29,8 @@ public static class ModifierManager
          DiagnosticException.LogWarning(LocationContext.Empty,
                                         ParsingError.Instance.UndefinedModifierKey,
                                         nameof(ModifierManager),
-                                        key);
+                                        key,
+                                        value);
          return false;
       }
 
@@ -43,7 +44,7 @@ public static class ModifierManager
          return false;
       }
 
-      if (!ValidateModifierValue(value, inferredType!.Value))
+      if (!TryConvertValueToType(value, inferredType!.Value, out var convertedValue))
       {
          DiagnosticException.LogWarning(LocationContext.Empty,
                                         ParsingError.Instance.InvalidModifierValueType,
@@ -54,10 +55,34 @@ public static class ModifierManager
       }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-      instance = new(definition, value, inferredType.Value);
+      instance = new(definition, convertedValue, inferredType.Value);
 #pragma warning restore CS0618 // Type or member is obsolete
 
       return true;
+   }
+
+   public static bool TryConvertValueToType(object value,
+                                            ModifierType type,
+                                            [MaybeNullWhen(false)] out object convertedValue)
+   {
+      convertedValue = null;
+      try
+      {
+         convertedValue = type switch
+         {
+            ModifierType.Boolean => Convert.ToBoolean(value, CultureInfo.InvariantCulture),
+            ModifierType.ScriptedValue => Convert.ToString(value, CultureInfo.InvariantCulture),
+            ModifierType.Percentage => Convert.ToDouble(value, CultureInfo.InvariantCulture),
+            ModifierType.Floating => Convert.ToSingle(value, CultureInfo.InvariantCulture),
+            ModifierType.Integer => Convert.ToInt32(value, CultureInfo.InvariantCulture),
+            _ => null,
+         };
+         return convertedValue is not null;
+      }
+      catch
+      {
+         return false;
+      }
    }
 
    public static bool ValidateModifierValue(object value, ModifierType type)

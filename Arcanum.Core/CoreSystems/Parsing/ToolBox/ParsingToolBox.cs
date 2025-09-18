@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -111,7 +112,7 @@ public static class ParsingToolBox
    /// <param name="value"></param>
    /// <param name="validation"></param>
    /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollectionString(
+   public static bool ArcTryParse_ObservableRangeCollection_String(
       BlockNode node,
       LocationContext ctx,
       string actionName,
@@ -514,6 +515,43 @@ public static class ParsingToolBox
          return false;
       }
 
+      return true;
+   }
+
+   /// <summary>
+   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of ModValInstance.
+   /// Each ContentNode is expected to define a ModValInstance.
+   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="value"></param>
+   /// <param name="validation"></param>
+   /// <returns></returns>
+   public static bool ArcTryParse_ObservableRangeCollection_ModValInstance(
+      BlockNode node,
+      LocationContext ctx,
+      string actionName,
+      string source,
+      [MaybeNullWhen(false)] out ObservableRangeCollection<ModValInstance> value,
+      ref bool validation)
+   {
+      var results = new ObservableRangeCollection<ModValInstance>();
+
+      foreach (var statement in node.Children)
+      {
+         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
+            continue;
+
+         if (!cn.TryParseModValInstance(ctx, actionName, source, ref validation, out var mvi))
+            continue;
+
+         results.Add(mvi);
+      }
+
+      value = results;
       return true;
    }
 }

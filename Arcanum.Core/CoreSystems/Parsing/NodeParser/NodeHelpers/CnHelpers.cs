@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -560,6 +561,35 @@ public static class CnHelpers
       }
 
       value = fcn;
+      return true;
+   }
+
+   public static bool TryParseModValInstance(this ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             ref bool validationResult,
+                                             [MaybeNullWhen(false)] out ModValInstance modValInstance)
+   {
+      modValInstance = null;
+
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult))
+         return false;
+
+      if (!node.Value.IsLiteralValueNodeOptionalUnary(ctx,
+                                                      actionName,
+                                                      source,
+                                                      ref validationResult,
+                                                      out var value,
+                                                      out _))
+         return false;
+
+      if (!ModifierManager.TryCreateModifierInstance(node.KeyNode.GetLexeme(source), value, out modValInstance))
+      {
+         validationResult = false;
+         return false;
+      }
+
       return true;
    }
 }

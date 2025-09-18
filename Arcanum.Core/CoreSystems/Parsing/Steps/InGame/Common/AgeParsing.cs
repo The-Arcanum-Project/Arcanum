@@ -26,6 +26,6 @@ public partial class AgeParsing : ParserValidationLoadingService
                                           string source,
                                           ref bool validation)
    {
-      // TODO: @Minnator SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Ages);
+      SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Ages);
    }
 }

@@ -201,4 +201,19 @@ public static class Helpers
 
       return false;
    }
+
+   public static bool IsListOrCollection(IPropertySymbol propertySymbol)
+   {
+      var type = propertySymbol.Type;
+
+      if (type.TypeKind == TypeKind.Array)
+         return false;
+
+      foreach (var @interface in type.AllInterfaces)
+         if (@interface.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IList<T>" ||
+             @interface.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.ICollection<T>")
+            return true;
+
+      return false;
+   }
 }

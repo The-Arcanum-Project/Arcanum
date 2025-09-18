@@ -33,4 +33,9 @@ public class ModValInstance
    /// The type of the modifier, inferred from the definition.
    /// </summary>
    public ModifierType Type { get; }
+
+   public override string ToString()
+   {
+      return $"{Definition.UniqueKey} : {Value} ({Type})";
+   }
 }

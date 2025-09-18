@@ -148,7 +148,7 @@ public class NUISettings
                                                          .Cast<Enum>()
                                                          .ToArray());
 
-   public NUISetting AgeSettings { get; set; } = new(Age.Field.Name,
+   public NUISetting AgeSettings { get; set; } = new(Age.Field.UniqueKey,
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray());

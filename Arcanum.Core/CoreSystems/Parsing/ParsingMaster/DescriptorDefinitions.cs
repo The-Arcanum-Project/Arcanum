@@ -20,6 +20,16 @@ public static class DescriptorDefinitions
                                                            new ColorParser(),
                                                            false);
 
+   public static readonly FileDescriptor ModifierDefinitionDescriptor = new([ColorParser],
+                                                                            [
+                                                                               "game", "main_menu", "common",
+                                                                               "modifier_type_definitions"
+                                                                            ],
+                                                                            ISavingService.Dummy,
+                                                                            new("modifiers", "txt", "#"),
+                                                                            new Steps.MainMenu.Common.ModifierParsing(),
+                                                                            false);
+
    public static readonly FileDescriptor DefaultMapPreDescriptor = new([],
                                                                        ["game", "in_game", "map_data", "default.map"],
                                                                        ISavingService.Dummy,
@@ -159,7 +169,7 @@ public static class DescriptorDefinitions
                                                                   new LanguageParsing(),
                                                                   false);
 
-   public static readonly FileDescriptor AgeDescriptor = new([],
+   public static readonly FileDescriptor AgeDescriptor = new([ModifierDefinitionDescriptor],
                                                              ["game", "in_game", "common", "age"],
                                                              ISavingService.Dummy,
                                                              new("ages", "txt", "#"),
@@ -179,16 +189,6 @@ public static class DescriptorDefinitions
                                                                     new("vegetation", "txt", "#"),
                                                                     new VegetationParsing(),
                                                                     false);
-
-   public static readonly FileDescriptor ModifierDefinitionDescriptor = new([ColorParser],
-                                                                            [
-                                                                               "game", "main_menu", "common",
-                                                                               "modifier_type_definitions"
-                                                                            ],
-                                                                            ISavingService.Dummy,
-                                                                            new("modifiers", "txt", "#"),
-                                                                            new Steps.MainMenu.Common.ModifierParsing(),
-                                                                            false);
 
    public static readonly FileDescriptor TopographyDescriptor = new([],
                                                                     ["game", "in_game", "common", "topography"],

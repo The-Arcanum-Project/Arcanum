@@ -630,12 +630,13 @@ public class ParsingError : ILazySingleton
        DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The modifier key that is undefined</param>
+   /// <param name="1">The value that was attempted to be assigned to the undefined modifier key</param>
    public DiagnosticDescriptor UndefinedModifierKey { get; } = new(DiagnosticCategory.Parsing,
                                                                    65,
                                                                    "Undefined Modifier Key",
                                                                    DiagnosticSeverity.Error,
                                                                    "The modifier key '{0}' is not defined.",
-                                                                   "The modifier key '{0}' was referenced but does not exist in the current context. Please ensure it is defined before use.",
+                                                                   "The modifier key '{0}' was referenced with value '{1}' but does not exist in the current context. Please ensure it is defined before use.",
                                                                    DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The modifier key that has an invalid value type</param>

@@ -100,17 +100,30 @@ public class PropertySavingMetadata
       if (!settings.SkipDefaultValues)
          return false;
 
-      if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
+      switch (ValueType)
       {
-         if (DefaultValue != null && Convert.ToInt64(DefaultValue).Equals(Convert.ToInt64(value)))
+         case SavingValueType.FlagsEnum or SavingValueType.Enum:
+         {
+            if (DefaultValue != null && Convert.ToInt64(DefaultValue).Equals(Convert.ToInt64(value)))
+               return true;
+
+            break;
+         }
+         case SavingValueType.Float when DefaultValue == null && value == null!:
+         case SavingValueType.Float when DefaultValue != null &&
+                                         Math.Abs(Convert.ToDouble(DefaultValue) - Convert.ToDouble(value)) < 0.0001:
             return true;
-      }
-      else
-      {
-         if (DefaultValue == null && value == null!)
-            return true;
-         if (DefaultValue != null && DefaultValue.Equals(value))
-            return true;
+         case SavingValueType.Float:
+            break;
+         default:
+         {
+            if (DefaultValue == null && value == null!)
+               return true;
+            if (DefaultValue != null && DefaultValue.Equals(value))
+               return true;
+
+            break;
+         }
       }
 
       return false;

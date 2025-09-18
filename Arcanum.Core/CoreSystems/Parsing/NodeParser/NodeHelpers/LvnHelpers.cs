@@ -12,39 +12,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
 public static class LvnHelpers
 {
-   public static bool IsLiteralValueNode(this ValueNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         [MaybeNullWhen(false)] out LiteralValueNode value)
-   {
-      if (node is not LiteralValueNode lvn)
-      {
-         ctx.SetPosition(node);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidNodeType,
-                                        actionName,
-                                        node.GetType().Name,
-                                        nameof(LiteralValueNode),
-                                        "N/A");
-         value = null!;
-         return false;
-      }
-
-      value = lvn;
-      return true;
-   }
-
-   public static bool IsLiteralValueNode(this ValueNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         ref bool validationResult,
-                                         [MaybeNullWhen(false)] out LiteralValueNode value)
-   {
-      var returnVal = node.IsLiteralValueNode(ctx, actionName + ".ValueNode.IsLiteralValueNode", out value);
-      validationResult &= returnVal;
-      return returnVal;
-   }
-
    public static bool TryParseLocationFromLvn(this LiteralValueNode lvn,
                                               LocationContext ctx,
                                               string actionName,

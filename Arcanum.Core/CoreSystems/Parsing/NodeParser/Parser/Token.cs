@@ -8,6 +8,8 @@ public readonly struct Token
    public int Line { get; }
    public int Column { get; }
 
+   public int End => Start + Length; // The ending index (exclusive)
+
    public Token(TokenType type, int start, int length, int line, int column)
    {
       Type = type;
@@ -27,6 +29,17 @@ public readonly struct Token
          return "";
 
       return source.Substring(Start, Length);
+   }
+
+   public string GetLexeme(string source, int startColumn)
+   {
+      var offset = Column - startColumn;
+      var newLength = Length + offset;
+      var newStart = Start - offset;
+      if (newLength == 0 || newStart + newLength > source.Length)
+         return "";
+
+      return source.Substring(newStart, newLength);
    }
 
    /// <summary>
