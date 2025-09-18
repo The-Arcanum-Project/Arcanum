@@ -63,4 +63,9 @@ public partial class Debug_Panel
    {
       new AgsWindow().Show();
    }
+
+   private void OpenTestWindowButton_Click(object sender, RoutedEventArgs e)
+   {
+      new ExportFileWindow().Show();
+   }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -24,12 +25,28 @@ namespace Arcanum.Core.GameObjects.BaseTypes;
 /// 
 /// </summary>
 /// <typeparam name="T">The type of the object itself</typeparam>
-public interface IEu5Object<out T> : ISearchable, INUI, IAgs, ICollectionProvider<T>, IEmpty<T>
+public interface IEu5Object<out T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
    where T : IEu5Object<T>, new()
 {
+   /// <summary>
+   /// Provides the default implementation for the non-generic gateway method from IEu5Object.
+   /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
+   /// </summary>
+   IEnumerable IEu5Object.GetGlobalItemsNonGeneric() => T.GetGlobalItems();
+}
+
+public interface IEu5Object : ISearchable, INUI, IAgs
+{
+   [SuppressAgs]
    [AddModifiable]
    public string UniqueKey { get; set; }
 
    [SuppressAgs]
    public FileObj Source { get; set; }
+
+   /// <summary>
+   /// Provides the default implementation for the non-generic gateway method from IEu5Object.
+   /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
+   /// </summary>
+   public IEnumerable GetGlobalItemsNonGeneric();
 }
