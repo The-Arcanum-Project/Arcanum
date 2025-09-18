@@ -36,8 +36,8 @@
         <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Components\Helpers\" />
         <Folder Include="Components\Models\" />
+        <Folder Include="Components\UserControls\ViewModels\"/>
         <Folder Include="FeatureSpotlight\" />
         <Folder Include="HostUIServices\" />
     </ItemGroup>

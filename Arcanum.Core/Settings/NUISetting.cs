@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
@@ -189,4 +190,15 @@ public class NUISettings
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ModValInstanceSettings { get; set; } = new(ModValInstance.Field.Type,
+                                                                Enum.GetValues<ModValInstance.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ModValInstance.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ModValInstance.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray());
 }

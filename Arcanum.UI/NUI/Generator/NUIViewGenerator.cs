@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -454,6 +455,8 @@ public static class NUIViewGenerator
          Nx.ForceGet(targets[0], nxProp, ref temp);
          element = GetJominiColorUI(binding, temp);
       }
+      else if (type == typeof(object))
+         element = GetStringUI(binding);
       else
          throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
 
@@ -474,19 +477,7 @@ public static class NUIViewGenerator
                                               null,
                                               null);
 
-      var line = new Rectangle
-      {
-         Height = 1,
-         Fill = Brushes.Transparent,
-         Stroke = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
-         StrokeThickness = 1,
-         StrokeDashArray = new([4, 6]),
-         StrokeDashCap = PenLineCap.Flat,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Bottom,
-         SnapsToDevicePixels = true,
-         Margin = new(leftMargin, 0, 5, 3),
-      };
+      var line = GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
 
       var grid = new Grid
@@ -530,6 +521,20 @@ public static class NUIViewGenerator
    private static readonly DoubleToDecimalConverter DoubleToDecimalConverter = new();
    private static readonly EnumConverter EnumConverter = new();
 
+   private static Rectangle GenerateDashedLine(int leftMargin) => new()
+   {
+      Height = 1,
+      Fill = Brushes.Transparent,
+      Stroke = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+      StrokeThickness = 1,
+      StrokeDashArray = new([4, 6]),
+      StrokeDashCap = PenLineCap.Flat,
+      HorizontalAlignment = HorizontalAlignment.Stretch,
+      VerticalAlignment = VerticalAlignment.Bottom,
+      SnapsToDevicePixels = true,
+      Margin = new(leftMargin, 0, 5, 3),
+   };
+
    private static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
    {
       FloatNumericUpDown numericUpDown = new()
@@ -545,6 +550,17 @@ public static class NUIViewGenerator
       };
       numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
       return numericUpDown;
+   }
+
+   private static UserControl GetModValInstanceUI(ModValInstance instance, int height = 23, int fontSize = 12)
+   {
+      ModValViewer viewer = new(instance)
+      {
+         Height = height,
+         FontSize = fontSize,
+         Margin = new(0),
+      };
+      return viewer;
    }
 
    private static CorneredTextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)
@@ -1083,10 +1099,13 @@ public static class NUIViewGenerator
    }
 
    private static void GenerateCollectionItemPreview(NUINavHistory navHistory,
-                                                     IEnumerable<INUI> inuiItems,
+                                                     List<INUI> inuiItems,
                                                      Grid grid,
                                                      IList modifiableList)
    {
+      if (inuiItems.Count == 0)
+         return;
+
       for (var i = grid.Children.Count - 1; i >= 0; i--)
       {
          var child = grid.Children[i];
@@ -1101,7 +1120,12 @@ public static class NUIViewGenerator
 
       foreach (var item in inuiItems.Take(Config.Settings.NUIConfig.MaxCollectionItemsPreviewed))
       {
-         var shortInfo = GenerateShortInfo(item, navHistory);
+         FrameworkElement shortInfo;
+         if (item is ModValInstance instance)
+            shortInfo = GetModValInstanceUI(instance);
+         else
+            shortInfo = GenerateShortInfo(item, navHistory);
+
          grid.RowDefinitions.Add(new() { Height = new(20, GridUnitType.Pixel) });
          grid.Children.Add(shortInfo);
          Grid.SetRow(shortInfo, grid.RowDefinitions.Count - 1);

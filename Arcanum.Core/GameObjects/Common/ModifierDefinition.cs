@@ -164,4 +164,23 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
 
    #endregion
+
+   public override string ToString() => UniqueKey;
+
+   protected bool Equals(ModifierDefinition other) => UniqueKey == other.UniqueKey;
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != GetType())
+         return false;
+
+      return Equals((ModifierDefinition)obj);
+   }
+
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
+   public override int GetHashCode() => UniqueKey.GetHashCode();
 }
