@@ -169,6 +169,34 @@ public static class ModifierManager
       };
    }
 
+   /// <summary>
+   /// Formats a modifier instance's value based on its type.
+   /// </summary>
+   /// <param name="instance"></param>
+   /// <returns></returns>
+   /// <exception cref="InvalidOperationException"></exception>
+   /// <exception cref="ArgumentOutOfRangeException"></exception>
+   public static string FormatModifierToCode(this ModValInstance instance)
+   {
+      switch (instance.Type)
+      {
+         case ModifierType.Boolean:
+            return (bool)instance.Value ? "true" : "false";
+         case ModifierType.ScriptedValue:
+            return instance.Value.ToString() ??
+                   throw new InvalidOperationException("Identifier modifier value cannot be null");
+         case ModifierType.Percentage:
+         case ModifierType.Floating:
+            return
+               $"{Convert.ToDouble(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}";
+         case ModifierType.Integer:
+            return Convert.ToInt32(instance.Value).ToString();
+         default:
+            throw new
+               ArgumentOutOfRangeException($"Unknown modifier type {instance.Type} for modifier {instance.Definition.UniqueKey}");
+      }
+   }
+
    #region Modifier Type Inference Helpers
 
    private static bool IsBooleanModifier(ModifierDefinition definition)

@@ -3,6 +3,8 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.BaseTypes;
@@ -25,5 +27,9 @@ namespace Arcanum.Core.GameObjects.BaseTypes;
 public interface IEu5Object<out T> : ISearchable, INUI, IAgs, ICollectionProvider<T>, IEmpty<T>
    where T : IEu5Object<T>, new()
 {
+   [AddModifiable]
    public string UniqueKey { get; set; }
+
+   [SuppressAgs]
+   public FileObj Source { get; set; }
 }

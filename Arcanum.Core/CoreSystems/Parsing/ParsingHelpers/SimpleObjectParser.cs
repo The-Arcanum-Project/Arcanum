@@ -4,14 +4,15 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class SimpleObjectParser
 {
-   public static void Parse<TTarget>(RootNode rn,
+   public static void Parse<TTarget>(FileObj fileObj,
+                                     RootNode rn,
                                      LocationContext ctx,
                                      string actionStack,
                                      string source,
@@ -22,7 +23,8 @@ public static class SimpleObjectParser
    {
       foreach (var sn in rn.Statements)
       {
-         if (!ValidateAndCreateInstance(ctx,
+         if (!ValidateAndCreateInstance(fileObj,
+                                        ctx,
                                         actionStack,
                                         source,
                                         ref validation,
@@ -57,7 +59,8 @@ public static class SimpleObjectParser
       }
    }
 
-   public static void Parse<TTarget>(RootNode rn,
+   public static void Parse<TTarget>(FileObj fileObj,
+                                     RootNode rn,
                                      LocationContext ctx,
                                      string actionStack,
                                      string source,
@@ -68,7 +71,8 @@ public static class SimpleObjectParser
    {
       foreach (var sn in rn.Statements)
       {
-         if (!ValidateAndCreateInstance(ctx,
+         if (!ValidateAndCreateInstance(fileObj,
+                                        ctx,
                                         actionStack,
                                         source,
                                         ref validation,
@@ -132,7 +136,8 @@ public static class SimpleObjectParser
          }
    }
 
-   private static bool ValidateAndCreateInstance<TTarget>(LocationContext ctx,
+   private static bool ValidateAndCreateInstance<TTarget>(FileObj fileObj,
+                                                          LocationContext ctx,
                                                           string actionStack,
                                                           string source,
                                                           ref bool validation,
@@ -147,7 +152,7 @@ public static class SimpleObjectParser
          return false;
       }
 
-      eu5Obj = new() { UniqueKey = bn.KeyNode.GetLexeme(source) };
+      eu5Obj = new() { UniqueKey = bn.KeyNode.GetLexeme(source), Source = fileObj };
       return true;
    }
 }

@@ -10,24 +10,28 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 
 [ParserFor(typeof(ModifierDefinition))]
-public partial class ModifierParsing : ParserValidationLoadingService
+public partial class ModifierParsing : ParserValidationLoadingService<ModifierDefinition>
 {
    public override List<Type> ParsedObjects { get; } = [typeof(ModifierDefinition)];
    public override string GetFileDataDebugInfo() => $"Parsed Modifier Definitions: {Globals.ModifierDefinitions.Count}";
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<ModifierDefinition> fileObj)
    {
-      Globals.ModifierDefinitions.Clear();
+      foreach (var obj in fileObj.GetEu5Objects())
+         Globals.ModifierDefinitions.Remove(obj.UniqueKey);
+
       return true;
    }
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
+                                          Eu5FileObj<ModifierDefinition> fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation)
    {
-      SimpleObjectParser.Parse(rn,
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
                                ctx,
                                actionStack,
                                source,

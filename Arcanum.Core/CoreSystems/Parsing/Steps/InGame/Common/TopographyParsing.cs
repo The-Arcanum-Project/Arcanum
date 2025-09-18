@@ -10,23 +10,33 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Topography))]
-public partial class TopographyParsing : ParserValidationLoadingService
+public partial class TopographyParsing : ParserValidationLoadingService<Topography>
 {
    public override List<Type> ParsedObjects { get; } = [typeof(Topography)];
    public override string GetFileDataDebugInfo() => $"Parsed Topographies: {Globals.Topography.Count}";
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Topography> fileObj)
    {
-      Globals.Topography.Clear();
+      foreach (var obj in fileObj.GetEu5Objects())
+         Globals.Topography.Remove(obj.UniqueKey);
+
       return true;
    }
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
+                                          Eu5FileObj<Topography> fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation)
    {
-      // TODO: @Minnator SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Topography);
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
+                               ctx,
+                               actionStack,
+                               source,
+                               ref validation,
+                               ParseProperties,
+                               Globals.Topography);
    }
 }

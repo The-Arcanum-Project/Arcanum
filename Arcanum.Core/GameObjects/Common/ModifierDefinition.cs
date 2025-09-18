@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Nexus.Core;
@@ -164,6 +165,10 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
 
    #endregion
+
+   [SuppressAgs]
+   [IgnoreModifiable]
+   public FileObj Source { get; set; } = null!;
 
    public override string ToString() => UniqueKey;
 

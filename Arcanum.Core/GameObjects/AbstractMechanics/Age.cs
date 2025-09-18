@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
@@ -96,6 +97,8 @@ public partial class Age : IEu5Object<Age>
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
 
    #endregion
+
+   public FileObj Source { get; set; }
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
    public string SavingKey => UniqueKey;

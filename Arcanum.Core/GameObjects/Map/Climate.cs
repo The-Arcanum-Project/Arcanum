@@ -1,49 +1,79 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Map;
 
-public partial
-   class Climate(string name) : OldNameKeyDefined(name), INUI, IEmpty<Climate>, ICollectionProvider<Climate>
+[ObjectSaveAs]
+public partial class Climate : IEu5Object<Climate>
 {
    #region Enums
 
    public enum WinterType
    {
+      [EnumAgsData("none", true)]
       None,
+
+      [EnumAgsData("mild", true)]
       Normal,
+
+      [EnumAgsData("normal", true)]
       Mild,
+
+      [EnumAgsData("severe", true)]
       Severe,
    }
 
    #endregion
 
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this object. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueKey { get; set; } = null!;
+   public FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
+
    # region Nexus Properties
 
-   [ParseAs("winter", AstNodeType.ContentNode)]
+   [SaveAs]
+   [DefaultValue(WinterType.None)]
+   [ParseAs("winter")]
    [Description("What type of winter this climate has. Options are None, Light, Normal, and Harsh.")]
    public WinterType Winter { get; set; } = WinterType.None;
 
-   [ParseAs("color", AstNodeType.ContentNode)]
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("color")]
    [Description("The Color the climate has on the map.")]
    public JominiColor Color { get; set; } = JominiColor.Empty;
 
-   [ParseAs("debug_color", AstNodeType.ContentNode)]
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("debug_color")]
    [Description("The debug color the climate has on the climate_screenshot mapmode.")]
    public JominiColor DebugMapColor { get; set; } = JominiColor.Empty;
 
-   [ParseAs("has_precipitation", AstNodeType.ContentNode)]
+   [SaveAs]
+   [DefaultValue(true)]
+   [ParseAs("has_precipitation")]
    [Description("Whether this climate has precipitation.")]
    public bool HasPrecipitation { get; set; } = true;
 
-   [ParseAs("always_winter", AstNodeType.ContentNode)]
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("always_winter")]
    [Description("Whether this climate is always in winter, regardless of the season.")]
-   public bool AlwaysWinter { get; set; } = false;
+   public bool AlwaysWinter { get; set; }
 
    # endregion
 
@@ -52,16 +82,30 @@ public partial
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ClimateSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Climate Empty { get; } = new("Arcanum_Empty_Climate");
+   public static Climate Empty { get; } = new() { UniqueKey = "Arcanum_Empty_Climate" };
    public static IEnumerable<Climate> GetGlobalItems() => Globals.Climates.Values;
 
    #endregion
 
    #region ISearchable
 
-   public override string GetNamespace => nameof(Climate);
-   public override IQueastorSearchSettings.Category SearchCategory
+   public string GetNamespace => $"Map.{nameof(Climate)}";
+   public string ResultName => UniqueKey;
+   public List<string> SearchTerms => [UniqueKey];
+
+   public void OnSearchSelected()
+   {
+      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   }
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueKey, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory
       => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
 
    #endregion
+
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ClimateAgsSettings;
+   public string SavingKey => UniqueKey;
+
+   public override string ToString() => UniqueKey;
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Nexus.Core;
@@ -20,20 +21,34 @@ public static class SavingUtil
       if (svl == SavingValueType.Auto)
          svl = GetSavingValueType(value);
 
-      return svl switch
+      switch (svl)
       {
-         SavingValueType.String => $"\"{value}\"",
-         SavingValueType.Int => ((int)value).ToString(),
-         SavingValueType.Float => ((float)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
-         SavingValueType.Bool => (bool)value ? "yes" : "no",
-         SavingValueType.Double => ((double)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
-         SavingValueType.Identifier => $"{value}",
-         SavingValueType.Color => ((JominiColor)value).ToString(),
-         SavingValueType.Auto => throw new InvalidOperationException("SavingValueType cannot be Auto at this point."),
-         SavingValueType.Enum => value.ToString()!,
-         SavingValueType.IAgs => throw new InvalidOperationException("IAgs type needs to be handled in advance"),
-         _ => throw new ArgumentOutOfRangeException(nameof(svl), svl, null),
-      };
+         case SavingValueType.String:
+            return $"\"{value}\"";
+         case SavingValueType.Int:
+            return ((int)value).ToString();
+         case SavingValueType.Float:
+            return ((float)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+         case SavingValueType.Bool:
+            return (bool)value ? "yes" : "no";
+         case SavingValueType.Double:
+            return ((double)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+         case SavingValueType.Identifier:
+            return $"{value}";
+         case SavingValueType.Color:
+            return ((JominiColor)value).ToString();
+         case SavingValueType.Auto:
+            throw new InvalidOperationException("SavingValueType cannot be Auto at this point.");
+         case SavingValueType.Enum:
+            return value.ToString()!;
+         case SavingValueType.IAgs:
+            throw new InvalidOperationException("IAgs type needs to be handled in advance");
+         case SavingValueType.Modifier:
+            var instance = (ModValInstance)value;
+            return $"{instance.Definition.UniqueKey} = {instance.FormatModifierToCode()}";
+         default:
+            throw new ArgumentOutOfRangeException(nameof(svl), svl, null);
+      }
    }
 
    /// <summary>
@@ -125,7 +140,7 @@ public static class SavingUtil
          return SavingValueType.Double;
       if (type == typeof(bool))
          return SavingValueType.Bool;
-      if (type == typeof(JominiColor))
+      if (item is JominiColor)
          return SavingValueType.Color;
       if (type.IsEnum)
          return SavingValueType.Enum;
@@ -133,6 +148,8 @@ public static class SavingUtil
          return SavingValueType.IAgs;
       if (item is IEnumerable enumerable)
          return GetSavingValueTypeForCollection(enumerable);
+      if (item is ModValInstance)
+         return SavingValueType.Modifier;
 
       throw new NotSupportedException($"Type {type} is not supported as item key type.");
    }

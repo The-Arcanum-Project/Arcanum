@@ -236,15 +236,15 @@ public static class FileManager
       {
          // We have a mod file, so we return the mod file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new DummyFileObj(new(descriptor.LocalPath, fileName, ModDataSpace), descriptor);
+         return new DefaultFileObject(new(descriptor.LocalPath, fileName, ModDataSpace), descriptor);
       }
 
       if (ExistsInVanilla(descriptor.LocalPath, fileName != null))
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new DummyFileObj(new(descriptor.LocalPath, fileName, VanillaDataSpace),
-                                 descriptor);
+         return new DefaultFileObject(new(descriptor.LocalPath, fileName, VanillaDataSpace),
+                                      descriptor);
       }
 
       throw new
@@ -261,7 +261,7 @@ public static class FileManager
    {
       List<FileObj> fileInfos = [];
       foreach (var po in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
-         fileInfos.Add(new DummyFileObj(po, descriptor));
+         fileInfos.Add(new DefaultFileObject(po, descriptor));
 
       return fileInfos;
    }

@@ -1,11 +1,12 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-public class FileDescriptor : IDependencyNode<string>
+public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
 {
    public string[] LocalPath { get; }
    public readonly FileDescriptor[] DescriptorDependencies;
@@ -57,13 +58,13 @@ public class FileDescriptor : IDependencyNode<string>
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
    public bool SuccessfullyLoaded { get; set; } = false;
    public bool IsMultithreadable { get; }
-   
+
    /// <summary>
    /// Points to other file descriptors that this file depends on.
    /// This is used to ensure that the files are loaded in the correct order.
    /// </summary>
    public IEnumerable<IDependencyNode<string>> Dependencies => DescriptorDependencies;
-   public static FileDescriptor Dummy { get; } = new([],
+   public static FileDescriptor Empty { get; } = new([],
                                                      [],
                                                      ISavingService.Dummy,
                                                      FileTypeInformation.Default,

@@ -10,25 +10,34 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Climate))]
-public partial class ClimateParsing : ParserValidationLoadingService
+public partial class ClimateParsing : ParserValidationLoadingService<Climate>
 {
    public override List<Type> ParsedObjects { get; } = [typeof(Climate)];
    public override string GetFileDataDebugInfo() => $"Parsed Climates: {Globals.Climates.Count}";
+   public override bool IsFullyParsed => false;
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Climate> fileObj)
    {
-      Globals.Climates.Clear();
+      foreach (var obj in fileObj.GetEu5Objects())
+         Globals.Climates.Remove(obj.UniqueKey);
+
       return true;
    }
 
-   public override bool IsFullyParsed => false;
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
+                                          Eu5FileObj<Climate> fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation)
    {
-      // TODO: @Minnator SimpleObjectParser.Parse(rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Climates);
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
+                               ctx,
+                               actionStack,
+                               source,
+                               ref validation,
+                               ParseProperties,
+                               Globals.Climates);
    }
 }

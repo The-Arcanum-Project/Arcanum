@@ -12,19 +12,22 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Vegetation))]
-public partial class VegetationParsing : ParserValidationLoadingService
+public partial class VegetationParsing : ParserValidationLoadingService<Vegetation>
 {
    public override List<Type> ParsedObjects { get; } = [typeof(Vegetation)];
    public override string GetFileDataDebugInfo() => $"Parsed Vegetation: {Globals.Vegetation.Count}";
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Vegetation> fileObj)
    {
-      Globals.Vegetation.Clear();
+      foreach (var obj in fileObj.GetEu5Objects())
+         Globals.Vegetation.Remove(obj.UniqueKey);
+
       return true;
    }
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
+                                          Eu5FileObj<Vegetation> fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation)
@@ -35,7 +38,7 @@ public partial class VegetationParsing : ParserValidationLoadingService
             continue;
 
          var key = bn.KeyNode.GetLexeme(source);
-         var vegetation = new Vegetation(key);
+         var vegetation = new Vegetation { UniqueKey = key, Source = fileObj };
 
          var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation);
          if (!Globals.Vegetation.TryAdd(key, vegetation))
@@ -46,7 +49,7 @@ public partial class VegetationParsing : ParserValidationLoadingService
                                            actionStack,
                                            key,
                                            typeof(Vegetation),
-                                           Vegetation.Field.Name);
+                                           Vegetation.Field.UniqueKey);
          }
 
          foreach (var node in unhandledNodes)

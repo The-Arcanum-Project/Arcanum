@@ -1,6 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -154,12 +153,12 @@ public class NUISettings
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting ClimateSettings { get; set; } = new(Climate.Field.Name,
+   public NUISetting ClimateSettings { get; set; } = new(Climate.Field.UniqueKey,
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting VegetationSettings { get; set; } = new(Vegetation.Field.Name,
+   public NUISetting VegetationSettings { get; set; } = new(Vegetation.Field.UniqueKey,
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray());
@@ -186,7 +185,7 @@ public class NUISettings
                                                                       .Cast<Enum>()
                                                                       .ToArray());
 
-   public NUISetting TopographySettings { get; set; } = new(Topography.Field.Name,
+   public NUISetting TopographySettings { get; set; } = new(Topography.Field.UniqueKey,
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray());
