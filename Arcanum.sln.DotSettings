@@ -177,6 +177,8 @@
     <s:Int64
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=UniqueKey/Order/@EntryValue">3</s:Int64>
     <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/IsBlessed/@EntryValue">True</s:Boolean>
+    <s:Boolean
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Reformat/@EntryValue">True</s:Boolean>
     <s:Boolean
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
@@ -185,7 +187,7 @@
     <s:String
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
     <s:String
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Shortcut/@EntryValue">eu5BaseObject</s:String>
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Shortcut/@EntryValue">eu5Object</s:String>
     <s:Boolean
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
     <s:String
@@ -201,7 +203,7 @@ public partial class $ClassName$ : IBaseEu5Object&lt;$ClassName$&gt;
    
    #region INexus Properties
    
-   $$
+   
    
    #endregion
 
@@ -214,6 +216,7 @@ public partial class $ClassName$ : IBaseEu5Object&lt;$ClassName$&gt;
 
    public void OnSearchSelected()
    {
+      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    }
 
    public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, $UniqueKey$, "$Description$");
@@ -226,6 +229,8 @@ public partial class $ClassName$ : IBaseEu5Object&lt;$ClassName$&gt;
    public static IEnumerable&lt;$ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s.Values;
 
    public static $ClassName$ Empty { get; } = new() { $UniqueKey$ = "$ClassName$_ARCANUM_EMPTY" };
+   
+   public FileObj Source { get; set; } = null!;
 
    private bool Equals($ClassName$ other) =&gt; $UniqueKey$ == other.$UniqueKey$;
 
@@ -238,12 +243,13 @@ public partial class $ClassName$ : IBaseEu5Object&lt;$ClassName$&gt;
       if (obj.GetType() != typeof($ClassName$))
          return false;
 
-      return Equals((TestObj)obj);
+      return Equals(($ClassName$)obj);
    }
 
    // ReSharper disable once NonReadonlyMemberInGetHashCode
    public override int GetHashCode() =&gt; $UniqueKey$.GetHashCode();
 
+   public override string ToString() =&gt; $UniqueKey$;
    #endregion
 }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>

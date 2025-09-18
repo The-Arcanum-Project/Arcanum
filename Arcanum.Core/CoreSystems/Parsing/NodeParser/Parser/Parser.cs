@@ -81,6 +81,7 @@ public class Parser(LexerResult lexerResult)
             case TokenType.LeftBrace:
                return ParseBlockStatement();
             case TokenType.Equals
+              or TokenType.NotEquals
               or TokenType.Less
               or TokenType.Greater
               or TokenType.LessOrEqual

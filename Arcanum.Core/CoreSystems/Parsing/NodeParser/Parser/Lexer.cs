@@ -61,6 +61,9 @@ public class Lexer
          case '=':
             AddToken(TokenType.Equals);
             break;
+         case '!':
+            AddToken(Match('=') ? TokenType.NotEquals : TokenType.Unexpected);
+            break;
          case '<':
             AddToken(Match('=') ? TokenType.LessOrEqual : TokenType.Less);
             break;

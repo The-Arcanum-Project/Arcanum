@@ -20,6 +20,7 @@ public enum TokenType
    Less, // < 
    Greater, // > 
    Equals, // =
+   NotEquals, // !=
    LessOrEqual, // <=
    GreaterOrEqual, // >=
    QuestionEquals, // ?=

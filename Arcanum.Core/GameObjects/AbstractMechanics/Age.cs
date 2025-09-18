@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
 
@@ -91,6 +92,7 @@ public partial class Age : IEu5Object<Age>
 
    public void OnSearchSelected()
    {
+      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Age", string.Empty);
@@ -98,7 +100,7 @@ public partial class Age : IEu5Object<Age>
 
    #endregion
 
-   public FileObj Source { get; set; }
+   public FileObj Source { get; set; } = null!;
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
    public string SavingKey => UniqueKey;
