@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Arcanum.Core.CoreSystems.ErrorSystem;
+using Arcanum.Core.CoreSystems.IO.JsonConverters;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
@@ -11,6 +12,7 @@ public class MainSettingsObj
    public GeneralNUISettings NUIConfig { get; set; } = new();
 
    [IsSubMenu("NUI Settings")]
+   [JsonConverter(typeof(IgnoreDeserializationAndCreateNewConverter<NUISettings>))]
    public NUISettings NUIObjectSettings { get; set; } = new();
 
    [IsSubMenu("AGS Settings")]

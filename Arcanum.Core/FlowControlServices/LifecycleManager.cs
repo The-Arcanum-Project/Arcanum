@@ -111,10 +111,16 @@ public class LifecycleManager
 
    private void LoadConfig()
    {
-      Config.Settings =
-         JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
-                                                                        Config.CONFIG_FILE_PATH)) ??
-         new MainSettingsObj();
+      try
+      {
+         var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
+                                                                               Config.CONFIG_FILE_PATH));
+         Config.Settings = parsedObj!;
+      }
+      catch (Exception)
+      {
+         Config.Settings = new();
+      }
 
       var edcs =
          JsonProcessor.DefaultDeserialize<List<ErrorDataClass>>(Path.Combine(IO.GetArcanumDataPath,

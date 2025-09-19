@@ -348,7 +348,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
          }
 
          sb.AppendLine("    }");
-         sb.AppendLine();
       }
 
       sb.AppendLine("    #endregion");
@@ -434,7 +433,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation);");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
-      sb.AppendLine();
    }
 
    /// <summary>
@@ -547,7 +545,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
       sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
-      sb.AppendLine("        // Delegate the entire implementation to the Pdh helper.");
       sb.AppendLine("        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers);");
       sb.AppendLine("    }");
       sb.AppendLine();
