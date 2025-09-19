@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.NUI;
+﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
@@ -11,8 +10,6 @@ namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 /// </summary>
 public partial class ModValInstance : INUI, IEmpty<ModValInstance>, IModifierPattern
 {
-   private object _value;
-
    /// <summary>
    /// An instance of a modifier definition with an associated value.
    /// </summary>
@@ -40,18 +37,7 @@ public partial class ModValInstance : INUI, IEmpty<ModValInstance>, IModifierPat
    /// <summary>
    /// The value of the modifier.
    /// </summary>
-   public object Value
-   {
-      get => _value;
-      set
-      {
-         if (value.Equals("yes"))
-         {
-         }
-
-         _value = value;
-      }
-   }
+   public object Value { get; set; }
    /// <summary>
    /// The type of the modifier, inferred from the definition.
    /// </summary>

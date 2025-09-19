@@ -78,6 +78,12 @@ public class AgsObjectSavingContext
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
          Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
 
+      if (Ags.ClassMetadata.SavingMethod != null)
+      {
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb);
+         return;
+      }
+
       var isInCollections = false;
 
       using (sb.BlockWithName(Ags, Settings.Format))

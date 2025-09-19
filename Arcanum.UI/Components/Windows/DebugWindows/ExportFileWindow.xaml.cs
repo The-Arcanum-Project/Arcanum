@@ -125,10 +125,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       var sb = new IndentedStringBuilder();
       foreach (var obj in value)
-      {
-         var context = obj.ToAgsContext();
-         context.BuildContext(sb);
-      }
+         obj.ToAgsContext().BuildContext(sb);
 
       PreviewText = sb.ToString();
    }

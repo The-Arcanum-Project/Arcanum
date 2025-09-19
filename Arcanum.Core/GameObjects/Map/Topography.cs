@@ -55,20 +55,20 @@ public partial class Topography : IEu5Object<Topography>
    public float VegetationDensity { get; set; } = 1f;
 
    [SaveAs]
-   [DefaultValue(1f)]
+   [DefaultValue(0f)]
    [ParseAs("weather_front_strength_change_percent")]
    [Description("How much weather fronts are strengthened or weakened when passing through this topography, as a percentage." +
                 "\n-0.08 #every FRONT_DEGRADATION_DISTANCE_FOR_TOPOGRAPHY pixels moved")]
    public float WeatherFrontStrengthChangePercent { get; set; }
 
    [SaveAs]
-   [DefaultValue(1f)]
+   [DefaultValue(0f)]
    [ParseAs("weather_cyclone_strength_change_percent")]
    [Description("How much cyclones are strengthened or weakened when passing through this topography, as a percentage.")]
    public float WeatherCycloneStrengthChangePercent { get; set; }
 
    [SaveAs]
-   [DefaultValue(1f)]
+   [DefaultValue(0f)]
    [ParseAs("weather_tornado_strength_change_percent")]
    [Description("How much tornadoes are strengthened or weakened when passing through this topography, as a percentage.")]
    public float WeatherTornadoStrengthChangePercent { get; set; }

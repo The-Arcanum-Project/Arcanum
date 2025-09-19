@@ -341,8 +341,12 @@ public static class NexusHelpers
       builder.AppendLine();
       builder.AppendLine("    public object this[Enum key]");
       builder.AppendLine("    {");
-      builder.AppendLine("        get => _getValue(key);");
-      builder.AppendLine("        set => _setValue(key, value);");
+      builder.AppendLine("        get {");
+      builder.AppendLine("            object value = null!;");
+      builder.AppendLine("            Nx.ForceGet(this, key, ref value);");
+      builder.AppendLine("            return value;");
+      builder.AppendLine("        }");
+      builder.AppendLine("        set => Nx.ForceSet(value, this, key);");
       builder.AppendLine("    }");
 
       #endregion

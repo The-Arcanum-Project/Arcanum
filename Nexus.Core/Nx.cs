@@ -100,4 +100,6 @@ public static class Nx
    {
       target._clearCollection(e);
    }
+
+   // Indexer wrapper for INexus[enum] = value;
 }

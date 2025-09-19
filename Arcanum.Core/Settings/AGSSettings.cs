@@ -10,4 +10,5 @@ public class AGSSettings
    public AgsSettings VegetationAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
+   public AgsSettings RoadAgsSettings { get; set; } = new();
 }

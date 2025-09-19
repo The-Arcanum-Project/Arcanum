@@ -1,6 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
-using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 

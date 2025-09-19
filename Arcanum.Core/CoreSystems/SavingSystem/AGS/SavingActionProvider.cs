@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.GameObjects.Map;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -18,10 +19,11 @@ public static class SavingActionProvider
       sb.AppendLine($"{metadata.Keyword} = {value}");
    }
 
-   public static void DefaultContentSaver(IAgs target, PropertySavingMetadata metadata, IndentedStringBuilder sb)
+   public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
    {
-      object value = null!;
-      Nx.ForceGet(target, metadata.NxProp, ref value);
-      sb.AppendLine($"{metadata.Keyword} {SavingUtil.GetSeparator(metadata.Separator)} {value}");
+      if (target is not Road road)
+         throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
+
+      sb.AppendLine($"{road.StartLocation.Name} = {road.EndLocation.Name}");
    }
 }

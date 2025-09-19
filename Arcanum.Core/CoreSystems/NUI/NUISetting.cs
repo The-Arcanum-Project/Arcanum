@@ -11,6 +11,7 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// <param name="viewFields"></param>
 /// <param name="embeddedFields"></param>
 /// <param name="shortInfoFields"></param>
+[CustomResetMethod(nameof(ResetNUISetting))]
 public class NUISetting(Enum title,
                         Enum[] viewFields,
                         Enum[] embeddedFields,
@@ -45,7 +46,7 @@ public class NUISetting(Enum title,
    /// </summary>
    [DefaultValue(true)]
    public bool InferActionsInEmbedded { get; set; } = true;
-   
+
    public object ResetToDefaults(PropertyInfo propertyInfo)
    {
       switch (propertyInfo.Name)
@@ -53,11 +54,22 @@ public class NUISetting(Enum title,
          case nameof(Title):
             return (Enum)Activator.CreateInstance(Title.GetType(), 0)!;
          case nameof(ViewFields):
-            case nameof(EmbeddedFields):
-            case nameof(ShortInfoFields):
-               return Enum.GetValues(Title.GetType()).Cast<Enum>().ToArray();
+         case nameof(EmbeddedFields):
+         case nameof(ShortInfoFields):
+            return Enum.GetValues(Title.GetType()).Cast<Enum>().ToArray();
          default:
             throw new ArgumentOutOfRangeException();
       }
+   }
+
+   public NUISetting ResetNUISetting()
+   {
+      var titleEnumType = Title.GetType();
+      var allEnums = Enum.GetValues(titleEnumType).Cast<Enum>().ToArray();
+
+      return new(allEnums[0],
+                 allEnums,
+                 allEnums,
+                 allEnums);
    }
 }

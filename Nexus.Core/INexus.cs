@@ -47,12 +47,6 @@ public interface INexus
    void _clearCollection(Enum property);
 
    /// <summary>
-   /// Accessor to get or set a property by its enum key.
-   /// </summary>
-   /// <param name="key"></param>
-   object this[Enum key] { get; set; }
-
-   /// <summary>
    /// Returns whether the given property is read-only and cannot be modified.
    /// </summary>
    /// <param name="property"></param>

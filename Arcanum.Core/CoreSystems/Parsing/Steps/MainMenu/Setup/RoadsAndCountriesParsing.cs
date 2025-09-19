@@ -8,7 +8,6 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.KeyWordClasses;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
@@ -83,7 +82,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
                const string roadNetworkKey = "road_network";
                const string countriesKey = "countries";
                if (rootBn.KeyNode.GetLexeme(source).Equals(roadNetworkKey))
-                  ProcessRoadNode(rootBn, ctx, source);
+                  ProcessRoadNode(rootBn, ctx, source, new(fileObj.Path, fileObj.Descriptor));
                else if (rootBn.KeyNode.GetLexeme(source).Equals(countriesKey))
                   ValidateAndParseCountries(rootBn, ctx, source);
                else
@@ -119,7 +118,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
       }
    }
 
-   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source)
+   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source, Eu5FileObj<Road> fileObj)
    {
       foreach (var rdNode in rootBn.Children)
       {
@@ -142,7 +141,12 @@ public class RoadsAndCountriesParsing : FileLoadingService
          }
 
          if (create)
-            Globals.Roads.Add(new(start, end));
+            Globals.Roads.Add(new()
+            {
+               StartLocation = start,
+               EndLocation = end,
+               Source = fileObj,
+            });
       }
    }
 

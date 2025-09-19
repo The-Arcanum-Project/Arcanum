@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -54,6 +55,31 @@ public class PropertySavingMetadata
    /// </summary>
    public required bool IsCollection { get; set; }
 
+   #region Equality operations
+
+   public override string ToString() => $"{NxProp} as {Keyword} ({ValueType})";
+
+   public override int GetHashCode()
+   {
+      return NxProp.GetHashCode();
+   }
+
+   protected bool Equals(PropertySavingMetadata other) => NxProp.Equals(other.NxProp);
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != GetType())
+         return false;
+
+      return Equals((PropertySavingMetadata)obj);
+   }
+
+   #endregion
+
    /// <summary>
    /// Formats the property and appends it to the provided IndentedStringBuilder. 
    /// </summary>
@@ -66,10 +92,12 @@ public class PropertySavingMetadata
       if (CommentProvider != null)
          CommentProvider(ags, commentChar, sb);
 
-      if (ValueType == SavingValueType.Auto)
-         ValueType = SavingUtil.GetSavingValueType(ags[NxProp]);
+      object value = null!;
+      Nx.ForceGet(ags, NxProp, ref value);
 
-      var value = ags[NxProp];
+      if (ValueType == SavingValueType.Auto)
+         ValueType = SavingUtil.GetSavingValueType(value);
+
       if (ShouldSkipValueProcessing(settings, value))
          return;
 
@@ -177,11 +205,14 @@ public class PropertySavingMetadata
             if (format == SavingFormat.Spacious)
                sb.AppendLine();
             List<string> keys = [];
+            object value = null!;
+            Nx.ForceGet(ags, NxProp, ref value);
+
             if (CollectionItemKeyProvider != null)
-               keys.AddRange(from object item in (IEnumerable)ags[NxProp]
+               keys.AddRange(from object item in (IEnumerable)value
                              select CollectionItemKeyProvider(item));
             else
-               keys.AddRange(from object item in (IEnumerable)ags[NxProp]
+               keys.AddRange(from object item in (IEnumerable)value
                              select SavingUtil.FormatValue(ValueType, item));
             sb.AppendList(keys);
             if (format == SavingFormat.Spacious)

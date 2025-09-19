@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Arcanum.Core.GameObjects.BaseTypes;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.NUI;
 

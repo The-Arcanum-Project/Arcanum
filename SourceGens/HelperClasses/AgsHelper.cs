@@ -125,8 +125,8 @@ public static class AgsHelper
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], SAVING_COMMENT_PROVIDER)}");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], SAVING_COMMENT_PROVIDER)},");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)}");
       sb.AppendLine($"        );");
       sb.AppendLine();
 

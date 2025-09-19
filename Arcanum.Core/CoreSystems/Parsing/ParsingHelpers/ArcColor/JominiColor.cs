@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.GameObjects;
-using Arcanum.Core.GameObjects.BaseTypes;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
 using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;

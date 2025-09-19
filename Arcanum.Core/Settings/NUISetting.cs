@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Jomini.AudioTags;
+﻿using Arcanum.API.Attributes;
+using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;

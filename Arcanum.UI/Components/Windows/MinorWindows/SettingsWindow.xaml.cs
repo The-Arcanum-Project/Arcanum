@@ -217,7 +217,24 @@ public partial class SettingsWindow
       if (selectedObject == null)
          return;
 
-      propGrid.SelectedObject = Activator.CreateInstance(selectedObject.GetType(), true);
+      var customResetMethod = selectedObject.GetType().GetCustomAttribute<CustomResetMethod>();
+      if (customResetMethod == null)
+         propGrid.SelectedObject = Activator.CreateInstance(selectedObject.GetType(), true);
+      else
+      {
+         // Find the method in the selected object's type
+         var methodInfo = selectedObject.GetType()
+                                        .GetMethod(customResetMethod.MethodName,
+                                                   BindingFlags.Public | BindingFlags.Instance);
+
+         if (methodInfo == null ||
+             methodInfo.ReturnType != selectedObject.GetType() ||
+             methodInfo.GetParameters().Length != 0)
+            throw new
+               InvalidOperationException($"Method '{customResetMethod.MethodName}' must have signature: {selectedObject.GetType().Name} Method()");
+
+         propGrid.SelectedObject = methodInfo.Invoke(selectedObject, null);
+      }
    }
 
    private void ResetSelected_OnClick(object sender, RoutedEventArgs e)

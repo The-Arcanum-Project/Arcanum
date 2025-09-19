@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.GameObjects;
-using Arcanum.Core.GameObjects.AbstractMechanics;
+﻿using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;

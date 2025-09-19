@@ -40,11 +40,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (classSymbol == null)
          return null!;
 
-      foreach (var attribute in classSymbol.GetAttributes())
-         if (string.Equals(attribute.AttributeClass?.ToDisplayString(),
-                           PARSER_FOR_ATTRIBUTE,
-                           StringComparison.Ordinal))
-            return (INamedTypeSymbol)classSymbol;
+      if (Enumerable.Any(classSymbol.GetAttributes(),
+                         attribute => string.Equals(attribute.AttributeClass?.ToDisplayString(),
+                                                    PARSER_FOR_ATTRIBUTE,
+                                                    StringComparison.Ordinal)))
+         return (INamedTypeSymbol)classSymbol;
 
       return null!;
    }
@@ -69,34 +69,50 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       foreach (var parserSymbol in parsers.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
       {
-         var attr = parserSymbol.GetAttributes()
-                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSER_FOR_ATTRIBUTE);
+         try
+         {
+            var attr = parserSymbol.GetAttributes()
+                                   .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSER_FOR_ATTRIBUTE);
 
-         if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol targetTypeSymbol)
-            continue;
+            if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol targetTypeSymbol)
+               continue;
 
-         // --- Collect Metadata from Target Type's Properties ---
-         var propertiesToParse = new List<PropertyMetadata>();
-         ExtractMetadata(targetTypeSymbol, propertiesToParse);
+            // --- Collect Metadata from Target Type's Properties ---
+            var propertiesToParse = new List<PropertyMetadata>();
+            ExtractMetadata(targetTypeSymbol, propertiesToParse);
 
-         // If no properties are marked for parsing, there's nothing to generate
-         if (propertiesToParse.Count == 0)
-            continue;
+            // If no properties are marked for parsing, there's nothing to generate
+            if (propertiesToParse.Count == 0)
+               continue;
 
-         // Generate the Keywords class
-         var (keywordsHintName, keywordsSource) =
-            GenerateKeywordsClass(parserSymbol, targetTypeSymbol, propertiesToParse);
-         context.AddSource(keywordsHintName, keywordsSource);
+            // Generate the Keywords class
+            var (keywordsHintName, keywordsSource) =
+               GenerateKeywordsClass(parserSymbol, targetTypeSymbol, propertiesToParse);
+            context.AddSource(keywordsHintName, keywordsSource);
 
-         // Generate the Parser class
-         var (parserHintName, parserSource) = GenerateParserClass(parserSymbol,
-                                                                  targetTypeSymbol,
-                                                                  propertiesToParse,
-                                                                  toolboxSymbol,
-                                                                  $"{parserSymbol.ContainingNamespace}.{targetTypeSymbol.Name}Keywords",
-                                                                  parsers,
-                                                                  context);
-         context.AddSource(parserHintName, parserSource);
+            // Generate the Parser class
+            var (parserHintName, parserSource) = GenerateParserClass(parserSymbol,
+                                                                     targetTypeSymbol,
+                                                                     propertiesToParse,
+                                                                     toolboxSymbol,
+                                                                     $"{parserSymbol.ContainingNamespace}.{targetTypeSymbol.Name}Keywords",
+                                                                     parsers,
+                                                                     context);
+            context.AddSource(parserHintName, parserSource);
+         }
+         catch (Exception ex)
+         {
+            // ADD THIS to see the real error
+            context.ReportDiagnostic(Diagnostic.Create(new("GEN001",
+                                                           "Generator Crash",
+                                                           "Generator failed for parser '{0}'. Error: {1}",
+                                                           "Generator",
+                                                           DiagnosticSeverity.Error,
+                                                           true),
+                                                       parserSymbol.Locations.FirstOrDefault(),
+                                                       parserSymbol.Name,
+                                                       ex.ToString()));
+         }
       }
    }
 

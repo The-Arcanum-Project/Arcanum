@@ -60,7 +60,7 @@ public static class SimpleObjectParser
    }
 
    public static void Parse<TTarget>(FileObj fileObj,
-                                     RootNode rn,
+                                     List<StatementNode> statements,
                                      LocationContext ctx,
                                      string actionStack,
                                      string source,
@@ -69,7 +69,7 @@ public static class SimpleObjectParser
                                      Dictionary<string, TTarget> globals,
                                      bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
    {
-      foreach (var sn in rn.Statements)
+      foreach (var sn in statements)
       {
          if (!ValidateAndCreateInstance(fileObj,
                                         ctx,
@@ -104,6 +104,27 @@ public static class SimpleObjectParser
                                  bn,
                                  instance);
       }
+   }
+
+   public static void Parse<TTarget>(FileObj fileObj,
+                                     RootNode rn,
+                                     LocationContext ctx,
+                                     string actionStack,
+                                     string source,
+                                     ref bool validation,
+                                     Pdh.PropertyParser<TTarget> propsParser,
+                                     Dictionary<string, TTarget> globals,
+                                     bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
+   {
+      Parse(fileObj,
+            rn.Statements,
+            ctx,
+            actionStack,
+            source,
+            ref validation,
+            propsParser,
+            globals,
+            allowUnknownBlocks);
    }
 
    private static void SetPropsAndProcessNodes<TTarget>(LocationContext ctx,
