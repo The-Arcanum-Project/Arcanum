@@ -35,6 +35,14 @@ public static class Pdh
       out TItem value,
       ref bool validation);
 
+   public delegate bool BlockItemParser<in TTarget>(
+      BlockNode block,
+      TTarget target,
+      LocationContext ctx,
+      string source,
+      ref bool validation)
+      where TTarget : INexus;
+
    public delegate bool BlockParser<in TTarget>(BlockNode bn,
                                                 TTarget target,
                                                 LocationContext ctx,
@@ -242,6 +250,32 @@ public static class Pdh
 
          if (itemParser(kon, ctx, callStack, source, out var item, ref validation))
             results.Add(item);
+      }
+
+      return results;
+   }
+
+   public static ObservableRangeCollection<T> ParseBlockCollection<T>(BlockNode node,
+                                                                      LocationContext ctx,
+                                                                      string source,
+                                                                      string callStack,
+                                                                      ref bool validation,
+                                                                      BlockItemParser<T> itemParser) where T : INexus
+   {
+      var results = new ObservableRangeCollection<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+            continue;
+
+         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
+         Debug.Assert(newInstance != null, "newInstance != null");
+
+         if (itemParser(bn, newInstance, ctx, source, ref validation))
+            results.Add(newInstance);
       }
 
       return results;

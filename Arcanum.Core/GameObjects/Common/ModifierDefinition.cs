@@ -133,7 +133,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public bool IsAlreadyPercent { get; set; }
 
    [SaveAs]
-   [ParseAsEmbedded("game_data")]
+   [ParseAs("game_data", AstNodeType.BlockNode, isEmbedded: true)]
    [Description("Game data associated with this modifier.")]
    public ModifierGameData GameData { get; set; } = new();
 

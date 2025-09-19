@@ -12,7 +12,8 @@ public class ParseAsAttribute(string? key,
                               AstNodeType nodeType = AstNodeType.ContentNode,
                               string? customParser = null,
                               bool isShatteredList = false,
-                              AstNodeType itemNodeType = AstNodeType.KeyOnlyNode) : Attribute
+                              AstNodeType itemNodeType = AstNodeType.KeyOnlyNode,
+                              bool isEmbedded = false) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -37,4 +38,9 @@ public class ParseAsAttribute(string? key,
    /// If we are parsing a list of items, this specifies the node type of each item in the list.
    /// </summary>
    public AstNodeType ItemNodeType { get; set; } = itemNodeType;
+
+   /// <summary>
+   /// If true, the property is an embedded object which has it's own parser and is wrapped by the key.
+   /// </summary>
+   public bool IsEmbedded { get; set; } = isEmbedded;
 }

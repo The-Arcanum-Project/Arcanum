@@ -227,10 +227,14 @@ public partial class Country : IEu5Object<Country>
    public ObservableRangeCollection<AiTag> AiAdvancePreferenceTags { get; set; } = [];
 
    [SaveAs]
-   [ParseAsEmbedded("timed_modifier")]
+   [ParseAs("timed_modifier",
+              AstNodeType.BlockNode,
+              isEmbedded: true,
+              isShatteredList: true,
+              itemNodeType: AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A modifier starting and ending at a given date.")]
-   public TimedModifier TimedModifier { get; set; } = TimedModifier.Empty;
+   public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
 
    #endregion
 

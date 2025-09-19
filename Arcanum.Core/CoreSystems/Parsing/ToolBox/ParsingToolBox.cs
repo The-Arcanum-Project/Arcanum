@@ -112,36 +112,6 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a BlockNode containing a list of KeyOnlyNodes into a List of strings.
-   /// Each KeyOnlyNode's key is added to the list.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_StringList(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out List<string> value,
-      ref bool validation)
-   {
-      var results = new List<string>();
-
-      foreach (var statement in node.Children)
-         if (statement.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var keyOnlyNode))
-            results.Add(keyOnlyNode.KeyNode.GetLexeme(source));
-
-      value = results;
-      return validation;
-   }
-
-   /// <summary>
    /// Parses a ContentNode containing a literal integer value into an int.
    /// Validates that the ContentNode's separator is one of the supported types for integer values.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
