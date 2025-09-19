@@ -2,6 +2,8 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
@@ -16,6 +18,22 @@ public static class Pdh
                                                   string source,
                                                   ref bool validation)
       where TTarget : INexus;
+
+   public delegate bool ContentItemParser<TItem>(
+      ContentNode node,
+      LocationContext ctx,
+      string actionName,
+      string source,
+      out TItem value,
+      ref bool validation);
+
+   public delegate bool KeyOnlyItemParser<TItem>(
+      KeyOnlyNode node,
+      LocationContext ctx,
+      string actionName,
+      string source,
+      out TItem value,
+      ref bool validation);
 
    public delegate bool BlockParser<in TTarget>(BlockNode bn,
                                                 TTarget target,
@@ -181,5 +199,51 @@ public static class Pdh
       }
 
       return unhandledNodes;
+   }
+
+   public static ObservableRangeCollection<T> ParseContentCollection<T>(BlockNode node,
+                                                                        LocationContext ctx,
+                                                                        string source,
+                                                                        string callStack,
+                                                                        ref bool validation,
+                                                                        ContentItemParser<T> itemParser)
+   {
+      var results = new ObservableRangeCollection<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsContentNode(ctx, source, callStack, ref validation, out var cn))
+            continue;
+
+         if (itemParser(cn, ctx, callStack, source, out var item, ref validation))
+            results.Add(item);
+      }
+
+      return results;
+   }
+
+   public static ObservableRangeCollection<T> ParseKeyOnlyCollection<T>(BlockNode node,
+                                                                        LocationContext ctx,
+                                                                        string source,
+                                                                        string callStack,
+                                                                        ref bool validation,
+                                                                        KeyOnlyItemParser<T> itemParser)
+   {
+      var results = new ObservableRangeCollection<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsKeyOnlyNode(ctx, source, callStack, ref validation, out var kon))
+            continue;
+
+         if (itemParser(kon, ctx, callStack, source, out var item, ref validation))
+            results.Add(item);
+      }
+
+      return results;
    }
 }

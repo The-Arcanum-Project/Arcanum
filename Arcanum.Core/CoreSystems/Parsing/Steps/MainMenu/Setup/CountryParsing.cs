@@ -10,7 +10,7 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(Country))]
-public partial class CountriesParsing
+public partial class CountryParsing
 {
    protected internal static void LoadSingleFile(List<StatementNode> sns,
                                                  LocationContext ctx,

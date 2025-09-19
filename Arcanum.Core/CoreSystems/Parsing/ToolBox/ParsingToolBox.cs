@@ -112,37 +112,6 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a BlockNode containing a list of KeyOnlyNodes into an ObservableRangeCollection of strings.
-   /// Each KeyOnlyNode's key is added to the collection.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_String(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<string> value,
-      ref bool validation)
-   {
-      if (ArcTryParse_StringList(node, ctx, actionName, source, out var stringList, ref validation))
-      {
-         value = [];
-         value.AddRange(stringList);
-         return true;
-      }
-
-      value = null;
-      return false;
-   }
-
-   /// <summary>
    /// Parses a BlockNode containing a list of KeyOnlyNodes into a List of strings.
    /// Each KeyOnlyNode's key is added to the list.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
@@ -530,80 +499,6 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of ModValInstance.
-   /// Each ContentNode is expected to define a ModValInstance.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_ModValInstance(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<ModValInstance> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<ModValInstance>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-            continue;
-
-         if (!cn.TryParseModValInstance(ctx, actionName, source, ref validation, out var mvi))
-            continue;
-
-         results.Add(mvi);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of AudioTag.
-   /// Each ContentNode is expected to define an AudioTag.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_AudioTag(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<AudioTag> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<AudioTag>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-            continue;
-
-         if (!cn.TryParseAudioTagInstance(ctx, actionName, source, ref validation, out var tag))
-            continue;
-
-         results.Add(tag);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
    /// Parses a ContentNode containing a location definition into a Location object.
    /// Utilizes the LocationContext to resolve the location.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
@@ -623,6 +518,110 @@ public static class ParsingToolBox
                                            ref bool validation)
    {
       return node.TryGetLocation(ctx, actionName, source, ref validation, out value);
+   }
+
+   /// <summary>
+   /// Parses a ContentNode containing a location definition into a Location object.
+   /// Utilizes the LocationContext to resolve the location.
+   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   /// </summary>
+   /// <param name="node"></param>
+   /// <param name="ctx"></param>
+   /// <param name="actionName"></param>
+   /// <param name="source"></param>
+   /// <param name="value"></param>
+   /// <param name="validation"></param>
+   /// <returns></returns>
+   public static bool ArcTryParse_Location(KeyOnlyNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           [MaybeNullWhen(false)] out Location value,
+                                           ref bool validation)
+   {
+      return node.TryGetLocation(ctx, source, actionName, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_ModValInstance(ContentNode node,
+                                                 LocationContext ctx,
+                                                 string actionName,
+                                                 string source,
+                                                 [MaybeNullWhen(false)] out ModValInstance value,
+                                                 ref bool validation)
+   {
+      return node.TryParseModValInstance(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_AudioTag(ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           [MaybeNullWhen(false)] out AudioTag value,
+                                           ref bool validation)
+   {
+      return node.TryParseAudioTagInstance(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_CurrencyData(ContentNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               [MaybeNullWhen(false)] out CurrencyData value,
+                                               ref bool validation)
+   {
+      value = null;
+      return false;
+   }
+
+   public static bool ArcTryParse_Province(KeyOnlyNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           [MaybeNullWhen(false)] out Province value,
+                                           ref bool validation)
+   {
+      return node.TryGetProvince(ctx, source, actionName, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Area(KeyOnlyNode node,
+                                       LocationContext ctx,
+                                       string actionName,
+                                       string source,
+                                       [MaybeNullWhen(false)] out Area value,
+                                       ref bool validation)
+   {
+      return node.TryGetArea(ctx, source, actionName, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Region(KeyOnlyNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         [MaybeNullWhen(false)] out Region value,
+                                         ref bool validation)
+   {
+      return node.TryGetRegion(ctx, source, actionName, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_AiTag(ContentNode node,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        string source,
+                                        [MaybeNullWhen(false)] out AiTag value,
+                                        ref bool validation)
+   {
+      return node.TryParseAiTagInstance(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_String(KeyOnlyNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         [MaybeNullWhen(false)] out string value,
+                                         ref bool validation)
+   {
+      value = node.KeyNode.GetLexeme(source);
+      return true;
    }
 
    /// <summary>
@@ -709,253 +708,6 @@ public static class ParsingToolBox
          validation = false;
          return false;
       }
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of Location.
-   /// Each ContentNode is expected to define a Location.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_Location(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<Location> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<Location>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var kon))
-            continue;
-
-         if (!kon.TryGetLocation(ctx, source, actionName, ref validation, out var loc))
-            continue;
-
-         results.Add(loc);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// The method parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of EffectInstance.
-   /// Each ContentNode is expected to define an EffectInstance.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_EffectInstance(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<EffectInstance> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<EffectInstance>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-            continue;
-
-         if (!cn.TryParseEffectInstance(ctx, actionName, source, ref validation, out var ei))
-            continue;
-
-         results.Add(ei);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of ContentNodes into an ObservableRangeCollection of CurrencyData.
-   /// Each ContentNode is expected to define a CurrencyData.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_CurrencyData(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<CurrencyData> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<CurrencyData>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-            continue;
-
-         if (!cn.TryParseCurrencyData(ctx, actionName, source, ref validation, out var cd))
-            continue;
-
-         results.Add(cd);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of KeyOnlyNodes into an ObservableRangeCollection of Area.
-   /// Each KeyOnlyNode's key is used to look up an Area in the global Areas dictionary.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_Area(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<Area> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<Area>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var kon))
-            continue;
-
-         if (!kon.TryGetArea(ctx, source, actionName, ref validation, out var area))
-            continue;
-
-         results.Add(area);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of KeyOnlyNodes into an ObservableRangeCollection of Region. <br/>
-   /// Each KeyOnlyNode's key is used to look up a Region in the global Regions dictionary. <br/>
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_Region(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<Region> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<Region>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var kon))
-            continue;
-
-         if (!kon.TryGetRegion(ctx, source, actionName, ref validation, out var region))
-            continue;
-
-         results.Add(region);
-      }
-
-      value = results;
-      return true;
-   }
-
-   /// <summary>
-   /// Parses a BlockNode containing a list of KeyOnlyNodes into an ObservableRangeCollection of Province. <br/>
-   /// Each KeyOnlyNode's key is used to look up a Province in the global Provinces dictionary. <br/>
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_ObservableRangeCollection_Province(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<Province> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<Province>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var kon))
-            continue;
-
-         if (!kon.TryGetProvince(ctx, source, actionName, ref validation, out var province))
-            continue;
-
-         results.Add(province);
-      }
-
-      value = results;
-      return true;
-   }
-
-   public static bool ArcTryParse_ObservableRangeCollection_AiTag(
-      BlockNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      [MaybeNullWhen(false)] out ObservableRangeCollection<AiTag> value,
-      ref bool validation)
-   {
-      var results = new ObservableRangeCollection<AiTag>();
-
-      foreach (var statement in node.Children)
-      {
-         if (!statement.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-            continue;
-
-         if (!cn.TryParseAiTagInstance(ctx, actionName, source, ref validation, out var aiTag))
-            continue;
-
-         results.Add(aiTag);
-      }
-
-      value = results;
-      return true;
    }
 
    public static bool ArcTryParse_JominiDate(ContentNode node,

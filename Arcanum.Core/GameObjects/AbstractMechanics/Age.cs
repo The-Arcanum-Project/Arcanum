@@ -68,7 +68,7 @@ public partial class Age : IEu5Object<Age>
    public float WarScoreFromBattles { get; set; } = 1f;
 
    [SaveAs]
-   [ParseAs("modifier", AstNodeType.BlockNode)]
+   [ParseAs("modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [Description("Modifiers applied during this age.")]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
 

@@ -59,13 +59,13 @@ public partial class Vegetation : IEu5Object<Vegetation>
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("location_modifier", AstNodeType.BlockNode)]
+   [ParseAs("location_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [Description("The location modifier applied to provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("audio_tags", AstNodeType.BlockNode)]
+   [ParseAs("audio_tags", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [Description("The audio tags associated with this climate.")]
    public ObservableRangeCollection<AudioTag> AudioTags { get; set; } = [];
 

@@ -4,13 +4,15 @@ public enum AstNodeType
 {
    ContentNode,
    BlockNode,
+   KeyOnlyNode,
 }
 
 [AttributeUsage(AttributeTargets.Property)]
 public class ParseAsAttribute(string? key,
                               AstNodeType nodeType = AstNodeType.ContentNode,
                               string? customParser = null,
-                              bool isContentNodeList = false) : Attribute
+                              bool isShatteredList = false,
+                              AstNodeType itemNodeType = AstNodeType.KeyOnlyNode) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -26,7 +28,13 @@ public class ParseAsAttribute(string? key,
    public string? CustomParser { get; set; } = customParser;
 
    /// <summary>
-   /// If true, several <see cref="AstNodeType.ContentNode"/> of this type are expected and will be parsed into a list
+   /// If true, several items of this type are expected, but they are not wrapped in a parent node.
+   /// Instead, all nodes with the same key will be parsed into a list.
    /// </summary>
-   public bool IsContentNodeList { get; set; } = isContentNodeList;
+   public bool IsShatteredList { get; set; } = isShatteredList;
+
+   /// <summary>
+   /// If we are parsing a list of items, this specifies the node type of each item in the list.
+   /// </summary>
+   public AstNodeType ItemNodeType { get; set; } = itemNodeType;
 }

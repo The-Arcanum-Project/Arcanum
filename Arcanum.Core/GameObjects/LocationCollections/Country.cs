@@ -173,7 +173,7 @@ public partial class Country : IEu5Object<Country>
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
    [SaveAs]
-   [ParseAs("include", isContentNodeList: true)]
+   [ParseAs("include", isShatteredList: true)]
    [DefaultValue(null)]
    [Description("A list of included ??? for this country.")]
    public ObservableRangeCollection<string> Includes { get; set; } = [];
@@ -191,7 +191,7 @@ public partial class Country : IEu5Object<Country>
    public ObservableRangeCollection<string> ToleratedCultures { get; set; } = [];
 
    [SaveAs]
-   [ParseAs("currency_data", AstNodeType.BlockNode)]
+   [ParseAs("currency_data", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [DefaultValue(null)]
    [Description("A list of currency data effects for this country before game start.")]
    public ObservableRangeCollection<CurrencyData> CurrencyData { get; set; } = [];
@@ -221,7 +221,7 @@ public partial class Country : IEu5Object<Country>
    public ObservableRangeCollection<Region> DiscoveredRegions { get; set; } = [];
 
    [SaveAs]
-   [ParseAs("ai_advance_preference_tags", AstNodeType.BlockNode)]
+   [ParseAs("ai_advance_preference_tags", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [DefaultValue(null)]
    [Description("These tags are used by the AI to determine which advances to prefer.")]
    public ObservableRangeCollection<AiTag> AiAdvancePreferenceTags { get; set; } = [];

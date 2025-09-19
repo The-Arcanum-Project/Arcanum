@@ -110,7 +110,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
          return;
 
       Eu5FileObj<Country> fo = new(fileObj.Path, fileObj.Descriptor);
-      CountriesParsing.LoadSingleFile(cn2S[0].Children, ctx, fo, GetActionName(), source, ref validation);
+      CountryParsing.LoadSingleFile(cn2S[0].Children, ctx, fo, GetActionName(), source, ref validation);
       //
       // foreach (var cNode in cNodes)
       // {
