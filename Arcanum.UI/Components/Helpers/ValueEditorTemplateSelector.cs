@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.UI.Components.Helpers;
 

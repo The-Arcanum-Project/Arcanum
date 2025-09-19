@@ -3,13 +3,17 @@ using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
+using Arcanum.Core.CoreSystems.Jomini.Effects;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Nexus.Core;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
@@ -613,5 +617,80 @@ public static class CnHelpers
                                                         value,
                                                         ref validationResult,
                                                         out audioTagInstance);
+   }
+
+   public static bool TryParseAiTagInstance(this ContentNode node,
+                                            LocationContext ctx,
+                                            string actionName,
+                                            string source,
+                                            ref bool validationResult,
+                                            [MaybeNullWhen(false)] out AiTag aiTagInstance)
+   {
+      aiTagInstance = null;
+
+      if (!LUtil.ValidateNodeSeparatorAndNumberValue(node,
+                                                     ctx,
+                                                     actionName,
+                                                     source,
+                                                     ref validationResult,
+                                                     out var value))
+         return false;
+
+      return AiTagManager.TryCreateAiTagInstance(ctx,
+                                                 node.KeyNode,
+                                                 source,
+                                                 value,
+                                                 ref validationResult,
+                                                 out aiTagInstance);
+   }
+
+   public static bool TryParseEffectInstance(this ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             ref bool validationResult,
+                                             [MaybeNullWhen(false)] out EffectInstance effectInstance)
+   {
+      effectInstance = null;
+
+      if (!LUtil.ValidateNodeSeparatorAndNumberValue(node,
+                                                     ctx,
+                                                     actionName,
+                                                     source,
+                                                     ref validationResult,
+                                                     out var value))
+         return false;
+
+      return EffectManager.TryCreateEffectInstance(ctx,
+                                                   node.KeyNode,
+                                                   source,
+                                                   value,
+                                                   ref validationResult,
+                                                   out effectInstance);
+   }
+
+   public static bool TryParseCurrencyData(this ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           ref bool validationResult,
+                                           [MaybeNullWhen(false)] out CurrencyData currencyData)
+   {
+      currencyData = null;
+
+      if (!LUtil.ValidateNodeSeparatorAndNumberValue(node,
+                                                     ctx,
+                                                     actionName,
+                                                     source,
+                                                     ref validationResult,
+                                                     out var value))
+         return false;
+
+      return CurrencyDataManager.TryCreateCurrencyInstance(ctx,
+                                                           node.KeyNode,
+                                                           source,
+                                                           value,
+                                                           ref validationResult,
+                                                           out currencyData);
    }
 }

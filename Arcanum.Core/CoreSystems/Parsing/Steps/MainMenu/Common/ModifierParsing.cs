@@ -18,7 +18,7 @@ public partial class ModifierParsing : ParserValidationLoadingService<ModifierDe
    protected override bool UnloadSingleFileContent(Eu5FileObj<ModifierDefinition> fileObj)
    {
       foreach (var obj in fileObj.GetEu5Objects())
-         Globals.ModifierDefinitions.Remove(obj.UniqueKey);
+         Globals.ModifierDefinitions.Remove(obj.UniqueId);
 
       return true;
    }

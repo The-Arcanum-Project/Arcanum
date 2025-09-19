@@ -9,7 +9,8 @@ public enum AstNodeType
 [AttributeUsage(AttributeTargets.Property)]
 public class ParseAsAttribute(string? key,
                               AstNodeType nodeType = AstNodeType.ContentNode,
-                              string? customParser = null) : Attribute
+                              string? customParser = null,
+                              bool isContentNodeList = false) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -23,4 +24,9 @@ public class ParseAsAttribute(string? key,
    /// The method must match the required parser delegate signature.
    /// </summary>
    public string? CustomParser { get; set; } = customParser;
+
+   /// <summary>
+   /// If true, several <see cref="AstNodeType.ContentNode"/> of this type are expected and will be parsed into a list
+   /// </summary>
+   public bool IsContentNodeList { get; set; } = isContentNodeList;
 }

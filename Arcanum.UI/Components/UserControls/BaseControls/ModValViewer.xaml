@@ -52,7 +52,7 @@
             <ColumnDefinition Width = "*" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Text = "{Binding Definition.UniqueKey}"
+        <TextBlock Text = "{Binding Definition.UniqueId}"
                    VerticalAlignment = "Center"
                    Margin = "5,0"
                    FontWeight = "SemiBold" />

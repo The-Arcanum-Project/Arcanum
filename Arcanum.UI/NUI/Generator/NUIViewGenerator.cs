@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -27,6 +26,7 @@ using Arcanum.UI.NUI.UserControls.BaseControls;
 using Microsoft.Xaml.Behaviors.Core;
 using Nexus.Core;
 using AutoCompleteComboBox = Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox.AutoCompleteComboBox;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.UI.NUI.Generator;
 

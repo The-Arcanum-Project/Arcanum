@@ -1,6 +1,6 @@
 ﻿namespace Arcanum.Core.CoreSystems.Parsing.Steps.KeyWordClasses;
 
-public static class CountryKeywords
+public static class OldCountryKeywords
 {
    public const string INCLUDE = "include";
    public const string CAPITAL = "capital";

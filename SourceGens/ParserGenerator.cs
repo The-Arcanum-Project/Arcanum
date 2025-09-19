@@ -80,10 +80,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
             // --- Collect Metadata from Target Type's Properties ---
             var propertiesToParse = new List<PropertyMetadata>();
             ExtractMetadata(targetTypeSymbol, propertiesToParse);
-
-            // If no properties are marked for parsing, there's nothing to generate
-            if (propertiesToParse.Count == 0)
-               continue;
+            //
+            // // If no properties are marked for parsing, there's nothing to generate
+            // if (propertiesToParse.Count == 0)
+            //    continue;
 
             // Generate the Keywords class
             var (keywordsHintName, keywordsSource) =
@@ -156,7 +156,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                  embeddedBlockProps);
 
       // --- ParseProperties Method ---
-      ParsePropertiesFromBlockNode(targetTypeSymbol, sb, targetTypeName);
+      GenerateParsePropertiesMethod(targetTypeSymbol, sb, targetTypeName);
 
       // --- Wrapper Methods (partial signatures) ---
       GenerateParserMethodSignatures(properties, sb, targetTypeName);
@@ -215,7 +215,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (prop.CustomParserMethodName != null)
          return prop.CustomParserMethodName;
 
-      return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}";
+      return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}{IsContentNodeListSuffix(prop)}";
+   }
+
+   private static string IsContentNodeListSuffix(PropertyMetadata prop)
+   {
+      if (prop.IsContentNodeList)
+         return "_PartList";
+      else
+         return string.Empty;
    }
 
    private static string FlagsPrefix(PropertyMetadata prop) => IsFlagsEnum(prop) ? "Flags" : string.Empty;
@@ -269,19 +277,31 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     out var wrapperMethodName,
                                     out var propTypeName,
                                     out var actionName,
-                                    out var toolMethodCall))
+                                    out var toolMethodCall,
+                                    out var genericType))
          {
             sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{toolMethodCall}'.");
             continue;
          }
 
+         var outvalue = prop.IsContentNodeList ? genericType : propTypeName;
+
          sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
          sb.AppendLine("    {");
-         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {propTypeName} value, ref validation))");
+         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
          sb.AppendLine("        {");
-         sb.AppendLine(IsFlagsEnum(prop)
-                          ? $"            target.{prop.PropertyName} |= value;"
-                          : $"            target.{prop.PropertyName} = value;");
+         if (IsFlagsEnum(prop))
+            sb.AppendLine($"            target.{prop.PropertyName} |= value;");
+         else if (prop.IsContentNodeList)
+         {
+            sb.AppendLine($"            if (target.{prop.PropertyName} == null)");
+            sb.AppendLine($"                target.{prop.PropertyName} = new {propTypeName}();");
+            sb.AppendLine();
+            sb.AppendLine($"            target.{prop.PropertyName}.Add(value);");
+         }
+         else
+            sb.AppendLine($"            target.{prop.PropertyName} = value;");
+
          sb.AppendLine("            return true;");
          sb.AppendLine("        }");
          sb.AppendLine("        return false;");
@@ -341,7 +361,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                               out string wrapperMethodName,
                                               out string propTypeName,
                                               out string actionName,
-                                              out string toolMethodCall)
+                                              out string toolMethodCall,
+                                              out string genericType)
    {
       if (prop.CustomParserMethodName != null)
       {
@@ -349,6 +370,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
          propTypeName = null!;
          actionName = null!;
          toolMethodCall = prop.CustomParserMethodName;
+         genericType = null!;
          return true;
       }
 
@@ -360,15 +382,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
          propTypeName = null!;
          actionName = null!;
          toolMethodCall = wrapperMethodName;
+         genericType = null!;
          return true;
       }
 
-      var toolMethod = FindMatchingTool(toolboxSymbol, prop, out toolMethodCall, out var message);
+      var toolMethod = FindMatchingTool(toolboxSymbol, prop, out toolMethodCall, out var message, out genericType);
       if (toolMethod == null)
       {
          propTypeName = null!;
          actionName = null!;
          toolMethodCall = message;
+         genericType = null!;
          return true;
       }
 
@@ -422,9 +446,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine();
    }
 
-   private static void ParsePropertiesFromBlockNode(INamedTypeSymbol targetTypeSymbol,
-                                                    StringBuilder sb,
-                                                    string targetTypeName)
+   private static void GenerateParsePropertiesMethod(INamedTypeSymbol targetTypeSymbol,
+                                                     StringBuilder sb,
+                                                     string targetTypeName)
    {
       sb.AppendLine("    /// <summary>");
       sb.AppendLine("    /// Parses all properties of a " +
@@ -449,7 +473,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
    private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
                                                   PropertyMetadata prop,
                                                   out string expectedToolName,
-                                                  out string message)
+                                                  out string message,
+                                                  out string genericType)
    {
       message = string.Empty;
       var propertyType = prop.PropertyType;
@@ -479,14 +504,16 @@ public class ParserSourceGenerator : IIncrementalGenerator
             if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
                continue;
 
+            genericType = member.TypeArguments.FirstOrDefault()?.ToDisplayString() ?? string.Empty;
             return member;
          }
 
+         genericType = string.Empty;
          return null;
       }
 
-      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX);
-      return FindToolByName(toolboxSymbol, expectedToolName, prop.AstNodeType, propertyType, out message);
+      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX, prop, out genericType);
+      return FindToolByName(toolboxSymbol, expectedToolName, prop.AstNodeType, propertyType, prop, out message);
    }
 
    // Extracted the search logic to a reusable method
@@ -494,6 +521,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                 string toolName,
                                                 string astNodeType,
                                                 ITypeSymbol propertyType,
+                                                PropertyMetadata prop,
                                                 out string message)
    {
       foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
@@ -510,6 +538,20 @@ public class ParserSourceGenerator : IIncrementalGenerator
                return member;
             }
 
+            if (prop.IsContentNodeList)
+            {
+               var genericType = propertyType is INamedTypeSymbol { IsGenericType: true } namedType
+                                    ? namedType.TypeArguments.FirstOrDefault()
+                                    : null;
+               if (genericType != null &&
+                   outParam != null &&
+                   SymbolEqualityComparer.Default.Equals(outParam.Type, genericType))
+               {
+                  message = string.Empty;
+                  return member;
+               }
+            }
+
             message =
                $"Found method '{toolName}' but its 'out' parameter type '{outParam?.Type.Name}' does not match the property type '{propertyType.Name}'.";
             return null;
@@ -521,15 +563,22 @@ public class ParserSourceGenerator : IIncrementalGenerator
       return null;
    }
 
-   private static string GetExpectedToolName(ITypeSymbol type, string prefix)
+   private static string GetExpectedToolName(ITypeSymbol type,
+                                             string prefix,
+                                             PropertyMetadata prop,
+                                             out string genericType)
    {
       if (type is INamedTypeSymbol { IsGenericType: true } namedType)
       {
          var genericTypeName = namedType.Name;
-         var itemTypeName = namedType.TypeArguments.FirstOrDefault()?.Name ?? "Object";
-         return $"{prefix}_{genericTypeName}_{itemTypeName}";
+         genericType = namedType.TypeArguments.FirstOrDefault()?.Name ?? "Object";
+         if (prop.IsContentNodeList)
+            return $"{prefix}_{genericType}";
+
+         return $"{prefix}_{genericTypeName}_{genericType}";
       }
 
+      genericType = string.Empty;
       return $"{prefix}_{type.Name}";
    }
 
@@ -570,6 +619,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       public string AstNodeType { get; }
       public string? CustomParserMethodName { get; }
       public bool IsEmbedded { get; }
+      public bool IsContentNodeList { get; }
 
       public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute, bool isEmbedded)
       {
@@ -580,6 +630,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
          CustomParserMethodName = attribute.NamedArguments
                                            .FirstOrDefault(arg => arg.Key == "CustomParser")
                                            .Value.Value as string;
+
+         // get the 4th constructor argument
+         var attributeConstructorArgs = attribute.ConstructorArguments;
+         if (attributeConstructorArgs.Length > 3 &&
+             attributeConstructorArgs[3].Value is bool isContentNodeList and true)
+            IsContentNodeList = isContentNodeList;
 
          if (isEmbedded)
          {

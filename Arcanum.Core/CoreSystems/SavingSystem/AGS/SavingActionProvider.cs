@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.GameObjects.Map;
 using Nexus.Core;
 
@@ -25,5 +26,13 @@ public static class SavingActionProvider
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
 
       sb.AppendLine($"{road.StartLocation.Name} = {road.EndLocation.Name}");
+   }
+
+   public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   {
+      if (target is not JominiDate date)
+         throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
+
+      sb.AppendLine(date.ToString());
    }
 }

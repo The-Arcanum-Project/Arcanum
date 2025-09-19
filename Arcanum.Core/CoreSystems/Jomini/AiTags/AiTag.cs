@@ -6,28 +6,28 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Jomini.AudioTags;
+namespace Arcanum.Core.CoreSystems.Jomini.AiTags;
 
 [ObjectSaveAs]
-public partial class AudioTag : INUI, IEmpty<AudioTag>, IModifierPattern
+public partial class AiTag : INUI, IEmpty<AiTag>, IModifierPattern
 {
    [ReadonlyNexus]
    [DefaultValue("null")]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    public string UniqueId { get; set; } = null!;
 
-   [Description("The factor by which this audio tag influences sound effects. Default is 1.0.")]
+   [Description("The factor by which the AI will modify its behavior.")]
    public object Value { get; set; } = 1f;
    public ModifierType Type { get; set; } = ModifierType.Float;
 
    public bool IsReadonly => true;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AudioTagSettings;
+   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AiTagSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static AudioTag Empty { get; } = new() { UniqueId = "Arcanum_empty_audio_tag", Value = 1f };
+   public static AiTag Empty { get; } = new() { UniqueId = "Arcanum_empty_ai_tag", Value = 1f };
 
    public override string ToString() => UniqueId;
 
-   protected bool Equals(AudioTag other) => UniqueId == other.UniqueId && Value.Equals(other.Value);
+   protected bool Equals(AiTag other) => UniqueId == other.UniqueId && Value.Equals(other.Value);
 
    public override bool Equals(object? obj)
    {
@@ -38,7 +38,7 @@ public partial class AudioTag : INUI, IEmpty<AudioTag>, IModifierPattern
       if (obj.GetType() != GetType())
          return false;
 
-      return Equals((AudioTag)obj);
+      return Equals((AiTag)obj);
    }
 
    // ReSharper disable twice NonReadonlyMemberInGetHashCode

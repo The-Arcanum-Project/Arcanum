@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -12,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
@@ -22,7 +22,7 @@ public partial class Topography : IEu5Object<Topography>
    [ReadonlyNexus]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueKey { get; set; } = null!;
+   public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
    public FileObj Source { get; set; } = null!;
@@ -134,7 +134,7 @@ public partial class Topography : IEu5Object<Topography>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TopographySettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Topography Empty { get; } = new() { UniqueKey = "Arcanum_Empty_Topography" };
+   public static Topography Empty { get; } = new() { UniqueId = "Arcanum_Empty_Topography" };
    public static IEnumerable<Topography> GetGlobalItems() => Globals.Topography.Values;
 
    #endregion
@@ -142,22 +142,22 @@ public partial class Topography : IEu5Object<Topography>
    #region ISearchable
 
    public string GetNamespace => $"Map.{nameof(Topography)}";
-   public string ResultName => UniqueKey;
-   public List<string> SearchTerms => [UniqueKey];
+   public string ResultName => UniqueId;
+   public List<string> SearchTerms => [UniqueId];
 
    public void OnSearchSelected()
    {
       UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    }
 
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueKey, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
    public IQueastorSearchSettings.Category SearchCategory
       => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
 
    #endregion
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TopographyAgsSettings;
-   public string SavingKey => UniqueKey;
+   public string SavingKey => UniqueId;
 
-   public override string ToString() => UniqueKey;
+   public override string ToString() => UniqueId;
 }

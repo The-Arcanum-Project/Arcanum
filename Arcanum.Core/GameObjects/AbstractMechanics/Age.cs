@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
@@ -10,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
 
@@ -20,7 +20,7 @@ public partial class Age : IEu5Object<Age>
    [ReadonlyNexus]
    [Description("Unique key for ages. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueKey { get; set; } = null!;
+   public string UniqueId { get; set; } = null!;
 #pragma warning restore AGS004
 
    # region Nexus Properties
@@ -79,7 +79,7 @@ public partial class Age : IEu5Object<Age>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.AgeSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Age Empty { get; } = new() { UniqueKey = "Arcanum_Empty_Age" };
+   public static Age Empty { get; } = new() { UniqueId = "Arcanum_Empty_Age" };
    public static IEnumerable<Age> GetGlobalItems() => Globals.Ages;
 
    #endregion
@@ -87,8 +87,8 @@ public partial class Age : IEu5Object<Age>
    #region ISearchable
 
    public string GetNamespace => $"AbstractMechanics.{nameof(Age)}";
-   public string ResultName => UniqueKey;
-   public List<string> SearchTerms => [UniqueKey];
+   public string ResultName => UniqueId;
+   public List<string> SearchTerms => [UniqueId];
 
    public void OnSearchSelected()
    {
@@ -103,11 +103,11 @@ public partial class Age : IEu5Object<Age>
    public FileObj Source { get; set; } = null!;
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
-   public string SavingKey => UniqueKey;
+   public string SavingKey => UniqueId;
 
-   public override string ToString() => UniqueKey;
+   public override string ToString() => UniqueId;
 
-   protected bool Equals(Age other) => UniqueKey == other.UniqueKey;
+   protected bool Equals(Age other) => UniqueId == other.UniqueId;
 
    public override bool Equals(object? obj)
    {
@@ -122,5 +122,5 @@ public partial class Age : IEu5Object<Age>
    }
 
    // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => UniqueKey.GetHashCode();
+   public override int GetHashCode() => UniqueId.GetHashCode();
 }

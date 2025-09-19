@@ -11,4 +11,7 @@ public class AGSSettings
    public AgsSettings TopographyAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
+   public AgsSettings CountryAgsSettings { get; set; } = new();
+   public AgsSettings TimedModifierAgsSettings { get; set; } = new();
+   public AgsSettings JominiDateSettings { get; set; } = new();
 }

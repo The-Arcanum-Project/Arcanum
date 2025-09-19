@@ -1,6 +1,6 @@
 ﻿using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
 /// <summary>
 /// An interface to define a modifier pattern with a unique identifier and an associated value.

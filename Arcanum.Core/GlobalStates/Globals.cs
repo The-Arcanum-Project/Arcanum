@@ -32,7 +32,7 @@ public static class Globals
    public static List<CountryRank> CountryRanks { get; } = [];
    public static List<Road> Roads { get; set; } = [];
 
-   public static Dictionary<Tag, Country> Countries { get; } = [];
+   public static Dictionary<string, Country> Countries { get; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
    public static Dictionary<string, Language> Languages { get; set; } = [];

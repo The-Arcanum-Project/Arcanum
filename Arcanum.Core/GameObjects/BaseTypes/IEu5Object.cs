@@ -37,7 +37,7 @@ public interface IEu5Object : ISearchable, INUI, IAgs
 {
    [SuppressAgs]
    [AddModifiable]
-   public string UniqueKey { get; set; }
+   public string UniqueId { get; set; }
 
    [SuppressAgs]
    public FileObj Source { get; set; }

@@ -3,7 +3,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
 /// <summary>
 /// An instance of a modifier definition with an associated value.
@@ -31,8 +31,8 @@ public partial class ModValInstance : INUI, IEmpty<ModValInstance>, IModifierPat
 
    public string UniqueId
    {
-      get => Definition.UniqueKey;
-      set => Definition.UniqueKey = value;
+      get => Definition.UniqueId;
+      set => Definition.UniqueId = value;
    }
    /// <summary>
    /// The value of the modifier.
@@ -45,7 +45,7 @@ public partial class ModValInstance : INUI, IEmpty<ModValInstance>, IModifierPat
 
    public override string ToString()
    {
-      return $"{Definition.UniqueKey} : {Value} ({Type})";
+      return $"{Definition.UniqueId} : {Value} ({Type})";
    }
 
    public bool IsReadonly => false;

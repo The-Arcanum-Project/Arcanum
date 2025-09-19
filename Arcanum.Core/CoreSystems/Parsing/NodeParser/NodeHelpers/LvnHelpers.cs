@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -173,6 +174,39 @@ public static class LvnHelpers
          return false;
       }
 
+      return true;
+   }
+
+   public static bool TryParseJominiDate(this LiteralValueNode lvn,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         ref bool validationResult,
+                                         out JominiDate value,
+                                         bool complainOnError = true)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      var parts = lexeme.Split('.');
+      if (parts.Length != 3 ||
+          !int.TryParse(parts[0], out var year) ||
+          !int.TryParse(parts[1], out var day) ||
+          !int.TryParse(parts[2], out var month))
+      {
+         if (complainOnError)
+         {
+            ctx.SetPosition(lvn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.InvalidDateValue,
+                                           actionName,
+                                           lexeme);
+            validationResult = false;
+         }
+
+         value = JominiDate.MinValue;
+         return false;
+      }
+
+      value = new(year, month, day);
       return true;
    }
 }

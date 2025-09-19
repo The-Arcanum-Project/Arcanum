@@ -18,7 +18,7 @@ public partial class TopographyParsing : ParserValidationLoadingService<Topograp
    protected override bool UnloadSingleFileContent(Eu5FileObj<Topography> fileObj)
    {
       foreach (var obj in fileObj.GetEu5Objects())
-         Globals.Topography.Remove(obj.UniqueKey);
+         Globals.Topography.Remove(obj.UniqueId);
 
       return true;
    }

@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -40,9 +41,9 @@ public static class SimpleObjectParser
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
-                                           instance.UniqueKey,
+                                           instance.UniqueId,
                                            typeof(TTarget),
-                                           "UniqueKey");
+                                           "UniqueId");
             validation = false;
             continue;
          }
@@ -82,15 +83,15 @@ public static class SimpleObjectParser
              instance == null)
             continue;
 
-         if (!globals.TryAdd(instance.UniqueKey, instance))
+         if (!globals.TryAdd(instance.UniqueId, instance))
          {
             ctx.SetPosition(bn!.KeyNode);
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
-                                           instance.UniqueKey,
+                                           instance.UniqueId,
                                            typeof(TTarget),
-                                           "UniqueKey");
+                                           "UniqueId");
             validation = false;
             continue;
          }
@@ -173,7 +174,7 @@ public static class SimpleObjectParser
          return false;
       }
 
-      eu5Obj = new() { UniqueKey = bn.KeyNode.GetLexeme(source), Source = fileObj };
+      eu5Obj = new() { UniqueId = bn.KeyNode.GetLexeme(source), Source = fileObj };
       return true;
    }
 }

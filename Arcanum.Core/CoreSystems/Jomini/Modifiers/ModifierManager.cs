@@ -3,11 +3,12 @@ using System.Globalization;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
 
-namespace Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
 public static class ModifierManager
 {
@@ -56,17 +57,13 @@ public static class ModifierManager
          return false;
       }
 
-      if (!TryConvertValueToType(value, inferredType!.Value, out var convertedValue))
-      {
-         ctx.SetPosition(nodeKeyNode);
-         DiagnosticException.LogWarning(ctx,
-                                        ParsingError.Instance.InvalidModifierValueType,
-                                        nameof(ModifierManager),
-                                        key,
-                                        value.GetType().Name);
-         validation = false;
+      if (!EffectManager.TryConvertValue(ctx,
+                                         nodeKeyNode,
+                                         ref validation,
+                                         value,
+                                         inferredType!.Value,
+                                         out var convertedValue))
          return false;
-      }
 
 #pragma warning disable CS0618 // Type or member is obsolete
       instance = new(definition, convertedValue, inferredType.Value);
@@ -225,7 +222,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsBooleanModifier)}",
-                                     definition.UniqueKey,
+                                     definition.UniqueId,
                                      "A boolean modifier cannot be a percentage or already percent.");
       return false;
    }
@@ -241,7 +238,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsIntegerModifier)}",
-                                     definition.UniqueKey,
+                                     definition.UniqueId,
                                      "An integer modifier cannot be a percentage, already_percent, or boolean.");
       return false;
    }
@@ -257,7 +254,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsFloatingModifier)}",
-                                     definition.UniqueKey,
+                                     definition.UniqueId,
                                      "A floating modifier cannot be a percentage, already_percent, or boolean.");
       return false;
    }
@@ -273,7 +270,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsPercentageModifier)}",
-                                     definition.UniqueKey,
+                                     definition.UniqueId,
                                      "A percentage modifier cannot be boolean.");
       return false;
    }
@@ -286,7 +283,7 @@ public static class ModifierManager
       DiagnosticException.LogWarning(LocationContext.Empty,
                                      ParsingError.Instance.InconclusiveModifierTypeDefinition,
                                      $"{nameof(InferModifierType)}.{nameof(IsIdentifierModifier)}",
-                                     definition.UniqueKey,
+                                     definition.UniqueId,
                                      "An identifier modifier cannot be boolean, percentage, or already_percent, and must have 0 decimals.");
       return false;
    }

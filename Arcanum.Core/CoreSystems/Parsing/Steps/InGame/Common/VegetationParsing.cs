@@ -20,7 +20,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
    protected override bool UnloadSingleFileContent(Eu5FileObj<Vegetation> fileObj)
    {
       foreach (var obj in fileObj.GetEu5Objects())
-         Globals.Vegetation.Remove(obj.UniqueKey);
+         Globals.Vegetation.Remove(obj.UniqueId);
 
       return true;
    }
@@ -38,7 +38,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
             continue;
 
          var key = bn.KeyNode.GetLexeme(source);
-         var vegetation = new Vegetation { UniqueKey = key, Source = fileObj };
+         var vegetation = new Vegetation { UniqueId = key, Source = fileObj };
 
          var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation);
          if (!Globals.Vegetation.TryAdd(key, vegetation))
@@ -49,7 +49,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
                                            actionStack,
                                            key,
                                            typeof(Vegetation),
-                                           Vegetation.Field.UniqueKey);
+                                           Vegetation.Field.UniqueId);
          }
 
          foreach (var node in unhandledNodes)

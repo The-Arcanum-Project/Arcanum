@@ -1,6 +1,9 @@
-﻿using Arcanum.API.Attributes;
+﻿using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
+using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.Jomini.Effects;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
@@ -13,6 +16,7 @@ using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
@@ -85,15 +89,10 @@ public class NUISettings
                                                       Enum.GetValues<Road.Field>().Cast<Enum>().ToArray(),
                                                       Enum.GetValues<Road.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting CountrySettings { get; set; } = new(Country.Field.Tag,
+   public NUISetting CountrySettings { get; set; } = new(Country.Field.UniqueId,
                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray());
-
-   public NUISetting TagSettings { get; set; } = new(Tag.Field.Name,
-                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
-                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray(),
-                                                     Enum.GetValues<Tag.Field>().Cast<Enum>().ToArray());
 
    public NUISetting CountryRankSettings { get; set; } = new(CountryRank.Field.Name,
                                                              Enum.GetValues<CountryRank.Field>()
@@ -150,22 +149,22 @@ public class NUISettings
                                                          .Cast<Enum>()
                                                          .ToArray());
 
-   public NUISetting AgeSettings { get; set; } = new(Age.Field.UniqueKey,
+   public NUISetting AgeSettings { get; set; } = new(Age.Field.UniqueId,
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting ClimateSettings { get; set; } = new(Climate.Field.UniqueKey,
+   public NUISetting ClimateSettings { get; set; } = new(Climate.Field.UniqueId,
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Climate.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting VegetationSettings { get; set; } = new(Vegetation.Field.UniqueKey,
+   public NUISetting VegetationSettings { get; set; } = new(Vegetation.Field.UniqueId,
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Vegetation.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting ModifierDefinitionSettings { get; set; } = new(ModifierDefinition.Field.UniqueKey,
+   public NUISetting ModifierDefinitionSettings { get; set; } = new(ModifierDefinition.Field.UniqueId,
                                                                     Enum.GetValues<ModifierDefinition.Field>()
                                                                         .Cast<Enum>()
                                                                         .ToArray(),
@@ -187,7 +186,7 @@ public class NUISettings
                                                                       .Cast<Enum>()
                                                                       .ToArray());
 
-   public NUISetting TopographySettings { get; set; } = new(Topography.Field.UniqueKey,
+   public NUISetting TopographySettings { get; set; } = new(Topography.Field.UniqueId,
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<Topography.Field>().Cast<Enum>().ToArray());
@@ -207,4 +206,53 @@ public class NUISettings
                                                           Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<AudioTag.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting EffectDefinitionSettings { get; set; } = new(EffectDefinition.Field.Name,
+                                                                  Enum.GetValues<EffectDefinition.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<EffectDefinition.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<EffectDefinition.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray());
+
+   public NUISetting CurrencyDataSettings { get; set; } = new(CurrencyData.Field.UniqueId,
+                                                              Enum.GetValues<CurrencyData.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<CurrencyData.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<CurrencyData.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray());
+
+   public NUISetting AiTagSettings { get; set; } = new(AiTag.Field.UniqueId,
+                                                       Enum.GetValues<AiTag.Field>().Cast<Enum>().ToArray(),
+                                                       Enum.GetValues<AiTag.Field>().Cast<Enum>().ToArray(),
+                                                       Enum.GetValues<AiTag.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting TimedModifierSettings { get; set; } = new(TimedModifier.Field.UniqueId,
+                                                               Enum.GetValues<TimedModifier.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<TimedModifier.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<TimedModifier.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray());
+
+   public NUISetting JominiDateSettings { get; set; } = new(JominiDate.Field.Year,
+                                                            Enum.GetValues<JominiDate.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray(),
+                                                            Enum.GetValues<JominiDate.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray(),
+                                                            Enum.GetValues<JominiDate.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray());
 }

@@ -115,7 +115,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       ObjectsInFile.Clear();
       foreach (var obj in value)
-         ObjectsInFile.Add(obj.UniqueKey);
+         ObjectsInFile.Add(obj.UniqueId);
    }
 
    private void RenderPreview()

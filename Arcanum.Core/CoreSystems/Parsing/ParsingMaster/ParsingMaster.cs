@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Sorting;
@@ -84,6 +85,8 @@ public class ParsingMaster
 
    public Task<bool> ExecuteAllParsingSteps()
    {
+      EffectParser.ParseEffectDefinitions();
+
       InitializeSteps();
 
       ParsingStepsDone = 0;
@@ -93,7 +96,7 @@ public class ParsingMaster
          ParsingStepsChanged?.Invoke(this, descriptor);
 
          var stepWrapper = descriptor.LoadingService.GetParsingStep(descriptor);
-         
+
          stepWrapper.SubStepCompleted += (_, _) =>
          {
             StepProcessChanged?.Invoke(this, (stepWrapper.SubPercentageCompleted, stepWrapper.SubStepsDone));
@@ -106,7 +109,7 @@ public class ParsingMaster
          StepDurations.Add(stepWrapper.Duration);
          ParsingStepsDone++;
       }
-      
+
       if (ParsingSteps != ParsingStepsDone)
          return Task.FromResult(false);
 
@@ -115,7 +118,7 @@ public class ParsingMaster
       Queastor.Queastor.GlobalInstance.RebuildBkTree();
       sw.Stop();
       Debug.WriteLine($"[Queastor] Rebuilt BK-Tree in {sw.ElapsedMilliseconds} ms for {items} words.");
-      
-      return Task.FromResult(true); 
+
+      return Task.FromResult(true);
    }
 }

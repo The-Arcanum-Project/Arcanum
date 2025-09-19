@@ -99,7 +99,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    [ReadonlyNexus]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueKey { get; set; } = null!;
+   public string UniqueId { get; set; } = null!;
 #pragma warning restore AGS004
 
    # region Nexus Properties
@@ -144,9 +144,9 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ModifierDefinitionSettings;
    public AgsSettings AgsSettings { get; } = new();
-   public string SavingKey => UniqueKey;
+   public string SavingKey => UniqueId;
    public INUINavigation[] Navigations { get; } = [];
-   public static ModifierDefinition Empty { get; } = new() { UniqueKey = "Arcanum_Empty_ModifierDefinition" };
+   public static ModifierDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_ModifierDefinition" };
    public static IEnumerable<ModifierDefinition> GetGlobalItems() => Globals.ModifierDefinitions.Values;
 
    #endregion
@@ -154,14 +154,14 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    #region ISearchable
 
    public string GetNamespace => nameof(ModifierDefinition);
-   public string ResultName => UniqueKey;
-   public List<string> SearchTerms => [UniqueKey];
+   public string ResultName => UniqueId;
+   public List<string> SearchTerms => [UniqueId];
 
    public void OnSearchSelected()
    {
    }
 
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueKey, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
 
    #endregion
@@ -170,9 +170,9 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    [IgnoreModifiable]
    public FileObj Source { get; set; } = null!;
 
-   public override string ToString() => UniqueKey;
+   public override string ToString() => UniqueId;
 
-   protected bool Equals(ModifierDefinition other) => UniqueKey == other.UniqueKey;
+   protected bool Equals(ModifierDefinition other) => UniqueId == other.UniqueId;
 
    public override bool Equals(object? obj)
    {
@@ -187,5 +187,5 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    }
 
    // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => UniqueKey.GetHashCode();
+   public override int GetHashCode() => UniqueId.GetHashCode();
 }

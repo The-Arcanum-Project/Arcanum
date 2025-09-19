@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
+﻿using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 

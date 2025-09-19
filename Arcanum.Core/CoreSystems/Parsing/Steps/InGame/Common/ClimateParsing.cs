@@ -19,7 +19,7 @@ public partial class ClimateParsing : ParserValidationLoadingService<Climate>
    protected override bool UnloadSingleFileContent(Eu5FileObj<Climate> fileObj)
    {
       foreach (var obj in fileObj.GetEu5Objects())
-         Globals.Climates.Remove(obj.UniqueKey);
+         Globals.Climates.Remove(obj.UniqueId);
 
       return true;
    }

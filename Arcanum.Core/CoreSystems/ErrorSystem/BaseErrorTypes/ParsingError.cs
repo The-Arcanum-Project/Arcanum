@@ -658,11 +658,60 @@ public class ParsingError : ILazySingleton
                                                                               DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The audio tag value that is invalid</param>
-   public DiagnosticDescriptor InvalidAudioTagValue { get; } = new(DiagnosticCategory.Parsing,
-                                                                   68,
-                                                                   "Invalid Audio Tag Value",
+   /// <param name="1">The tag type for which the value is invalid</param>
+   /// <param name="2">The tag key that is invalid</param>
+   public DiagnosticDescriptor InvalidTagTypeOrValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                    68,
+                                                                    "Invalid Tag Value",
+                                                                    DiagnosticSeverity.Error,
+                                                                    "The {1} value '{0}' or key {2} is invalid.",
+                                                                    "The provided tag value '{0}' or key '{2}' does not conform to the expected format or range for {1}.",
+                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The effect key that is undefined</param>
+   public DiagnosticDescriptor UndefinedEffectKey { get; } = new(DiagnosticCategory.Parsing,
+                                                                 69,
+                                                                 "Undefined Effect Key",
+                                                                 DiagnosticSeverity.Error,
+                                                                 "The effect key '{0}' is not defined.",
+                                                                 "The effect key '{0}' was referenced but does not exist in the EffectRegistry. Is there a typo? Is it listed in the Eu5 Effect Definitions?",
+                                                                 DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The value that could not be converted</param>
+   /// <param name="1">The modifier type to which the value could not be converted</param>
+   public DiagnosticDescriptor UnableToConvertValueToModifierType { get; } = new(DiagnosticCategory.Parsing,
+       70,
+       "Unable to Convert Value to Modifier Type",
+       DiagnosticSeverity.Error,
+       "The value '{0}' could not be converted to the modifier type '{1}'.",
+       "The provided value '{0}' does not match the expected format or range for the modifier type '{1}'.",
+       DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The currency value that is invalid</param>
+   public DiagnosticDescriptor InvalidCurrencyValue { get; } = new(DiagnosticCategory.Parsing,
+                                                                   71,
+                                                                   "Invalid Currency Value",
                                                                    DiagnosticSeverity.Error,
-                                                                   "The audio tag value '{0}' is invalid.",
-                                                                   "The provided audio tag value does not conform to the expected float format or range. Please ensure it is a valid audio tag.",
+                                                                   "The currency value '{0}' is invalid.",
+                                                                   "The provided currency value does not conform to the expected format or range.",
                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The object key that is invalid</param>
+   /// <param name="1">The object type for which the key is invalid</param>
+   public DiagnosticDescriptor InvalidObjectKey { get; } = new(DiagnosticCategory.Parsing,
+                                                               72,
+                                                               "Invalid Object Key",
+                                                               DiagnosticSeverity.Error,
+                                                               "The object key '{0}' is invalid for any object of type {1}.",
+                                                               "The provided object key '{0}' does not match any known keys for objects of type {1}. Please ensure it is a valid key.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The date value that is invalid</param>
+   public DiagnosticDescriptor InvalidDateValue { get; } = new(DiagnosticCategory.Parsing,
+                                                               73,
+                                                               "Invalid Date Value",
+                                                               DiagnosticSeverity.Error,
+                                                               "The date value '{0}' is invalid.",
+                                                               "The provided date value does not conform to the expected format or range.",
+                                                               DiagnosticReportSeverity.PopupNotify);
 }

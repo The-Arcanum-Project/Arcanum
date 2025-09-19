@@ -34,7 +34,7 @@ public partial class Road : IEu5Object<Road>
    public static IEnumerable<Road> GetGlobalItems() => Globals.Roads;
    public static Road Empty { get; } = new() { StartLocation = Location.Empty, EndLocation = Location.Empty };
    public string GetNamespace => "Map.Roads";
-   public string ResultName => UniqueKey;
+   public string ResultName => UniqueId;
    public List<string> SearchTerms => [StartLocation.Name, EndLocation.Name];
 
    public void OnSearchSelected()
@@ -47,7 +47,7 @@ public partial class Road : IEu5Object<Road>
       => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.RoadAgsSettings;
    public string SavingKey => string.Empty;
-   public string UniqueKey
+   public string UniqueId
    {
       get => $"{StartLocation.Name}_{EndLocation.Name}";
       set => throw new NotSupportedException();

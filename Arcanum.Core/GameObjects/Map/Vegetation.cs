@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
-using Arcanum.Core.CoreSystems.Jomini.ModifierSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -12,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
+using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
@@ -22,7 +22,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
    [ReadonlyNexus]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueKey { get; set; } = null!;
+   public string UniqueId { get; set; } = null!;
 #pragma warning restore AGS004
 
    # region Nexus Properties
@@ -76,7 +76,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.VegetationSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Vegetation Empty { get; } = new() { UniqueKey = "Arcanum_Empty_Vegetation" };
+   public static Vegetation Empty { get; } = new() { UniqueId = "Arcanum_Empty_Vegetation" };
    public static IEnumerable<Vegetation> GetGlobalItems() => Globals.Vegetation.Values;
 
    #endregion
@@ -84,8 +84,8 @@ public partial class Vegetation : IEu5Object<Vegetation>
    #region ISearchable
 
    public string GetNamespace => $"Map.{nameof(Vegetation)}";
-   public string ResultName => UniqueKey;
-   public List<string> SearchTerms => [UniqueKey];
+   public string ResultName => UniqueId;
+   public List<string> SearchTerms => [UniqueId];
 
    public void OnSearchSelected()
    {
@@ -99,7 +99,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
    #endregion
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.VegetationAgsSettings;
-   public string SavingKey => UniqueKey;
+   public string SavingKey => UniqueId;
 
    [SuppressAgs]
    public FileObj Source { get; set; } = null!;
