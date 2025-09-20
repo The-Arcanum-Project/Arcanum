@@ -140,7 +140,7 @@ public class AdjacencyFileLoading : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Adjacencies.Clear();
       Globals.Adjacencies.TrimExcess();

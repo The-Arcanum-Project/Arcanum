@@ -41,7 +41,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
              $"Roads: {Globals.Roads.Count} entries";
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       // TODO: @MelCo only remove the ones from the file being unloaded
       // This can only be done once we have the working Saveable system

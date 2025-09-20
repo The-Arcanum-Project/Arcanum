@@ -15,7 +15,7 @@ public partial class AgeParsing : ParserValidationLoadingService<Age>
    public override List<Type> ParsedObjects { get; } = [typeof(Age)];
    public override string GetFileDataDebugInfo() => $"Parsed Ages: {Globals.Ages.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Age> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Age> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Ages.Remove(obj);
@@ -28,8 +28,17 @@ public partial class AgeParsing : ParserValidationLoadingService<Age>
                                           Eu5FileObj<Age> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
-      SimpleObjectParser.Parse(fileObj, rn, ctx, actionStack, source, ref validation, ParseProperties, Globals.Ages);
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
+                               ctx,
+                               actionStack,
+                               source,
+                               ref validation,
+                               ParseProperties,
+                               Globals.Ages,
+                               lockObject);
    }
 }

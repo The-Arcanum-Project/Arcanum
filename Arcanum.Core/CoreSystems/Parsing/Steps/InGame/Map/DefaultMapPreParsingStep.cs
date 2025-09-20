@@ -124,7 +124,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
       Globals.DefaultMapDefinition = dmd;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.DefaultMapDefinition.Adjacencies = string.Empty;
       Globals.DefaultMapDefinition.HeightMap = string.Empty;

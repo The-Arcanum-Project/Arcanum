@@ -16,7 +16,7 @@ public class CultureAfterParsing : AfterLoadingService
    public override string GetFileDataDebugInfo()
       => $"Initialized '{Globals.Cultures.Values.Sum(x => x.Opinions.Count)}' cultural relations.";
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       foreach (var culture in Globals.Cultures.Values)
          Nx.ClearCollection(culture, Culture.Field.Opinions);

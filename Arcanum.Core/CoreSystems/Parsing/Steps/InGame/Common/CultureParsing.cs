@@ -267,7 +267,7 @@ public class CultureParsing : FileLoadingService
 
    #endregion
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
       => throw new NotImplementedException();
 
    public struct ContentNodeGroup(List<ContentNode> nodes, Culture culture)

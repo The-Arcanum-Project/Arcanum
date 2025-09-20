@@ -261,7 +261,7 @@ public class DefinitionFileLoading : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Areas.Clear();
       Globals.Continents.Clear();

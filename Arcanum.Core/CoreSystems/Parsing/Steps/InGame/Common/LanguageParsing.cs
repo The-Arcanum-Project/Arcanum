@@ -62,6 +62,6 @@ public partial class LanguageParsing : FileLoadingService
          }
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
       => throw new NotImplementedException();
 }

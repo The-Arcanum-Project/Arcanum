@@ -19,6 +19,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      List<TTarget> globals,
+                                     object? lockObject,
                                      bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
    {
       foreach (var sn in rn.Statements)
@@ -34,7 +35,23 @@ public static class SimpleObjectParser
              instance == null)
             continue;
 
-         if (globals.Contains(instance))
+         if (lockObject != null)
+         {
+            lock (lockObject)
+               if (globals.Contains(instance))
+               {
+                  ctx.SetPosition(bn!.KeyNode);
+                  DiagnosticException.LogWarning(ctx,
+                                                 ParsingError.Instance.DuplicateObjectDefinition,
+                                                 actionStack,
+                                                 instance.UniqueId,
+                                                 typeof(TTarget),
+                                                 "UniqueId");
+                  validation = false;
+                  continue;
+               }
+         }
+         else if (globals.Contains(instance))
          {
             ctx.SetPosition(bn!.KeyNode);
             DiagnosticException.LogWarning(ctx,
@@ -60,6 +77,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
+                                     object? lockObject,
                                      bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
       foreach (var sn in statements)
@@ -75,7 +93,23 @@ public static class SimpleObjectParser
              instance == null)
             continue;
 
-         if (!globals.TryAdd(instance.UniqueId, instance))
+         if (lockObject != null)
+            lock (lockObject)
+            {
+               if (!globals.TryAdd(instance.UniqueId, instance))
+               {
+                  ctx.SetPosition(bn!.KeyNode);
+                  DiagnosticException.LogWarning(ctx,
+                                                 ParsingError.Instance.DuplicateObjectDefinition,
+                                                 actionStack,
+                                                 instance.UniqueId,
+                                                 typeof(TTarget),
+                                                 "UniqueId");
+                  validation = false;
+                  continue;
+               }
+            }
+         else if (!globals.TryAdd(instance.UniqueId, instance))
          {
             ctx.SetPosition(bn!.KeyNode);
             DiagnosticException.LogWarning(ctx,
@@ -100,6 +134,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
+                                     object? lockObject,
                                      bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
       Parse(fileObj,
@@ -110,6 +145,7 @@ public static class SimpleObjectParser
             ref validation,
             propsParser,
             globals,
+            lockObject,
             allowUnknownBlocks);
    }
 

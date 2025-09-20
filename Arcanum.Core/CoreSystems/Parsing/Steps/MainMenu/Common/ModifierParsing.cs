@@ -15,7 +15,7 @@ public partial class ModifierParsing : ParserValidationLoadingService<ModifierDe
    public override List<Type> ParsedObjects { get; } = [typeof(ModifierDefinition)];
    public override string GetFileDataDebugInfo() => $"Parsed Modifier Definitions: {Globals.ModifierDefinitions.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<ModifierDefinition> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<ModifierDefinition> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.ModifierDefinitions.Remove(obj.UniqueId);
@@ -28,7 +28,8 @@ public partial class ModifierParsing : ParserValidationLoadingService<ModifierDe
                                           Eu5FileObj<ModifierDefinition> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
@@ -37,6 +38,7 @@ public partial class ModifierParsing : ParserValidationLoadingService<ModifierDe
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.ModifierDefinitions);
+                               Globals.ModifierDefinitions,
+                               lockObject);
    }
 }

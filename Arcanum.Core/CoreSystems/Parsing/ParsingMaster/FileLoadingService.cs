@@ -23,12 +23,12 @@ public abstract class FileLoadingService
    {
       Name = GetType().Name;
    }
-   
+
    /// <summary>
    /// Returns a list of types that this file loading service creates / parses from the file
    /// </summary>
    public abstract List<Type> ParsedObjects { get; }
-   
+
    protected string GetActionName([System.Runtime.CompilerServices.CallerMemberName] string caller = "")
    {
       var declaringType = GetType();
@@ -59,14 +59,14 @@ public abstract class FileLoadingService
    {
       _stopwatch.Restart();
 
-      LoadWithErrorHandling(fileObj, descriptor);
+      LoadWithErrorHandling(fileObj, descriptor, null);
 
       _stopwatch.Stop();
    }
 
    public ReloadFileException? LoadWithErrorHandling(FileObj fileObj,
                                                      FileDescriptor descriptor,
-                                                     object? lockObject = null)
+                                                     object? lockObject)
    {
       var repeatLoading = true;
       while (repeatLoading)
@@ -80,7 +80,7 @@ public abstract class FileLoadingService
             if (ex.IsCritical)
                return ex;
 
-            UnloadSingleFileContent(fileObj, descriptor);
+            UnloadSingleFileContent(fileObj, descriptor, lockObject);
          }
 
       return null;
@@ -94,15 +94,15 @@ public abstract class FileLoadingService
    /// <param name="descriptor"></param>
    /// <param name="lockObject"></param>
    /// <returns></returns>
-   public abstract bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null);
+   public abstract bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
-   public abstract bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor);
+   public abstract bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
-   public virtual void ReloadFile(FileObj fileObj, FileDescriptor descriptor)
+   public virtual void ReloadFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
-      UnloadSingleFileContent(fileObj, descriptor);
+      UnloadSingleFileContent(fileObj, descriptor, lockObject);
       LoadSingleFileWithMetrics(fileObj, descriptor);
    }
-   
-   public virtual bool IsFullyParsed { get; } = true; 
+
+   public virtual bool IsFullyParsed { get; } = true;
 }

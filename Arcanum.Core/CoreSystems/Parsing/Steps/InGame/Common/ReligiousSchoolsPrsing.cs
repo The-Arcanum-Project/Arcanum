@@ -43,7 +43,7 @@ public class ReligiousSchoolsParsing : FileLoadingService
 
    public override bool IsFullyParsed => false;
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.ReligiousSchools.Clear();
       return true;

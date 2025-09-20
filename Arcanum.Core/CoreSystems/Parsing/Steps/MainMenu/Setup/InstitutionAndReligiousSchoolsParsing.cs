@@ -211,6 +211,6 @@ public class InstitutionAndReligiousSchoolsParsing : FileLoadingService
       school.Relations.Add(new(left, (ReligiousSchoolRelationType)enumObj));
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
       => throw new NotImplementedException();
 }

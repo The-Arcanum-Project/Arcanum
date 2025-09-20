@@ -15,7 +15,7 @@ public partial class TopographyParsing : ParserValidationLoadingService<Topograp
    public override List<Type> ParsedObjects { get; } = [typeof(Topography)];
    public override string GetFileDataDebugInfo() => $"Parsed Topographies: {Globals.Topography.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Topography> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Topography> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Topography.Remove(obj.UniqueId);
@@ -28,7 +28,8 @@ public partial class TopographyParsing : ParserValidationLoadingService<Topograp
                                           Eu5FileObj<Topography> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
@@ -37,6 +38,7 @@ public partial class TopographyParsing : ParserValidationLoadingService<Topograp
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.Topography);
+                               Globals.Topography,
+                               lockObject);
    }
 }

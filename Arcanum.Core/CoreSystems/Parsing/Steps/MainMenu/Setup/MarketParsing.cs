@@ -111,7 +111,7 @@ public class MarketParsing : FileLoadingService
       return flawless;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       foreach (var location in Globals.Locations.Values)
          location.Market = Market.Empty;

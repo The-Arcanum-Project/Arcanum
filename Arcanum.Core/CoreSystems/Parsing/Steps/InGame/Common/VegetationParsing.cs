@@ -17,7 +17,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
    public override List<Type> ParsedObjects { get; } = [typeof(Vegetation)];
    public override string GetFileDataDebugInfo() => $"Parsed Vegetation: {Globals.Vegetation.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Vegetation> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Vegetation> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Vegetation.Remove(obj.UniqueId);
@@ -30,7 +30,8 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
                                           Eu5FileObj<Vegetation> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       foreach (var sn in rn.Statements)
       {
@@ -41,7 +42,22 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
          var vegetation = new Vegetation { UniqueId = key, Source = fileObj };
 
          ParseProperties(bn, vegetation, ctx, source, ref validation, false);
-         if (!Globals.Vegetation.TryAdd(key, vegetation))
+
+         if (lockObject != null)
+         {
+            lock (lockObject)
+               if (!Globals.Vegetation.TryAdd(key, vegetation))
+               {
+                  ctx.SetPosition(bn.KeyNode);
+                  DiagnosticException.LogWarning(ctx.GetInstance(),
+                                                 ParsingError.Instance.DuplicateObjectDefinition,
+                                                 actionStack,
+                                                 key,
+                                                 typeof(Vegetation),
+                                                 Vegetation.Field.UniqueId);
+               }
+         }
+         else if (!Globals.Vegetation.TryAdd(key, vegetation))
          {
             ctx.SetPosition(bn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),

@@ -164,7 +164,7 @@ public class DefaultParsingStep
          {
             var startTime = _stopwatch.Elapsed;
 
-            var ex = Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor);
+            var ex = Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor, null);
             if (ex is { IsCritical: true })
                return false;
 
@@ -210,7 +210,7 @@ public class DefaultParsingStep
    public bool UnloadAllFiles()
    {
       foreach (var file in Descriptor.Files)
-         if (!Descriptor.LoadingService.UnloadSingleFileContent(file, Descriptor))
+         if (!Descriptor.LoadingService.UnloadSingleFileContent(file, Descriptor, null))
             return false;
 
       return true;

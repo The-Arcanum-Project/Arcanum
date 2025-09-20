@@ -16,7 +16,7 @@ public partial class LocationRankParsing : ParserValidationLoadingService<Locati
 
    public override string GetFileDataDebugInfo() => $"Parsed LocationRanks: {Globals.Regencies.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<LocationRank> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<LocationRank> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Regencies.Remove(obj.UniqueId);
@@ -30,7 +30,8 @@ public partial class LocationRankParsing : ParserValidationLoadingService<Locati
                                           Eu5FileObj<LocationRank> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
@@ -39,6 +40,7 @@ public partial class LocationRankParsing : ParserValidationLoadingService<Locati
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.LocationRanks);
+                               Globals.LocationRanks,
+                               lockObject);
    }
 }

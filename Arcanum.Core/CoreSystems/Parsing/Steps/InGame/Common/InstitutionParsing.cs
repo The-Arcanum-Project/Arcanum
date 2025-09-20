@@ -65,7 +65,7 @@ public class InstitutionParsing : FileLoadingService
 
    public override bool IsFullyParsed => false;
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Institutions.Clear();
       return true;

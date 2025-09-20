@@ -16,7 +16,7 @@ public partial class RegencyParsing : ParserValidationLoadingService<Regency>
 
    public override string GetFileDataDebugInfo() => $"Parsed Regencies: {Globals.Regencies.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Regency> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Regency> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Regencies.Remove(obj.UniqueId);
@@ -28,7 +28,8 @@ public partial class RegencyParsing : ParserValidationLoadingService<Regency>
                                           Eu5FileObj<Regency> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
@@ -37,6 +38,7 @@ public partial class RegencyParsing : ParserValidationLoadingService<Regency>
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.Regencies);
+                               Globals.Regencies,
+                               lockObject);
    }
 }

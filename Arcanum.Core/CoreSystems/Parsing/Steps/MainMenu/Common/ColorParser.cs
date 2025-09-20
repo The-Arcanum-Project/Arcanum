@@ -64,7 +64,7 @@ public class ColorParser : FileLoadingService
       return validation;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       return true;
    }

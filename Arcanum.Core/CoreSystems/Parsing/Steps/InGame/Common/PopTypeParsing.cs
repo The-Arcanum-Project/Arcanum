@@ -19,7 +19,7 @@ public class PopTypeParsing : FileLoadingService
       return $"PopTypes: {Globals.PopTypes.Count} entries";
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.PopTypes.Clear();
       Globals.PopTypes.TrimExcess();

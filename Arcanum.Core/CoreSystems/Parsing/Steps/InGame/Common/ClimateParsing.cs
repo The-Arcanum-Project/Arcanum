@@ -16,7 +16,7 @@ public partial class ClimateParsing : ParserValidationLoadingService<Climate>
    public override string GetFileDataDebugInfo() => $"Parsed Climates: {Globals.Climates.Count}";
    public override bool IsFullyParsed => false;
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Climate> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Climate> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Climates.Remove(obj.UniqueId);
@@ -29,7 +29,8 @@ public partial class ClimateParsing : ParserValidationLoadingService<Climate>
                                           Eu5FileObj<Climate> fileObj,
                                           string actionStack,
                                           string source,
-                                          ref bool validation)
+                                          ref bool validation,
+                                          object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
@@ -38,6 +39,7 @@ public partial class ClimateParsing : ParserValidationLoadingService<Climate>
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.Climates);
+                               Globals.Climates,
+                               lockObject);
    }
 }

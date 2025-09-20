@@ -110,7 +110,7 @@ public class PopsParsing : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       foreach (var location in Globals.Locations)
          location.Value.Pops.Clear();

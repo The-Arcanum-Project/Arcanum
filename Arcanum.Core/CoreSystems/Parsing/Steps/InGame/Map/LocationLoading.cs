@@ -64,7 +64,7 @@ public class LocationFileLoading : FileLoadingService
       return isFlawless;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor)
+   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       List<Location> locationsToRemove = [];
       // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
