@@ -14,4 +14,8 @@ public class AGSSettings
    public AgsSettings CountryAgsSettings { get; set; } = new();
    public AgsSettings TimedModifierAgsSettings { get; set; } = new();
    public AgsSettings JominiDateSettings { get; set; } = new();
+   public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
+   public AgsSettings RulerTermAgsSettings { get; set; } = new();
+   public AgsSettings EnactedLawAgsSettings { get; set; } = new();
+   public AgsSettings ReganlNumberAgsSettings { get; set; } = new();
 }

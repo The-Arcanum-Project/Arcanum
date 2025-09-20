@@ -68,7 +68,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
+                                     bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
       foreach (var sn in statements)
       {
@@ -115,7 +115,7 @@ public static class SimpleObjectParser
                                      ref bool validation,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
-                                     bool allowUnknownBlocks = true) where TTarget : IEu5Object<TTarget>, new()
+                                     bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
       Parse(fileObj,
             rn.Statements,
@@ -137,7 +137,7 @@ public static class SimpleObjectParser
                                                         BlockNode? bn,
                                                         TTarget eu5Obj) where TTarget : IEu5Object<TTarget>, new()
    {
-      var unknownNodes = propsParser(bn!, eu5Obj, ctx, source, ref validation);
+      var unknownNodes = propsParser(bn!, eu5Obj, ctx, source, ref validation, allowUnknownBlocks);
 
       if (allowUnknownBlocks)
          foreach (var ukn in unknownNodes)
@@ -145,15 +145,20 @@ public static class SimpleObjectParser
       else
          foreach (var ukn in unknownNodes)
          {
-            if (!ukn.IsBlockNode(ctx, source, actionStack, ref validation, out var dbn))
-               continue;
+            var lexeme = ukn.KeyNode.GetLexeme(source);
+            var type = ukn.GetType();
 
-            ctx.SetPosition(dbn.KeyNode);
+            if (lexeme == "variables")
+            {
+               continue;
+            }
+
+            ctx.SetPosition(ukn.KeyNode);
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.UnknownKey,
                                            actionStack,
-                                           dbn.KeyNode.GetLexeme(source),
-                                           dbn.Children.Count);
+                                           ukn.KeyNode.GetLexeme(source),
+                                           "???");
             validation = false;
          }
    }

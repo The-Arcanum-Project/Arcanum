@@ -75,6 +75,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
             if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol targetTypeSymbol)
                continue;
 
+            var allowUnknownNodes = AttributeHelper.GetAttributeArgumentValue(attr, 1, "allowUnknownNodes", false);
+
             // --- Collect Metadata from Target Type's Properties ---
             var propertiesToParse = new List<PropertyMetadata>();
             ExtractMetadata(targetTypeSymbol, propertiesToParse);
@@ -95,7 +97,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                      toolboxSymbol,
                                                                      $"{parserSymbol.ContainingNamespace}.{targetTypeSymbol.Name}Keywords",
                                                                      parsers,
-                                                                     context);
+                                                                     context,
+                                                                     allowUnknownNodes);
             context.AddSource(parserHintName, parserSource);
          }
          catch (Exception ex)
@@ -120,7 +123,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                        INamedTypeSymbol toolboxSymbol,
                                                                        string fullyQualifiedKeywordClassName,
                                                                        ImmutableArray<INamedTypeSymbol> parsers,
-                                                                       SourceProductionContext context)
+                                                                       SourceProductionContext context,
+                                                                       bool allowUnknownNodes)
    {
       var hintName = $"{parserSymbol.ContainingNamespace}.{parserSymbol.Name}.g.cs";
       var targetTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -293,10 +297,16 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
          // We have a pure embedded property, not in combination with a list.
          var hasEmbeddedParser =
-            TryGetEmbeddedParserName(parserSymbol, sb, parsers, context, prop, out var customParserName);
+            TryGetEmbeddedParserName(parserSymbol,
+                                     sb,
+                                     parsers,
+                                     context,
+                                     prop,
+                                     out var customParserName,
+                                     out var allowUnknownNodes);
          if (hasEmbeddedParser && !prop.IsCollection)
          {
-            GenerateEmbeddedPropertyParserMethod(sb, targetTypeName, prop, customParserName!);
+            GenerateEmbeddedPropertyParserMethod(sb, targetTypeName, prop, customParserName!, allowUnknownNodes);
             continue;
          }
 
@@ -322,7 +332,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
             var parserName = customParserName ?? "<MISSING_PARSER_!_CREATE_A_PARTIAL_PARSING_STUB";
             var genericTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
             sb.AppendLine($"        var newInstance = ({genericTypeName})Activator.CreateInstance(typeof({genericTypeName}))!;");
-            sb.AppendLine($"        {parserName}.ParseProperties(node, newInstance, ctx, source, ref validation);");
+            sb.AppendLine($"        {parserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {allowUnknownNodes.ToString().ToLower()});");
             sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
             sb.AppendLine("        return true;");
          }
@@ -390,14 +400,18 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                 ImmutableArray<INamedTypeSymbol> parsers,
                                                 SourceProductionContext context,
                                                 PropertyMetadata prop,
-                                                out string? customParserName)
+                                                out string? customParserName,
+                                                out bool allowUnknownNodes)
    {
       customParserName = null;
+      allowUnknownNodes = false;
 
       if (!prop.IsEmbedded)
          return false;
 
-      var nestedParserSymbol = FindParserForType(prop.IsCollection ? prop.ItemType : prop.PropertyType, parsers);
+      var nestedParserSymbol = FindParserForType(prop.IsCollection ? prop.ItemType : prop.PropertyType,
+                                                 out allowUnknownNodes,
+                                                 parsers);
 
       if (nestedParserSymbol == null)
       {
@@ -422,15 +436,14 @@ public class ParserSourceGenerator : IIncrementalGenerator
    private static void GenerateEmbeddedPropertyParserMethod(StringBuilder sb,
                                                             string targetTypeName,
                                                             PropertyMetadata prop,
-                                                            string customParserName)
+                                                            string customParserName,
+                                                            bool allowUnknownNodes)
    {
       var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
       sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
-      sb.AppendLine($"        // This is an embedded object which has its own parser and is not a list.");
-      sb.AppendLine($"        if (target.{prop.PropertyName} == null) ");
-      sb.AppendLine($"            target.{prop.PropertyName} = new {propTypeName2}();");
-      sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation);");
+      sb.AppendLine($"        target.{prop.PropertyName} = new {propTypeName2}();");
+      sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation, {allowUnknownNodes.ToString().ToLower()});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
    }
@@ -494,8 +507,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
    private static INamedTypeSymbol? FindParserForType(
       ITypeSymbol targetType,
+      out bool allowUnknownNodes,
       ImmutableArray<INamedTypeSymbol> allKnownParsers)
    {
+      allowUnknownNodes = false;
       foreach (var potentialParser in allKnownParsers)
       {
          var attr = potentialParser.GetAttributes()
@@ -503,6 +518,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
          if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol attrTargetType)
             continue;
+
+         allowUnknownNodes = AttributeHelper.GetAttributeArgumentValue(attr, 1, "allowUnknownNodes", false);
 
          if (SymbolEqualityComparer.Default.Equals(attrTargetType, targetType))
             return potentialParser;
@@ -543,9 +560,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// This is a facade that calls the centralized logic in the Pdh helper class.");
       sb.AppendLine("    /// </summary>");
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
-      sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
       sb.AppendLine("    {");
-      sb.AppendLine("        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers);");
+      sb.AppendLine($"        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, allowUnknownNodes);");
       sb.AppendLine("    }");
       sb.AppendLine();
    }

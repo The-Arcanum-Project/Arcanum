@@ -1,0 +1,90 @@
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GlobalStates;
+using Common.UI;
+
+namespace Arcanum.Core.GameObjects.Court.State;
+
+[ObjectSaveAs]
+public partial class RulerTerm : IEu5Object<RulerTerm>
+{
+   [SaveAs]
+   [DefaultValue("")]
+   [Description("The ID of the character serving this ruler term.")]
+   [ParseAs("character")]
+   public string CharacterId { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [Description("The starting year of this ruler term.")]
+   [ParseAs("start_date")]
+   public JominiDate StartDate { get; set; } = JominiDate.Empty;
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [Description("The ending year of this ruler term.")]
+   [ParseAs("end_date")]
+   public JominiDate EndDate { get; set; } = JominiDate.Empty;
+
+   [SaveAs]
+   [DefaultValue(1)]
+   [Description("The regnal number of the ruler during this term.")]
+   [ParseAs("regnal_number")]
+   public int RegnalNumber { get; set; }
+
+   #region IEu5Object Implementation
+
+   public string GetNamespace => $"Court.{nameof(RulerTerm)}";
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public bool IsReadonly => false;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RulerTermSettings;
+   public INUINavigation[] Navigations { get; } = [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RulerTermAgsSettings;
+   public string UniqueId
+   {
+      get => CharacterId;
+      set => CharacterId = value;
+   }
+   public FileObj Source { get; set; } = null!;
+   public static IEnumerable<RulerTerm> GetGlobalItems() => throw new NotImplementedException();
+
+   public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };
+
+   #endregion
+
+   #region Equality Members
+
+   protected bool Equals(RulerTerm other) => CharacterId == other.CharacterId &&
+                                             StartDate.Equals(other.StartDate) &&
+                                             EndDate.Equals(other.EndDate) &&
+                                             RegnalNumber == other.RegnalNumber;
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != GetType())
+         return false;
+
+      return Equals((RulerTerm)obj);
+   }
+
+   [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+   public override int GetHashCode() => HashCode.Combine(CharacterId, StartDate, EndDate, RegnalNumber);
+
+   public override string ToString() => $"{CharacterId} ({StartDate} - {EndDate})";
+
+   #endregion
+}

@@ -182,25 +182,49 @@ public static class LvnHelpers
                                          string actionName,
                                          string source,
                                          ref bool validationResult,
-                                         out JominiDate value,
-                                         bool complainOnError = true)
+                                         out JominiDate value)
    {
       var lexeme = lvn.Value.GetLexeme(source);
       var parts = lexeme.Split('.');
       if (parts.Length != 3 ||
           !int.TryParse(parts[0], out var year) ||
-          !int.TryParse(parts[1], out var day) ||
-          !int.TryParse(parts[2], out var month))
+          !int.TryParse(parts[1], out var month) ||
+          !int.TryParse(parts[2], out var day))
       {
-         if (complainOnError)
+         // if the year is present we interpret any missing month/day as 1
+         if (parts.Length == 1 && int.TryParse(parts[0], out year))
          {
+            month = 1;
+            day = 1;
             ctx.SetPosition(lvn.Value);
             DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.InvalidDateValue,
+                                           ParsingError.Instance.PartialDateValue,
                                            actionName,
                                            lexeme);
             validationResult = false;
+            value = new(year, month, day);
+            return true;
          }
+
+         if (parts.Length == 2 && int.TryParse(parts[0], out year) && int.TryParse(parts[1], out month))
+         {
+            day = 1;
+            ctx.SetPosition(lvn.Value);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.PartialDateValue,
+                                           actionName,
+                                           lexeme);
+            validationResult = false;
+            value = new(year, month, day);
+            return true;
+         }
+
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidDateValue,
+                                        actionName,
+                                        lexeme);
+         validationResult = false;
 
          value = JominiDate.MinValue;
          return false;

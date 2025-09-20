@@ -42,6 +42,11 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    [SuppressAgs]
    public FileObj Source { get; set; }
 
+   string ISearchable.ResultName => UniqueId;
+   List<string> ISearchable.SearchTerms => [UniqueId];
+
+   string IAgs.SavingKey => UniqueId;
+
    /// <summary>
    /// Provides the default implementation for the non-generic gateway method from IEu5Object.
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.

@@ -19,6 +19,6 @@ public class IgnoreDeserializationAndCreateNewConverter<T> : JsonConverter<T> wh
 
    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
    {
-      writer.WriteNullValue();
+      JsonSerializer.Serialize(writer, value, options);
    }
 }

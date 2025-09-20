@@ -8,6 +8,8 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -246,13 +248,38 @@ public class NUISettings
                                                                    .ToArray());
 
    public NUISetting JominiDateSettings { get; set; } = new(JominiDate.Field.Year,
-                                                            Enum.GetValues<JominiDate.Field>()
-                                                                .Cast<Enum>()
-                                                                .ToArray(),
-                                                            Enum.GetValues<JominiDate.Field>()
-                                                                .Cast<Enum>()
-                                                                .ToArray(),
-                                                            Enum.GetValues<JominiDate.Field>()
-                                                                .Cast<Enum>()
-                                                                .ToArray());
+                                                            Enum.GetValues<JominiDate.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<JominiDate.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<JominiDate.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting GovernmentStateSettings { get; set; } = new(GovernmentState.Field.Ruler,
+                                                                 Enum.GetValues<GovernmentState.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<GovernmentState.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<GovernmentState.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray());
+
+   public NUISetting RulerTermSettings { get; set; } = new(RulerTerm.Field.CharacterId,
+                                                           Enum.GetValues<RulerTerm.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<RulerTerm.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<RulerTerm.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting EnactedLawSettings { get; set; } = new(EnactedLaw.Field.Key,
+                                                            Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray());
+   public NUISetting RegnalNumberNUISettings { get; set; } = new(EnactedLaw.Field.Key,
+                                                                 Enum.GetValues<EnactedLaw.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<EnactedLaw.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray(),
+                                                                 Enum.GetValues<EnactedLaw.Field>()
+                                                                     .Cast<Enum>()
+                                                                     .ToArray());
 }

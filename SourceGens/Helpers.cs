@@ -79,9 +79,17 @@ public static class Helpers
                                                List<string> checkedMembers,
                                                bool isInterface = false)
    {
+      if (classSymbol.Name.Contains("GovernmentState"))
+      {
+      }
+
       // --- Iterate through the potential members and apply the rules ---
       foreach (var member in potentialMembers.Values)
       {
+         if (member.Name.Contains("UniqueId"))
+         {
+         }
+
          checkedMembers.Add(member.Name);
          // Must not be static
          if (member.IsStatic)
@@ -100,20 +108,10 @@ public static class Helpers
             if (property.SetMethod == null || !IsAccessibleFrom(property.SetMethod, classSymbol))
                continue;
 
-         var addAttr = member.GetAttributes()
-                             .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                   MODIFIABLE_ATTRIBUTE_STRING);
+         var (ignoreAttr, addAttr) = FindEffectiveAttributes(classSymbol, member.Name);
 
          if (isInterface && addAttr == null)
             continue; // Require [AddModifiable] on interface members.
-
-         if (member.Name.Equals("Source"))
-         {
-         }
-
-         var ignoreAttr = member.GetAttributes()
-                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
-                                                      IGNORE_MODIFIABLE_ATTRIBUTE_STRING);
 
          if (ignoreAttr != null)
          {
@@ -163,6 +161,75 @@ public static class Helpers
 
          finalMembers.Add(member);
       }
+   }
+
+   /// <summary>
+   /// For a given member name, walks up the type hierarchy of a class (including interfaces)
+   /// to find the most-derived declaration and its [IgnoreModifiable] or [AddModifiable] attributes.
+   /// </summary>
+   private static (AttributeData? Ignore, AttributeData? Add) FindEffectiveAttributes(
+      INamedTypeSymbol classSymbol,
+      string memberName)
+   {
+      AttributeData? ignoreAttr = null;
+      AttributeData? addAttr = null;
+
+      // Search the class and its base classes first (most-derived wins)
+      var currentType = classSymbol;
+      while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+      {
+         var memberOnType = currentType.GetMembers(memberName).FirstOrDefault();
+         if (memberOnType != null)
+         {
+            // If we haven't found an attribute yet, check this level.
+            // This correctly gives precedence to attributes on derived classes.
+            ignoreAttr ??= memberOnType.GetAttributes()
+                                       .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                             IGNORE_MODIFIABLE_ATTRIBUTE_STRING);
+            addAttr ??= memberOnType.GetAttributes()
+                                    .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                          MODIFIABLE_ATTRIBUTE_STRING);
+         }
+
+         currentType = currentType.BaseType;
+      }
+
+      // Only if we haven't found attributes yet, check the interfaces.
+      // This ensures class attributes always override interface attributes.
+      if (ignoreAttr == null && addAttr == null)
+      {
+         foreach (var iface in classSymbol.AllInterfaces)
+         {
+            var memberOnIface = iface.GetMembers(memberName).FirstOrDefault();
+            if (memberOnIface != null)
+            {
+               ignoreAttr ??= memberOnIface.GetAttributes()
+                                           .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                                 IGNORE_MODIFIABLE_ATTRIBUTE_STRING);
+               addAttr ??= memberOnIface.GetAttributes()
+                                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                              MODIFIABLE_ATTRIBUTE_STRING);
+            }
+         }
+      }
+
+      return (ignoreAttr, addAttr);
+   }
+
+   // You will also need this helper from a previous answer
+   private static ISymbol FindOriginalDefinition(ISymbol symbol)
+   {
+      if (symbol is IPropertySymbol propertySymbol)
+      {
+         while (propertySymbol.OverriddenProperty != null)
+         {
+            propertySymbol = propertySymbol.OverriddenProperty;
+         }
+
+         return propertySymbol;
+      }
+
+      return symbol;
    }
 
    private static bool IsAccessibleFrom(ISymbol member, INamedTypeSymbol accessingType)

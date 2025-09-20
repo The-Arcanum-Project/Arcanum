@@ -76,8 +76,8 @@ public partial class Location
 
    public static bool operator !=(Location? left, Location? right) => !(left == right);
 
-   public bool IsReadonly { get; } = false;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.LocationSettings;
+   public bool IsReadonly => false;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationSettings;
    public INUINavigation[] Navigations
    {
       get

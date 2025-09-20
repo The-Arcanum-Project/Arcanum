@@ -34,7 +34,7 @@ public partial class EffectDefinition(string name) : INUI, ICollectionProvider<E
    }
 
    public bool IsReadonly => true;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.EffectDefinitionSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EffectDefinitionSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static IEnumerable<EffectDefinition> GetGlobalItems() => EffectRegistry.Effects.Values;
 

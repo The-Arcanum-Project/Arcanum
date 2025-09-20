@@ -395,7 +395,7 @@ public class ParsingError : ILazySingleton
                                                               41,
                                                               "Invalid Node Type",
                                                               DiagnosticSeverity.Error,
-                                                              "The node type '{0}' is invalid in the current context.",
+                                                              "The node type '{0}' ('{2}') is invalid in the current context.",
                                                               "The node ('{2}') of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
                                                               DiagnosticReportSeverity.PopupNotify);
 
@@ -713,5 +713,14 @@ public class ParsingError : ILazySingleton
                                                                DiagnosticSeverity.Error,
                                                                "The date value '{0}' is invalid.",
                                                                "The provided date value does not conform to the expected format or range.",
+                                                               DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The date value that is partial and missing components</param>
+   public DiagnosticDescriptor PartialDateValue { get; } = new(DiagnosticCategory.Parsing,
+                                                               74,
+                                                               "Partial Date Value",
+                                                               DiagnosticSeverity.Warning,
+                                                               "The date value {0} is partial and missing components.",
+                                                               "The provided date value is incomplete. Please ensure it includes all necessary components (e.g., day, month, year).",
                                                                DiagnosticReportSeverity.PopupNotify);
 }

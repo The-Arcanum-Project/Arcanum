@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -7,13 +6,12 @@ using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Date;
-using Arcanum.Core.CoreSystems.Jomini.Effects;
-using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
@@ -706,6 +704,62 @@ public static class ParsingToolBox
       if (!lvn.TryParseJominiDate(ctx, actionName, source, ref validation, out value))
          return false;
 
+      return true;
+   }
+
+   public static bool ArcTryParse_EnactedLaw(ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out EnactedLaw value,
+                                             ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_EnactedLaw)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
+      return true;
+   }
+
+   public static bool ArcTryParse_RegnalNumber(ContentNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               [MaybeNullWhen(false)] out RegnalNumber value,
+                                               ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_RegnalNumber)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
       return true;
    }
 }

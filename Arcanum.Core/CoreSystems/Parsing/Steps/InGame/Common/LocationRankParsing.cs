@@ -37,7 +37,7 @@ public partial class LocationRankParsing : FileLoadingService
 
          var rankKey = bn.KeyNode.GetLexeme(source);
          var rank = new LocationRank(rankKey, order);
-         var unresolvedNodes = ParseProperties(bn, rank, ctx, source, ref validation);
+         var unresolvedNodes = ParseProperties(bn, rank, ctx, source, ref validation, false);
 
          foreach (var node in unresolvedNodes)
             // We only care if we have unparsed content nodes

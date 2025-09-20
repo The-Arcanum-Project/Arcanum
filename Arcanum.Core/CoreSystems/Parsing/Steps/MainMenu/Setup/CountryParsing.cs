@@ -27,7 +27,8 @@ public partial class CountryParsing
                                source,
                                ref validation,
                                ParseProperties,
-                               tagCheck);
+                               tagCheck,
+                               false);
 
       foreach (var country in tagCheck.Values)
          Globals.Countries[country.UniqueId] = country;

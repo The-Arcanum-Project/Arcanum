@@ -54,7 +54,8 @@ public static class Pdh
                                                                   TTarget target,
                                                                   LocationContext ctx,
                                                                   string source,
-                                                                  ref bool validation)
+                                                                  ref bool validation,
+                                                                  bool complainOnUnknownNodes)
       where TTarget : INexus;
 
    /// <summary>
@@ -168,6 +169,7 @@ public static class Pdh
    /// <param name="validation">A reference to the overall validation flag.</param>
    /// <param name="contentParsers">The dictionary of parsers for ContentNodes.</param>
    /// <param name="blockParsers">The dictionary of parsers for BlockNodes.</param>
+   /// <param name="allowUnknownNodes"></param>
    /// <returns>A list of all child StatementNodes that were not handled by any parser.</returns>
    public static List<StatementNode> ParseProperties<TTarget>(
       BlockNode block,
@@ -176,7 +178,8 @@ public static class Pdh
       string source,
       ref bool validation,
       IReadOnlyDictionary<string, ContentParser<TTarget>> contentParsers,
-      IReadOnlyDictionary<string, BlockParser<TTarget>> blockParsers) where TTarget : INexus
+      IReadOnlyDictionary<string, BlockParser<TTarget>> blockParsers,
+      bool allowUnknownNodes = false) where TTarget : INexus
    {
       var unhandledNodes = new List<StatementNode>();
 
@@ -202,8 +205,20 @@ public static class Pdh
             }
          }
 
-         if (!wasHandled)
-            unhandledNodes.Add(propertyNode);
+         if (wasHandled)
+            continue;
+
+         unhandledNodes.Add(propertyNode);
+         if (allowUnknownNodes)
+            continue;
+
+         ctx.SetPosition(propertyNode.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"Parsing {typeof(TTarget).Name}",
+                                        propertyNode.GetType().Name,
+                                        "ContentNode or BlockNode",
+                                        propertyNode.KeyNode.GetLexeme(source));
       }
 
       return unhandledNodes;

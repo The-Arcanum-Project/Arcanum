@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Map;
 using Nexus.Core;
 
@@ -11,13 +12,15 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// </summary>
 public static class SavingActionProvider
 {
-   public static void ExampleCustomSavingMethod(IAgs target, PropertySavingMetadata metadata, IndentedStringBuilder sb)
+   public static void SaveIdentifierStringKvp(IAgs target,
+                                              HashSet<PropertySavingMetadata> metadata,
+                                              IndentedStringBuilder sb)
    {
-      object value = null!;
-      Nx.ForceGet(target, metadata.NxProp, ref value);
-      sb.AppendLine($"# Custom saving for property: {metadata.Keyword}");
-      sb.AppendLine($"# Value: {value}");
-      sb.AppendLine($"{metadata.Keyword} = {value}");
+      if (target is not IStringKvp targetKvp)
+         throw new
+            InvalidOperationException("SaveIdentifierStringKvp can only be used with IIdentifierStringKvp instances.");
+
+      sb.AppendLine($"{targetKvp.Key} = {targetKvp.Value}");
    }
 
    public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)

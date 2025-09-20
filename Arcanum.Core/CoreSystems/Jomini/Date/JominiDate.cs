@@ -183,7 +183,7 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
    {
       return month switch
       {
-         2 => 28,
+         2 => 29,
          4 or 6 or 9 or 11 => 30,
          _ => 31,
       };

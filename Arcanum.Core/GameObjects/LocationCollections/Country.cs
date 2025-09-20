@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
@@ -65,10 +66,10 @@ public partial class Country : IEu5Object<Country>
    public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
 
    [SaveAs]
-   [ParseAs("dynasty")]
    [DefaultValue("")]
+   [ParseAs("dynasty", isShatteredList: true)]
    [Description("The ruling dynasty of this country.")]
-   public string Dynasty { get; set; } = string.Empty;
+   public ObservableRangeCollection<string> Dynasty { get; set; } = [];
 
    [SaveAs]
    [ParseAs("court_language")]
@@ -235,6 +236,12 @@ public partial class Country : IEu5Object<Country>
    [DefaultValue(null)]
    [Description("A modifier starting and ending at a given date.")]
    public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("government", AstNodeType.BlockNode, isEmbedded: true)]
+   [DefaultValue(null)]
+   [Description("The government state of this country.")]
+   public GovernmentState GovernmentState { get; set; } = GovernmentState.Empty;
 
    #endregion
 

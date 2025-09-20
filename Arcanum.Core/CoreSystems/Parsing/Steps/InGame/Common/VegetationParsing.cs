@@ -40,7 +40,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
          var key = bn.KeyNode.GetLexeme(source);
          var vegetation = new Vegetation { UniqueId = key, Source = fileObj };
 
-         var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation);
+         var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation, false);
          if (!Globals.Vegetation.TryAdd(key, vegetation))
          {
             ctx.SetPosition(bn.KeyNode);

@@ -31,7 +31,7 @@ public partial class LanguageParsing : FileLoadingService
          var langKey = bn.KeyNode.GetLexeme(source);
          var language = new Language(langKey);
 
-         var unhandledNodes = ParseProperties(bn, language, ctx, source, ref validation);
+         var unhandledNodes = ParseProperties(bn, language, ctx, source, ref validation, false);
          if (!Globals.Languages.TryAdd(langKey, language))
          {
             ctx.SetPosition(bn.KeyNode);
@@ -79,7 +79,7 @@ public partial class LanguageParsing : FileLoadingService
          if (statement is BlockNode dbn)
          {
             var dialect = new Language(dbn.KeyNode.GetLexeme(source));
-            ParseProperties(dbn, dialect, ctx, source, ref validation);
+            ParseProperties(dbn, dialect, ctx, source, ref validation, false);
             parentLanguage.Dialects.Add(dialect);
          }
    }
