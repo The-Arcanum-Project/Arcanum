@@ -1,0 +1,249 @@
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GlobalStates;
+using Common.UI;
+
+namespace Arcanum.Core.GameObjects.Court;
+
+[ObjectSaveAs]
+public partial class Character : IEu5Object<Character>
+{
+   #region Nexus Properties
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("first_name", isEmbedded: true)]
+   [Description("The character's first name.")]
+   public CharacterNameDeclaration FirstName { get; set; } = CharacterNameDeclaration.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("last_name", isEmbedded: true)]
+   [Description("The character's first name.")]
+   public CharacterNameDeclaration LastName { get; set; } = CharacterNameDeclaration.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("nickname", isEmbedded: true)]
+   [Description("The character's first name.")]
+   public CharacterNameDeclaration NickName { get; set; } = CharacterNameDeclaration.Empty;
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("female")]
+   [Description("Is this character female?")]
+   public bool IsFemale { get; set; }
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("has_patronym")]
+   [Description("If true, this character uses a patronymic naming system.")]
+   public bool HasPatronym { get; set; }
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("mother")]
+   [Description("The mother of this character.")]
+   public Character Mother { get; set; } = Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("spouse")]
+   [Description("The spouse of this character.")]
+   public Character Spouse { get; set; } = Empty;
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("adm")]
+   [Description("The administrative skill of this character.")]
+   public int Adm { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("dip")]
+   [Description("The diplomatic skill of this character.")]
+   public int Dip { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("mil")]
+   [Description("The military skill of this character.")]
+   public int Mil { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("fertility")]
+   [Description("The fertility of this character.")]
+   public int Fertility { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0f)]
+   [ParseAs("artist_skill")]
+   [Description("The artistic skill of this character.")]
+   public float ArtistSkill { get; set; }
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("artist")]
+   [Description("The type of artist this character is.")]
+   public string ArtistType { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("ruler_trait", isShatteredList: true)]
+   [Description("The traits of this character.")]
+   public ObservableRangeCollection<string> RulerTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("artist_trait", isShatteredList: true)]
+   [Description("The artistic traits of this character.")]
+   public ObservableRangeCollection<string> ArtistTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("child_trait", isShatteredList: true)]
+   [Description("The traits of this child character.")]
+   public ObservableRangeCollection<string> ChildTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("religious_figure_trait", isShatteredList: true)]
+   [Description("The religous traits of this character.")]
+   public ObservableRangeCollection<string> ReligiousFigureTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("admiral_trait", isShatteredList: true)]
+   [Description("The admiral traits of this character.")]
+   public ObservableRangeCollection<string> AdmiralTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("general_trait", isShatteredList: true)]
+   [Description("The general traits of this character.")]
+   public ObservableRangeCollection<string> GeneralTraits { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("timed_modifier",
+              AstNodeType.BlockNode,
+              isEmbedded: true,
+              isShatteredList: true,
+              itemNodeType: AstNodeType.BlockNode)]
+   [DefaultValue(null)]
+   [Description("A modifier starting and ending at a given date.")]
+   public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("estate")]
+   [Description("The estate this character belongs to.")]
+   public string Estate { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("culture")]
+   [Description("The culture this character belongs to.")]
+   public string Culture { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("religion")]
+   [Description("The religion this character follows.")]
+   public string Religion { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("birth_date")]
+   [Description("The character's birth date.")]
+   public JominiDate BirthDate { get; set; } = JominiDate.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("death_date")]
+   [Description("The character's death date.")]
+   public JominiDate DeathDate { get; set; } = JominiDate.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("birth")]
+   [Description("The location where this character was born.")]
+   public Location BirthPlace { get; set; } = Location.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("dynasty")]
+   [Description("The dynasty of this character")]
+   public string Dynasty { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("tag")]
+   [Description("The country this is a character of.")]
+   public Country AssociatedCountry { get; set; } = Country.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("father")]
+   [Description("The father of this character.")]
+   public Character Father { get; set; } = Empty;
+
+   #endregion
+
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this Character. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string GetNamespace => $"Court.{nameof(Character)}";
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public bool IsReadonly => true;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterAgsSettings;
+   public static IEnumerable<Character> GetGlobalItems() => Globals.Characters.Values;
+
+   public static Character Empty { get; } = new() { UniqueId = "Arcanum_Empty_Character" };
+
+   #endregion
+
+   #region Equality Members
+
+   protected bool Equals(Character other) => UniqueId == other.UniqueId;
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != GetType())
+         return false;
+
+      return Equals((Character)obj);
+   }
+
+   // ReSharper disable once NonReadonlyMemberInGetHashCode
+   public override int GetHashCode() => UniqueId.GetHashCode();
+
+   #endregion
+}

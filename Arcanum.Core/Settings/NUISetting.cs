@@ -9,6 +9,7 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
@@ -297,4 +298,23 @@ public class NUISettings
                                                          Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting CharacterSettings { get; set; } = new(Character.Field.UniqueId,
+                                                           Enum.GetValues<Character.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Character.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<Character.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting CharacterNameDeclarationNUISettings { get; set; } = new(CharacterNameDeclaration.Field.Name,
+                                                                             Enum.GetValues<CharacterNameDeclaration.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
+                                                                             Enum.GetValues<CharacterNameDeclaration.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
+                                                                             Enum.GetValues<CharacterNameDeclaration.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray());
 }

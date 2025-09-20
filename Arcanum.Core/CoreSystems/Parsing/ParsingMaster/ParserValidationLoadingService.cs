@@ -24,7 +24,18 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
       return UnloadSingleFileContent(new(fileObj.Path, fileObj.Descriptor), lockObject);
    }
 
-   protected abstract bool UnloadSingleFileContent(Eu5FileObj<T> fileObj, object? lockObject);
+   protected virtual bool UnloadSingleFileContent(Eu5FileObj<T> fileObj, object? lockObject)
+   {
+      var globals = (Dictionary<string, T>)T.GetGlobalItems();
+      if (lockObject != null)
+         lock (lockObject)
+            foreach (var obj in fileObj.GetEu5Objects())
+               globals.Remove(obj.UniqueId);
+      else
+         foreach (var obj in fileObj.GetEu5Objects())
+            globals.Remove(obj.UniqueId);
+      return true;
+   }
 
    protected abstract void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

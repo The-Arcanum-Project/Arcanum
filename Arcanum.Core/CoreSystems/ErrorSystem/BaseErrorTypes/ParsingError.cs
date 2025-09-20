@@ -723,4 +723,13 @@ public class ParsingError : ILazySingleton
                                                                "The date value {0} is partial and missing components.",
                                                                "The provided date value is incomplete. Please ensure it includes all necessary components (e.g., day, month, year).",
                                                                DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The grouping key that is invalid</param>
+   public DiagnosticDescriptor InvalidGroupingNode { get; } = new(DiagnosticCategory.Parsing,
+                                                                  75,
+                                                                  "Invalid Grouping Node",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "No grouping node found for the given key '{0}'.",
+                                                                  "The provided key '{0}' does not correspond to any known grouping nodes. Please ensure it is a valid key.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
 }

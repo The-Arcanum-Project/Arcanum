@@ -76,6 +76,16 @@ public static class DescriptorDefinitions
                                                                  new PopTypeParsing(),
                                                                  false);
 
+   public static readonly FileDescriptor CharactersDiscoveryDescriptor = new([],
+                                                                             [
+                                                                                "game", "main_menu", "setup", "start",
+                                                                                "05_characters.txt",
+                                                                             ],
+                                                                             new("characters", "txt", "#"),
+                                                                             new CharacterDiscovererParsing(),
+                                                                             false,
+                                                                             uniqueId: 'A');
+
    public static readonly FileDescriptor PopDescriptor = new([PopTypeDescriptor, LocationDescriptor, ColorParser],
                                                              ["game", "main_menu", "setup", "start", "06_pops.txt"],
                                                              new("06_pops", "txt", "#"),
@@ -123,7 +133,10 @@ public static class DescriptorDefinitions
           false);
 
    public static readonly FileDescriptor RoadsAndCountriesDescriptor =
-      new([LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor, ColorParser],
+      new([
+             LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor, ColorParser,
+             CharactersDiscoveryDescriptor,
+          ],
           ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
           new("10_countries_and_roads", "txt", "#"),
           new RoadsAndCountriesParsing(),
@@ -179,6 +192,14 @@ public static class DescriptorDefinitions
                                                                    new RegencyParsing(),
                                                                    true);
 
+   public static readonly FileDescriptor CharactersPropertyDescriptor =
+      new([ColorParser, LocationDescriptor, RoadsAndCountriesDescriptor],
+          ["game", "main_menu", "setup", "start", "05_characters.txt",],
+          new("characters", "txt", "#"),
+          new CharacterPropertyParsing(),
+          false,
+          uniqueId: 'B');
+
    static DescriptorDefinitions()
    {
       FileDescriptors =
@@ -188,7 +209,8 @@ public static class DescriptorDefinitions
          RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
          CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
-         ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor,
+         ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor,
+         CharactersPropertyDescriptor,
       ];
    }
 }

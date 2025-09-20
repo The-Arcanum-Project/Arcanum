@@ -6,6 +6,7 @@ namespace Arcanum.Core.Settings;
 public class AGSSettings
 {
    public AgsSettings ModifierDataSettings { get; set; } = new();
+   public AgsSettings CharacterNameDeclarationAgsSettings { get; set; } = new();
    public AgsSettings AgeAgsSettings { get; set; } = new();
    public AgsSettings VegetationAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
@@ -22,4 +23,5 @@ public class AGSSettings
    public AgsSettings RegencyAgsSettings { get; set; } = new();
    public AgsSettings LocationRankAgsSettings { get; set; } = new();
    public AgsSettings LanguageAgsSettings { get; set; } = new();
+   public AgsSettings CharacterAgsSettings { get; set; } = new();
 }

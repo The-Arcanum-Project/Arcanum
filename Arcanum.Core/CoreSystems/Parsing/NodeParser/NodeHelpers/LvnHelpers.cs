@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Nexus.Core;
@@ -251,6 +252,30 @@ public static class LvnHelpers
                                         lexeme,
                                         typeof(Country));
          country = null;
+         validationResult = false;
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool TryParseCharacter(this LiteralValueNode lvn,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        string source,
+                                        ref bool validationResult,
+                                        [MaybeNullWhen(false)] out Character character)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!Globals.Characters.TryGetValue(lexeme, out character))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidObjectKey,
+                                        actionName,
+                                        lexeme,
+                                        typeof(Character));
+         character = null;
          validationResult = false;
          return false;
       }

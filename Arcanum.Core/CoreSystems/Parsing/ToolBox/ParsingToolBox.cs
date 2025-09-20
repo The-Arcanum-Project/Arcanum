@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
@@ -790,5 +791,32 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseCountry(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Character(ContentNode node,
+                                            LocationContext ctx,
+                                            string actionName,
+                                            string source,
+                                            [MaybeNullWhen(false)] out Character value,
+                                            ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Character)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseCharacter(ctx, actionName, source, ref validation, out value);
    }
 }

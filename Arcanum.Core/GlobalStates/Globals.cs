@@ -2,6 +2,7 @@
 using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
@@ -38,7 +39,6 @@ public static class Globals
    public static Dictionary<string, Country> Countries { get; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
-   public static Dictionary<string, Language> Languages { get; set; } = [];
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
 
@@ -57,10 +57,17 @@ public static class Globals
 
    #endregion
 
+   #region Court
+
+   public static Dictionary<string, Language> Languages { get; set; } = [];
+   public static Dictionary<string, Regency> Regencies { get; set; } = [];
+   public static Dictionary<string, Character> Characters { get; } = [];
+
+   #endregion
+
    #region Common
 
    public static Dictionary<string, ModifierDefinition> ModifierDefinitions { get; set; } = [];
-   public static Dictionary<string, Regency> Regencies { get; set; } = [];
 
    #endregion
 
