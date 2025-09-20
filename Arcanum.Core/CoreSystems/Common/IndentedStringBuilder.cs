@@ -19,8 +19,9 @@ public class IndentedStringBuilder(string indentString = "\t")
 
    // default 4 spaces
 
-   public int MaxItemsInCollectionLine { get; init; } = 10;
-   public bool OneItemPerLine { get; init; } = true;
+   public int MaxItemsInCollectionLine { get; init; } = 7;
+   public int MaxCollectionLineLength { get; init; } = 130;
+   public bool OneItemPerLine { get; init; } = false;
    public bool PadCollectionItems { get; set; } = false;
    public int CollectionItemPadding { get; set; } = 5;
    public bool AutoCollectionPadding { get; set; } = true;
@@ -29,6 +30,8 @@ public class IndentedStringBuilder(string indentString = "\t")
    /// Gets the current indentation level.
    /// </summary>
    public int IndentLevel => _indentLevel;
+
+   public int IndentLength => indentString.Length * _indentLevel;
 
    /// <summary>
    /// Increases the indentation level by one.
@@ -246,8 +249,9 @@ public class IndentedStringBuilder(string indentString = "\t")
       }
    }
 
-   public void AppendList(List<string> items)
+   public void AppendList(List<string> items, string separator)
    {
+      var separatorLength = separator.Length;
       if (OneItemPerLine)
       {
          foreach (var item in items)
@@ -269,8 +273,16 @@ public class IndentedStringBuilder(string indentString = "\t")
 
          foreach (var item in items)
          {
+            if (line.Length + item.Length + separatorLength > MaxCollectionLineLength && itemCount > 0)
+            {
+               line.Append(separator);
+               AppendLine(line.ToString());
+               line.Clear();
+               itemCount = 0;
+            }
+
             if (itemCount > 0)
-               line.Append(", ");
+               line.Append(separator);
             if (PadCollectionItems)
                line.Append(item.PadRight(CollectionItemPadding));
             else

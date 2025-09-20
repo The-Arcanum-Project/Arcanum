@@ -287,33 +287,52 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       foreach (var prop in properties)
       {
-         // If a custom parser is specified, we DO NOT generate an implementation.
-         if (GenerateToolMethodCall(parserSymbol,
-                                    toolboxSymbol,
-                                    prop,
-                                    handwrittenMethods,
-                                    out var wrapperMethodName,
-                                    out var propTypeName,
-                                    out var actionName,
-                                    out var toolMethodCall,
-                                    out var genericType))
-         {
-            sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{toolMethodCall}'.");
+         if (GatherMethodCreationData(parserSymbol,
+                                      toolboxSymbol,
+                                      sb,
+                                      handwrittenMethods,
+                                      parsers,
+                                      context,
+                                      prop,
+                                      out var wrapperMethodName,
+                                      out var propTypeName,
+                                      out var actionName,
+                                      out var toolMethodCall,
+                                      out var genericType,
+                                      out var hasEmbeddedParser,
+                                      out var customParserName,
+                                      out var allowUnknownNodes))
             continue;
-         }
 
-         // We have a pure embedded property, not in combination with a list.
-         var hasEmbeddedParser =
-            TryGetEmbeddedParserName(parserSymbol,
-                                     sb,
-                                     parsers,
-                                     context,
-                                     prop,
-                                     out var customParserName,
-                                     out var allowUnknownNodes);
-         if (hasEmbeddedParser && !prop.IsCollection)
+         if (hasEmbeddedParser)
          {
-            GenerateEmbeddedPropertyParserMethod(sb, targetTypeName, prop, customParserName!, allowUnknownNodes);
+            if (!prop.IsCollection)
+            {
+               GenerateEmbeddedPropertyParserMethod(sb, targetTypeName, prop, customParserName!, allowUnknownNodes);
+               continue;
+            }
+
+            if (!prop.IsShatteredList)
+            {
+               GenerateEmbeddedCollectionPropertyParserMethod(sb,
+                                                              targetTypeName,
+                                                              actionName,
+                                                              prop,
+                                                              wrapperMethodName,
+                                                              genericType,
+                                                              customParserName!,
+                                                              allowUnknownNodes);
+               continue;
+            }
+
+            GenerateShatteredEmbeddedCollectionPropertyParserMethod(sb,
+                                                                    targetTypeName,
+                                                                    actionName,
+                                                                    prop,
+                                                                    wrapperMethodName,
+                                                                    genericType,
+                                                                    customParserName!,
+                                                                    allowUnknownNodes);
             continue;
          }
 
@@ -329,55 +348,154 @@ public class ParserSourceGenerator : IIncrementalGenerator
             continue;
          }
 
-         var outvalue = prop.IsCollection ? genericType?.Name ?? "object" : propTypeName;
-
-         sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
-         sb.AppendLine("    {");
-
-         if (prop.IsEmbedded && prop.IsShatteredList)
-         {
-            var parserName = customParserName ?? "<MISSING_PARSER_!_CREATE_A_PARTIAL_PARSING_STUB";
-            var genericTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-            sb.AppendLine($"        var newInstance = ({genericTypeName})Activator.CreateInstance(typeof({genericTypeName}))!;");
-            sb.AppendLine($"        {parserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {allowUnknownNodes.ToString().ToLower()});");
-            sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
-            sb.AppendLine("        return true;");
-         }
-         else
-         {
-            sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
-            sb.AppendLine("        {");
-            if (IsFlagsEnum(prop))
-               sb.AppendLine($"            target.{prop.PropertyName} |= value;");
-            else if (prop.IsShatteredList)
-            {
-               sb.AppendLine($"            if (target.{prop.PropertyName} == null)");
-               sb.AppendLine($"                target.{prop.PropertyName} = new {propTypeName}();");
-               sb.AppendLine();
-               sb.AppendLine($"            target.{prop.PropertyName}.Add(value);");
-            }
-            else
-               sb.AppendLine($"            target.{prop.PropertyName} = value;");
-
-            sb.AppendLine("            return true;");
-            sb.AppendLine("        }");
-            sb.AppendLine("        return false;");
-         }
-
-         sb.AppendLine("    }");
+         GeneratePropertyParserMethod(sb,
+                                      targetTypeName,
+                                      prop,
+                                      genericType,
+                                      propTypeName,
+                                      wrapperMethodName,
+                                      toolMethodCall,
+                                      actionName);
       }
 
       sb.AppendLine("    #endregion");
       sb.AppendLine("}");
    }
 
-   private static void WriteIgnoreList(StringBuilder sb, string ignoredblocktypes, string[] ignoredBlockKeys)
+   private static bool GatherMethodCreationData(INamedTypeSymbol parserSymbol,
+                                                INamedTypeSymbol toolboxSymbol,
+                                                StringBuilder sb,
+                                                ImmutableHashSet<string> handwrittenMethods,
+                                                ImmutableArray<INamedTypeSymbol> parsers,
+                                                SourceProductionContext context,
+                                                PropertyMetadata prop,
+                                                out string wrapperMethodName,
+                                                out string propTypeName,
+                                                out string actionName,
+                                                out string toolMethodCall,
+                                                out ITypeSymbol? genericType,
+                                                out bool hasEmbeddedParser,
+                                                out string? customParserName,
+                                                out bool allowUnknownNodes)
    {
-      sb.AppendLine($"    private static readonly HashSet<string> {ignoredblocktypes} = new(StringComparer.OrdinalIgnoreCase)");
+      // If a custom parser is specified, we DO NOT generate an implementation.
+      if (GenerateToolMethodCall(parserSymbol,
+                                 toolboxSymbol,
+                                 prop,
+                                 handwrittenMethods,
+                                 out wrapperMethodName,
+                                 out propTypeName,
+                                 out actionName,
+                                 out toolMethodCall,
+                                 out genericType))
+      {
+         sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{toolMethodCall}'.");
+         hasEmbeddedParser = false;
+         customParserName = null;
+         allowUnknownNodes = false;
+         return true;
+      }
+
+      // We have a pure embedded property, not in combination with a list.
+      hasEmbeddedParser = TryGetEmbeddedParserName(parserSymbol,
+                                                   sb,
+                                                   parsers,
+                                                   context,
+                                                   prop,
+                                                   out customParserName,
+                                                   out allowUnknownNodes);
+      return false;
+   }
+
+   private static void GeneratePropertyParserMethod(StringBuilder sb,
+                                                    string targetTypeName,
+                                                    PropertyMetadata prop,
+                                                    ITypeSymbol? genericType,
+                                                    string propTypeName,
+                                                    string wrapperMethodName,
+                                                    string toolMethodCall,
+                                                    string actionName)
+   {
+      var outvalue = prop.IsCollection ? genericType?.Name ?? "object" : propTypeName;
+
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
-      foreach (var key in ignoredBlockKeys)
-         sb.AppendLine($"        \"{key}\",");
-      sb.AppendLine("    };");
+      sb.AppendLine("// ### Property Parser ###");
+      sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
+      sb.AppendLine("        {");
+      if (IsFlagsEnum(prop))
+         sb.AppendLine($"            target.{prop.PropertyName} |= value;");
+      else if (prop.IsShatteredList)
+      {
+         sb.AppendLine($"            if (target.{prop.PropertyName} == null)");
+         sb.AppendLine($"                target.{prop.PropertyName} = new {propTypeName}();");
+         sb.AppendLine();
+         sb.AppendLine($"            target.{prop.PropertyName}.Add(value);");
+      }
+      else
+         sb.AppendLine($"            target.{prop.PropertyName} = value;");
+
+      sb.AppendLine("            return true;");
+      sb.AppendLine("        }");
+      sb.AppendLine("        return false;");
+
+      sb.AppendLine("    }");
+   }
+
+   private static void GenerateShatteredEmbeddedCollectionPropertyParserMethod(StringBuilder sb,
+                                                                               string targetTypeName,
+                                                                               string actionName,
+                                                                               PropertyMetadata prop,
+                                                                               string wrapperMethodName,
+                                                                               ITypeSymbol? genericType,
+                                                                               string customParserName,
+                                                                               bool allowUnknownNodes)
+   {
+      sb.AppendLine("// ### Embedded Shattered Collection Property Parser ###");
+      var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+      sb.AppendLine($"        var newInstance = ({itemTypeName})Activator.CreateInstance(typeof({itemTypeName}))!;");
+      sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {allowUnknownNodes.ToString().ToLower()});");
+      sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+   }
+
+   private static void GenerateEmbeddedCollectionPropertyParserMethod(StringBuilder sb,
+                                                                      string targetTypeName,
+                                                                      string actionName,
+                                                                      PropertyMetadata prop,
+                                                                      string wrapperMethodName,
+                                                                      ITypeSymbol? genericType,
+                                                                      string customParserName,
+                                                                      bool allowUnknownNodes)
+   {
+      sb.AppendLine("// ### Embedded Collection Property Parser ###");
+      if (prop.AstNodeType != NodeType.BlockNode)
+      {
+         sb.AppendLine($"    // ERROR: Embedded collection property '{prop.PropertyName}' must be parsed from a BlockNode.");
+         return;
+      }
+
+      var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+      var pdhMethodName = prop.IsEmbedded
+                             ? "ParseEmbeddedCollection"
+                             : prop.ItemNodeType switch
+                             {
+                                NodeType.ContentNode => "ParseContentCollection",
+                                NodeType.KeyOnlyNode => "ParseKeyOnlyCollection",
+                                NodeType.BlockNode => "ParseBlockCollection",
+                                _ => throw new ArgumentOutOfRangeException(),
+                             };
+
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+      sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {customParserName}.ParseProperties, {allowUnknownNodes.ToString().ToLower()});");
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
    }
 
    private static void GenerateCollectionMethodCall(StringBuilder sb,
@@ -388,6 +506,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string targetTypeName,
                                                     string actionName)
    {
+      sb.AppendLine("// ### Collection Property Parser ###");
       if (prop.AstNodeType != NodeType.BlockNode)
       {
          sb.AppendLine($"    // ERROR: Collection property '{prop.PropertyName}' must be parsed from a BlockNode.");
@@ -409,6 +528,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {toolMethodCall});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
+   }
+
+   private static void WriteIgnoreList(StringBuilder sb, string ignoredblocktypes, string[] ignoredBlockKeys)
+   {
+      sb.AppendLine($"    private static readonly HashSet<string> {ignoredblocktypes} = new(StringComparer.OrdinalIgnoreCase)");
+      sb.AppendLine("    {");
+      foreach (var key in ignoredBlockKeys)
+         sb.AppendLine($"        \"{key}\",");
+      sb.AppendLine("    };");
    }
 
    private static bool TryGetEmbeddedParserName(INamedTypeSymbol parserSymbol,
@@ -455,6 +583,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                             string customParserName,
                                                             bool allowUnknownNodes)
    {
+      sb.AppendLine("// ### Embedded Property Parser ###");
       var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
       sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");

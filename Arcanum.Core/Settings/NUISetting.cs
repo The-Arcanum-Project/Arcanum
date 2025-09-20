@@ -9,7 +9,6 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
-using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
@@ -141,16 +140,16 @@ public class NUISettings
                                                              .Cast<Enum>()
                                                              .ToArray());
 
-   public NUISetting LanguageNUI { get; set; } = new(Language.Field.Name,
-                                                     Enum.GetValues<Language.Field>()
-                                                         .Cast<Enum>()
-                                                         .ToArray(),
-                                                     Enum.GetValues<Language.Field>()
-                                                         .Cast<Enum>()
-                                                         .ToArray(),
-                                                     Enum.GetValues<Language.Field>()
-                                                         .Cast<Enum>()
-                                                         .ToArray());
+   public NUISetting LanguageNuiSettings { get; set; } = new(Language.Field.UniqueId,
+                                                             Enum.GetValues<Language.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<Language.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray(),
+                                                             Enum.GetValues<Language.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray());
 
    public NUISetting AgeSettings { get; set; } = new(Age.Field.UniqueId,
                                                      Enum.GetValues<Age.Field>().Cast<Enum>().ToArray(),

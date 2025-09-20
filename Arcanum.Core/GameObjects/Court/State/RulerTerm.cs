@@ -62,7 +62,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
       set => CharacterId = value;
    }
    public FileObj Source { get; set; } = null!;
-   public static IEnumerable<RulerTerm> GetGlobalItems() => throw new NotImplementedException();
+   public static IEnumerable<RulerTerm> GetGlobalItems() => [];
 
    public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };
 

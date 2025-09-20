@@ -21,4 +21,5 @@ public class AGSSettings
    public AgsSettings ParliamentDefinitionAgsSettings { get; set; } = new();
    public AgsSettings RegencyAgsSettings { get; set; } = new();
    public AgsSettings LocationRankAgsSettings { get; set; } = new();
+   public AgsSettings LanguageAgsSettings { get; set; } = new();
 }

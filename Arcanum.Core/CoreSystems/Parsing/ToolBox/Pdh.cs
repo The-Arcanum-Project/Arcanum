@@ -43,6 +43,15 @@ public static class Pdh
       ref bool validation)
       where TTarget : INexus;
 
+   public delegate void EmbeddedItemParser<in TTarget>(
+      BlockNode block,
+      TTarget target,
+      LocationContext ctx,
+      string source,
+      ref bool validation,
+      bool allowUnknownNodes)
+      where TTarget : INexus;
+
    public delegate bool BlockParser<in TTarget>(BlockNode bn,
                                                 TTarget target,
                                                 LocationContext ctx,
@@ -296,6 +305,34 @@ public static class Pdh
 
          if (itemParser(bn, newInstance, ctx, source, ref validation))
             results.Add(newInstance);
+      }
+
+      return results;
+   }
+
+   public static ObservableRangeCollection<T> ParseEmbeddedCollection<T>(BlockNode node,
+                                                                         LocationContext ctx,
+                                                                         string source,
+                                                                         string callStack,
+                                                                         ref bool validation,
+                                                                         EmbeddedItemParser<T> itemParser,
+                                                                         bool allowUnknownNodes)
+      where T : INexus, IEu5Object<T>, new()
+   {
+      var results = new ObservableRangeCollection<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+            continue;
+
+         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
+         newInstance.UniqueId = bn.KeyNode.GetLexeme(source);
+         Debug.Assert(newInstance != null, "newInstance != null");
+         itemParser(bn, newInstance, ctx, source, ref validation, allowUnknownNodes);
+         results.Add(newInstance);
       }
 
       return results;

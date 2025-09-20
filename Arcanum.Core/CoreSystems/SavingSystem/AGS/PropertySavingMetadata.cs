@@ -55,6 +55,12 @@ public class PropertySavingMetadata
    /// </summary>
    public required bool IsCollection { get; set; }
 
+   /// <summary>
+   /// The separator to use between items in a collection when saving. <br/>
+   /// Only relevant if IsCollection is true. Default is "".
+   /// </summary>
+   public required string CollectionSeparator { get; init; } = "";
+
    #region Equality operations
 
    public override string ToString() => $"{NxProp} as {Keyword} ({ValueType})";
@@ -103,14 +109,14 @@ public class PropertySavingMetadata
 
       if (SavingMethod == null)
       {
-         if (ValueType == SavingValueType.IAgs)
+         if (ValueType == SavingValueType.IAgs && !IsCollection)
          {
             HandleIAgsProperty((IAgs)value, sb, commentChar);
             return;
          }
 
          if (IsCollection)
-            HandleCollection(ags, sb, commentChar, settings.Format);
+            HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator);
          else if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
             HandleEnumProperty(ags, sb, value);
          else
@@ -193,14 +199,20 @@ public class PropertySavingMetadata
       sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatObjectValue(ValueType, ags, NxProp)}");
    }
 
-   private void HandleCollection(IAgs ags, IndentedStringBuilder sb, string commentChar, SavingFormat format)
+   private void HandleCollection(IAgs ags,
+                                 IndentedStringBuilder sb,
+                                 string commentChar,
+                                 SavingFormat format,
+                                 string collectionSeparator)
    {
+      Debug.Assert(IsCollection, "Property is not a collection");
+
+      if (!ags.AgsSettings.WriteEmptyCollectionHeader)
+         return;
+
       using (sb.BlockWithName(Keyword))
       {
-         // ValueType is only auto if the property is null or an empty collection
-         if (ags.AgsSettings.WriteEmptyCollectionHeader && ValueType == SavingValueType.Auto)
-            sb.AppendComment(commentChar, "Empty Collection");
-         else
+         if (ValueType != SavingValueType.IAgs)
          {
             if (format == SavingFormat.Spacious)
                sb.AppendLine();
@@ -214,7 +226,28 @@ public class PropertySavingMetadata
             else
                keys.AddRange(from object item in (IEnumerable)value
                              select SavingUtil.FormatValue(ValueType, item));
-            sb.AppendList(keys);
+            sb.AppendList(keys, collectionSeparator);
+            if (format == SavingFormat.Spacious)
+               sb.AppendLine();
+         }
+         else
+         {
+            if (format == SavingFormat.Spacious)
+               sb.AppendLine();
+            object collection = null!;
+            Nx.ForceGet(ags, NxProp, ref collection);
+
+            foreach (var item in (IEnumerable)collection)
+            {
+               if (item is IAgs ia)
+               {
+                  ia.ToAgsContext(commentChar).BuildContext(sb);
+               }
+               else
+                  throw new
+                     InvalidOperationException($"Collection property '{NxProp}' contains non-IAgs item of type '{item.GetType()}'.");
+            }
+
             if (format == SavingFormat.Spacious)
                sb.AppendLine();
          }

@@ -1,8 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -12,56 +10,35 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Language))]
-public partial class LanguageParsing : FileLoadingService
+public partial class LanguageParsing : ParserValidationLoadingService<Language>
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(Language)];
+   public override List<Type> ParsedObjects => [typeof(Language)];
+
    public override string GetFileDataDebugInfo() => $"Parsed Languages: {Globals.Languages.Count}";
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Language> fileObj, object? lockObject)
    {
-      const string actionStack = nameof(LanguageParsing);
-      var rn = Parser.Parse(fileObj, out var source, out var ctx);
-      var validation = true;
-
-      foreach (var sn in rn.Statements)
-      {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
-            continue;
-
-         var langKey = bn.KeyNode.GetLexeme(source);
-         var language = new Language(langKey);
-
-         ParseProperties(bn, language, ctx, source, ref validation, false);
-         if (!Globals.Languages.TryAdd(langKey, language))
-         {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.DuplicateObjectDefinition,
-                                           actionStack,
-                                           langKey,
-                                           typeof(Language),
-                                           Language.Field.Name);
-         }
-      }
-
-      return validation;
+      foreach (var obj in fileObj.GetEu5Objects())
+         Globals.Languages.Remove(obj.UniqueId);
+      return true;
    }
 
-   private static void ParseDialects(BlockNode dialectsBlock,
-                                     Language parentLanguage,
-                                     string source,
-                                     LocationContext ctx,
-                                     ref bool validation)
+   protected override void LoadSingleFile(RootNode rn,
+                                          LocationContext ctx,
+                                          Eu5FileObj<Language> fileObj,
+                                          string actionStack,
+                                          string source,
+                                          ref bool validation,
+                                          object? lockObject)
    {
-      foreach (var statement in dialectsBlock.Children)
-         if (statement is BlockNode dbn)
-         {
-            var dialect = new Language(dbn.KeyNode.GetLexeme(source));
-            ParseProperties(dbn, dialect, ctx, source, ref validation, false);
-            parentLanguage.Dialects.Add(dialect);
-         }
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
+                               ctx,
+                               actionStack,
+                               source,
+                               ref validation,
+                               ParseProperties,
+                               Globals.Languages,
+                               lockObject);
    }
-
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-      => throw new NotImplementedException();
 }

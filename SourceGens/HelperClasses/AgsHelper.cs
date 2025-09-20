@@ -182,6 +182,8 @@ public static class AgsHelper
       if (defaultValueAttr != null && defaultValueAttr.ConstructorArguments.Any())
          defaultValueLiteral = Helpers.FormatDefaultValueLiteral(defaultValueAttr.ConstructorArguments[0].Value);
 
+      var collSeparator = Helpers.FormatDefaultValueLiteral(saveAs.ConstructorArguments[6].Value);
+
       sb.AppendLine("                new()");
       sb.AppendLine("                {");
       sb.AppendLine($"                    NxProp = {namespaceName}.{prop.ContainingType.Name}.Field.{prop.Name},");
@@ -193,6 +195,7 @@ public static class AgsHelper
       sb.AppendLine($"                    Separator = TokenType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[1])},");
       sb.AppendLine($"                    CollectionItemKeyProvider = {GetNullOrString(saveAs.ConstructorArguments[4], CUSTOM_ITEM_KEY_PROVIDER)},");
       sb.AppendLine($"                    IsCollection = {collVal},");
+      sb.AppendLine($"                    CollectionSeparator = {collSeparator}");
       sb.AppendLine("                },");
    }
 

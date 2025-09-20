@@ -395,8 +395,8 @@ public class ParsingError : ILazySingleton
                                                               41,
                                                               "Invalid Node Type",
                                                               DiagnosticSeverity.Error,
-                                                              "The node type '{0}' ('{2}') is invalid in the current context.",
-                                                              "The node ('{2}') of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
+                                                              "The node type '{0}' ({2}) is invalid in the current context.",
+                                                              "The node ({2}) of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
                                                               DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The node type that is invalid</param>

@@ -15,7 +15,8 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
                              string? savingMethod = null,
                              string? commentMethod = null,
                              string? collectionKeyMethod = null,
-                             bool isCollection = false
+                             bool isCollection = false,
+                             string? collectionSeparator = " "
 ) : Attribute
 {
    public SavingValueType ValueType { get; } = valueType;
@@ -24,4 +25,5 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
    public string? CommentMethod { get; } = commentMethod;
    public string? CollectionKeyMethod { get; } = collectionKeyMethod;
    public bool IsCollection { get; } = isCollection;
+   public string? CollectionSeparator { get; } = collectionSeparator;
 }

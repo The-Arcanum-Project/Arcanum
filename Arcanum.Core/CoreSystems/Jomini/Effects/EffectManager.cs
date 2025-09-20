@@ -75,7 +75,8 @@ public static class EffectManager
                                         ref bool validationResult,
                                         string value,
                                         ModifierType type,
-                                        [MaybeNullWhen(false)] out object convertedValue)
+                                        [MaybeNullWhen(false)] out object convertedValue,
+                                        bool defaultToScriptedValue = true)
    {
       switch (type)
       {
@@ -131,6 +132,13 @@ public static class EffectManager
 
       bool LogConversionError(out bool validationResult, out object? convertedValue)
       {
+         if (defaultToScriptedValue)
+         {
+            convertedValue = value;
+            validationResult = true;
+            return true;
+         }
+
          ctx.SetPosition(token);
          DiagnosticException.LogWarning(ctx,
                                         ParsingError.Instance.UnableToConvertValueToModifierType,

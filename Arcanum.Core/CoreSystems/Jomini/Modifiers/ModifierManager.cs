@@ -209,9 +209,15 @@ public static class ModifierManager
                    throw new InvalidOperationException("Identifier modifier value cannot be null");
          case ModifierType.Percentage:
          case ModifierType.Float:
+            if (instance.Value is string strValue)
+               return strValue;
+
             return
                $"{Convert.ToDouble(instance.Value, CultureInfo.InvariantCulture).ToString("0.##", CultureInfo.InvariantCulture)}";
          case ModifierType.Integer:
+            if (instance.Value is string strValue2)
+               return strValue2;
+
             return Convert.ToInt32(instance.Value).ToString();
          default:
             throw new
