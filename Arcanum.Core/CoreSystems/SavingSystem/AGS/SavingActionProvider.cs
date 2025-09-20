@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Map;
 using Nexus.Core;
 
@@ -37,5 +38,19 @@ public static class SavingActionProvider
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
 
       sb.AppendLine(date.ToString());
+   }
+
+   public static void SaveNameDeclaration(IAgs target,
+                                          HashSet<PropertySavingMetadata> metadata,
+                                          IndentedStringBuilder sb)
+   {
+      if (target is not CharacterNameDeclaration cnd)
+         throw new
+            InvalidOperationException("SaveNameDeclaration can only be used with CharacterNameDeclaration instances.");
+
+      if (cnd.IsRandom)
+         sb.AppendLine($"{cnd.SavingKey} = {cnd.Name}");
+      else if (!string.IsNullOrEmpty(cnd.Name))
+         sb.AppendLine($"{cnd.SavingKey} = {{ name = {cnd.Name} }}");
    }
 }

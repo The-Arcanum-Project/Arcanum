@@ -18,23 +18,35 @@ namespace Arcanum.Core.GameObjects.Court;
 [ObjectSaveAs]
 public partial class Character : IEu5Object<Character>
 {
+   public Character()
+   {
+      Mother = Empty;
+      Spouse = Empty;
+      Father = Empty;
+   }
+
+   private Character(string uniqueId)
+   {
+      UniqueId = uniqueId;
+   }
+
    #region Nexus Properties
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("first_name", isEmbedded: true)]
+   [ParseAs("first_name", AstNodeType.StatementNode)]
    [Description("The character's first name.")]
    public CharacterNameDeclaration FirstName { get; set; } = CharacterNameDeclaration.Empty;
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("last_name", isEmbedded: true)]
+   [ParseAs("last_name", AstNodeType.StatementNode)]
    [Description("The character's first name.")]
    public CharacterNameDeclaration LastName { get; set; } = CharacterNameDeclaration.Empty;
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("nickname", isEmbedded: true)]
+   [ParseAs("nickname", AstNodeType.StatementNode)]
    [Description("The character's first name.")]
    public CharacterNameDeclaration NickName { get; set; } = CharacterNameDeclaration.Empty;
 
@@ -54,13 +66,19 @@ public partial class Character : IEu5Object<Character>
    [DefaultValue(null)]
    [ParseAs("mother")]
    [Description("The mother of this character.")]
-   public Character Mother { get; set; } = Empty;
+   public Character Mother { get; set; } = null!;
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("spouse")]
    [Description("The spouse of this character.")]
-   public Character Spouse { get; set; } = Empty;
+   public Character Spouse { get; set; } = null!;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("father")]
+   [Description("The father of this character.")]
+   public Character Father { get; set; } = null!;
 
    [SaveAs]
    [DefaultValue(0)]
@@ -192,12 +210,6 @@ public partial class Character : IEu5Object<Character>
    [Description("The country this is a character of.")]
    public Country AssociatedCountry { get; set; } = Country.Empty;
 
-   [SaveAs]
-   [DefaultValue(null)]
-   [ParseAs("father")]
-   [Description("The father of this character.")]
-   public Character Father { get; set; } = Empty;
-
    #endregion
 
 #pragma warning disable AGS004
@@ -222,7 +234,20 @@ public partial class Character : IEu5Object<Character>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterAgsSettings;
    public static IEnumerable<Character> GetGlobalItems() => Globals.Characters.Values;
 
-   public static Character Empty { get; } = new() { UniqueId = "Arcanum_Empty_Character" };
+   private static readonly Lazy<Character> EmptyInstance = new(() =>
+   {
+      var emptyChar = new Character("Arcanum_Empty_Character");
+      emptyChar.Mother = emptyChar;
+      emptyChar.Spouse = emptyChar;
+      emptyChar.Father = emptyChar;
+
+      return emptyChar;
+   });
+
+   public static Character Empty => EmptyInstance.Value;
+
+   private static readonly Lazy<Character> RandomInstance = new(() => new("random"));
+   public static Character RandomCharacter => RandomInstance.Value;
 
    #endregion
 
@@ -246,4 +271,6 @@ public partial class Character : IEu5Object<Character>
    public override int GetHashCode() => UniqueId.GetHashCode();
 
    #endregion
+
+   public override string ToString() => UniqueId;
 }

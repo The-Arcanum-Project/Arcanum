@@ -8,7 +8,7 @@ using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Court;
 
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "SaveNameDeclaration")]
 #pragma warning disable ARC002
 public partial class CharacterNameDeclaration : INUI, IAgs, IEmpty<CharacterNameDeclaration>
 #pragma warning restore ARC002
@@ -19,11 +19,14 @@ public partial class CharacterNameDeclaration : INUI, IAgs, IEmpty<CharacterName
    [ParseAs("name")]
    public string Name { get; set; } = string.Empty;
 
+   [SuppressAgs]
+   public bool IsRandom { get; set; }
+
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterNameDeclarationNUISettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterNameDeclarationAgsSettings;
-   public string SavingKey => "first_name";
+   public string SavingKey { get; set; } = string.Empty;
    public static CharacterNameDeclaration Empty { get; } = new() { Name = "Arcanum_CharacterNameDeclaration_Empty", };
 
    #region Equals and GetHashCode

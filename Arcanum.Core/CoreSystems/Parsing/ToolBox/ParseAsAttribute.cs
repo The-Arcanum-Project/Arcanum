@@ -5,6 +5,7 @@ public enum AstNodeType
    ContentNode,
    BlockNode,
    KeyOnlyNode,
+   StatementNode,
 }
 
 /// <summary>

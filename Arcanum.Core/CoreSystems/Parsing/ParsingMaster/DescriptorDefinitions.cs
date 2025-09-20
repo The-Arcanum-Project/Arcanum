@@ -196,7 +196,7 @@ public static class DescriptorDefinitions
       new([ColorParser, LocationDescriptor, RoadsAndCountriesDescriptor],
           ["game", "main_menu", "setup", "start", "05_characters.txt",],
           new("characters", "txt", "#"),
-          new CharacterPropertyParsing(),
+          new CharacterPropertiesParsing(),
           false,
           uniqueId: 'B');
 

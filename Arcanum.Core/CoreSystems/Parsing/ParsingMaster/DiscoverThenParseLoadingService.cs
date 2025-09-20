@@ -50,6 +50,7 @@ public abstract class DiscoverThenParseLoadingService<T> : ParserValidationLoadi
 
       SimpleObjectParser.DiscoverObjectDeclarations(sns,
                                                     ctx,
+                                                    fileObj,
                                                     actionStack,
                                                     source,
                                                     ref validation,

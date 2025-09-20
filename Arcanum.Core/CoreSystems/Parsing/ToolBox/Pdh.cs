@@ -59,6 +59,13 @@ public static class Pdh
                                                 ref bool validation)
       where TTarget : INexus;
 
+   public delegate bool StatementParser<in TTarget>(StatementNode bn,
+                                                    TTarget target,
+                                                    LocationContext ctx,
+                                                    string source,
+                                                    ref bool validation)
+      where TTarget : INexus;
+
    public delegate void PropertyParser<in TTarget>(BlockNode block,
                                                    TTarget target,
                                                    LocationContext ctx,
@@ -178,6 +185,7 @@ public static class Pdh
    /// <param name="validation">A reference to the overall validation flag.</param>
    /// <param name="contentParsers">The dictionary of parsers for ContentNodes.</param>
    /// <param name="blockParsers">The dictionary of parsers for BlockNodes.</param>
+   /// <param name="statementParsers"></param>
    /// <param name="ignoredBlockKeys"></param>
    /// <param name="ignoredContentKeys"></param>
    /// <param name="allowUnknownNodes"></param>
@@ -191,14 +199,16 @@ public static class Pdh
                                                   contentParsers,
                                                IReadOnlyDictionary<string, BlockParser<TTarget>>
                                                   blockParsers,
+                                               IReadOnlyDictionary<string, StatementParser<TTarget>>
+                                                  statementParsers,
                                                HashSet<string> ignoredBlockKeys,
                                                HashSet<string> ignoredContentKeys,
                                                bool allowUnknownNodes = false) where TTarget : INexus
    {
-      foreach (var propertyNode in block.Children)
+      foreach (var sn in block.Children)
       {
          var wasHandled = false;
-         if (propertyNode is ContentNode cn)
+         if (sn is ContentNode cn)
          {
             var key = cn.KeyNode.GetLexeme(source);
             if (contentParsers.TryGetValue(key, out var parser))
@@ -207,7 +217,7 @@ public static class Pdh
                wasHandled = true;
             }
          }
-         else if (propertyNode is BlockNode bn)
+         else if (sn is BlockNode bn)
          {
             var key = bn.KeyNode.GetLexeme(source);
             if (blockParsers.TryGetValue(key, out var parser))
@@ -220,21 +230,27 @@ public static class Pdh
          if (wasHandled)
             continue;
 
+         if (statementParsers.TryGetValue(sn.KeyNode.GetLexeme(source), out var snParser))
+         {
+            snParser(sn, target, ctx, source, ref validation);
+            continue;
+         }
+
          if (allowUnknownNodes)
             continue;
 
-         if (propertyNode is ContentNode cNode && ignoredContentKeys.Contains(cNode.KeyNode.GetLexeme(source)))
+         if (sn is ContentNode cNode && ignoredContentKeys.Contains(cNode.KeyNode.GetLexeme(source)))
             continue;
-         if (propertyNode is BlockNode bNode && ignoredBlockKeys.Contains(bNode.KeyNode.GetLexeme(source)))
+         if (sn is BlockNode bNode && ignoredBlockKeys.Contains(bNode.KeyNode.GetLexeme(source)))
             continue;
 
-         ctx.SetPosition(propertyNode.KeyNode);
+         ctx.SetPosition(sn.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
                                         $"Parsing {typeof(TTarget).Name}",
-                                        propertyNode.GetType().Name,
+                                        sn.GetType().Name,
                                         "ContentNode or BlockNode",
-                                        propertyNode.KeyNode.GetLexeme(source));
+                                        sn.KeyNode.GetLexeme(source));
       }
    }
 

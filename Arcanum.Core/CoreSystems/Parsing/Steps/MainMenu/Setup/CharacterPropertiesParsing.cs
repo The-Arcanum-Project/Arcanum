@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -10,7 +11,7 @@ using Arcanum.Core.GlobalStates;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(Character))]
-public partial class CharacterPropertyParsing : DiscoverThenParseLoadingService<Character>
+public partial class CharacterPropertiesParsing : DiscoverThenParseLoadingService<Character>
 {
    public override Dictionary<string, Character> GetGlobals() => Globals.Characters;
    private const string GROUPING_NODE_KEY = "character_db";
@@ -50,5 +51,12 @@ public partial class CharacterPropertyParsing : DiscoverThenParseLoadingService<
                                                          ref validation,
                                                          ParseProperties,
                                                          GetGlobals());
+
+      foreach (var character in Globals.Characters.Values)
+      {
+         Debug.Assert(character.Source != null, "character.Source != null");
+         Debug.Assert(character.Father != null, "character.Father != null");
+         Debug.Assert(character.Mother != null, "character.Mother != null");
+      }
    }
 }

@@ -151,7 +151,8 @@ public static class SavingUtil
       if (item is IModifierPattern)
          return SavingValueType.Modifier;
 
-      throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
+      return SavingValueType.String;
+      //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
    }
 
    /// <summary>

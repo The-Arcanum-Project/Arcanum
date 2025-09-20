@@ -819,4 +819,114 @@ public static class ParsingToolBox
 
       return lvn.TryParseCharacter(ctx, actionName, source, ref validation, out value);
    }
+
+   public static bool ArcTryParse_CharacterNameDeclaration(ContentNode node,
+                                                           LocationContext ctx,
+                                                           string actionName,
+                                                           string source,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
+                                                           ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_CharacterNameDeclaration)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var name = lvn.Value.GetLexeme(source);
+
+      value = new()
+      {
+         SavingKey = node.KeyNode.GetLexeme(source),
+         Name = name,
+         IsRandom = true,
+      };
+      return true;
+   }
+
+   public static bool ArcTryParse_CharacterNameDeclaration(BlockNode node,
+                                                           LocationContext ctx,
+                                                           string actionName,
+                                                           string source,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
+                                                           ref bool validation)
+   {
+      var key = node.KeyNode.GetLexeme(source);
+
+      if (node.Children.Count != 1)
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        $"Expected exactly one child node in block for CharacterNameDeclaration with key '{key}', found {node.Children.Count}.",
+                                        nameof(ContentNode),
+                                        key);
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      if (node.Children[0] is not ContentNode cn)
+      {
+         ctx.SetPosition(node.Children[0].KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        $"Expected child node in block for CharacterNameDeclaration with key '{key}' to be a {nameof(ContentNode)}, found {node.Children[0].GetType().Name}.",
+                                        nameof(ContentNode),
+                                        key);
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      if (!SeparatorHelper.IsSeparatorOfType(cn.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_CharacterNameDeclaration)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!cn.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      value = new() { SavingKey = key, Name = lvn.Value.GetLexeme(source) };
+      return true;
+   }
+
+   public static bool ArcTryParse_CharacterNameDeclaration(StatementNode node,
+                                                           LocationContext ctx,
+                                                           string actionName,
+                                                           string source,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
+                                                           ref bool validation)
+   {
+      if (node is BlockNode bn)
+         return ArcTryParse_CharacterNameDeclaration(bn, ctx, actionName, source, out value, ref validation);
+      if (node.IsContentNode(ctx, source, actionName, ref validation, out var cn))
+         return ArcTryParse_CharacterNameDeclaration(cn, ctx, actionName, source, out value, ref validation);
+
+      value = null;
+      validation = false;
+      return false;
+   }
 }

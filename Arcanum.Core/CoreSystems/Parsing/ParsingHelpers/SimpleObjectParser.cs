@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -176,6 +177,7 @@ public static class SimpleObjectParser
    /// </summary>
    public static void DiscoverObjectDeclarations<TTarget>(List<StatementNode> statements,
                                                           LocationContext ctx,
+                                                          Eu5FileObj<TTarget> fileObj,
                                                           string actionStack,
                                                           string source,
                                                           ref bool validation,
@@ -188,7 +190,11 @@ public static class SimpleObjectParser
             continue;
 
          var key = bn.KeyNode.GetLexeme(source);
-         var instance = new TTarget { UniqueId = key };
+         var instance = (TTarget)Activator.CreateInstance(typeof(TTarget))!;
+         instance.UniqueId = key;
+         instance.Source = fileObj;
+
+         Debug.Assert(instance.Source != null, "instance.Source != null");
 
          if (lockObject != null)
          {

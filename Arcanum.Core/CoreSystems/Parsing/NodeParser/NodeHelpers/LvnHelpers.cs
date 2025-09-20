@@ -269,6 +269,12 @@ public static class LvnHelpers
       var lexeme = lvn.Value.GetLexeme(source);
       if (!Globals.Characters.TryGetValue(lexeme, out character))
       {
+         if (lexeme == Character.RandomCharacter.UniqueId)
+         {
+            character = Character.RandomCharacter;
+            return true;
+         }
+
          ctx.SetPosition(lvn.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidObjectKey,
