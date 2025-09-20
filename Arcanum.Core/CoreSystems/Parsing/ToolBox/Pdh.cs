@@ -50,12 +50,12 @@ public static class Pdh
                                                 ref bool validation)
       where TTarget : INexus;
 
-   public delegate List<StatementNode> PropertyParser<in TTarget>(BlockNode block,
-                                                                  TTarget target,
-                                                                  LocationContext ctx,
-                                                                  string source,
-                                                                  ref bool validation,
-                                                                  bool complainOnUnknownNodes)
+   public delegate void PropertyParser<in TTarget>(BlockNode block,
+                                                   TTarget target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool complainOnUnknownNodes)
       where TTarget : INexus;
 
    /// <summary>
@@ -173,21 +173,19 @@ public static class Pdh
    /// <param name="ignoredContentKeys"></param>
    /// <param name="allowUnknownNodes"></param>
    /// <returns>A list of all child StatementNodes that were not handled by any parser.</returns>
-   public static List<StatementNode> ParseProperties<TTarget>(BlockNode block,
-                                                              TTarget target,
-                                                              LocationContext ctx,
-                                                              string source,
-                                                              ref bool validation,
-                                                              IReadOnlyDictionary<string, ContentParser<TTarget>>
-                                                                 contentParsers,
-                                                              IReadOnlyDictionary<string, BlockParser<TTarget>>
-                                                                 blockParsers,
-                                                              HashSet<string> ignoredBlockKeys,
-                                                              HashSet<string> ignoredContentKeys,
-                                                              bool allowUnknownNodes = false) where TTarget : INexus
+   public static void ParseProperties<TTarget>(BlockNode block,
+                                               TTarget target,
+                                               LocationContext ctx,
+                                               string source,
+                                               ref bool validation,
+                                               IReadOnlyDictionary<string, ContentParser<TTarget>>
+                                                  contentParsers,
+                                               IReadOnlyDictionary<string, BlockParser<TTarget>>
+                                                  blockParsers,
+                                               HashSet<string> ignoredBlockKeys,
+                                               HashSet<string> ignoredContentKeys,
+                                               bool allowUnknownNodes = false) where TTarget : INexus
    {
-      var unhandledNodes = new List<StatementNode>();
-
       foreach (var propertyNode in block.Children)
       {
          var wasHandled = false;
@@ -213,28 +211,22 @@ public static class Pdh
          if (wasHandled)
             continue;
 
-         unhandledNodes.Add(propertyNode);
          if (allowUnknownNodes)
             continue;
 
-         switch (propertyNode)
-         {
-            case ContentNode cNode when ignoredContentKeys.Contains(cNode.KeyNode.GetLexeme(source)):
-            case BlockNode bNode when ignoredBlockKeys.Contains(bNode.KeyNode.GetLexeme(source)):
-               continue;
-            default:
-               ctx.SetPosition(propertyNode.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
-                                              ParsingError.Instance.InvalidNodeType,
-                                              $"Parsing {typeof(TTarget).Name}",
-                                              propertyNode.GetType().Name,
-                                              "ContentNode or BlockNode",
-                                              propertyNode.KeyNode.GetLexeme(source));
-               break;
-         }
-      }
+         if (propertyNode is ContentNode cNode && ignoredContentKeys.Contains(cNode.KeyNode.GetLexeme(source)))
+            continue;
+         if (propertyNode is BlockNode bNode && ignoredBlockKeys.Contains(bNode.KeyNode.GetLexeme(source)))
+            continue;
 
-      return unhandledNodes;
+         ctx.SetPosition(propertyNode.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"Parsing {typeof(TTarget).Name}",
+                                        propertyNode.GetType().Name,
+                                        "ContentNode or BlockNode",
+                                        propertyNode.KeyNode.GetLexeme(source));
+      }
    }
 
    public static ObservableRangeCollection<T> ParseContentCollection<T>(BlockNode node,

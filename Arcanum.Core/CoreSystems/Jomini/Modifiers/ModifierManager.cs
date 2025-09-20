@@ -72,27 +72,44 @@ public static class ModifierManager
       return true;
    }
 
-   public static bool TryConvertValueToType(object value,
+   public static bool TryConvertValueToType(string value,
                                             ModifierType type,
-                                            [MaybeNullWhen(false)] out object convertedValue)
+                                            [MaybeNullWhen(false)] out object convertedValue,
+                                            bool defaultToScripted = true)
    {
       convertedValue = null;
       try
       {
-         convertedValue = type switch
+         switch (type)
          {
-            ModifierType.Boolean => value.Equals("yes") || value.Equals("no"),
-            ModifierType.ScriptedValue => Convert.ToString(value, CultureInfo.InvariantCulture),
-            ModifierType.Percentage => Convert.ToDouble(value, CultureInfo.InvariantCulture),
-            ModifierType.Float => Convert.ToSingle(value, CultureInfo.InvariantCulture),
-            ModifierType.Integer => Convert.ToInt32(value, CultureInfo.InvariantCulture),
-            _ => null,
-         };
+            case ModifierType.Boolean:
+               convertedValue = value.Equals("yes") || value.Equals("no");
+               break;
+            case ModifierType.ScriptedValue:
+               convertedValue = Convert.ToString(value, CultureInfo.InvariantCulture);
+               break;
+            case ModifierType.Percentage:
+               convertedValue = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+               break;
+            case ModifierType.Float:
+            case ModifierType.Integer:
+               convertedValue = Convert.ToSingle(value, CultureInfo.InvariantCulture);
+               break;
+            default:
+               convertedValue = null;
+               break;
+         }
+
          return convertedValue is not null;
       }
       catch
       {
-         return false;
+         if (!defaultToScripted)
+            return false;
+
+         convertedValue = Convert.ToString(value, CultureInfo.InvariantCulture) ??
+                          throw new InvalidOperationException("Identifier modifier value cannot be null");
+         return true;
       }
    }
 
@@ -125,12 +142,6 @@ public static class ModifierManager
       if (IsBooleanModifier(definition))
       {
          type = ModifierType.Boolean;
-         return true;
-      }
-
-      if (IsIntegerModifier(definition))
-      {
-         type = ModifierType.Integer;
          return true;
       }
 
@@ -245,9 +256,6 @@ public static class ModifierManager
 
    private static bool IsFloatingModifier(ModifierDefinition definition)
    {
-      if (definition.NumDecimals <= 0)
-         return false;
-
       if (definition is { IsPercentage: false, IsAlreadyPercent: false, IsBoolean: false })
          return true;
 

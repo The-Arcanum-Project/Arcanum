@@ -1,51 +1,103 @@
 ﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class LocationRank(string name, int order)
-   : OldNameKeyDefined(name), INUI, ICollectionProvider<LocationRank>, IEmpty<LocationRank>
+[ObjectSaveAs]
+public partial class LocationRank : IEu5Object<LocationRank>
 {
-   [Description("The color associated with this location rank, often used in the UI.")]
-   [ParseAs("color", AstNodeType.ContentNode)]
-   public JominiColor ColorKey { get; set; } = JominiColor.Empty;
-   [Description("The rank of the location rank.")]
-   [ParseAs("max_rank", AstNodeType.ContentNode)]
+   # region Nexus Properties
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("color")]
+   [Description("The color of this LocationRank.")]
+   public JominiColor Color { get; set; } = JominiColor.Empty;
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("max_rank")]
+   [Description("If true, this LocationRank is the maximum rank achievable.")]
    public bool IsMaxRank { get; set; }
-   [Description("Whether this location rank is considered an established city.")]
-   [ParseAs("is_established_city", AstNodeType.ContentNode)]
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("is_established_city")]
+   [Description("If true, locations with this rank are considered established cities.")]
    public bool IsEstablishedCity { get; set; }
-   [Description("Whether this location rank should be shown in labels.")]
-   [ParseAs("show_in_label", AstNodeType.ContentNode)]
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("show_in_label")]
+   [Description("If true, this LocationRank will be shown in location labels.")]
    public bool ShowInLabel { get; set; }
-   [Description("The number of days it takes to build this location rank.")]
-   [ParseAs("build_time", AstNodeType.ContentNode)]
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("build_time")]
+   [Description("The time in months required to build up to this LocationRank.")]
    public int BuildTime { get; set; }
-   [Description("The tier of the frame used for this location rank.")]
-   [ParseAs("frame_tier", AstNodeType.ContentNode)]
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("frame_tier")]
+   [Description("The frame tier associated with this LocationRank.")]
    public int FrameTier { get; set; }
-   [Description("What type of construction is required to build this location rank.")]
-   [ParseAs("construction_demand", AstNodeType.ContentNode)]
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("construction_demand")]
+   [Description("The construction demand associated with this LocationRank.")]
    public string ConstructionDemand { get; set; } = string.Empty;
 
-   /// <summary>
-   /// LocationRanks are ordered by appearance in the file, meaning the first one is the best and everything beneath is worse.
-   /// </summary>
-   public int Order { get; set; } = order;
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("rank_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to locations of this rank.")]
+   public ObservableRangeCollection<ModValInstance> RankModifiers { get; set; } = [];
 
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("country_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to the country owning a location of this rank.")]
+   public ObservableRangeCollection<ModValInstance> CountryModifiers { get; set; } = [];
+
+   # endregion
+
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this LocationRank. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string GetNamespace => $"Map.{nameof(LocationRank)}";
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
    public bool IsReadonly => true;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.LocationRankSettings;
-   public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<LocationRank> GetGlobalItems() => Globals.LocationRanks;
-   public static LocationRank Empty { get; } = new("empty", int.MinValue);
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationRankSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationRankAgsSettings;
+   public static IEnumerable<LocationRank> GetGlobalItems() => Globals.LocationRanks.Values;
 
-   #region ISearchable
-
-   public override string GetNamespace => nameof(LocationRank);
+   public static LocationRank Empty { get; } = new() { UniqueId = "Arcanum_Empty_LocationRank" };
 
    #endregion
 }

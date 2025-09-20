@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -49,14 +48,7 @@ public static class SimpleObjectParser
          }
 
          globals.Add(instance);
-         SetPropsAndProcessNodes(ctx,
-                                 actionStack,
-                                 source,
-                                 ref validation,
-                                 propsParser,
-                                 allowUnknownBlocks,
-                                 bn,
-                                 instance);
+         propsParser(bn!, instance, ctx, source, ref validation, allowUnknownBlocks);
       }
    }
 
@@ -96,14 +88,7 @@ public static class SimpleObjectParser
             continue;
          }
 
-         SetPropsAndProcessNodes(ctx,
-                                 actionStack,
-                                 source,
-                                 ref validation,
-                                 propsParser,
-                                 allowUnknownBlocks,
-                                 bn,
-                                 instance);
+         propsParser(bn!, instance, ctx, source, ref validation, allowUnknownBlocks);
       }
    }
 
@@ -126,41 +111,6 @@ public static class SimpleObjectParser
             propsParser,
             globals,
             allowUnknownBlocks);
-   }
-
-   private static void SetPropsAndProcessNodes<TTarget>(LocationContext ctx,
-                                                        string actionStack,
-                                                        string source,
-                                                        ref bool validation,
-                                                        Pdh.PropertyParser<TTarget> propsParser,
-                                                        bool allowUnknownBlocks,
-                                                        BlockNode? bn,
-                                                        TTarget eu5Obj) where TTarget : IEu5Object<TTarget>, new()
-   {
-      var unknownNodes = propsParser(bn!, eu5Obj, ctx, source, ref validation, allowUnknownBlocks);
-
-      if (allowUnknownBlocks)
-         foreach (var ukn in unknownNodes)
-            ukn.IsBlockNode(ctx, source, actionStack, out _);
-      else
-         foreach (var ukn in unknownNodes)
-         {
-            var lexeme = ukn.KeyNode.GetLexeme(source);
-            var type = ukn.GetType();
-
-            if (lexeme == "variables")
-            {
-               continue;
-            }
-
-            ctx.SetPosition(ukn.KeyNode);
-            DiagnosticException.LogWarning(ctx,
-                                           ParsingError.Instance.UnknownKey,
-                                           actionStack,
-                                           ukn.KeyNode.GetLexeme(source),
-                                           "???");
-            validation = false;
-         }
    }
 
    private static bool ValidateAndCreateInstance<TTarget>(FileObj fileObj,

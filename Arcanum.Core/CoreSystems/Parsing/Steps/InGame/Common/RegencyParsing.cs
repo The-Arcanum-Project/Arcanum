@@ -4,30 +4,28 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-[ParserFor(typeof(LocationRank), ignoredBlockKeys: ["allow"])]
-public partial class LocationRankParsing : ParserValidationLoadingService<LocationRank>
+[ParserFor(typeof(Regency), ignoredBlockKeys: ["start_effect", "allow"])]
+public partial class RegencyParsing : ParserValidationLoadingService<Regency>
 {
-   public override List<Type> ParsedObjects => [typeof(LocationRank)];
+   public override List<Type> ParsedObjects => [typeof(Regency)];
 
-   public override string GetFileDataDebugInfo() => $"Parsed LocationRanks: {Globals.Regencies.Count}";
+   public override string GetFileDataDebugInfo() => $"Parsed Regencies: {Globals.Regencies.Count}";
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj<LocationRank> fileObj)
+   protected override bool UnloadSingleFileContent(Eu5FileObj<Regency> fileObj)
    {
       foreach (var obj in fileObj.GetEu5Objects())
          Globals.Regencies.Remove(obj.UniqueId);
       return true;
    }
 
-   public override bool IsFullyParsed => false;
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<LocationRank> fileObj,
+                                          Eu5FileObj<Regency> fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation)
@@ -39,6 +37,6 @@ public partial class LocationRankParsing : ParserValidationLoadingService<Locati
                                source,
                                ref validation,
                                ParseProperties,
-                               Globals.LocationRanks);
+                               Globals.Regencies);
    }
 }

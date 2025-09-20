@@ -7,6 +7,16 @@ public enum AstNodeType
    KeyOnlyNode,
 }
 
+/// <summary>
+/// Defines how a parser is being build. <br/>
+/// By default we look for a content node but Collections and embedded objects are defaulted to block nodes.
+/// </summary>
+/// <param name="key"></param>
+/// <param name="nodeType"></param>
+/// <param name="customParser"></param>
+/// <param name="isShatteredList"></param>
+/// <param name="itemNodeType"></param>
+/// <param name="isEmbedded"></param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ParseAsAttribute(string? key,
                               AstNodeType nodeType = AstNodeType.ContentNode,

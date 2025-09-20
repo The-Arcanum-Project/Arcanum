@@ -19,4 +19,6 @@ public class AGSSettings
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();
    public AgsSettings RegnalNumberAgsSettings { get; set; } = new();
    public AgsSettings ParliamentDefinitionAgsSettings { get; set; } = new();
+   public AgsSettings RegencyAgsSettings { get; set; } = new();
+   public AgsSettings LocationRankAgsSettings { get; set; } = new();
 }

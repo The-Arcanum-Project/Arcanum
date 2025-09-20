@@ -31,7 +31,7 @@ public partial class LanguageParsing : FileLoadingService
          var langKey = bn.KeyNode.GetLexeme(source);
          var language = new Language(langKey);
 
-         var unhandledNodes = ParseProperties(bn, language, ctx, source, ref validation, false);
+         ParseProperties(bn, language, ctx, source, ref validation, false);
          if (!Globals.Languages.TryAdd(langKey, language))
          {
             ctx.SetPosition(bn.KeyNode);
@@ -41,28 +41,6 @@ public partial class LanguageParsing : FileLoadingService
                                            langKey,
                                            typeof(Language),
                                            Language.Field.Name);
-         }
-
-         foreach (var node in unhandledNodes)
-         {
-            if (!node.IsBlockNode(ctx, source, actionStack, ref validation, out var dn))
-               continue;
-
-            var blockKey = dn.KeyNode.GetLexeme(source);
-            const string dialects = "dialects";
-            if (string.Equals(blockKey, dialects, StringComparison.Ordinal))
-            {
-               ParseDialects(dn, language, source, ctx, ref validation);
-            }
-            else
-            {
-               ctx.SetPosition(dn.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
-                                              ParsingError.Instance.InvalidBlockName,
-                                              actionStack,
-                                              blockKey,
-                                              dialects);
-            }
          }
       }
 

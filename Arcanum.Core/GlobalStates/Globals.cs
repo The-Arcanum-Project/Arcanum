@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.AbstractMechanics;
+using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Culture;
@@ -28,7 +29,7 @@ public static class Globals
 {
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static Dictionary<string, PopType> PopTypes { get; } = [];
-   public static List<LocationRank> LocationRanks { get; } = [];
+   public static Dictionary<string, LocationRank> LocationRanks { get; } = [];
    public static List<CountryRank> CountryRanks { get; } = [];
    public static List<Road> Roads { get; set; } = [];
 
@@ -57,6 +58,7 @@ public static class Globals
    #region Common
 
    public static Dictionary<string, ModifierDefinition> ModifierDefinitions { get; set; } = [];
+   public static Dictionary<string, Regency> Regencies { get; set; } = [];
 
    #endregion
 

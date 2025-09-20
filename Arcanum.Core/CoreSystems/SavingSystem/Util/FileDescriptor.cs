@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.SavingSystem.Services;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Utils.Sorting;
@@ -10,7 +9,6 @@ public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
 {
    public string[] LocalPath { get; }
    public readonly FileDescriptor[] DescriptorDependencies;
-   public readonly ISavingService SavingService;
    public readonly FileTypeInformation FileType;
    public FileLoadingService LoadingService { get; }
    public readonly bool AllowMultipleInstances;
@@ -25,7 +23,6 @@ public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
 
    public FileDescriptor(FileDescriptor[] dependencies,
                          string[] localPath,
-                         ISavingService savingService,
                          FileTypeInformation fileType,
                          FileLoadingService loadingServiceService,
                          bool isMultithreadable,
@@ -34,7 +31,6 @@ public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
    {
       LocalPath = localPath;
       DescriptorDependencies = dependencies;
-      SavingService = savingService;
       FileType = fileType;
       LoadingService = loadingServiceService;
       AllowMultipleInstances = allowMultipleInstances;
@@ -66,7 +62,6 @@ public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
    public IEnumerable<IDependencyNode<string>> Dependencies => DescriptorDependencies;
    public static FileDescriptor Empty { get; } = new([],
                                                      [],
-                                                     ISavingService.Dummy,
                                                      FileTypeInformation.Default,
                                                      null!,
                                                      false);

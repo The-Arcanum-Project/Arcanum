@@ -22,16 +22,16 @@ public partial class Climate : IEu5Object<Climate>
 
    public enum WinterType
    {
-      [EnumAgsData("none", true)]
+      [EnumAgsData("none")]
       None,
 
-      [EnumAgsData("mild", true)]
+      [EnumAgsData("mild")]
       Normal,
 
-      [EnumAgsData("normal", true)]
+      [EnumAgsData("normal")]
       Mild,
 
-      [EnumAgsData("severe", true)]
+      [EnumAgsData("severe")]
       Severe,
    }
 

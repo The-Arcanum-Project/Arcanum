@@ -583,9 +583,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// This is a facade that calls the centralized logic in the Pdh helper class.");
       sb.AppendLine("    /// </summary>");
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
-      sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
+      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
       sb.AppendLine("    {");
-      sb.AppendLine($"        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
+      sb.AppendLine($"        Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
       sb.AppendLine("    }");
       sb.AppendLine();
    }
@@ -792,8 +792,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
          ItemNodeType =
             AttributeHelper.SimpleGetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
          IsEmbedded = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
+         IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
 
-         if (IsEmbedded)
+         if (IsEmbedded || (IsCollection && !IsShatteredList))
          {
             AstNodeType = NodeType.BlockNode;
          }
@@ -820,8 +821,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
          }
 
          Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
-
-         IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
       }
 
       private static string ToSnakeCase(string text)

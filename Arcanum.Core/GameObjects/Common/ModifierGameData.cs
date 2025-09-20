@@ -35,7 +35,14 @@ public partial class ModifierGameData
    [SaveAs]
    [DefaultValue(false)]
    public bool Ai { get; set; }
-   [ParseAs("should_show_in_modifier_tab")]
+
+   [SaveAs]
+   [ParseAs("is_societal_value_change")]
+   [Description("Whether this modifier represents a change in societal values.")]
+   [DefaultValue(false)]
+   public bool IsSocietalValueChange { get; set; }
+
+   [ParseAs("should_show_in_modifiers_tab")]
    [Description("Whether this modifier should be shown in the country modifier tab of the UI.")]
    [SaveAs]
    [DefaultValue(true)]

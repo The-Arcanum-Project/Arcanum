@@ -159,9 +159,8 @@
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=DefaultValue/@KeyIndexDefined">False</s:Boolean>
 
     <s:Boolean
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Description/@KeyIndexDefined">True</s:Boolean>
-    <s:Int64
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Description/Order/@EntryValue">2</s:Int64>
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Description/@KeyIndexDefined">False</s:Boolean>
+
     <s:Boolean
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=JominiKey/@KeyIndexDefined">False</s:Boolean>
 
@@ -169,13 +168,15 @@
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Key/@KeyIndexDefined">False</s:Boolean>
 
     <s:Boolean
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=NameSpace/@KeyIndexDefined">True</s:Boolean>
-    <s:Int64
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=NameSpace/Order/@EntryValue">1</s:Int64>
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=NameSpace/@KeyIndexDefined">False</s:Boolean>
     <s:Boolean
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=UniqueKey/@KeyIndexDefined">True</s:Boolean>
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Namespace/@KeyIndexDefined">True</s:Boolean>
+
     <s:Int64
-            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=UniqueKey/Order/@EntryValue">3</s:Int64>
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=Namespace/Order/@EntryValue">1</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Field/=UniqueKey/@KeyIndexDefined">False</s:Boolean>
+
     <s:Boolean
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/IsBlessed/@EntryValue">True</s:Boolean>
     <s:Boolean
@@ -192,65 +193,38 @@
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
     <s:String
             x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Text/@EntryValue">[ObjectSaveAs]
-public partial class $ClassName$ : IBaseEu5Object&lt;$ClassName$&gt;
+public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 {
+
+#region Nexus Properties
+
+#endregion
+
 #pragma warning disable AGS004
    [ReadonlyNexus]
-   [Description("$Description$")]
+   [Description("Unique key of this $ClassName$. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string $UniqueKey$ { get; set; } = string.Empty;   
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public FileObj Source { get; set; } = null!;
 #pragma warning restore AGS004
-   
-   #region INexus Properties
-   
-   
-   
-   #endregion
 
-   #region IBaseEu5Object Implementation
+#region IEu5Object
 
-   public string GetNamespace =&gt; "$NameSpace$.$ClassName$";
-   public string ResultName =&gt; $UniqueKey$;
-
-   public List&lt;string&gt; SearchTerms =&gt; [$UniqueKey$];
-
-   public void OnSearchSelected()
-   {
-      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
-   }
-
-   public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, $UniqueKey$, "$Description$");
+   public string GetNamespace =&gt; $"$Namespace$.{nameof($ClassName$)}";
+   public void OnSearchSelected() =&gt; UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, UniqueId, string.Empty);
    public IQueastorSearchSettings.Category SearchCategory =&gt; IQueastorSearchSettings.Category.GameObjects;
-   public bool IsReadonly =&gt; false;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.$ClassName$NUISettings;
-   public INUINavigation[] Navigations { get; } = [];
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.$ClassName$AgsSettings;
-   public string SavingKey =&gt; $UniqueKey$;
+   public bool IsReadonly =&gt; true;
+   public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$ClassName$Settings;
+   public INUINavigation[] Navigations =&gt; [];
+   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$AgsSettings;
    public static IEnumerable&lt;$ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s.Values;
 
-   public static $ClassName$ Empty { get; } = new() { $UniqueKey$ = "$ClassName$_ARCANUM_EMPTY" };
+   public static $ClassName$ Empty { get; } = new() { UniqueId = "Arcanum_Empty_$ClassName$" };
    
-   public FileObj Source { get; set; } = null!;
-
-   private bool Equals($ClassName$ other) =&gt; $UniqueKey$ == other.$UniqueKey$;
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != typeof($ClassName$))
-         return false;
-
-      return Equals(($ClassName$)obj);
-   }
-
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() =&gt; $UniqueKey$.GetHashCode();
-
-   public override string ToString() =&gt; $UniqueKey$;
-   #endregion
+#endregion
 }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>

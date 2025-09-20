@@ -40,7 +40,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
          var key = bn.KeyNode.GetLexeme(source);
          var vegetation = new Vegetation { UniqueId = key, Source = fileObj };
 
-         var unhandledNodes = ParseProperties(bn, vegetation, ctx, source, ref validation, false);
+         ParseProperties(bn, vegetation, ctx, source, ref validation, false);
          if (!Globals.Vegetation.TryAdd(key, vegetation))
          {
             ctx.SetPosition(bn.KeyNode);
@@ -50,24 +50,6 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
                                            key,
                                            typeof(Vegetation),
                                            Vegetation.Field.UniqueId);
-         }
-
-         foreach (var node in unhandledNodes)
-         {
-            if (node.IsBlockNode(ctx, source, actionStack, ref validation, out _))
-               continue;
-
-            ctx.SetPosition(node.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.InvalidBlockName,
-                                           actionStack,
-                                           node.KeyNode.GetLexeme(source),
-                                           new[]
-                                           {
-                                              VegetationKeywords.COLOR, VegetationKeywords.DEBUG_COLOR,
-                                              VegetationKeywords.DEFENDER, VegetationKeywords.HAS_SAND,
-                                              VegetationKeywords.MOVEMENT_COST,
-                                           });
          }
       }
    }

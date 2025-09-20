@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
+using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
@@ -75,7 +76,7 @@ public class NUISettings
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Adjacency.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting LocationRankSettings { get; set; } = new(LocationRank.Field.Name,
+   public NUISetting LocationRankSettings { get; set; } = new(LocationRank.Field.UniqueId,
                                                               Enum.GetValues<LocationRank.Field>()
                                                                   .Cast<Enum>()
                                                                   .ToArray(),
@@ -292,4 +293,9 @@ public class NUISettings
                                                                       Enum.GetValues<ParliamentDefinition.Field>()
                                                                           .Cast<Enum>()
                                                                           .ToArray());
+
+   public NUISetting RegencySettings { get; set; } = new(Regency.Field.UniqueId,
+                                                         Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Regency.Field>().Cast<Enum>().ToArray());
 }
