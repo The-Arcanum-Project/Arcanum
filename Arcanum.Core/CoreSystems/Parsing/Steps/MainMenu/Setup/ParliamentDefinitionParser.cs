@@ -3,5 +3,5 @@ using Arcanum.Core.GameObjects.Court.State;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-[ParserFor(typeof(GovernmentState))]
-public static partial class GovernmentStateParsing;
+[ParserFor(typeof(ParliamentDefinition))]
+public partial class ParliamentDefinitionParser;

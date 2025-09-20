@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -412,7 +413,8 @@ public static class ParsingToolBox
       }
 
       var lexeme = lvn.Value.GetLexeme(source);
-      if (!Enum.TryParse(lexeme, true, out value))
+
+      if (!EnumAgsRegistry.TryParse(lexeme, out value))
       {
          ctx.SetPosition(lvn.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -761,5 +763,32 @@ public static class ParsingToolBox
 
       value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
       return true;
+   }
+
+   public static bool ArcTryParse_Country(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          [MaybeNullWhen(false)] out Country value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_RegnalNumber)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseCountry(ctx, actionName, source, ref validation, out value);
    }
 }

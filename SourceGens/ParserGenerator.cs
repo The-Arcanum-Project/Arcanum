@@ -76,6 +76,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
                continue;
 
             var allowUnknownNodes = AttributeHelper.GetAttributeArgumentValue(attr, 1, "allowUnknownNodes", false);
+            var ignoredBlockKeys =
+               AttributeHelper.GetAttributeArgumentValue(attr, 2, "ignoredBlockKeys", new string[] { }) ?? [];
+            var ignoredContentKeys =
+               AttributeHelper.GetAttributeArgumentValue(attr, 3, "ignoredContentKeys", new string[] { }) ?? [];
 
             // --- Collect Metadata from Target Type's Properties ---
             var propertiesToParse = new List<PropertyMetadata>();
@@ -98,7 +102,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                      $"{parserSymbol.ContainingNamespace}.{targetTypeSymbol.Name}Keywords",
                                                                      parsers,
                                                                      context,
-                                                                     allowUnknownNodes);
+                                                                     ignoredBlockKeys,
+                                                                     ignoredContentKeys);
             context.AddSource(parserHintName, parserSource);
          }
          catch (Exception ex)
@@ -124,7 +129,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                        string fullyQualifiedKeywordClassName,
                                                                        ImmutableArray<INamedTypeSymbol> parsers,
                                                                        SourceProductionContext context,
-                                                                       bool allowUnknownNodes)
+                                                                       string[] ignoredBlockKeys,
+                                                                       string[] ignoredContentKeys)
    {
       var hintName = $"{parserSymbol.ContainingNamespace}.{parserSymbol.Name}.g.cs";
       var targetTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -160,7 +166,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     embeddedBlockProps);
 
          // --- ParseProperties Method ---
-         GenerateParsePropertiesMethod(targetTypeSymbol, sb, targetTypeName);
+         GenerateParsePropertiesMethod(targetTypeSymbol, sb, targetTypeName, ignoredBlockKeys, ignoredContentKeys);
 
          // --- Wrapper Methods (partial signatures) ---
          GenerateParserMethodSignatures(properties, sb, targetTypeName);
@@ -278,6 +284,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                       SourceProductionContext context)
    {
       sb.AppendLine("    #region Auto-Implemented Parsers");
+
       foreach (var prop in properties)
       {
          // If a custom parser is specified, we DO NOT generate an implementation.
@@ -362,6 +369,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       sb.AppendLine("    #endregion");
       sb.AppendLine("}");
+   }
+
+   private static void WriteIgnoreList(StringBuilder sb, string ignoredblocktypes, string[] ignoredBlockKeys)
+   {
+      sb.AppendLine($"    private static readonly HashSet<string> {ignoredblocktypes} = new(StringComparer.OrdinalIgnoreCase)");
+      sb.AppendLine("    {");
+      foreach (var key in ignoredBlockKeys)
+         sb.AppendLine($"        \"{key}\",");
+      sb.AppendLine("    };");
    }
 
    private static void GenerateCollectionMethodCall(StringBuilder sb,
@@ -551,8 +567,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
    private static void GenerateParsePropertiesMethod(INamedTypeSymbol targetTypeSymbol,
                                                      StringBuilder sb,
-                                                     string targetTypeName)
+                                                     string targetTypeName,
+                                                     string[] ignoredBlockKeys,
+                                                     string[] ignoredContentKeys)
    {
+      // Write the ignored keys lists
+      WriteIgnoreList(sb, "_ignoredBlockTypes", ignoredBlockKeys);
+      sb.AppendLine();
+      WriteIgnoreList(sb, "_ignoredContentTypes", ignoredContentKeys);
+
       sb.AppendLine("    /// <summary>");
       sb.AppendLine("    /// Parses all properties of a " +
                     targetTypeSymbol.Name +
@@ -562,7 +585,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
       sb.AppendLine($"    public static List<StatementNode> ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
       sb.AppendLine("    {");
-      sb.AppendLine($"        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, allowUnknownNodes);");
+      sb.AppendLine($"        return Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
       sb.AppendLine("    }");
       sb.AppendLine();
    }
@@ -763,10 +786,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
          Symbol = symbol;
          Attribute = attribute;
 
-         IsShatteredList = AttributeHelper.GetAttributeArgumentValue<bool>(attribute, 3, "isShatteredList");
-         CustomParserMethodName = AttributeHelper.GetAttributeArgumentValue<string?>(attribute, 2, "customParser");
-         ItemNodeType = AttributeHelper.GetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
-         IsEmbedded = AttributeHelper.GetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
+         IsShatteredList = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 3, "isShatteredList");
+         CustomParserMethodName =
+            AttributeHelper.SimpleGetAttributeArgumentValue<string?>(attribute, 2, "customParser");
+         ItemNodeType =
+            AttributeHelper.SimpleGetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
+         IsEmbedded = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
 
          if (IsEmbedded)
          {

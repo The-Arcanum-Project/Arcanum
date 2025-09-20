@@ -12,4 +12,10 @@ public enum GovernmentType
 
    [EnumAgsData("theocracy")]
    Theocracy,
+
+   [EnumAgsData("tribe")]
+   Tribal,
+
+   [EnumAgsData("steppe_horde")]
+   SteppeHorde
 }

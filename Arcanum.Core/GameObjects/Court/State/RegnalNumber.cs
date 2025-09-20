@@ -14,7 +14,7 @@ public partial class RegnalNumber : INUI, IAgs, IStringKvp, IEmpty<RegnalNumber>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RegnalNumberNUISettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReganlNumberAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegnalNumberAgsSettings;
    public string SavingKey => string.Empty;
    public string Key { get; set; } = string.Empty;
    public string Value { get; set; } = string.Empty;

@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
 using Nexus.Core;
@@ -27,6 +28,12 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [Description("The type of a regency this government has.")]
    [ParseAs("regency")]
    public string Regency { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue("")]
+   [Description("The type of a regency this government has.")]
+   [ParseAs("inherit_ruler_terms")]
+   public Country InheritRulerTerms { get; set; } = Country.Empty;
 
    [SaveAs]
    [DefaultValue("")]
@@ -78,6 +85,12 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
 
    [SaveAs]
    [DefaultValue(null)]
+   [Description("Properties defining the parliament of this government")]
+   [ParseAs("parliament", AstNodeType.BlockNode, isEmbedded: true)]
+   public ParliamentDefinition ParliamentDefinition { get; set; } = ParliamentDefinition.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
    [Description("All reforms that have been enacted in this government state.")]
    [ParseAs("reforms", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Reforms { get; set; } = [];
@@ -97,13 +110,13 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [SaveAs]
    [DefaultValue(null)]
    [Description("All regnal numbers that have been used in this government state.")]
-   [ParseAs("regnal_number", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [ParseAs("regnal_numbers", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<RegnalNumber> RegnalNumbers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [Description("All estate privileges that are currently enacted.")]
-   [ParseAs("privilege")]
+   [ParseAs("privilege", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
 
    #region IEu5Object Implementation

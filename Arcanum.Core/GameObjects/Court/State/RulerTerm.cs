@@ -23,6 +23,12 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public string CharacterId { get; set; } = string.Empty;
 
    [SaveAs]
+   [DefaultValue("")]
+   [Description("The regnal name used by the ruler during this term.")]
+   [ParseAs("regnal_name")]
+   public string RegnalName { get; set; } = string.Empty;
+
+   [SaveAs]
    [DefaultValue(0)]
    [Description("The starting year of this ruler term.")]
    [ParseAs("start_date")]

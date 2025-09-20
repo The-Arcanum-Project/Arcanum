@@ -1,4 +1,6 @@
-﻿namespace ParserGenerator.HelperClasses;
+﻿using System.Collections.Immutable;
+
+namespace ParserGenerator.HelperClasses;
 
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -48,21 +50,109 @@ public static class AttributeHelper
    /// Safely retrieves and casts an argument's value from an AttributeData instance.
    /// </summary>
    /// <typeparam name="T">The expected type of the argument.</typeparam>
+   /// <param name="name"></param>
    /// <param name="defaultValue">The value to return if the argument is not found.</param>
+   /// <param name="attribute"></param>
+   /// <param name="position"></param>
    /// <returns>The argument's value cast to T, or the provided default value.</returns>
-   public static T? GetAttributeArgumentValue<T>(AttributeData attribute,
-                                                 int position,
-                                                 string name,
-                                                 T? defaultValue = default)
+   public static T? SimpleGetAttributeArgumentValue<T>(AttributeData attribute,
+                                                       int position,
+                                                       string name,
+                                                       T? defaultValue = default)
    {
       object? rawValue = GetAttributeArgumentValue(attribute, position, name);
 
       if (rawValue is null)
+         return defaultValue;
+
+      return (T)rawValue;
+   }
+
+   /// <summary>
+   /// Safely retrieves and casts an argument's value from an AttributeData instance.
+   /// This method correctly handles both single values and array values.
+   /// </summary>
+   /// <typeparam name="T">The expected type of the argument (e.g., bool, string, or string[]).</typeparam>
+   /// <param name="attribute">The AttributeData to inspect.</param>
+   /// <param name="position">The zero-based index for a positional constructor argument.</param>
+   /// <param name="name">The name for a named argument (property). Ignored if position is used.</param>
+   /// <param name="defaultValue">The value to return if the argument is not found or is null.</param>
+   /// <returns>The argument's value cast to T, or the provided default value.</returns>
+   public static T? GetAttributeArgumentValue<T>(
+      AttributeData attribute,
+      int position = -1, // Use -1 as a sentinel for "not a positional argument"
+      string? name = null,
+      T? defaultValue = default)
+   {
+      // Find the correct TypedConstant from either constructor or named arguments
+      TypedConstant argumentConstant;
+      if (position >= 0)
       {
+         // Positional argument
+         if (position >= attribute.ConstructorArguments.Length)
+            return defaultValue;
+
+         argumentConstant = attribute.ConstructorArguments[position];
+      }
+      else if (!string.IsNullOrEmpty(name))
+      {
+         // Named argument
+         argumentConstant = attribute.NamedArguments
+                                     .FirstOrDefault(arg => arg.Key == name)
+                                     .Value;
+
+         // If the named argument wasn't found, the Value will be null/default.
+         if (argumentConstant.IsNull)
+            return defaultValue;
+      }
+      else
+      {
+         // Invalid usage of the helper
          return defaultValue;
       }
 
-      // This cast works for primitive types and for enums (where rawValue is the underlying integer).
-      return (T)rawValue;
+      // --- THE CORE FIX FOR ARRAYS ---
+
+      // Check if the requested type 'T' is an array type.
+      if (typeof(T).IsArray)
+      {
+         // If the argument is not an array kind, something is wrong.
+         if (argumentConstant.Kind != TypedConstantKind.Array)
+         {
+            return defaultValue;
+         }
+
+         // The value is in the 'Values' property.
+         var arrayValues = argumentConstant.Values;
+         if (arrayValues.IsDefault)
+            return defaultValue; // Handle empty/null array case
+
+         // Get the element type of the requested array (e.g., 'string' from 'string[]')
+         var elementType = typeof(T).GetElementType();
+         if (elementType == null)
+            return defaultValue;
+
+         // Create a new array of the correct element type
+         var resultArray = Array.CreateInstance(elementType, arrayValues.Length);
+
+         // Populate the new array by converting each TypedConstant
+         for (var i = 0; i < arrayValues.Length; i++)
+         {
+            resultArray.SetValue(arrayValues[i].Value, i);
+         }
+
+         // Return the populated array, cast to the final type T
+         return (T)(object)resultArray;
+      }
+      else
+      {
+         // --- This is the logic for non-array types ---
+         if (argumentConstant.Value is T typedValue)
+         {
+            return typedValue;
+         }
+
+         return defaultValue;
+      }
    }
 }

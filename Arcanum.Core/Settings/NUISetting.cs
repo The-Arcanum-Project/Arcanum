@@ -272,14 +272,24 @@ public class NUISettings
                                                             Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray(),
                                                             Enum.GetValues<EnactedLaw.Field>().Cast<Enum>().ToArray());
-   public NUISetting RegnalNumberNUISettings { get; set; } = new(EnactedLaw.Field.Key,
-                                                                 Enum.GetValues<EnactedLaw.Field>()
+   public NUISetting RegnalNumberNUISettings { get; set; } = new(RegnalNumber.Field.Key,
+                                                                 Enum.GetValues<RegnalNumber.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray(),
-                                                                 Enum.GetValues<EnactedLaw.Field>()
+                                                                 Enum.GetValues<RegnalNumber.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray(),
-                                                                 Enum.GetValues<EnactedLaw.Field>()
+                                                                 Enum.GetValues<RegnalNumber.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray());
+   public NUISetting ParliamentDefinitionSettings { get; set; } = new(ParliamentDefinition.Field.Type,
+                                                                      Enum.GetValues<ParliamentDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<ParliamentDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<ParliamentDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray());
 }

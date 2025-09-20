@@ -17,4 +17,6 @@ public class EnumDataInfo
    /// A mapping of enum value names to their corresponding AGS string representations.
    /// </summary>
    public required Dictionary<string, string> Mapping { get; init; }
+
+   public required Dictionary<string, string> ReverseMapping { get; init; }
 }

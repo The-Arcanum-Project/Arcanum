@@ -233,4 +233,28 @@ public static class LvnHelpers
       value = new(year, month, day);
       return true;
    }
+
+   public static bool TryParseCountry(this LiteralValueNode lvn,
+                                      LocationContext ctx,
+                                      string actionName,
+                                      string source,
+                                      ref bool validationResult,
+                                      [MaybeNullWhen(false)] out Country country)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!Globals.Countries.TryGetValue(lexeme, out country))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidObjectKey,
+                                        actionName,
+                                        lexeme,
+                                        typeof(Country));
+         country = null;
+         validationResult = false;
+         return false;
+      }
+
+      return true;
+   }
 }

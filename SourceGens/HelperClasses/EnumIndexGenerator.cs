@@ -42,13 +42,11 @@ public static class EnumIndexGenerator
       sb.AppendLine("    public static class EnumAgsRegistry");
       sb.AppendLine("    {");
       sb.AppendLine("        private static readonly Dictionary<Type, EnumDataInfo> _registry;");
-      sb.AppendLine();
       sb.AppendLine("        public static IReadOnlyDictionary<Type, EnumDataInfo> Registry => _registry;");
       sb.AppendLine();
       sb.AppendLine("        static EnumAgsRegistry()");
       sb.AppendLine("        {");
-      sb.AppendLine("            _registry = new Dictionary<Type, EnumDataInfo>");
-      sb.AppendLine("            {");
+      sb.AppendLine("            var tempRegistry = new Dictionary<Type, EnumDataInfo>();");
 
       foreach (var value in cache.Values)
       {
@@ -56,32 +54,65 @@ public static class EnumIndexGenerator
             continue;
 
          var enumFullName = value.EnumSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
          var isFlags = value.EnumSymbol.GetAttributeForKey(FLAGS_ATTRIBUTE) != null;
 
-         sb.AppendLine($"                [typeof({enumFullName})] = new EnumDataInfo");
-         sb.AppendLine("                {");
-         sb.AppendLine($"                    EnumType = typeof({enumFullName}),");
-         sb.AppendLine($"                    IsFlags = {isFlags.ToString().ToLower()},");
-         sb.AppendLine("                    Mapping = new Dictionary<string, string>(new Dictionary<string, string>");
-         sb.AppendLine("                    {");
+         // --- THIS IS THE NEW LOGIC ---
 
-         foreach (var fieldResult in value.FieldResults)
+         // Generate the forward mapping dictionary first
+         sb.AppendLine($"            var forwardMap_{value.EnumSymbol.Name} = new Dictionary<string, string>");
+         sb.AppendLine("            {");
+         foreach (var field in value.FieldResults)
          {
-            if (!fieldResult.IsValid || fieldResult.IsIgnored)
+            if (!field.IsValid || field.IsIgnored)
                continue;
 
-            var fieldName = fieldResult.FieldSymbol.Name;
-            var serialKey = fieldResult.Key;
-            sb.AppendLine($"                        {{ \"{fieldName}\", \"{serialKey}\" }},");
+            sb.AppendLine($"                {{ \"{field.FieldSymbol.Name}\", \"{field.Key}\" }},");
          }
 
-         sb.AppendLine("                    })"); // End of new Dictionary
-         sb.AppendLine("                },"); // End of new EnumDataInfo
+         sb.AppendLine("            };");
+
+         // Generate the reverse mapping dictionary from the forward one
+         sb.AppendLine($"            var reverseMap_{value.EnumSymbol.Name} = forwardMap_{value.EnumSymbol.Name}");
+         sb.AppendLine("                .ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);");
+         sb.AppendLine();
+
+         // Now, create the EnumDataInfo with both maps
+         sb.AppendLine($"            tempRegistry[typeof({enumFullName})] = new EnumDataInfo");
+         sb.AppendLine("            {");
+         sb.AppendLine($"                EnumType = typeof({enumFullName}),");
+         sb.AppendLine($"                IsFlags = {isFlags.ToString().ToLower()},");
+         sb.AppendLine($"                Mapping = forwardMap_{value.EnumSymbol.Name},");
+         sb.AppendLine($"                ReverseMapping = reverseMap_{value.EnumSymbol.Name}");
+         sb.AppendLine("            };");
       }
 
-      sb.AppendLine("            };"); // End of _registry initialization
-      sb.AppendLine("        }"); // End of static constructor
+      sb.AppendLine("            _registry = tempRegistry;");
+      sb.AppendLine("        }");
+
+      sb.AppendLine();
+      sb.AppendLine("        /// <summary>");
+      sb.AppendLine("        /// Gets the serialized key for a specific enum member.");
+      sb.AppendLine("        /// </summary>");
+      sb.AppendLine("        public static string? GetKey<TEnum>(TEnum value) where TEnum : Enum");
+      sb.AppendLine("        {");
+      sb.AppendLine("            if (_registry.TryGetValue(typeof(TEnum), out var dataInfo))");
+      sb.AppendLine("                if (dataInfo.Mapping.TryGetValue(value.ToString(), out var key))");
+      sb.AppendLine("                    return key;");
+      sb.AppendLine("            return null;");
+      sb.AppendLine("        }");
+      sb.AppendLine();
+      sb.AppendLine("        /// <summary>");
+      sb.AppendLine("        /// The fastest way to parse an enum from its serialized key.");
+      sb.AppendLine("        /// </summary>");
+      sb.AppendLine("        public static bool TryParse<TEnum>(string key, out TEnum value) where TEnum : struct, Enum");
+      sb.AppendLine("        {");
+      sb.AppendLine("            value = default;");
+      sb.AppendLine("            if (_registry.TryGetValue(typeof(TEnum), out var dataInfo))");
+      sb.AppendLine("                if (dataInfo.ReverseMapping.TryGetValue(key, out var memberName))");
+      sb.AppendLine("                    return Enum.TryParse(memberName, out value);");
+      sb.AppendLine("            return false;");
+      sb.AppendLine("        }");
+
       sb.AppendLine("    }"); // End of class
       sb.AppendLine("}"); // End of namespace
 
