@@ -3,7 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.Parsing.ModifierParsing;
+using Arcanum.Core.GameObjects.Common;
+using Arcanum.Core.GlobalStates;
 using Timer = System.Timers.Timer;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -15,7 +16,7 @@ public partial class ModifierBrowser
    public ModifierBrowser()
    {
       InitializeComponent();
-      var exampleDocObj = new ModifierDefinition("example");
+      var exampleDocObj = new ModifierDefinition();
       var docObjPublicProperties = exampleDocObj.GetType().GetProperties().Where(p => p.GetGetMethod() != null);
       foreach (var property in docObjPublicProperties)
          PropertyFilterComboBox.Items.Add(property.Name);
@@ -27,11 +28,13 @@ public partial class ModifierBrowser
          Dispatcher.Invoke(() => Search(SearchTextBox.Text));
       };
    }
-   
+
    public static ModifierBrowser ShowModifierBrowser()
    {
-      var data = ParseModifiers.Load();
-      var browser = new ModifierBrowser { DocsObjDataGrid = { DataContext = new ListCollectionView(data) } };
+      var browser = new ModifierBrowser
+      {
+         DocsObjDataGrid = { DataContext = new ListCollectionView(Globals.ModifierDefinitions.Values.ToList()) }
+      };
 
       return browser;
    }
@@ -80,7 +83,7 @@ public partial class ModifierBrowser
       if (PropertyFilterComboBox.SelectedItem is not string selectedProperty)
          return null!;
 
-      var exampleDocObj = new ModifierDefinition("example");
+      var exampleDocObj = new ModifierDefinition();
       var propertyInfo = exampleDocObj.GetType().GetProperty(selectedProperty);
       if (propertyInfo == null)
          throw new InvalidOperationException($"Property '{selectedProperty}' not found on DocsObj.");
@@ -98,5 +101,4 @@ public partial class ModifierBrowser
    {
       Search(SearchTextBox.Text);
    }
-
 }
