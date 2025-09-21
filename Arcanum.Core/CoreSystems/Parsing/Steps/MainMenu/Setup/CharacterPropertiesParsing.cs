@@ -8,21 +8,15 @@ using Arcanum.Core.GameObjects.Court;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
+public class CharacterDiscovererParsing() : DiscoverThenParseLoadingService<Character>(true)
+{
+   public override string[] GroupingNodeNames => ["character_db"];
+}
+
 [ParserFor(typeof(Character))]
-public partial class CharacterPropertiesParsing : DiscoverThenParseLoadingService<Character>
+public partial class CharacterPropertiesParsing() : DiscoverThenParseLoadingService<Character>(false)
 {
    private const string GROUPING_NODE_KEY = "character_db";
-
-   protected override void DiscoverObjects(RootNode rn,
-                                           LocationContext ctx,
-                                           Eu5FileObj<Character> fileObj,
-                                           string actionStack,
-                                           string source,
-                                           ref bool validation,
-                                           object? lockObject)
-   {
-      // We do nothing as this is the properties parsing step
-   }
 
    protected override void LoadSingleFileProperties(RootNode rn,
                                                     LocationContext ctx,

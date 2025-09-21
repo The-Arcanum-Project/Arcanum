@@ -220,7 +220,7 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
    public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$ClassName$Settings;
    public INUINavigation[] Navigations =&gt; [];
    public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$AgsSettings;
-   public static IEnumerable&lt;$ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s.Values;
+   public static Dictionary&lt;string, $ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s;
 
    public static $ClassName$ Empty { get; } = new() { UniqueId = "Arcanum_Empty_$ClassName$" };
    

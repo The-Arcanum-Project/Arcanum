@@ -225,4 +225,6 @@ public partial class Language : IEu5Object<Language>
    public static Language Empty { get; } = new() { UniqueId = "Arcanum_Empty_Language" };
 
    #endregion
+
+   public override string ToString() => UniqueId;
 }

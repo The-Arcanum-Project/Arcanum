@@ -11,6 +11,7 @@ using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
@@ -130,7 +131,7 @@ public class NUISettings
                                                                      .Cast<Enum>()
                                                                      .ToArray());
 
-   public NUISetting CultureSettings { get; set; } = new(Culture.Field.Name,
+   public NUISetting CultureSettings { get; set; } = new(Culture.Field.UniqueId,
                                                          Enum.GetValues<Culture.Field>()
                                                              .Cast<Enum>()
                                                              .ToArray(),
@@ -317,4 +318,14 @@ public class NUISettings
                                                                                    Field>()
                                                                                .Cast<Enum>()
                                                                                .ToArray());
+   public NUISetting OpinionValueSettings { get; set; } = new(OpinionValue.Field.Key,
+                                                              Enum.GetValues<OpinionValue.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<OpinionValue.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<OpinionValue.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray());
 }

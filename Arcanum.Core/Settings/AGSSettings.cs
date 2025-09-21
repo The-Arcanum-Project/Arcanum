@@ -9,10 +9,12 @@ public class AGSSettings
    public AgsSettings CharacterNameDeclarationAgsSettings { get; set; } = new();
    public AgsSettings AgeAgsSettings { get; set; } = new();
    public AgsSettings VegetationAgsSettings { get; set; } = new();
+   public AgsSettings OpinionValueAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
    public AgsSettings CountryAgsSettings { get; set; } = new();
+   public AgsSettings CultureAgsSettings { get; set; } = new();
    public AgsSettings TimedModifierAgsSettings { get; set; } = new();
    public AgsSettings JominiDateSettings { get; set; } = new();
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();

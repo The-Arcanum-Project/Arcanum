@@ -77,35 +77,51 @@ public partial class ExportFileWindow : INotifyPropertyChanged
       if (!_selectedType.ImplementsGenericInterface(typeof(IEu5Object<>), out var eu5Object) || eu5Object == null)
          return;
 
-      if (!_selectedType.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out var implementedType) ||
-          implementedType == null)
-         return;
+      IDictionary allItems;
 
       var methodInfo = _selectedType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
       if (methodInfo != null)
       {
-         var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
-
-         AvailableFiles.Clear();
-         _filesDict.Clear();
-
-         foreach (var item in allItems)
+         allItems = (IDictionary)methodInfo.Invoke(null, null)!;
+      }
+      else if (_selectedType.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out var implementedType) &&
+               implementedType != null)
+      {
+         if (typeof(IEu5Object).IsAssignableFrom(_selectedType))
          {
-            if (item is not IEu5Object eu5Obj)
-               continue;
+            var emptyProperty = _selectedType.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
+            if (emptyProperty != null && emptyProperty.GetValue(null) is IEu5Object emptyInstance)
+               allItems = emptyInstance.GetGlobalItemsNonGeneric();
+            else
+               return;
+         }
+         else
+            return;
+      }
+      else
+      {
+         return;
+      }
 
-            if (!_filesDict.TryGetValue(eu5Obj.Source, out var value))
-            {
-               value = [];
-               _filesDict[eu5Obj.Source] = value;
-               AvailableFiles.Add(eu5Obj.Source);
-            }
+      AvailableFiles.Clear();
+      _filesDict.Clear();
 
-            value.Add(eu5Obj);
+      foreach (var item in allItems.Values)
+      {
+         if (item is not IEu5Object eu5Obj)
+            continue;
+
+         if (!_filesDict.TryGetValue(eu5Obj.Source, out var value))
+         {
+            value = [];
+            _filesDict[eu5Obj.Source] = value;
+            AvailableFiles.Add(eu5Obj.Source);
          }
 
-         AvailableFileObjectsListView.SelectedIndex = 0;
+         value.Add(eu5Obj);
       }
+
+      AvailableFileObjectsListView.SelectedIndex = 0;
    }
 
    private void LoadObjectsInFile()

@@ -14,6 +14,8 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GlobalStates;
@@ -791,6 +793,98 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseCountry(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Language(ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           [MaybeNullWhen(false)] out Language value,
+                                           ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Language)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!Globals.Languages.TryGetValue(lexeme, out value))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        actionName,
+                                        lexeme,
+                                        nameof(Language));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool ArcTryParse_OpinionValue(ContentNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               [MaybeNullWhen(false)] out OpinionValue value,
+                                               ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_OpinionValue)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!Globals.Cultures.TryGetValue(node.KeyNode.GetLexeme(source), out var culture))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        actionName,
+                                        node.KeyNode.GetLexeme(source),
+                                        nameof(Culture));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidEnumValue,
+                                        actionName,
+                                        lexeme,
+                                        nameof(Opinion),
+                                        Enum.GetNames(typeof(Opinion)));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new() { Key = culture, Value = opinion };
+      return true;
    }
 
    public static bool ArcTryParse_Character(ContentNode node,

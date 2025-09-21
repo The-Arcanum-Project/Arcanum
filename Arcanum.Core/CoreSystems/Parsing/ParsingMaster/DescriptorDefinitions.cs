@@ -149,13 +149,6 @@ public static class DescriptorDefinitions
                                                                  new CultureParsing(),
                                                                  false);
 
-   public static readonly FileDescriptor CultureAfterParsingDescriptor = new([CultureDescriptor, ColorParser],
-                                                                             ["game", "in_game", "common", "cultures"],
-                                                                             new("cultures", "txt", "#"),
-                                                                             new CultureAfterParsing(),
-                                                                             false,
-                                                                             uniqueId: 'B');
-
    public static readonly FileDescriptor LanguageDescriptor = new([ColorParser],
                                                                   ["game", "in_game", "common", "languages"],
                                                                   new("languages", "txt", "#"),
@@ -191,6 +184,14 @@ public static class DescriptorDefinitions
                                                                    new("regencies", "txt", "#"),
                                                                    new RegencyParsing(),
                                                                    true);
+
+   public static readonly FileDescriptor CultureAfterParsingDescriptor =
+      new([CultureDescriptor, ColorParser, LanguageDescriptor],
+          ["game", "in_game", "common", "cultures"],
+          new("cultures", "txt", "#"),
+          new CultureAfterParsing(),
+          false,
+          uniqueId: 'B');
 
    public static readonly FileDescriptor CharactersPropertyDescriptor =
       new([ColorParser, LocationDescriptor, RoadsAndCountriesDescriptor],

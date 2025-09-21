@@ -60,6 +60,7 @@ public static class Globals
    #region Court
 
    public static Dictionary<string, Language> Languages { get; set; } = [];
+   public static Dictionary<string, Language> Dialects { get; set; } = [];
    public static Dictionary<string, Regency> Regencies { get; set; } = [];
    public static Dictionary<string, Character> Characters { get; } = [];
 
