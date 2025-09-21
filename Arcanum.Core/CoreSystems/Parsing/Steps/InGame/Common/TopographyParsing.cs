@@ -12,17 +12,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 [ParserFor(typeof(Topography))]
 public partial class TopographyParsing : ParserValidationLoadingService<Topography>
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(Topography)];
-   public override string GetFileDataDebugInfo() => $"Parsed Topographies: {Globals.Topography.Count}";
-
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Topography> fileObj, object? lockObject)
-   {
-      foreach (var obj in fileObj.GetEu5Objects())
-         Globals.Topography.Remove(obj.UniqueId);
-
-      return true;
-   }
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj<Topography> fileObj,

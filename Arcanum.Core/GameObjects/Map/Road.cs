@@ -31,7 +31,7 @@ public partial class Road : IEu5Object<Road>
       new NUINavigation(EndLocation, $"End: {EndLocation.Name}"),
    ];
 
-   public static IEnumerable<Road> GetGlobalItems() => Globals.Roads;
+   public static Dictionary<string, Road> GetGlobalItems() => Globals.Roads;
    public static Road Empty { get; } = new() { StartLocation = Location.Empty, EndLocation = Location.Empty };
    public string GetNamespace => "Map.Roads";
    public string ResultName => UniqueId;

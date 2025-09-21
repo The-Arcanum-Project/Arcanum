@@ -13,29 +13,30 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<Test
          SomeInt = 7,
          SomeString = "Embedded",
          SomeDouble = 0.57721,
-      }
+      },
    ];
 
    static TestINUI()
    {
-      Globals.TestNUIObjects.Add(new()
-      {
-         Embedded = EmbeddedObjects[1],
-         TestInt = 12,
-         TestString = "First",
-         TestDouble = 1.23,
-         TestFloat = 1.23f,
-         TestBool = false,
-         TestEnum = Field.TestDouble,
-      });
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
-      Globals.TestNUIObjects.Add(new());
+      Globals.TestNUIObjects.Add("123",
+                                 new()
+                                 {
+                                    Embedded = EmbeddedObjects[1],
+                                    TestInt = 12,
+                                    TestString = "First",
+                                    TestDouble = 1.23,
+                                    TestFloat = 1.23f,
+                                    TestBool = false,
+                                    TestEnum = Field.TestDouble,
+                                 });
+      Globals.TestNUIObjects.Add("1234", new());
+      Globals.TestNUIObjects.Add("12345", new());
+      Globals.TestNUIObjects.Add("12346", new());
+      Globals.TestNUIObjects.Add("12347", new());
+      Globals.TestNUIObjects.Add("12348", new());
+      Globals.TestNUIObjects.Add("12349", new());
+      Globals.TestNUIObjects.Add("12340", new());
+      Globals.TestNUIObjects.Add("1234-", new());
    }
 
    public bool IsReadonly { get; } = false;
@@ -52,7 +53,7 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<Test
    public double TestDouble { get; set; } = 3.14;
    public bool TestBool { get; set; } = true;
    public Field TestEnum { get; set; } = Field.TestBool;
-   public static IEnumerable<TestINUI> GetGlobalItems() => Globals.TestNUIObjects;
+   public static Dictionary<string, TestINUI> GetGlobalItems() => Globals.TestNUIObjects;
    public static TestINUI Empty { get; } = new();
 }
 
@@ -67,7 +68,7 @@ public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>,
                                                 Enum.GetValues<Field>().Cast<Enum>().ToArray(),
                                                 Enum.GetValues<Field>().Cast<Enum>().ToArray());
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<EmbeddedObject> GetGlobalItems() => TestINUI.EmbeddedObjects;
+   public static Dictionary<string, EmbeddedObject> GetGlobalItems() => [];
 
    public override string ToString() => string.Empty;
    public static EmbeddedObject Empty { get; } = new();

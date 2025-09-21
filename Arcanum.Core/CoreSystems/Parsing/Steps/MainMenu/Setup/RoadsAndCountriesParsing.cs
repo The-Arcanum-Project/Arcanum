@@ -13,26 +13,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 public class RoadsAndCountriesParsing : FileLoadingService
 {
-   // private delegate void CountryAttributeParser(LocationContext ctx, string source, ContentNode cn, Country country);
-   //
-   // private static readonly Dictionary<string, CountryAttributeParser> AttributeParsers = new()
-   // {
-   //    { OldCountryKeywords.INCLUDE, ParseIncludes },
-   //    { OldCountryKeywords.CAPITAL, ParseCapital },
-   //    { OldCountryKeywords.DYNASTY, DynastyParser },
-   //    { OldCountryKeywords.COUNTRY_RANK, CountryRankParser },
-   //    { OldCountryKeywords.STARTING_TECHNOLOGY_LEVEL, StartingTechParser },
-   //    { OldCountryKeywords.COURT_LANGUAGE, CourtLanguageParser },
-   //    { OldCountryKeywords.LITURGICAL_LANGUAGE, LiturgicalLanguageParser },
-   //    { OldCountryKeywords.TYPE, CountryTypeParser },
-   //    { OldCountryKeywords.RELIGIOUS_SCHOOL, ReligiousSchoolParser },
-   //    { OldCountryKeywords.REVOLT, RevoltParser },
-   //    { OldCountryKeywords.IS_VALID_FOR_RELEASE, IsValidForReleaseParser },
-   //    { OldCountryKeywords.FLAG, DefaultParser },
-   //    { OldCountryKeywords.COUNTRY_NAME, DefaultParser },
-   //    { OldCountryKeywords.COLOR, ColorParser },
-   // };
-
    public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country)];
 
    public override string GetFileDataDebugInfo()
@@ -52,7 +32,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
       return true;
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var currentAge = string.Empty;
       var rn = Parser.Parse(fileObj, out var source);
@@ -111,11 +91,6 @@ public class RoadsAndCountriesParsing : FileLoadingService
 
       Eu5FileObj<Country> fo = new(fileObj.Path, fileObj.Descriptor);
       CountryParsing.LoadSingleFile(cn2S[0].Children, ctx, fo, GetActionName(), source, ref validation);
-      //
-      // foreach (var cNode in cNodes)
-      // {
-      //    ParseCountryFromNode(cNode, ctx, source, fo);
-      // }
    }
 
    private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source, Eu5FileObj<Road> fileObj)
@@ -141,12 +116,13 @@ public class RoadsAndCountriesParsing : FileLoadingService
          }
 
          if (create)
-            Globals.Roads.Add(new()
-            {
-               StartLocation = start,
-               EndLocation = end,
-               Source = fileObj,
-            });
+            Globals.Roads.TryAdd($"{start}-{end}",
+                                 new()
+                                 {
+                                    StartLocation = start,
+                                    EndLocation = end,
+                                    Source = fileObj,
+                                 });
       }
    }
 
@@ -168,194 +144,4 @@ public class RoadsAndCountriesParsing : FileLoadingService
                                      rootCn.KeyNode.GetLexeme(source),
                                      currentAgeKey);
    }
-   //
-   //    private static readonly ImmutableArray<string> CollectionKeys =
-   //    [
-   //       "own_control_core", "own_control_integrated", "own_control_conquered", "own_control_colony", "own_core",
-   //       "own_conquered", "own_integrated", "own_colony", "control_core", "control", "our_cores_conquered_by_others",
-   //    ];
-   //
-   //    private static void ParseCountryFromNode(BlockNode cNode,
-   //                                             LocationContext ctx,
-   //                                             string source,
-   //                                             Eu5FileObj<Country> fileObj)
-   //    {
-   //       Tag tag = new(cNode.KeyNode.GetLexeme(source));
-   //
-   //       if (!tag.Verify(ctx))
-   //          return;
-   //
-   //       Country country = new() { Tag = tag, Source = fileObj };
-   //
-   //       foreach (var sNode in cNode.Children)
-   //       {
-   //          if (sNode is BlockNode bNode)
-   //          {
-   //             ParseCollectionNodes(ctx, source, bNode, country);
-   //          }
-   //          else if (sNode is ContentNode cn)
-   //          {
-   //             var cnKey = cn.KeyNode.GetLexeme(source);
-   //             ParseCountryAttributes(ctx, source, cnKey, cn, country);
-   //          }
-   //          else
-   //          {
-   //             ctx.LineNumber = sNode.KeyNode.Line;
-   //             ctx.ColumnNumber = sNode.KeyNode.Column;
-   //             DiagnosticException.LogWarning(ctx.GetInstance(),
-   //                                            ParsingError.Instance.InvalidBlockType,
-   //                                            "Parsing Country",
-   //                                            ctx.LineNumber,
-   //                                            ctx.ColumnNumber,
-   //                                            sNode.GetType().Name,
-   //                                            "BlockNode or ContentNode");
-   //          }
-   //       }
-   //
-   //       Globals.Countries[tag] = country;
-   //    }
-   //
-   //    private static void ParseCountryAttributes(LocationContext ctx,
-   //                                               string source,
-   //                                               string cnKey,
-   //                                               ContentNode cn,
-   //                                               Country country)
-   //    {
-   //       if (AttributeParsers.TryGetValue(cnKey, out var parser))
-   //       {
-   //          parser(ctx, source, cn, country);
-   //       }
-   //       else
-   //       {
-   //          // If not found, it's an unknown keyword. 
-   // #if DEBUG
-   //          Console.WriteLine($"Unknown country property: {cnKey}");
-   // #endif
-   //          ctx.SetPosition(cn.KeyNode);
-   //          DiagnosticException.LogWarning(ctx.GetInstance(),
-   //                                         ParsingError.Instance.InvalidContentKeyOrType,
-   //                                         "Parsing Country attributes",
-   //                                         cnKey,
-   //                                         string.Join(", ", AttributeParsers.Keys));
-   //       }
-   //    }
-   //
-   //    private static void ParseCollectionNodes(LocationContext ctx, string source, BlockNode bNode, Country country)
-   //    {
-   //       var key = bNode.KeyNode.GetLexeme(source);
-   //       if (!CollectionKeys.Contains(key))
-   //       {
-   //          // We have either a government, accepted_cultures, tolerated_cultures
-   //       }
-   //       else
-   //       {
-   //          // We have any kind of the location collections
-   //          country.SetCollection(key,
-   //                                LUtil.LocationsFromStatementNodes(bNode.Children,
-   //                                                                  ctx,
-   //                                                                  "Country collection parsing",
-   //                                                                  source));
-   //       }
-   //    }
-   //
-   //    #region Strategy Pattern Parsers
-   //
-   //    private static void DefaultParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       // No default parsing action
-   //    }
-   //
-   //    private static void ParseIncludes(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       if (cn.TryGetStringContentNode(ctx, nameof(ParseCountryFromNode), source, out var include))
-   //          country.Includes.Add(include);
-   //    }
-   //
-   //    private static void ParseCapital(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       if (cn.TryParseLocationFromCn(ctx, nameof(ParseCapital), source, out var location))
-   //          country.Capital = location;
-   //    }
-   //
-   //    private static void ColorParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       var validation = true;
-   //       cn.SetColorIfValid(ctx, nameof(ColorParser), source, ref validation, country, Country.Field.Color);
-   //    }
-   //
-   //    private static void DynastyParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetIdentifierIfValid(ctx, nameof(DynastyParser), source, country, Country.Field.Dynasty);
-   //    }
-   //
-   //    private static void CountryRankParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       if (!cn.TryGetIdentifierNode(ctx, nameof(CountryRankParser), source, out var crlName))
-   //          return;
-   //
-   //       var crl = Globals.CountryRanks.FirstOrDefault(cr => cr.Name.Equals(crlName));
-   //       if (crl == null)
-   //       {
-   //          ctx.SetPosition(cn.Value);
-   //          DiagnosticException.LogWarning(ctx.GetInstance(),
-   //                                         ParsingError.Instance.InvalidCountryRankKey,
-   //                                         nameof(CountryRankParser),
-   //                                         crlName,
-   //                                         Globals.CountryRanks.Select(cr => cr.Name));
-   //          return;
-   //       }
-   //
-   //       country.CountryRank = crl;
-   //    }
-   //
-   //    private static void StartingTechParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetIntegerIfNotX(ctx, nameof(StartingTechParser), source, country, Country.Field.StartingTechLevel);
-   //    }
-   //
-   //    private static void CourtLanguageParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetIdentifierIfValid(ctx, nameof(CourtLanguageParser), source, country, Country.Field.CourtLanguage);
-   //    }
-   //
-   //    private static void LiturgicalLanguageParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetIdentifierIfValid(ctx, nameof(LiturgicalLanguageParser), source, country, Country.Field.LiturgicalLanguage);
-   //    }
-   //
-   //    private static void CountryTypeParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetEnumIfValid(ctx, nameof(CountryTypeParser), source, country, Country.Field.Type, typeof(CountryType));
-   //    }
-   //
-   //    private static void ReligiousSchoolParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       if (cn.TryGetIdentifierNode(ctx, nameof(ReligiousSchoolParser), source, out var rsName))
-   //       {
-   //          if (!Globals.ReligiousSchools.TryGetValue(rsName, out var rs))
-   //          {
-   //             ctx.SetPosition(cn.Value);
-   //             DiagnosticException.LogWarning(ctx.GetInstance(),
-   //                                            ParsingError.Instance.UnknownObjectKey,
-   //                                            nameof(ReligiousSchoolParser),
-   //                                            rsName,
-   //                                            nameof(ReligiousSchool));
-   //             return;
-   //          }
-   //
-   //          country.ReligiousSchool = rs;
-   //       }
-   //    }
-   //
-   //    private static void RevoltParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetBoolIfValid(ctx, nameof(RevoltParser), source, country, Country.Field.Revolt);
-   //    }
-   //
-   //    private static void IsValidForReleaseParser(LocationContext ctx, string source, ContentNode cn, Country country)
-   //    {
-   //       cn.SetBoolIfValid(ctx, nameof(IsValidForReleaseParser), source, country, Country.Field.IsValidForRelease);
-   //    }
-   //
-   //    #endregion
 }

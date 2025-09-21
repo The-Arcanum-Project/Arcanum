@@ -52,7 +52,7 @@ public partial class Adjacency(Location from,
       return $"{Name}: {From.Name} -> {To.Name} ({Type})";
    }
 
-   public static IEnumerable<Adjacency> GetGlobalItems() => Globals.Adjacencies;
+   public static Dictionary<string, Adjacency> GetGlobalItems() => Globals.Adjacencies;
 
    public override bool Equals(object? obj)
    {

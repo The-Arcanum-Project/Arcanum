@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
 using Arcanum.UI.NUI.Generator;
@@ -62,23 +63,31 @@ public partial class NUIObjectView
          return;
 
       if (type.ImplementsGenericInterface(typeof(ICollectionProvider<>), out var implementedType) &&
-          implementedType != null ||
-          type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out implementedType) && implementedType != null)
+          implementedType != null)
       {
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
          if (methodInfo != null)
+            NUIObjects = ((IDictionary)methodInfo.Invoke(null, null)!).Values.Cast<INUI>().ToList();
+      }
+      else if (type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out implementedType) &&
+               implementedType != null)
+      {
+         if (typeof(IEu5Object).IsAssignableFrom(type))
          {
-            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
-            NUIObjects = allItems.Cast<INUI>().ToList();
-            NUIObjects.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
-            ObjectListView.SelectedIndex = 0;
-            return;
+            var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
+            if (emptyProperty != null && emptyProperty.GetValue(null) is IEu5Object emptyInstance)
+               NUIObjects = emptyInstance.GetGlobalItemsNonGeneric().Values.Cast<INUI>().ToList();
          }
       }
+      else
+      {
+         SelectedObjectName = "No objects found";
+         NUIObjects = [];
+         ViewPresenter.Content = null;
+      }
 
-      SelectedObjectName = "No objects found";
-      NUIObjects = [];
-      ViewPresenter.Content = null;
+      NUIObjects.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
+      ObjectListView.SelectedIndex = 0;
    }
 
    private void ObjectSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)

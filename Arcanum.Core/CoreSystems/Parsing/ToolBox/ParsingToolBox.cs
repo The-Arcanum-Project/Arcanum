@@ -664,7 +664,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = Globals.CountryRanks.FirstOrDefault(cr => cr.Name.Equals(crlName));
+      Globals.CountryRanks.TryGetValue(crlName, out value);
       if (value != null)
          return true;
 
@@ -674,7 +674,7 @@ public static class ParsingToolBox
                                         ParsingError.Instance.InvalidCountryRankKey,
                                         actionName,
                                         crlName,
-                                        Globals.CountryRanks.Select(cr => cr.Name));
+                                        Globals.CountryRanks.Values.Select(cr => cr.Name));
          value = null;
          validation = false;
          return false;

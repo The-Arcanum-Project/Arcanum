@@ -135,7 +135,7 @@ public partial class Topography : IEu5Object<Topography>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TopographySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Topography Empty { get; } = new() { UniqueId = "Arcanum_Empty_Topography" };
-   public static IEnumerable<Topography> GetGlobalItems() => Globals.Topography.Values;
+   public static Dictionary<string, Topography> GetGlobalItems() => Globals.Topography;
 
    #endregion
 

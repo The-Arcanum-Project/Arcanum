@@ -220,7 +220,7 @@ public partial class Language : IEu5Object<Language>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LanguageNuiSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LanguageAgsSettings;
-   public static IEnumerable<Language> GetGlobalItems() => Globals.Languages.Values;
+   public static Dictionary<string, Language> GetGlobalItems() => Globals.Languages;
 
    public static Language Empty { get; } = new() { UniqueId = "Arcanum_Empty_Language" };
 

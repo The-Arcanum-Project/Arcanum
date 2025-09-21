@@ -232,7 +232,7 @@ public partial class Character : IEu5Object<Character>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterAgsSettings;
-   public static IEnumerable<Character> GetGlobalItems() => Globals.Characters.Values;
+   public static Dictionary<string, Character> GetGlobalItems() => Globals.Characters;
 
    private static readonly Lazy<Character> EmptyInstance = new(() =>
    {

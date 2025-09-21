@@ -77,8 +77,7 @@ public partial class ModifierGameData
    public INUINavigation[] Navigations { get; } = [];
    public static ModifierGameData Empty { get; } = new();
 
-   public static IEnumerable<ModifierGameData> GetGlobalItems()
-      => Globals.ModifierDefinitions.Values.Select(x => x.GameData);
+   public static Dictionary<string, ModifierGameData> GetGlobalItems() => [];
 
    #endregion
 

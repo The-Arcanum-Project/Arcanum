@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
-using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
@@ -20,6 +19,7 @@ using Arcanum.Core.GameObjects.Religion;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 

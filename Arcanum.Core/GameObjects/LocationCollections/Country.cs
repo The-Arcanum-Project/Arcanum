@@ -87,7 +87,8 @@ public partial class Country : IEu5Object<Country>
    [ParseAs("country_rank")]
    [DefaultValue(null)]
    [Description("The rank of this country.")]
-   public CountryRank CountryRank { get; set; } = Globals.CountryRanks.Find(x => x.Level == 1) ?? CountryRank.Empty;
+   public CountryRank CountryRank { get; set; } =
+      Globals.CountryRanks.Values.FirstOrDefault(x => x.Level == 1) ?? CountryRank.Empty;
 
    [SaveAs]
    [ParseAs("starting_technology_level")]
@@ -248,7 +249,7 @@ public partial class Country : IEu5Object<Country>
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<Country> GetGlobalItems() => Globals.Countries.Values;
+   public static Dictionary<string, Country> GetGlobalItems() => Globals.Countries;
 
    public override string ToString() => UniqueId;
    public static Country Empty { get; } = new() { UniqueId = "Arcanum_EMPTY_Country" };

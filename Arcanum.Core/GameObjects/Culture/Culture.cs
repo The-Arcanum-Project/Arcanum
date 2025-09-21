@@ -41,7 +41,7 @@ public partial class Culture(string name) : INUI, IEmpty<Culture>, ICollectionPr
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CultureSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Culture Empty { get; } = new("Arcanum_Empty_Culture");
-   public static IEnumerable<Culture> GetGlobalItems() => Globals.Cultures.Values;
+   public static Dictionary<string, Culture> GetGlobalItems() => Globals.Cultures;
 
    public override string ToString() => Name;
 }

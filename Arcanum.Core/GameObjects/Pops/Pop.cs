@@ -22,7 +22,7 @@ public partial class Pop(PopType type,
       return $"{Type.Name} ({Size})";
    }
 
-   public static IEnumerable<Pop> GetGlobalItems() => Globals.Locations.Values.SelectMany(l => l.Pops);
+   public static Dictionary<string, Pop> GetGlobalItems() => [];
 
    public override bool Equals(object? obj)
    {

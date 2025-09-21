@@ -27,7 +27,7 @@ public partial class Institution(string name) : INUI, IEmpty<Institution>, IColl
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.InstitutionSettings;
    public INUINavigation[] Navigations => [new NUINavigation(BirthPlace, "Go to Birth Place")];
    public static Institution Empty { get; } = new("Arcanum_Empty_Institution");
-   public static IEnumerable<Institution> GetGlobalItems() => Globals.Institutions.Values;
+   public static Dictionary<string, Institution> GetGlobalItems() => Globals.Institutions;
 
    public override bool Equals(object? obj) => obj is Institution other &&
                                                string.Equals(Name, other.Name, StringComparison.Ordinal);

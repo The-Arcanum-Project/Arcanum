@@ -77,7 +77,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.VegetationSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Vegetation Empty { get; } = new() { UniqueId = "Arcanum_Empty_Vegetation" };
-   public static IEnumerable<Vegetation> GetGlobalItems() => Globals.Vegetation.Values;
+   public static Dictionary<string, Vegetation> GetGlobalItems() => Globals.Vegetation;
 
    #endregion
 

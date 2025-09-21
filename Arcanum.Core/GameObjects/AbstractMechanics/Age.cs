@@ -80,7 +80,7 @@ public partial class Age : IEu5Object<Age>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.AgeSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Age Empty { get; } = new() { UniqueId = "Arcanum_Empty_Age" };
-   public static IEnumerable<Age> GetGlobalItems() => Globals.Ages;
+   public static Dictionary<string, Age> GetGlobalItems() => Globals.Ages;
 
    #endregion
 

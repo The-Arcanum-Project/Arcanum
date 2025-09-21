@@ -53,7 +53,7 @@ public partial class Location
 
    public override LocationCollectionType LCType => LocationCollectionType.Location;
 
-   public static IEnumerable<Location> GetGlobalItems() => Globals.Locations.Values;
+   public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
    public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Distinct().ToList();
    public static IMapMode GetMapMode { get; } = new BaseMapMode();

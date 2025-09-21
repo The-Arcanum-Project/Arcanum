@@ -142,7 +142,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
       get => SavingKey;
       set => _privateKey = value;
    }
-   public static IEnumerable<GovernmentState> GetGlobalItems() => [];
+   public static Dictionary<string, GovernmentState> GetGlobalItems() => [];
 
    public static GovernmentState Empty { get; } = new() { UniqueId = "Arcanum_Empty_GovernmentState" };
 

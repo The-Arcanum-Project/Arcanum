@@ -54,7 +54,7 @@ public class Eu5FileObj<T>(PathObj path, FileDescriptor descriptor)
    public IEnumerable<T> GetEu5Objects()
    {
       List<T> objects = [];
-      foreach (var obj in T.GetGlobalItems())
+      foreach (var obj in T.GetGlobalItems().Values)
          if (ReferenceEquals(obj.Source, this))
             objects.Add(obj);
 

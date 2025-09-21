@@ -167,7 +167,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     statementNodeProps);
 
          // --- ParseProperties Method ---
-         GenerateParsePropertiesMethod(targetTypeSymbol, sb, targetTypeName, ignoredBlockKeys, ignoredContentKeys);
+         GenerateParsePropertiesMethod(targetTypeSymbol,
+                                       sb,
+                                       targetTypeName,
+                                       ignoredBlockKeys,
+                                       ignoredContentKeys);
 
          // --- Wrapper Methods (partial signatures) ---
          GenerateParserMethodSignatures(properties, sb, targetTypeName);
@@ -338,7 +342,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
             GenerateShatteredEmbeddedCollectionPropertyParserMethod(sb,
                                                                     targetTypeName,
-                                                                    actionName,
                                                                     prop,
                                                                     wrapperMethodName,
                                                                     genericType,
@@ -429,9 +432,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
    {
       var outvalue = prop.IsCollection ? genericType?.Name ?? "object" : propTypeName;
 
+      sb.AppendLine("// ### Property Parser ###");
       sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
-      sb.AppendLine("// ### Property Parser ###");
       sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
       sb.AppendLine("        {");
       if (IsFlagsEnum(prop))
@@ -455,7 +458,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
    private static void GenerateShatteredEmbeddedCollectionPropertyParserMethod(StringBuilder sb,
                                                                                string targetTypeName,
-                                                                               string actionName,
                                                                                PropertyMetadata prop,
                                                                                string wrapperMethodName,
                                                                                ITypeSymbol? genericType,
@@ -909,7 +911,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
    private record PropertyMetadata
    {
       public IPropertySymbol Symbol { get; }
-      public AttributeData Attribute { get; }
       public string PropertyName => Symbol.Name;
       public ITypeSymbol PropertyType => Symbol.Type;
       public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
@@ -927,7 +928,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
       {
          Symbol = symbol;
-         Attribute = attribute;
 
          IsShatteredList = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 3, "isShatteredList");
          CustomParserMethodName =

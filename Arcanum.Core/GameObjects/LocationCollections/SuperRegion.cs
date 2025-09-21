@@ -52,7 +52,7 @@ public partial class SuperRegion
          return navigations.ToArray()!;
       }
    }
-   public static IEnumerable<SuperRegion> GetGlobalItems() => Globals.SuperRegions.Values;
+   public static Dictionary<string, SuperRegion> GetGlobalItems() => Globals.SuperRegions;
 
    public static List<SuperRegion> GetInferredList(IEnumerable<Location> sLocs) => sLocs
      .Select(loc => (SuperRegion)loc

@@ -60,7 +60,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public INUINavigation[] Navigations { get; } = [];
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TimedModifierAgsSettings;
    public string SavingKey => UniqueId;
-   public static IEnumerable<TimedModifier> GetGlobalItems() => []; // TODO parse static modifiers
+   public static Dictionary<string, TimedModifier> GetGlobalItems() => []; // TODO parse static modifiers
 
    public static TimedModifier Empty { get; } = new() { UniqueId = "Arcanum_empty_timed_modifier" };
 }

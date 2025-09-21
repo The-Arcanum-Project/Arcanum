@@ -103,7 +103,7 @@ public partial class Climate : IEu5Object<Climate>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ClimateSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Climate Empty { get; } = new() { UniqueId = "Arcanum_Empty_Climate" };
-   public static IEnumerable<Climate> GetGlobalItems() => Globals.Climates.Values;
+   public static Dictionary<string, Climate> GetGlobalItems() => Globals.Climates;
 
    #endregion
 

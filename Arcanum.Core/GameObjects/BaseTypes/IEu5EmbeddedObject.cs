@@ -16,5 +16,5 @@ namespace Arcanum.Core.GameObjects.BaseTypes;
 /// - T must have a public parameterless constructor (<c>new()</c>) <br/>
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IEu5EmbeddedObject<out T> : INUI, IAgs, ICollectionProvider<T>
+public interface IEu5EmbeddedObject<T> : INUI, IAgs, ICollectionProvider<T>
    where T : IEu5EmbeddedObject<T>, new();

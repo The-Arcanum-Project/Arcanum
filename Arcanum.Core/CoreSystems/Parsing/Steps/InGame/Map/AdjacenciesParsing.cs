@@ -16,8 +16,8 @@ public class AdjacencyFileLoading : FileLoadingService
    public override string GetFileDataDebugInfo()
    {
       return $"Loaded '{Globals.Adjacencies.Count}' adjacencies.\n" +
-             $"\tLongest: \t{Globals.Adjacencies.Max(adj => adj.GetLength())}\n" +
-             $"\tShortest: \t{Globals.Adjacencies.Min(adj => adj.GetLength())}\n";
+             $"\tLongest: \t{Globals.Adjacencies.Values.Max(adj => adj.GetLength())}\n" +
+             $"\tShortest: \t{Globals.Adjacencies.Values.Min(adj => adj.GetLength())}\n";
    }
 
    public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
@@ -123,7 +123,8 @@ public class AdjacencyFileLoading : FileLoadingService
             if (!isValid)
                continue;
 
-            Globals.Adjacencies.Add(new(from!,
+            Globals.Adjacencies.Add($"{from}-{to}",
+                                    new(from!,
                                         to!,
                                         type,
                                         parts[3],

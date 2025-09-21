@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -10,10 +9,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 public abstract class DiscoverThenParseLoadingService<T> : ParserValidationLoadingService<T>
    where T : IEu5Object<T>, new()
 {
-   public override List<Type> ParsedObjects => [typeof(T)];
-   public abstract Dictionary<string, T> GetGlobals();
-   public virtual string[] GroupingNodeNames => [];
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj<T> fileObj,
@@ -58,46 +53,6 @@ public abstract class DiscoverThenParseLoadingService<T> : ParserValidationLoadi
                                                     lockObject);
    }
 
-   private bool RemoveAllGroupingNodes(RootNode rn,
-                                       LocationContext ctx,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
-                                       out List<StatementNode> sns)
-   {
-      if (GroupingNodeNames.Length == 0)
-      {
-         sns = rn.Statements;
-         return true;
-      }
-
-      if (!SimpleObjectParser.StripGroupingNodes(rn,
-                                                 ctx,
-                                                 actionStack,
-                                                 source,
-                                                 ref validation,
-                                                 GroupingNodeNames[0],
-                                                 out sns))
-         return false;
-
-      for (var i = 1; i < GroupingNodeNames.Length; i++)
-      {
-         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, out var bn))
-            continue;
-
-         if (!SimpleObjectParser.StripGroupingNodes(bn!,
-                                                    ctx,
-                                                    actionStack,
-                                                    source,
-                                                    ref validation,
-                                                    GroupingNodeNames[i],
-                                                    out sns))
-            return false;
-      }
-
-      return true;
-   }
-
    /// <summary>
    /// Do not create new objects here, only parse the properties of the objects discovered in <see cref="DiscoverObjects"/>.
    /// </summary>
@@ -115,6 +70,4 @@ public abstract class DiscoverThenParseLoadingService<T> : ParserValidationLoadi
                                                     string source,
                                                     ref bool validation,
                                                     object? lockObject);
-
-   public override string GetFileDataDebugInfo() => $"Parsed {nameof(T)}: {GetGlobals().Count}";
 }

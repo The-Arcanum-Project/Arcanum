@@ -22,7 +22,7 @@ public partial class ReligiousSchool(string name) : INUI, ICollectionProvider<Re
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ReligiousSchoolSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<ReligiousSchool> GetGlobalItems() => Globals.ReligiousSchools.Values;
+   public static Dictionary<string, ReligiousSchool> GetGlobalItems() => Globals.ReligiousSchools;
    public static ReligiousSchool Empty { get; } = new("EmptyArcanum_ReligiousSchool");
 
    public override bool Equals(object? obj) => obj is ReligiousSchool other &&

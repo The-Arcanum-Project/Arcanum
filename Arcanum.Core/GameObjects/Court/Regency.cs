@@ -11,7 +11,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Character;
+namespace Arcanum.Core.GameObjects.Court;
 
 [ObjectSaveAs]
 public partial class Regency : IEu5Object<Regency>
@@ -50,7 +50,7 @@ public partial class Regency : IEu5Object<Regency>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RegencySettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegencyAgsSettings;
-   public static IEnumerable<Regency> GetGlobalItems() => Globals.Regencies.Values;
+   public static Dictionary<string, Regency> GetGlobalItems() => Globals.Regencies;
 
    public static Regency Empty { get; } = new() { UniqueId = "Arcanum_Empty_Regency" };
 }

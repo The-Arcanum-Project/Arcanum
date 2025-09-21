@@ -18,8 +18,7 @@ public partial class Market(Location location) : INUI, ICollectionProvider<Marke
    }
    public static Market Empty { get; } = new(Location.Empty);
 
-   public static IEnumerable<Market> GetGlobalItems()
-      => Globals.Locations.Values.Where(loc => loc.HasMarket).Select(loc => loc.Market);
+   public static Dictionary<string, Market> GetGlobalItems() => [];
 
    public override bool Equals(object? obj) => obj is Market market && Location == market.Location;
 

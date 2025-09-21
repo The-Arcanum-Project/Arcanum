@@ -12,9 +12,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 [ParserFor(typeof(ModifierDefinition))]
 public partial class ModifierParsing : ParserValidationLoadingService<ModifierDefinition>
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(ModifierDefinition)];
-   public override string GetFileDataDebugInfo() => $"Parsed Modifier Definitions: {Globals.ModifierDefinitions.Count}";
-
    protected override bool UnloadSingleFileContent(Eu5FileObj<ModifierDefinition> fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.GetEu5Objects())

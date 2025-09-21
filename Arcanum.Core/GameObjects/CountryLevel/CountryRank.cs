@@ -14,7 +14,7 @@ public partial class CountryRank(string name) : INUI, ICollectionProvider<Countr
    public bool IsReadonly { get; } = true;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CountryRankSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<CountryRank> GetGlobalItems() => Globals.CountryRanks;
+   public static Dictionary<string, CountryRank> GetGlobalItems() => Globals.CountryRanks;
 
    public override string ToString() => Name;
 

@@ -36,7 +36,7 @@ public partial class EffectDefinition(string name) : INUI, ICollectionProvider<E
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EffectDefinitionSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<EffectDefinition> GetGlobalItems() => EffectRegistry.Effects.Values;
+   public static Dictionary<string, EffectDefinition> GetGlobalItems() => EffectRegistry.Effects;
 
    public override string ToString() => Name;
 }

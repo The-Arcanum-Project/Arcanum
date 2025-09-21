@@ -23,14 +23,14 @@ namespace Arcanum.Core.GameObjects.BaseTypes;
 /// 
 /// </summary>
 /// <typeparam name="T">The type of the object itself</typeparam>
-public interface IEu5Object<out T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
+public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
    where T : IEu5Object<T>, new()
 {
    /// <summary>
    /// Provides the default implementation for the non-generic gateway method from IEu5Object.
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
-   IEnumerable IEu5Object.GetGlobalItemsNonGeneric() => T.GetGlobalItems();
+   IDictionary IEu5Object.GetGlobalItemsNonGeneric() => T.GetGlobalItems();
 }
 
 public interface IEu5Object : ISearchable, INUI, IAgs
@@ -51,5 +51,5 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// Provides the default implementation for the non-generic gateway method from IEu5Object.
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
-   public IEnumerable GetGlobalItemsNonGeneric();
+   public IDictionary GetGlobalItemsNonGeneric();
 }

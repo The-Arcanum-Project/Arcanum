@@ -52,7 +52,7 @@ public partial class Province
          return navigations.ToArray()!;
       }
    }
-   public static IEnumerable<Province> GetGlobalItems() => Globals.Provinces.Values;
+   public static Dictionary<string, Province> GetGlobalItems() => Globals.Provinces;
 
    public static List<Province> GetInferredList(IEnumerable<Location> sLocs) => sLocs
      .Select(loc => (Province)loc.GetFirstParentOfType(LocationCollectionType.Province))

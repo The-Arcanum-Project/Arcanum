@@ -39,7 +39,7 @@ public partial class PopType(string name,
       return false;
    }
 
-   public static IEnumerable<PopType> GetGlobalItems() => Pop.GetGlobalItems().Select(p => p.Type).Distinct();
+   public static Dictionary<string, PopType> GetGlobalItems() => [];
 
    public override bool Equals(object? obj)
    {

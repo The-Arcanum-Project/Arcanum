@@ -10,6 +10,25 @@ public static class Helpers
    public const string IGNORE_MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.IgnoreModifiableAttribute";
    public const string MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.AddModifiableAttribute";
 
+   public static bool InheritsFrom(this INamedTypeSymbol classSymbol, INamedTypeSymbol baseTypeSymbol)
+   {
+      var currentBaseType = classSymbol.BaseType;
+
+      while (currentBaseType != null)
+      {
+         var symbolToCompare = currentBaseType.IsGenericType
+                                  ? currentBaseType.OriginalDefinition
+                                  : currentBaseType;
+
+         if (SymbolEqualityComparer.Default.Equals(symbolToCompare, baseTypeSymbol))
+            return true;
+
+         currentBaseType = currentBaseType.BaseType;
+      }
+
+      return false;
+   }
+
    /// <summary>
    /// Formats an object from an attribute argument into its C# source code literal representation.
    /// </summary>

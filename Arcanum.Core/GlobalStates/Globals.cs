@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.GameObjects.AbstractMechanics;
-using Arcanum.Core.GameObjects.Character;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
@@ -12,6 +11,7 @@ using Arcanum.Core.GlobalStates.BackingClasses;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
+using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
@@ -33,8 +33,8 @@ public static class Globals
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static Dictionary<string, PopType> PopTypes { get; } = [];
    public static Dictionary<string, LocationRank> LocationRanks { get; } = [];
-   public static List<CountryRank> CountryRanks { get; } = [];
-   public static List<Road> Roads { get; set; } = [];
+   public static Dictionary<string, CountryRank> CountryRanks { get; } = [];
+   public static Dictionary<string, Road> Roads { get; set; } = [];
 
    public static Dictionary<string, Country> Countries { get; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
@@ -53,7 +53,7 @@ public static class Globals
    public static Dictionary<string, Region> Regions { get; } = [];
    public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
    public static Dictionary<string, Continent> Continents { get; } = [];
-   public static List<Adjacency> Adjacencies { get; } = [];
+   public static Dictionary<string, Adjacency> Adjacencies { get; } = [];
 
    #endregion
 
@@ -71,8 +71,8 @@ public static class Globals
 
    #endregion
 
-   public static List<Age> Ages { get; set; } = [];
+   public static Dictionary<string, Age> Ages { get; set; } = [];
 #if DEBUG
-   public static List<TestINUI> TestNUIObjects { get; } = [];
+   public static Dictionary<string, TestINUI> TestNUIObjects { get; } = [];
 #endif
 }

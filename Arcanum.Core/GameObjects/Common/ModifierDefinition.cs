@@ -147,7 +147,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public string SavingKey => UniqueId;
    public INUINavigation[] Navigations { get; } = [];
    public static ModifierDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_ModifierDefinition" };
-   public static IEnumerable<ModifierDefinition> GetGlobalItems() => Globals.ModifierDefinitions.Values;
+   public static Dictionary<string, ModifierDefinition> GetGlobalItems() => Globals.ModifierDefinitions;
 
    #endregion
 

@@ -51,7 +51,7 @@ public partial class Area
          return navigations.ToArray()!;
       }
    }
-   public static IEnumerable<Area> GetGlobalItems() => Globals.Areas.Values;
+   public static Dictionary<string, Area> GetGlobalItems() => Globals.Areas;
 
    public static List<Area> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                            .Select(loc => (Area)

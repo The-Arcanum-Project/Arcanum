@@ -12,17 +12,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 [ParserFor(typeof(Language))]
 public partial class LanguageParsing : ParserValidationLoadingService<Language>
 {
-   public override List<Type> ParsedObjects => [typeof(Language)];
-
-   public override string GetFileDataDebugInfo() => $"Parsed Languages: {Globals.Languages.Count}";
-
-   protected override bool UnloadSingleFileContent(Eu5FileObj<Language> fileObj, object? lockObject)
-   {
-      foreach (var obj in fileObj.GetEu5Objects())
-         Globals.Languages.Remove(obj.UniqueId);
-      return true;
-   }
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj<Language> fileObj,

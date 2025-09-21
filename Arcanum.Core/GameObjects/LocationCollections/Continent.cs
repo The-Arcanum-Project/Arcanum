@@ -39,7 +39,7 @@ public partial class Continent
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static IEnumerable<Continent> GetGlobalItems() => Globals.Continents.Values;
+   public static Dictionary<string, Continent> GetGlobalItems() => Globals.Continents;
 
    public static List<Continent> GetInferredList(IEnumerable<Location> sLocs) => sLocs
      .Select(loc => (Continent)loc
