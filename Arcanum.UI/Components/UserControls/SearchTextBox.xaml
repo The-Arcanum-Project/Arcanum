@@ -20,8 +20,8 @@
 
     <Border Padding = "5, 0,0,0"
             CornerRadius = "0"
-            Background = "{StaticResource DefaultBackColorBrush}"
-            BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+            Background = "{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            BorderBrush = "{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
             BorderThickness = "0"
             Margin = "1">
         <DockPanel LastChildFill = "True">
@@ -71,7 +71,8 @@
                          MinWidth = "100"
                          Foreground = "{StaticResource DefaultForeColorBrush}"
                          CaretBrush = "{StaticResource DefaultForeColorBrush}"
-                         TextChanged = "SearchInputTextBox_OnTextChanged" />
+                         TextChanged = "SearchInputTextBox_OnTextChanged"
+                         />
 
 
             </Grid>

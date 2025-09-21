@@ -45,6 +45,21 @@ public static class NativeMethods
    [DllImport("user32.dll")]
    public static extern uint GetDoubleClickTime();
    
+   public static Rect GetCurrentMonitorRect(Window window)
+   {
+      var hwnd = new WindowInteropHelper(window).Handle;
+      var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+
+      var monitorInfo = new MonitorInfoEx();
+      if (GetMonitorInfo(new(null, monitor), monitorInfo))
+      {
+         return monitorInfo.rcMonitor;
+      }
+
+
+      return new ();
+   }
+   
    public static MinMaxInfo GetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
    {
       var mmi = (MinMaxInfo)(Marshal.PtrToStructure(lParam, typeof(MinMaxInfo)) ?? throw new InvalidOperationException());
