@@ -30,4 +30,13 @@ public partial class LanguageParsing : ParserValidationLoadingService<Language>
                                Globals.Languages,
                                lockObject);
    }
+
+   public override bool AfterLoadingStep(FileDescriptor descriptor)
+   {
+      foreach (var lang in GetGlobals().Values)
+         foreach (var dialect in lang.Dialects)
+            if (!Globals.Languages.TryGetValue(dialect.UniqueId, out _))
+               Globals.Dialects.Add(dialect.UniqueId, dialect);
+      return true;
+   }
 }

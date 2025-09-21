@@ -224,6 +224,8 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 
    public static $ClassName$ Empty { get; } = new() { UniqueId = "Arcanum_Empty_$ClassName$" };
    
+   public override string ToString() =&gt; UniqueId;
+   
 #endregion
 }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>

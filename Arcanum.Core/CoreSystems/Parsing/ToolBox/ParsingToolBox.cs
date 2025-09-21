@@ -815,7 +815,7 @@ public static class ParsingToolBox
       }
 
       var lexeme = lvn.Value.GetLexeme(source);
-      if (!Globals.Languages.TryGetValue(lexeme, out value))
+      if (!Globals.Languages.TryGetValue(lexeme, out value) && !Globals.Dialects.TryGetValue(lexeme, out value))
       {
          ctx.SetPosition(lvn.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),

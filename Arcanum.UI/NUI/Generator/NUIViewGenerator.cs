@@ -1313,14 +1313,21 @@ public static class NUIViewGenerator
             continue;
          }
 
-         contextMenu.Items.Add(new MenuItem
+         var newItem = new MenuItem
          {
             FontSize = 12,
             FontWeight = FontWeights.Normal,
             Foreground = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
             Header = navigation.ToolStripString,
-            Command = new ActionCommand(() => { GenerateAndSetView(new(navigation.Target, true, root)); }),
-         });
+            IsEnabled = navigation.IsEnabled,
+         };
+
+         if (navigation.Target != null)
+            newItem.Command = new ActionCommand(() => { GenerateAndSetView(new(navigation.Target, true, root)); });
+         else
+            newItem.IsEnabled = false;
+
+         contextMenu.Items.Add(newItem);
       }
 
       return contextMenu;

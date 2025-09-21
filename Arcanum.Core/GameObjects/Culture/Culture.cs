@@ -130,11 +130,13 @@ public partial class Culture : IEu5Object<Culture>
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;
-   public INUINavigation[] Navigations => [];
+   public INUINavigation[] Navigations => [new NUINavigation(Language == Language.Empty ? null : Language, "Language")];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureAgsSettings;
    public static Dictionary<string, Culture> GetGlobalItems() => Globals.Cultures;
 
    public static Culture Empty { get; } = new() { UniqueId = "Arcanum_Empty_Culture" };
 
    #endregion
+
+   public override string ToString() => UniqueId;
 }

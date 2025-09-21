@@ -1,7 +1,8 @@
 ﻿namespace Arcanum.Core.CoreSystems.NUI;
 
-public class NUINavigation(INUI target, string toolStripString) : INUINavigation
+public class NUINavigation(INUI? target, string toolStripString) : INUINavigation
 {
-   public INUI Target { get; } = target;
+   public INUI? Target { get; } = target;
    public string ToolStripString { get; } = toolStripString;
+   public bool IsEnabled { get; set; } = true;
 }

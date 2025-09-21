@@ -30,5 +30,5 @@ public interface INUI : INexus, INotifyPropertyChanged
    /// An optional list of elements that can be navigated to from this MainItems RMB
    /// </summary>
    [IgnoreModifiable]
-   public INUINavigation[] Navigations { get; }
+   public INUINavigation?[] Navigations { get; }
 }

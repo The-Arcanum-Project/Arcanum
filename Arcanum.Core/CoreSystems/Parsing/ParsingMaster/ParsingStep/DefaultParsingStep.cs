@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 
 public class DefaultParsingStep
 {
@@ -120,31 +120,9 @@ public class DefaultParsingStep
             CancellationTokenSource cts = new();
             var cancellationToken = cts.Token;
 
-            Parallel.For(0,
-                         files.Count,
-                         new() { MaxDegreeOfParallelism = maxThreads, CancellationToken = cancellationToken },
-                         i =>
-                         {
-                            var file = files[i];
-                            var startTime = _stopwatch.Elapsed;
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                               Volatile.Write(ref _isSuccessful, false);
-                               return;
-                            }
+            ProcessFileInParallel(files, maxThreads, cancellationToken, ParallelLoadWithErrorHandling, cts);
 
-                            var ex =
-                               Descriptor.LoadingService.LoadWithErrorHandling(file,
-                                                                               Descriptor,
-                                                                               lockObject: _lock);
-
-                            if (ex is { IsCritical: true })
-                               cts.Cancel();
-
-                            var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
-                            var weight = StepWeights![i];
-                            ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
-                         });
+            ProcessFileInParallel(files, maxThreads, cancellationToken, ParallelAfterLoadingStepErrorHandling, cts);
          }
          catch (OperationCanceledException)
          {
@@ -173,12 +151,68 @@ public class DefaultParsingStep
             _doneSteps++;
          }
 
+         foreach (var file in Descriptor.Files)
+            if (Descriptor.LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, null) is
+                {
+                   IsCritical: true
+                })
+               return false;
+
          swInner.Stop();
          Debug.WriteLine($"Single-threaded parsing step {Name} took {swInner.Elapsed.TotalMilliseconds:#####.0} ms to complete.");
       }
 
+      if (!Descriptor.LoadingService.AfterLoadingStep(Descriptor))
+         IsSuccessful = false;
+
       FinalizeExecutionContext();
       return IsSuccessful;
+   }
+
+   private void ProcessFileInParallel(List<FileObj> files,
+                                      int maxThreads,
+                                      CancellationToken cancellationToken,
+                                      Func<FileObj, ReloadFileException?> func,
+                                      CancellationTokenSource cts)
+   {
+      Parallel.For(0,
+                   files.Count,
+                   new() { MaxDegreeOfParallelism = maxThreads, CancellationToken = cancellationToken },
+                   i => { ParallelProcessFileStep(files, i, func, cts, cancellationToken); });
+   }
+
+   private void ParallelProcessFileStep(List<FileObj> files,
+                                        int i,
+                                        Func<FileObj, ReloadFileException?> handle,
+                                        CancellationTokenSource cts,
+                                        CancellationToken cancellationToken)
+   {
+      var file = files[i];
+      var startTime = _stopwatch.Elapsed;
+      if (cancellationToken.IsCancellationRequested)
+      {
+         Volatile.Write(ref _isSuccessful, false);
+         return;
+      }
+
+      var ex = handle(file);
+
+      if (ex is { IsCritical: true })
+         cts.Cancel();
+
+      var stepIndex = Interlocked.Increment(ref _doneSteps) - 1;
+      var weight = StepWeights![i];
+      ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
+   }
+
+   private ReloadFileException? ParallelLoadWithErrorHandling(FileObj file)
+   {
+      return Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor, lockObject: _lock);
+   }
+
+   private ReloadFileException? ParallelAfterLoadingStepErrorHandling(FileObj file)
+   {
+      return Descriptor.LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, lockObject: _lock);
    }
 
    protected void FinalizeExecutionContext()
@@ -190,7 +224,7 @@ public class DefaultParsingStep
    protected void SetupExecutionContext()
    {
       IsSuccessful = true;
-      if (!ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
+      if (!Parsing.ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
          throw
             new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
 
@@ -249,7 +283,7 @@ public class DefaultParsingStep
 
    protected virtual List<double> GetFileWeights()
    {
-      return ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
+      return Parsing.ParsingMaster.ParsingMaster.GetStepWeightsByFileSize(Descriptor);
    }
 
    public double SubPercentageCompleted { get; private set; }

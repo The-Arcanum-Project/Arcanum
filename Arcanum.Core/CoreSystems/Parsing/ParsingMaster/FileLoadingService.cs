@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingStep;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -86,13 +86,53 @@ public abstract class FileLoadingService
       return null;
    }
 
+   public ReloadFileException? LoadAfterStepWithErrorHandling(FileObj fileObj,
+                                                              FileDescriptor descriptor,
+                                                              object? lockObject)
+   {
+      var isReloading = false;
+      var repeatLoading = true;
+      while (repeatLoading)
+         try
+         {
+            if (isReloading)
+               LoadSingleFile(fileObj, descriptor, lockObject);
+            SingleFileAfterLoadingStep(fileObj, descriptor, lockObject);
+            repeatLoading = false;
+         }
+         catch (ReloadFileException ex)
+         {
+            if (ex.IsCritical)
+               return ex;
+
+            isReloading = true;
+            UnloadSingleFileContent(fileObj, descriptor, lockObject);
+         }
+
+      return null;
+   }
+
+   /// <summary>
+   /// This step is called once all files of this step have been loaded.
+   /// </summary>
+   public virtual bool SingleFileAfterLoadingStep(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   {
+      return true;
+   }
+
+   /// <summary>
+   /// This step is executed after the <see cref="SingleFileAfterLoadingStep"/> and is only executed once per file descriptor.
+   /// This is useful for example to resolve references between objects that are parsed in different files.
+   /// </summary>
+   public virtual bool AfterLoadingStep(FileDescriptor descriptor)
+   {
+      return true;
+   }
+
    /// <summary>
    /// Loads a single file.
    /// Has to be thread-safe and should not be called directly but always by a manager that handles the performance measurement.
    /// </summary>
-   /// <param name="fileObj"></param>
-   /// <param name="descriptor"></param>
-   /// <param name="lockObject"></param>
    /// <returns></returns>
    public abstract bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
@@ -104,5 +144,5 @@ public abstract class FileLoadingService
       LoadSingleFileWithMetrics(fileObj, descriptor);
    }
 
-   public virtual bool IsFullyParsed { get; } = true;
+   public virtual bool IsFullyParsed => true;
 }
