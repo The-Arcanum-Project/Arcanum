@@ -1,7 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 
@@ -17,7 +15,7 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
 
    public override string GetFileDataDebugInfo() => $"Parsed Climates: {GetGlobals().Count}";
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var rn = Parser.Parse(fileObj, out var source, out var ctx);
       var validation = true;
@@ -27,27 +25,27 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
       return validation;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       return UnloadSingleFileContent(new(fileObj.Path, fileObj.Descriptor), lockObject);
    }
 
-   protected virtual bool UnloadSingleFileContent(Eu5FileObj<T> fileObj, object? lockObject)
+   protected virtual bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
-      var globals = T.GetGlobalItems();
+      var globals = GetGlobals();
       if (lockObject != null)
          lock (lockObject)
-            foreach (var obj in fileObj.GetEu5Objects())
+            foreach (var obj in fileObj.ObjectsInFile)
                globals.Remove(obj.UniqueId);
       else
-         foreach (var obj in fileObj.GetEu5Objects())
+         foreach (var obj in fileObj.ObjectsInFile)
             globals.Remove(obj.UniqueId);
       return true;
    }
 
    protected abstract void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<T> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

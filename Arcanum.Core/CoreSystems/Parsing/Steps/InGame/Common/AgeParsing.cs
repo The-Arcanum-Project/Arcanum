@@ -14,7 +14,7 @@ public partial class AgeParsing : ParserValidationLoadingService<Age>
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<Age> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

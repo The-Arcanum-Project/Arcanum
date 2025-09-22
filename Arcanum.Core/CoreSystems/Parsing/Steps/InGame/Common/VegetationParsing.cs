@@ -14,7 +14,7 @@ public partial class VegetationParsing : ParserValidationLoadingService<Vegetati
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<Vegetation> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

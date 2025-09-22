@@ -21,7 +21,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
 #pragma warning restore AGS004
 
    [SaveAs]

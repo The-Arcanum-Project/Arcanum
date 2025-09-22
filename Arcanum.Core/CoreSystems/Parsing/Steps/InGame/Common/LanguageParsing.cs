@@ -14,7 +14,7 @@ public partial class LanguageParsing : ParserValidationLoadingService<Language>
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<Language> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

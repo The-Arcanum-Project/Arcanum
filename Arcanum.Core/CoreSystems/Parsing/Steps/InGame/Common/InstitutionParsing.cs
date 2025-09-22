@@ -15,7 +15,7 @@ public class InstitutionParsing : FileLoadingService
    public override List<Type> ParsedObjects { get; } = [typeof(Institution)];
    public override string GetFileDataDebugInfo() => $"Parsed Institutions: {Globals.Institutions.Count}";
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       const string ageKey = "age";
       const string actionName = $"{nameof(InstitutionParsing)}.DiscoverObjects";
@@ -65,7 +65,7 @@ public class InstitutionParsing : FileLoadingService
 
    public override bool IsFullyParsed => false;
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Institutions.Clear();
       return true;

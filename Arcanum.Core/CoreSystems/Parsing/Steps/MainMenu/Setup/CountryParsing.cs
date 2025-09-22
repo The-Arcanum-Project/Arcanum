@@ -14,7 +14,7 @@ public partial class CountryParsing
 {
    protected internal static void LoadSingleFile(List<StatementNode> sns,
                                                  LocationContext ctx,
-                                                 Eu5FileObj<Country> fileObj,
+                                                 Eu5FileObj fileObj,
                                                  string actionStack,
                                                  string source,
                                                  ref bool validation)

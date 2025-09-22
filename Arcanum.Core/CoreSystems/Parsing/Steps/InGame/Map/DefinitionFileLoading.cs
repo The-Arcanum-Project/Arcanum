@@ -29,7 +29,7 @@ public class DefinitionFileLoading : FileLoadingService
              $"\t\tProvinces: {Globals.Provinces.Count}";
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var (blocks, content) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
@@ -261,7 +261,7 @@ public class DefinitionFileLoading : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Areas.Clear();
       Globals.Continents.Clear();

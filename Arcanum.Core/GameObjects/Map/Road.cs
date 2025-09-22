@@ -52,5 +52,5 @@ public partial class Road : IEu5Object<Road>
       get => $"{StartLocation.Name}_{EndLocation.Name}";
       set => throw new NotSupportedException();
    }
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
 }

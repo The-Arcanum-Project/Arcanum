@@ -26,7 +26,7 @@ public class DefaultMapParsing : FileLoadingService
              $"\tNumber of ImpassableMountains:  {Globals.DefaultMapDefinition.ImpassableMountains.Count}";
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var (blocks, _) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
@@ -82,7 +82,7 @@ public class DefaultMapParsing : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.DefaultMapDefinition.NotOwnable = [];
       Globals.DefaultMapDefinition.SeaZones = [];

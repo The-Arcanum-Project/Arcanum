@@ -21,7 +21,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
              $"Roads: {Globals.Roads.Count} entries";
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       // TODO: @MelCo only remove the ones from the file being unloaded
       // This can only be done once we have the working Saveable system
@@ -32,7 +32,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
       return true;
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var currentAge = string.Empty;
       var rn = Parser.Parse(fileObj, out var source);
@@ -79,7 +79,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
    private void ValidateAndParseCountries(BlockNode rootBn,
                                           LocationContext ctx,
                                           string source,
-                                          FileObj fileObj,
+                                          Eu5FileObj fileObj,
                                           ref bool validation)
    {
       if (!Parser.EnforceNodeCountOfType(rootBn.Children,
@@ -89,11 +89,11 @@ public class RoadsAndCountriesParsing : FileLoadingService
                                          out List<BlockNode> cn2S))
          return;
 
-      Eu5FileObj<Country> fo = new(fileObj.Path, fileObj.Descriptor);
+      Eu5FileObj fo = new(fileObj.Path, fileObj.Descriptor);
       CountryParsing.LoadSingleFile(cn2S[0].Children, ctx, fo, GetActionName(), source, ref validation);
    }
 
-   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source, Eu5FileObj<Road> fileObj)
+   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source, Eu5FileObj fileObj)
    {
       foreach (var rdNode in rootBn.Children)
       {

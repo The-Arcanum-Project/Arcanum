@@ -61,7 +61,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
       get => CharacterId;
       set => CharacterId = value;
    }
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
    public static Dictionary<string, RulerTerm> GetGlobalItems() => [];
 
    public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };

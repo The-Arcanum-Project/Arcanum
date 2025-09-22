@@ -16,7 +16,7 @@ public partial class CultureAfterParsing() : DiscoverThenParseLoadingService<Cul
 {
    protected override void LoadSingleFileProperties(RootNode rn,
                                                     LocationContext ctx,
-                                                    Eu5FileObj<Culture> fileObj,
+                                                    Eu5FileObj fileObj,
                                                     string actionStack,
                                                     string source,
                                                     ref bool validation,

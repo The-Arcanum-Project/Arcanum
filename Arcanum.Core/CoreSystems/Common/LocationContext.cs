@@ -40,5 +40,5 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
       ColumnNumber = column;
    }
 
-   public static LocationContext GetNew(FileObj fileObj) => new(0, 0, fileObj.Path.FullPath);
+   public static LocationContext GetNew(Eu5FileObj fileObj) => new(0, 0, fileObj.Path.FullPath);
 }

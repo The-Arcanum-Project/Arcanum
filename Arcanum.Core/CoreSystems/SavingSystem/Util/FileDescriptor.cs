@@ -19,7 +19,7 @@ public class FileDescriptor : IDependencyNode<string>, IEmpty<FileDescriptor>
    /// </summary>
    public readonly char UniqueId;
 
-   public List<FileObj> Files { get; }
+   public List<Eu5FileObj> Files { get; }
 
    public FileDescriptor(FileDescriptor[] dependencies,
                          string[] localPath,

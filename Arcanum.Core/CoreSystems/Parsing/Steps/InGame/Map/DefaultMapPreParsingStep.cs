@@ -32,7 +32,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
              $"\tEquatorY:\t\t{Globals.DefaultMapDefinition.EquatorY}\n";
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var (_, elements) = ElementParser.GetElements(fileObj.Path);
       var dmd = new DefaultMapDefinition();
@@ -124,7 +124,7 @@ public class DefaultMapPreParsingStep : FileLoadingService
       Globals.DefaultMapDefinition = dmd;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.DefaultMapDefinition.Adjacencies = string.Empty;
       Globals.DefaultMapDefinition.HeightMap = string.Empty;

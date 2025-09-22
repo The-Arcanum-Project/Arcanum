@@ -267,5 +267,5 @@ public partial class Country : IEu5Object<Country>
       => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.CountryAgsSettings;
    public string SavingKey => UniqueId;
-   public FileObj Source { get; set; } = FileObj.Empty;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
 }

@@ -29,7 +29,7 @@ public class PopsParsing : FileLoadingService
              string.Join("\n", popTypes.Select(x => $"\t{x.Key.Name,-15} ({x.Key.ColorKey,-15}): {x.Value,-5}"));
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var sw = Stopwatch.StartNew();
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
@@ -110,7 +110,7 @@ public class PopsParsing : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       foreach (var location in Globals.Locations)
          location.Value.Pops.Clear();

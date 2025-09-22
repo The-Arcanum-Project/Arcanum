@@ -14,7 +14,7 @@ public partial class RegencyParsing : ParserValidationLoadingService<Regency>
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<Regency> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

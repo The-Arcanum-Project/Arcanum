@@ -20,7 +20,7 @@ public class AdjacencyFileLoading : FileLoadingService
              $"\tShortest: \t{Globals.Adjacencies.Values.Min(adj => adj.GetLength())}\n";
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var sr))
       {
@@ -141,7 +141,7 @@ public class AdjacencyFileLoading : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Adjacencies.Clear();
       Globals.Adjacencies.TrimExcess();

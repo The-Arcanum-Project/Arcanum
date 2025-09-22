@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
-using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -97,11 +96,11 @@ public static class FileManager
       var modMetadata = ExistingModsLoader.ParseModMetadata(descriptor.ModPath.FullPath);
       if (modMetadata == null)
       {
-         #if !DEBUG
+#if !DEBUG
          UIHandle.Instance.PopUpHandle
                  .ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
                            "Mod Metadata Loaded");
-         #endif
+#endif
          return;
       }
 
@@ -228,7 +227,7 @@ public static class FileManager
       return VanillaDataSpace;
    }
 
-   public static FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)
+   public static Eu5FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)
    {
       // TODO: @Melco @Minnator
       // How do we handle the Dependencies?
@@ -238,15 +237,15 @@ public static class FileManager
       {
          // We have a mod file, so we return the mod file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new DefaultFileObject(new(descriptor.LocalPath, fileName, ModDataSpace), descriptor);
+         return new(new(descriptor.LocalPath, fileName, ModDataSpace), descriptor);
       }
 
       if (ExistsInVanilla(descriptor.LocalPath, fileName != null))
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new DefaultFileObject(new(descriptor.LocalPath, fileName, VanillaDataSpace),
-                                      descriptor);
+         return new(new(descriptor.LocalPath, fileName, VanillaDataSpace),
+                    descriptor);
       }
 
       throw new
@@ -259,11 +258,11 @@ public static class FileManager
    /// <param name="descriptor"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentException"></exception>
-   public static List<FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
+   public static List<Eu5FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
    {
-      List<FileObj> fileInfos = [];
+      List<Eu5FileObj> fileInfos = [];
       foreach (var po in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
-         fileInfos.Add(new DefaultFileObject(po, descriptor));
+         fileInfos.Add(new(po, descriptor));
 
       return fileInfos;
    }

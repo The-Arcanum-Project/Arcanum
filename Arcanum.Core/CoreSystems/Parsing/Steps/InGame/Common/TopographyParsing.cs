@@ -14,7 +14,7 @@ public partial class TopographyParsing : ParserValidationLoadingService<Topograp
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<Topography> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

@@ -169,10 +169,10 @@ public class DefaultParsingStep
       return IsSuccessful;
    }
 
-   private void ProcessFileInParallel(List<FileObj> files,
+   private void ProcessFileInParallel(List<Eu5FileObj> files,
                                       int maxThreads,
                                       CancellationToken cancellationToken,
-                                      Func<FileObj, ReloadFileException?> func,
+                                      Func<Eu5FileObj, ReloadFileException?> func,
                                       CancellationTokenSource cts)
    {
       Parallel.For(0,
@@ -181,9 +181,9 @@ public class DefaultParsingStep
                    i => { ParallelProcessFileStep(files, i, func, cts, cancellationToken); });
    }
 
-   private void ParallelProcessFileStep(List<FileObj> files,
+   private void ParallelProcessFileStep(List<Eu5FileObj> files,
                                         int i,
-                                        Func<FileObj, ReloadFileException?> handle,
+                                        Func<Eu5FileObj, ReloadFileException?> handle,
                                         CancellationTokenSource cts,
                                         CancellationToken cancellationToken)
    {
@@ -205,12 +205,12 @@ public class DefaultParsingStep
       ReportSubStepCompletion(_stopwatch.Elapsed - startTime, weight, stepIndex);
    }
 
-   private ReloadFileException? ParallelLoadWithErrorHandling(FileObj file)
+   private ReloadFileException? ParallelLoadWithErrorHandling(Eu5FileObj file)
    {
       return Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor, lockObject: _lock);
    }
 
-   private ReloadFileException? ParallelAfterLoadingStepErrorHandling(FileObj file)
+   private ReloadFileException? ParallelAfterLoadingStepErrorHandling(Eu5FileObj file)
    {
       return Descriptor.LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, lockObject: _lock);
    }

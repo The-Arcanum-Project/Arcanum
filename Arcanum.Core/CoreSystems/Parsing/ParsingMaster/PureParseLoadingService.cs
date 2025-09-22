@@ -9,7 +9,7 @@ public abstract class PureParseLoadingService : FileLoadingService
    private const string ACTION_STACK = nameof(PureParseLoadingService);
    public virtual string[] GroupingNodeNames => [];
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var rn = Parser.Parse(fileObj, out var source, out var ctx);
       var validation = true;
@@ -21,7 +21,7 @@ public abstract class PureParseLoadingService : FileLoadingService
 
    protected abstract void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          FileObj fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

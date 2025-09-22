@@ -16,7 +16,7 @@ public partial class LocationRankParsing : ParserValidationLoadingService<Locati
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<LocationRank> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

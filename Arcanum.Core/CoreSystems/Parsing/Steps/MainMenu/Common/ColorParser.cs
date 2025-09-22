@@ -13,7 +13,7 @@ public class ColorParser : FileLoadingService
    public override List<Type> ParsedObjects { get; } = [typeof(JominiColor)];
    public override string GetFileDataDebugInfo() => $"Parsed Colors: {ColorResolver.Instance.ColorMap.Count}";
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       const string colorKey = "colors";
       const string actionStack = nameof(ColorParser);
@@ -64,7 +64,7 @@ public class ColorParser : FileLoadingService
       return validation;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       return true;
    }

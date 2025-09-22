@@ -102,5 +102,5 @@ public partial class Vegetation : IEu5Object<Vegetation>
    public string SavingKey => UniqueId;
 
    [SuppressAgs]
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
 }

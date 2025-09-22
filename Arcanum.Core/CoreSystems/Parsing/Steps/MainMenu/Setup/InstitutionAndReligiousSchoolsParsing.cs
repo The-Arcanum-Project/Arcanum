@@ -18,7 +18,7 @@ public class InstitutionStateReligiousSchoolStateParsing : PureParseLoadingServi
    public override List<Type> ParsedObjects => [typeof(InstitutionManager), typeof(ReligiousSchoolRelations)];
    public override string GetFileDataDebugInfo() => "Parsed InstitutionState and ReligiousSchoolState";
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.State.InstitutionManager = new();
       Globals.State.ReligiousSchoolRelations = new();
@@ -27,7 +27,7 @@ public class InstitutionStateReligiousSchoolStateParsing : PureParseLoadingServi
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          FileObj fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,
@@ -55,7 +55,7 @@ public abstract partial class InstitutionStateManager : ParserValidationLoadingS
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,
-                                        FileObj fileObj,
+                                        Eu5FileObj fileObj,
                                         string source,
                                         string actionStack,
                                         ref bool validation)
@@ -75,7 +75,7 @@ public abstract partial class InstitutionStateManager : ParserValidationLoadingS
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<InstitutionManager> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,
@@ -93,7 +93,7 @@ public partial class ReligiousSchoolRelationsParsing
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,
-                                        FileObj fileObj,
+                                        Eu5FileObj fileObj,
                                         string source,
                                         string actionStack,
                                         ref bool validation)
@@ -111,7 +111,7 @@ public partial class ReligiousSchoolRelationsParsing
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<ReligiousSchoolRelations> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,

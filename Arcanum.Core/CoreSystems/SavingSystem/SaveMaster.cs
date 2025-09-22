@@ -4,7 +4,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem;
 
 public static class SaveMaster
 {
-   private static List<FileObj> NeedsToBeSaved { get; } = [];
+   private static List<Eu5FileObj> NeedsToBeSaved { get; } = [];
    private static Dictionary<SaveableType, List<ISaveable>> NewSaveables { get; } = [];
    private static readonly Dictionary<SaveableType, int> ModificationCache;
 
@@ -28,7 +28,6 @@ public static class SaveMaster
 
    public static void HandleNewSaveables()
    {
-      
    }
 
    public static void SaveAll(bool onlyModified = true)
@@ -38,8 +37,6 @@ public static class SaveMaster
 
    public static void Save(List<SaveableType> saveableTypes, bool onlyModified = true)
    {
-
-      
       /*
        How to handle Dependencies
 
@@ -58,8 +55,7 @@ public static class SaveMaster
       */
    }
 
-   public static void RegisterFile(FileObj fileObj)
+   public static void RegisterFile(Eu5FileObj fileObj)
    {
-
    }
 }

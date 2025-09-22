@@ -15,14 +15,14 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class ExportFileWindow : INotifyPropertyChanged
 {
-   public ObservableCollection<FileObj> AvailableFiles { get; } = [];
+   public ObservableCollection<Eu5FileObj> AvailableFiles { get; } = [];
    public ObservableCollection<string> ObjectsInFile { get; } = [];
    public ObservableCollection<Type> AvailableTypes { get; }
 
-   private FileObj? _selectedFile;
+   private Eu5FileObj? _selectedFile;
    private Type? _selectedType;
 
-   private readonly Dictionary<FileObj, List<IEu5Object>> _filesDict = [];
+   private readonly Dictionary<Eu5FileObj, List<IEu5Object>> _filesDict = [];
    private string _previewText = string.Empty;
 
    public string PreviewText
@@ -61,7 +61,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
    private void OnFileSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
    {
-      if (e.AddedItems.Count > 0 && e.AddedItems[0] is FileObj file)
+      if (e.AddedItems.Count > 0 && e.AddedItems[0] is Eu5FileObj file)
       {
          _selectedFile = file;
          LoadObjectsInFile();

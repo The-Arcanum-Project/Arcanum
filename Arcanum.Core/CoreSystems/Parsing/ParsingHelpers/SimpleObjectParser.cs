@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -15,7 +13,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class SimpleObjectParser
 {
-   public static void Parse<TTarget>(FileObj fileObj,
+   public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      List<StatementNode> statements,
                                      LocationContext ctx,
                                      string actionStack,
@@ -72,7 +70,7 @@ public static class SimpleObjectParser
       }
    }
 
-   public static void Parse<TTarget>(FileObj fileObj,
+   public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      RootNode rn,
                                      LocationContext ctx,
                                      string actionStack,
@@ -95,7 +93,7 @@ public static class SimpleObjectParser
             allowUnknownBlocks);
    }
 
-   public static bool Parse<TTarget>(FileObj fileObj,
+   public static bool Parse<TTarget>(Eu5FileObj fileObj,
                                      StatementNode sn,
                                      LocationContext ctx,
                                      string actionStack,
@@ -120,7 +118,7 @@ public static class SimpleObjectParser
       return true;
    }
 
-   private static bool ValidateAndCreateInstance<TTarget>(FileObj fileObj,
+   private static bool ValidateAndCreateInstance<TTarget>(Eu5FileObj fileObj,
                                                           LocationContext ctx,
                                                           string actionStack,
                                                           string source,
@@ -146,7 +144,7 @@ public static class SimpleObjectParser
    /// </summary>
    public static void DiscoverObjectDeclarations<TTarget>(List<StatementNode> statements,
                                                           LocationContext ctx,
-                                                          Eu5FileObj<TTarget> fileObj,
+                                                          Eu5FileObj fileObj,
                                                           string actionStack,
                                                           string source,
                                                           ref bool validation,

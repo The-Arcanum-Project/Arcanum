@@ -20,7 +20,7 @@ public partial class CharacterPropertiesParsing() : DiscoverThenParseLoadingServ
 
    protected override void LoadSingleFileProperties(RootNode rn,
                                                     LocationContext ctx,
-                                                    Eu5FileObj<Character> fileObj,
+                                                    Eu5FileObj fileObj,
                                                     string actionStack,
                                                     string source,
                                                     ref bool validation,

@@ -40,7 +40,7 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    public string UniqueId { get; set; }
 
    [SuppressAgs]
-   public FileObj Source { get; set; }
+   public Eu5FileObj Source { get; set; }
 
    string ISearchable.ResultName => UniqueId;
    List<string> ISearchable.SearchTerms => [UniqueId];

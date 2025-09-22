@@ -19,14 +19,14 @@ public class PopTypeParsing : FileLoadingService
       return $"PopTypes: {Globals.PopTypes.Count} entries";
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.PopTypes.Clear();
       Globals.PopTypes.TrimExcess();
       return true;
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);

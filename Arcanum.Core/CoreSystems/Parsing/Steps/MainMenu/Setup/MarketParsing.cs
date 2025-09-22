@@ -18,7 +18,7 @@ public class MarketParsing : FileLoadingService
       return $"Loaded '{Globals.Locations.Values.Count(x => x.HasMarket)}' markets";
    }
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
    {
       var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
@@ -111,7 +111,7 @@ public class MarketParsing : FileLoadingService
       return flawless;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       foreach (var location in Globals.Locations.Values)
          location.Market = Market.Empty;

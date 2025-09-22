@@ -17,7 +17,7 @@ public class CountryRankLoading : FileLoadingService
 
    public override string GetFileDataDebugInfo() => $"Country Ranks Loaded: {Globals.CountryRanks.Count}";
 
-   public override bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       var rns = Parser.Parse(fileObj, out var source);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
@@ -59,7 +59,7 @@ public class CountryRankLoading : FileLoadingService
       return true;
    }
 
-   public override bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.CountryRanks.Clear();
       return true;

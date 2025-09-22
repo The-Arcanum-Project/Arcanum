@@ -11,9 +11,9 @@ public class Parser(LexerResult lexerResult)
    private readonly string _source = lexerResult.Source;
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private int _current;
-   private static FileObj _fileObj = null!;
+   private static Eu5FileObj _fileObj = null!;
 
-   public static RootNode Parse(FileObj fileObj, out string source, out LocationContext ctx)
+   public static RootNode Parse(Eu5FileObj fileObj, out string source, out LocationContext ctx)
    {
       _fileObj = fileObj;
       ctx = LocationContext.GetNew(fileObj);
@@ -22,7 +22,7 @@ public class Parser(LexerResult lexerResult)
       return rn;
    }
 
-   public static RootNode Parse(FileObj fileObj, out string source)
+   public static RootNode Parse(Eu5FileObj fileObj, out string source)
    {
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
       if (string.IsNullOrWhiteSpace(source))

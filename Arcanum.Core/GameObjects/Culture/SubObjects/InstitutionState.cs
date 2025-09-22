@@ -39,7 +39,7 @@ public partial class InstitutionState : IEu5Object<InstitutionState>
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
 #pragma warning restore AGS004
 
    #region IEu5Object

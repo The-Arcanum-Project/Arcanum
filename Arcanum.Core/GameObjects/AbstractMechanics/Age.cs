@@ -100,7 +100,7 @@ public partial class Age : IEu5Object<Age>
 
    #endregion
 
-   public FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = null!;
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
    public string SavingKey => UniqueId;

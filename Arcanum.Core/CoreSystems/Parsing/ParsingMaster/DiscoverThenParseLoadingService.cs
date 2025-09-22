@@ -13,7 +13,7 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase) 
 
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<T> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,
@@ -31,7 +31,7 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase) 
    /// </summary>
    protected virtual void DiscoverObjects(RootNode rn,
                                           LocationContext ctx,
-                                          Eu5FileObj<T> fileObj,
+                                          Eu5FileObj fileObj,
                                           string actionStack,
                                           string source,
                                           ref bool validation,
@@ -61,7 +61,7 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase) 
    /// </summary>
    protected virtual void LoadSingleFileProperties(RootNode rn,
                                                    LocationContext ctx,
-                                                   Eu5FileObj<T> fileObj,
+                                                   Eu5FileObj fileObj,
                                                    string actionStack,
                                                    string source,
                                                    ref bool validation,

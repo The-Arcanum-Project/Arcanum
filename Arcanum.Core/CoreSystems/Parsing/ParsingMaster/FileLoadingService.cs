@@ -55,7 +55,7 @@ public abstract class FileLoadingService
    /// <param name="fileObj"></param>
    /// <param name="descriptor"></param>
    /// <returns></returns>
-   public virtual void LoadSingleFileWithMetrics(FileObj fileObj, FileDescriptor descriptor)
+   public virtual void LoadSingleFileWithMetrics(Eu5FileObj fileObj, FileDescriptor descriptor)
    {
       _stopwatch.Restart();
 
@@ -64,7 +64,7 @@ public abstract class FileLoadingService
       _stopwatch.Stop();
    }
 
-   public ReloadFileException? LoadWithErrorHandling(FileObj fileObj,
+   public ReloadFileException? LoadWithErrorHandling(Eu5FileObj fileObj,
                                                      FileDescriptor descriptor,
                                                      object? lockObject)
    {
@@ -86,7 +86,7 @@ public abstract class FileLoadingService
       return null;
    }
 
-   public ReloadFileException? LoadAfterStepWithErrorHandling(FileObj fileObj,
+   public ReloadFileException? LoadAfterStepWithErrorHandling(Eu5FileObj fileObj,
                                                               FileDescriptor descriptor,
                                                               object? lockObject)
    {
@@ -115,7 +115,7 @@ public abstract class FileLoadingService
    /// <summary>
    /// This step is called once all files of this step have been loaded.
    /// </summary>
-   public virtual bool SingleFileAfterLoadingStep(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public virtual bool SingleFileAfterLoadingStep(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       return true;
    }
@@ -134,11 +134,11 @@ public abstract class FileLoadingService
    /// Has to be thread-safe and should not be called directly but always by a manager that handles the performance measurement.
    /// </summary>
    /// <returns></returns>
-   public abstract bool LoadSingleFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject);
+   public abstract bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
-   public abstract bool UnloadSingleFileContent(FileObj fileObj, FileDescriptor descriptor, object? lockObject);
+   public abstract bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
-   public virtual void ReloadFile(FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public virtual void ReloadFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       UnloadSingleFileContent(fileObj, descriptor, lockObject);
       LoadSingleFileWithMetrics(fileObj, descriptor);
