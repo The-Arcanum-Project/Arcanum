@@ -11,7 +11,9 @@ using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GlobalStates;
 using Nexus.Core;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
@@ -692,5 +694,33 @@ public static class CnHelpers
                                                            value,
                                                            ref validationResult,
                                                            out currencyData);
+   }
+
+   public static bool TryParseAge(this ContentNode node,
+                                  LocationContext ctx,
+                                  string actionName,
+                                  string source,
+                                  ref bool validationResult,
+                                  [MaybeNullWhen(false)] out Age value)
+   {
+      value = null;
+
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult))
+      {
+         validationResult = false;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validationResult, out var lvn))
+      {
+         validationResult = false;
+         return false;
+      }
+
+      if (lvn.TryParseAge(ctx, actionName, source, ref validationResult, out value))
+         return true;
+
+      validationResult = false;
+      return false;
    }
 }

@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 
@@ -72,6 +73,30 @@ public static class LUtil
                                                       out value,
                                                       out _))
          return false;
+
+      return true;
+   }
+
+   public static bool TryGetFromGlobalsAndLog<T>(
+      LocationContext ctx,
+      Token token,
+      string source,
+      string actionStack,
+      ref bool validationResult,
+      Dictionary<string, T> globals,
+      [MaybeNullWhen(false)] out T value) where T : IEu5Object
+   {
+      if (!globals.TryGetValue(token.GetLexeme(source), out value))
+      {
+         ctx.SetPosition(token);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        $"{actionStack}.TryGetFromGlobals",
+                                        token.GetLexeme(source),
+                                        typeof(T).Name);
+         validationResult = false;
+         return false;
+      }
 
       return true;
    }

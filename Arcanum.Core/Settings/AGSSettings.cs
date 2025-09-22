@@ -21,7 +21,9 @@ public class AGSSettings
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
    public AgsSettings RulerTermAgsSettings { get; set; } = new();
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();
+   public AgsSettings InstitutionAgsSettings { get; set; } = new();
    public AgsSettings RegnalNumberAgsSettings { get; set; } = new();
+   public AgsSettings CountryRankAgsSettings { get; set; } = new();
    public AgsSettings ParliamentDefinitionAgsSettings { get; set; } = new();
    public AgsSettings ReligiousSchoolRelationsAgsSettings { get; set; } = new();
    public AgsSettings RegencyAgsSettings { get; set; } = new();

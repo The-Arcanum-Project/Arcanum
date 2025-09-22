@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
@@ -547,6 +548,16 @@ public static class ParsingToolBox
       return false;
    }
 
+   public static bool ArcTryParse_Age(ContentNode node,
+                                      LocationContext ctx,
+                                      string actionName,
+                                      string source,
+                                      [MaybeNullWhen(false)] out Age value,
+                                      ref bool validation)
+   {
+      return node.TryParseAge(ctx, source, actionName, ref validation, out value);
+   }
+
    public static bool ArcTryParse_Province(KeyOnlyNode node,
                                            LocationContext ctx,
                                            string actionName,
@@ -677,7 +688,7 @@ public static class ParsingToolBox
                                         ParsingError.Instance.InvalidCountryRankKey,
                                         actionName,
                                         crlName,
-                                        Globals.CountryRanks.Values.Select(cr => cr.Name));
+                                        Globals.CountryRanks.Keys);
          value = null;
          validation = false;
          return false;

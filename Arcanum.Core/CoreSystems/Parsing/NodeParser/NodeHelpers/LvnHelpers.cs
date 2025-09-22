@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -62,14 +63,6 @@ public static class LvnHelpers
    /// Gets the enum value from the LiteralValueNode. <br/>
    /// Logs a warning if the value could not be parsed to the enum type.
    /// </summary>
-   /// <param name="lvn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="enumType"></param>
-   /// <param name="validationResult"></param>
-   /// <param name="enumValue"></param>
-   /// <returns></returns>
    public static bool GetEnum(this LiteralValueNode lvn,
                               LocationContext ctx,
                               string actionName,
@@ -96,40 +89,9 @@ public static class LvnHelpers
    }
 
    /// <summary>
-   /// Sets the enum property on the target NUI if the value could be parsed from the LiteralValueNode. <br/>
-   /// Logs a warning if the value could not be parsed to the enum type.
-   /// </summary>
-   /// <param name="lvn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="validationResult"></param>
-   /// <param name="target"></param>
-   /// <param name="nxProp"></param>
-   public static void SetEnumIfValid(this LiteralValueNode lvn,
-                                     LocationContext ctx,
-                                     string actionName,
-                                     string source,
-                                     ref bool validationResult,
-                                     INUI target,
-                                     Enum nxProp)
-   {
-      if (lvn.GetEnum(ctx, actionName, source, nxProp.GetType(), ref validationResult, out var enumObj))
-         Nx.ForceSet(enumObj, target, nxProp);
-   }
-
-   /// <summary>
    /// Tries to parse a byte from the LiteralValueNode. <br/>
    /// Logs a warning if the value could not be parsed to a byte.
    /// </summary>
-   /// <param name="lvn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="validationResult"></param>
-   /// <param name="value"></param>
-   /// <param name="complainOnError"></param>
-   /// <returns></returns>
    public static bool TryParseByte(this LiteralValueNode lvn,
                                    LocationContext ctx,
                                    string actionName,
@@ -242,21 +204,13 @@ public static class LvnHelpers
                                       ref bool validationResult,
                                       [MaybeNullWhen(false)] out Country country)
    {
-      var lexeme = lvn.Value.GetLexeme(source);
-      if (!Globals.Countries.TryGetValue(lexeme, out country))
-      {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidObjectKey,
-                                        actionName,
-                                        lexeme,
-                                        typeof(Country));
-         country = null;
-         validationResult = false;
-         return false;
-      }
-
-      return true;
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Countries,
+                                           out country);
    }
 
    public static bool TryParseCharacter(this LiteralValueNode lvn,
@@ -287,5 +241,21 @@ public static class LvnHelpers
       }
 
       return true;
+   }
+
+   public static bool TryParseAge(this LiteralValueNode lvn,
+                                  LocationContext ctx,
+                                  string actionName,
+                                  string source,
+                                  ref bool validationResult,
+                                  [MaybeNullWhen(false)] out Age value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Ages,
+                                           out value);
    }
 }

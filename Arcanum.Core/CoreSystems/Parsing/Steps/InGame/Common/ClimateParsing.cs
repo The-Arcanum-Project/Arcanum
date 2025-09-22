@@ -12,16 +12,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 [ParserFor(typeof(Climate))]
 public partial class ClimateParsing : ParserValidationLoadingService<Climate>
 {
-   public override bool IsFullyParsed => false;
-
-   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
-   {
-      foreach (var obj in fileObj.ObjectsInFile)
-         Globals.Climates.Remove(obj.UniqueId);
-
-      return true;
-   }
-
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,

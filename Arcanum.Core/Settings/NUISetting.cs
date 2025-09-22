@@ -100,7 +100,7 @@ public class NUISettings
                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Country.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting CountryRankSettings { get; set; } = new(CountryRank.Field.Name,
+   public NUISetting CountryRankSettings { get; set; } = new(CountryRank.Field.UniqueId,
                                                              Enum.GetValues<CountryRank.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray(),
@@ -111,7 +111,7 @@ public class NUISettings
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 
-   public NUISetting InstitutionSettings { get; set; } = new(Institution.Field.Name,
+   public NUISetting InstitutionSettings { get; set; } = new(Institution.Field.UniqueId,
                                                              Enum.GetValues<Institution.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray(),
