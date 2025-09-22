@@ -4,12 +4,11 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
+namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
 
 public static class SimpleObjectParser
 {
@@ -135,6 +134,7 @@ public static class SimpleObjectParser
       }
 
       eu5Obj = new() { UniqueId = bn.KeyNode.GetLexeme(source), Source = fileObj };
+      fileObj.ObjectsInFile.Add(eu5Obj);
       return true;
    }
 
@@ -160,6 +160,7 @@ public static class SimpleObjectParser
          var instance = (TTarget)Activator.CreateInstance(typeof(TTarget))!;
          instance.UniqueId = key;
          instance.Source = fileObj;
+         fileObj.ObjectsInFile.Add(instance);
 
          Debug.Assert(instance.Source != null, "instance.Source != null");
 
