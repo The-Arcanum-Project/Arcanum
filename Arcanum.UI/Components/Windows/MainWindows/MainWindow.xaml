@@ -5,6 +5,7 @@
                          xmlns:mainWindow = "clr-namespace:Arcanum.UI.Components.Views.MainWindow"
                          xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
+                         xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -415,8 +416,12 @@
 
         </GridSplitter>
 
-        <Image Grid.Column = "4"
-               Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapInteractionFiller.png" />
+        <!-- <Image Grid.Column = "4" -->
+        <!--        Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapInteractionFiller.png" /> -->
+        <debugPanel:DebugPanelGrid Grid.Column = "4"
+                                   x:Name = "DebugPanel"
+                                   VerticalAlignment = "Stretch"
+                                   HorizontalAlignment = "Stretch" />
     </Grid>
 
 

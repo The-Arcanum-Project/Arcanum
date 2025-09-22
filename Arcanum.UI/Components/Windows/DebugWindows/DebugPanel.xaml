@@ -10,48 +10,6 @@
                          Width = "800"
                          WindowStartupLocation = "CenterScreen">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "1*" />
-            <ColumnDefinition Width = "4*" />
-        </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row = "0"
-                    Grid.Column = "0"
-                    Margin = "4"
-                    Orientation = "Vertical">
-            <styleClasses:BaseButton Content = "Browse Provinces"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "BrowseProvincesButton_Click" />
-
-            <styleClasses:BaseButton Content = "FindNullMarkets"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "FindNullMarketsButton_Click" />
-
-            <styleClasses:BaseButton Content = "Null location in Market"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "FindNullLocationInMarketButton_Click" />
-
-            <styleClasses:BaseButton Content = "Saving Window"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "OpenSavingWindowButton_Click" />
-
-            <styleClasses:BaseButton Content = "Saving Exporter Window"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "OpenSavingWindowExporterButton_Click" />
-
-            <styleClasses:BaseButton Content = "Open File Exporter"
-                                     Margin = "2"
-                                     Padding = "4"
-                                     Click = "OpenTestWindowButton_Click" />
-        </StackPanel>
-
-        <ContentPresenter Grid.Column = "1"
-                          x:Name = "DebugView">
-        </ContentPresenter>
     </Grid>
 </styleClasses:BaseWindow>
