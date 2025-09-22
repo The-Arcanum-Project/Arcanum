@@ -22,7 +22,17 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
     public string Filename { get; } = filename;
     public readonly DataSpace DataSpace = dataSpace;
     
+    public void AddSearchTerms(ICollection<string> terms)
+    {
+        foreach (var term in LocalPath)
+            terms.Add(term);
+        terms.Add(Filename);
+        terms.Add(FilenameWithoutExtension);
+    }
     
+    public string FilenameWithoutExtension => Path.GetFileNameWithoutExtension(Filename);
+    
+    public string RelativePath => Path.Combine(Path.Combine(LocalPath), Filename);
     /// <summary>
     /// The full path as a string, combining the root position, local path, and filename.
     /// </summary>

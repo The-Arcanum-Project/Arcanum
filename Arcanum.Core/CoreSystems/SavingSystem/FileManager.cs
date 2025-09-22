@@ -97,9 +97,11 @@ public static class FileManager
       var modMetadata = ExistingModsLoader.ParseModMetadata(descriptor.ModPath.FullPath);
       if (modMetadata == null)
       {
+         #if !DEBUG
          UIHandle.Instance.PopUpHandle
                  .ShowMBox($"Failed to load mod metadata for {modMetadata?.Name} (ID: {modMetadata?.Id}).\nSome functionality may depend on this metadata and thus be broken or not available",
                            "Mod Metadata Loaded");
+         #endif
          return;
       }
 

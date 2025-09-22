@@ -16,6 +16,18 @@ public interface IQueastor
    /// <param name="item"></param>
    public void AddToIndex(ISearchable item);
    /// <summary>
+   /// Adds the item to the search index with the given term.
+   /// </summary>
+   /// <param name="item"></param>
+   /// <param name="term"></param>
+   public void AddToIndex(ISearchable item, string term);
+   /// <summary>
+   /// Removes the item from the search index with the given term.
+   /// </summary>
+   /// <param name="item"></param>
+   /// <param name="term"></param>
+   public void RemoveFromIndex(ISearchable item, string term);
+   /// <summary>
    /// Remove the item from the search index.
    /// </summary>
    /// <param name="item"></param>

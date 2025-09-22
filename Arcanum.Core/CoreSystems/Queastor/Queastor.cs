@@ -34,6 +34,23 @@ public class Queastor : IQueastor
       foreach (var term in item.SearchTerms)
          InternalAddToIndex(item, term);
    }
+   
+   public void AddToIndex(ISearchable item, string term)
+   {
+      InternalAddToIndex(item, term);
+   }
+   
+   public void RemoveFromIndex(ISearchable item, string term)
+   {
+      var lowerTerm = term.ToLowerInvariant();
+      if (_invertedIndex.TryGetValue(lowerTerm, out var list))
+      {
+         list.Remove(item);
+         SearchIndexSize--;
+         if (list.Count == 0)
+            _invertedIndex.Remove(lowerTerm);
+      }
+   }
 
    private void InternalAddToIndex(ISearchable item, string term)
    {
@@ -54,14 +71,7 @@ public class Queastor : IQueastor
    {
       foreach (var term in item.SearchTerms)
       {
-         var lowerTerm = term.ToLowerInvariant();
-         if (_invertedIndex.TryGetValue(lowerTerm, out var list))
-         {
-            list.Remove(item);
-            SearchIndexSize--;
-            if (list.Count == 0)
-               _invertedIndex.Remove(lowerTerm);
-         }
+         RemoveFromIndex(item, term);
       }
    }
 

@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.BaseTypes;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -8,7 +9,7 @@ public abstract class FileObj(PathObj path, FileDescriptor descriptor) : IEmpty<
 
    public PathObj Path { get; } = path;
 
-   public abstract IEnumerable<ISaveable> GetSaveables();
+   public abstract IEnumerable<IEu5Object> GetSaveables();
    public static FileObj Empty { get; } = new DefaultFileObject(PathObj.Empty, FileDescriptor.Empty);
 
    public override string ToString() => $"{Descriptor} @ {Path}";
@@ -33,7 +34,7 @@ public abstract class FileObj(PathObj path, FileDescriptor descriptor) : IEmpty<
 public class DefaultFileObject(PathObj path, FileDescriptor descriptor) : FileObj(path,
     descriptor)
 {
-   public override IEnumerable<ISaveable> GetSaveables()
+   public override IEnumerable<IEu5Object> GetSaveables()
    {
       return [];
    }
@@ -42,11 +43,11 @@ public class DefaultFileObject(PathObj path, FileDescriptor descriptor) : FileOb
 public class Eu5FileObj<T>(PathObj path, FileDescriptor descriptor)
    : FileObj(path, descriptor) where T : IEu5Object<T>, new()
 {
-   public override IEnumerable<ISaveable> GetSaveables()
+   public override IEnumerable<IEu5Object> GetSaveables()
    {
-      return [];
+      return GetEu5Objects().Cast<IEu5Object>();
    }
-
+   
    /// <summary>
    /// Returns all EU5 objects that originate from this file.
    /// </summary>
@@ -68,8 +69,8 @@ public class FileObj<T>(PathObj path, FileDescriptor descriptor)
 {
    public readonly List<T> Saveables = [];
 
-   public override IEnumerable<ISaveable> GetSaveables()
+   public override IEnumerable<IEu5Object> GetSaveables()
    {
-      return Saveables.Cast<ISaveable>();
+      return Saveables.Cast<IEu5Object>();
    }
 }
