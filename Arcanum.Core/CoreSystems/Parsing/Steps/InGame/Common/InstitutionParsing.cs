@@ -39,7 +39,7 @@ public class InstitutionParsing : FileLoadingService
                                            actionName,
                                            key,
                                            nameof(ReligiousSchool),
-                                           ReligiousSchool.Field.Name);
+                                           ReligiousSchool.Field.UniqueId);
             validation = false;
             continue;
          }

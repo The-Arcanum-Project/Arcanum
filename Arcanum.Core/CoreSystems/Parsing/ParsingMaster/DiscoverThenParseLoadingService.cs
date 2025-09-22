@@ -37,7 +37,13 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase) 
                                           ref bool validation,
                                           object? lockObject)
    {
-      if (!RemoveAllGroupingNodes(rn, ctx, actionStack, source, ref validation, out var sns))
+      if (!ParsingMaster.RemoveAllGroupingNodes(rn,
+                                                ctx,
+                                                actionStack,
+                                                source,
+                                                ref validation,
+                                                GroupingNodeNames,
+                                                out var sns))
          return;
 
       SimpleObjectParser.DiscoverObjectDeclarations(sns,

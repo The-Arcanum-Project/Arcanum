@@ -66,7 +66,7 @@ public partial class Culture : IEu5Object<Culture>
    [DefaultValue(null)]
    [ParseAs("opinions", itemNodeType: AstNodeType.ContentNode)]
    [Description("Opinions towards other cultures.")]
-   public ObservableRangeCollection<OpinionValue> Opinions { get; set; } = [];
+   public ObservableRangeCollection<CultureOpinionValue> Opinions { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]

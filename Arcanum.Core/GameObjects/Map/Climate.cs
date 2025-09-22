@@ -79,19 +79,19 @@ public partial class Climate : IEu5Object<Climate>
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("unit_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [ParseAs("unit_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("The unit modifier applied to units in provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> UnitModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("location_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [ParseAs("location_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("The location modifier applied to provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("audio_tags", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [ParseAs("audio_tags", itemNodeType: AstNodeType.ContentNode)]
    [Description("The audio tags associated with this climate.")]
    public ObservableRangeCollection<AudioTag> AudioTags { get; set; } = [];
 

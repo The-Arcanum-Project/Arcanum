@@ -34,7 +34,7 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
 
    protected virtual bool UnloadSingleFileContent(Eu5FileObj<T> fileObj, object? lockObject)
    {
-      var globals = (Dictionary<string, T>)T.GetGlobalItems();
+      var globals = T.GetGlobalItems();
       if (lockObject != null)
          lock (lockObject)
             foreach (var obj in fileObj.GetEu5Objects())
@@ -52,44 +52,4 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
                                           string source,
                                           ref bool validation,
                                           object? lockObject);
-
-   protected bool RemoveAllGroupingNodes(RootNode rn,
-                                         LocationContext ctx,
-                                         string actionStack,
-                                         string source,
-                                         ref bool validation,
-                                         out List<StatementNode> sns)
-   {
-      if (GroupingNodeNames.Length == 0)
-      {
-         sns = rn.Statements;
-         return true;
-      }
-
-      if (!SimpleObjectParser.StripGroupingNodes(rn,
-                                                 ctx,
-                                                 actionStack,
-                                                 source,
-                                                 ref validation,
-                                                 GroupingNodeNames[0],
-                                                 out sns))
-         return false;
-
-      for (var i = 1; i < GroupingNodeNames.Length; i++)
-      {
-         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, out var bn))
-            continue;
-
-         if (!SimpleObjectParser.StripGroupingNodes(bn!,
-                                                    ctx,
-                                                    actionStack,
-                                                    source,
-                                                    ref validation,
-                                                    GroupingNodeNames[i],
-                                                    out sns))
-            return false;
-      }
-
-      return true;
-   }
 }

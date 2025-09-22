@@ -125,10 +125,9 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor InstitutionsAndReligiousSchools =
       new([LocationDescriptor, ReligiousSchoolsDescriptor, InstitutionsDescriptor],
-          ["game", "main_menu", "setup", "start", "02_core.txt",],
+          ["game", "main_menu", "setup", "start", "02_core.txt"],
           new("02_core", "txt", "#"),
-          new
-             InstitutionAndReligiousSchoolsParsing(),
+          new InstitutionStateReligiousSchoolStateParsing(),
           false,
           false);
 

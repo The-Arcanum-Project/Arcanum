@@ -14,9 +14,11 @@ using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.MainMenu.States;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
+using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
@@ -120,7 +122,7 @@ public class NUISettings
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 
-   public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.Name,
+   public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.UniqueId,
                                                                  Enum.GetValues<ReligiousSchool.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray(),
@@ -318,14 +320,64 @@ public class NUISettings
                                                                                    Field>()
                                                                                .Cast<Enum>()
                                                                                .ToArray());
-   public NUISetting OpinionValueSettings { get; set; } = new(OpinionValue.Field.Key,
-                                                              Enum.GetValues<OpinionValue.Field>()
+   public NUISetting OpinionValueSettings { get; set; } = new(CultureOpinionValue.Field.Key,
+                                                              Enum.GetValues<CultureOpinionValue.Field>()
                                                                   .Cast<Enum>()
                                                                   .ToArray(),
-                                                              Enum.GetValues<OpinionValue.Field>()
+                                                              Enum.GetValues<CultureOpinionValue.Field>()
                                                                   .Cast<Enum>()
                                                                   .ToArray(),
-                                                              Enum.GetValues<OpinionValue.Field>()
+                                                              Enum.GetValues<CultureOpinionValue.Field>()
                                                                   .Cast<Enum>()
                                                                   .ToArray());
+
+   public NUISetting InstitutionStateSettings { get; set; } = new(InstitutionState.Field.UniqueId,
+                                                                  Enum.GetValues<InstitutionState.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<InstitutionState.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<InstitutionState.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray());
+
+   public NUISetting InstitutionManagerSettings { get; set; } = new(InstitutionManager.Field.UniqueId,
+                                                                    Enum.GetValues<InstitutionManager.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<InstitutionManager.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<InstitutionManager.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray());
+
+   public NUISetting ReligiousSchoolOpinionValueSettings { get; set; } = new(ReligiousSchoolOpinionValue.Field.Key,
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
+                                                                                   Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray());
+
+   public NUISetting ReligiousSchoolRelationsSettings { get; set; } = new(ReligiousSchoolRelations.Field.UniqueId,
+                                                                          Enum.GetValues<ReligiousSchoolRelations.
+                                                                                  Field>()
+                                                                              .Cast<Enum>()
+                                                                              .ToArray(),
+                                                                          Enum.GetValues<ReligiousSchoolRelations.
+                                                                                  Field>()
+                                                                              .Cast<Enum>()
+                                                                              .ToArray(),
+                                                                          Enum.GetValues<ReligiousSchoolRelations.
+                                                                                  Field>()
+                                                                              .Cast<Enum>()
+                                                                              .ToArray());
 }

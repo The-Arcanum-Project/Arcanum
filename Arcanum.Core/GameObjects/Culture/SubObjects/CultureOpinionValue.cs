@@ -9,7 +9,7 @@ namespace Arcanum.Core.GameObjects.Culture.SubObjects;
 
 [ObjectSaveAs(savingMethod: "SaveIAgsEnumKvp")]
 #pragma warning disable ARC002
-public partial class OpinionValue : IEmpty<OpinionValue>, IIagsEnumKvp<Culture, Opinion>
+public partial class CultureOpinionValue : IEmpty<CultureOpinionValue>, IIagsEnumKvp<Culture, Opinion>
 #pragma warning restore ARC002
 {
    [SuppressAgs]
@@ -29,13 +29,13 @@ public partial class OpinionValue : IEmpty<OpinionValue>, IIagsEnumKvp<Culture, 
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.OpinionValueAgsSettings;
    public string SavingKey => string.Empty;
-   public static OpinionValue Empty { get; } = new() { Key = Culture.Empty, Value = Opinion.Neutral };
+   public static CultureOpinionValue Empty { get; } = new() { Key = Culture.Empty, Value = Opinion.Neutral };
 
    #endregion
 
    #region Equality Members
 
-   protected bool Equals(OpinionValue other) => Key.Equals(other.Key) && Value.Equals(other.Value);
+   protected bool Equals(CultureOpinionValue other) => Key.Equals(other.Key) && Value.Equals(other.Value);
 
    public override bool Equals(object? obj)
    {
@@ -46,7 +46,7 @@ public partial class OpinionValue : IEmpty<OpinionValue>, IIagsEnumKvp<Culture, 
       if (obj.GetType() != GetType())
          return false;
 
-      return Equals((OpinionValue)obj);
+      return Equals((CultureOpinionValue)obj);
    }
 
    // ReSharper disable twice NonReadonlyMemberInGetHashCode

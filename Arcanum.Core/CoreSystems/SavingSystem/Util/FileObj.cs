@@ -47,7 +47,7 @@ public class Eu5FileObj<T>(PathObj path, FileDescriptor descriptor)
    {
       return GetEu5Objects().Cast<IEu5Object>();
    }
-   
+
    /// <summary>
    /// Returns all EU5 objects that originate from this file.
    /// </summary>

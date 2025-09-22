@@ -207,10 +207,10 @@ public static class Pdh
    {
       foreach (var sn in block.Children)
       {
+         var key = sn.KeyNode.GetLexeme(source);
          var wasHandled = false;
          if (sn is ContentNode cn)
          {
-            var key = cn.KeyNode.GetLexeme(source);
             if (contentParsers.TryGetValue(key, out var parser))
             {
                parser(cn, target, ctx, source, ref validation);
@@ -219,7 +219,6 @@ public static class Pdh
          }
          else if (sn is BlockNode bn)
          {
-            var key = bn.KeyNode.GetLexeme(source);
             if (blockParsers.TryGetValue(key, out var parser))
             {
                parser(bn, target, ctx, source, ref validation);
@@ -247,9 +246,9 @@ public static class Pdh
          ctx.SetPosition(sn.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
-                                        $"Parsing {typeof(TTarget).Name}",
+                                        $"Parsing.{typeof(TTarget).Name}.{nameof(ParseProperties)}.{key}",
                                         sn.GetType().Name,
-                                        "ContentNode or BlockNode",
+                                        "ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.",
                                         sn.KeyNode.GetLexeme(source));
       }
    }

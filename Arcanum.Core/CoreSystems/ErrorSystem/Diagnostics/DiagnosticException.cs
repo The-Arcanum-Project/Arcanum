@@ -95,7 +95,7 @@ public sealed class DiagnosticException : Exception
          case DiagnosticReportSeverity.PopupNotify:
             ohNoWhatShouldWeDoNow =
                MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
                                                               "Error Encountered",
                                                               icon: GetMessageBoxIconForSeverity(Severity),
                                                               height: 450));

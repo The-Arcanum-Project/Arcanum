@@ -30,6 +30,8 @@ public static class Globals
 {
    public const string REPLACE_DESCRIPTION = "???REPLACE_ME???";
 
+   public static GameState State { get; set; } = new();
+
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static Dictionary<string, PopType> PopTypes { get; } = [];
    public static Dictionary<string, LocationRank> LocationRanks { get; } = [];

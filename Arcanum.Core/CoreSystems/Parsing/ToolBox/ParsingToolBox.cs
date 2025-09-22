@@ -18,6 +18,7 @@ using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
+using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Arcanum.Core.GlobalStates;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
@@ -831,17 +832,17 @@ public static class ParsingToolBox
       return true;
    }
 
-   public static bool ArcTryParse_OpinionValue(ContentNode node,
-                                               LocationContext ctx,
-                                               string actionName,
-                                               string source,
-                                               [MaybeNullWhen(false)] out OpinionValue value,
-                                               ref bool validation)
+   public static bool ArcTryParse_CultureOpinionValue(ContentNode node,
+                                                      LocationContext ctx,
+                                                      string actionName,
+                                                      string source,
+                                                      [MaybeNullWhen(false)] out CultureOpinionValue value,
+                                                      ref bool validation)
    {
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
                                              ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_OpinionValue)}"))
+                                             $"{actionName}.{nameof(ArcTryParse_CultureOpinionValue)}"))
       {
          validation = false;
          value = null;
@@ -884,6 +885,63 @@ public static class ParsingToolBox
       }
 
       value = new() { Key = culture, Value = opinion };
+      return true;
+   }
+
+   public static bool ArcTryParse_ReligiousSchoolOpinionValue(ContentNode node,
+                                                              LocationContext ctx,
+                                                              string actionName,
+                                                              string source,
+                                                              [MaybeNullWhen(false)]
+                                                              out ReligiousSchoolOpinionValue value,
+                                                              ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_ReligiousSchoolOpinionValue)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!Globals.ReligiousSchools.TryGetValue(node.KeyNode.GetLexeme(source), out var rs))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        actionName,
+                                        node.KeyNode.GetLexeme(source),
+                                        nameof(ReligiousSchoolOpinionValue));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidEnumValue,
+                                        actionName,
+                                        lexeme,
+                                        nameof(Opinion),
+                                        Enum.GetNames(typeof(Opinion)));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new() { Key = rs, Value = opinion };
       return true;
    }
 

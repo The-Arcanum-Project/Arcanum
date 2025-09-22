@@ -22,7 +22,7 @@ public static class SnNodesHelpers
                                   LocationContext ctx,
                                   string source,
                                   string actionName,
-                                  out BlockNode? value)
+                                  [MaybeNullWhen(false)] out BlockNode value)
    {
       if (node is not BlockNode bn)
       {

@@ -1,6 +1,10 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Sorting;
@@ -120,5 +124,46 @@ public class ParsingMaster
       Debug.WriteLine($"[Queastor] Rebuilt BK-Tree in {sw.ElapsedMilliseconds} ms for {items} words.");
 
       return Task.FromResult(true);
+   }
+
+   public static bool RemoveAllGroupingNodes(RootNode rn,
+                                             LocationContext ctx,
+                                             string actionStack,
+                                             string source,
+                                             ref bool validation,
+                                             string[] groupingNodeNames,
+                                             out List<StatementNode> sns)
+   {
+      if (groupingNodeNames.Length == 0)
+      {
+         sns = rn.Statements;
+         return true;
+      }
+
+      if (!SimpleObjectParser.StripGroupingNodes(rn,
+                                                 ctx,
+                                                 actionStack,
+                                                 source,
+                                                 ref validation,
+                                                 groupingNodeNames[0],
+                                                 out sns))
+         return false;
+
+      for (var i = 1; i < groupingNodeNames.Length; i++)
+      {
+         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, out var bn))
+            continue;
+
+         if (!SimpleObjectParser.StripGroupingNodes(bn!,
+                                                    ctx,
+                                                    actionStack,
+                                                    source,
+                                                    ref validation,
+                                                    groupingNodeNames[i],
+                                                    out sns))
+            return false;
+      }
+
+      return true;
    }
 }

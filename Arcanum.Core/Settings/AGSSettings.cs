@@ -11,6 +11,7 @@ public class AGSSettings
    public AgsSettings VegetationAgsSettings { get; set; } = new();
    public AgsSettings OpinionValueAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
+   public AgsSettings InstitutionStateAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
    public AgsSettings CountryAgsSettings { get; set; } = new();
@@ -22,8 +23,11 @@ public class AGSSettings
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();
    public AgsSettings RegnalNumberAgsSettings { get; set; } = new();
    public AgsSettings ParliamentDefinitionAgsSettings { get; set; } = new();
+   public AgsSettings ReligiousSchoolRelationsAgsSettings { get; set; } = new();
    public AgsSettings RegencyAgsSettings { get; set; } = new();
    public AgsSettings LocationRankAgsSettings { get; set; } = new();
    public AgsSettings LanguageAgsSettings { get; set; } = new();
    public AgsSettings CharacterAgsSettings { get; set; } = new();
+   public AgsSettings ReligiousSchoolAgsSettings { get; set; } = new();
+   public AgsSettings ReligiousSchoolOpinionValueAgsSettings { get; set; } = new();
 }

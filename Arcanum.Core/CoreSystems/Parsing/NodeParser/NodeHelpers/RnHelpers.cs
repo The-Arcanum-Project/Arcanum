@@ -70,4 +70,39 @@ public static class RnHelpers
       success &= retVal;
       return retVal;
    }
+
+   public static bool GetBlockNodes(this RootNode rn,
+                                    LocationContext ctx,
+                                    string source,
+                                    string className,
+                                    ref bool validationResult,
+                                    string[] keys,
+                                    out BlockNode[] nodes,
+                                    bool onlyBlocks = true)
+   {
+      nodes = new BlockNode[keys.Length];
+
+      foreach (var sn in rn.Statements)
+      {
+         BlockNode bn;
+         if (onlyBlocks)
+         {
+            if (!sn.IsBlockNode(ctx, source, className, ref validationResult, out bn!))
+               continue;
+         }
+         else
+         {
+            if (sn is not BlockNode node)
+               continue;
+
+            bn = node;
+         }
+
+         for (var i = 0; i < keys.Length; i++)
+            if (bn.KeyNode.GetLexeme(source) == keys[i])
+               nodes[i] = bn;
+      }
+
+      return nodes.Any(n => n != null!);
+   }
 }
