@@ -28,8 +28,11 @@ public class WindowDrag : Behavior<FrameworkElement>
       var nullableWindow = Window.GetWindow(AssociatedObject);
       if (nullableWindow is null)
          return;
-
+      
       _window = nullableWindow;
+      
+      EnableDoubleClickMaximize &= _window.ResizeMode != ResizeMode.NoResize && _window.ResizeMode != ResizeMode.CanMinimize;
+      
       base.OnAttached();
       AssociatedObject.MouseLeftButtonDown += AssociatedObject_MouseLeftButtonDown;
       AssociatedObject.MouseMove += AssociatedObject_MouseMove;

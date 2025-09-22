@@ -36,6 +36,8 @@ public class BaseWindow : Window
    public override void OnApplyTemplate()
    {
       base.OnApplyTemplate();
+      ShowMaximizeButton &= ResizeMode != ResizeMode.NoResize && ResizeMode != ResizeMode.CanMinimize;
+      ShowMinimizeButton &= ResizeMode != ResizeMode.NoResize;
       UpdateHeaderSeparator();
    }
 
