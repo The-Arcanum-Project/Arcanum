@@ -141,7 +141,7 @@ public class Queastor : IQueastor
 #if TIME_QUEASTOR
       Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {results.Count} exact matches and {filteredResults.Count} fuzzy matches.");
 #endif
-
+      filteredResults.UnionWith(results);
       return ApplySorting(filteredResults, query);
    }
 
