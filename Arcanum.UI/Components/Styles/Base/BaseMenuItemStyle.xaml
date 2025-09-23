@@ -179,8 +179,7 @@
                             BorderThickness = "1"
                             CornerRadius = "0,3,3,3"
                             Padding = "2">
-                        <ScrollViewer x:Name = "SubMenuScrollViewer"
-                                      Style = "{StaticResource DarkScrollViewer}">
+                        <ScrollViewer x:Name = "SubMenuScrollViewer">
                             <Grid RenderOptions.ClearTypeHint = "Enabled">
                                 <Canvas HorizontalAlignment = "Left"
                                         Height = "0"
@@ -459,8 +458,7 @@
                             BorderThickness = "1"
                             Padding = "2"
                             CornerRadius = "3">
-                        <ScrollViewer x:Name = "SubMenuScrollViewer"
-                                      Style = "{StaticResource DarkScrollViewer}">
+                        <ScrollViewer x:Name = "SubMenuScrollViewer">
                             <Grid RenderOptions.ClearTypeHint = "Enabled">
                                 <Canvas HorizontalAlignment = "Left"
                                         Height = "0"

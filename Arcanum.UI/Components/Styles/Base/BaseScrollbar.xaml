@@ -83,7 +83,7 @@
         <Setter Property = "Focusable"
                 Value = "false" />
         <Setter Property = "MinWidth"
-                Value = "8" />
+                Value = "6" />
         <Setter Property = "MinHeight"
                 Value = "6" />
         <Setter Property = "Template">
@@ -92,9 +92,7 @@
                     <Border CornerRadius = "3"
                             Background = "{TemplateBinding Background}"
                             BorderBrush = "{TemplateBinding BorderBrush}"
-                            BorderThickness = "0"
-                            Padding = "0"
-                            Margin = "0" />
+                            BorderThickness = "0"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -104,18 +102,6 @@
     <ControlTemplate x:Key = "VerticalScrollBar"
                      TargetType = "{x:Type ScrollBar}">
         <Grid Width = "8">
-            <!-- <Grid.RowDefinitions> -->
-            <!--     ~1~ <RowDefinition MaxHeight = "0" /> @1@ -->
-            <!--     <RowDefinition Height = "*" /> -->
-            <!--     ~1~ <RowDefinition MaxHeight = "0" /> @1@ -->
-            <!-- </Grid.RowDefinitions> -->
-            <!-- <Border CornerRadius = "2" -->
-            <!--         Background = "Orange" /> -->
-            <!-- <RepeatButton Grid.Row = "0" -->
-            <!--               Style = "{StaticResource ScrollBarLineButton}" -->
-            <!--               Height = "18" -->
-            <!--               Command = "ScrollBar.LineUpCommand" -->
-            <!--               Content = "M 0 4 L 8 4 L 4 0 Z" /> -->
             <Track Name = "PART_Track"
                    Grid.Row = "0"
                    IsDirectionReversed = "true">
@@ -126,17 +112,14 @@
                     <Thumb Style = "{StaticResource ScrollBarThumb}"
                            Background = "{StaticResource LightBackColorBrush}"
                            BorderBrush = "Transparent"
-                           HorizontalAlignment = "Right" />
+                           Margin="1,0,1,0"
+                           HorizontalAlignment="Center"
+                    />
                 </Track.Thumb>
                 <Track.IncreaseRepeatButton>
                     <RepeatButton Visibility = "Collapsed" />
                 </Track.IncreaseRepeatButton>
             </Track>
-            <!-- <RepeatButton Grid.Row = "3" -->
-            <!--               Style = "{StaticResource ScrollBarLineButton}" -->
-            <!--               Height = "18" -->
-            <!--               Command = "ScrollBar.LineDownCommand" -->
-            <!--               Content = "M 0 0 L 4 4 L 8 0 Z" /> -->
         </Grid>
     </ControlTemplate>
 
@@ -144,20 +127,6 @@
     <ControlTemplate x:Key = "HorizontalScrollBar"
                      TargetType = "{x:Type ScrollBar}">
         <Grid Height = "8">
-            <!-- <Grid.ColumnDefinitions> -->
-            <!--     <ColumnDefinition MaxWidth = "18" /> -->
-            <!--     <ColumnDefinition Width = "0.00001*" /> -->
-            <!--     <ColumnDefinition MaxWidth = "18" /> -->
-            <!--     <ColumnDefinition /> -->
-            <!-- </Grid.ColumnDefinitions> -->
-            <!-- Grid.ColumnSpan = "3" -->
-            <Border CornerRadius = "2"
-                    Background = "{StaticResource DefaultBackColorBrush}" />
-            <!-- <RepeatButton Grid.Column = "0" -->
-            <!--               Style = "{StaticResource ScrollBarLineButton}" -->
-            <!--               Width = "18" -->
-            <!--               Command = "ScrollBar.LineLeftCommand" -->
-            <!--               Content = "M 4 0 L 4 8 L 0 4 Z" /> -->
             <Track Name = "PART_Track"
                    IsDirectionReversed = "False">
                 <Track.DecreaseRepeatButton>
@@ -165,7 +134,8 @@
                 </Track.DecreaseRepeatButton>
                 <Track.Thumb>
                     <Thumb Style = "{StaticResource ScrollBarThumb}"
-                           Margin = "0,1,0,1"
+                           Margin="0,1,0,1"
+                           VerticalAlignment="Center"
                            Background = "{StaticResource LightBackColorBrush}"
                            BorderBrush = "Transparent" />
                 </Track.Thumb>
@@ -173,11 +143,6 @@
                     <RepeatButton Visibility = "Collapsed" />
                 </Track.IncreaseRepeatButton>
             </Track>
-            <!-- <RepeatButton Grid.Column = "3" -->
-            <!--               Style = "{StaticResource ScrollBarLineButton}" -->
-            <!--               Width = "18" -->
-            <!--               Command = "ScrollBar.LineRightCommand" -->
-            <!--               Content = "M 0 0 L 4 4 L 0 8 Z" /> -->
         </Grid>
     </ControlTemplate>
 
@@ -203,79 +168,82 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key = "DarkScrollViewer"
-           TargetType = "{x:Type ScrollViewer}">
-        <Setter Property = "OverridesDefaultStyle"
-                Value = "True" />
-        <Setter Property = "Template">
-            <Setter.Value>
-                <ControlTemplate TargetType = "{x:Type ScrollViewer}">
-                    <Border BorderThickness = "0">
-                        <Grid Margin = "0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width = "1*" />
-                                <ColumnDefinition Width = "Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height = "1*" />
-                                <RowDefinition Height = "Auto" />
-                            </Grid.RowDefinitions>
-                            <ScrollContentPresenter Grid.Row = "0"
-                                                    Grid.Column = "0"
-                                                    HorizontalAlignment = "Stretch"
-                                                    VerticalAlignment = "Stretch"
-                                                    Margin = "0" />
-                            <ScrollBar Grid.Row = "0"
-                                       Grid.Column = "1"
-                                       Name = "PART_VerticalScrollBar"
-                                       Margin = "0"
-                                       Padding = "0"
-                                       Value = "{TemplateBinding VerticalOffset}"
-                                       Maximum = "{TemplateBinding ScrollableHeight}"
-                                       ViewportSize = "{TemplateBinding ViewportHeight}"
-                                       Visibility = "{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                       HorizontalAlignment = "Right">
+        <Style TargetType = "{x:Type ScrollViewer}">
+            <Setter Property = "OverridesDefaultStyle"
+                    Value = "True" />
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType = "{x:Type ScrollViewer}">
+                        <Border BorderThickness = "0">
+                            <Grid Margin = "0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width = "1*" />
+                                    <ColumnDefinition Width = "Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height = "1*" />
+                                    <RowDefinition Height = "Auto" />
+                                </Grid.RowDefinitions>
+                                <ScrollContentPresenter Grid.Row = "0"
+                                                        Grid.Column = "0"
+                                                        HorizontalAlignment = "Stretch"
+                                                        VerticalAlignment = "Stretch"
+                                                        Margin = "0" />
+                                <ScrollBar Name = "PART_VerticalScrollBar"
+                                           Orientation="Vertical"
+                                           Grid.Row = "0"
+                                           Grid.Column = "1"
+                                           Value = "{TemplateBinding VerticalOffset}"
+                                           Maximum = "{TemplateBinding ScrollableHeight}"
+                                           ViewportSize = "{TemplateBinding ViewportHeight}"
+                                           Visibility = "{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                           HorizontalAlignment = "Right">
 
-                                <ScrollBar.Style>
-                                    <Style TargetType = "ScrollBar"
-                                           BasedOn = "{StaticResource {x:Type ScrollBar}}">
-                                        <Style.Triggers>
-                                            <Trigger Property = "Visibility"
-                                                     Value = "Collapsed">
-                                                <Setter Property = "Width"
-                                                        Value = "0" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ScrollBar.Style>
-                            </ScrollBar>
-                            <ScrollBar Name = "PART_HorizontalScrollBar"
-                                       Orientation = "Horizontal"
-                                       Grid.Row = "1"
-                                       Grid.Column = "0"
-                                       Value = "{TemplateBinding HorizontalOffset}"
-                                       Maximum = "{TemplateBinding ScrollableWidth}"
-                                       ViewportSize = "{TemplateBinding ViewportWidth}"
-                                       Visibility = "{TemplateBinding ComputedHorizontalScrollBarVisibility}"
-                                       VerticalAlignment = "Bottom">
+                                    <ScrollBar.Style>
+                                        <Style TargetType = "ScrollBar"
+                                               BasedOn = "{StaticResource {x:Type ScrollBar}}">
+                                            <Style.Triggers>
+                                                <Trigger Property = "Visibility"
+                                                         Value = "Collapsed">
+                                                    <Setter Property = "Width"
+                                                            Value = "0" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ScrollBar.Style>
+                                </ScrollBar>
+                                <ScrollBar Name = "PART_HorizontalScrollBar"
+                                           Orientation = "Horizontal"
+                                           Grid.Row = "1"
+                                           Grid.Column = "0"
+                                           Value = "{TemplateBinding HorizontalOffset}"
+                                           Maximum = "{TemplateBinding ScrollableWidth}"
+                                           ViewportSize = "{TemplateBinding ViewportWidth}"
+                                           Visibility = "{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                                           VerticalAlignment = "Bottom">
 
-                                <ScrollBar.Style>
-                                    <Style TargetType = "ScrollBar"
-                                           BasedOn = "{StaticResource {x:Type ScrollBar}}">
-                                        <Style.Triggers>
-                                            <Trigger Property = "Visibility"
-                                                     Value = "Collapsed">
-                                                <Setter Property = "Height"
-                                                        Value = "0" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ScrollBar.Style>
-                            </ScrollBar>
-                        </Grid>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+                                    <ScrollBar.Style>
+                                        <Style TargetType = "ScrollBar"
+                                               BasedOn = "{StaticResource {x:Type ScrollBar}}">
+                                            <Style.Triggers>
+                                                <Trigger Property = "Visibility"
+                                                         Value = "Collapsed">
+                                                    <Setter Property = "Height"
+                                                            Value = "0" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ScrollBar.Style>
+                                </ScrollBar>
+                                <Border Grid.Row="1"
+                                        Grid.Column="1"
+                                        SnapsToDevicePixels="True"
+                                        Background="Transparent">
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 </ResourceDictionary>

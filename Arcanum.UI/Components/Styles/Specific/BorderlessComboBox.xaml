@@ -178,8 +178,7 @@
                                         BorderBrush="{TemplateBinding BorderBrush}"
                                         HorizontalAlignment="Stretch">
                                     <ScrollViewer Margin="3, 3, 2, 3"
-                                                  SnapsToDevicePixels="True"
-                                                  Style="{StaticResource DarkScrollViewer}">
+                                                  SnapsToDevicePixels="True">
                                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"
                                                         HorizontalAlignment="Stretch" />
                                     </ScrollViewer>
