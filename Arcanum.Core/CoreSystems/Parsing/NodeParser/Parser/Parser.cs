@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
@@ -14,10 +15,13 @@ public ref struct Parser
    private readonly string _source;
    private readonly Span<Token> _tokens;
 
+   private readonly NodeArena _arena;
+
    public Parser(Span<Token> tokens, string source)
    {
       _source = source;
       _tokens = tokens;
+      _arena = new(tokens.Length / 4);
    }
 
    public RootNode Parse(Eu5FileObj fileObj, out string sourceCode, out LocationContext ctx)
@@ -50,7 +54,7 @@ public ref struct Parser
 
    public RootNode Parse()
    {
-      var root = new RootNode();
+      var root = _arena.AllocateRootNode();
       while (!IsAtEnd())
          root.Statements.Add(ParseStatement());
 
@@ -94,7 +98,7 @@ public ref struct Parser
                return ParseContentOrBlockStatement();
          }
 
-         return new KeyOnlyNode(Advance());
+         return _arena.AllocateKeyOnlyNode(Advance());
       }
 
       if (Check(TokenType.AtIdentifier))
@@ -117,7 +121,7 @@ public ref struct Parser
    private BlockNode ParseAnonymousBlock()
    {
       var brace = Expect(TokenType.LeftBrace, "'{' to start anonymous block.");
-      var block = new BlockNode(brace); // Use the '{' token as the identifier
+      var block = _arena.AllocateBlockNode(brace); // Use the '{' token as the identifier
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
          block.Children.Add(ParseStatement());
 
@@ -139,7 +143,7 @@ public ref struct Parser
 
       // Otherwise, it's a standard ContentNode like `width = 1280`.
       var value = ParseValue();
-      return new ContentNode(key, separator, value);
+      return _arena.AllocateContentNode(key, separator, value);
    }
 
    private BlockNode ParseBlockStatement(Token? knownIdentifier = null)
@@ -151,7 +155,7 @@ public ref struct Parser
          Match(TokenType.Equals);
 
       Expect(TokenType.LeftBrace, $"'{{' after block name .");
-      var block = new BlockNode(name);
+      var block = _arena.AllocateBlockNode(name);
 
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
          block.Children.Add(ParseStatement());
@@ -168,7 +172,7 @@ public ref struct Parser
          // After the '-', we recursively call ParseValue to get the operand.
          // This is powerful because it could handle `-(2+3)` if you extend the grammar later.
          var right = ParseValue();
-         return new UnaryNode(op, right);
+         return _arena.AllocateUnaryNode(op, right);
       }
 
       // An Identifier followed by a LeftBrace is a function call.
@@ -178,7 +182,7 @@ public ref struct Parser
       // A block used as a value, e.g., OR = { ... }
       if (Match(TokenType.LeftBrace))
       {
-         var blockValue = new BlockValueNode();
+         var blockValue = _arena.AllocateBlockValueNode();
          while (!Check(TokenType.RightBrace) && !IsAtEnd())
             blockValue.Children.Add(ParseStatement());
 
@@ -194,13 +198,13 @@ public ref struct Parser
             mathTokens.Add(Advance());
 
          Expect(TokenType.RightBracket, "']' to close math expression.");
-         return new MathExpressionNode(mathTokens);
+         return _arena.AllocateMathExpressionNode(mathTokens);
       }
 
       // FALLBACK: If it's not a special case, it must be a simple literal.
       // correctly handles `quality = high` without consuming `rgb` prematurely.
       if (Match(TokenType.Number, TokenType.String, TokenType.Yes, TokenType.No, TokenType.Identifier, TokenType.Date))
-         return new LiteralValueNode(Previous());
+         return _arena.AllocateLiteralValueNode(Previous());
 
       DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
@@ -219,7 +223,7 @@ public ref struct Parser
    private FunctionCallNode ParseFunctionCallNode()
    {
       var name = Expect(TokenType.Identifier, "function name.");
-      var funcCall = new FunctionCallNode(name);
+      var funcCall = _arena.AllocateFunctionCallNode(name);
 
       Expect(TokenType.LeftBrace, "'{{' after function name");
 
@@ -234,14 +238,28 @@ public ref struct Parser
 
    #region Helper Methods
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private bool Match(TokenType type1)
+   {
+      if (Check(type1))
+      {
+         Advance();
+         return true;
+      }
+
+      return false;
+   }
+
    private bool Match(params TokenType[] types)
    {
       foreach (var type in types)
+      {
          if (Check(type))
          {
             Advance();
             return true;
          }
+      }
 
       return false;
    }
@@ -266,33 +284,40 @@ public ref struct Parser
 
    private Token Advance()
    {
-      SkipUnexpectedTokens();
+      while (Peek().Type == TokenType.Unexpected)
+         if (_current < _tokens.Length - 1)
+            _current++;
+         else
+            break;
 
       if (!IsAtEnd())
          _current++;
+
       return Previous();
    }
 
    private bool IsAtEnd()
    {
-      SkipUnexpectedTokens();
-
-      if (_tokens[_current].Type == TokenType.EndOfFile)
-         return true;
-
-      return false;
+      return _tokens[_current].Type == TokenType.EndOfFile;
    }
 
    private Token Peek()
    {
-      SkipUnexpectedTokens();
       return _tokens[_current];
    }
 
    private Token Current() => _tokens[_current];
    private Token PeekNext() => _current + 1 >= _tokens.Length ? _tokens[^1] : _tokens[_current + 1];
    private Token Previous() => _tokens[_current - 1];
-   private bool Check(TokenType type) => !IsAtEnd() && Peek().Type == type;
+
+   private bool Check(TokenType type)
+   {
+      if (IsAtEnd())
+         return false;
+
+      return Peek().Type == type;
+   }
+
    private Token PeekAt(int offset) => _current + offset >= _tokens.Length ? _tokens[^1] : _tokens[_current + offset];
    private bool CheckNext(TokenType type) => !IsAtEnd() && PeekNext().Type == type;
    private bool CheckAt(int offset, TokenType type) => !IsAtEnd() && PeekAt(offset).Type == type;
@@ -302,7 +327,7 @@ public ref struct Parser
       var keyword = Advance(); // Consume 'scripted_trigger'
       var name = Advance(); // Consume the name
 
-      var node = new ScriptedStatementNode(keyword, name);
+      var node = _arena.AllocateScriptedStatementNode(keyword, name);
 
       Expect(TokenType.Equals, $"Expected '=' after name in '{keyword.GetValue(_source)}' statement.");
       Expect(TokenType.LeftBrace, "Expected '{' to open scripted statement block.");
@@ -313,16 +338,6 @@ public ref struct Parser
 
       Expect(TokenType.RightBrace, "Expected '}' to close scripted statement block.");
       return node;
-   }
-
-   private void SkipUnexpectedTokens()
-   {
-      while (_tokens[_current].Type == TokenType.Unexpected)
-         if (_current < _tokens.Length - 1)
-            _current++;
-         else
-            // The last token is always EOF, which is not Unexpected.
-            break;
    }
 
    #endregion
