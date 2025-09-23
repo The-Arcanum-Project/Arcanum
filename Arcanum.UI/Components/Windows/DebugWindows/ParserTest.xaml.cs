@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
 
@@ -181,7 +182,7 @@ public partial class ParserTest : INotifyPropertyChanged
          var lexTime = watch.ElapsedMilliseconds;
 
          watch.Restart();
-         var parser = new Parser(tokens, source);
+         var parser = new Parser(tokens, source, Eu5FileObj.Empty);
          var rn = parser.Parse();
          watch.Stop();
 

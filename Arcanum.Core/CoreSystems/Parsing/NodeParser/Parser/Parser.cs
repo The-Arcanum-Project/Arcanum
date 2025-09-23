@@ -17,8 +17,9 @@ public ref struct Parser
 
    private readonly NodeArena _arena;
 
-   public Parser(Span<Token> tokens, string source)
+   public Parser(Span<Token> tokens, string source, Eu5FileObj fileObj)
    {
+      _fileObj = fileObj;
       _source = source;
       _tokens = tokens;
       _arena = new(tokens.Length / 4);
@@ -104,14 +105,20 @@ public ref struct Parser
       if (Check(TokenType.AtIdentifier))
          return ParseContentOrBlockStatement();
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
+      var current = Current();
+      var ctx = new LocationContext(current.Line, current.Column, _fileObj.Path.FullPath);
+      var line = current.Line;
+      var col = current.Column;
+      var lexeme = current.GetValue(_source);
+
+      DiagnosticException.CreateAndHandle(ctx,
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
                                           DiagnosticReportSeverity.PopupError,
-                                          Current().Line,
-                                          _tokens[0].Column,
-                                          Current().GetValue(_source),
+                                          line,
+                                          col,
+                                          lexeme,
                                           "a block or content definition");
 
       throw

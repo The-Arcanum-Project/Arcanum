@@ -16,7 +16,7 @@ public static class PLHelper
       var lexer = new Lexer(source.AsSpan(), tokenBuffer.AsSpan());
       var tokens = lexer.ScanTokens();
 
-      var parser = new Parser(tokens, source);
+      var parser = new Parser(tokens, source, fileObj);
       var rn = parser.Parse();
       ArrayPool<Token>.Shared.Return(tokenBuffer);
       return rn;
@@ -35,7 +35,7 @@ public static class PLHelper
       var lexer = new Lexer(source.AsSpan(), tokenBuffer.AsSpan());
       var tokens = lexer.ScanTokens();
 
-      var parser = new Parser(tokens, source);
+      var parser = new Parser(tokens, source, fileObj);
       var rn = parser.Parse();
       ArrayPool<Token>.Shared.Return(tokenBuffer);
       return rn;

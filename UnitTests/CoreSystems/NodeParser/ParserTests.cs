@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace UnitTests.CoreSystems.NodeParser;
 
@@ -16,7 +17,7 @@ public class ParserTests
       var tokens = lexer.ScanTokens();
 
       // 2. Parse the token stream
-      var parser = new Parser(tokens, source);
+      var parser = new Parser(tokens, source, Eu5FileObj.Empty);
       return parser.Parse();
    }
 
