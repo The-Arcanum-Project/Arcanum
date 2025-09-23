@@ -1,0 +1,163 @@
+﻿<styleClasses:BaseWindow x:Class="Arcanum.UI.Saving.Window.SaveWindow"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:local="clr-namespace:Arcanum.UI.Saving.Window"
+                         xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:window="clr-namespace:Arcanum.UI.Saving.Window"
+                         xmlns:userControls="clr-namespace:Arcanum.UI.Components.UserControls"
+                         xmlns:window1="clr-namespace:Arcanum.UI.Saving.Window"
+                         xmlns:behaviors="clr-namespace:Arcanum.UI.Components.Behaviors"
+                         mc:Ignorable="d"
+                         Title="Advanced Save Window"
+                         Height="450"
+                         Width="600"
+                         ResizeMode="CanMinimize">
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source="/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+    <styleClasses:BaseWindow.HeaderContent>
+        <Border Margin="2"
+                CornerRadius="5"
+                BorderBrush="{StaticResource DefaultBorderColorBrush}"
+                BorderThickness="1"
+                behaviors:WindowDrag.IsClickExclusionZone="True">
+            <userControls:SearchTextBox Width="280"
+                                        Margin="2"
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Background="Transparent"
+                                        x:Name="SearchBox" />
+        </Border>
+    </styleClasses:BaseWindow.HeaderContent>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"
+                                  MinWidth="100"
+                                  MaxWidth="600" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ListView x:Name="FileListView"
+                      Grid.Column="0"
+                      Margin="2,2,0,4"
+                      Background="Transparent"
+                      ItemsSource="{Binding SearchResults, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding ResultName}"
+                                   AllowDrop="True"
+                                   Drop="UIElement_OnDrop"
+                                   DragOver="UIElement_OnDrag"
+                                   DragEnter="UIElement_OnDrag" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <GridSplitter Grid.Column="1"
+                          Width="6"
+                          Margin="2, 4"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          ResizeBehavior="BasedOnAlignment" />
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Margin="2, 2,0,0"
+                           Text="{Binding CurrentFile.Path, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}" />
+
+                <ListView x:Name="ObjectListView"
+                          Grid.Row="1"
+                          Margin="0,2,2,4"
+                          Background="Transparent"
+                          ItemsSource="{Binding CurrentFile.ChangedObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding UniqueId}"
+                                       PreviewMouseLeftButtonDown="UIElement_OnPreviewMouseLeftButtonDown" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Grid>
+        <Border Grid.Row="1"
+                Background="{StaticResource DefaultBorderColorBrush}"
+                Height="2"
+                CornerRadius="1"
+                Margin="5,0,5,0" />
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <StackPanel.Resources>
+                <Style TargetType="styleClasses:BaseButton"
+                       BasedOn="{StaticResource {x:Type styleClasses:BaseButton}}">
+                    <Setter Property="Width"
+                            Value="30" />
+                    <Setter Property="BorderThickness"
+                            Value="1" />
+                    <Setter Property="Height"
+                            Value="30" />
+                    <Setter Property="Margin"
+                            Value="0,4,5,4" />
+                </Style>
+            </StackPanel.Resources>
+            <styleClasses:BaseButton> SA </styleClasses:BaseButton>
+            <styleClasses:BaseButton> SE </styleClasses:BaseButton>
+            <styleClasses:BaseButton> AU </styleClasses:BaseButton>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left">
+            <StackPanel.Resources>
+                <Style TargetType="styleClasses:BaseButton"
+                       BasedOn="{StaticResource {x:Type styleClasses:BaseButton}}">
+                    <Setter Property="Width"
+                            Value="34" />
+                    <Setter Property="BorderThickness"
+                            Value="1" />
+                    <Setter Property="Height"
+                            Value="34" />
+                    <Setter Property="Margin"
+                            Value="5,4,0,4" />
+                </Style>
+            </StackPanel.Resources>
+            <styleClasses:BaseButton x:Name="SelectButton"
+                                     ToolTip="Select all shown items.&#x0a;Use double click to select all items.">
+                <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CheckSquareStack30x30.png"
+                       Stretch="None"
+                />
+            </styleClasses:BaseButton>
+            <styleClasses:BaseButton x:Name="UnselectButton"
+                ToolTip="Unselect all shown items.&#x0a;Use double click to unselect all items.">
+                <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CloseSquareStack30x30.png"
+                       Stretch="None" />
+            </styleClasses:BaseButton>
+            <styleClasses:BaseButton>
+                <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png"
+                       Stretch="None" />
+            </styleClasses:BaseButton>
+        </StackPanel>
+    </Grid>
+
+</styleClasses:BaseWindow>

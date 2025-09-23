@@ -54,7 +54,7 @@ public partial class DebugPanelGrid : UserControl
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
    {
-      var sw = new SaveWindow();
+      var sw = new Saving.Window.SaveWindow();
       sw.Show();
    }
 
