@@ -8,7 +8,6 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;

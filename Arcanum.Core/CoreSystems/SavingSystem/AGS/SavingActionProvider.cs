@@ -30,7 +30,7 @@ public static class SavingActionProvider
       if (target is not Road road)
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
 
-      sb.AppendLine($"{road.StartLocation.Name} = {road.EndLocation.Name}");
+      sb.AppendLine($"{road.StartLocation.UniqueId} = {road.EndLocation.UniqueId}");
    }
 
    public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)

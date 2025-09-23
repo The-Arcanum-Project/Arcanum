@@ -1,4 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using System.Runtime.CompilerServices;
+
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 /// <summary>
 /// Scans a source code string and produces a sequence of tokens. This implementation
@@ -233,10 +235,16 @@ public class Lexer
    private char Peek() => IsAtEnd() ? '\0' : _source[_current];
    private char PeekNext() => _current + 1 >= _source.Length ? '\0' : _source[_current + 1];
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static bool IsDigit(char c) => char.IsDigit(c);
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static bool IsAlphaNumeric(char c) => IsAlpha(c) || IsDigit(c);
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static bool IsIdentifierContinuationChar(char c)
       => IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
 

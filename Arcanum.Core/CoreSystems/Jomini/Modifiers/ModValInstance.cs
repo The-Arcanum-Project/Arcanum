@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Common;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 

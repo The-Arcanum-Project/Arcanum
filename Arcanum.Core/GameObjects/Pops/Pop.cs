@@ -1,6 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GlobalStates;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 

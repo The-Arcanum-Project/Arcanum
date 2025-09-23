@@ -2,14 +2,13 @@
 using System.Text;
 using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
 public static class DefaultCommands
 {
-   [Flags] 
+   [Flags]
    public enum CommandCategory
    {
       None = 0, // No commands
@@ -28,7 +27,7 @@ public static class DefaultCommands
 
    public class DefaultCommandDefinition : CommandBase
    {
-      public CommandCategory Category { get; set; } 
+      public CommandCategory Category { get; set; }
 
       public DefaultCommandDefinition(string name,
                                       string usage,
@@ -37,7 +36,7 @@ public static class DefaultCommands
                                       CommandCategory category,
                                       params string[] aliases) : base(name, usage, clearance, aliases, execute)
       {
-         Category = category; 
+         Category = category;
       }
    }
 
@@ -60,8 +59,7 @@ public static class DefaultCommands
                                              return [commandDef.Usage, aliasString];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic
-                                         );
+                                          category: CommandCategory.Basic);
    }
 
    public static ICommandDefinition CreateEchoCommand()
@@ -70,7 +68,7 @@ public static class DefaultCommands
                                           usage: "echo <message ...> | Displays the provided message.",
                                           execute: args => [string.Join(" ", args)],
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic, 
+                                          category: CommandCategory.Basic,
                                           aliases: ["say"]);
    }
 
@@ -84,7 +82,7 @@ public static class DefaultCommands
                                              return [];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic, 
+                                          category: CommandCategory.Basic,
                                           aliases: ["cls"]);
    }
 
@@ -127,8 +125,7 @@ public static class DefaultCommands
                                                        : ["No commands registered."];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic 
-                                         );
+                                          category: CommandCategory.Basic);
    }
 
    public static ICommandDefinition CreateAliasCommand(IConsoleService consoleService)
@@ -157,8 +154,7 @@ public static class DefaultCommands
                                              }
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Alias
-                                         );
+                                          category: CommandCategory.Alias);
    }
 
    public static ICommandDefinition CreateMacroCommand(IConsoleService consoleService)
@@ -201,8 +197,7 @@ public static class DefaultCommands
                                              return [usage];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Macro 
-                                         );
+                                          category: CommandCategory.Macro);
    }
 
    public static ICommandDefinition CreateHistoryCommand(IConsoleService consoleService)
@@ -223,8 +218,7 @@ public static class DefaultCommands
                                              return ["Command history cleared."];
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.History 
-                                         );
+                                          category: CommandCategory.History);
    }
 
    public static ICommandDefinition CreatePwdCommand()
@@ -233,7 +227,7 @@ public static class DefaultCommands
                                           usage: "pwd | Prints the current working directory of the application.",
                                           execute: _ => [Directory.GetCurrentDirectory()],
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.FileSystem, 
+                                          category: CommandCategory.FileSystem,
                                           aliases: ["cwd", "dir"]);
    }
 
@@ -251,8 +245,7 @@ public static class DefaultCommands
                                              return DrawTable(separator: '|', columns: columns);
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Basic 
-                                         );
+                                          category: CommandCategory.Basic);
    }
 
    public static ICommandDefinition CreateSetClearanceCommand(IConsoleService consoleService)
@@ -262,8 +255,7 @@ public static class DefaultCommands
                                           "setclearance <User|Admin|Debug> | Sets the clearance level.",
                                           execute: _ => [consoleService.CurrentClearance.ToString()],
                                           clearance: ClearanceLevel.Admin,
-                                          category: CommandCategory.Debug 
-                                         );
+                                          category: CommandCategory.Debug);
    }
 
    public static ICommandDefinition BrowseCommand()
@@ -288,7 +280,8 @@ public static class DefaultCommands
                                                    UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(metadata);
                                                    break;
                                                 case "mmsd":
-                                                   UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
+                                                   UIHandle.Instance.PopUpHandle
+                                                           .OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
                                                    break;
                                                 default:
                                                    return
@@ -296,6 +289,7 @@ public static class DefaultCommands
                                                       $"Unknown type. Supported types: {string.Join(", ", supportedTypes)}"
                                                    ];
                                              }
+
                                              return ["Finished opening AppData in property browser."];
                                           },
                                           clearance: ClearanceLevel.User,
@@ -307,7 +301,7 @@ public static class DefaultCommands
    public static ICommandDefinition PrintLoadingTimesCommand()
    {
       var usage = "Prints the loading times of the application.";
-      
+
       return new DefaultCommandDefinition(name: "printLT",
                                           usage: usage,
                                           execute: _ =>

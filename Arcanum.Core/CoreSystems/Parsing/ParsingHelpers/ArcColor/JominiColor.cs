@@ -14,6 +14,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       Rgb,
       Hsv,
       Hsv360,
+      Hex,
    }
 
    private JominiColor()
@@ -54,6 +55,20 @@ public abstract record JominiColor : IEmpty<JominiColor>
 
       public override JominiColorType Type => JominiColorType.Hsv360;
       public override string ToString() => $"hsv360 {{ {H:F0} {S:F0} {V:F0} }}";
+   }
+
+   public sealed record Int(int Value) : JominiColor
+   {
+      public override Color ToMediaColor()
+      {
+         var r = (byte)((Value >> 16) & 0xFF);
+         var g = (byte)((Value >> 8) & 0xFF);
+         var b = (byte)(Value & 0xFF);
+         return Color.FromRgb(r, g, b);
+      }
+
+      public override JominiColorType Type => JominiColorType.Hex;
+      public override string ToString() => $"{Value:X6}";
    }
 
    public static JominiColor Empty { get; } = new Hsv(1, 0, 1);

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Reflection;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.API.UtilServices.Search.SearchableSetting;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
@@ -34,12 +33,12 @@ public class Queastor : IQueastor
       foreach (var term in item.SearchTerms)
          InternalAddToIndex(item, term);
    }
-   
+
    public void AddToIndex(ISearchable item, string term)
    {
       InternalAddToIndex(item, term);
    }
-   
+
    public void RemoveFromIndex(ISearchable item, string term)
    {
       var lowerTerm = term.ToLowerInvariant();

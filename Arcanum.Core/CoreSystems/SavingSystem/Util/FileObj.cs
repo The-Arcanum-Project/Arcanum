@@ -7,7 +7,7 @@ public class Eu5FileObj(PathObj path, FileDescriptor descriptor)
    public FileDescriptor Descriptor { get; } = descriptor;
    public PathObj Path { get; } = path;
 
-   public List<IEu5Object> ObjectsInFile { get; } = [];
+   public HashSet<IEu5Object> ObjectsInFile { get; } = [];
 
    public static Eu5FileObj Empty { get; } = new(PathObj.Empty, FileDescriptor.Empty);
    protected bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);

@@ -31,6 +31,16 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
    IDictionary IEu5Object.GetGlobalItemsNonGeneric() => T.GetGlobalItems();
+
+   static T CreateInstance(string uniqueId, Eu5FileObj source)
+   {
+      var instance = new T
+      {
+         UniqueId = uniqueId, Source = source,
+      };
+      source.ObjectsInFile.Add(instance);
+      return instance;
+   }
 }
 
 public interface IEu5Object : ISearchable, INUI, IAgs

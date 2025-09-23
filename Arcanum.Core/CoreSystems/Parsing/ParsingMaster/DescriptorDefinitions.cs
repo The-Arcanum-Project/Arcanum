@@ -49,7 +49,7 @@ public static class DescriptorDefinitions
    public static readonly FileDescriptor DefinitionsDescriptor = new([LocationDescriptor, DefaultMapPreDescriptor],
                                                                      ["game", "in_game", "map_data", "definitions.txt"],
                                                                      new("definitions", "txt", "#"),
-                                                                     new DefinitionFileLoading(),
+                                                                     new DefinitionsParsing(),
                                                                      false,
                                                                      false);
 
@@ -131,10 +131,16 @@ public static class DescriptorDefinitions
           false,
           false);
 
+   public static readonly FileDescriptor LanguageDescriptor = new([ColorParser],
+                                                                  ["game", "in_game", "common", "languages"],
+                                                                  new("languages", "txt", "#"),
+                                                                  new LanguageParsing(),
+                                                                  false);
+
    public static readonly FileDescriptor RoadsAndCountriesDescriptor =
       new([
              LocationDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor, ColorParser,
-             CharactersDiscoveryDescriptor,
+             CharactersDiscoveryDescriptor, LanguageDescriptor,
           ],
           ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
           new("10_countries_and_roads", "txt", "#"),
@@ -142,17 +148,11 @@ public static class DescriptorDefinitions
           false,
           false);
 
-   public static readonly FileDescriptor CultureDescriptor = new([ColorParser],
+   public static readonly FileDescriptor CultureDescriptor = new([ColorParser, LanguageDescriptor],
                                                                  ["game", "in_game", "common", "cultures"],
                                                                  new("cultures", "txt", "#"),
                                                                  new CultureParsing(),
                                                                  false);
-
-   public static readonly FileDescriptor LanguageDescriptor = new([ColorParser],
-                                                                  ["game", "in_game", "common", "languages"],
-                                                                  new("languages", "txt", "#"),
-                                                                  new LanguageParsing(),
-                                                                  false);
 
    public static readonly FileDescriptor AgeDescriptor = new([ModifierDefinitionDescriptor],
                                                              ["game", "in_game", "common", "age"],

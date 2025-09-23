@@ -2,17 +2,16 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class ValuesParsing
 {
    public static bool ParseBool(string value,
-                                   LocationContext ctx,
-                                   string actionName,
-                                   out bool result,
-                                   bool defaultValue = false)
+                                LocationContext ctx,
+                                string actionName,
+                                out bool result,
+                                bool defaultValue = false)
    {
       if (string.IsNullOrWhiteSpace(value))
       {

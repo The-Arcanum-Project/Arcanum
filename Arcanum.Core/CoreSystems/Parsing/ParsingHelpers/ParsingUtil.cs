@@ -3,13 +3,11 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class ParsingUtil
 {
-   
    public static List<Location> ParseLocationList(Content content, LocationContext ctx)
    {
       List<Location> locations = [];

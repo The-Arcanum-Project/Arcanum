@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.Common;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 

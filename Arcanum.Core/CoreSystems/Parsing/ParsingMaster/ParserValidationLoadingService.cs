@@ -1,4 +1,7 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Collections;
+using System.Reflection;
+using System.Text;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -9,11 +12,40 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
 {
    private const string ACTION_STACK = nameof(ParserValidationLoadingService<T>);
 
-   public override List<Type> ParsedObjects => [typeof(T)];
    public virtual string[] GroupingNodeNames => [];
    public virtual Dictionary<string, T> GetGlobals() => T.GetGlobalItems();
 
-   public override string GetFileDataDebugInfo() => $"Parsed Climates: {GetGlobals().Count}";
+   public override List<Type> ParsedObjects => [typeof(T)];
+
+   public override string GetFileDataDebugInfo()
+   {
+      var str = "Parsed File Data Summary:\n";
+
+      foreach (var type in ParsedObjects)
+      {
+         var getGlobalItemsMethod = type.GetMethod("GetGlobalItems",
+                                                   BindingFlags.Public | BindingFlags.Static);
+
+         string countStr;
+
+         if (getGlobalItemsMethod != null)
+         {
+            var collectionAsObject = getGlobalItemsMethod.Invoke(null, null);
+            countStr = collectionAsObject switch
+            {
+               ICollection collection => collection.Count.ToString(),
+               IEnumerable enumerable => enumerable.Cast<object>().Count().ToString(),
+               _ => "[Returned null or not a collection]",
+            };
+         }
+         else
+            countStr = "[Method Not Found]";
+
+         str += $"\t\t{type.Name}: {countStr}\n";
+      }
+
+      return str;
+   }
 
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {

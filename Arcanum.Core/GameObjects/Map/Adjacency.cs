@@ -2,7 +2,6 @@
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Map;
 
@@ -49,7 +48,7 @@ public partial class Adjacency(Location from,
 
    public override string ToString()
    {
-      return $"{Name}: {From.Name} -> {To.Name} ({Type})";
+      return $"{Name}: {From.UniqueId} -> {To.UniqueId} ({Type})";
    }
 
    public static Dictionary<string, Adjacency> GetGlobalItems() => Globals.Adjacencies;
@@ -69,8 +68,10 @@ public partial class Adjacency(Location from,
    public override int GetHashCode() => Name.GetHashCode();
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
-   public INUINavigation[] Navigations
-      => [new NUINavigation(From, $"From {From.Name}"), new NUINavigation(To, $"To {To.Name}")];
+   public INUINavigation[] Navigations =>
+   [
+      new NUINavigation(From, $"From {From.UniqueId}"), new NUINavigation(To, $"To {To.UniqueId}")
+   ];
    public static Adjacency Empty { get; } = new(Location.Empty,
                                                 Location.Empty,
                                                 AdjacencyType.Sea,

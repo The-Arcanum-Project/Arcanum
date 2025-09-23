@@ -18,18 +18,27 @@ public class ParserForAttribute : Attribute
    /// </summary>
    public string[] IgnoredContentKeys { get; set; }
 
+   public bool ContainsOnlyChildObjects { get; set; } = false;
+   public string? ChildObjectList { get; set; } = null;
+
    /// <param name="targetType">The data model class (e.g., typeof(ToolBoxObj)) that this parser is for.</param>
    /// <param name="allowUnknownNodes"></param>
    /// <param name="ignoredBlockKeys"></param>
    /// <param name="ignoredContentKeys"></param>
+   /// <param name="containsOnlyChildObjects"></param>
+   /// <param name="childObjectList"></param>
    public ParserForAttribute(Type targetType,
                              bool allowUnknownNodes = false,
                              string[]? ignoredBlockKeys = null,
-                             string[]? ignoredContentKeys = null)
+                             string[]? ignoredContentKeys = null,
+                             bool containsOnlyChildObjects = false,
+                             string? childObjectList = null)
    {
       TargetType = targetType;
       AllowUnknownNodes = allowUnknownNodes;
       IgnoredBlockKeys = ignoredBlockKeys ?? [];
       IgnoredContentKeys = ignoredContentKeys ?? [];
+      ContainsOnlyChildObjects = containsOnlyChildObjects;
+      ChildObjectList = childObjectList;
    }
 }

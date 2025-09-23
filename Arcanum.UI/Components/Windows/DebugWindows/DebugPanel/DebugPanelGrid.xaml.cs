@@ -26,7 +26,7 @@ public partial class DebugPanelGrid : UserControl
       {
          if (loc.Market == null!)
          {
-            str += loc.Name;
+            str += loc.UniqueId;
             str += ", ";
             count++;
          }
@@ -43,7 +43,7 @@ public partial class DebugPanelGrid : UserControl
       {
          if (loc.Market.Location == null!)
          {
-            str += loc.Name;
+            str += loc.UniqueId;
             str += ", ";
             count++;
          }

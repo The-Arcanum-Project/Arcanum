@@ -9,7 +9,6 @@ namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 public partial class BrowseProvincesView
 {
    public ICollectionView ItemsView { get; }
-   
 
    private string _filterText = string.Empty;
    public string FilterText
@@ -21,23 +20,22 @@ public partial class BrowseProvincesView
          ItemsView.Refresh();
       }
    }
-   
+
    public BrowseProvincesView()
    {
       InitializeComponent();
 
-      
       ItemsView = CollectionViewSource.GetDefaultView(Globals.Locations.Values);
       ItemsView.Filter = FilterItem;
    }
-   
+
    private bool FilterItem(object obj)
    {
       if (string.IsNullOrWhiteSpace(FilterText))
          return true;
 
       if (obj is Location s)
-         return s.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+         return s.UniqueId.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
 
       return false;
    }

@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Jomini.Scopes;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Effects;
 

@@ -2,7 +2,6 @@
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 

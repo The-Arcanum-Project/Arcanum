@@ -7,7 +7,6 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.GlobalStates;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
 

@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Map;
@@ -27,15 +26,15 @@ public partial class Road : IEu5Object<Road>
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RoadSettings;
    public INUINavigation[] Navigations =>
    [
-      new NUINavigation(StartLocation, $"Start: {StartLocation.Name}"),
-      new NUINavigation(EndLocation, $"End: {EndLocation.Name}"),
+      new NUINavigation(StartLocation, $"Start: {StartLocation.UniqueId}"),
+      new NUINavigation(EndLocation, $"End: {EndLocation.UniqueId}"),
    ];
 
    public static Dictionary<string, Road> GetGlobalItems() => Globals.Roads;
    public static Road Empty { get; } = new() { StartLocation = Location.Empty, EndLocation = Location.Empty };
    public string GetNamespace => "Map.Roads";
    public string ResultName => UniqueId;
-   public List<string> SearchTerms => [StartLocation.Name, EndLocation.Name];
+   public List<string> SearchTerms => [StartLocation.UniqueId, EndLocation.UniqueId];
 
    public void OnSearchSelected()
    {
@@ -49,7 +48,7 @@ public partial class Road : IEu5Object<Road>
    public string SavingKey => string.Empty;
    public string UniqueId
    {
-      get => $"{StartLocation.Name}_{EndLocation.Name}";
+      get => $"{StartLocation.UniqueId}_{EndLocation.UniqueId}";
       set => throw new NotSupportedException();
    }
    public Eu5FileObj Source { get; set; } = null!;

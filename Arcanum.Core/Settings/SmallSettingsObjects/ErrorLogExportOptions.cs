@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.Settings.SmallSettingsObjects;
 

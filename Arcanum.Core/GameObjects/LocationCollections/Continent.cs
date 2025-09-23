@@ -1,42 +1,22 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
-using Arcanum.Core.GlobalStates;
-using Nexus.Core;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[ObjectSaveAs]
 public partial class Continent
-   : LocationCollection<SuperRegion>, INUI, ICollectionProvider<Continent>, IMapInferable<Continent>, IEmpty<Continent>
+   : IMapInferable<Continent>, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>
 {
-   public Continent(FileInformation fileInfo, string name, ICollection<SuperRegion> provinces) :
-      base(fileInfo, name, provinces)
-   {
-   }
-
-   public Continent(FileInformation fileInfo, string name) : base(fileInfo, name)
-   {
-   }
-
-   public override LocationCollectionType LCType => LocationCollectionType.Continent;
-
-   public override void RemoveGlobal()
-   {
-      throw new NotImplementedException();
-   }
-
-   public override void AddGlobal()
-   {
-      throw new NotImplementedException();
-   }
-
-   [IgnoreModifiable]
-   public new ObservableRangeCollection<LocationComposite> Parents { get; set; } = [];
-
-   public bool IsReadonly { get; } = false;
+   public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Continent> GetGlobalItems() => Globals.Continents;
@@ -44,10 +24,24 @@ public partial class Continent
    public static List<Continent> GetInferredList(IEnumerable<Location> sLocs) => sLocs
      .Select(loc => (Continent)loc
                .GetFirstParentOfType(LocationCollectionType
-                                       .Area))
+                                       .Area)!)
      .Distinct()
      .ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
-   public new static Continent Empty { get; } = new(FileInformation.Empty, "EmptyArcanum_Continent");
+   public string GetNamespace => $"Map.{nameof(Continent)}";
+
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory
+      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ContinentAgsSettings;
+   public string UniqueId { get; set; } = string.Empty;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public static Continent Empty => new() { UniqueId = "Arcanum_Empty_Continent" };
+   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
+   public LocationCollectionType LcType => LocationCollectionType.Continent;
+   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   public ObservableRangeCollection<SuperRegion> LocationChildren { get; set; } = [];
 }

@@ -38,7 +38,7 @@ public class NUISettings
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray());
-   public NUISetting LocationSettings { get; set; } = new(Location.Field.Name,
+   public NUISetting LocationSettings { get; set; } = new(Location.Field.UniqueId,
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray());
@@ -47,29 +47,29 @@ public class NUISettings
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray());
-   public NUISetting ProvinceSettings { get; set; } = new(Province.Field.Name,
+   public NUISetting ProvinceSettings { get; set; } = new(Province.Field.UniqueId,
                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting AreaSettings { get; set; } = new(Area.Field.Name,
+   public NUISetting AreaSettings { get; set; } = new(Area.Field.UniqueId,
                                                       Enum.GetValues<Area.Field>().Cast<Enum>().ToArray(),
                                                       Enum.GetValues<Area.Field>().Cast<Enum>().ToArray(),
                                                       Enum.GetValues<Area.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting RegionSettings { get; set; } = new(Region.Field.Name,
+   public NUISetting RegionSettings { get; set; } = new(Region.Field.UniqueId,
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting SuperRegionSettings { get; set; } = new(SuperRegion.Field.Name,
+   public NUISetting SuperRegionSettings { get; set; } = new(SuperRegion.Field.UniqueId,
                                                              Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
                                                              Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
                                                              Enum.GetValues<SuperRegion.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 
-   public NUISetting ContinentSettings { get; set; } = new(Continent.Field.Name,
+   public NUISetting ContinentSettings { get; set; } = new(Continent.Field.UniqueId,
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<Continent.Field>().Cast<Enum>().ToArray());

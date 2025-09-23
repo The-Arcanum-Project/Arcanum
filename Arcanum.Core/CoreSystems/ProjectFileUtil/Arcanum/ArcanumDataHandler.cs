@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Git;
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
@@ -21,7 +20,7 @@ public static class ArcanumDataHandler
       data = IO.IO.ReadAllText(filePath, Encoding.UTF8);
    }
 
-   private static void LoadGitData() 
+   private static void LoadGitData()
    {
       GetFromAppData(AppData.GitDataDescriptor.InternalPathLatestRelease, out var latestReleaseJson);
 
@@ -47,7 +46,6 @@ public static class ArcanumDataHandler
          IO.IO.WriteAllText(filePath, latestReleaseJson, Encoding.UTF8);
       }
    }
-
 
    #endregion
 }

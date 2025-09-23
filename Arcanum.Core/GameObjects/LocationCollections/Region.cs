@@ -1,52 +1,36 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
-using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-public partial class Region
-   : LocationCollection<Area>, INUI, ICollectionProvider<Region>, IMapInferable<Region>, IEmpty<Region>
+[ObjectSaveAs]
+public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocation, ILocationCollection<Area>
 {
-   public Region(FileInformation fileInfo, string name, ICollection<Area> provinces) : base(fileInfo, name, provinces)
-   {
-   }
-
-   public Region(FileInformation fileInfo, string name) : base(fileInfo, name)
-   {
-   }
-
-   public override LocationCollectionType LCType => LocationCollectionType.Region;
-
-   public override void RemoveGlobal()
-   {
-      throw new NotImplementedException();
-   }
-
-   public override void AddGlobal()
-   {
-      throw new NotImplementedException();
-   }
-
-   public bool IsReadonly { get; } = false;
+   public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
    public INUINavigation[] Navigations
    {
       get
       {
          List<INUINavigation?> navigations = [];
-         var parent = GetFirstParentOfType(LocationCollectionType.SuperRegion);
-         if (parent != Empty)
-            navigations.Add(new NUINavigation((INUI)parent, $"SuperRegion: {parent.Name}"));
+         var parent = this.GetFirstParentOfType(LocationCollectionType.SuperRegion);
+         if (parent != null)
+            navigations.Add(new NUINavigation(parent, $"SuperRegion: {parent.UniqueId}"));
 
-         if (SubCollection.Count > 0)
+         if (LocationChildren.Count > 0)
             navigations.Add(null);
 
-         foreach (var location in SubCollection)
-            navigations.Add(new NUINavigation(location, $"Region: {location.Name}"));
+         foreach (var location in LocationChildren)
+            navigations.Add(new NUINavigation(location, $"Region: {location.UniqueId}"));
 
          return navigations.ToArray()!;
       }
@@ -55,11 +39,26 @@ public partial class Region
 
    public static List<Region> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                              .Select(loc => (Region)loc
-                                                                                    .GetFirstParentOfType(LocationCollectionType
-                                                                                           .Area))
+                                                                                .GetFirstParentOfType(LocationCollectionType
+                                                                                   .Area)!)
                                                                              .Distinct()
                                                                              .ToList();
 
+   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
-   public new static Region Empty { get; } = new(FileInformation.Empty, "EmptyArcanum_Region");
+   public string GetNamespace => "Map.Region";
+
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory
+      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegionAgsSettings;
+   public string UniqueId { get; set; } = string.Empty;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public static Region Empty { get; } = new() { UniqueId = "Arcanum_Empty_Region" };
+
+   public LocationCollectionType LcType => LocationCollectionType.Region;
+   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   public ObservableRangeCollection<Area> LocationChildren { get; set; } = [];
 }

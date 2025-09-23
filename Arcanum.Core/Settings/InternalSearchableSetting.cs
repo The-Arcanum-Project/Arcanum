@@ -2,7 +2,6 @@
 using Arcanum.API.Attributes;
 using Arcanum.API.UtilServices.Search.SearchableSetting;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 using Common.Utils.PropertyUtils;
 

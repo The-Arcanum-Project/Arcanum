@@ -7,7 +7,6 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Sorting;
 using JetBrains.Annotations;
 

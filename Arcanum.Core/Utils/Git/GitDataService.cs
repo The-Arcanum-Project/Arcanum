@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using Arcanum.Core.GlobalStates;
 using Octokit;
 
 namespace Arcanum.Core.Utils.Git;
@@ -11,9 +10,9 @@ public static class GitDataService
    private const string MOD_FORGE_GIT_REPOSITORY = "Minnators-Modforge";
    public const string ARCANUM_REPOSITORY_URL = "https://github.com/Minnator/Arcanum";
    public const string MODFORGE_REPOSITORY_URL = "https://github.com/Minnator/Minnators-Modforge";
-   
+
    public const string MODFORGE_DISCORD_URL = "https://discord.gg/22AhD5qkme";
-   
+
    private const string RELEASE_NOTES_FILE_PATH = "Arcanum.Nexus.Core/ReleaseNotes";
 
    public static string GetFileFromRepositoryUrl(string owner, string repository, string branch, string filePath)

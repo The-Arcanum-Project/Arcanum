@@ -76,7 +76,7 @@ public static class VnHelper
                                          ref bool validationResult,
                                          [MaybeNullWhen(false)] out LiteralValueNode value)
    {
-      var returnVal = node.IsLiteralValueNode(ctx, actionName + ".ValueNode.IsLiteralValueNode", out value);
+      var returnVal = node.IsLiteralValueNode(ctx, actionName, out value);
       validationResult &= returnVal;
       return returnVal;
    }

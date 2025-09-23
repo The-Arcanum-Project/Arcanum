@@ -5,7 +5,6 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
@@ -99,5 +98,43 @@ public static class LUtil
       }
 
       return true;
+   }
+
+   public static bool TryAddToGlobals<T>(LocationContext ctx,
+                                         Token token,
+                                         string key,
+                                         string actionStack,
+                                         ref bool validationResult,
+                                         T value) where T : IEu5Object
+   {
+      return TryAddToGlobals(ctx,
+                             token,
+                             key,
+                             actionStack,
+                             ref validationResult,
+                             value,
+                             (Dictionary<string, T>)value.GetGlobalItemsNonGeneric());
+   }
+
+   public static bool TryAddToGlobals<T>(LocationContext ctx,
+                                         Token token,
+                                         string key,
+                                         string actionStack,
+                                         ref bool validationResult,
+                                         T value,
+                                         Dictionary<string, T> globals) where T : IEu5Object
+   {
+      if (globals.TryAdd(key, value))
+         return true;
+
+      ctx.SetPosition(token);
+      DiagnosticException.LogWarning(ctx.GetInstance(),
+                                     ParsingError.Instance.DuplicateObjectDefinition,
+                                     $"{actionStack}.TryAddToGlobals",
+                                     key,
+                                     typeof(T).Name,
+                                     "UniqueId");
+      validationResult = false;
+      return false;
    }
 }

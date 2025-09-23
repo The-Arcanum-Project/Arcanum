@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
@@ -111,7 +110,7 @@ public class RoadsAndCountriesParsing : FileLoadingService
             DiagnosticException.LogWarning(ctx.GetInstance(),
                                            ParsingError.Instance.InvalidRoadSameLocation,
                                            GetActionName(),
-                                           start.Name);
+                                           start.UniqueId);
             create = false;
          }
 

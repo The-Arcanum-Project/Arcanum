@@ -80,79 +80,95 @@ public static class AttributeHelper
    /// <returns>The argument's value cast to T, or the provided default value.</returns>
    public static T? GetAttributeArgumentValue<T>(
       AttributeData attribute,
-      int position = -1, // Use -1 as a sentinel for "not a positional argument"
+      int position = -1,
       string? name = null,
       T? defaultValue = default)
    {
-      // Find the correct TypedConstant from either constructor or named arguments
       TypedConstant argumentConstant;
+
+      // --- Step 1: Find the correct TypedConstant ---
       if (position >= 0)
       {
          // Positional argument
          if (position >= attribute.ConstructorArguments.Length)
+         {
+            // The argument was not provided, try to get the default from the constructor signature
+            var param = attribute.AttributeConstructor?.Parameters.ElementAtOrDefault(position);
+            if (param != null && param.HasExplicitDefaultValue)
+            {
+               if (param.ExplicitDefaultValue is T val)
+                  return val;
+            }
+
             return defaultValue;
+         }
 
          argumentConstant = attribute.ConstructorArguments[position];
       }
       else if (!string.IsNullOrEmpty(name))
       {
          // Named argument
-         argumentConstant = attribute.NamedArguments
-                                     .FirstOrDefault(arg => arg.Key == name)
-                                     .Value;
-
-         // If the named argument wasn't found, the Value will be null/default.
+         argumentConstant = attribute.NamedArguments.FirstOrDefault(arg => arg.Key == name).Value;
          if (argumentConstant.IsNull)
             return defaultValue;
       }
       else
       {
-         // Invalid usage of the helper
+         // Invalid use of the helper
          return defaultValue;
       }
 
-      // --- THE CORE FIX FOR ARRAYS ---
+      // --- Step 2: Safely extract the value based on its Kind ---
 
-      // Check if the requested type 'T' is an array type.
-      if (typeof(T).IsArray)
+      // Case A: The argument is an array
+      if (argumentConstant.Kind == TypedConstantKind.Array)
       {
-         // If the argument is not an array kind, something is wrong.
-         if (argumentConstant.Kind != TypedConstantKind.Array)
+         // Check if the caller is *expecting* an array.
+         if (!typeof(T).IsArray)
          {
+            // Type mismatch: attribute provided an array, but caller wants a single value.
             return defaultValue;
          }
 
-         // The value is in the 'Values' property.
-         var arrayValues = argumentConstant.Values;
-         if (arrayValues.IsDefault)
-            return defaultValue; // Handle empty/null array case
+         ImmutableArray<TypedConstant> arrayValues = argumentConstant.Values;
+         if (arrayValues.IsDefaultOrEmpty)
+         {
+            // Return an empty array of the correct type, or the default.
+            return defaultValue ?? (T)(object)System.Array.CreateInstance(typeof(T).GetElementType()!, 0);
+         }
 
-         // Get the element type of the requested array (e.g., 'string' from 'string[]')
-         var elementType = typeof(T).GetElementType();
+         Type? elementType = typeof(T).GetElementType();
          if (elementType == null)
             return defaultValue;
 
-         // Create a new array of the correct element type
          var resultArray = Array.CreateInstance(elementType, arrayValues.Length);
-
-         // Populate the new array by converting each TypedConstant
-         for (var i = 0; i < arrayValues.Length; i++)
+         for (int i = 0; i < arrayValues.Length; i++)
          {
             resultArray.SetValue(arrayValues[i].Value, i);
          }
 
-         // Return the populated array, cast to the final type T
          return (T)(object)resultArray;
       }
-      else
-      {
-         // --- This is the logic for non-array types ---
-         if (argumentConstant.Value is T typedValue)
-         {
-            return typedValue;
-         }
 
-         return defaultValue;
+      // Case B: The argument is a single value
+      if (argumentConstant.Value is T typedValue)
+      {
+         return typedValue;
       }
+
+      // Handle cases where the type might need conversion (e.g., int to Enum)
+      if (typeof(T).IsEnum && argumentConstant.Value is int intValue)
+      {
+         try
+         {
+            return (T)Enum.ToObject(typeof(T), intValue);
+         }
+         catch
+         {
+            return defaultValue;
+         }
+      }
+
+      return defaultValue;
    }
 }

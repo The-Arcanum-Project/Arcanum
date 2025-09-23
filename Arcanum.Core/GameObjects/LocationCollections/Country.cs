@@ -14,7 +14,6 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Religion;
-using Arcanum.Core.GlobalStates;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;

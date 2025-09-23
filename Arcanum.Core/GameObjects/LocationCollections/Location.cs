@@ -1,36 +1,38 @@
 ﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GlobalStates;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[ObjectSaveAs]
 public partial class Location
-   : LocationComposite, INUI, ICollectionProvider<Location>, IMapInferable<Location>, IEmpty<Location>
+   : IMapInferable<Location>, IEu5Object<Location>, ILocation
 {
-   public Location(FileInformation information, int color, string name) : base(name, information)
-   {
-      Color = color;
-   }
-
    #region game/in_game/map_data/named_locations.txt
 
+   [SuppressAgs]
    [ToStringArguments("X")]
    [Description("The color of the location in the map data.")]
-   public int Color { get; set; }
-   public new static Location Empty { get; } = new(FileInformation.Empty, 0, "EmptyArcanum_Location");
+   public JominiColor Color { get; set; } = JominiColor.Empty;
 
    #endregion
 
    #region Market: game/main_menu/setup/start
 
+   [SuppressAgs]
    [Description("The market associated with this location, if any.")]
    public Market Market { get; set; } = Market.Empty;
    public bool HasMarket => Market != Market.Empty;
@@ -39,42 +41,22 @@ public partial class Location
 
    #region Pops: game/main_menu/setup/start/06_pops.txt
 
+   [SuppressAgs]
    [Description("The pops residing in this location.")]
    public ObservableRangeCollection<Pop> Pops { get; set; } = [];
 
    #endregion
 
-   public override string ToString() => $"{Name}";
+   public override string ToString() => UniqueId;
+   public ICollection<Location> GetLocations() => throw new NotImplementedException();
 
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => Name.GetHashCode();
-
-   public override ICollection<Location> GetLocations() => [this];
-
-   public override LocationCollectionType LCType => LocationCollectionType.Location;
+   public LocationCollectionType LcType => LocationCollectionType.Location;
+   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
-   public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Distinct().ToList();
+   public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.ToList();
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is Location other)
-         return string.Equals(Name, other.Name, StringComparison.Ordinal);
-
-      return false;
-   }
-
-   public static bool operator ==(Location? left, Location? right)
-   {
-      if (left is null)
-         return right is null;
-
-      return left.Equals(right);
-   }
-
-   public static bool operator !=(Location? left, Location? right) => !(left == right);
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationSettings;
@@ -83,9 +65,9 @@ public partial class Location
       get
       {
          List<INUINavigation?> navigations = [];
-         var parent = GetFirstParentOfType(LocationCollectionType.Province);
-         if (parent != Empty)
-            navigations.Add(new NUINavigation((INUI)parent, $"Province: {parent.Name}"));
+         var parent = this.GetFirstParentOfType(LocationCollectionType.Province);
+         if (parent != null)
+            navigations.Add(new NUINavigation(parent, $"Province: {parent.UniqueId}"));
 
          navigations.Add(null);
          navigations.AddRange(Pops.Select(pop => new NUINavigation(pop,
@@ -100,4 +82,15 @@ public partial class Location
          return navigations.ToArray()!;
       }
    }
+   public string GetNamespace => throw new NotImplementedException();
+
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory
+      => IQueastorSearchSettings.Category.GameObjects | IQueastorSearchSettings.Category.MapObjects;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationAgsSettings;
+   public string UniqueId { get; set; } = string.Empty;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" };
 }

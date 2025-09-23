@@ -133,8 +133,7 @@ public static class SimpleObjectParser
          return false;
       }
 
-      eu5Obj = new() { UniqueId = bn.KeyNode.GetLexeme(source), Source = fileObj };
-      fileObj.ObjectsInFile.Add(eu5Obj);
+      eu5Obj = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
       return true;
    }
 
@@ -156,35 +155,31 @@ public static class SimpleObjectParser
          if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
-         var key = bn.KeyNode.GetLexeme(source);
-         var instance = (TTarget)Activator.CreateInstance(typeof(TTarget))!;
-         instance.UniqueId = key;
-         instance.Source = fileObj;
-         fileObj.ObjectsInFile.Add(instance);
+         var instance = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
 
          Debug.Assert(instance.Source != null, "instance.Source != null");
 
          if (lockObject != null)
          {
             lock (lockObject)
-               if (!globals.TryAdd(key, instance))
+               if (!globals.TryAdd(instance.UniqueId, instance))
                {
                   ctx.SetPosition(bn.KeyNode);
                   DiagnosticException.LogWarning(ctx,
                                                  ParsingError.Instance.DuplicateObjectDefinition,
                                                  actionStack,
-                                                 key,
+                                                 bn.KeyNode.GetLexeme(source),
                                                  typeof(TTarget),
                                                  "UniqueId");
                }
          }
-         else if (!globals.TryAdd(key, instance))
+         else if (!globals.TryAdd(instance.UniqueId, instance))
          {
             ctx.SetPosition(bn.KeyNode);
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
-                                           key,
+                                           bn.KeyNode.GetLexeme(source),
                                            typeof(TTarget),
                                            "UniqueId");
          }

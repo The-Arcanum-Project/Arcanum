@@ -20,7 +20,6 @@ using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
-using Arcanum.Core.GlobalStates;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 

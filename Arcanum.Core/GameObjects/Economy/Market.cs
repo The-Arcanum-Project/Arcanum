@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GlobalStates;
 
 namespace Arcanum.Core.GameObjects.Economy;
 
@@ -40,5 +39,5 @@ public partial class Market(Location location) : INUI, ICollectionProvider<Marke
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations { get; } = [];
 
-   public override string ToString() => $"Market of {Location.Name}";
+   public override string ToString() => $"Market of {Location.UniqueId}";
 }

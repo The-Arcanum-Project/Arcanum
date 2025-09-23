@@ -4,7 +4,6 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
-using Arcanum.Core.GlobalStates;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;

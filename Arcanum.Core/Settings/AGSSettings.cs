@@ -14,7 +14,13 @@ public class AGSSettings
    public AgsSettings InstitutionStateAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
+   public AgsSettings ProvinceAgsSettings { get; set; } = new();
+   public AgsSettings AreaAgsSettings { get; set; } = new();
+   public AgsSettings RegionAgsSettings { get; set; } = new();
+   public AgsSettings SuperRegionAgsSettings { get; set; } = new();
+   public AgsSettings ContinentAgsSettings { get; set; } = new();
    public AgsSettings CountryAgsSettings { get; set; } = new();
+   public AgsSettings LocationAgsSettings { get; set; } = new();
    public AgsSettings CultureAgsSettings { get; set; } = new();
    public AgsSettings TimedModifierAgsSettings { get; set; } = new();
    public AgsSettings JominiDateSettings { get; set; } = new();
