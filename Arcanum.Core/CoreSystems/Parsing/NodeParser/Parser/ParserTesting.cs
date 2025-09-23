@@ -21,7 +21,7 @@ public static class ParserTesting
    public static string GetFilePath(FilesToTest file)
    {
       const string location =
-         @"C:\Users\david\source\repos\Arcanum\Arcanum.Core\CoreSystems\Parsing\CeasarParser\TestFiles";
+         @"C:\Users\david\source\repos\Arcanum\Arcanum.Core\CoreSystems\Parsing\NodeParser\TestFiles";
       return Path.Combine(location, file + ".txt");
    }
 }

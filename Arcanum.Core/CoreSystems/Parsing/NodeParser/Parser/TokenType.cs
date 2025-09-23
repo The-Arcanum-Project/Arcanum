@@ -41,4 +41,6 @@ public enum TokenType
    Comment, // # this is a comment (usually skipped)
    EndOfFile, // EOF
    Unexpected, // For error handling
+   Whitespace,
+   NewLine,
 }
