@@ -150,7 +150,7 @@ public ref struct Parser
       if (knownIdentifier == null)
          Match(TokenType.Equals);
 
-      Expect(TokenType.LeftBrace, $"'{{' after block name '{name.GetValue(_source)}'.");
+      Expect(TokenType.LeftBrace, $"'{{' after block name .");
       var block = new BlockNode(name);
 
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
@@ -221,7 +221,7 @@ public ref struct Parser
       var name = Expect(TokenType.Identifier, "function name.");
       var funcCall = new FunctionCallNode(name);
 
-      Expect(TokenType.LeftBrace, $"'{{' after function name '{name.GetValue(_source)}'.");
+      Expect(TokenType.LeftBrace, "'{{' after function name");
 
       // Loop until we find the closing brace.
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
@@ -259,9 +259,9 @@ public ref struct Parser
                                           Current().Line,
                                           _tokens[0].Column,
                                           Current().GetValue(_source),
-                                          message);
+                                          $"{message} but found '{Current().GetValue(_source)}' instead.");
 
-      throw new($"Syntax Error on line {Peek().Line}: {message}");
+      throw new InvalidOperationException($"Syntax Error on line {Peek().Line}: {message}");
    }
 
    private Token Advance()
