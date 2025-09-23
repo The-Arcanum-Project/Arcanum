@@ -52,14 +52,14 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
       var rn = Parser.Parse(fileObj, out var source, out var ctx);
       var validation = true;
 
-      LoadSingleFile(rn, ctx, new(fileObj.Path, fileObj.Descriptor), ACTION_STACK, source, ref validation, lockObject);
+      LoadSingleFile(rn, ctx, fileObj, ACTION_STACK, source, ref validation, lockObject);
 
       return validation;
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
-      return UnloadSingleFileContent(new(fileObj.Path, fileObj.Descriptor), lockObject);
+      return UnloadSingleFileContent(fileObj, lockObject);
    }
 
    protected virtual bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)

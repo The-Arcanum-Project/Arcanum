@@ -11,12 +11,13 @@ public class InterfaceGatherer : IIncrementalGenerator
    // --- CONFIGURATION ---
    // Key: The fully qualified name of the interface to find.
    // Value: The name of the property list in the generated class.
-   private static readonly Dictionary<string, string> InterfacesToRegister = new()
+   private static readonly Dictionary<string, (string name, bool generateEnum)> InterfacesToRegister = new()
    {
-      { "Arcanum.API.UtilServices.Search.ISearchable", "AllSearchableTypes" },
-      { "Arcanum.Core.CoreSystems.NUI.IHasMapMode", "MapModeProvider" },
-      { "Arcanum.Core.CoreSystems.NUI.INUI", "NUIType" },
-      { "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs", "Ags" },
+      { "Arcanum.API.UtilServices.Search.ISearchable", ("AllSearchableTypes", false) },
+      { "Arcanum.Core.CoreSystems.NUI.IHasMapMode", ("MapModeProvider", false) },
+      { "Arcanum.Core.CoreSystems.NUI.INUI", ("NUIType", false) },
+      { "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs", ("Ags", false) },
+      { "Arcanum.Core.GameObjects.BaseTypes.IEu5Object", ("Eu5Objects", true) },
    };
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -54,10 +55,10 @@ public class InterfaceGatherer : IIncrementalGenerator
       sb.AppendLine();
       sb.AppendLine("namespace Arcanum.Core.Registry;");
       sb.AppendLine();
-      sb.AppendLine($"public static class {InterfacesToRegister[results.Key]}Registry");
+      sb.AppendLine($"public static class {InterfacesToRegister[results.Key].name}Registry");
       sb.AppendLine("{");
 
-      sb.AppendLine($"    public static readonly IReadOnlyList<Type> {InterfacesToRegister[results.Key]} = ");
+      sb.AppendLine($"    public static readonly IReadOnlyList<Type> {InterfacesToRegister[results.Key].name} = ");
       sb.AppendLine("    [");
 
       foreach (var typeSymbol in results.Value)
@@ -66,11 +67,75 @@ public class InterfaceGatherer : IIncrementalGenerator
       sb.AppendLine("    ];");
       sb.AppendLine();
 
-      sb.AppendLine("}");
 
-      context.AddSource($"{InterfacesToRegister[results.Key]}Registry.g.cs", sb.ToString());
+      if (InterfacesToRegister[results.Key].generateEnum)
+         GenerateEnumSource(context, results, sb);
+      else
+         sb.AppendLine("}");
+      
+      
+      context.AddSource($"{InterfacesToRegister[results.Key].name}Registry.g.cs", sb.ToString());
    }
 
+   private static void GenerateEnumSource(SourceProductionContext context,
+                                        KeyValuePair<string, List<INamedTypeSymbol>> results, StringBuilder sb)
+   {
+      sb.AppendLine($"    public static Type ToType(this {InterfacesToRegister[results.Key].name}Enum enumValue)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        return enumValue switch");
+      sb.AppendLine("        {");
+      foreach (var typeSymbol in results.Value)
+      {
+         var enumName = typeSymbol.Name;
+         if (results.Value.Count(t => t.Name == enumName) > 1)
+            enumName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                                 .Replace("global::", "")
+                                 .Replace('.', '_');
+
+         sb.AppendLine($"            {InterfacesToRegister[results.Key].name}Enum.{enumName} => typeof(global::{typeSymbol.ToDisplayString()}),");
+      }
+      sb.AppendLine("            _ => throw new ArgumentOutOfRangeException(nameof(enumValue), enumValue, null)");
+      sb.AppendLine("        };");
+      sb.AppendLine("    }");
+      sb.AppendLine($"    public static bool TryGetEnumRepresentation(Type type, out {InterfacesToRegister[results.Key].name}Enum result)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        switch (type)");
+      sb.AppendLine("        {");
+      foreach (var typeSymbol in results.Value)
+      {
+         var enumName = typeSymbol.Name;
+         if (results.Value.Count(t => t.Name == enumName) > 1)
+            enumName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                                 .Replace("global::", "")
+                                 .Replace('.', '_');
+
+         sb.AppendLine($"            case var t when t == typeof(global::{typeSymbol.ToDisplayString()}):");
+         sb.AppendLine($"                result = {InterfacesToRegister[results.Key].name}Enum.{enumName};");
+         sb.AppendLine("                return true;");
+      }
+      sb.AppendLine("            default:");
+      sb.AppendLine("                result = default;");
+      sb.AppendLine("                return false;");
+      sb.AppendLine("        }");
+      sb.AppendLine("    }");
+      
+      sb.AppendLine($"    public enum {InterfacesToRegister[results.Key].name}Enum");
+      sb.AppendLine("    {");
+
+      foreach (var typeSymbol in results.Value)
+      {
+         var enumName = typeSymbol.Name;
+         if (results.Value.Count(t => t.Name == enumName) > 1)
+            enumName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                                 .Replace("global::", "")
+                                 .Replace('.', '_');
+
+         sb.AppendLine($"        {enumName},");
+      }
+      sb.AppendLine("    }");
+      sb.AppendLine("}");
+   }
+   
    private static Dictionary<string, List<INamedTypeSymbol>> FoundTypesByInterface(
       Compilation compilation,
       ImmutableArray<ClassDeclarationSyntax> classes)
