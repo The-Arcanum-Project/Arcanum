@@ -44,3 +44,15 @@ public enum TokenType
    Whitespace,
    NewLine,
 }
+
+[Flags]
+public enum CharFlags : byte
+{
+   None = 0,
+   IsAlpha = 1 << 0,
+   IsDigit = 1 << 1,
+   IsContinuation = 1 << 2, // e.g., ':', '.', '|', '-'
+   IsAlphaNumeric = IsAlpha | IsDigit,
+   IsIdentifierStart = IsAlpha,
+   IsIdentifierContinuation = IsAlphaNumeric | IsContinuation,
+}

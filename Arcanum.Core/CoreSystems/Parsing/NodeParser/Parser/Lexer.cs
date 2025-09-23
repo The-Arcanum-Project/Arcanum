@@ -10,6 +10,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 public ref struct Lexer
 {
    private readonly ReadOnlySpan<char> _source;
+   private static readonly CharFlags[] _charFlags = new CharFlags[128];
    private Span<Token> _tokens;
 
    private int _tokenCount;
@@ -62,6 +63,20 @@ public ref struct Lexer
 
       for (var c = '0'; c <= '9'; c++)
          CharToTokenMap[c] = TokenType.Number;
+
+      for (var c = 'a'; c <= 'z'; c++)
+         _charFlags[c] |= CharFlags.IsAlpha;
+      for (var c = 'A'; c <= 'Z'; c++)
+         _charFlags[c] |= CharFlags.IsAlpha;
+      _charFlags['_'] |= CharFlags.IsAlpha;
+
+      for (var c = '0'; c <= '9'; c++)
+         _charFlags[c] |= CharFlags.IsDigit;
+
+      _charFlags[':'] |= CharFlags.IsContinuation;
+      _charFlags['.'] |= CharFlags.IsContinuation;
+      _charFlags['|'] |= CharFlags.IsContinuation;
+      _charFlags['-'] |= CharFlags.IsContinuation;
    }
 
    public Lexer(ReadOnlySpan<char> source, Span<Token> tokenBuffer)
@@ -176,11 +191,12 @@ public ref struct Lexer
 
    private void ScanIdentifier(bool isAtIdentifier = false)
    {
-      while (_current < _source.Length && IsIdentifierContinuationChar(_source[_current]))
+      do
       {
          _current++;
          _column++;
       }
+      while (_current < _source.Length && IsIdentifierContinuationChar(_source[_current]));
 
       if (isAtIdentifier)
       {
@@ -247,12 +263,23 @@ public ref struct Lexer
 
    private void ScanString()
    {
-      while (_current < _source.Length && _source[_current] != '"')
+      while (_current < _source.Length)
       {
-         if (_source[_current] == '\n')
+         var c = _source[_current];
+         if (c == '"')
+            break; // Found the end
+
+         switch (c)
          {
-            _line++;
-            _column = 0;
+            case '\\' when _current + 1 < _source.Length:
+               // If it's an escape sequence, consume both characters
+               _current++;
+               _column++;
+               break;
+            case '\n':
+               _line++;
+               _column = 0;
+               break;
          }
 
          _current++;
@@ -281,21 +308,23 @@ public ref struct Lexer
       return _source[_current++];
    }
 
-   private void AddToken(TokenType type)
-   {
-      var consumedChars = _current - _start;
-      AddToken(type, _start, consumedChars);
-   }
-
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private void AddToken(TokenType type, int start, int length)
    {
       if (_tokenCount >= _tokens.Length)
-         // Handle buffer full error - maybe throw or have a return code
-         // For simplicity, we'll just stop adding tokens.
          return;
 
-      _tokens[_tokenCount++] = new(type, start, length, _line, _column - length);
+      var consumedChars = _current - _start;
+      var startColumn = _column - consumedChars;
+
+      _tokens[_tokenCount++] = new(type, start, length, _line, startColumn);
+   }
+
+   private void AddToken(TokenType type)
+   {
+      // Now it's consistent.
+      var consumedChars = _current - _start;
+      AddToken(type, _start, consumedChars);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -320,14 +349,9 @@ public ref struct Lexer
    private static bool IsAlpha(char c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or '_';
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private static bool IsAlphaNumeric(char c) => IsAlpha(c) || IsAsciiDigit(c);
-
-   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static bool IsIdentifierContinuationChar(char c)
    {
-      // This is a great candidate for another small lookup table if you want to push it further,
-      // but a series of ORs is usually compiled efficiently.
-      return IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
+      return c < 128 && (_charFlags[c] & CharFlags.IsIdentifierContinuation) != 0;
    }
 
    #endregion
