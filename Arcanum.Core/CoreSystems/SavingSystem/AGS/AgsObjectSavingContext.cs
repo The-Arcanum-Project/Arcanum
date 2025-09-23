@@ -84,17 +84,17 @@ public class AgsObjectSavingContext
          return;
       }
 
-      var isInCollections = false;
+      // var isInCollections = false;
 
       using (sb.BlockWithName(Ags, Settings.Format))
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
-            if (prop.IsCollection && !isInCollections)
-            {
-               sb.AppendLine();
-               isInCollections = true;
-            }
+            // if (prop.IsCollection && !isInCollections)
+            // {
+            //    sb.AppendLine();
+            //    isInCollections = true;
+            // }
 
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();

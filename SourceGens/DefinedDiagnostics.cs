@@ -87,4 +87,12 @@ public static class DefinedDiagnostics
        category: CATEGORY,
        DiagnosticSeverity.Error,
        isEnabledByDefault: true);
+
+   public static DiagnosticDescriptor InvalidSaveAsAttribute = new(id: "AGS011",
+                                                                   title: "Invalid SaveAs Attribute",
+                                                                   messageFormat:
+                                                                   "The [SaveAs] attribute on property '{0}' in class '{1}' has an invalid argument: {2}",
+                                                                   category: CATEGORY,
+                                                                   DiagnosticSeverity.Error,
+                                                                   isEnabledByDefault: true);
 }

@@ -61,5 +61,6 @@ public partial class SuperRegion
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
+   [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Region> LocationChildren { get; set; } = [];
 }

@@ -60,5 +60,6 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
 
    public LocationCollectionType LcType => LocationCollectionType.Region;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Area> LocationChildren { get; set; } = [];
 }

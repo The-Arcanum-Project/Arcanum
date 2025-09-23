@@ -61,8 +61,8 @@ public partial class AgsWindow
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
          if (methodInfo != null)
          {
-            var allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
-            AgsItems = allItems.Cast<IAgs>().ToList();
+            var allItems = (IDictionary)methodInfo.Invoke(null, null)!;
+            AgsItems = allItems.Values.Cast<IAgs>().ToList();
             AgsItems.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
             AgsItemsView.SelectedIndex = 0;
             return;

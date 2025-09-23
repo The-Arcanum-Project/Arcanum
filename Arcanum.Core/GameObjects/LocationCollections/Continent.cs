@@ -43,5 +43,6 @@ public partial class Continent
    public ICollection<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.Continent;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<SuperRegion> LocationChildren { get; set; } = [];
 }

@@ -296,6 +296,9 @@ public class IndentedStringBuilder(string indentString = "\t")
                itemCount = 0;
             }
          }
+
+         if (line.Length > 0)
+            AppendLine(line.ToString());
       }
    }
 }
