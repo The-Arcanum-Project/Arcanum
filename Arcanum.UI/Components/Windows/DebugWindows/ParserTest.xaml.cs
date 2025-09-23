@@ -1,6 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System.Buffers;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
@@ -86,25 +89,26 @@ public partial class ParserTest : INotifyPropertyChanged
          InputText = source;
       else
          InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
-      var lexer = new Lexer(source);
+      var tokenBuffer = ArrayPool<Token>.Shared.Rent(source.Length / 4); // Rent a buffer
 
       var watch = System.Diagnostics.Stopwatch.StartNew();
-      var result = lexer.ScanTokens();
+      var lexer = new Lexer(source.AsSpan(), tokenBuffer.AsSpan());
+      var tokens = lexer.ScanTokens();
       watch.Stop();
       Time = $"Lexing: {watch.ElapsedMilliseconds} ms";
 
-      var sb = new System.Text.StringBuilder();
+      var sb = new StringBuilder();
 
-      if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
+      if (tokens.Length > MAX_OUTPUT_LENGTH)
       {
-         sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
+         sb.AppendLine($"--- Output truncated due to length ({tokens.Length} tokens) ---\n");
       }
       else
       {
-         if (result.Tokens.Count != 0)
+         if (tokens.Length != 0)
          {
-            sb.AppendLine($"--- Tokens Found ({result.Tokens.Count}) ---\n");
-            foreach (var token in result.Tokens)
+            sb.AppendLine($"--- Tokens Found ({tokens.Length}) ---\n");
+            foreach (var token in tokens)
             {
                if (sb.Length > MAX_OUTPUT_LENGTH)
                {
@@ -123,7 +127,8 @@ public partial class ParserTest : INotifyPropertyChanged
          }
       }
 
-      Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
+      ArrayPool<Token>.Shared.Return(tokenBuffer);
+      Time += $", lines: {tokens[^1].Line}|{source.Length} chars";
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
@@ -167,29 +172,32 @@ public partial class ParserTest : INotifyPropertyChanged
             InputText = source;
          else
             InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
-         var lexer = new Lexer(source);
          var watch = System.Diagnostics.Stopwatch.StartNew();
-         var result = lexer.ScanTokens();
+         var tokenBuffer = ArrayPool<Token>.Shared.Rent(source.Length / 4); // Rent a buffer
+         var lexer = new Lexer(source.AsSpan(), tokenBuffer.AsSpan());
+         var tokens = lexer.ScanTokens();
          watch.Stop();
          Time = $"Lexing {watch.ElapsedMilliseconds} ms";
          var lexTime = watch.ElapsedMilliseconds;
+
          watch.Restart();
-         var parser = new Parser(result);
-         var ast = parser.Parse();
+         var parser = new Parser(tokens, source);
+         var rn = parser.Parse();
          watch.Stop();
 
-         var sb = new System.Text.StringBuilder();
-         if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
-            sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
+         var sb = new StringBuilder();
+         if (tokens.Length > MAX_OUTPUT_LENGTH)
+            sb.AppendLine($"--- Output truncated due to length ({tokens.Length} tokens) ---\n");
          else
          {
-            Parser.PrintAst(ast, sb, "", source);
+            Parser.PrintAst(rn, sb, "", source);
             OutputText = sb.ToString();
          }
 
          Time +=
             $", Parsing {watch.ElapsedMilliseconds} ms, Total {lexTime + watch.ElapsedMilliseconds} ms";
-         Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
+         Time += $", lines: {tokens[^1].Line}|{source.Length} chars";
+         ArrayPool<Token>.Shared.Return(tokenBuffer);
       }
       catch (Exception e)
       {

@@ -49,8 +49,9 @@ public abstract class ParserValidationLoadingService<T> : FileLoadingService whe
 
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
-      var rn = Parser.Parse(fileObj, out var source, out var ctx);
+      var rn = PLHelper.ParseFile(fileObj, out var source);
       var validation = true;
+      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
 
       LoadSingleFile(rn, ctx, fileObj, ACTION_STACK, source, ref validation, lockObject);
 

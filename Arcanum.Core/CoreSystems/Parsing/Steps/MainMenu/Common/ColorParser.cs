@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -17,7 +18,8 @@ public class ColorParser : FileLoadingService
    {
       const string colorKey = "colors";
       const string actionStack = nameof(ColorParser);
-      var rn = Parser.Parse(fileObj, out var source, out var ctx);
+      var rn = PLHelper.ParseFile(fileObj, out var source);
+      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
       var validation = true;
 
       rn.HasXStatements(ctx, 1, ref validation);

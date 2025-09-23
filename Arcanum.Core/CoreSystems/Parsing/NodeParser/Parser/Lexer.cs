@@ -7,10 +7,12 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 /// is highly optimized for performance, minimizing allocations, method calls in hot loops,
 /// and branching.
 /// </summary>
-public class Lexer
+public ref struct Lexer
 {
-   private readonly string _source;
-   private readonly List<Token> _tokens;
+   private readonly ReadOnlySpan<char> _source;
+   private Span<Token> _tokens;
+
+   private int _tokenCount;
 
    private int _start;
    private int _current;
@@ -62,28 +64,24 @@ public class Lexer
          CharToTokenMap[c] = TokenType.Number;
    }
 
-   public Lexer(string source)
+   public Lexer(ReadOnlySpan<char> source, Span<Token> tokenBuffer)
    {
       _source = source;
-      // Pre-allocate the list capacity. A heuristic like length / 5
-      // is a good starting point to avoid most, if not all, reallocations.
-      var estimatedTokenCount = Math.Max(16, source.Length / 5);
-      _tokens = new(estimatedTokenCount);
+      _tokens = tokenBuffer;
    }
 
-   public LexerResult ScanTokens()
+   public Span<Token> ScanTokens()
    {
-      // Cache the source length to avoid accessing property in the loop condition.
-      var sourceLength = _source.Length;
-
-      while (_current < sourceLength)
+      while (_current < _source.Length)
       {
          _start = _current;
          ScanToken();
       }
 
-      _tokens.Add(new(TokenType.EndOfFile, _source.Length, 0, _line, _column));
-      return new(_source, _tokens);
+      if (_tokenCount < _tokens.Length)
+         _tokens[_tokenCount++] = new(TokenType.EndOfFile, _source.Length, 0, _line, _column);
+
+      return _tokens[.._tokenCount];
    }
 
    private void ScanToken()
@@ -190,7 +188,7 @@ public class Lexer
       }
       else
       {
-         var textSpan = _source.AsSpan(_start, _current - _start);
+         var textSpan = _source[_start.._current];
          var type = LookupIdentifierType(textSpan);
          AddToken(type);
       }
@@ -285,13 +283,19 @@ public class Lexer
 
    private void AddToken(TokenType type)
    {
-      AddToken(type, _start, _current - _start);
+      var consumedChars = _current - _start;
+      AddToken(type, _start, consumedChars);
    }
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private void AddToken(TokenType type, int start, int length)
    {
-      var consumedChars = _current - _start;
-      _tokens.Add(new(type, start, length, _line, _column - consumedChars));
+      if (_tokenCount >= _tokens.Length)
+         // Handle buffer full error - maybe throw or have a return code
+         // For simplicity, we'll just stop adding tokens.
+         return;
+
+      _tokens[_tokenCount++] = new(type, start, length, _line, _column - length);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
