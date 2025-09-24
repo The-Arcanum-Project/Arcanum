@@ -2,7 +2,6 @@
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -43,5 +42,6 @@ public partial class Continent
    public ICollection<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.Continent;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<SuperRegion> LocationChildren { get; set; } = [];
 }

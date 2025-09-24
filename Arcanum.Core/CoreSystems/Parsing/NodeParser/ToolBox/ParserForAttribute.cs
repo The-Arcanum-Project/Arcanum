@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 /// <summary>
 /// Marks a partial class as a parser that should be completed by the source generator.

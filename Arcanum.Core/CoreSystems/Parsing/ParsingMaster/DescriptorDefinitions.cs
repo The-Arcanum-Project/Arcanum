@@ -89,7 +89,8 @@ public static class DescriptorDefinitions
     public static readonly FileDescriptor PopTypeDescriptor = new(
         ["game", "in_game", "common", "pop_types"],
         new("01_pop_types", "txt", "#"),
-        [new PopTypeParsing([ColorParser.LoadingService[0]])],
+        ConsequentialLoadingSteps([new PopTypeDiscoverer([]),
+            new PopTypeParsing([ColorParser.LoadingService[0], ModifierDefinitionDescriptor.LoadingService[0]])]),
         false);
 
 

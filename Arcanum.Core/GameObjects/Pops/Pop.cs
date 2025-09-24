@@ -18,7 +18,7 @@ public partial class Pop(PopType type,
 
    public override string ToString()
    {
-      return $"{Type.Name} ({Size})";
+      return $"{Type.UniqueId} ({Size})";
    }
 
    public static Dictionary<string, Pop> GetGlobalItems() => [];

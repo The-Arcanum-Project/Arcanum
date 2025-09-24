@@ -57,5 +57,6 @@ public partial class Province : IMapInferable<Province>, IEu5Object<Province>, I
 
    public LocationCollectionType LcType => LocationCollectionType.Province;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+   [SaveAs(collectionAsPureIdentifierList: true)]
    public ObservableRangeCollection<Location> LocationChildren { get; set; } = [];
 }

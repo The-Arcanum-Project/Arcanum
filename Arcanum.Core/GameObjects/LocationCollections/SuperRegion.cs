@@ -2,7 +2,6 @@
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -61,5 +60,6 @@ public partial class SuperRegion
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
+   [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Region> LocationChildren { get; set; } = [];
 }

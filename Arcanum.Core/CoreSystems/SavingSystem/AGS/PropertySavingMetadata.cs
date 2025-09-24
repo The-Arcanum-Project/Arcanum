@@ -4,8 +4,11 @@ using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils;
 using Nexus.Core;
+
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -35,7 +38,7 @@ public class PropertySavingMetadata
    public required object? DefaultValue { get; set; }
    /// <summary>
    /// A delegate to provide a comment for this property when saving. <br/>
-   /// If null, no comment will be added. 
+   /// If null, no comment will be added.
    /// </summary>
    public required AgsDelegates.AgsCommentProvider? CommentProvider { get; set; }
    /// <summary>
@@ -52,13 +55,16 @@ public class PropertySavingMetadata
    /// Indicates whether this property is a collection (e.g., List, Array). <br/>
    /// If true, the property will be handled as a collection during saving.
    /// </summary>
-   public required bool IsCollection { get; set; }
+   public required bool IsCollection { get; init; }
+   public required bool CollectionAsPureIdentifierList { get; init; }
+   public required bool IsEmbeddedObject { get; init; }
 
    /// <summary>
    /// The separator to use between items in a collection when saving. <br/>
    /// Only relevant if IsCollection is true. Default is "".
    /// </summary>
    public required string CollectionSeparator { get; init; } = "";
+   public required bool SaveEmbeddedAsIdentifier { get; init; } = true;
 
    #region Equality operations
 
@@ -86,7 +92,7 @@ public class PropertySavingMetadata
    #endregion
 
    /// <summary>
-   /// Formats the property and appends it to the provided IndentedStringBuilder. 
+   /// Formats the property and appends it to the provided IndentedStringBuilder.
    /// </summary>
    /// <param name="ags"></param>
    /// <param name="sb"></param>
@@ -115,11 +121,14 @@ public class PropertySavingMetadata
          }
 
          if (IsCollection)
-            HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator);
+         {
+            if (value is IEnumerable collection)
+               HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator, collection);
+         }
          else if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
-            HandleEnumProperty(ags, sb, value);
-         else
-            HandlePrimitiveProperty(ags, sb);
+         {
+            HandleEnumProperty(sb, value);
+         }
       }
       else
          SavingMethod(ags, this, sb);
@@ -162,7 +171,7 @@ public class PropertySavingMetadata
       return false;
    }
 
-   private void HandleEnumProperty(IAgs ags, IndentedStringBuilder sb, object value)
+   private void HandleEnumProperty(IndentedStringBuilder sb, object value)
    {
       Debug.Assert(value is Enum, "Property is not an Enum");
 
@@ -182,7 +191,6 @@ public class PropertySavingMetadata
       }
       else
       {
-         // If it is not contained in the mapping it is meant to be ignored as it is a default or code-only value
          if (!data.Mapping.TryGetValue(value.ToString()!, out var stringRep))
             return;
 
@@ -190,66 +198,149 @@ public class PropertySavingMetadata
       }
    }
 
-   private static void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)
-      => ags.ToAgsContext(commentChar).BuildContext(sb);
-
-   private void HandlePrimitiveProperty(IAgs ags, IndentedStringBuilder sb)
+   private void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)
    {
-      sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatObjectValue(ValueType, ags, NxProp)}");
+      if (SaveEmbeddedAsIdentifier)
+         sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ags.SavingKey}");
+      else
+         ags.ToAgsContext(commentChar).BuildContext(sb);
    }
 
    private void HandleCollection(IAgs ags,
                                  IndentedStringBuilder sb,
                                  string commentChar,
                                  SavingFormat format,
-                                 string collectionSeparator)
+                                 string collectionSeparator,
+                                 IEnumerable collection)
    {
-      Debug.Assert(IsCollection, "Property is not a collection");
-
-      if (!ags.AgsSettings.WriteEmptyCollectionHeader)
+      if (!collection.HasItems() && !ags.AgsSettings.WriteEmptyCollectionHeader)
          return;
 
-      using (sb.BlockWithName(Keyword))
-      {
-         if (ValueType != SavingValueType.IAgs)
-         {
-            if (format == SavingFormat.Spacious)
-               sb.AppendLine();
-            List<string> keys = [];
-            object value = null!;
-            Nx.ForceGet(ags, NxProp, ref value);
+      if (format == SavingFormat.Spacious)
+         sb.AppendLine();
 
-            if (CollectionItemKeyProvider != null)
-               keys.AddRange(from object item in (IEnumerable)value
-                             select CollectionItemKeyProvider(item));
+      if (CollectionAsPureIdentifierList)
+         FormatAsIdentifierList(sb, collection, collectionSeparator);
+      else if (IsEmbeddedObject)
+         FormatAsEmbeddedObjectList(sb, collection, commentChar);
+      else
+         using (sb.BlockWithName(Keyword))
+            if (ValueType == SavingValueType.IAgs)
+               FormatAsEmbeddedObjectList(sb, collection, commentChar);
             else
-               keys.AddRange(from object item in (IEnumerable)value
-                             select SavingUtil.FormatValue(ValueType, item));
-            sb.AppendList(keys, collectionSeparator);
-            if (format == SavingFormat.Spacious)
-               sb.AppendLine();
+               FormatAsValueList(sb, collection, collectionSeparator);
+
+      if (format == SavingFormat.Spacious)
+         sb.AppendLine();
+   }
+
+   private static void FormatAsIdentifierList(IndentedStringBuilder sb, IEnumerable collection, string separator)
+   {
+      var lineItemCount = 0;
+      var currentLineStartPos = sb.InnerBuilder.Length;
+      var isFirstItem = true;
+
+      foreach (var item in collection)
+      {
+         if (item is not IAgs ia)
+            continue;
+
+         var savingKey = ia.SavingKey;
+
+         var needsLineBreak = !isFirstItem &&
+                              (sb.InnerBuilder.Length - currentLineStartPos + savingKey.Length + separator.Length >
+                               sb.MaxCollectionLineLength ||
+                               lineItemCount >= sb.MaxItemsInCollectionLine);
+
+         if (needsLineBreak)
+         {
+            sb.AppendLine();
+            currentLineStartPos = sb.InnerBuilder.Length;
+            lineItemCount = 0;
+         }
+
+         if (!isFirstItem)
+            sb.Append(separator);
+
+         sb.Append(savingKey);
+         lineItemCount++;
+         isFirstItem = false;
+      }
+   }
+
+   private void FormatAsValueList(IndentedStringBuilder sb, IEnumerable collection, string separator)
+   {
+      var padding = 0;
+      if (sb.PadCollectionItems)
+      {
+         if (sb.AutoCollectionPadding)
+         {
+            var maxLength = 0;
+            foreach (var item in collection)
+            {
+               var value = CollectionItemKeyProvider != null
+                              ? CollectionItemKeyProvider(item)
+                              : SavingUtil.FormatValue(ValueType, item);
+               if (value.Length > maxLength)
+                  maxLength = value.Length;
+            }
+
+            padding = maxLength + 1;
          }
          else
          {
-            if (format == SavingFormat.Spacious)
-               sb.AppendLine();
-            object collection = null!;
-            Nx.ForceGet(ags, NxProp, ref collection);
-
-            foreach (var item in (IEnumerable)collection)
-            {
-               if (item is IAgs ia)
-               {
-                  ia.ToAgsContext(commentChar).BuildContext(sb);
-               }
-               else
-                  throw new
-                     InvalidOperationException($"Collection property '{NxProp}' contains non-IAgs item of type '{item.GetType()}'.");
-            }
-
-            if (format == SavingFormat.Spacious)
-               sb.AppendLine();
+            padding = sb.CollectionItemPadding;
          }
       }
+
+      var lineItemCount = 0;
+      var currentLineStartPos = sb.InnerBuilder.Length;
+      var isFirstItem = true;
+
+      foreach (var item in collection)
+      {
+         var valueToAppend = CollectionItemKeyProvider != null
+                                ? CollectionItemKeyProvider(item)
+                                : SavingUtil.FormatValue(ValueType, item);
+
+         var needsLineBreak = !isFirstItem &&
+                              (sb.InnerBuilder.Length -
+                               currentLineStartPos +
+                               valueToAppend.Length +
+                               separator.Length >
+                               sb.MaxCollectionLineLength ||
+                               lineItemCount >= sb.MaxItemsInCollectionLine);
+
+         if (needsLineBreak)
+         {
+            sb.AppendLine();
+            currentLineStartPos = sb.InnerBuilder.Length;
+            lineItemCount = 0;
+         }
+
+         if (!isFirstItem)
+            sb.Append(separator);
+
+         sb.Append(valueToAppend);
+         if (sb.PadCollectionItems)
+         {
+            var padCount = padding - valueToAppend.Length;
+            if (padCount > 0)
+               sb.InnerBuilder.Append(' ', padCount);
+         }
+
+         lineItemCount++;
+         isFirstItem = false;
+      }
+   }
+
+   private void FormatAsEmbeddedObjectList(IndentedStringBuilder sb, IEnumerable collection, string commentChar)
+   {
+      foreach (var item in collection)
+         if (item is IAgs ia)
+            ia.ToAgsContext(commentChar).BuildContext(sb);
+         else
+            throw new
+               InvalidOperationException($"Collection property '{NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");
    }
 }

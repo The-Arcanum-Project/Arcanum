@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,17 +37,17 @@ public partial class NUIObjectView
                                   typeof(NUIObjectView),
                                   new(default(string)));
 
-   public List<INUI> NUIObjects
+   public ObservableCollection<INUI> NUIObjects
    {
-      get => (List<INUI>)GetValue(NUIObjectsProperty);
+      get => (ObservableCollection<INUI>)GetValue(NUIObjectsProperty);
       set => SetValue(NUIObjectsProperty, value);
    }
 
    public static readonly DependencyProperty NUIObjectsProperty =
       DependencyProperty.Register(nameof(NUIObjects),
-                                  typeof(List<INUI>),
+                                  typeof(ObservableCollection<INUI>),
                                   typeof(NUIObjectView),
-                                  new(default(List<INUI>)));
+                                  new(new ObservableCollection<INUI>()));
 
    public NUIObjectView()
    {
@@ -62,12 +63,14 @@ public partial class NUIObjectView
       if (sender is not ListView { SelectedItem: Type type })
          return;
 
+      List<INUI> newItems = []; // Create a temporary standard List
+
       if (type.ImplementsGenericInterface(typeof(ICollectionProvider<>), out var implementedType) &&
           implementedType != null)
       {
          var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
          if (methodInfo != null)
-            NUIObjects = ((IDictionary)methodInfo.Invoke(null, null)!).Values.Cast<INUI>().ToList();
+            newItems = ((IDictionary)methodInfo.Invoke(null, null)!).Values.Cast<INUI>().ToList();
       }
       else if (type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out implementedType) &&
                implementedType != null)
@@ -76,7 +79,7 @@ public partial class NUIObjectView
          {
             var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
             if (emptyProperty != null && emptyProperty.GetValue(null) is IEu5Object emptyInstance)
-               NUIObjects = emptyInstance.GetGlobalItemsNonGeneric().Values.Cast<INUI>().ToList();
+               newItems = emptyInstance.GetGlobalItemsNonGeneric().Values.Cast<INUI>().ToList();
          }
       }
       else
@@ -86,7 +89,10 @@ public partial class NUIObjectView
          ViewPresenter.Content = null;
       }
 
-      NUIObjects.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
+      newItems.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
+
+      NUIObjects = new(newItems);
+
       ObjectListView.SelectedIndex = 0;
    }
 

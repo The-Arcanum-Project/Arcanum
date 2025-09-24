@@ -1,76 +1,131 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
-public partial class PopType(string name,
-                             string colorKey,
-                             float foodConsumption,
-                             float assimilationConversionFactor)
-   : INUI, ICollectionProvider<PopType>, IEmpty<PopType>
+[ObjectSaveAs]
+public partial class PopType : IEu5Object<PopType>
 {
-   public string Name { get; set; } = name;
-   public string ColorKey { get; set; } = colorKey;
-   public float FoodConsumption { get; set; } = foodConsumption;
-   public float AssimilationConversionFactor { get; set; } = assimilationConversionFactor;
+   #region Nexus Properties
 
-   public override string ToString()
-   {
-      return $"{Name}";
-   }
+   [SaveAs]
+   [ParseAs("color")]
+   [DefaultValue(null)]
+   [Description("Color used to represent this PopType in various UI elements.")]
+   public JominiColor Color { get; set; } = JominiColor.Empty;
 
-   public static PopType Empty { get; } = new(string.Empty, string.Empty, 0f, 0f);
+   [SaveAs]
+   [ParseAs("editor")]
+   [DefaultValue(0f)]
+   [Description(Globals.REPLACE_DESCRIPTION)]
+   public float Editor { get; set; }
 
-   public bool Parse(string? str, out PopType? result)
-   {
-      if (Globals.PopTypes.TryGetValue(str ?? string.Empty, out result))
-         return true;
+   [SaveAs]
+   [ParseAs("pop_food_consumption")]
+   [DefaultValue(1f)]
+   [Description("Amount of food consumed by a single pop of this type per month.")]
+   public float PopFoodConsumption { get; set; }
 
-      DiagnosticException.LogWarning(LocationContext.Empty,
-                                     ParsingError.Instance.InvalidPopTypeKey,
-                                     nameof(Parse).GetType().FullName!,
-                                     str ?? "null");
+   [SaveAs]
+   [ParseAs("assimilation_conversion_factor")]
+   [DefaultValue(0f)]
+   [Description("Factor affecting the rate of cultural assimilation for this pop type. Higher values lead to faster assimilation.")]
+   public float AssimilationConversionFactor { get; set; }
 
-      result = Empty;
-      return false;
-   }
+   [SaveAs]
+   [ParseAs("city_graphics")]
+   [DefaultValue(0f)]
+   [Description(Globals.REPLACE_DESCRIPTION)]
+   public float CityGraphics { get; set; }
 
-   public static Dictionary<string, PopType> GetGlobalItems() => [];
+   [SaveAs]
+   [ParseAs("promotion_factor")]
+   [DefaultValue(0f)]
+   [Description("Factor influencing the likelihood of this pop type being promoted to a higher tier.")]
+   public float PromotionFactor { get; set; }
 
-   public override bool Equals(object? obj)
-   {
-      if (obj is PopType other)
-         return GetHashCode().Equals(other.GetHashCode());
+   [SaveAs]
+   [ParseAs("migration_factor")]
+   [DefaultValue(0f)]
+   [Description("Factor influencing the likelihood of this pop type migrating to other regions.")]
+   public float MigrationFactor { get; set; }
 
-      return false;
-   }
+   [SaveAs]
+   [ParseAs("grow")]
+   [DefaultValue(false)]
+   [Description("Indicates whether this pop type is capable of growth.")]
+   public bool Grow { get; set; }
 
-   public override int GetHashCode()
-   {
-      // ReSharper disable once NonReadonlyMemberInGetHashCode
-      return Name.GetHashCode();
-   }
+   [SaveAs]
+   [ParseAs("upper")]
+   [DefaultValue(false)]
+   [Description("Indicates whether this pop type is considered an upper-class pop.")]
+   public bool Upper { get; set; }
 
-   public static bool operator ==(PopType? left, PopType? right)
-   {
-      if (left is null && right is null)
-         return true;
+   [SaveAs]
+   [ParseAs("has_cap")]
+   [DefaultValue(false)]
+   [Description("Indicates whether this pop type has a population cap.")]
+   public bool HasCap { get; set; }
 
-      if (left is null || right is null)
-         return false;
+   [SaveAs]
+   [ParseAs("counts_towards_market_language")]
+   [DefaultValue(false)]
+   [Description("If true, pops of this type count towards the market language requirements.")]
+   public bool CountsTowardsMarketLanguage { get; set; }
 
-      return left.Equals(right);
-   }
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("promote_to", isShatteredList: true, itemNodeType: AstNodeType.ContentNode)]
+   [Description("The PopTypes that this pop type can promote to.")]
+   public ObservableRangeCollection<PopType> Dynasty { get; set; } = [];
 
-   public static bool operator !=(PopType? left, PopType? right)
-   {
-      return !(left == right);
-   }
+   [SaveAs]
+   [ParseAs("literacy_impact", itemNodeType: AstNodeType.ContentNode)]
+   [DefaultValue(null)]
+   [Description("Modifiers affecting the literacy rate of this pop type.")]
+   public ObservableRangeCollection<ModValInstance> LiteracyImpact { get; set; } = [];
 
-   public bool IsReadonly { get; } = false;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.PopTypeSettings;
-   public INUINavigation[] Navigations { get; } = [];
+   #endregion
+
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this PopType. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public Eu5FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string GetNamespace => $"Pops.{nameof(PopType)}";
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public bool IsReadonly => true;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopTypeSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopTypeAgsSettings;
+   public static Dictionary<string, PopType> GetGlobalItems() => Globals.PopTypes;
+
+   public static PopType Empty { get; } = new() { UniqueId = "Arcanum_Empty_PopType" };
+
+   public override string ToString() => UniqueId;
+
+   #endregion
 }

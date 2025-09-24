@@ -8,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 public static class SimpleObjectParser
 {

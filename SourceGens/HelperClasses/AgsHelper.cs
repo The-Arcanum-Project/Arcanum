@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
+using ParserGenerator.SubClasses;
 
 namespace ParserGenerator.HelperClasses;
 
@@ -8,10 +9,10 @@ public static class AgsHelper
    private const string OBJECT_SAVE_AS_ATTRIBUTE =
       "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.ObjectSaveAsAttribute";
 
-   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsAttribute";
+   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
 
    private const string PARSE_AS_EMBEDDED_ATTRIBUTE =
-      "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsEmbeddedAttribute";
+      "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsEmbeddedAttribute";
 
    private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SaveAsAttribute";
    private const string SUPPRESS_AGS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SuppressAgs";
@@ -19,9 +20,6 @@ public static class AgsHelper
 
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
-   private const string CUSTOM_ITEM_KEY_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.CustomItemKeyProvider";
-
-   private const string DEFAULT_VALUE_ATTRIBUTE = "System.ComponentModel.DefaultValueAttribute";
 
    public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
 
@@ -41,9 +39,13 @@ public static class AgsHelper
          return;
       }
 
-      var saveAsProps = new List<IPropertySymbol>();
+      var saveAsProps = new List<SaveAsMetadata>();
 
-      GetValidProperties(context, nexusProperties, saveAsProps);
+      if (classSymbol.Name.Contains("Area"))
+      {
+      }
+
+      GetValidProperties(context, nexusProperties, saveAsProps, classSymbol);
       var (saverHintName, saverSource) =
          GenerateSaverClass(classSymbol, objectSaveAsAttr, saveAsProps, context);
 
@@ -54,20 +56,20 @@ public static class AgsHelper
 
    private static void GetValidProperties(SourceProductionContext context,
                                           List<IPropertySymbol> nexusProperties,
-                                          List<IPropertySymbol> saveAsProps)
+                                          List<SaveAsMetadata> saveAsProps,
+                                          INamedTypeSymbol classSymbol)
    {
       foreach (var member in nexusProperties)
       {
          if (member is null)
             continue;
 
+         var (suppressAttr, saveAsAttr) = FindEffectiveAttributes(classSymbol, member.Name);
+
          // If [SuppressAgs] is present, silently skip this property.
-         if (member.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == SUPPRESS_AGS_ATTRIBUTE))
+         if (suppressAttr != null)
             continue;
 
-         // The [SaveAs] attribute is required.
-         var saveAsAttr = member.GetAttributes()
-                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE);
          if (saveAsAttr == null)
          {
             context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingSaveAsAttributeWarning,
@@ -76,18 +78,83 @@ public static class AgsHelper
             continue;
          }
 
-         saveAsProps.Add(member);
+         try
+         {
+            saveAsProps.Add(new(member, saveAsAttr));
+         }
+         catch (Exception e)
+         {
+            context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.InvalidSaveAsAttribute,
+                                                       member.Locations.FirstOrDefault(),
+                                                       member.Name,
+                                                       e.Message,
+                                                       e.GetType().Name,
+                                                       e.StackTrace));
+         }
       }
+   }
+
+   /// <summary>
+   /// For a given member name, walks up the type hierarchy of a class (including interfaces)
+   /// to find the most-derived declaration and its [IgnoreModifiable] or [AddModifiable] attributes.
+   /// </summary>
+   private static (AttributeData? Ignore, AttributeData? Add) FindEffectiveAttributes(
+      INamedTypeSymbol classSymbol,
+      string memberName)
+   {
+      AttributeData? suppressAttr = null;
+      AttributeData? saveAsAttribute = null;
+
+      // Search the class and its base classes first (most-derived wins)
+      var currentType = classSymbol;
+      while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+      {
+         var memberOnType = currentType.GetMembers(memberName).FirstOrDefault();
+         if (memberOnType != null)
+         {
+            // If we haven't found an attribute yet, check this level.
+            // This correctly gives precedence to attributes on derived classes.
+            suppressAttr ??= memberOnType.GetAttributes()
+                                         .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                               SUPPRESS_AGS_ATTRIBUTE);
+            saveAsAttribute ??= memberOnType.GetAttributes()
+                                            .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                                  SAVE_AS_ATTRIBUTE);
+         }
+
+         currentType = currentType.BaseType;
+      }
+
+      // Only if we haven't found attributes yet, check the interfaces.
+      // This ensures class attributes always override interface attributes.
+      if (suppressAttr == null && saveAsAttribute == null)
+      {
+         foreach (var iface in classSymbol.AllInterfaces)
+         {
+            var memberOnIface = iface.GetMembers(memberName).FirstOrDefault();
+            if (memberOnIface != null)
+            {
+               suppressAttr ??= memberOnIface.GetAttributes()
+                                             .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                                   SUPPRESS_AGS_ATTRIBUTE);
+               saveAsAttribute ??= memberOnIface.GetAttributes()
+                                                .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                                      SAVE_AS_ATTRIBUTE);
+            }
+         }
+      }
+
+      return (suppressAttr, saveAsAttribute);
    }
 
    private static (string HintName, string Source) GenerateSaverClass(INamedTypeSymbol agsClassSymbol,
                                                                       AttributeData objectSaveAsAttr,
-                                                                      List<IPropertySymbol> nexusProperties,
+                                                                      List<SaveAsMetadata> nexusProperties,
                                                                       SourceProductionContext context)
    {
       var className = agsClassSymbol.Name;
       var hintName = $"{agsClassSymbol.ContainingNamespace}.{className}Ags.g.cs";
-      var namespaceName = agsClassSymbol.ContainingNamespace.ToDisplayString();
+      var namespaceName = agsClassSymbol.ToDisplayString();
 
       var sb = new StringBuilder();
       sb.AppendLine("// <auto-generated/>");
@@ -114,7 +181,7 @@ public static class AgsHelper
       sb.AppendLine("            {");
 
       foreach (var prop in nexusProperties)
-         GenerateMetadataEntry(sb, prop, context, namespaceName, Helpers.IsPropertySymbolACollection(prop));
+         GenerateMetadataEntry(sb, prop, context, namespaceName);
 
       sb.AppendLine("            };");
       sb.AppendLine("        }");
@@ -143,59 +210,40 @@ public static class AgsHelper
    }
 
    private static void GenerateMetadataEntry(StringBuilder sb,
-                                             IPropertySymbol prop,
+                                             SaveAsMetadata prop,
                                              SourceProductionContext context,
-                                             string namespaceName,
-                                             bool isCollection)
+                                             string namespaceName)
    {
-      var keyword = GetPropertyMetadata(prop, context);
+      var keyword = GetPropertyMetadata(prop.Prop, context);
 
-      if (prop.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == SUPPRESS_AGS_ATTRIBUTE))
-         return;
-
-      var saveAs = prop.GetAttributes()
-                       .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE);
-
-      // Report diagnostics if SaveAs is missing
-      if (saveAs == null)
-      {
-         context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingSaveAsAttribute,
-                                                    prop.Locations.FirstOrDefault(),
-                                                    prop.Name,
-                                                    prop.ContainingType.Name));
-         return;
-      }
-
-      var defaultValueAttr = prop.GetAttributes()
-                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == DEFAULT_VALUE_ATTRIBUTE);
-
-      if (defaultValueAttr == null &&
-          !prop.Type.AllInterfaces.Any(i => i.ToDisplayString() == UniGen.IAGS_INTERFACE) &&
-          !isCollection)
+      if (prop.DefaultValueAttribute == null &&
+          !prop.Prop.Type.AllInterfaces.Any(i => i.ToDisplayString() == UniGen.IAGS_INTERFACE) &&
+          !prop.IsCollection)
          context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingDefaultValueAttributeWarning,
-                                                    prop.Locations.FirstOrDefault(),
-                                                    prop.Name,
-                                                    prop.ContainingType.Name));
+                                                    prop.Prop.Locations.FirstOrDefault(),
+                                                    prop.Prop.Name,
+                                                    prop.Prop.ContainingType.Name));
 
-      var collVal = isCollection ? "true" : saveAs.ConstructorArguments[5].Value!.ToString().ToLower();
       var defaultValueLiteral = "null";
-      if (defaultValueAttr != null && defaultValueAttr.ConstructorArguments.Any())
-         defaultValueLiteral = Helpers.FormatDefaultValueLiteral(defaultValueAttr.ConstructorArguments[0].Value);
-
-      var collSeparator = Helpers.FormatDefaultValueLiteral(saveAs.ConstructorArguments[6].Value);
+      if (prop.DefaultValueAttribute != null && prop.DefaultValueAttribute.ConstructorArguments.Any())
+         defaultValueLiteral =
+            Helpers.FormatDefaultValueLiteral(prop.DefaultValueAttribute.ConstructorArguments[0].Value);
 
       sb.AppendLine("                new()");
       sb.AppendLine("                {");
-      sb.AppendLine($"                    NxProp = {namespaceName}.{prop.ContainingType.Name}.Field.{prop.Name},");
+      sb.AppendLine($"                    NxProp = {namespaceName}.Field.{prop.Prop.Name},");
       sb.AppendLine($"                    Keyword = \"{keyword}\",");
-      sb.AppendLine($"                    CommentProvider = {GetNullOrString(saveAs.ConstructorArguments[3], SAVING_COMMENT_PROVIDER)},");
-      sb.AppendLine($"                    SavingMethod = {GetNullOrString(saveAs.ConstructorArguments[2], CUSTOM_SAVING_PROVIDER)},");
-      sb.AppendLine($"                    ValueType = SavingValueType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[0])},");
+      sb.AppendLine($"                    CommentProvider = {prop.CommentMethod},");
+      sb.AppendLine($"                    SavingMethod = {prop.SavingMethod},");
+      sb.AppendLine($"                    ValueType = SavingValueType.{prop.ValueType},");
       sb.AppendLine($"                    DefaultValue = {defaultValueLiteral},");
-      sb.AppendLine($"                    Separator = TokenType.{Helpers.GetEnumMemberName(saveAs.ConstructorArguments[1])},");
-      sb.AppendLine($"                    CollectionItemKeyProvider = {GetNullOrString(saveAs.ConstructorArguments[4], CUSTOM_ITEM_KEY_PROVIDER)},");
-      sb.AppendLine($"                    IsCollection = {collVal},");
-      sb.AppendLine($"                    CollectionSeparator = {collSeparator}");
+      sb.AppendLine($"                    Separator = TokenType.{prop.Separator},");
+      sb.AppendLine($"                    CollectionItemKeyProvider = {prop.CollectionKeyMethod},");
+      sb.AppendLine($"                    IsCollection = {prop.IsCollection.ToString().ToLowerInvariant()},");
+      sb.AppendLine($"                    CollectionSeparator = {prop.CollectionSeparator},");
+      sb.AppendLine($"                    SaveEmbeddedAsIdentifier = {prop.SaveEmbeddedAsIdentifier.ToString().ToLowerInvariant()},");
+      sb.AppendLine($"                    CollectionAsPureIdentifierList = {prop.CollectionAsPureIdentifierList.ToString().ToLowerInvariant()},");
+      sb.AppendLine($"                    IsEmbeddedObject = {prop.IsEmbeddedObject.ToString().ToLowerInvariant()}");
       sb.AppendLine("                },");
    }
 

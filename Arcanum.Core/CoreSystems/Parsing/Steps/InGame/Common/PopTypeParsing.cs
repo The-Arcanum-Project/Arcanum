@@ -1,69 +1,34 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public class PopTypeParsing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
+public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<PopType>(true, dependencies);
+
+[ParserFor(typeof(PopType))]
+public partial class PopTypeParsing(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<PopType>(false, dependencies)
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(PopType)];
-
-   public override string GetFileDataDebugInfo()
+   protected override void LoadSingleFile(RootNode rn,
+                                          LocationContext ctx,
+                                          Eu5FileObj fileObj,
+                                          string actionStack,
+                                          string source,
+                                          ref bool validation,
+                                          object? lockObject)
    {
-      return $"PopTypes: {Globals.PopTypes.Count} entries";
+      SimpleObjectParser.Parse(fileObj,
+                               rn,
+                               ctx,
+                               actionStack,
+                               source,
+                               ref validation,
+                               ParseProperties,
+                               GetGlobals(),
+                               lockObject);
    }
-
-   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
-      Globals.PopTypes.Clear();
-      Globals.PopTypes.TrimExcess();
-      return true;
-   }
-
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
-   {
-      var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
-      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
-
-      if (contents.Count != 0)
-      {
-         ctx.LineNumber = contents[0].StartLine;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidContentElementCount,
-                                        nameof(PopTypeParsing).GetType().FullName!,
-                                        0,
-                                        contents.Count,
-                                        fileObj.Path);
-      }
-
-      foreach (var block in blocks)
-      {
-         var values = GetKeyValues.GetKeyValuesFromContents(block.ContentElements,
-                                                            [
-                                                               "pop_food_consumption", "assimilation_conversion_factor",
-                                                               "color",
-                                                            ],
-                                                            ctx,
-                                                            fileObj.Path);
-
-         NumberParsing.TryParseFloat(values[0], ctx, out var foodConsumption, 0f, fallback: 0f);
-         NumberParsing.TryParseFloat(values[1], ctx, out var assimilationConversionFactor, 0f, fallback: 0f);
-
-         Globals.PopTypes.Add(block.Name,
-                              new(block.Name,
-                                  values[2],
-                                  foodConsumption,
-                                  assimilationConversionFactor));
-      }
-
-      return true;
-   }
-
-   public override bool IsFullyParsed { get; } = false;
 }

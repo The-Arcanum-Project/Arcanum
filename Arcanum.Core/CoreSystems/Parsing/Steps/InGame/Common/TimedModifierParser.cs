@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.CoreSystems.Parsing.ToolBox;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
