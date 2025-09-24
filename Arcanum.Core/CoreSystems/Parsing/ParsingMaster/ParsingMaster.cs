@@ -15,40 +15,40 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 public class ParsingMaster
 {
    [UsedImplicitly]
-   public EventHandler<FileDescriptor>? ParsingStepsChanged;
+   public EventHandler<FileLoadingService>? ParsingStepsChanged;
 
    public EventHandler<(double percentage, int doneSteps)>? StepProcessChanged;
    public EventHandler<TimeSpan>? StepDurationEstimationChanged;
    public EventHandler<double>? TotalProgressChanged;
 
-   private static HashSet<FileDescriptor> _sortedFileDescriptors = [];
+   private static HashSet<FileLoadingService> _sortedLoadingSteps = [];
 
    private static readonly Lazy<ParsingMaster> LazyInstance = new(() => new());
    public static ParsingMaster Instance => LazyInstance.Value;
-   public int ParsingSteps => _sortedFileDescriptors.Count;
+   public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
-   public static List<(string, TimeSpan)> StepDurationsByName => _sortedFileDescriptors
-                                                                .Select(descriptor
-                                                                           => (descriptor.LoadingService.Name,
-                                                                               descriptor.LastTotalLoadingDuration))
+   public static List<(string, TimeSpan)> StepDurationsByName => _sortedLoadingSteps
+                                                                .Select(loading
+                                                                           => (loading.Name,
+                                                                               loading.LastTotalLoadingDuration))
                                                                 .ToList();
 
-   public static bool AreDependenciesLoaded(FileDescriptor descriptor)
+   public static bool AreDependenciesLoaded(FileLoadingService descriptor)
    {
       ArgumentNullException.ThrowIfNull(descriptor);
-      if (_sortedFileDescriptors.Count == 0)
+      if (_sortedLoadingSteps.Count == 0)
          throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
 
       var dependentDescriptors =
-         TopologicalSort.GetAllDependencies<string, FileDescriptor>(descriptor, StaticData.FileDescriptors);
+         TopologicalSort.GetAllDependencies<string, FileLoadingService>(descriptor, _sortedLoadingSteps); // TODO @MelCo why empty list?
 
       if (dependentDescriptors.Count == 0)
          return true;
 
       foreach (var descr in dependentDescriptors)
       {
-         if (_sortedFileDescriptors.TryGetValue(descr, out var parsingStep) && parsingStep.SuccessfullyLoaded)
+         if (_sortedLoadingSteps.TryGetValue(descr, out var parsingStep) && parsingStep.SuccessfullyLoaded)
             continue;
 
          return false;
@@ -60,7 +60,7 @@ public class ParsingMaster
    public static List<double> GetStepWeightsByFileSize(FileDescriptor descriptor)
    {
       ArgumentNullException.ThrowIfNull(descriptor);
-      if (_sortedFileDescriptors.Count == 0)
+      if (_sortedLoadingSteps.Count == 0)
          throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
 
       List<long> fileSizes = [];
@@ -84,7 +84,7 @@ public class ParsingMaster
    /// </summary>
    private static void InitializeSteps()
    {
-      _sortedFileDescriptors = new(TopologicalSort.Sort<string, FileDescriptor>(DescriptorDefinitions.FileDescriptors));
+      _sortedLoadingSteps = new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
    }
 
    public Task<bool> ExecuteAllParsingSteps()
@@ -94,12 +94,13 @@ public class ParsingMaster
       InitializeSteps();
 
       ParsingStepsDone = 0;
-      foreach (var descriptor in _sortedFileDescriptors)
+      foreach (var loadingStep in _sortedLoadingSteps)
       {
          TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
-         ParsingStepsChanged?.Invoke(this, descriptor);
+         
+         ParsingStepsChanged?.Invoke(this, loadingStep);
 
-         var stepWrapper = descriptor.LoadingService.GetParsingStep(descriptor);
+         var stepWrapper = loadingStep.GetParsingStep(DescriptorDefinitions.StepMap[loadingStep]);
 
          stepWrapper.SubStepCompleted += (_, _) =>
          {

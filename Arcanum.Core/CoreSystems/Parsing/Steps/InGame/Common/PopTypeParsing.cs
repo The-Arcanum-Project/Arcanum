@@ -6,10 +6,11 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public class PopTypeParsing : FileLoadingService
+public class PopTypeParsing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [typeof(PopType)];
 

@@ -4,10 +4,11 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
-public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase) : ParserValidationLoadingService<T>
+public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase, IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<T>(dependencies)
    where T : IEu5Object<T>, new()
 {
    private bool IsDiscoveryPhase { get; } = isDiscoveryPhase;

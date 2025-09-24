@@ -4,13 +4,15 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public partial class InstitutionParsing() : DiscoverThenParseLoadingService<Institution>(true);
+public partial class InstitutionParsing(IEnumerable<IDependencyNode<string>> dependencies)
+    : DiscoverThenParseLoadingService<Institution>(true, dependencies);
 
 [ParserFor(typeof(Institution))]
-public partial class InstitutionPropertyParsing() : DiscoverThenParseLoadingService<Institution>(false)
+public partial class InstitutionPropertyParsing(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<Institution>(false, dependencies)
 {
    protected override void LoadSingleFileProperties(RootNode rn,
                                                     LocationContext ctx,

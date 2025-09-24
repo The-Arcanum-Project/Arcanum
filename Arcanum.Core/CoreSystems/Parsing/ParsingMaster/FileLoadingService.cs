@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
@@ -13,14 +14,23 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 /// 3. Make sure to define all dependencies in the <see cref="FileDescriptor.Dependencies"/> <br/>
 /// 4. Add it to the <see cref="DescriptorDefinitions.FileDescriptors"/> list<br/>
 /// </summary>
-public abstract class FileLoadingService
+public abstract class FileLoadingService : IDependencyNode<string>
 {
+   
+   public IEnumerable<IDependencyNode<string>> Dependencies { get; }
    public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
    protected TimeSpan Duration => _stopwatch.Elapsed;
+   
+   public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
+   public bool SuccessfullyLoaded { get; set; } = false;
+   
 
-   protected FileLoadingService()
+   //TODO @MelCo make dependencies optional for automatic dependency resolution
+   protected FileLoadingService(IEnumerable<IDependencyNode<string>> dependencies)
    {
+      dependencies ??= [];
+      Dependencies = dependencies;
       Name = GetType().Name;
    }
 
@@ -37,7 +47,7 @@ public abstract class FileLoadingService
 
    public virtual DefaultParsingStep GetParsingStep(FileDescriptor descriptor)
    {
-      return new(descriptor, descriptor.IsMultithreadable);
+      return new(this, descriptor.IsMultithreadable);
    }
 
    /// <summary>
@@ -145,4 +155,5 @@ public abstract class FileLoadingService
    }
 
    public virtual bool IsFullyParsed => true;
+   public string Id => Name;
 }

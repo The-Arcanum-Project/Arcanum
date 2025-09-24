@@ -21,7 +21,9 @@ public class DefaultParsingStep
    private int TotalSteps => Descriptor.Files.Count;
    public bool IsMultithreadable { get; }
    private List<double>? StepWeights { get; set; }
-   public FileDescriptor Descriptor { get; }
+   public FileDescriptor Descriptor => DescriptorDefinitions.StepMap[LoadingService];
+   
+   public FileLoadingService LoadingService { get; }
    public List<Diagnostic> Diagnostics { get; } = [];
    public TimeSpan Duration { get; private set; }
    public bool IsSuccessful
@@ -31,9 +33,9 @@ public class DefaultParsingStep
    }
    public string Name { get; }
 
-   public DefaultParsingStep(FileDescriptor descriptor, bool isMultithreadable)
+   public DefaultParsingStep(FileLoadingService loadingService, bool isMultithreadable)
    {
-      Descriptor = descriptor;
+      LoadingService = loadingService;
       IsMultithreadable = isMultithreadable;
       Name = GetType().Name;
    }
@@ -142,7 +144,7 @@ public class DefaultParsingStep
          {
             var startTime = _stopwatch.Elapsed;
 
-            var ex = Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor, null);
+            var ex = LoadingService.LoadWithErrorHandling(file, Descriptor, null);
             if (ex is { IsCritical: true })
                return false;
 
@@ -152,7 +154,7 @@ public class DefaultParsingStep
          }
 
          foreach (var file in Descriptor.Files)
-            if (Descriptor.LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, null) is
+            if (LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, null) is
                 {
                    IsCritical: true
                 })
@@ -162,10 +164,10 @@ public class DefaultParsingStep
          Debug.WriteLine($"Single-threaded parsing step {Name} took {swInner.Elapsed.TotalMilliseconds:#####.0} ms to complete.");
       }
 
-      if (!Descriptor.LoadingService.AfterLoadingStep(Descriptor))
+      if (!LoadingService.AfterLoadingStep(Descriptor))
          IsSuccessful = false;
 
-      FinalizeExecutionContext();
+      FinalizeExecutionContext(IsSuccessful);
       return IsSuccessful;
    }
 
@@ -207,24 +209,25 @@ public class DefaultParsingStep
 
    private ReloadFileException? ParallelLoadWithErrorHandling(Eu5FileObj file)
    {
-      return Descriptor.LoadingService.LoadWithErrorHandling(file, Descriptor, lockObject: _lock);
+      return LoadingService.LoadWithErrorHandling(file, Descriptor, lockObject: _lock);
    }
 
    private ReloadFileException? ParallelAfterLoadingStepErrorHandling(Eu5FileObj file)
    {
-      return Descriptor.LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, lockObject: _lock);
+      return LoadingService.LoadAfterStepWithErrorHandling(file, Descriptor, lockObject: _lock);
    }
 
-   protected void FinalizeExecutionContext()
+   protected void FinalizeExecutionContext(bool isSuccessful)
    {
       _stopwatch.Stop();
       Duration = _stopwatch.Elapsed;
+      LoadingService.SuccessfullyLoaded = isSuccessful;
    }
 
    protected void SetupExecutionContext()
    {
       IsSuccessful = true;
-      if (!Parsing.ParsingMaster.ParsingMaster.AreDependenciesLoaded(Descriptor))
+      if (!Parsing.ParsingMaster.ParsingMaster.AreDependenciesLoaded(LoadingService))
          throw
             new InvalidOperationException($"Cannot execute parsing step {Name} because dependencies are not loaded.");
 
@@ -244,7 +247,7 @@ public class DefaultParsingStep
    public bool UnloadAllFiles()
    {
       foreach (var file in Descriptor.Files)
-         if (!Descriptor.LoadingService.UnloadSingleFileContent(file, Descriptor, null))
+         if (!LoadingService.UnloadSingleFileContent(file, Descriptor, null))
             return false;
 
       return true;

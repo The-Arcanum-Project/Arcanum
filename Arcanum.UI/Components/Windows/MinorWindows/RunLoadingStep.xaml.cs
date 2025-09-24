@@ -9,20 +9,21 @@ namespace Arcanum.UI.Components.Windows.MinorWindows;
 
 public partial class RunLoadingStep
 {
-   public ObservableCollection<FileDescriptor> Steps { get; set; }
+   public ObservableCollection<FileLoadingService> Steps { get; set; }
 
    public RunLoadingStep()
    {
       InitializeComponent();
-      Steps = new(DescriptorDefinitions.FileDescriptors);
+      Steps = new(DescriptorDefinitions.LoadingStepsList);
    }
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
       // Execute the selected LoadingStep
-      if (sender is BaseButton { Tag: FileDescriptor descriptor })
+      if (sender is BaseButton { Tag: FileLoadingService service})
       {
-         var step = descriptor.LoadingService.GetParsingStep(descriptor);
+         var descriptor = DescriptorDefinitions.StepMap[service];
+         var step = service.GetParsingStep(descriptor);
          step.UnloadAllFiles();
          if (!step.Execute())
             UIHandle.Instance.MainWindowsHandle.OpenMainMenuScreen();
@@ -30,7 +31,7 @@ public partial class RunLoadingStep
             $"{"Step:",-25} '{step.Name}'\n" +
             $"{"Success:",-25} {step.IsSuccessful}\n" +
             $"{"Duration:",-25} {step.Duration.TotalMilliseconds:#####.0} ms\n" +
-            $"{"Debug Infos:",-25} {descriptor.LoadingService.GetFileDataDebugInfo()}\n" +
+            $"{"Debug Infos:",-25} {service.GetFileDataDebugInfo()}\n" +
             $"{"Num of Diagnostics:",-25} {step.Diagnostics.Count}\n" +
             $"{"Diagnostics:",-25} {string.Join(", ", step.Diagnostics.Select(d => d.ToString()))}";
       }
@@ -39,13 +40,14 @@ public partial class RunLoadingStep
    private void DoublePlay_OnClick(object sender, RoutedEventArgs e)
    {
       const int numOfExecutions = 10;
-      if (sender is BaseButton { Tag: FileDescriptor descriptor })
+      if (sender is BaseButton { Tag: FileLoadingService service})
       {
+         var descriptor = DescriptorDefinitions.StepMap[service];
+         var step = service.GetParsingStep(descriptor);
          var durations = new TimeSpan[numOfExecutions];
-         var step = descriptor.LoadingService.GetParsingStep(descriptor);
          for (var i = 0; i < numOfExecutions; i++)
          {
-            step = descriptor.LoadingService.GetParsingStep(descriptor);
+            step = service.GetParsingStep(descriptor);
             step.UnloadAllFiles();
             if (!step.Execute())
                UIHandle.Instance.MainWindowsHandle.OpenMainMenuScreen();
@@ -60,7 +62,7 @@ public partial class RunLoadingStep
             $"{"Last step invocation info",-30}\n" +
             $"{"Success:",-30} {step.IsSuccessful}\n" +
             $"{"Duration:",-30} {step.Duration.TotalMilliseconds:#####.0} ms\n" +
-            $"{"Debug Infos:",-30} {descriptor.LoadingService.GetFileDataDebugInfo()}\n" +
+            $"{"Debug Infos:",-30} {service.GetFileDataDebugInfo()}\n" +
             $"{"Num of Diagnostics:",-30} {step.Diagnostics.Count}\n" +
             $"{"Diagnostics:",-30} {string.Join(", ", step.Diagnostics.Select(d => d.ToString()))}";
       }

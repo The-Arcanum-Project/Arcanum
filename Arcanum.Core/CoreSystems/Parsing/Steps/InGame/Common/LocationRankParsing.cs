@@ -5,11 +5,12 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(LocationRank), ignoredBlockKeys: ["allow"])]
-public partial class LocationRankParsing : ParserValidationLoadingService<LocationRank>
+public partial class LocationRankParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<LocationRank>(dependencies)
 {
    public override bool IsFullyParsed => false;
 

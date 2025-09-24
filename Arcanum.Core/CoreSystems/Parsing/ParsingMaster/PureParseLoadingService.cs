@@ -1,10 +1,11 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
-public abstract class PureParseLoadingService : FileLoadingService
+public abstract class PureParseLoadingService(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    private const string ACTION_STACK = nameof(PureParseLoadingService);
    public virtual string[] GroupingNodeNames => [];

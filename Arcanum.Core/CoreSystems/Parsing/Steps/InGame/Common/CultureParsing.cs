@@ -5,13 +5,14 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public class CultureParsing() : DiscoverThenParseLoadingService<Culture>(true);
+public class CultureParsing(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<Culture>(true, dependencies);
 
 [ParserFor(typeof(Culture))]
-public partial class CultureAfterParsing() : DiscoverThenParseLoadingService<Culture>(false)
+public partial class CultureAfterParsing(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<Culture>(false,dependencies)
 {
    protected override void LoadSingleFileProperties(RootNode rn,
                                                     LocationContext ctx,

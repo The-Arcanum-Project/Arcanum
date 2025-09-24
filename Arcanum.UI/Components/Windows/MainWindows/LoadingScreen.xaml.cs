@@ -67,9 +67,9 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    public async Task<bool> StartLoading()
    {
-      ParsingMaster.Instance.ParsingStepsChanged += (_, descriptor) =>
+      ParsingMaster.Instance.ParsingStepsChanged += (_, step) =>
       {
-         _stepName = descriptor.LoadingService.Name;
+         _stepName = step.Name;
          FormatLoadingText();
       };
 
