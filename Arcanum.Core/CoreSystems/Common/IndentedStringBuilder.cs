@@ -118,7 +118,7 @@ public class IndentedStringBuilder
       return this;
    }
 
-   private void PrependIndentIfNecessary()
+   internal void PrependIndentIfNecessary()
    {
       if (_isAtStartOfLine)
       {
