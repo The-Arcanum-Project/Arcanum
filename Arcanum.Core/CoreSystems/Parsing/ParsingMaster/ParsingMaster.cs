@@ -100,7 +100,7 @@ public class ParsingMaster
          
          ParsingStepsChanged?.Invoke(this, loadingStep);
 
-         var stepWrapper = loadingStep.GetParsingStep(DescriptorDefinitions.StepMap[loadingStep]);
+         var stepWrapper = loadingStep.GetParsingStep();
 
          stepWrapper.SubStepCompleted += (_, _) =>
          {

@@ -25,6 +25,9 @@ public abstract class FileLoadingService : IDependencyNode<string>
    public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
    private IEnumerable<IDependencyNode<string>> _dependencies;
+
+   public FileDescriptor Descriptor;
+   
    protected TimeSpan Duration => _stopwatch.Elapsed;
    
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
@@ -50,9 +53,9 @@ public abstract class FileLoadingService : IDependencyNode<string>
       return $"{declaringType.FullName}.{caller}";
    }
 
-   public virtual DefaultParsingStep GetParsingStep(FileDescriptor descriptor)
+   public virtual DefaultParsingStep GetParsingStep()
    {
-      return new(this, descriptor.IsMultithreadable);
+      return new(this, Descriptor.IsMultithreadable);
    }
 
    /// <summary>

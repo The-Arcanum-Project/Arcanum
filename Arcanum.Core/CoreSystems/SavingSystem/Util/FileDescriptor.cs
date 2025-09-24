@@ -17,13 +17,17 @@ public class FileDescriptor : IEmpty<FileDescriptor>
 
    public FileDescriptor(string[] localPath,
                          FileTypeInformation fileType,
-                         FileLoadingService[] loadingServiceService,
+                         FileLoadingService[] loadingService,
                          bool isMultithreadable,
                          bool allowMultipleInstances = true) //TODO @MelCo remove uniqueId
    {
+      foreach (var fileLoadingService in loadingService)
+      {
+         fileLoadingService.Descriptor = this;
+      }
       LocalPath = localPath;
       FileType = fileType;
-      LoadingService = loadingServiceService;
+      LoadingService = loadingService;
       AllowMultipleInstances = allowMultipleInstances;
       IsMultithreadable = isMultithreadable;
       Files = FileManager.GetAllFileInfosForDirectory(this);
@@ -41,7 +45,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>
    public bool IsMultithreadable { get; }
    public static FileDescriptor Empty { get; } = new([],
                                                      FileTypeInformation.Default,
-                                                     null!,
+                                                     [],
                                                      false);
 
    public override string ToString() => $"FileDescriptor: {FilePath}";

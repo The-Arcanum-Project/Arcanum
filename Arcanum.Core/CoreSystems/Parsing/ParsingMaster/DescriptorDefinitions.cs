@@ -34,9 +34,6 @@ public static class DescriptorDefinitions
     public static List<FileDescriptor> FileDescriptors { get; }
     public static List<FileLoadingService> LoadingStepsList { get; }
 
-    //TODO Rework this Map
-    public static Dictionary<FileLoadingService, FileDescriptor> StepMap { get; }
-
     public static readonly FileDescriptor ColorParser = new(
         ["game", "main_menu", "common", "named_colors"],
         new("colors", "txt", "#"),
@@ -244,16 +241,11 @@ public static class DescriptorDefinitions
         ];
 
         LoadingStepsList = new(FileDescriptors.Count);
-        StepMap = new(FileDescriptors.Count);
 
         foreach (var descriptor in FileDescriptors)
         {
             var loadingSteps = descriptor.LoadingService;
             LoadingStepsList.AddRange(loadingSteps);
-            foreach (var step in loadingSteps)
-            {
-                StepMap.Add(step, descriptor);
-            }
         }
     }
 }

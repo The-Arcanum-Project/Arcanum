@@ -21,7 +21,7 @@ public class DefaultParsingStep
    private int TotalSteps => Descriptor.Files.Count;
    public bool IsMultithreadable { get; }
    private List<double>? StepWeights { get; set; }
-   public FileDescriptor Descriptor => DescriptorDefinitions.StepMap[LoadingService];
+   public FileDescriptor Descriptor => LoadingService.Descriptor;
    
    public FileLoadingService LoadingService { get; }
    public List<Diagnostic> Diagnostics { get; } = [];
