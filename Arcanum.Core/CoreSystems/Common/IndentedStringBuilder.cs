@@ -19,6 +19,20 @@ public class IndentedStringBuilder(string indentString = "\t")
 
    // default 4 spaces
 
+   public StringBuilder InnerBuilder => _builder;
+
+   public void Merge(StringBuilder sb)
+   {
+      foreach (var chunk in _builder.GetChunks())
+         sb.Append(chunk);
+   }
+
+   public void Merge(IndentedStringBuilder sb)
+   {
+      foreach (var chunk in _builder.GetChunks())
+         sb._builder.Append(chunk);
+   }
+
    public int MaxItemsInCollectionLine { get; init; } = 7;
    public int MaxCollectionLineLength { get; init; } = 130;
    public bool OneItemPerLine { get; init; } = false;

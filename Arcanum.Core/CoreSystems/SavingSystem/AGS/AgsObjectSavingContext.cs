@@ -25,48 +25,8 @@ public class AgsObjectSavingContext
    {
       Ags = ags;
       Settings = ags.AgsSettings;
-      OrderedProperties = SortSaveableProperties(ags);
+      OrderedProperties = PropertyOrderCache.GetOrCreateSortedProperties(ags);
       CommentChar = commentChar;
-   }
-
-   private List<PropertySavingMetadata> SortSaveableProperties(IAgs ags)
-   {
-      if (Settings.CustomSaveOrder)
-         return SortBySettings(ags.SaveableProps, Settings.SaveOrder);
-
-      if (Settings.SortCollectionsAndPropertiesSeparately)
-      {
-         List<PropertySavingMetadata> collections = [];
-         List<PropertySavingMetadata> properties = [];
-
-         foreach (var property in ags.SaveableProps)
-            if (property.IsCollection)
-               collections.Add(property);
-            else
-               properties.Add(property);
-
-         collections = collections.OrderBy(p => p.Keyword).ToList();
-         properties = properties.OrderBy(p => p.Keyword).ToList();
-
-         properties.AddRange(collections);
-         return properties;
-      }
-
-      return ags.SaveableProps.OrderBy(p => p.Keyword).ToList();
-   }
-
-   private static List<PropertySavingMetadata> SortBySettings(IReadOnlyList<PropertySavingMetadata> propertiesToSave,
-                                                              List<Enum> saveOrder)
-   {
-      var sortedList = new List<PropertySavingMetadata>();
-      foreach (var enumValue in saveOrder)
-      {
-         var prop = propertiesToSave.FirstOrDefault(p => p.ValueType.Equals(enumValue));
-         if (prop != null)
-            sortedList.Add(prop);
-      }
-
-      return sortedList;
    }
 
    /// <summary>
