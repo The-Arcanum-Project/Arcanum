@@ -24,9 +24,9 @@ public abstract class FileLoadingService : IDependencyNode<string>
 
    public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
-   private IEnumerable<IDependencyNode<string>> _dependencies;
+   private IEnumerable<IDependencyNode<string>> _dependencies = null!;
 
-   public FileDescriptor Descriptor;
+   public FileDescriptor Descriptor = null!;
    
    protected TimeSpan Duration => _stopwatch.Elapsed;
    

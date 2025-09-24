@@ -41,7 +41,7 @@ public class ParsingMaster
          throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
 
       var dependentDescriptors =
-         TopologicalSort.GetAllDependencies<string, FileLoadingService>(descriptor, _sortedLoadingSteps); // TODO @MelCo why empty list?
+         TopologicalSort.GetAllDependencies<string, FileLoadingService>(descriptor, _sortedLoadingSteps);
 
       if (dependentDescriptors.Count == 0)
          return true;

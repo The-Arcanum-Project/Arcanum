@@ -19,7 +19,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>
                          FileTypeInformation fileType,
                          FileLoadingService[] loadingService,
                          bool isMultithreadable,
-                         bool allowMultipleInstances = true) //TODO @MelCo remove uniqueId
+                         bool allowMultipleInstances = true)
    {
       foreach (var fileLoadingService in loadingService)
       {
