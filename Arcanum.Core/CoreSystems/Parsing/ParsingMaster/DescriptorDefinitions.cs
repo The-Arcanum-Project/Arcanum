@@ -11,9 +11,29 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 public static class DescriptorDefinitions
 {
+    /// <summary>
+    /// Use this to define multiple loading steps that have to be executed after each other in a specific order.
+    /// </summary>
+    /// <description>
+    /// The input is a list of loading steps, each consequent step will automatically depend on the previous one.
+    /// Therefore, each step only has to define its own dependencies, the dependency to the previous step is added automatically.
+    /// </description>
+    /// <param name="steps"></param>
+    /// <returns></returns>
+    private static FileLoadingService[] ConsequentialLoadingSteps(List<FileLoadingService> steps)
+    {
+        for (var index = 1; index < steps.Count; index++)
+        {
+            steps[index].Dependencies = steps[index].Dependencies.Append(steps[index - 1]);
+        }
+
+        return steps.ToArray();
+    }
+
+
     public static List<FileDescriptor> FileDescriptors { get; }
     public static List<FileLoadingService> LoadingStepsList { get; }
-    
+
     //TODO Rework this Map
     public static Dictionary<FileLoadingService, FileDescriptor> StepMap { get; }
 
@@ -35,15 +55,9 @@ public static class DescriptorDefinitions
     public static readonly FileDescriptor DefaultMapPreDescriptor = new(
         ["game", "in_game", "map_data", "default.map"],
         new("default.map", "map", "#"),
-        [new DefaultMapPreParsingStep([])],
-        false,
-        uniqueId: 'P');
-
-    public static readonly FileDescriptor DefaultMapDescriptor = new(
-        ["game", "in_game", "map_data", "default.map"],
-        new("default.map", "map", "#"),
-        [new DefaultMapParsing([DefaultMapPreDescriptor.LoadingService[0]])],
+        ConsequentialLoadingSteps([new DefaultMapPreParsingStep([]), new DefaultMapParsing([])]),
         false);
+
 
     public static readonly FileDescriptor LocationDescriptor = new(
         ["game", "in_game", "map_data", "named_locations"],
@@ -81,15 +95,6 @@ public static class DescriptorDefinitions
         [new PopTypeParsing([ColorParser.LoadingService[0]])],
         false);
 
-    public static readonly FileDescriptor CharactersDiscoveryDescriptor = new(
-        [
-            "game", "main_menu", "setup", "start",
-            "05_characters.txt",
-        ],
-        new("characters", "txt", "#"),
-        [new CharacterDiscovererParsing([])],
-        false,
-        uniqueId: 'A');
 
     public static readonly FileDescriptor PopDescriptor = new(
         ["game", "main_menu", "setup", "start", "06_pops.txt"],
@@ -151,23 +156,48 @@ public static class DescriptorDefinitions
         [new LanguageParsing([ColorParser.LoadingService[0]])],
         false);
 
+    private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
+
     public static readonly FileDescriptor RoadsAndCountriesDescriptor =
         new(
             ["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
             new("10_countries_and_roads", "txt", "#"),
             [
                 new RoadsAndCountriesParsing([
-                    LocationDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0], ReligiousSchoolsDescriptor.LoadingService[0], ColorParser.LoadingService[0],
-                    CharactersDiscoveryDescriptor.LoadingService[0], LanguageDescriptor.LoadingService[0],
+                    LocationDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
+                    ReligiousSchoolsDescriptor.LoadingService[0], ColorParser.LoadingService[0],
+                    CharacterDiscovery, LanguageDescriptor.LoadingService[0],
                 ])
             ],
             false,
             false);
 
+
+    public static readonly FileDescriptor CharactersDiscoveryDescriptor = new(
+        [
+            "game", "main_menu", "setup", "start",
+            "05_characters.txt",
+        ],
+        new("characters", "txt", "#"),
+        ConsequentialLoadingSteps([
+            CharacterDiscovery, new CharacterPropertiesParsing([
+                ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
+                RoadsAndCountriesDescriptor.LoadingService[0]
+            ])
+        ]),
+        false);
+
     public static readonly FileDescriptor CultureDescriptor = new(
         ["game", "in_game", "common", "cultures"],
         new("cultures", "txt", "#"),
-        [new CultureParsing([ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0]])],
+        ConsequentialLoadingSteps([
+                new CultureParsing([ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0]]),
+                new CultureAfterParsing([
+                    ColorParser.LoadingService[0],
+                    LanguageDescriptor.LoadingService[0]
+                ])
+            ]
+        ),
         false);
 
     public static readonly FileDescriptor AgeDescriptor = new(
@@ -200,49 +230,22 @@ public static class DescriptorDefinitions
         [new RegencyParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
         true);
 
-    public static readonly FileDescriptor CultureAfterParsingDescriptor =
-        new(
-            ["game", "in_game", "common", "cultures"],
-            new("cultures", "txt", "#"),
-            [
-                new CultureAfterParsing([
-                    CultureDescriptor.LoadingService[0], ColorParser.LoadingService[0],
-                    LanguageDescriptor.LoadingService[0]
-                ])
-            ],
-            false,
-            uniqueId: 'B');
-
-    public static readonly FileDescriptor CharactersPropertyDescriptor =
-        new(
-            ["game", "main_menu", "setup", "start", "05_characters.txt",],
-            new("characters", "txt", "#"),
-            [
-                new CharacterPropertiesParsing([
-                    ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
-                    RoadsAndCountriesDescriptor.LoadingService[0]
-                ])
-            ],
-            false,
-            uniqueId: 'B');
-
     //TODO Autogenerate this list
     static DescriptorDefinitions()
     {
         FileDescriptors =
         [
-            DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
+            DefaultMapPreDescriptor, LocationDescriptor, DefinitionsDescriptor,
             AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
             RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
-            ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
-            CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
-            ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor,
-            CharactersPropertyDescriptor,
+            ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser, LanguageDescriptor,
+            AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
+            ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor
         ];
 
-        LoadingStepsList = new (FileDescriptors.Count);
+        LoadingStepsList = new(FileDescriptors.Count);
         StepMap = new(FileDescriptors.Count);
-        
+
         foreach (var descriptor in FileDescriptors)
         {
             var loadingSteps = descriptor.LoadingService;

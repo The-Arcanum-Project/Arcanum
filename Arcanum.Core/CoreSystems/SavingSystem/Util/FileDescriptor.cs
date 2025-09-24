@@ -19,8 +19,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>
                          FileTypeInformation fileType,
                          FileLoadingService[] loadingServiceService,
                          bool isMultithreadable,
-                         bool allowMultipleInstances = true,
-                         char uniqueId = 'G') //TODO @MelCo remove uniqueId
+                         bool allowMultipleInstances = true) //TODO @MelCo remove uniqueId
    {
       LocalPath = localPath;
       FileType = fileType;

@@ -16,10 +16,15 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 /// </summary>
 public abstract class FileLoadingService : IDependencyNode<string>
 {
-   
-   public IEnumerable<IDependencyNode<string>> Dependencies { get; }
+   public IEnumerable<IDependencyNode<string>> Dependencies
+   {
+      get => _dependencies;
+      set => _dependencies = SuccessfullyLoaded ? throw new InvalidOperationException("Cannot change dependencies after loading.") : value;
+   }
+
    public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
+   private IEnumerable<IDependencyNode<string>> _dependencies;
    protected TimeSpan Duration => _stopwatch.Elapsed;
    
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
