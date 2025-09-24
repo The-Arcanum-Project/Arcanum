@@ -43,7 +43,7 @@ public partial class Location
 
    [SuppressAgs]
    [Description("The pops residing in this location.")]
-   public ObservableRangeCollection<Pop> Pops { get; set; } = [];
+   public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];
 
    #endregion
 
@@ -71,7 +71,7 @@ public partial class Location
 
          navigations.Add(null);
          navigations.AddRange(Pops.Select(pop => new NUINavigation(pop,
-                                                                   $"Pop: {pop.Type} ({pop.Culture}, {pop.Religion})")));
+                                                                   $"Pop: {pop.PopType} ({pop.Culture}, {pop.Religion})")));
 
          if (HasMarket)
          {

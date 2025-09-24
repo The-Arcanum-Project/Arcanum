@@ -38,4 +38,6 @@ public class AGSSettings
    public AgsSettings CharacterAgsSettings { get; set; } = new();
    public AgsSettings ReligiousSchoolAgsSettings { get; set; } = new();
    public AgsSettings ReligiousSchoolOpinionValueAgsSettings { get; set; } = new();
+   public AgsSettings PopTypeAgsSettings { get; set; } = new();
+   public AgsSettings PopDefinitionAgsSettings { get; set; } = new();
 }

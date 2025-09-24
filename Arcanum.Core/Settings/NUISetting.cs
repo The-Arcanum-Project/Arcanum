@@ -34,7 +34,7 @@ public class NUISettings
                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
                                                      Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray());
-   public NUISetting PopTypeSettings { get; set; } = new(PopType.Field.Name,
+   public NUISetting PopTypeSettings { get; set; } = new(PopType.Field.UniqueId,
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray());
@@ -380,4 +380,15 @@ public class NUISettings
                                                                                   Field>()
                                                                               .Cast<Enum>()
                                                                               .ToArray());
+
+   public NUISetting PopDefinitionSettings { get; set; } = new(PopDefinition.Field.UniqueId,
+                                                               Enum.GetValues<PopDefinition.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<PopDefinition.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<PopDefinition.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray());
 }

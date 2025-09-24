@@ -18,12 +18,13 @@ using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
-namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
+namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 /// <summary>
 /// Any method in this class matching the signature of 'ArcTryParse{Type}' can be used in generated parsers to parse values of type {Type}.
@@ -1090,5 +1091,54 @@ public static class ParsingToolBox
       value = null;
       validation = false;
       return false;
+   }
+
+   public static bool ArcTryParse_PopType(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          [MaybeNullWhen(false)] out PopType value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_PopType)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParsePopType(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Culture(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          [MaybeNullWhen(false)] out Culture value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Culture)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseCulture(ctx, actionName, source, ref validation, out value);
    }
 }

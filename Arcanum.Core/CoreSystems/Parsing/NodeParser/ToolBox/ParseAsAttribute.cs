@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.ToolBox;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 public enum AstNodeType
 {

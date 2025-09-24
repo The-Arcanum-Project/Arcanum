@@ -174,3 +174,15 @@ public sealed class DiagnosticException : Exception
       return $"{Code} ({Severity.GetPrefix()}): {Message}";
    }
 }
+
+public static class De
+{
+   public static void Warning(LocationContext ctx,
+                              DiagnosticDescriptor descriptor,
+                              string action,
+                              params object[] args)
+   {
+      DiagnosticException diagnosticException = new(descriptor, args);
+      diagnosticException.HandleDiagnostic(ctx, action);
+   }
+}

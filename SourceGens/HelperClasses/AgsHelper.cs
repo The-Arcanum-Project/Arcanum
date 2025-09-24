@@ -9,10 +9,10 @@ public static class AgsHelper
    private const string OBJECT_SAVE_AS_ATTRIBUTE =
       "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.ObjectSaveAsAttribute";
 
-   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsAttribute";
+   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
 
    private const string PARSE_AS_EMBEDDED_ATTRIBUTE =
-      "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsEmbeddedAttribute";
+      "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsEmbeddedAttribute";
 
    private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SaveAsAttribute";
    private const string SUPPRESS_AGS_ATTRIBUTE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes.SuppressAgs";
@@ -20,9 +20,6 @@ public static class AgsHelper
 
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
-   private const string CUSTOM_ITEM_KEY_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.CustomItemKeyProvider";
-
-   private const string DEFAULT_VALUE_ATTRIBUTE = "System.ComponentModel.DefaultValueAttribute";
 
    public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
 

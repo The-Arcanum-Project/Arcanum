@@ -1,118 +1,66 @@
-﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Common;
+﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Pops;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-public class PopsParsing : FileLoadingService
+[ParserFor(typeof(PopDefinition))]
+public partial class PopsParsing : ParserValidationLoadingService<PopDefinition>
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(Pop)];
-
-   public override string GetFileDataDebugInfo()
+   protected override void LoadSingleFile(RootNode rn,
+                                          LocationContext ctx,
+                                          Eu5FileObj fileObj,
+                                          string actionStack,
+                                          string source,
+                                          ref bool validation,
+                                          object? lockObject)
    {
-      Dictionary<PopType, int> popTypes = new(Globals.PopTypes.Count);
-      foreach (var pop in Globals.Locations)
-         foreach (var popEntry in pop.Value.Pops)
-            if (popTypes.TryGetValue(popEntry.Type, out var count))
-               popTypes[popEntry.Type] = count + 1;
-            else
-               popTypes[popEntry.Type] = 1;
-
-      return $"Pops: {popTypes.Sum(x => x.Value)} entries:\n" +
-             string.Join("\n", popTypes.Select(x => $"\t{x.Key.Name,-15} ({x.Key.ColorKey,-15}): {x.Value,-5}"));
-   }
-
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject = null)
-   {
-      var sw = Stopwatch.StartNew();
-      var (blocks, contents) = ElementParser.GetElements(fileObj.Path);
-      sw.Stop();
-      Debug.WriteLine($"PopsParsing: ElementParser took {sw.ElapsedMilliseconds}ms for {fileObj.Path.FullPath}");
-      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
-
-      if (contents.Count != 0)
+      if (rn.Statements.Count != 1)
       {
-         ctx.LineNumber = contents[0].StartLine;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidContentElementCount,
-                                        nameof(PopsParsing).GetType().FullName!,
-                                        0,
-                                        contents.Count,
-                                        fileObj.Path);
+         De.Warning(ctx,
+                    ParsingError.Instance.InvalidNodeCountOfType,
+                    actionStack,
+                    "undefined",
+                    rn.Statements.Count,
+                    1);
+         validation = false;
+         return;
       }
 
-      if (blocks.Count != 1)
-      {
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidBlockCount,
-                                        nameof(PopsParsing).GetType().FullName!,
-                                        fileObj.Path,
-                                        1,
-                                        blocks.Count);
-         return false;
-      }
+      if (!rn.Statements[0].IsBlockNode(ctx, source, actionStack, ref validation, out var locationNode))
+         return;
 
-      foreach (var block in blocks[0].SubBlocks)
+      foreach (var ln in locationNode.Children)
       {
-         ctx.LineNumber = block.StartLine;
-         if (!LocationChecks.IsValidLocation(ctx, block.Name, out var location))
+         if (!ln.IsBlockNode(ctx, source, actionStack, ref validation, out var popNode))
             continue;
 
-         if (block.SubBlocks.Count < 1 || block.SubBlocks[0].ContentElements.Count < 1)
-            continue;
-
-         var popType = PopType.Empty;
-         var size = 0f;
-         var culture = string.Empty;
-         var religion = string.Empty;
-         var valid = true;
-
-         foreach (var kvp in block.SubBlocks[0].ContentElements[0].GetLineKvpEnumerator(fileObj.Path))
+         var locName = popNode.KeyNode.GetLexeme(source);
+         if (!Globals.Locations.TryGetValue(locName, out var loc))
          {
-            switch (kvp.Key)
-            {
-               case "type":
-                  if (!PopType.Empty.Parse(kvp.Value, out popType))
-                     valid = false;
-                  break;
-               case "size":
-                  if (!NumberParsing.TryParseFloat(kvp.Value, ctx, out size, 0f, fallback: 0f))
-                     valid = false;
-                  break;
-               case "culture":
-                  culture = kvp.Value;
-                  break;
-               case "religion":
-                  religion = kvp.Value;
-                  break;
-               default:
-                  DiagnosticException.LogWarning(ctx.GetInstance(),
-                                                 ParsingError.Instance.UnknownKey,
-                                                 nameof(PopsParsing).GetType().FullName!,
-                                                 kvp.Key,
-                                                 kvp.Value);
-                  valid = false;
-                  break;
-            }
+            De.Warning(ctx,
+                       ParsingError.Instance.InvalidLocationKey,
+                       actionStack,
+                       locName);
+            validation = false;
+            continue;
+         }
 
-            if (valid)
-               location!.Pops.Add(new(popType!, size, culture, religion));
+         foreach (var pn in popNode.Children)
+         {
+            if (!pn.IsBlockNode(ctx, source, actionStack, ref validation, out var popDefNode))
+               continue;
+
+            var definition = new PopDefinition();
+            ParseProperties(popDefNode, definition, ctx, source, ref validation, false);
+            loc.Pops.Add(definition);
          }
       }
-
-      return true;
-   }
-
-   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
-      foreach (var location in Globals.Locations)
-         location.Value.Pops.Clear();
-      return true;
    }
 }

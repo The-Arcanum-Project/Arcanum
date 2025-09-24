@@ -7,7 +7,9 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -255,6 +257,38 @@ public static class LvnHelpers
                                            actionName,
                                            ref validationResult,
                                            Globals.Ages,
+                                           out value);
+   }
+
+   public static bool TryParsePopType(this LiteralValueNode lvn,
+                                      LocationContext ctx,
+                                      string actionName,
+                                      string source,
+                                      ref bool validationResult,
+                                      [MaybeNullWhen(false)] out PopType value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.PopTypes,
+                                           out value);
+   }
+
+   public static bool TryParseCulture(this LiteralValueNode lvn,
+                                      LocationContext ctx,
+                                      string actionName,
+                                      string source,
+                                      ref bool validationResult,
+                                      [MaybeNullWhen(false)] out Culture value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Cultures,
                                            out value);
    }
 }

@@ -18,6 +18,7 @@ public static class SnNodesHelpers
    /// <param name="actionName"></param>
    /// <param name="value"></param>
    /// <returns></returns>
+   [Obsolete("Use the overload that takes a className and a ref bool validationResult instead.")]
    public static bool IsBlockNode(this StatementNode node,
                                   LocationContext ctx,
                                   string source,

@@ -70,11 +70,19 @@ public static class DescriptorDefinitions
                                                                 false,
                                                                 false);
 
-   public static readonly FileDescriptor PopTypeDescriptor = new([ColorParser],
+   public static readonly FileDescriptor PopTypeDiscoverer = new([],
+                                                                 ["game", "in_game", "common", "pop_types"],
+                                                                 new("01_pop_types", "txt", "#"),
+                                                                 new PopTypeDiscoverer(),
+                                                                 false,
+                                                                 uniqueId: 'A');
+
+   public static readonly FileDescriptor PopTypeDescriptor = new([ColorParser, PopTypeDiscoverer],
                                                                  ["game", "in_game", "common", "pop_types"],
                                                                  new("01_pop_types", "txt", "#"),
                                                                  new PopTypeParsing(),
-                                                                 false);
+                                                                 false,
+                                                                 uniqueId: 'B');
 
    public static readonly FileDescriptor CharactersDiscoveryDescriptor = new([],
                                                                              [
@@ -85,13 +93,6 @@ public static class DescriptorDefinitions
                                                                              new CharacterDiscovererParsing(),
                                                                              false,
                                                                              uniqueId: 'A');
-
-   public static readonly FileDescriptor PopDescriptor = new([PopTypeDescriptor, LocationDescriptor, ColorParser],
-                                                             ["game", "main_menu", "setup", "start", "06_pops.txt"],
-                                                             new("06_pops", "txt", "#"),
-                                                             new PopsParsing(),
-                                                             false,
-                                                             false);
 
    public static readonly FileDescriptor LocationRankDescriptor = new([ColorParser, ModifierDefinitionDescriptor],
                                                                       ["game", "in_game", "common", "location_ranks"],
@@ -154,6 +155,14 @@ public static class DescriptorDefinitions
                                                                  new CultureParsing(),
                                                                  false);
 
+   public static readonly FileDescriptor PopDescriptor =
+      new([PopTypeDescriptor, PopTypeDiscoverer, CultureDescriptor, LocationDescriptor, ColorParser],
+          ["game", "main_menu", "setup", "start", "06_pops.txt"],
+          new("06_pops", "txt", "#"),
+          new PopsParsing(),
+          false,
+          false);
+
    public static readonly FileDescriptor AgeDescriptor = new([ModifierDefinitionDescriptor],
                                                              ["game", "in_game", "common", "age"],
                                                              new("ages", "txt", "#"),
@@ -205,8 +214,8 @@ public static class DescriptorDefinitions
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefaultMapDescriptor, DefinitionsDescriptor,
-         AdjacenciesDescriptor, MarketDescriptor, PopTypeDescriptor, PopDescriptor, LocationRankDescriptor,
-         RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
+         AdjacenciesDescriptor, MarketDescriptor, PopTypeDiscoverer, PopTypeDescriptor, PopDescriptor,
+         LocationRankDescriptor, RoadsAndCountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
          CultureAfterParsingDescriptor, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
          ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor,

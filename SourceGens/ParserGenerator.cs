@@ -11,9 +11,9 @@ namespace ParserGenerator;
 [Generator]
 public class ParserSourceGenerator : IIncrementalGenerator
 {
-   private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParserForAttribute";
-   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParseAsAttribute";
-   private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.ToolBox.ParsingToolBox";
+   private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParserForAttribute";
+   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+   private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParsingToolBox";
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
@@ -80,7 +80,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
             // --- Collect Metadata from Target Type's Properties ---
             var propertiesToParse = new List<PropertyMetadata>();
-            ExtractMetadata(targetTypeSymbol, propertiesToParse);
+            ExtractMetadata(targetTypeSymbol, propertiesToParse, context);
             //
             // // If no properties are marked for parsing, there's nothing to generate
             // if (propertiesToParse.Count == 0)
@@ -280,7 +280,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("using Arcanum.Core.CoreSystems.Common;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;");
       sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;");
-      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.ToolBox;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;");
       sb.AppendLine("using System.Collections.ObjectModel;");
       sb.AppendLine($"using {targetTypeSymbol.ContainingNamespace.ToDisplayString()};");
       sb.AppendLine($"using static {toolboxSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)};");
@@ -1051,7 +1051,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
-                                       List<PropertyMetadata> propertiesToParse)
+                                       List<PropertyMetadata> propertiesToParse,
+                                       SourceProductionContext context)
    {
       foreach (var member in targetTypeSymbol.GetMembers().OfType<IPropertySymbol>())
       {
@@ -1060,6 +1061,18 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                  .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
          if (parseAsAttr != null)
             propertiesToParse.Add(new(member, parseAsAttr));
+         else
+         {
+            // Report warning
+            context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
+                                                           title: "Missing [ParseAs] Attribute",
+                                                           messageFormat:
+                                                           $"Property '{member.Name}' in class '{targetTypeSymbol.Name}' is missing the required [ParseAs] attribute and will be ignored by the parser generator.",
+                                                           category: "SourceGens",
+                                                           DiagnosticSeverity.Warning,
+                                                           isEnabledByDefault: true),
+                                                       Location.None));
+         }
       }
    }
 
