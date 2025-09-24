@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Common.UI.MBox;
+using static System.Double;
 
 namespace Arcanum.UI.Components.Windows.PopUp;
 
@@ -111,8 +112,8 @@ public partial class MBox
       string title = "Message",
       MBoxButton buttons = MBoxButton.OK,
       MessageBoxImage icon = MessageBoxImage.None,
-      int height = 150,
-      int width = 400)
+      int height = -1,
+      int width = -1)
    {
       if (Application.Current?.Dispatcher == null)
          throw new InvalidOperationException("No UI dispatcher found.");
@@ -141,8 +142,8 @@ public partial class MBox
    {
       var box = new MBox(message, title, buttons, icon)
       {
-         Height = height,
-         Width = width,
+         Height = height < 0 ? NaN : height,
+         Width = width < 0 ? NaN : width,
          WindowStartupLocation = WindowStartupLocation.CenterScreen,
          ResizeMode = ResizeMode.NoResize,
          ShowInTaskbar = false,

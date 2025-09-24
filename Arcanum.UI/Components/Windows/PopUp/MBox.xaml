@@ -8,6 +8,7 @@
                          Title = "MBox"
                          Height = "200"
                          Width = "400"
+                         SizeToContent="WidthAndHeight"
                          FooterHeight = "0"
                          ShowInTaskbar = "False"
                          ShowMaximizeButton = "False"
@@ -27,14 +28,14 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Margin = "5">
+    <Grid Margin = "0,5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "60" />
-            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "Auto" />
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height = "*" />
+            <RowDefinition Height = "Auto" />
             <RowDefinition Height = "24" />
         </Grid.RowDefinitions>
 
@@ -58,7 +59,8 @@
                                       Margin = "20, 10"
                                       BorderThickness = "0"
                                       IsReadOnly = "True"
-                                      IsReadOnlyCaretVisible = "False" />
+                                      IsReadOnlyCaretVisible = "False"
+                                      MaxAspectRatio="20"/>
 
         <Grid Grid.Row = "1"
               Grid.ColumnSpan = "2"
