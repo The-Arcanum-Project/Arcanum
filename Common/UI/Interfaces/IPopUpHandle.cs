@@ -18,8 +18,8 @@ public interface IPopUpHandle
       string title = "Message",
       MBoxButton buttons = MBoxButton.OK,
       MessageBoxImage icon = MessageBoxImage.Information,
-      int height = 150,
-      int width = 400);
+      int height = -1,
+      int width = -1);
 
    public Window GetPropertyGridOrCollectionView(object? obj);
 }

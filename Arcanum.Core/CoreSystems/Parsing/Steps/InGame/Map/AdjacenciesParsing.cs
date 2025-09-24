@@ -4,11 +4,12 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
+using Arcanum.Core.Utils.Sorting;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
-public class AdjacencyFileLoading : FileLoadingService
+public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects => [typeof(Adjacency)];
 

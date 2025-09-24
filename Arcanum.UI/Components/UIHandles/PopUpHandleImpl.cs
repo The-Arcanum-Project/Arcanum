@@ -25,8 +25,8 @@ public class PopUpHandleImpl : IPopUpHandle
                               string title = "Message",
                               MBoxButton buttons = MBoxButton.OK,
                               MessageBoxImage icon = MessageBoxImage.Asterisk,
-                              int height = 150,
-                              int width = 400)
+                              int height = -1,
+                              int width = -1)
    {
       return MBox.Show(message, title, buttons, icon, height, width);
    }

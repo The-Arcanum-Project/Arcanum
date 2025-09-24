@@ -97,7 +97,7 @@ public partial class SaveWindow
         else
             SearchResults = new(_quaestor.Search(s).Cast<FileRepresentation>().Where(file =>
                 _settings.AvailableCategories.Select(category => ((Eu5ObjectsRegistry.Eu5ObjectsEnum)category).ToType())
-                    .Any(type => file.FileObj.Descriptor.LoadingService.ParsedObjects.Contains(type))));
+                    .Any(type => file.FileObj.Descriptor.LoadingService[0].ParsedObjects.Contains(type))));
         // Mark selected files again
         ReloadSelection();
     }

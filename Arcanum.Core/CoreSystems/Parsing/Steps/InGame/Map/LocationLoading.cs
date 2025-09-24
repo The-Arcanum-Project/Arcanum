@@ -9,10 +9,11 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
-public class LocationFileLoading : ParserValidationLoadingService<Location>
+public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Location>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

@@ -25,7 +25,7 @@ public class FileRepresentation : ISearchable
         ChangedObjects = new(changedObjects);
         _queastor = queastor;
         FileObj = fileObj;
-        AllowedObjects = fileObj.Descriptor.LoadingService.ParsedObjects.Select(c =>
+        AllowedObjects = fileObj.Descriptor.LoadingService[0].ParsedObjects.Select(c =>
         {
             if(Eu5ObjectsRegistry.TryGetEnumRepresentation(c, out var objEnum))
                 return objEnum;

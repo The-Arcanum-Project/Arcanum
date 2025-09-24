@@ -6,11 +6,12 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Sorting;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-public class RoadsAndCountriesParsing : FileLoadingService
+public class RoadsAndCountriesParsing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country)];
 

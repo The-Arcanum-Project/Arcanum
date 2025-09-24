@@ -6,12 +6,13 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Sorting;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 [ParserFor(typeof(Continent))]
-public partial class DefinitionsParsing : ParserValidationLoadingService<Continent>
+public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Continent>(dependencies)
 {
    public override List<Type> ParsedObjects
       => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province)];
