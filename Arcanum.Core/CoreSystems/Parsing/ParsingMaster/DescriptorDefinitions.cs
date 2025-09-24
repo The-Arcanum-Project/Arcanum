@@ -93,13 +93,21 @@ public static class DescriptorDefinitions
             new PopTypeParsing([ColorParser.LoadingService[0], ModifierDefinitionDescriptor.LoadingService[0]])]),
         false);
 
+    public static readonly FileDescriptor LanguageDescriptor = new(
+        ["game", "in_game", "common", "languages"],
+        new("languages", "txt", "#"),
+        [new LanguageParsing([ColorParser.LoadingService[0]])],
+        false);
 
+    private static readonly CultureParsing CultureDiscovery =
+        new ([ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0]]);
+    
     public static readonly FileDescriptor PopDescriptor = new(
         ["game", "main_menu", "setup", "start", "06_pops.txt"],
         new("06_pops", "txt", "#"),
         [
             new PopsParsing([
-                PopTypeDescriptor.LoadingService[0], LocationDescriptor.LoadingService[0], ColorParser.LoadingService[0]
+                PopTypeDescriptor.LoadingService[0], CultureDiscovery, LocationDescriptor.LoadingService[0], ColorParser.LoadingService[0]
             ])
         ],
         false,
@@ -148,12 +156,6 @@ public static class DescriptorDefinitions
             false,
             false);
 
-    public static readonly FileDescriptor LanguageDescriptor = new(
-        ["game", "in_game", "common", "languages"],
-        new("languages", "txt", "#"),
-        [new LanguageParsing([ColorParser.LoadingService[0]])],
-        false);
-
     private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
 
     public static readonly FileDescriptor RoadsAndCountriesDescriptor =
@@ -189,7 +191,7 @@ public static class DescriptorDefinitions
         ["game", "in_game", "common", "cultures"],
         new("cultures", "txt", "#"),
         ConsequentialLoadingSteps([
-                new CultureParsing([ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0]]),
+                CultureDiscovery,
                 new CultureAfterParsing([
                     ColorParser.LoadingService[0],
                     LanguageDescriptor.LoadingService[0]
