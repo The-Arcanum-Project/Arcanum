@@ -44,4 +44,22 @@ public partial class Continent
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<SuperRegion> LocationChildren { get; set; } = [];
+
+   public override string ToString() => UniqueId;
+
+   protected bool Equals(Continent other) => UniqueId == other.UniqueId;
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is null)
+         return false;
+      if (ReferenceEquals(this, obj))
+         return true;
+      if (obj.GetType() != GetType())
+         return false;
+
+      return Equals((Continent)obj);
+   }
+
+   public override int GetHashCode() => UniqueId.GetHashCode();
 }
