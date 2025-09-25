@@ -35,6 +35,8 @@ public class RangeCollectionAnalyzer : DiagnosticAnalyzer
       var iCollectionInterfaceSymbol =
          context.Compilation.GetTypeByMetadataName("System.Collections.Generic.ICollection`1");
 
+      var isHashSet = context.Compilation.GetTypeByMetadataName("Arcanum.Core.CoreSystems.NUI.ObservableHashSet`1");
+
       if (requiredCollectionSymbol != null &&
           iCollectionInterfaceSymbol != null &&
           expectedValueType is INamedTypeSymbol namedExpectedType)
@@ -46,27 +48,52 @@ public class RangeCollectionAnalyzer : DiagnosticAnalyzer
                                SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition,
                                                                      iCollectionInterfaceSymbol);
 
-         if (isAnyCollection)
-            if (!SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition,
-                                                       requiredCollectionSymbol))
-            {
-               var itemType = namedExpectedType.TypeArguments.FirstOrDefault();
+         var isTypeAHashSet = isHashSet != null &&
+                              SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition,
+                                                                    isHashSet);
 
-               // --- THIS IS THE CHANGE ---
-               // Find the syntax node for the property's type.
-               var propertySyntax =
-                  propertySymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
-               var location = propertySyntax?.Type.GetLocation() ?? propertySymbol.Locations[0];
+         if (!isAnyCollection)
+            return;
 
-               context.ReportDiagnostic(Diagnostic.Create(Diagnostics.IncorrectCollectionType,
-                                                          location, // Use the location of the TYPE SYNTAX
-                                                          propertySymbol.Name,
-                                                          requiredCollectionSymbol.ToDisplayString(SymbolDisplayFormat
-                                                                .MinimallyQualifiedFormat),
-                                                          itemType?.ToDisplayString(SymbolDisplayFormat
-                                                                .MinimallyQualifiedFormat) ??
-                                                          "T"));
-            }
+         if (isTypeAHashSet)
+         {
+            if (SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition,
+                                                      isHashSet))
+               return;
+
+            // If it's a HashSet but not the correct type, report it.
+            var itemType = namedExpectedType.TypeArguments.FirstOrDefault();
+            var propertySyntax =
+               propertySymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
+            var location = propertySyntax?.Type.GetLocation() ?? propertySymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(Diagnostics.IncorrectCollectionType,
+                                                       location, // Use the location of the TYPE SYNTAX
+                                                       propertySymbol.Name,
+                                                       isHashSet.ToDisplayString(SymbolDisplayFormat
+                                                             .MinimallyQualifiedFormat),
+                                                       itemType?.ToDisplayString(SymbolDisplayFormat
+                                                             .MinimallyQualifiedFormat) ??
+                                                       "T"));
+         }
+         else if (!SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition,
+                                                         requiredCollectionSymbol) &&
+                  !SymbolEqualityComparer.Default.Equals(namedExpectedType.OriginalDefinition, isHashSet))
+         {
+            var itemType = namedExpectedType.TypeArguments.FirstOrDefault();
+            var propertySyntax =
+               propertySymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
+            var location = propertySyntax?.Type.GetLocation() ?? propertySymbol.Locations[0];
+
+            context.ReportDiagnostic(Diagnostic.Create(Diagnostics.IncorrectCollectionType,
+                                                       location, // Use the location of the TYPE SYNTAX
+                                                       propertySymbol.Name,
+                                                       requiredCollectionSymbol.ToDisplayString(SymbolDisplayFormat
+                                                             .MinimallyQualifiedFormat),
+                                                       itemType?.ToDisplayString(SymbolDisplayFormat
+                                                             .MinimallyQualifiedFormat) ??
+                                                       "T"));
+         }
       }
    }
 

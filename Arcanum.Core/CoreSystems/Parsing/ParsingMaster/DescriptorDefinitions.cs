@@ -77,12 +77,13 @@ public static class DescriptorDefinitions
                                                                  false,
                                                                  uniqueId: 'A');
 
-   public static readonly FileDescriptor PopTypeDescriptor = new([ColorParser, PopTypeDiscoverer],
-                                                                 ["game", "in_game", "common", "pop_types"],
-                                                                 new("01_pop_types", "txt", "#"),
-                                                                 new PopTypeParsing(),
-                                                                 false,
-                                                                 uniqueId: 'B');
+   public static readonly FileDescriptor PopTypeDescriptor =
+      new([ColorParser, PopTypeDiscoverer, ModifierDefinitionDescriptor],
+          ["game", "in_game", "common", "pop_types"],
+          new("01_pop_types", "txt", "#"),
+          new PopTypeParsing(),
+          false,
+          uniqueId: 'B');
 
    public static readonly FileDescriptor CharactersDiscoveryDescriptor = new([],
                                                                              [

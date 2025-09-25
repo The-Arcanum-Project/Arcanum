@@ -362,6 +362,7 @@ public static class CnHelpers
                                              LocationContext ctx,
                                              string actionName,
                                              string source,
+                                             ref bool validation,
                                              out Location location)
    {
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName))
@@ -376,7 +377,7 @@ public static class CnHelpers
          return false;
       }
 
-      return lvn.TryParseLocationFromLvn(ctx, actionName, source, out location);
+      return lvn.TryParseLocationFromLvn(ctx, actionName, source, ref validation, out location);
    }
 
    /// <summary>

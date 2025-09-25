@@ -20,14 +20,12 @@ public partial class PopTypeParsing() : DiscoverThenParseLoadingService<PopType>
                                           ref bool validation,
                                           object? lockObject)
    {
-      SimpleObjectParser.Parse(fileObj,
-                               rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
-                               ParseProperties,
-                               GetGlobals(),
-                               lockObject);
+      SimpleObjectParser.ParseDiscoveredObjectProperties(rn,
+                                                         ctx,
+                                                         actionStack,
+                                                         source,
+                                                         ref validation,
+                                                         ParseProperties,
+                                                         GetGlobals());
    }
 }

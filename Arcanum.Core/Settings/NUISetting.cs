@@ -391,4 +391,20 @@ public class NUISettings
                                                                Enum.GetValues<PopDefinition.Field>()
                                                                    .Cast<Enum>()
                                                                    .ToArray());
+
+   public NUISetting SoundTollSettings { get; set; } = new(SoundToll.Field.StraitLocationOne,
+                                                           Enum.GetValues<SoundToll.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<SoundToll.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<SoundToll.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting DefaultMapDefinitionSettings { get; set; } = new(DefaultMapDefinition.Field.UniqueId,
+                                                                      Enum.GetValues<DefaultMapDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<DefaultMapDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<DefaultMapDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray());
 }

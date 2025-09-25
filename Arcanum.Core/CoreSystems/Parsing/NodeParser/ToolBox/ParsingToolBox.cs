@@ -18,6 +18,7 @@ using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
@@ -1140,5 +1141,33 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseCulture(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_SoundToll(ContentNode node,
+                                            LocationContext ctx,
+                                            string actionName,
+                                            string source,
+                                            [MaybeNullWhen(false)] out SoundToll value,
+                                            ref bool validation)
+   {
+      value = null;
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_SoundToll)}",
+                                             ref validation))
+         return false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+         return false;
+
+      if (!lvn.TryParseLocationFromLvn(ctx, actionName, source, ref validation, out var loc))
+         return false;
+
+      if (!node.KeyNode.TryGetLocationFromToken(ctx, source, actionName, ref validation, out var from))
+         return false;
+
+      value = new() { StraitLocationOne = from, StraitLocationTwo = loc };
+      return true;
    }
 }

@@ -732,4 +732,13 @@ public class ParsingError : ILazySingleton
                                                                   "No grouping node found for the given key '{0}'.",
                                                                   "The provided key '{0}' does not correspond to any known grouping nodes. Please ensure it is a valid key.",
                                                                   DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The item that is duplicated in the collection</param>
+   public DiagnosticDescriptor DuplicateItemInCollection { get; } = new(DiagnosticCategory.Parsing,
+                                                                        76,
+                                                                        "Duplicate Item in Collection",
+                                                                        DiagnosticSeverity.Error,
+                                                                        "The item '{0}' is duplicated in the collection.",
+                                                                        "Items in a collection must be unique. The item '{0}' appears multiple times, which is not allowed.",
+                                                                        DiagnosticReportSeverity.PopupNotify);
 }

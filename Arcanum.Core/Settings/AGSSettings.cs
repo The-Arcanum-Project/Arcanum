@@ -40,4 +40,6 @@ public class AGSSettings
    public AgsSettings ReligiousSchoolOpinionValueAgsSettings { get; set; } = new();
    public AgsSettings PopTypeAgsSettings { get; set; } = new();
    public AgsSettings PopDefinitionAgsSettings { get; set; } = new();
+   public AgsSettings SoundTollAgsSettings { get; set; } = new();
+   public AgsSettings DefaultMapDefinitionAgsSettings { get; set; } = new();
 }

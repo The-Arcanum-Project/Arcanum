@@ -59,4 +59,13 @@ public static class De
                                      expected);
       validation = false;
    }
+
+   public static void Warning(LocationContext ctx,
+                              DiagnosticDescriptor descriptor,
+                              string action,
+                              params object[] args)
+   {
+      DiagnosticException diagnosticException = new(descriptor, args);
+      diagnosticException.HandleDiagnostic(ctx, action);
+   }
 }

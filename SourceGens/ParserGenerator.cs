@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using ParserGenerator.HelperClasses;
 using ParserGenerator.SubClasses;
 
@@ -210,7 +211,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                   List<PropertyMetadata> embeddedBlockNodeProps,
                                                   List<PropertyMetadata> statementNodeProps)
    {
-      sb.AppendLine($"    private static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
       sb.AppendLine("    {");
 
       foreach (var prop in contentNodeProps)
@@ -218,7 +219,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       sb.AppendLine("    };");
       sb.AppendLine();
-      sb.AppendLine($"    private static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
       sb.AppendLine("    {");
 
       foreach (var prop in blockNodeProps)
@@ -229,7 +230,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    };");
 
       sb.AppendLine();
-      sb.AppendLine($"    private static readonly Dictionary<string, Pdh.StatementParser<{targetTypeName}>> _statementParsers = new()");
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.StatementParser<{targetTypeName}>> _statementParsers = new()");
       sb.AppendLine("    {");
 
       foreach (var prop in statementNodeProps)
@@ -348,7 +349,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
             continue;
          }
 
-         if (prop.IsCollection && !prop.IsShatteredList)
+         if ((prop.IsHashSet || prop.IsCollection) && !prop.IsShatteredList)
          {
             GenerateCollectionMethodCall(sb,
                                          prop,
@@ -430,7 +431,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
    {
       var outvalue = prop.IsCollection ? genericType?.Name ?? "object" : propTypeName;
 
-      sb.AppendLine("// ### Property Parser ###");
+      sb.AppendLine($"// ### Property Parser ###");
       sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
 
@@ -505,18 +506,18 @@ public class ParserSourceGenerator : IIncrementalGenerator
       }
 
       var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+      var collectionKeyName = prop.IsHashSet ? "ObservableHashSet" : "Collection";
 
       var pdhMethodName = prop.IsEmbedded
-                             ? "ParseEmbeddedCollection"
+                             ? $"ParseEmbedded{collectionKeyName}"
                              : prop.ItemNodeType switch
                              {
-                                NodeType.ContentNode => "ParseContentCollection",
-                                NodeType.KeyOnlyNode => "ParseKeyOnlyCollection",
-                                NodeType.BlockNode => "ParseBlockCollection",
-                                NodeType.StatementNode => "ParseStatementCollection",
+                                NodeType.ContentNode => $"ParseContent{collectionKeyName}",
+                                NodeType.KeyOnlyNode => $"ParseKeyOnly{collectionKeyName}",
+                                NodeType.BlockNode => $"ParseBlock{collectionKeyName}",
+                                NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
                                 _ => throw new ArgumentOutOfRangeException(),
                              };
-
       sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
       sb.AppendLine("    {");
       if (!pmc.ContainsOnlyChildObjects)
@@ -543,12 +544,14 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
+      var collectionKeyName = prop.IsHashSet ? "ObservableHashSet" : "Collection";
+
       var pdhMethodName = prop.ItemNodeType switch
       {
-         NodeType.ContentNode => "ParseContentCollection",
-         NodeType.KeyOnlyNode => "ParseKeyOnlyCollection",
-         NodeType.BlockNode => "ParseBlockCollection",
-         NodeType.StatementNode => "ParseStatementCollection",
+         NodeType.ContentNode => $"ParseContent{collectionKeyName}",
+         NodeType.KeyOnlyNode => $"ParseKeyOnly{collectionKeyName}",
+         NodeType.BlockNode => $"ParseBlock{collectionKeyName}",
+         NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
          _ => throw new ArgumentOutOfRangeException(),
       };
 
@@ -866,6 +869,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       message +=
          $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
+      message +=
+         $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
 
       foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
       {
@@ -982,6 +987,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       public bool IsEmbedded { get; }
       public bool IsShatteredList { get; }
       public bool IsCollection { get; }
+      public bool IsHashSet { get; }
       public NodeType ItemNodeType { get; }
 
       public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
@@ -995,8 +1001,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
             AttributeHelper.SimpleGetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
          IsEmbedded = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
          IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
+         IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
+                     "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";
+         if (IsHashSet)
+            IsCollection = true;
 
-         if (IsEmbedded || (IsCollection && !IsShatteredList))
+         if (IsEmbedded || ((IsHashSet || IsCollection) && !IsShatteredList))
          {
             AstNodeType = NodeType.BlockNode;
          }

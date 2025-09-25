@@ -29,6 +29,7 @@ public enum AppState
 public static class Globals
 {
    public const string REPLACE_DESCRIPTION = "???REPLACE_ME???";
+   public const string DO_NOT_PARSE_ME = "DO_NOT_PARSE_ME";
 
    public static GameState State { get; set; } = new();
 

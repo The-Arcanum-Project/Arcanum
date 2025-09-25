@@ -20,6 +20,7 @@ public static class LvnHelpers
                                               LocationContext ctx,
                                               string actionName,
                                               string source,
+                                              ref bool validation,
                                               out Location location)
    {
       var lexeme = lvn.Value.GetLexeme(source);
@@ -31,6 +32,7 @@ public static class LvnHelpers
                                         actionName,
                                         lexeme);
          location = Location.Empty;
+         validation = false;
          return false;
       }
 

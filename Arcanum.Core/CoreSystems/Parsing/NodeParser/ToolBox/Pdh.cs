@@ -352,4 +352,132 @@ public static class Pdh
 
       return results;
    }
+
+   public static ObservableHashSet<T> ParseKeyOnlyObservableHashSet<T>(BlockNode node,
+                                                                       LocationContext ctx,
+                                                                       string source,
+                                                                       string callStack,
+                                                                       ref bool validation,
+                                                                       KeyOnlyItemParser<T> itemParser)
+   {
+      var results = new ObservableHashSet<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsKeyOnlyNode(ctx, source, callStack, ref validation, out var kon))
+            continue;
+
+         if (itemParser(kon, ctx, callStack, source, out var item, ref validation))
+            if (!results.Add(item))
+            {
+               ctx.SetPosition(kon.KeyNode);
+               DiagnosticException.LogWarning(ctx.GetInstance(),
+                                              ParsingError.Instance.DuplicateItemInCollection,
+                                              callStack,
+                                              kon.KeyNode.GetLexeme(source));
+            }
+      }
+
+      return results;
+   }
+
+   public static ObservableHashSet<T> ParseContentObservableHashSet<T>(BlockNode node,
+                                                                       LocationContext ctx,
+                                                                       string source,
+                                                                       string callStack,
+                                                                       ref bool validation,
+                                                                       ContentItemParser<T> itemParser)
+   {
+      var results = new ObservableHashSet<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsContentNode(ctx, source, callStack, ref validation, out var cn))
+            continue;
+
+         if (itemParser(cn, ctx, callStack, source, out var item, ref validation))
+            if (!results.Add(item))
+            {
+               ctx.SetPosition(cn.KeyNode);
+               DiagnosticException.LogWarning(ctx.GetInstance(),
+                                              ParsingError.Instance.DuplicateItemInCollection,
+                                              callStack,
+                                              cn.KeyNode.GetLexeme(source));
+            }
+      }
+
+      return results;
+   }
+
+   public static ObservableHashSet<T> ParseBlockObservableHashSet<T>(BlockNode node,
+                                                                     LocationContext ctx,
+                                                                     string source,
+                                                                     string callStack,
+                                                                     ref bool validation,
+                                                                     BlockItemParser<T> itemParser) where T : INexus
+   {
+      var results = new ObservableHashSet<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+            continue;
+
+         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
+         Debug.Assert(newInstance != null, "newInstance != null");
+
+         if (itemParser(bn, newInstance, ctx, source, ref validation))
+            if (!results.Add(newInstance))
+            {
+               ctx.SetPosition(bn.KeyNode);
+               DiagnosticException.LogWarning(ctx.GetInstance(),
+                                              ParsingError.Instance.DuplicateItemInCollection,
+                                              callStack,
+                                              bn.KeyNode.GetLexeme(source));
+            }
+      }
+
+      return results;
+   }
+
+   public static ObservableHashSet<T> ParseEmbeddedObservableHashSet<T>(BlockNode node,
+                                                                        LocationContext ctx,
+                                                                        string source,
+                                                                        string callStack,
+                                                                        ref bool validation,
+                                                                        EmbeddedItemParser<T> itemParser,
+                                                                        bool allowUnknownNodes)
+      where T : INexus, IEu5Object<T>, new()
+   {
+      var results = new ObservableHashSet<T>();
+      if (node.Children.Count == 0)
+         return results;
+
+      foreach (var sn in node.Children)
+      {
+         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+            continue;
+
+         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
+         newInstance.UniqueId = bn.KeyNode.GetLexeme(source);
+         Debug.Assert(newInstance != null, "newInstance != null");
+         itemParser(bn, newInstance, ctx, source, ref validation, allowUnknownNodes);
+         if (!results.Add(newInstance))
+         {
+            ctx.SetPosition(bn.KeyNode);
+            DiagnosticException.LogWarning(ctx.GetInstance(),
+                                           ParsingError.Instance.DuplicateItemInCollection,
+                                           callStack,
+                                           bn.KeyNode.GetLexeme(source));
+         }
+      }
+
+      return results;
+   }
 }
