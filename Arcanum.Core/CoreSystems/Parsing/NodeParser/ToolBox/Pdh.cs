@@ -81,7 +81,7 @@ public static class Pdh
    /// <param name="target"></param>
    /// <param name="ctx"></param>
    /// <param name="source"></param>
-   /// <param name="actionName"></param>
+   /// <param name="actionStack"></param>
    /// <param name="validation"></param>
    /// <param name="parsers"></param>
    /// <typeparam name="TTarget"></typeparam>
@@ -90,7 +90,7 @@ public static class Pdh
       TTarget target,
       LocationContext ctx,
       string source,
-      string actionName,
+      string actionStack,
       Dictionary<string, ContentParser<TTarget>> parsers,
       ref bool validation) where TTarget : INexus
    {
@@ -104,7 +104,7 @@ public static class Pdh
          ctx.SetPosition(cn.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionName,
+                                        actionStack,
                                         key,
                                         string.Join(", ", parsers.Keys));
       }
@@ -117,7 +117,7 @@ public static class Pdh
    /// <param name="target"></param>
    /// <param name="ctx"></param>
    /// <param name="source"></param>
-   /// <param name="actionName"></param>
+   /// <param name="actionStack"></param>
    /// <param name="validation"></param>
    /// <param name="parsers"></param>
    /// <typeparam name="TTarget"></typeparam>
@@ -126,7 +126,7 @@ public static class Pdh
       TTarget target,
       LocationContext ctx,
       string source,
-      string actionName,
+      string actionStack,
       Dictionary<string, BlockParser<TTarget>> parsers,
       ref bool validation) where TTarget : INexus
    {
@@ -140,7 +140,7 @@ public static class Pdh
          ctx.SetPosition(bn.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidBlockName,
-                                        actionName,
+                                        actionStack,
                                         key,
                                         string.Join(", ", parsers.Keys));
       }
@@ -151,22 +151,22 @@ public static class Pdh
       TTarget target,
       LocationContext ctx,
       string source,
-      string actionName,
+      string actionStack,
       Dictionary<string, ContentParser<TTarget>> contentParsers,
       Dictionary<string, BlockParser<TTarget>> blockParsers,
       ref bool validation) where TTarget : INexus
    {
       if (sn is ContentNode cn)
-         DispatchContentNode(cn, target, ctx, source, actionName, contentParsers, ref validation);
+         DispatchContentNode(cn, target, ctx, source, actionStack, contentParsers, ref validation);
       else if (sn is BlockNode bn)
-         DispatchBlockNode(bn, target, ctx, source, actionName, blockParsers, ref validation);
+         DispatchBlockNode(bn, target, ctx, source, actionStack, blockParsers, ref validation);
       else
       {
          validation = false;
          ctx.SetPosition(sn.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
+                                        actionStack,
                                         sn.GetType().Name,
                                         "ContentNode or BlockNode",
                                         sn.KeyNode.GetLexeme(source));
@@ -256,7 +256,7 @@ public static class Pdh
    public static ObservableRangeCollection<T> ParseContentCollection<T>(BlockNode node,
                                                                         LocationContext ctx,
                                                                         string source,
-                                                                        string callStack,
+                                                                        string actionStack,
                                                                         ref bool validation,
                                                                         ContentItemParser<T> itemParser)
    {
@@ -266,10 +266,10 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsContentNode(ctx, source, callStack, ref validation, out var cn))
+         if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
             continue;
 
-         if (itemParser(cn, ctx, callStack, source, out var item, ref validation))
+         if (itemParser(cn, ctx, actionStack, source, out var item, ref validation))
             results.Add(item);
       }
 
@@ -279,7 +279,7 @@ public static class Pdh
    public static ObservableRangeCollection<T> ParseKeyOnlyCollection<T>(BlockNode node,
                                                                         LocationContext ctx,
                                                                         string source,
-                                                                        string callStack,
+                                                                        string actionStack,
                                                                         ref bool validation,
                                                                         KeyOnlyItemParser<T> itemParser)
    {
@@ -289,10 +289,10 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsKeyOnlyNode(ctx, source, callStack, ref validation, out var kon))
+         if (!sn.IsKeyOnlyNode(ctx, source, actionStack, ref validation, out var kon))
             continue;
 
-         if (itemParser(kon, ctx, callStack, source, out var item, ref validation))
+         if (itemParser(kon, ctx, actionStack, source, out var item, ref validation))
             results.Add(item);
       }
 
@@ -302,7 +302,7 @@ public static class Pdh
    public static ObservableRangeCollection<T> ParseBlockCollection<T>(BlockNode node,
                                                                       LocationContext ctx,
                                                                       string source,
-                                                                      string callStack,
+                                                                      string actionStack,
                                                                       ref bool validation,
                                                                       BlockItemParser<T> itemParser) where T : INexus
    {
@@ -312,7 +312,7 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
          var newInstance = (T)Activator.CreateInstance(typeof(T))!;
@@ -328,7 +328,7 @@ public static class Pdh
    public static ObservableRangeCollection<T> ParseEmbeddedCollection<T>(BlockNode node,
                                                                          LocationContext ctx,
                                                                          string source,
-                                                                         string callStack,
+                                                                         string actionStack,
                                                                          ref bool validation,
                                                                          EmbeddedItemParser<T> itemParser,
                                                                          bool allowUnknownNodes)
@@ -340,7 +340,7 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
          var newInstance = (T)Activator.CreateInstance(typeof(T))!;
@@ -356,7 +356,7 @@ public static class Pdh
    public static ObservableHashSet<T> ParseKeyOnlyObservableHashSet<T>(BlockNode node,
                                                                        LocationContext ctx,
                                                                        string source,
-                                                                       string callStack,
+                                                                       string actionStack,
                                                                        ref bool validation,
                                                                        KeyOnlyItemParser<T> itemParser)
    {
@@ -366,16 +366,16 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsKeyOnlyNode(ctx, source, callStack, ref validation, out var kon))
+         if (!sn.IsKeyOnlyNode(ctx, source, actionStack, ref validation, out var kon))
             continue;
 
-         if (itemParser(kon, ctx, callStack, source, out var item, ref validation))
+         if (itemParser(kon, ctx, actionStack, source, out var item, ref validation))
             if (!results.Add(item))
             {
                ctx.SetPosition(kon.KeyNode);
                DiagnosticException.LogWarning(ctx.GetInstance(),
                                               ParsingError.Instance.DuplicateItemInCollection,
-                                              callStack,
+                                              actionStack,
                                               kon.KeyNode.GetLexeme(source));
             }
       }
@@ -386,7 +386,7 @@ public static class Pdh
    public static ObservableHashSet<T> ParseContentObservableHashSet<T>(BlockNode node,
                                                                        LocationContext ctx,
                                                                        string source,
-                                                                       string callStack,
+                                                                       string actionStack,
                                                                        ref bool validation,
                                                                        ContentItemParser<T> itemParser)
    {
@@ -396,16 +396,16 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsContentNode(ctx, source, callStack, ref validation, out var cn))
+         if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
             continue;
 
-         if (itemParser(cn, ctx, callStack, source, out var item, ref validation))
+         if (itemParser(cn, ctx, actionStack, source, out var item, ref validation))
             if (!results.Add(item))
             {
                ctx.SetPosition(cn.KeyNode);
                DiagnosticException.LogWarning(ctx.GetInstance(),
                                               ParsingError.Instance.DuplicateItemInCollection,
-                                              callStack,
+                                              actionStack,
                                               cn.KeyNode.GetLexeme(source));
             }
       }
@@ -416,7 +416,7 @@ public static class Pdh
    public static ObservableHashSet<T> ParseBlockObservableHashSet<T>(BlockNode node,
                                                                      LocationContext ctx,
                                                                      string source,
-                                                                     string callStack,
+                                                                     string actionStack,
                                                                      ref bool validation,
                                                                      BlockItemParser<T> itemParser) where T : INexus
    {
@@ -426,7 +426,7 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
          var newInstance = (T)Activator.CreateInstance(typeof(T))!;
@@ -438,7 +438,7 @@ public static class Pdh
                ctx.SetPosition(bn.KeyNode);
                DiagnosticException.LogWarning(ctx.GetInstance(),
                                               ParsingError.Instance.DuplicateItemInCollection,
-                                              callStack,
+                                              actionStack,
                                               bn.KeyNode.GetLexeme(source));
             }
       }
@@ -449,7 +449,7 @@ public static class Pdh
    public static ObservableHashSet<T> ParseEmbeddedObservableHashSet<T>(BlockNode node,
                                                                         LocationContext ctx,
                                                                         string source,
-                                                                        string callStack,
+                                                                        string actionStack,
                                                                         ref bool validation,
                                                                         EmbeddedItemParser<T> itemParser,
                                                                         bool allowUnknownNodes)
@@ -461,7 +461,7 @@ public static class Pdh
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, callStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
          var newInstance = (T)Activator.CreateInstance(typeof(T))!;
@@ -473,7 +473,7 @@ public static class Pdh
             ctx.SetPosition(bn.KeyNode);
             DiagnosticException.LogWarning(ctx.GetInstance(),
                                            ParsingError.Instance.DuplicateItemInCollection,
-                                           callStack,
+                                           actionStack,
                                            bn.KeyNode.GetLexeme(source));
          }
       }

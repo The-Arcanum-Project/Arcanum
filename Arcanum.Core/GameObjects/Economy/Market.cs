@@ -1,43 +1,63 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Economy;
 
 /// <summary>
 /// Placeholder for the market type. Not sure how to do it yet.
 /// </summary>
-public partial class Market(Location location) : INUI, ICollectionProvider<Market>, IEmpty<Market>
+[ObjectSaveAs]
+public partial class Market : IEu5Object<Market>
 {
-   private Location _location = location;
-   public Location Location
+   #region Nexus Properties
+
+   [SaveAs]
+   [ParseAs("add_market")]
+   [DefaultValue(null)]
+   [Description("The location where this market is situated.")]
+
+   public Location Location { get; set; } = Location.Empty;
+
+   #endregion
+
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this Market. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId
    {
-      get => _location;
-      set => _location = value;
-   }
-   public static Market Empty { get; } = new(Location.Empty);
-
-   public static Dictionary<string, Market> GetGlobalItems() => [];
-
-   public override bool Equals(object? obj) => obj is Market market && Location == market.Location;
-
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => Location.GetHashCode();
-
-   public static bool operator ==(Market? left, Market? right)
-   {
-      if (left is null && right is null)
-         return true;
-      if (left is null || right is null)
-         return false;
-
-      return left.Equals(right);
+      get => Location.UniqueId + "_Market";
+      set { }
    }
 
-   public static bool operator !=(Market? left, Market? right) => !(left == right);
-   public bool IsReadonly { get; } = true;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.MarketSettings;
-   public INUINavigation[] Navigations { get; } = [];
+   [SuppressAgs]
+   public Eu5FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
 
-   public override string ToString() => $"Market of {Location.UniqueId}";
+   #region IEu5Object
+
+   public string GetNamespace => $"Economy.{nameof(Market)}";
+   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public bool IsReadonly => true;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.MarketSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.MarketAgsSettings;
+   public static Dictionary<string, Market> GetGlobalItems() => Globals.Markets;
+
+   public static Market Empty { get; } = new() { UniqueId = "Arcanum_Empty_Market" };
+
+   public override string ToString() => UniqueId;
+
+   #endregion
 }

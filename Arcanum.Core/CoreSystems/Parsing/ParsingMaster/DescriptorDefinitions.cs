@@ -66,7 +66,7 @@ public static class DescriptorDefinitions
                                                                    "03_markets.txt",
                                                                 ],
                                                                 new("03_markets", "txt", "#"),
-                                                                new MarketParsing(),
+                                                                new MarketManagerParsing(),
                                                                 false,
                                                                 false);
 

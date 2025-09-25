@@ -72,14 +72,14 @@ public static class SnNodesHelpers
    /// <param name="node"></param>
    /// <param name="ctx"></param>
    /// <param name="source"></param>
-   /// <param name="className"></param>
+   /// <param name="actionStack"></param>
    /// <param name="validationResult"></param>
    /// <param name="value"></param>
    /// <returns></returns>
    public static bool IsContentNode(this StatementNode node,
                                     LocationContext ctx,
                                     string source,
-                                    string className,
+                                    string actionStack,
                                     ref bool validationResult,
                                     [MaybeNullWhen(false)] out ContentNode value)
    {
@@ -88,7 +88,7 @@ public static class SnNodesHelpers
          ctx.SetPosition(node.KeyNode);
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidNodeType,
-                                        $"{className}.StatementNode.IsContentNode",
+                                        $"{actionStack}.StatementNode.IsContentNode",
                                         $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
                                         nameof(ContentNode),
                                         node.KeyNode.GetLexeme(source));

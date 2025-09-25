@@ -3,6 +3,7 @@ using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
@@ -72,6 +73,12 @@ public static class Globals
    #region Common
 
    public static Dictionary<string, ModifierDefinition> ModifierDefinitions { get; set; } = [];
+
+   #endregion
+
+   #region Economy
+
+   public static Dictionary<string, Market> Markets { get; } = [];
 
    #endregion
 

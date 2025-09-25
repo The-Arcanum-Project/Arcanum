@@ -32,10 +32,7 @@ public partial class Location
 
    #region Market: game/main_menu/setup/start
 
-   [SuppressAgs]
-   [Description("The market associated with this location, if any.")]
-   public Market Market { get; set; } = Market.Empty;
-   public bool HasMarket => Market != Market.Empty;
+   public bool HasMarket => Globals.Markets.ContainsKey($"{UniqueId}_market");
 
    #endregion
 
@@ -72,12 +69,6 @@ public partial class Location
          navigations.Add(null);
          navigations.AddRange(Pops.Select(pop => new NUINavigation(pop,
                                                                    $"Pop: {pop.PopType} ({pop.Culture}, {pop.Religion})")));
-
-         if (HasMarket)
-         {
-            navigations.Add(null);
-            navigations.Add(new NUINavigation(Market, "Market"));
-         }
 
          return navigations.ToArray()!;
       }

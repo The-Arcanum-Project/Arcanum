@@ -20,36 +20,10 @@ public partial class DebugPanelGrid
 
    private void FindNullMarketsButton_Click(object sender, RoutedEventArgs e)
    {
-      var count = 0;
-      var str = string.Empty;
-      foreach (var loc in Globals.Locations.Values)
-      {
-         if (loc.Market == null!)
-         {
-            str += loc.UniqueId;
-            str += ", ";
-            count++;
-         }
-      }
-
-      DebugView.Content = new TextBlock { Text = $"Found {count} locations with null markets: {str}" };
    }
 
    private void FindNullLocationInMarketButton_Click(object sender, RoutedEventArgs e)
    {
-      var count = 0;
-      var str = string.Empty;
-      foreach (var loc in Globals.Locations.Values)
-      {
-         if (loc.Market.Location == null!)
-         {
-            str += loc.UniqueId;
-            str += ", ";
-            count++;
-         }
-      }
-
-      DebugView.Content = new TextBlock { Text = $"Found {count} markets with null locations: {str}" };
    }
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
