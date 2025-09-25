@@ -1,13 +1,10 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.ParsingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
+using Common;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 

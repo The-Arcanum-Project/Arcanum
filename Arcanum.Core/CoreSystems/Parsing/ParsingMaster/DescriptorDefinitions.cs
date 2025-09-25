@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.Map;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
 using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
 
@@ -24,7 +25,7 @@ public static class DescriptorDefinitions
                                                                                "modifier_type_definitions"
                                                                             ],
                                                                             new("modifiers", "txt", "#"),
-                                                                            new Steps.MainMenu.Common.ModifierParsing(),
+                                                                            new ModifierParsing(),
                                                                             false);
 
    public static readonly FileDescriptor DefaultMapPreDescriptor = new([],
