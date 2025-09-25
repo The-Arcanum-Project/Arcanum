@@ -17,7 +17,9 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.DevHelper;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
@@ -147,12 +149,12 @@ public static class NUIViewGenerator
       var baseGrid = baseUI.ContentGrid;
       var initialVisibility = startExpanded ? Visibility.Visible : Visibility.Collapsed;
       var collapsibleElements = new List<FrameworkElement>();
-      var itemType = target.GetType();
-      var methodInfo = itemType.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
-      IEnumerable? allItems = null;
 
-      if (methodInfo != null)
-         allItems = (IEnumerable)methodInfo.Invoke(null, null)!;
+      IEnumerable? allItems;
+      if (target is IEu5Object eu5Obj)
+         allItems = eu5Obj.GetGlobalItemsNonGeneric().Values;
+      else
+         allItems = new List<INUI>();
 
       var headerBlock = NavigationHeader(navHistory, target, property.ToString());
 
@@ -169,7 +171,7 @@ public static class NUIViewGenerator
 
       var collapseButton = GetCollapseButton(startExpanded);
 
-      if (allItems != null && !isReadonlyProp)
+      if (!isReadonlyProp)
       {
          var objectSelector = new AutoCompleteComboBox
          {
@@ -187,7 +189,7 @@ public static class NUIViewGenerator
          {
             Source = parent,
             Mode = BindingMode.TwoWay,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            UpdateSourceTrigger = UpdateSourceTrigger.Explicit,
          };
 
          objectSelector.SetBinding(Selector.SelectedItemProperty, binding);
@@ -195,7 +197,10 @@ public static class NUIViewGenerator
          objectSelector.SelectionChanged += (_, args) =>
          {
             if (args.AddedItems.Count > 0 && !args.AddedItems[0]!.Equals(target))
+            {
+               objectSelector.GetBindingExpression(Selector.SelectedItemProperty)?.UpdateSource();
                GenerateAndSetView(navHistory);
+            }
          };
 
          var headerGrid = new Grid
@@ -227,6 +232,7 @@ public static class NUIViewGenerator
             Grid.SetColumn(inferActions, 0);
          }
 
+         var itemType = target.GetType();
          if (!isReadonlyProp && TryGetEmpty(itemType, out var emptyInstance))
          {
             var setEmptyButton = GetSetEmptyButton(itemType,
