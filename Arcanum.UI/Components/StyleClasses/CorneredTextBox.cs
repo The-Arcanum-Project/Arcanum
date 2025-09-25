@@ -21,6 +21,15 @@ public class CorneredTextBox : TextBox
     public static readonly DependencyProperty HighlightOnFocusProperty =
         DependencyProperty.Register(nameof(HighlightOnFocus), typeof(bool), typeof(CorneredTextBox), new (true));
 
+    public static readonly DependencyProperty MaxAspectRatioProperty = DependencyProperty.Register(
+        nameof(MaxAspectRatio), typeof(double), typeof(CorneredTextBox), new PropertyMetadata(double.NaN));
+
+    public double MaxAspectRatio
+    {
+        get { return (double)GetValue(MaxAspectRatioProperty); }
+        set { SetValue(MaxAspectRatioProperty, value); }
+    }
+    
     // For some reason the textbox bubble the events from underneath up
     protected override void OnMouseMove(MouseEventArgs e)
     {
@@ -28,10 +37,32 @@ public class CorneredTextBox : TextBox
         e.Handled = true;
     }
     
+    protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+    {
+        base.OnRenderSizeChanged(sizeInfo);
+
+        if (MaxAspectRatio <= 0 || double.IsNaN(MaxAspectRatio))
+            return;
+
+        double aspect = ActualWidth / ActualHeight;
+        
+        // aspect * h = w
+        // w / aspect = h
+        // w 
+        
+        if (aspect > MaxAspectRatio)
+        {
+            // Clamp width so we don't exceed the max aspect ratio
+            Width = ActualHeight * MaxAspectRatio;
+        }
+    }
+    
     public bool HighlightOnFocus
     {
         get => (bool)GetValue(HighlightOnFocusProperty);
         set => SetValue(HighlightOnFocusProperty, value);
     }
-
+    
+    
+    
 }

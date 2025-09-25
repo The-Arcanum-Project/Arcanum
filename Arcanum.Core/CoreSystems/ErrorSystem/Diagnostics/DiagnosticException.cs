@@ -97,8 +97,7 @@ public sealed class DiagnosticException : Exception
                MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
                                                     .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
                                                               "Error Encountered",
-                                                              icon: GetMessageBoxIconForSeverity(Severity),
-                                                              height: 450));
+                                                              icon: GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupWarning:
             ohNoWhatShouldWeDoNow =
@@ -106,8 +105,7 @@ public sealed class DiagnosticException : Exception
                                                     .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
                                                               "Error Encountered",
                                                               MBoxButton.OKRetryCancel,
-                                                              GetMessageBoxIconForSeverity(Severity),
-                                                              height: 450));
+                                                              GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.PopupError:
             ohNoWhatShouldWeDoNow =
@@ -115,8 +113,7 @@ public sealed class DiagnosticException : Exception
                                                     .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
                                                               "Error Encountered",
                                                               MBoxButton.RetryCancel,
-                                                              GetMessageBoxIconForSeverity(Severity),
-                                                              height: 450));
+                                                              GetMessageBoxIconForSeverity(Severity)));
             break;
          case DiagnosticReportSeverity.Suppressed:
             // TODO @Minnator: Write to the Debug log of Arcanum

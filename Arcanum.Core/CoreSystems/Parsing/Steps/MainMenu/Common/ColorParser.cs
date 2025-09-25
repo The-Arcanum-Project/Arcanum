@@ -5,10 +5,11 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 
-public class ColorParser : FileLoadingService
+public class ColorParser(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [typeof(JominiColor)];
    public override string GetFileDataDebugInfo() => $"Parsed Colors: {ColorResolver.Instance.ColorMap.Count}";

@@ -8,11 +8,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(PopDefinition))]
-public partial class PopsParsing : ParserValidationLoadingService<PopDefinition>
+public partial class PopsParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<PopDefinition>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

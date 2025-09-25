@@ -5,10 +5,11 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
-public abstract class ParserValidationLoadingService<T> : FileLoadingService where T : IEu5Object<T>, new()
+public abstract class ParserValidationLoadingService<T>(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies) where T : IEu5Object<T>, new()
 {
    private const string ACTION_STACK = nameof(ParserValidationLoadingService<T>);
 

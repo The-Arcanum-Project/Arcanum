@@ -7,13 +7,14 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(Market))]
 public static partial class MarketParsing;
 
-public class MarketManagerParsing : ParserValidationLoadingService<Market>
+public class MarketManagerParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Market>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

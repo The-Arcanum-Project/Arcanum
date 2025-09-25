@@ -9,10 +9,11 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-public class InstitutionStateReligiousSchoolStateParsing : PureParseLoadingService
+public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependencyNode<string>> dependencies) : PureParseLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects => [typeof(InstitutionManager), typeof(ReligiousSchoolRelations)];
    public override string GetFileDataDebugInfo() => "Parsed InstitutionState and ReligiousSchoolState";
@@ -50,7 +51,7 @@ public class InstitutionStateReligiousSchoolStateParsing : PureParseLoadingServi
 }
 
 [ParserFor(typeof(InstitutionManager))]
-public abstract partial class InstitutionStateManager : ParserValidationLoadingService<InstitutionManager>
+public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<InstitutionManager>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,
@@ -88,7 +89,7 @@ public abstract partial class InstitutionStateParsing;
 
 [ParserFor(typeof(ReligiousSchoolRelations))]
 public partial class ReligiousSchoolRelationsParsing
-   : ParserValidationLoadingService<ReligiousSchoolRelations>
+  (IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<ReligiousSchoolRelations>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,

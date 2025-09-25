@@ -5,11 +5,12 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Language))]
-public partial class LanguageParsing : ParserValidationLoadingService<Language>
+public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Language>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

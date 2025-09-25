@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
 using Common;
+using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
@@ -12,7 +13,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 /// This class loads the header of the default.map file and provides fields to get the parsed data.
 /// If this fails we abort the entire loading process as everything depends on this file.
 /// </summary>
-public class DefaultMapPreParsingStep : ParserValidationLoadingService<DefaultMapDefinition>
+public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<DefaultMapDefinition>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
