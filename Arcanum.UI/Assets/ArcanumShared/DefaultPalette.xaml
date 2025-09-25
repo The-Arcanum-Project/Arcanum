@@ -41,6 +41,8 @@
                      Color = "{StaticResource AggressiveRedBackColor}" />
     <SolidColorBrush x:Key = "AccentBackColorBrush"
                      Color = "#FF0e3338" />
+    <SolidColorBrush x:Key = "LightAccentBackColorBrush"
+                     Color = "#194d55" />
     <SolidColorBrush x:Key = "DimErrorRedColorBrush"
                      Color = "{StaticResource DimErrorRedColor}" />
     <SolidColorBrush x:Key = "DimWarningYellowColorBrush"

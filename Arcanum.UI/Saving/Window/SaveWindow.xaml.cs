@@ -40,6 +40,15 @@ public partial class SaveWindow
 
     private readonly List<FileRepresentation> _files;
 
+    public static readonly DependencyProperty NewFileModeProperty = DependencyProperty.Register(
+        nameof(NewFileMode), typeof(bool), typeof(SaveWindow), new PropertyMetadata(default(bool)));
+
+    public bool NewFileMode
+    {
+        get { return (bool)GetValue(NewFileModeProperty); }
+        set { SetValue(NewFileModeProperty, value); }
+    }
+    
     public SaveWindow()
     {
         InitializeComponent();
@@ -193,5 +202,21 @@ public partial class SaveWindow
             : DragDropEffects.Move;
 
         e.Handled = true;
+    }
+    
+    private void NewObjectModeToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        NewFileMode = true;
+        DescriptorsColumn.MinWidth = 0;
+        DescriptorsColumn.Width = new GridLength(0);
+        SplitterColumn.Width = new GridLength(0);
+    }
+
+    private void NewObjectModeToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        NewFileMode = false;
+        DescriptorsColumn.MinWidth = 100;
+        DescriptorsColumn.Width = new GridLength(1, GridUnitType.Star);
+        SplitterColumn.Width = GridLength.Auto;
     }
 }
