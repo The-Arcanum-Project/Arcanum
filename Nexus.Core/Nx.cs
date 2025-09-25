@@ -55,7 +55,10 @@ public static class Nx
    public static Type TypeOf(INexus _,
                              [LinkedPropertyEnum(nameof(_))] Enum e)
    {
-      return e.GetType().GetField(e.ToString()).GetCustomAttribute<ExpectedTypeAttribute>().Type;
+      return e.GetType()
+              .GetField(e.ToString())
+              .GetCustomAttribute<ExpectedTypeAttribute>()
+              .Type; // TODO @Melco replace this with sourgenerated lookup as this is slow af
    }
 
    /// <summary>

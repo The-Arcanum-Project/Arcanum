@@ -6,7 +6,7 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
-public partial class DebugPanelGrid : UserControl
+public partial class DebugPanelGrid
 {
    public DebugPanelGrid()
    {
@@ -66,5 +66,10 @@ public partial class DebugPanelGrid : UserControl
    private void OpenTestWindowButton_Click(object sender, RoutedEventArgs e)
    {
       new ExportFileWindow().Show();
+   }
+
+   private void OpenNexusAccessorButton_Click(object sender, RoutedEventArgs e)
+   {
+      new NexusAccessorWindow().Show();
    }
 }
