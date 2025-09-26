@@ -88,17 +88,7 @@
                           Grid.Row="1"
                           Margin="0,2,0,4"
                           Background="Transparent"
-                          ItemsSource="{Binding SearchResults, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
-
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding ResultName}"
-                                       AllowDrop="True"
-                                       Drop="UIElement_OnDrop"
-                                       DragOver="UIElement_OnDrag"
-                                       DragEnter="UIElement_OnDrag" />
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
+                          ItemsSource="{Binding ShownFiles, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
                 </ListView>
             </Grid>
             <GridSplitter Grid.Column="1"
@@ -120,18 +110,39 @@
                           x:Name="FileListView"
                           Margin="0,2,0,4"
                           Background="Transparent"
-                          ItemsSource="{Binding SearchResults, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+                          ItemsSource="{Binding ShownFiles, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding ResultName}"
                                        AllowDrop="True"
-                                       Drop="UIElement_OnDrop"
-                                       DragOver="UIElement_OnDrag"
-                                       DragEnter="UIElement_OnDrag" />
+                                       Drop="OnDropInFile"
+                                       DragOver="OnDragInFile"
+                                       DragEnter="OnDragInFile" />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <TextBlock Grid.Row="1"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontStyle="Italic" Margin="25"
+                           Foreground="{StaticResource GreyedOutForeColorBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Text" Value="Please select a descriptor to see contained files."/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=FileListView, Path=Items.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NewFileMode, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }" Value="True">
+                                    <Setter Property="Text" Value="Please select a object (or multiple of the same type) to see valid files."/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
             <GridSplitter Grid.Column="3"
                           Width="6"
@@ -152,14 +163,34 @@
                           Grid.Row="1"
                           Margin="0,2,0,4"
                           Background="Transparent"
-                          ItemsSource="{Binding CurrentFile.ChangedObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+                          ItemsSource="{Binding ShownObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
+                          SelectionChanged="ObjectListView_OnSelectionChanged">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding UniqueId}"
-                                       PreviewMouseLeftButtonDown="UIElement_OnPreviewMouseLeftButtonDown" />
+                                       PreviewMouseLeftButtonDown="ObjectLeftButtonPreview"
+                                       MouseMove="ObjectLeftButtonMove"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <TextBlock Grid.Row="1"
+                           Text="Please select a file to see contained objects."
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontStyle="Italic" Margin="26"
+                           Foreground="{StaticResource GreyedOutForeColorBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=ObjectListView, Path=Items.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </Grid>
         <Border Grid.Row="1"

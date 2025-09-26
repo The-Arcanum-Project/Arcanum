@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -28,7 +30,9 @@ public partial class DebugPanelGrid
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
    {
-      var sw = new Saving.Window.SaveWindow();
+      var climates = Globals.Regencies.Values.Cast<IEu5Object>().Take(2).ToList();
+      climates.AddRange(Globals.Climates.Values.Take(2));
+      var sw = new Saving.Window.SaveWindow(climates);
       sw.Show();
    }
 
