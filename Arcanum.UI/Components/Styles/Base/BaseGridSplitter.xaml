@@ -25,6 +25,11 @@
                             CornerRadius = "2"
                             Width = "{TemplateBinding Width}"
                             Margin = "{TemplateBinding Margin}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SelectedControlBorderColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
