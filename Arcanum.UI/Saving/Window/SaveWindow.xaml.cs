@@ -38,6 +38,9 @@ public partial class SaveWindow
     private readonly Queastor _quaestor;
     private readonly List<IEu5Object> _newObjects;
     private readonly Dictionary<Eu5FileObj, FileRepresentation> _fileDescriptors = new();
+    // TODO @MelCo: Check if reset after mode change
+    private FileDescriptor? _currentDescriptor = null;
+    
     
     #region UI Bindings
 
@@ -149,12 +152,11 @@ public partial class SaveWindow
         _dragStartPoint = null;
         try
         {
-            ShownFiles = new (GetDescriptors(obj.Source.Descriptor.Files));
             DragDrop.DoDragDrop(ObjectListView, data, DragDropEffects.Move);
         }
         finally
         {
-            ShownFiles.Clear();
+            //ShownFiles.Clear();
         }
     }
 
@@ -185,7 +187,7 @@ public partial class SaveWindow
             ShownFiles.Clear();
             return;
         }
-
+        
         var selectedDescriptor = GetDescriptorFromItem(ObjectListView.SelectedItems[0] as IEu5Object ?? throw new InvalidOperationException());
         for (var index = 1; index < ObjectListView.SelectedItems.Count; index++)
         {
@@ -193,8 +195,10 @@ public partial class SaveWindow
             var descriptor = GetDescriptorFromItem(item as IEu5Object ?? throw new InvalidOperationException());
             if (Equals(descriptor, selectedDescriptor)) continue;
             ShownFiles.Clear();
+            _currentDescriptor = null;
             return;
         }
+        _currentDescriptor = selectedDescriptor;
         ShownFiles = new (GetDescriptors(selectedDescriptor.Files));
     }
     #endregion
@@ -232,4 +236,24 @@ public partial class SaveWindow
 
     #endregion
 
+    private void AddNewFile(object sender, RoutedEventArgs e)
+    {
+        if (NewFileMode)
+        {
+            if(_currentDescriptor is null)
+                // TODO @MelCo: Notify user
+                return;
+            
+            var dialog = new CreateNewFile(_currentDescriptor)
+            {
+                Owner = this
+            };
+            dialog.ShowDialog();
+            if (dialog.DialogResult != true)
+            {
+                
+            }
+
+        }
+    }
 }

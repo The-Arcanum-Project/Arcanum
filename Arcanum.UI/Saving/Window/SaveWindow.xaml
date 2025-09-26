@@ -236,17 +236,17 @@
                             Value="5,4,0,4" />
                 </Style>
             </StackPanel.Resources>
-            <styleClasses:BaseButton x:Name="SelectButton"
+            <styleClasses:BaseButton
                                      ToolTip="Select all shown items.&#x0a;Use double click to select all items.">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CheckSquareStack30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>
-            <styleClasses:BaseButton x:Name="UnselectButton"
+            <styleClasses:BaseButton
                                      ToolTip="Unselect all shown items.&#x0a;Use double click to unselect all items.">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CloseSquareStack30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>
-            <styleClasses:BaseButton>
+            <styleClasses:BaseButton Click="AddNewFile">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>
