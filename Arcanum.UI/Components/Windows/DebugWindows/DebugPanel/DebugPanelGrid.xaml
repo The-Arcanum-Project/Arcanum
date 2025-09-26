@@ -50,6 +50,10 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "OpenNexusAccessorButton_Click" />
+            <styleClasses:BaseButton Content = "Open Eu5 UI Gen"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "OpenEu5UiGenButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

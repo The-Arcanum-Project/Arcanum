@@ -53,6 +53,9 @@ public static class NexusHelpers
       // List of all members that are a collection
       var collectionMembers = new List<ISymbol>();
 
+      var propertyTypes = new List<ITypeSymbol>();
+      var collectionItemTypes = new List<ITypeSymbol?>();
+
       var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
       var className = classSymbol.Name;
 
@@ -82,6 +85,8 @@ public static class NexusHelpers
             _ => throw new ArgumentOutOfRangeException(),
          };
 
+         propertyTypes.Add(memberType);
+
          // Gather the readonly status
          readonlyStatuses.Add(member.GetAttributes()
                                     .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
@@ -107,9 +112,10 @@ public static class NexusHelpers
                                 ? desc
                                 : null);
 
-         if (memberType.AllInterfaces.Any(i => string.Equals(i.ToDisplayString(),
-                                                             "System.Collections.IList",
-                                                             StringComparison.Ordinal)))
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         collectionItemTypes.Add(itemType);
+
+         if (itemType != null)
             collectionMembers.Add(member);
 
          // 2. Get a fully qualified name for the type
@@ -160,7 +166,41 @@ public static class NexusHelpers
       builder.AppendLine($"    private static readonly string?[] _descriptions = {{ {descriptionInitializer} }};");
       builder.AppendLine();
 
-      builder.AppendLine("#endregion");
+      // -------- Property Type Array --------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array containing the Type of each property.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine($"    private static readonly Type[] _propertyTypes =");
+      builder.AppendLine("    {");
+      foreach (var typeSymbol in propertyTypes)
+      {
+         var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+         builder.AppendLine($"        typeof({typeName}),");
+      }
+
+      builder.AppendLine("    };");
+      builder.AppendLine();
+      builder.AppendLine($"#endregion");
+      builder.AppendLine();
+
+      // -------- Collection Item Type Array --------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array containing the item Type for collection properties, or null otherwise.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine($"    private static readonly Type?[] _collectionItemTypes =");
+      builder.AppendLine("    {");
+      foreach (var typeSymbol in collectionItemTypes)
+      {
+         var typeString = typeSymbol == null
+                             ? "null"
+                             : $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+
+         builder.AppendLine($"        {typeString},");
+      }
+
+      builder.AppendLine("    };");
       builder.AppendLine();
 
       builder.AppendLine("#region Property Modifier Methods");
@@ -230,8 +270,6 @@ public static class NexusHelpers
       builder.AppendLine("    }");
       builder.AppendLine();
 
-      // 3. Generate the GetValue method
-      //builder.AppendLine("    [PropertyGetter]");
       builder.AppendLine("    public object _getValue(Enum property)");
       builder.AppendLine("    {");
       builder.AppendLine("        switch (property)");
@@ -246,6 +284,39 @@ public static class NexusHelpers
       builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
+
+      // --- Public accessor method for the Property Type ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Gets the Type of a property.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public Type GetNxPropType(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _propertyTypes[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // --- Public accessor method for the Collection Item Type ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Gets the item Type for a collection property, or null if the property is not a collection.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public Type? GetNxItemType(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _collectionItemTypes[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // --- IsCollection ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Checks if a property is a collection.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public bool IsCollection(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return GetNxItemType(property) != null;");
+      builder.AppendLine("    }");
+      builder.AppendLine();
 
       #endregion
 
