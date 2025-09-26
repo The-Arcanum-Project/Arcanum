@@ -8,6 +8,8 @@
                          xmlns:saving="clr-namespace:Arcanum.UI.Saving"
                          mc:Ignorable="d"
                          Title="CreateNewFile"
+                         Width="Auto"
+                         Height="Auto"
                          SizeToContent="WidthAndHeight"
                          WindowStartupLocation="CenterOwner"
                          ResizeMode="NoResize">
