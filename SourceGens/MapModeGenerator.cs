@@ -14,75 +14,57 @@ public class MapModeGenerator : IIncrementalGenerator
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
-      // Find all class declarations
-      var classDeclarations = context.SyntaxProvider
-                                     .CreateSyntaxProvider(predicate: static (s, _) => s is ClassDeclarationSyntax,
-                                                           transform: static (ctx, _)
-                                                              => (ClassDeclarationSyntax)ctx.Node);
+      var classProvider = Helpers.CreateClassSyntaxProvider(context);
 
-      // Combine with compilation to get semantic symbols
-      IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax>)> compilationAndClasses =
-         context.CompilationProvider.Combine(classDeclarations.Collect());
-
-      // Register the source output action
-      context.RegisterSourceOutput(compilationAndClasses,
-                                   static (spc, source) => Execute(source.Item1, source.Item2, spc));
+      context.RegisterSourceOutput(context.CompilationProvider.Combine(classProvider),
+                                   (spc, source) => { Generate(source.Left, source.Right, spc); });
    }
 
-   private static void Execute(Compilation compilation,
-                               ImmutableArray<ClassDeclarationSyntax> classes,
-                               SourceProductionContext context)
+   private static void Generate(Compilation compilation,
+                                ImmutableArray<ClassDeclarationSyntax> classes,
+                                SourceProductionContext context)
    {
       if (classes.IsDefaultOrEmpty)
          return;
 
-      // Get the symbol for the IMapMode interface
-      var mapModeInterface = compilation.GetTypeByMetadataName(I_MAP_MODE_INTERFACE_NAME);
-      // The interface isn't defined, so we can't do anything.
-      if (mapModeInterface == null)
-         return;
+      var mapModeClasses = Helpers.FindTypesImplementingInterface(compilation, classes, I_MAP_MODE_INTERFACE_NAME);
 
       var mapModesToGenerate = new List<MapModeInfo>();
 
       // Find all classes that implement IMapMode and extract their info
-      foreach (var classSyntax in classes)
+      foreach (var classSymbol in mapModeClasses)
       {
-         var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
-         if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol classSymbol)
+         // --- 1. Get the 'Name' property and its string literal ---
+         var nameProperty = classSymbol.GetMembers("Name").OfType<IPropertySymbol>().FirstOrDefault();
+         var namePropertySyntax =
+            nameProperty?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
+
+         if ((namePropertySyntax?.Initializer?.Value ?? namePropertySyntax?.ExpressionBody?.Expression) is not
+             LiteralExpressionSyntax nameInitializerExpression ||
+             !nameInitializerExpression.IsKind(SyntaxKind.StringLiteralExpression))
             continue;
 
-         // Must implement the interface and not be abstract
-         if (!classSymbol.IsAbstract &&
-             classSymbol.AllInterfaces.Contains(mapModeInterface, SymbolEqualityComparer.Default))
-         {
-            // Find the 'Name' property
-            var nameProperty = classSymbol.GetMembers("Name").OfType<IPropertySymbol>().FirstOrDefault();
-            var propertySyntax =
-               nameProperty?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
+         var mapModeName = nameInitializerExpression.Token.ValueText;
 
-            if (propertySyntax?.Initializer?.Value is LiteralExpressionSyntax initializerValue &&
-                initializerValue.IsKind(SyntaxKind.StringLiteralExpression))
-               mapModesToGenerate.Add(new()
-               {
-                  ClassName = classSymbol.ToDisplayString(),
-                  MapModeName = initializerValue.Token.ValueText,
-                  EnumMemberName = SanitizeForIdentifier(initializerValue.Token.ValueText),
-                  Description = classSymbol.GetMembers("Description")
-                                           .OfType<IPropertySymbol>()
-                                           .FirstOrDefault()
-                                         ?
-                                        .DeclaringSyntaxReferences
-                                           .FirstOrDefault()
-                                         ?
-                                        .GetSyntax() is PropertyDeclarationSyntax
-                                   {
-                                      Initializer.Value: LiteralExpressionSyntax descInitializer,
-                                   } &&
-                                descInitializer.IsKind(SyntaxKind.StringLiteralExpression)
-                                   ? descInitializer.Token.ValueText
-                                   : "No description available.",
-               });
-         }
+         // --- 2. Get the 'Description' property and its string literal (with a default) ---
+         var description = "No description available."; // Default value
+         var descProperty = classSymbol.GetMembers("Description").OfType<IPropertySymbol>().FirstOrDefault();
+         var descPropertySyntax =
+            descProperty?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax;
+
+         if ((descPropertySyntax?.Initializer?.Value ?? descPropertySyntax?.ExpressionBody?.Expression) is
+             LiteralExpressionSyntax descInitializerExpression &&
+             descInitializerExpression.IsKind(SyntaxKind.StringLiteralExpression))
+            description = descInitializerExpression.Token.ValueText;
+
+         // --- 3. Add the extracted info to our list ---
+         mapModesToGenerate.Add(new()
+         {
+            ClassName = classSymbol.ToDisplayString(),
+            MapModeName = mapModeName,
+            EnumMemberName = SanitizeForIdentifier(mapModeName),
+            Description = description,
+         });
       }
 
       if (!mapModesToGenerate.Any())

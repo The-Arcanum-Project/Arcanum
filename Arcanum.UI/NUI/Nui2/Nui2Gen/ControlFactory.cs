@@ -13,6 +13,7 @@ public static class ControlFactory
 {
    public const int SHORT_INFO_ROW_HEIGHT = 20;
    public const int SHORT_INFO_FONT_SIZE = 11;
+   public const int EMBEDDED_VIEW_HEIGHT = 25;
 
    private static readonly Brush BlueBrush = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!;
    private static readonly Brush ForegroundBrush = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!;

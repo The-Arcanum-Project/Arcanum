@@ -46,8 +46,14 @@ public static class NUIViewGenerator
    /// <param name="navHistory"></param>
    public static void GenerateAndSetView(NUINavHistory navHistory)
    {
+      var sw = Stopwatch.StartNew();
       var view = GenerateView(navHistory);
+      sw.Stop();
+      Console.WriteLine($"[NUI] Generated view for {navHistory.PrimaryTarget.GetType().Name} in {sw.ElapsedMilliseconds} ms");
+      sw.Restart();
       navHistory.Root.Content = view;
+      sw.Stop();
+      Console.WriteLine($"[NUI] Set view content in {sw.ElapsedMilliseconds} ms");
    }
 
    /// <summary>
@@ -89,6 +95,9 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
+      long embeddedSwTicks = 0;
+      long collectionSwTicks = 0;
+      var sw = Stopwatch.StartNew();
       var viewFields = navHistory.PrimaryTarget.NUISettings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
@@ -114,16 +123,24 @@ public static class NUIViewGenerator
                }
                else
                {
+                  var embeddedSw = Stopwatch.StartNew();
                   INUI value = null!;
                   Nx.ForceGet(target, nxProp, ref value);
                   element = GetEmbeddedView(target, nxProp, value, navHistory);
+                  embeddedSw.Stop();
+                  embeddedSwTicks += embeddedSw.ElapsedTicks;
                }
             }
             else
                element = GenerateShortInfo(target, navHistory);
          }
          else
+         {
+            var collectionSw = Stopwatch.StartNew();
             element = BuildCollectionOrDefaultView(navHistory, type, navHistory.Targets.ToList(), nxProp);
+            collectionSw.Stop();
+            collectionSwTicks += collectionSw.ElapsedTicks;
+         }
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -131,6 +148,9 @@ public static class NUIViewGenerator
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
       }
+
+      sw.Stop();
+      Console.WriteLine($"[NUI] View generation for {target.GetType().Name} took {sw.ElapsedMilliseconds} ms \n(Embedded: {new TimeSpan(embeddedSwTicks).TotalMilliseconds} ms \nCollections: {new TimeSpan(collectionSwTicks).TotalMilliseconds} ms)");
    }
 
    private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,

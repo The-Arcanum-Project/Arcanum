@@ -29,7 +29,7 @@ public class EmptyCacheGenerator : IIncrementalGenerator
       if (classes.IsDefaultOrEmpty)
          return;
 
-      var foundTypesByInterface = FindEmptyInterface(compilation, classes);
+      var foundTypesByInterface = Helpers.FindTypesImplementingInterface(compilation, classes, EMPTY_GENERIC_INTERFACE);
 
       GenerateIndexSource(context, foundTypesByInterface);
    }
@@ -81,34 +81,5 @@ public class EmptyCacheGenerator : IIncrementalGenerator
       sb.AppendLine("}");
 
       context.AddSource("EmptyRegistry.g.cs", sb.ToString());
-   }
-
-   private static List<INamedTypeSymbol> FindEmptyInterface(
-      Compilation compilation,
-      ImmutableArray<ClassDeclarationSyntax> classes)
-   {
-      var emptySymbol = compilation.GetTypeByMetadataName(EMPTY_GENERIC_INTERFACE);
-      if (emptySymbol == null)
-         return [];
-
-      List<INamedTypeSymbol> foundTypesByInterface = [];
-
-      foreach (var classSyntax in classes.Distinct())
-      {
-         var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
-
-         if (semanticModel.GetDeclaredSymbol(classSyntax) is not INamedTypeSymbol
-             {
-                TypeKind: TypeKind.Class,
-             } classSymbol ||
-             classSymbol.IsAbstract)
-            continue;
-
-         if (classSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition,
-                                            emptySymbol)))
-            foundTypesByInterface.Add(classSymbol);
-      }
-
-      return foundTypesByInterface;
    }
 }

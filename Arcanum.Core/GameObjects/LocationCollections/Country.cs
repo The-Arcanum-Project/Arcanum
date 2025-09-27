@@ -3,6 +3,7 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -19,7 +20,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Country : IEu5Object<Country>
+public partial class Country : IEu5Object<Country>, IMapMode
 {
    #region Nexus
 
@@ -50,7 +51,7 @@ public partial class Country : IEu5Object<Country>
    [ParseAs("type")]
    [DefaultValue(CountryType.Location)]
    [Description("The type of this country.\nValid types: Location, Army, Pop, Building")]
-   public CountryType Type { get; set; } = CountryType.Location;
+   public CountryType CountryType { get; set; } = CountryType.Location;
 
    [SaveAs]
    [ParseAs("color")]
@@ -267,4 +268,13 @@ public partial class Country : IEu5Object<Country>
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.CountryAgsSettings;
    public string SavingKey => UniqueId;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+
+   #region IMapMode
+
+   public string Name => "Country";
+   MapModeManager.MapModeType IMapMode.Type => MapModeManager.MapModeType.Country;
+   public string Description => "Displays countries on the map.";
+   public string? IconSource => null;
+
+   #endregion
 }

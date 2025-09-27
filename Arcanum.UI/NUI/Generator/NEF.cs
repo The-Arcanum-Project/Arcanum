@@ -75,6 +75,18 @@ public static class NEF
       return info;
    }
 
+   public static DockPanel PropertyTitlePanel(int leftMargin)
+   {
+      return new()
+      {
+         LastChildFill = false,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+         Margin = new(leftMargin, 0, 0, 0),
+         Height = double.NaN,
+      };
+   }
+
    public static Grid CreateGridForProperty()
    {
       var grid = new Grid

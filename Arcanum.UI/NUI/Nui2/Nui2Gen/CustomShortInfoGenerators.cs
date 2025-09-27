@@ -70,7 +70,7 @@ public static class CustomShortInfoGenerators
       }
 
       var headerBlock =
-         GridManager.GetNavigationHeader(primary, navH, nxProperty.ToString(), fontSize, height, true);
+         GridManager.GetNavigationHeader(primary, navH, primary.UniqueId, fontSize, height, true);
       headerBlock.Margin = new(6, 0, 0, 0);
 
       var dashBlock = ControlFactory.GetDashBlock(fontSize);

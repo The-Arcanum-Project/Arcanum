@@ -19,7 +19,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class Location
-   : IMapInferable<Location>, IEu5Object<Location>, ILocation
+   : IMapInferable<Location>, IEu5Object<Location>, ILocation, IMapMode
 {
    #region game/in_game/map_data/named_locations.txt
 
@@ -84,4 +84,13 @@ public partial class Location
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" };
+
+   #region IMapMode
+
+   public string Name => "Locations";
+   MapModeManager.MapModeType IMapMode.Type => MapModeManager.MapModeType.Locations;
+   public string Description => "Displays locations on the map.";
+   public string? IconSource => null;
+
+   #endregion
 }
