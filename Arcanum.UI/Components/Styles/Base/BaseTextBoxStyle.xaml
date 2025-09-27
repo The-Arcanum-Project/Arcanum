@@ -65,7 +65,7 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName = "border"
                                     Property = "BorderBrush"
-                                    Value = "{StaticResource DefaultForeColorBrush}" />
+                                    Value = "{StaticResource BlueAccentColorBrush}" />
                         </MultiTrigger>
 
                         <Trigger Property = "IsEnabled"
@@ -79,6 +79,11 @@
 
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType = "local:JominiDateTextBox"
+           xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls"
+           BasedOn = "{StaticResource {x:Type styleClasses:CorneredTextBox}}">
     </Style>
 
 </ResourceDictionary>

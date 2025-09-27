@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Nexus.Core;
@@ -473,6 +474,31 @@ public static class NEF
          TextWrapping = TextWrapping.NoWrap,
       };
       textBox.SetBinding(TextBox.TextProperty, binding);
+      return textBox;
+   }
+
+   public static JominiDateTextBox GetJominiDateUI(Binding binding)
+   {
+      var textBox = new JominiDateTextBox
+      {
+         Margin = new(0),
+         BorderThickness = new(1, 1, 1, 1),
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+         TextWrapping = TextWrapping.NoWrap,
+      };
+
+      var textBinding = new Binding(binding.Path.Path)
+      {
+         Source = binding.Source,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
+         ValidatesOnExceptions = true,
+         Converter = new JominiDateToStringConverter(),
+      };
+
+      textBox.SetBinding(TextBox.TextProperty, textBinding);
+
       return textBox;
    }
 

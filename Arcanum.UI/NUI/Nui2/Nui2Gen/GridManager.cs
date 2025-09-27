@@ -9,9 +9,13 @@ public static class GridManager
 {
    private const int DEFAULT_ROW_HEIGHT = 27;
    private const int DEFAULT_HEADER_ROW_HEIGHT = 35;
+   private const int DEFAULT_TOP_MARGIN = 3;
+   private const int DEFAULT_BOTTOM_MARGIN = 0;
+   private const int DEFAULT_LEFT_MARGIN = 0;
+   private const int DEFAULT_RIGHT_MARGIN = 0;
 
    public static void AddToGrid(Grid mainGrid,
-                                UIElement element,
+                                FrameworkElement element,
                                 int row,
                                 int column,
                                 int columnSpan = 0,
@@ -21,6 +25,8 @@ public static class GridManager
 
       while (row >= mainGrid.RowDefinitions.Count)
          mainGrid.RowDefinitions.Add(new() { Height = new(rowHeight, GridUnitType.Auto) });
+
+      element.Margin = new(DEFAULT_LEFT_MARGIN, DEFAULT_TOP_MARGIN, DEFAULT_RIGHT_MARGIN, DEFAULT_BOTTOM_MARGIN);
 
       Grid.SetRow(element, row);
       Grid.SetColumn(element, column);
@@ -59,9 +65,10 @@ public static class GridManager
                                                string headerText,
                                                int fontSize,
                                                int height,
-                                               bool isNavigation)
+                                               bool isNavigation,
+                                               HorizontalAlignment alignment = HorizontalAlignment.Center)
    {
-      var header = ControlFactory.GetHeaderTextBlock(fontSize, true, headerText, height: height);
+      var header = ControlFactory.GetHeaderTextBlock(fontSize, true, headerText, height: height, alignment: alignment);
       if (isNavigation)
       {
          EventHandlers.SetOnMouseUpHandler(header, navH, primary);

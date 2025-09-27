@@ -45,20 +45,24 @@ public static class ControlFactory
                                               string headerText,
                                               FontWeight? fontWeight = null,
                                               int height = 35,
-                                              HorizontalAlignment alignment = HorizontalAlignment.Center)
+                                              HorizontalAlignment alignment = HorizontalAlignment.Center,
+                                              int leftMargin = 4)
    {
       var header = new TextBlock
       {
-         VerticalAlignment = VerticalAlignment.Center,
+         TextWrapping = TextWrapping.NoWrap,
          HorizontalAlignment = alignment,
+         VerticalAlignment = VerticalAlignment.Center,
          TextAlignment = TextAlignment.Center,
          FontWeight = fontWeight ?? FontWeights.Bold,
-         Margin = new(4, 0, 0, 0),
+         Margin = new(leftMargin, 0, 0, 0),
          FontSize = fontSize,
-         Height = height,
+         MaxHeight = height,
+         Height = double.NaN,
          Foreground = isNavigationHeader ? BlueBrush : ForegroundBrush,
          Text = headerText,
          TextTrimming = TextTrimming.CharacterEllipsis,
+         SnapsToDevicePixels = true,
       };
       return header;
    }

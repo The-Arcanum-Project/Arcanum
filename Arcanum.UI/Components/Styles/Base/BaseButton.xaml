@@ -61,7 +61,7 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName = "border"
                                     Property = "BorderBrush"
-                                    Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                    Value = "{StaticResource BlueAccentColorBrush}" />
                             <Setter TargetName = "border"
                                     Property = "BorderThickness"
                                     Value = "{Binding BorderThickness, RelativeSource={RelativeSource TemplatedParent}}" />

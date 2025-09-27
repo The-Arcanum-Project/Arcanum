@@ -32,11 +32,26 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border
-        BorderThickness = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
-        BorderBrush = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
-        CornerRadius = "2"
-        Background = "Transparent">
+    <Border CornerRadius = "2"
+            Background = "Transparent">
+
+        <Border.Style>
+            <Style TargetType = "Border">
+                <Setter Property = "BorderBrush"
+                        Value = "{Binding InnerBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <Setter Property = "BorderThickness"
+                        Value = "{Binding InnerBorderThickness, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <Style.Triggers>
+                    <DataTrigger Binding = "{Binding IsFocused, ElementName=NudTextBox}"
+                                 Value = "True">
+                        <Setter Property = "BorderBrush"
+                                Value = "{StaticResource BlueAccentColorBrush}" />
+                        <Setter Property = "BorderThickness"
+                                Value = "1" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Grid Background = "Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
@@ -111,6 +126,7 @@
                                                     Property = "Background"
                                                     Value = "{StaticResource LightBackColorBrush}" />
                                         </Trigger>
+
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>

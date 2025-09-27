@@ -194,6 +194,50 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
       return $"{year}.{month}.{day}";
    }
 
+   /// <summary>
+   /// Parses a string in the format "yyyy.M.d" into a JominiDate.
+   /// </summary>
+   public static bool TryParse(string text, out JominiDate date)
+   {
+      date = new(); // Or JominiDate.Empty if you prefer
+      if (string.IsNullOrWhiteSpace(text))
+         return false;
+
+      var parts = text.Split('.');
+      if (parts.Length != 3)
+         return false;
+
+      if (int.TryParse(parts[0], out var year) &&
+          int.TryParse(parts[1], out var month) &&
+          int.TryParse(parts[2], out var day))
+         try
+         {
+            date = new(year, month, day);
+            return true;
+         }
+         catch (Exception)
+         {
+            return false;
+         }
+
+      return false;
+   }
+
+   /// <summary>
+   /// Formats a JominiDate according to the specified format string.
+   /// This ensures visual consistency with leading zeros.
+   /// </summary>
+   public string FormatJominiDate(string format)
+   {
+      return format
+            .Replace("yyyy", Year.ToString("D4"))
+            .Replace("yy", (Year % 100).ToString("D2"))
+            .Replace("MM", Month.ToString("D2"))
+            .Replace("M", Month.ToString())
+            .Replace("dd", Day.ToString("D2"))
+            .Replace("d", Day.ToString());
+   }
+
    #endregion
 
    #region Operators and Equality

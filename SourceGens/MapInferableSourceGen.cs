@@ -35,7 +35,7 @@ public class MapInferableSourceGen : IIncrementalGenerator
       {
          Namespace = "Arcanum.Core.Registry",
          ClassName = "MapInferrableRegistry",
-         DelegateDefinition = "private delegate IEnumerable Accessor(IEnumerable<Location> sLocs);",
+         DelegateDefinition = "private delegate IList Accessor(List<Location> sLocs);",
          RuntimeMethodName = "GetInferredList",
          CompileTimeValueFactory = symbol =>
             $"(sLocs) => {symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.GetInferredList(sLocs)",
@@ -44,7 +44,7 @@ public class MapInferableSourceGen : IIncrementalGenerator
                                 /// <summary>
                                 /// This retrieves a list of items of type T based on the selection.
                                 /// </summary>
-                                public static IEnumerable? GetInferredList(Type type, IEnumerable<Location> sLocs)
+                                public static IList? GetInferredList(Type type, List<Location> sLocs)
                                 {
                                     if (_dispatchers.TryGetValue(type, out var accessor))
                                         return accessor(sLocs);

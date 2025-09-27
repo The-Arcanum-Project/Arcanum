@@ -37,13 +37,16 @@
 
         <DockPanel x:Name = "TitleDockPanel"
                    Grid.Row = "0"
-                   Grid.Column = "0">
+                   Grid.Column = "0"
+                   LastChildFill = "False"
+                   Margin = "0, 0, 0, -2">
         </DockPanel>
 
         <DockPanel x:Name = "SelectorDockPanel"
                    Grid.Column = "1"
                    Grid.Row = "0"
-                   LastChildFill = "True">
+                   LastChildFill = "True"
+                   Margin = "1, 0, 3, -2">
             <styleClasses:BaseButton x:Name = "ExpandButton"
                                      Width = "20"
                                      Height = "20"
@@ -85,6 +88,17 @@
                           Grid.Column = "0"
                           Grid.ColumnSpan = "2"
                           Content = "{Binding ExpandableContentGrid}"
-                          Visibility = "{Binding IsExpanded, Converter={StaticResource BoolToVis}}" />
+                          Visibility = "{Binding IsExpanded, Converter={StaticResource BoolToVis}}"
+                          Margin = "0, 0, 3, 2" />
+
+        <Border Grid.Column = "0"
+                Grid.Row = "0"
+                Grid.ColumnSpan = "2"
+                Grid.RowSpan = "2"
+                BorderBrush = "{StaticResource EmbeddedBorderColorBrush}"
+                BorderThickness = "1"
+                CornerRadius = "4"
+                Margin = "0, 2, 0, 0">
+        </Border>
     </Grid>
 </UserControl>

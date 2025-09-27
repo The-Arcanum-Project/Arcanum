@@ -34,17 +34,19 @@ public static class CustomShortInfoGenerators
       return viewer;
    }
 
-   public static StackPanel GenerateEu5ShortInfo(NavH navH,
-                                                 Enum nxProperty,
-                                                 IEu5Object primary,
-                                                 int height,
-                                                 int fontSize)
+   public static DockPanel GenerateEu5ShortInfo(NavH navH,
+                                                IEu5Object primary,
+                                                Enum sNxProp,
+                                                int height,
+                                                int fontSize,
+                                                int leftMargin,
+                                                int topMargin)
    {
-      var stackPanel = new StackPanel
+      var stackPanel = new DockPanel
       {
-         Orientation = Orientation.Horizontal,
          Margin = new(0),
          MinHeight = height,
+         LastChildFill = true,
       };
 
       var sb = new System.Text.StringBuilder();
@@ -70,16 +72,31 @@ public static class CustomShortInfoGenerators
       }
 
       var headerBlock =
-         GridManager.GetNavigationHeader(primary, navH, primary.UniqueId, fontSize, height, true);
+         GridManager.GetNavigationHeader(primary,
+                                         navH,
+                                         $"({sNxProp.ToString()}) {primary.UniqueId}",
+                                         fontSize,
+                                         height,
+                                         true);
       headerBlock.Margin = new(6, 0, 0, 0);
 
       var dashBlock = ControlFactory.GetDashBlock(fontSize);
 
       var infoBlock =
          ControlFactory.GetHeaderTextBlock(fontSize, false, sb.ToString().TrimEnd(' ', ';'), height: height);
+      infoBlock.TextTrimming = TextTrimming.CharacterEllipsis;
+      infoBlock.TextWrapping = TextWrapping.NoWrap;
+      infoBlock.HorizontalAlignment = HorizontalAlignment.Left;
+
+      Thickness margin = new(leftMargin, topMargin, 0, 0);
+      headerBlock.Margin = margin;
+      dashBlock.Margin = margin;
+      infoBlock.Margin = margin;
 
       stackPanel.Children.Add(headerBlock);
       stackPanel.Children.Add(dashBlock);
+      DockPanel.SetDock(headerBlock, Dock.Left);
+      DockPanel.SetDock(dashBlock, Dock.Left);
       stackPanel.Children.Add(infoBlock);
 
       return stackPanel;
