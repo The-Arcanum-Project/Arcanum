@@ -51,4 +51,9 @@ public partial class DebugPanelGrid
    {
       new Eu5Gen().Show();
    }
+
+   private void ColorPickerViewerButton_Click(object sender, RoutedEventArgs e)
+   {
+      new ColorPickerWindow().Show();
+   }
 }
