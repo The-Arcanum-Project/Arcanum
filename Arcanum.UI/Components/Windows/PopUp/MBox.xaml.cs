@@ -87,6 +87,10 @@ public partial class MBox
          if (drawing != null)
             IconImage.Source = drawing;
       }
+      else
+      {
+         IconImage.Visibility = Visibility.Collapsed;
+      }
    }
 
    private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -113,14 +117,14 @@ public partial class MBox
       MBoxButton buttons = MBoxButton.OK,
       MessageBoxImage icon = MessageBoxImage.None,
       int height = -1,
-      int width = -1)
+      int width = -1, Window? owner = null)
    {
       if (Application.Current?.Dispatcher == null)
          throw new InvalidOperationException("No UI dispatcher found.");
 
       if (Application.Current.Dispatcher.CheckAccess())
          // Already on UI thread
-         return ShowOnCurrentThread(message, title, buttons, icon, height, width);
+         return ShowOnCurrentThread(message, title, buttons, icon, height, width, owner);
       else
          // Marshal to UI thread and wait for result
          return Application.Current.Dispatcher.Invoke(() =>
@@ -129,7 +133,7 @@ public partial class MBox
                                                                              buttons,
                                                                              icon,
                                                                              height,
-                                                                             width));
+                                                                             width, owner));
    }
 
    private static MBoxResult ShowOnCurrentThread(
@@ -138,16 +142,17 @@ public partial class MBox
       MBoxButton buttons,
       MessageBoxImage icon,
       int height,
-      int width)
+      int width, Window? owner)
    {
       var box = new MBox(message, title, buttons, icon)
       {
          Height = height < 0 ? NaN : height,
          Width = width < 0 ? NaN : width,
-         WindowStartupLocation = WindowStartupLocation.CenterScreen,
+         WindowStartupLocation = owner is null ? WindowStartupLocation.CenterScreen: WindowStartupLocation.CenterOwner,
          ResizeMode = ResizeMode.NoResize,
          ShowInTaskbar = false,
-         Topmost = true
+         Topmost = true,
+         Owner = owner
       };
 
       box.ShowDialog();

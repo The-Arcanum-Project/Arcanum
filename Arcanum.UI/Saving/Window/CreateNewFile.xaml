@@ -42,7 +42,8 @@
                                                   MinWidth="80"
                                                   Height="22"
                                                   VerticalAlignment="Center"
-                                                  Margin="5" KeyDown="FileNameInput_KeyDown">
+                                                  Margin="5"
+                                                  KeyDown="FileNameInput_KeyDown">
                     </styleClasses:CorneredTextBox>
 
                     <TextBlock x:Name="FileExtension"

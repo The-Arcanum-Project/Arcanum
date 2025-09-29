@@ -30,14 +30,14 @@ public class SavingWrapperManager
     {
         if(!Descriptors.TryGetValue(descriptor, out var wrapper))
         {
-            Descriptors[descriptor] = wrapper = new(descriptor, this);
+            Descriptors[descriptor] = wrapper = new(descriptor);
             Debug.WriteLine($"Added Descriptor {descriptor.FilePath}: Total Descriptors: {Descriptors.Count}");
         }
 
         return wrapper;
     }
 
-    public bool TryGetDescriptor(FileDescriptor descriptor, [NotNullWhen(true)] out FileDescriptorSavingWrapper? wrapper)
+    private bool TryGetDescriptor(FileDescriptor descriptor, [NotNullWhen(true)] out FileDescriptorSavingWrapper? wrapper)
     {
         return Descriptors.TryGetValue(descriptor, out wrapper);
     }

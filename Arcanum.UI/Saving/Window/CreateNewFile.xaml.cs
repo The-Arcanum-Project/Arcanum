@@ -1,33 +1,30 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Saving.Backend;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Arcanum.UI.Saving.Window;
 
 public partial class CreateNewFile
 {
-
-    public PathObj NewPath => new PathObj(FileDescriptor.LocalPath, FileName + "." + FileDescriptor.FileType.FileEnding, FileManager.ModDataSpace);
+    public PathObj NewPath => new PathObj(FileDescriptor.LocalPath, FileName + "." + FileDescriptor.FileType.FileEnding,
+        FileManager.ModDataSpace);
 
     public static readonly DependencyProperty FileNameProperty = DependencyProperty.Register(
         nameof(FileName), typeof(string), typeof(CreateNewFile), new PropertyMetadata(default(string)));
-    
-    public FileDescriptor FileDescriptor { get; }
-    
-    
+
+    private FileDescriptor FileDescriptor { get; }
+
+
     public string FileName
     {
-        get { return (string)GetValue(FileNameProperty); }
-        set { SetValue(FileNameProperty, value); }
+        get => (string)GetValue(FileNameProperty);
+        set => SetValue(FileNameProperty, value);
     }
-    
+
     public CreateNewFile(FileDescriptor fileDescriptor, SavingWrapperManager manager)
     {
         FileDescriptor = fileDescriptor;
@@ -47,12 +44,12 @@ public partial class CreateNewFile
         binding.ValidationRules.Add(validationRule);
 
         FileNameInput.SetBinding(TextBox.TextProperty, binding);
-        
+
         FilePath.Text = fileDescriptor.FilePath;
         FileExtension.Text = '.' + fileDescriptor.FileType.FileEnding;
         FileNameInput.Focus();
     }
-    
+
     private void FileNameInput_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter) return;
@@ -72,5 +69,4 @@ public partial class CreateNewFile
 
         e.Handled = true; // prevent default behavior
     }
-    
 }

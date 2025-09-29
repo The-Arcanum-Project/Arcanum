@@ -20,18 +20,18 @@ public class Eu5FileComparer : IComparer<Eu5FileObj>
 
 public class FileDescriptorSavingWrapper : ISearchable
 {
-    public readonly FileDescriptor Descriptor;
+    private readonly FileDescriptor _descriptor;
 
     private readonly List<FileSavingWrapper> _newFiles = [];
 
     public readonly List<Eu5FileObj> AllFiles;
 
-    public FileDescriptorSavingWrapper(FileDescriptor descriptor, SavingWrapperManager manager)
+    public FileDescriptorSavingWrapper(FileDescriptor descriptor)
     {
         AllFiles = descriptor.Files;
         AllFiles.Sort(new Eu5FileComparer());
         
-        Descriptor = descriptor;
+        _descriptor = descriptor;
     }
 
     public void AddNewFile(FileSavingWrapper file)
@@ -46,7 +46,7 @@ public class FileDescriptorSavingWrapper : ISearchable
     public string GetNamespace => "";
 
     //TODO: @MelCo: Better name for descriptors
-    public string ResultName  => Descriptor.FileType.TypeName;
+    public string ResultName  => _descriptor.FileType.TypeName;
     public List<string> SearchTerms => [ResultName];
     public void OnSearchSelected()
     {

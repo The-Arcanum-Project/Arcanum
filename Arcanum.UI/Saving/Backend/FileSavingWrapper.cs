@@ -1,11 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
-using Arcanum.API.UtilServices.Search;
-using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+﻿using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.Registry;
 
 namespace Arcanum.UI.Saving.Backend;
 
@@ -13,10 +8,8 @@ public class FileSavingWrapper : ISearchable
 {
     public readonly Eu5FileObj FileObj;
 
-    private string Path => FileObj.Path.RelativePath;
-
-    public List<IEu5Object> AddedObjects { get; set; } = [];
-    public List<IEu5Object> TransferredObjects { get; set; } = [];
+    private List<IEu5Object> AddedObjects { get; set; } = [];
+    private List<IEu5Object> TransferredObjects { get; set; } = [];
     public FileSavingWrapper(Eu5FileObj fileObj)
     {
         FileObj = fileObj;
@@ -40,7 +33,7 @@ public class FileSavingWrapper : ISearchable
             AddedObjects.Add(obj);
     }
 
-    public void RemoveObject(IEu5Object obj)
+    private void RemoveObject(IEu5Object obj)
     {
         if(!AddedObjects.Remove(obj))
             TransferredObjects.Add(obj);
@@ -51,7 +44,7 @@ public class FileSavingWrapper : ISearchable
         TransferObject(obj, this, targetFile);
     }
 
-    public static void TransferObject(IEu5Object obj, FileSavingWrapper sourceFile, FileSavingWrapper targetFile)
+    private static void TransferObject(IEu5Object obj, FileSavingWrapper sourceFile, FileSavingWrapper targetFile)
     {
         sourceFile.RemoveObject(obj);
         targetFile.AddObject(obj);

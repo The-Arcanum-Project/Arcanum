@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Backend;
 
 namespace Arcanum.UI.Saving.Window;
@@ -20,7 +21,7 @@ namespace Arcanum.UI.Saving.Window;
 /// For the first task, the window is in New Object Mode.
 /// Only the file and object list are shown.
 /// The file list is initially empty, and all new objects are in the object list.
-/// Once an object is dragged, all valid files appear to drag them into.
+/// Once an object is dragged, all valid files appear to drag them into it.
 /// For the second task, the window is in normal mode.
 /// The user selects a descriptor, and a file list appears with all files of said descriptor.
 /// There a file can be selected, and the objects appear which are in it.
@@ -32,7 +33,7 @@ namespace Arcanum.UI.Saving.Window;
 /// </remarks>
 public partial class SaveWindow
 {
-    private Point? _dragStartPoint = null;
+    private Point? _dragStartPoint;
 
     private readonly Queastor _newFileQuaestor;
     private readonly List<IEu5Object> _newObjects;
@@ -49,8 +50,8 @@ public partial class SaveWindow
 
     public ObservableCollection<ISearchable> SearchResult
     {
-        get { return (ObservableCollection<ISearchable>)GetValue(SearchResultProperty); }
-        set { SetValue(SearchResultProperty, value); }
+        get => (ObservableCollection<ISearchable>)GetValue(SearchResultProperty);
+        set => SetValue(SearchResultProperty, value);
     }
 
     public static readonly DependencyProperty ShownFilesProperty = DependencyProperty.Register(
@@ -109,7 +110,7 @@ public partial class SaveWindow
     {
         SearchBox.RequestSearch = SearchBoxRequestSearch;
         SearchBox.SettingsOpened = OpenSettingsWindow;
-        SearchBox.SearchInputTextBox.PreviewKeyDown += (sender, e) =>
+        SearchBox.SearchInputTextBox.PreviewKeyDown += (_, e) =>
         {
             if (e.Key != Key.Down || ResultView.Items.Count <= 0) return;
             ResultView.SelectedIndex = 0;
@@ -222,6 +223,7 @@ public partial class SaveWindow
         if (ObjectListView.SelectedItems.Count < 1)
         {
             ShownFiles.Clear();
+            _currentDescriptor = null;
             return;
         }
 
@@ -254,16 +256,6 @@ public partial class SaveWindow
         ShownObjects.Remove(obj);
     }
 
-    private IEu5Object GetObjectFromItem(object sender)
-    {
-        if (ObjectListView.ContainerFromElement((DependencyObject)sender) is ListViewItem container)
-        {
-            return (IEu5Object)container.Content; // Source object
-        }
-
-        throw new ArgumentException("Sender is not a ListViewItem");
-    }
-
     private Eu5FileObj GetFileFromItem(object sender)
     {
         if (FileListView.ContainerFromElement((DependencyObject)sender) is ListViewItem container)
@@ -286,8 +278,10 @@ public partial class SaveWindow
     {
         if (!NewFileMode) return;
         if (_currentDescriptor is null)
-            // TODO @MelCo: Notify user
+        {
+            MBox.Show("Please select a object first to create a new file for it.", "No object selected", icon: MessageBoxImage.Warning, owner:this);
             return;
+        }
 
         var dialog = new CreateNewFile(_currentDescriptor, _savingWrapperManager)
         {
