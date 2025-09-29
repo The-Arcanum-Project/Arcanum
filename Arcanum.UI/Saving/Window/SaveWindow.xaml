@@ -3,9 +3,7 @@
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                         xmlns:local="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:window="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:userControls="clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:window1="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:behaviors="clr-namespace:Arcanum.UI.Components.Behaviors"
@@ -136,7 +134,7 @@
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding ResultName}"
+                            <TextBlock Text="{Binding Path.RelativePath }"
                                        AllowDrop="True"
                                        Drop="OnDropInFile"
                                        DragOver="OnDragInFile"

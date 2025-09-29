@@ -9,7 +9,7 @@ using Arcanum.Core.Registry;
 
 namespace Arcanum.UI.Saving.Backend;
 
-public class FileSavingWrapper : ISearchable, IComparable<FileSavingWrapper>
+public class FileSavingWrapper : ISearchable
 {
     public readonly Eu5FileObj FileObj;
 
@@ -33,10 +33,6 @@ public class FileSavingWrapper : ISearchable, IComparable<FileSavingWrapper>
     
     public ISearchResult VisualRepresentation => throw new NotImplementedException();
     public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.None;
-    public int CompareTo(FileSavingWrapper? other)
-    {
-        return other == null ? 1 : string.Compare(Path, other.Path, StringComparison.OrdinalIgnoreCase);
-    }
 
     public void AddObject(IEu5Object obj)
     {

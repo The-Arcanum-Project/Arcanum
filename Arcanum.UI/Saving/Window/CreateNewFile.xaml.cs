@@ -14,12 +14,13 @@ namespace Arcanum.UI.Saving.Window;
 public partial class CreateNewFile
 {
 
-    public PathObj NewPath => new PathObj(FileDescriptor.Descriptor.LocalPath, FileName + "." + FileDescriptor.Descriptor.FileType.FileEnding, FileManager.ModDataSpace);
+    public PathObj NewPath => new PathObj(FileDescriptor.LocalPath, FileName + "." + FileDescriptor.FileType.FileEnding, FileManager.ModDataSpace);
 
     public static readonly DependencyProperty FileNameProperty = DependencyProperty.Register(
         nameof(FileName), typeof(string), typeof(CreateNewFile), new PropertyMetadata(default(string)));
     
-    public FileDescriptorSavingWrapper FileDescriptor { get; }
+    public FileDescriptor FileDescriptor { get; }
+    
     
     public string FileName
     {
@@ -27,7 +28,7 @@ public partial class CreateNewFile
         set { SetValue(FileNameProperty, value); }
     }
     
-    public CreateNewFile(FileDescriptorSavingWrapper fileDescriptor)
+    public CreateNewFile(FileDescriptor fileDescriptor, SavingWrapperManager manager)
     {
         FileDescriptor = fileDescriptor;
         InitializeComponent();
@@ -40,15 +41,15 @@ public partial class CreateNewFile
 
         var validationRule = new WindowsFileNameValidation
         {
-            Descriptor = FileDescriptor,
+            ExistingFiles = manager.GetAllFiles(FileDescriptor),
             ValidatesOnTargetUpdated = true
         };
         binding.ValidationRules.Add(validationRule);
 
         FileNameInput.SetBinding(TextBox.TextProperty, binding);
         
-        FilePath.Text = fileDescriptor.Descriptor.FilePath;
-        FileExtension.Text = '.' + fileDescriptor.Descriptor.FileType.FileEnding;
+        FilePath.Text = fileDescriptor.FilePath;
+        FileExtension.Text = '.' + fileDescriptor.FileType.FileEnding;
         FileNameInput.Focus();
     }
     

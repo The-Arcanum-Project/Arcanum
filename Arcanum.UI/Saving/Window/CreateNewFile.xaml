@@ -3,9 +3,7 @@
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                         xmlns:local="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:saving="clr-namespace:Arcanum.UI.Saving"
                          mc:Ignorable="d"
                          Title="CreateNewFile"
                          Width="Auto"
@@ -66,7 +64,7 @@
                         <DataTrigger Binding="{Binding ElementName=FileNameInput, Path=(Validation.HasError)}"
                                      Value="True">
                             <Setter Property="Text"
-                                    Value="{Binding ElementName=FileNameInput, Path=(Validation.Errors)[0].ErrorContent}" />
+                                    Value="{Binding ElementName=FileNameInput, Path=(Validation.Errors)/ErrorContent}" />
                             <Setter Property="Foreground"
                                     Value="{StaticResource DimErrorRedColorBrush}" />
                         </DataTrigger>

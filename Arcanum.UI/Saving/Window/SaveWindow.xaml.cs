@@ -40,7 +40,7 @@ public partial class SaveWindow
     private readonly SavingWrapperManager _savingWrapperManager = new();
 
     // TODO @MelCo: Check if reset after mode change
-    private FileDescriptorSavingWrapper? _currentDescriptor;
+    private FileDescriptor? _currentDescriptor;
 
     #region UI Bindings
 
@@ -54,12 +54,12 @@ public partial class SaveWindow
     }
 
     public static readonly DependencyProperty ShownFilesProperty = DependencyProperty.Register(
-        nameof(ShownFiles), typeof(ObservableCollection<FileSavingWrapper>), typeof(SaveWindow),
-        new(new ObservableCollection<FileSavingWrapper>([])));
+        nameof(ShownFiles), typeof(ObservableCollection<Eu5FileObj>), typeof(SaveWindow),
+        new(new ObservableCollection<Eu5FileObj>([])));
 
-    public ObservableCollection<FileSavingWrapper> ShownFiles
+    public ObservableCollection<Eu5FileObj> ShownFiles
     {
-        get => (ObservableCollection<FileSavingWrapper>)GetValue(ShownFilesProperty);
+        get => (ObservableCollection<Eu5FileObj>)GetValue(ShownFilesProperty);
         set => SetValue(ShownFilesProperty, value);
     }
 
@@ -129,6 +129,7 @@ public partial class SaveWindow
     {
         ShownFiles.Clear();
         ShownObjects.Clear();
+        ShownDescriptors = new();
     }
 
     private void SearchBoxRequestSearch(string obj)
@@ -150,7 +151,7 @@ public partial class SaveWindow
     {
         if (_currentDescriptor is null)
             return;
-        var file = GetFileFromItem(sender);
+        var file = _savingWrapperManager.GetFile(GetFileFromItem(sender));
         if (NewFileMode)
         {
             for (var index = ObjectListView.SelectedItems.Count - 1; index >= 0; index--)
@@ -192,7 +193,6 @@ public partial class SaveWindow
         catch (Exception error) //finally
         {
             Console.WriteLine("Error: " + error.Message);
-            ;
             //ShownFiles.Clear();
         }
     }
@@ -238,8 +238,8 @@ public partial class SaveWindow
             return;
         }
 
-        _currentDescriptor = _savingWrapperManager.GetDescriptor(selectedDescriptor);
-        ShownFiles = new(_currentDescriptor.AllFiles);
+        _currentDescriptor = selectedDescriptor;
+        ShownFiles = new(_savingWrapperManager.GetAllFiles(selectedDescriptor));
     }
 
     #endregion
@@ -264,11 +264,11 @@ public partial class SaveWindow
         throw new ArgumentException("Sender is not a ListViewItem");
     }
 
-    private FileSavingWrapper GetFileFromItem(object sender)
+    private Eu5FileObj GetFileFromItem(object sender)
     {
         if (FileListView.ContainerFromElement((DependencyObject)sender) is ListViewItem container)
         {
-            return (FileSavingWrapper)container.Content; // Source object
+            return (Eu5FileObj)container.Content; // Source object
         }
 
         throw new ArgumentException("Sender is not a ListViewItem");
@@ -289,16 +289,17 @@ public partial class SaveWindow
             // TODO @MelCo: Notify user
             return;
 
-        var dialog = new CreateNewFile(_currentDescriptor)
+        var dialog = new CreateNewFile(_currentDescriptor, _savingWrapperManager)
         {
             Owner = this
         };
         dialog.ShowDialog();
         if (dialog.DialogResult != true)
             return;
-        var newFile = _savingWrapperManager.GetFile(new(dialog.NewPath, _currentDescriptor.Descriptor));
-        _currentDescriptor.AddNewFile(newFile);
-        ShownFiles = new(_currentDescriptor.AllFiles);
+        var newFile = _savingWrapperManager.GetFile(new(dialog.NewPath, _currentDescriptor));
+        var descriptor = _savingWrapperManager.GetDescriptor(_currentDescriptor);
+        descriptor.AddNewFile(newFile);
+        ShownFiles = new(descriptor.AllFiles);
     }
 
     private void SelectSearchResult(object sender, MouseButtonEventArgs e)

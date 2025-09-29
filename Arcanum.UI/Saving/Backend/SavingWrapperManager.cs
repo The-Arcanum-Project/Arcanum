@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.Util;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.UI.Saving.Backend;
 
@@ -11,7 +13,11 @@ public class SavingWrapperManager
     public FileSavingWrapper GetFile(Eu5FileObj fileObj)
     {
         if(!Files.TryGetValue(fileObj, out var wrapper))
+        {
             Files[fileObj] = wrapper = new(fileObj);
+            Debug.WriteLine($"Added file {fileObj.Path.RelativePath}: Total files: {Files.Count}");
+        }
+
         return wrapper;
     }
     
@@ -23,13 +29,27 @@ public class SavingWrapperManager
     public FileDescriptorSavingWrapper GetDescriptor(FileDescriptor descriptor)
     {
         if(!Descriptors.TryGetValue(descriptor, out var wrapper))
+        {
             Descriptors[descriptor] = wrapper = new(descriptor, this);
+            Debug.WriteLine($"Added Descriptor {descriptor.FilePath}: Total Descriptors: {Descriptors.Count}");
+        }
+
         return wrapper;
+    }
+
+    public bool TryGetDescriptor(FileDescriptor descriptor, [NotNullWhen(true)] out FileDescriptorSavingWrapper? wrapper)
+    {
+        return Descriptors.TryGetValue(descriptor, out wrapper);
     }
 
     public List<FileDescriptorSavingWrapper> GetDescriptors(List<FileDescriptor> descriptors)
     {
         return descriptors.Select(GetDescriptor).ToList();
+    }
+
+    public List<Eu5FileObj> GetAllFiles(FileDescriptor descriptor)
+    {
+        return TryGetDescriptor(descriptor, out var wrapper) ? wrapper.AllFiles : descriptor.Files;
     }
 
 }
