@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -9,7 +10,6 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Saving.Backend;
 
 namespace Arcanum.UI.Saving.Window;
-
 
 /// <summary>
 /// The window has multiple tasks:
@@ -33,29 +33,39 @@ namespace Arcanum.UI.Saving.Window;
 public partial class SaveWindow
 {
     private Point? _dragStartPoint = null;
-    
-    private readonly FileSearchSettings _settings = new();
-    private readonly Queastor _quaestor;
+
+    private readonly Queastor _newFileQuaestor;
     private readonly List<IEu5Object> _newObjects;
-    private readonly Dictionary<Eu5FileObj, FileRepresentation> _fileDescriptors = new();
+
+    private readonly SavingWrapperManager _savingWrapperManager = new();
+
     // TODO @MelCo: Check if reset after mode change
-    private FileDescriptor? _currentDescriptor = null;
-    
-    
+    private FileDescriptorSavingWrapper? _currentDescriptor;
+
     #region UI Bindings
 
-    public static readonly DependencyProperty ShownFilesProperty = DependencyProperty.Register(
-        nameof(ShownFiles), typeof(ObservableCollection<FileRepresentation>), typeof(SaveWindow),
-        new(new ObservableCollection<FileRepresentation>([])));
+    public static readonly DependencyProperty SearchResultProperty = DependencyProperty.Register(
+        nameof(SearchResult), typeof(ObservableCollection<ISearchable>), typeof(SaveWindow), new PropertyMetadata(default(ObservableCollection<ISearchable>)));
 
-    public ObservableCollection<FileRepresentation> ShownFiles
+    public ObservableCollection<ISearchable> SearchResult
     {
-        get => (ObservableCollection<FileRepresentation>)GetValue(ShownFilesProperty);
+        get { return (ObservableCollection<ISearchable>)GetValue(SearchResultProperty); }
+        set { SetValue(SearchResultProperty, value); }
+    }
+
+    public static readonly DependencyProperty ShownFilesProperty = DependencyProperty.Register(
+        nameof(ShownFiles), typeof(ObservableCollection<FileSavingWrapper>), typeof(SaveWindow),
+        new(new ObservableCollection<FileSavingWrapper>([])));
+
+    public ObservableCollection<FileSavingWrapper> ShownFiles
+    {
+        get => (ObservableCollection<FileSavingWrapper>)GetValue(ShownFilesProperty);
         set => SetValue(ShownFilesProperty, value);
     }
 
     public static readonly DependencyProperty ShownDescriptorsProperty = DependencyProperty.Register(
-        nameof(ShownDescriptors), typeof(ObservableCollection<FileDescriptor>), typeof(SaveWindow), new(new ObservableCollection<FileDescriptor>([])));
+        nameof(ShownDescriptors), typeof(ObservableCollection<FileDescriptor>), typeof(SaveWindow),
+        new(new ObservableCollection<FileDescriptor>([])));
 
     public ObservableCollection<FileDescriptor> ShownDescriptors
     {
@@ -64,7 +74,8 @@ public partial class SaveWindow
     }
 
     public static readonly DependencyProperty ShownObjectsProperty = DependencyProperty.Register(
-        nameof(ShownObjects), typeof(ObservableCollection<IEu5Object>), typeof(SaveWindow), new(new ObservableCollection<IEu5Object>([])));
+        nameof(ShownObjects), typeof(ObservableCollection<IEu5Object>), typeof(SaveWindow),
+        new(new ObservableCollection<IEu5Object>([])));
 
     public ObservableCollection<IEu5Object> ShownObjects
     {
@@ -86,8 +97,10 @@ public partial class SaveWindow
     public SaveWindow(List<IEu5Object> newObjects)
     {
         _newObjects = newObjects;
-        _quaestor = new (new());
-        
+        _newFileQuaestor = new(new());
+        foreach (var iEu5Object in newObjects)
+            _newFileQuaestor.AddToIndex(iEu5Object);
+        _newFileQuaestor.RebuildBkTree();
         InitializeComponent();
         SetupUi();
     }
@@ -96,12 +109,20 @@ public partial class SaveWindow
     {
         SearchBox.RequestSearch = SearchBoxRequestSearch;
         SearchBox.SettingsOpened = OpenSettingsWindow;
+        SearchBox.SearchInputTextBox.PreviewKeyDown += (sender, e) =>
+        {
+            if (e.Key != Key.Down || ResultView.Items.Count <= 0) return;
+            ResultView.SelectedIndex = 0;
+            var listViewItem = (ListViewItem)ResultView.ItemContainerGenerator.ContainerFromIndex(0);
+            listViewItem?.Focus();
+            e.Handled = true;
+        };
     }
 
     private void SetUpNewObjectMode()
     {
         ShownFiles.Clear();
-        ShownObjects = new (_newObjects);
+        ShownObjects = new(_newObjects);
     }
 
     private void SetUpNormalMode()
@@ -112,7 +133,10 @@ public partial class SaveWindow
 
     private void SearchBoxRequestSearch(string obj)
     {
-        throw new NotImplementedException();
+        if (NewFileMode)
+        {
+            SearchResult = new(_newFileQuaestor.Search(obj));
+        }
     }
 
     private void OpenSettingsWindow()
@@ -121,17 +145,30 @@ public partial class SaveWindow
     }
 
     #region UI Events
-    
+
     private void OnDropInFile(object sender, DragEventArgs e)
     {
-        
+        if (_currentDescriptor is null)
+            return;
+        var file = GetFileFromItem(sender);
+        if (NewFileMode)
+        {
+            for (var index = ObjectListView.SelectedItems.Count - 1; index >= 0; index--)
+            {
+                var obj = ObjectListView.SelectedItems[index] as IEu5Object ?? throw new InvalidOperationException();
+                TransferObjectTo(obj, file);
+            }
+        }
     }
-    
+
     private void OnDragInFile(object sender, DragEventArgs e)
     {
-        
+        if (_currentDescriptor is null)
+            e.Effects = DragDropEffects.None;
+        e.Effects = DragDropEffects.Move;
+        e.Handled = true;
     }
-    
+
     //TODO @MelCo: Convert to Behavior
     private void ObjectLeftButtonPreview(object sender, MouseButtonEventArgs e)
     {
@@ -143,19 +180,19 @@ public partial class SaveWindow
         if (!_dragStartPoint.HasValue || Mouse.LeftButton != MouseButtonState.Pressed) return;
         var currentPosition = e.GetPosition(null);
         var distance = (currentPosition - _dragStartPoint.Value).Length;
-        
+
         if (distance < Config.START_DRAG_DISTANCE) return;
         var data = new DataObject();
-
-        var obj = GetObjectFromItem(sender);
-        data.SetData("object", obj);
+        data.SetData("Test", "a");
         _dragStartPoint = null;
         try
         {
             DragDrop.DoDragDrop(ObjectListView, data, DragDropEffects.Move);
         }
-        finally
+        catch (Exception error) //finally
         {
+            Console.WriteLine("Error: " + error.Message);
+            ;
             //ShownFiles.Clear();
         }
     }
@@ -180,15 +217,17 @@ public partial class SaveWindow
 
     private void ObjectListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if(!NewFileMode) return;
+        if (!NewFileMode) return;
         // Check if all new objects have a common descriptor
         if (ObjectListView.SelectedItems.Count < 1)
         {
             ShownFiles.Clear();
             return;
         }
-        
-        var selectedDescriptor = GetDescriptorFromItem(ObjectListView.SelectedItems[0] as IEu5Object ?? throw new InvalidOperationException());
+
+        var selectedDescriptor =
+            GetDescriptorFromItem(
+                ObjectListView.SelectedItems[0] as IEu5Object ?? throw new InvalidOperationException());
         for (var index = 1; index < ObjectListView.SelectedItems.Count; index++)
         {
             var item = ObjectListView.SelectedItems[index];
@@ -198,12 +237,22 @@ public partial class SaveWindow
             _currentDescriptor = null;
             return;
         }
-        _currentDescriptor = selectedDescriptor;
-        ShownFiles = new (GetDescriptors(selectedDescriptor.Files));
+
+        _currentDescriptor = _savingWrapperManager.GetDescriptor(selectedDescriptor);
+        ShownFiles = new(_currentDescriptor.AllFiles);
     }
+
     #endregion
 
     #region Helper
+
+    private void TransferObjectTo(IEu5Object obj, FileSavingWrapper targetFile)
+    {
+        targetFile.AddObject(obj);
+        _newObjects.Remove(obj);
+        _newFileQuaestor.RemoveFromIndex(obj);
+        ShownObjects.Remove(obj);
+    }
 
     private IEu5Object GetObjectFromItem(object sender)
     {
@@ -215,45 +264,75 @@ public partial class SaveWindow
         throw new ArgumentException("Sender is not a ListViewItem");
     }
 
+    private FileSavingWrapper GetFileFromItem(object sender)
+    {
+        if (FileListView.ContainerFromElement((DependencyObject)sender) is ListViewItem container)
+        {
+            return (FileSavingWrapper)container.Content; // Source object
+        }
+
+        throw new ArgumentException("Sender is not a ListViewItem");
+    }
+
+
     private FileDescriptor GetDescriptorFromItem(IEu5Object obj)
     {
-       return obj.Source.Descriptor;
-    }
-
-    private FileRepresentation GetDescriptor(Eu5FileObj fileObj)
-    {
-        if(!_fileDescriptors.TryGetValue(fileObj, out var descriptor))
-            _fileDescriptors[fileObj] = descriptor = new(_quaestor, fileObj, []);
-        return descriptor;
-    }
-
-    private List<FileRepresentation> GetDescriptors(List<Eu5FileObj> objects)
-    {
-        var list = new List<FileRepresentation>(objects.Count);
-        list.AddRange(objects.Select(GetDescriptor));
-        return list;
+        return obj.Source.Descriptor;
     }
 
     #endregion
 
     private void AddNewFile(object sender, RoutedEventArgs e)
     {
-        if (NewFileMode)
-        {
-            if(_currentDescriptor is null)
-                // TODO @MelCo: Notify user
-                return;
-            
-            var dialog = new CreateNewFile(_currentDescriptor)
-            {
-                Owner = this
-            };
-            dialog.ShowDialog();
-            if (dialog.DialogResult != true)
-            {
-                
-            }
+        if (!NewFileMode) return;
+        if (_currentDescriptor is null)
+            // TODO @MelCo: Notify user
+            return;
 
+        var dialog = new CreateNewFile(_currentDescriptor)
+        {
+            Owner = this
+        };
+        dialog.ShowDialog();
+        if (dialog.DialogResult != true)
+            return;
+        var newFile = _savingWrapperManager.GetFile(new(dialog.NewPath, _currentDescriptor.Descriptor));
+        _currentDescriptor.AddNewFile(newFile);
+        ShownFiles = new(_currentDescriptor.AllFiles);
+    }
+
+    private void SelectSearchResult(object sender, MouseButtonEventArgs e)
+    {
+        if (ResultView.ContainerFromElement((DependencyObject)sender) is not ListViewItem container)
+            return;
+
+        HighlightSearchResult((ISearchable)container.Content);
+        
+    }
+
+    private void SelectSearchResultKey(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Up && ResultView.SelectedIndex == 0)
+        {
+            SearchBox.SearchInputTextBox.Focus();
+            ResultView.SelectedIndex = -1;
+            e.Handled = true;
+            return;
         }
+        if (e.Key != Key.Enter) return;
+        if (ResultView.SelectedItem is ISearchable selected)
+            HighlightSearchResult(selected);
+    }
+
+    private void HighlightSearchResult(ISearchable searchable)
+    {
+        if (searchable is IEu5Object)
+        {
+            var firstOrDefault = ShownObjects.FirstOrDefault(x => x!.Equals(searchable), null);
+            if(firstOrDefault is null)
+                return;
+            ObjectListView.SelectedItem = firstOrDefault;
+        }
+        SearchResult.Clear();
     }
 }

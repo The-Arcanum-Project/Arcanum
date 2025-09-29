@@ -23,23 +23,45 @@
                 <ResourceDictionary Source="/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source="/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:IsListNotEmptyConverter x:Key="IsListNotEmptyConverter"/>
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
     <styleClasses:BaseWindow.HeaderContent>
         <StackPanel Orientation="Horizontal">
-            <Border Margin="2"
-                    CornerRadius="5"
-                    BorderBrush="{StaticResource DefaultBorderColorBrush}"
-                    BorderThickness="1"
-                    behaviors:WindowDrag.IsClickExclusionZone="True">
-                <userControls:SearchTextBox Width="280"
-                                            Margin="0,2,0,2"
-                                            Height="22"
-                                            VerticalAlignment="Center"
-                                            Background="Transparent"
-                                            x:Name="SearchBox" />
-            </Border>
+            <Grid>
+                <Border Margin="2"
+                        CornerRadius="5"
+                        BorderBrush="{StaticResource DefaultBorderColorBrush}"
+                        BorderThickness="1"
+                        behaviors:WindowDrag.IsClickExclusionZone="True">
+                    <userControls:SearchTextBox Width="280"
+                                                Margin="0,2,0,2"
+                                                Height="22"
+                                                VerticalAlignment="Center"
+                                                Background="Transparent"
+                                                x:Name="SearchBox" />
+                </Border>
+                <Popup PlacementTarget="{Binding ElementName=SearchBox}"
+                       Placement="Bottom"
+                       StaysOpen="False"
+                       AllowsTransparency="True"
+                       IsOpen="{Binding SearchResult, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}, Converter={StaticResource IsListNotEmptyConverter}, Mode=OneWay}"
+                       PreviewKeyDown="SelectSearchResultKey">
+
+                        <ListView x:Name="ResultView" ItemsSource="{Binding SearchResult, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }"
+                                  MaxHeight="200"
+                                  BorderThickness="1"
+                                  SelectionMode="Single"
+                                  MinWidth="{Binding ActualWidth, ElementName=SearchBox}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ResultName}" MouseDown="SelectSearchResult"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                </Popup>
+            </Grid>
             <TextBlock Text="New Object Mode:"
                        VerticalAlignment="Center"
                        Margin="12,0,5,0" />
@@ -173,7 +195,6 @@
                     </ListView.ItemTemplate>
                 </ListView>
                 <TextBlock Grid.Row="1"
-                           Text="Please select a file to see contained objects."
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            TextWrapping="Wrap"
@@ -182,9 +203,13 @@
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Text" Value="Please select a file to see contained objects."/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=ObjectListView, Path=Items.Count}" Value="0">
                                     <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding NewFileMode, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }" Value="True">
+                                    <Setter Property="Text" Value="No more new objects remaining."/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

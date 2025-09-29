@@ -2,12 +2,13 @@
 using System.IO;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.UI.Saving.Backend;
 
 namespace Arcanum.UI.Saving;
 
 public class WindowsFileNameValidation() : ValidationRule
 {
-    public FileDescriptor? Descriptor { get; init; } = null;
+    public FileDescriptorSavingWrapper? Descriptor { get; init; } = null;
     
     public override ValidationResult Validate(object? value, CultureInfo cultureInfo)
     {
@@ -22,7 +23,7 @@ public class WindowsFileNameValidation() : ValidationRule
                 $"Filename contains invalid characters: {string.Join(" ", filename.Where(c => invalidChars.Contains(c)))}");
 
         // TODO @MelCo: Check if the filename was already added in action to the descriptor's files.'
-        if (Descriptor is not null && Descriptor.Files.Any(f => f.Path.FilenameWithoutExtension == filename))
+        if (Descriptor is not null && Descriptor.AllFiles.Any(f => f.FileObj.Path.FilenameWithoutExtension == filename))
             return new(false, "Filename already exists.");
         
         var reservedNames = new []

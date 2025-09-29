@@ -3,8 +3,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Saving.Backend;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Arcanum.UI.Saving.Window;
@@ -12,12 +14,12 @@ namespace Arcanum.UI.Saving.Window;
 public partial class CreateNewFile
 {
 
-    public PathObj NewPath = PathObj.Empty;
+    public PathObj NewPath => new PathObj(FileDescriptor.Descriptor.LocalPath, FileName + "." + FileDescriptor.Descriptor.FileType.FileEnding, FileManager.ModDataSpace);
 
     public static readonly DependencyProperty FileNameProperty = DependencyProperty.Register(
         nameof(FileName), typeof(string), typeof(CreateNewFile), new PropertyMetadata(default(string)));
     
-    public FileDescriptor FileDescriptor { get; }
+    public FileDescriptorSavingWrapper FileDescriptor { get; }
     
     public string FileName
     {
@@ -25,7 +27,7 @@ public partial class CreateNewFile
         set { SetValue(FileNameProperty, value); }
     }
     
-    public CreateNewFile(FileDescriptor fileDescriptor)
+    public CreateNewFile(FileDescriptorSavingWrapper fileDescriptor)
     {
         FileDescriptor = fileDescriptor;
         InitializeComponent();
@@ -45,8 +47,8 @@ public partial class CreateNewFile
 
         FileNameInput.SetBinding(TextBox.TextProperty, binding);
         
-        FilePath.Text = fileDescriptor.FilePath;
-        FileExtension.Text = '.' + fileDescriptor.FileType.FileEnding;
+        FilePath.Text = fileDescriptor.Descriptor.FilePath;
+        FileExtension.Text = '.' + fileDescriptor.Descriptor.FileType.FileEnding;
         FileNameInput.Focus();
     }
     
