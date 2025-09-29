@@ -8,7 +8,7 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- Converter to calculate radius from height -->
-    <converters:HeightToRadiusConverter x:Key="HeightToRadiusConverter" />
+    <converters:HalfRadiusConverter x:Key="HalfRadiusConverter" />
 
     <Style x:Key="ToggleSwitch" TargetType="{x:Type ToggleButton}">
         <Setter Property="Width" Value="50" />
@@ -19,31 +19,14 @@
                     <Grid x:Name="templateRoot" Background="Transparent" Margin="0">
                         <Border x:Name="Track"
                                 BorderBrush="{StaticResource DefaultBorderColorBrush}"
-                                BorderThickness="1">
-                            <Border.CornerRadius>
-                                <MultiBinding Converter="{StaticResource HeightToRadiusConverter}">
-                                    <Binding ElementName="Track" Path="ActualHeight" />
-                                </MultiBinding>
-                            </Border.CornerRadius>
+                                BorderThickness="1" CornerRadius="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource HalfRadiusConverter}}">
                             <Border.Background>
                                 <SolidColorBrush x:Name="TrackBackground" Color="{StaticResource LightBackColor}" />
                             </Border.Background>
                         </Border>
 
                         <Ellipse x:Name="Thumb"
-                                 HorizontalAlignment="Left" Margin="1">
-                            <Ellipse.Width>
-                                <MultiBinding Converter="{StaticResource HeightToRadiusConverter}">
-                                    <Binding ElementName="Track" Path="ActualHeight" />
-                                    <Binding RelativeSource="{RelativeSource Self}" Path="StrokeThickness"/>
-                                </MultiBinding>
-                            </Ellipse.Width>
-                             <Ellipse.Height>
-                                <MultiBinding Converter="{StaticResource HeightToRadiusConverter}">
-                                    <Binding ElementName="Track" Path="ActualHeight" />
-                                    <Binding RelativeSource="{RelativeSource Self}" Path="StrokeThickness"/>
-                                </MultiBinding>
-                            </Ellipse.Height>
+                                 HorizontalAlignment="Left" Margin="1" VerticalAlignment="Stretch" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
                             <Ellipse.Fill>
                                 <SolidColorBrush x:Name="ThumbFill" Color="{StaticResource DefaultForeColor}" />
                             </Ellipse.Fill>
@@ -58,6 +41,9 @@
                         
                         <!-- Hover State -->
                         <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource SelectedControlBorderColorBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource SelectedControlBorderColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>

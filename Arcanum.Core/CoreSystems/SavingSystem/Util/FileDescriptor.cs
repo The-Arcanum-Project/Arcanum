@@ -8,6 +8,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 public class FileDescriptor : IEmpty<FileDescriptor>
 {
+   public string Name => FileType.TypeName;
    public string[] LocalPath { get; }
    public readonly FileTypeInformation FileType;
    public FileLoadingService[] LoadingService { get; }

@@ -3,9 +3,7 @@
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                         xmlns:local="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:window="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:userControls="clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:window1="clr-namespace:Arcanum.UI.Saving.Window"
                          xmlns:behaviors="clr-namespace:Arcanum.UI.Components.Behaviors"
@@ -23,27 +21,52 @@
                 <ResourceDictionary Source="/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source="/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:IsListNotEmptyConverter x:Key="IsListNotEmptyConverter" />
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
     <styleClasses:BaseWindow.HeaderContent>
         <StackPanel Orientation="Horizontal">
-            <Border Margin="2"
-                    CornerRadius="5"
-                    BorderBrush="{StaticResource DefaultBorderColorBrush}"
-                    BorderThickness="1"
-                    behaviors:WindowDrag.IsClickExclusionZone="True">
-                <userControls:SearchTextBox Width="280"
-                                            Margin="0,2,0,2"
-                                            Height="22"
-                                            VerticalAlignment="Center"
-                                            Background="Transparent"
-                                            x:Name="SearchBox" />
-            </Border>
+            <Grid>
+                <Border Margin="2"
+                        CornerRadius="5"
+                        BorderBrush="{StaticResource DefaultBorderColorBrush}"
+                        BorderThickness="1"
+                        behaviors:WindowDrag.IsClickExclusionZone="True">
+                    <userControls:SearchTextBox Width="280"
+                                                Margin="0,2,0,2"
+                                                Height="22"
+                                                VerticalAlignment="Center"
+                                                Background="Transparent"
+                                                x:Name="SearchBox" />
+                </Border>
+                <Popup PlacementTarget="{Binding ElementName=SearchBox}"
+                       Placement="Bottom"
+                       StaysOpen="False"
+                       AllowsTransparency="True"
+                       IsOpen="{Binding SearchResult, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}, Converter={StaticResource IsListNotEmptyConverter}, Mode=OneWay}"
+                       PreviewKeyDown="SelectSearchResultKey">
+
+                    <ListView x:Name="ResultView"
+                              ItemsSource="{Binding SearchResult, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }"
+                              MaxHeight="200"
+                              BorderThickness="1"
+                              SelectionMode="Single"
+                              MinWidth="{Binding ActualWidth, ElementName=SearchBox}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ResultName}"
+                                           MouseDown="SelectSearchResult" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Popup>
+            </Grid>
             <TextBlock Text="New Object Mode:"
                        VerticalAlignment="Center"
                        Margin="12,0,5,0" />
-            <ToggleButton Style="{StaticResource ToggleSwitch}"
+            <ToggleButton x:Name="NewObjectModeToggle"
+                          Style="{StaticResource ToggleSwitch}"
                           Width="40"
                           Height="20"
                           VerticalAlignment="Center"
@@ -60,17 +83,18 @@
         </Grid.RowDefinitions>
 
 
-        <Grid Grid.Row="0" Margin="2,0">
+        <Grid Grid.Row="0"
+              Margin="2,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="DescriptorsColumn"
-                                  Width="*"
+                                  Width="2*"
                                   MinWidth="100" />
                 <ColumnDefinition x:Name="SplitterColumn"
                                   Width="Auto" />
-                <ColumnDefinition Width="*"
+                <ColumnDefinition Width="3*"
                                   MinWidth="100" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*"
+                <ColumnDefinition Width="2*"
                                   MinWidth="100" />
             </Grid.ColumnDefinitions>
 
@@ -87,25 +111,21 @@
                 <ListView x:Name="DescriptionListView"
                           Grid.Row="1"
                           Margin="0,2,0,4"
+                          SelectionMode="Single"
                           Background="Transparent"
-                          ItemsSource="{Binding SearchResults, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
-
+                          ItemsSource="{Binding ShownDescriptors, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
+                          SelectionChanged="DescriptionListView_OnSelectionChanged">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding ResultName}"
-                                       AllowDrop="True"
-                                       Drop="UIElement_OnDrop"
-                                       DragOver="UIElement_OnDrag"
-                                       DragEnter="UIElement_OnDrag" />
+                            <TextBlock Text="{Binding Name }"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
             </Grid>
             <GridSplitter Grid.Column="1"
-                          Width="6"
-                          Margin="2, 4"
-                          HorizontalAlignment="Stretch"
-                          ResizeBehavior="BasedOnAlignment"/>
+                          Width="2"
+                          Margin="4, 8"
+                          ResizeBehavior="BasedOnAlignment" />
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -119,24 +139,54 @@
                 <ListView Grid.Row="1"
                           x:Name="FileListView"
                           Margin="0,2,0,4"
+                          SelectionMode="Single"
                           Background="Transparent"
-                          ItemsSource="{Binding SearchResults, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+                          ItemsSource="{Binding ShownFiles, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
+                          SelectionChanged="FileListView_OnSelectionChanged">
 
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding ResultName}"
+                            <TextBlock Text="{Binding Path.RelativePath }"
                                        AllowDrop="True"
-                                       Drop="UIElement_OnDrop"
-                                       DragOver="UIElement_OnDrag"
-                                       DragEnter="UIElement_OnDrag" />
+                                       Drop="OnDropInFile"
+                                       DragOver="OnDragInFile"
+                                       DragEnter="OnDragInFile" />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <TextBlock Grid.Row="1"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontStyle="Italic"
+                           Margin="25"
+                           Foreground="{StaticResource GreyedOutForeColorBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed" />
+                            <Setter Property="Text"
+                                    Value="Please select a descriptor to see contained files." />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=FileListView, Path=Items.Count}"
+                                             Value="0">
+                                    <Setter Property="Visibility"
+                                            Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding NewFileMode, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }"
+                                    Value="True">
+                                    <Setter Property="Text"
+                                            Value="Please select a object (or multiple of the same type) to see valid files." />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
             <GridSplitter Grid.Column="3"
-                          Width="6"
-                          Margin="2, 4"
-                          HorizontalAlignment="Stretch"
+                          Width="2"
+                          Margin="4, 8"
                           ResizeBehavior="BasedOnAlignment" />
             <Grid Grid.Column="4">
                 <Grid.RowDefinitions>
@@ -152,14 +202,45 @@
                           Grid.Row="1"
                           Margin="0,2,0,4"
                           Background="Transparent"
-                          ItemsSource="{Binding CurrentFile.ChangedObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}">
+                          ItemsSource="{Binding ShownObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
+                          SelectionChanged="ObjectListView_OnSelectionChanged">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding UniqueId}"
-                                       PreviewMouseLeftButtonDown="UIElement_OnPreviewMouseLeftButtonDown" />
+                                       PreviewMouseLeftButtonDown="ObjectLeftButtonPreview"
+                                       MouseMove="ObjectLeftButtonMove" />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <TextBlock Grid.Row="1"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontStyle="Italic"
+                           Margin="26"
+                           Foreground="{StaticResource GreyedOutForeColorBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed" />
+                            <Setter Property="Text"
+                                    Value="Please select a file to see contained objects." />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=ObjectListView, Path=Items.Count}"
+                                             Value="0">
+                                    <Setter Property="Visibility"
+                                            Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding NewFileMode, RelativeSource={RelativeSource AncestorType=window1:SaveWindow} }"
+                                    Value="True">
+                                    <Setter Property="Text"
+                                            Value="No more new objects remaining." />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </Grid>
         <Border Grid.Row="1"
@@ -205,17 +286,15 @@
                             Value="5,4,0,4" />
                 </Style>
             </StackPanel.Resources>
-            <styleClasses:BaseButton x:Name="SelectButton"
-                                     ToolTip="Select all shown items.&#x0a;Use double click to select all items.">
+            <styleClasses:BaseButton ToolTip="Select all shown items.&#x0a;Use double click to select all items.">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CheckSquareStack30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>
-            <styleClasses:BaseButton x:Name="UnselectButton"
-                                     ToolTip="Unselect all shown items.&#x0a;Use double click to unselect all items.">
+            <styleClasses:BaseButton ToolTip="Unselect all shown items.&#x0a;Use double click to unselect all items.">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/CloseSquareStack30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>
-            <styleClasses:BaseButton>
+            <styleClasses:BaseButton Click="AddNewFile">
                 <Image Source="/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png"
                        Stretch="None" />
             </styleClasses:BaseButton>

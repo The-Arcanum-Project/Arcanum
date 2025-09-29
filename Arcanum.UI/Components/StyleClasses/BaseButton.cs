@@ -1,13 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Arcanum.UI.Components.Converters;
 
 namespace Arcanum.UI.Components.StyleClasses;
 
 public class BaseButton : Button
 {
    public static readonly DependencyProperty HoverBackgroundProperty =
-      DependencyProperty.Register("HoverBackground", typeof(Brush), typeof(BaseButton), new(Brushes.Transparent));
+      DependencyProperty.Register(nameof(HoverBackground), typeof(Brush), typeof(BaseButton), new(Brushes.Transparent));
 
    public Brush HoverBackground
    {
