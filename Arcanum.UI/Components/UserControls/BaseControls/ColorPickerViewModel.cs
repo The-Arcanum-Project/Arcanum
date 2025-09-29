@@ -44,6 +44,7 @@ public sealed class ColorPickerViewModel : INotifyPropertyChanged
 
          _hue = value;
          OnPropertyChanged(nameof(Hue));
+         OnPropertyChanged(nameof(PureHueColor));
          UpdatePropertiesFromHsv();
       }
    }
@@ -230,7 +231,23 @@ public sealed class ColorPickerViewModel : INotifyPropertyChanged
       if (_isUpdating)
          return;
 
-      SelectedColor = ColorConversion.HsvToRgb(_hue, _saturation, _value);
+      _isUpdating = true;
+
+      var newColor = ColorConversion.HsvToRgb(_hue, _saturation, _value);
+
+      _selectedColor = newColor;
+      _red = newColor.R;
+      _green = newColor.G;
+      _blue = newColor.B;
+      _hexText = $"{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
+
+      OnPropertyChanged(nameof(SelectedColor));
+      OnPropertyChanged(nameof(Red));
+      OnPropertyChanged(nameof(Green));
+      OnPropertyChanged(nameof(Blue));
+      OnPropertyChanged(nameof(HexText));
+
+      _isUpdating = false;
    }
 
    private void UpdatePropertiesFromRgb(byte r, byte g, byte b)
