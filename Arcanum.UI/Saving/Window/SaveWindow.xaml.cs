@@ -40,9 +40,14 @@ public partial class SaveWindow
 
     private readonly SavingWrapperManager _savingWrapperManager = new();
 
-    // TODO @MelCo: Check if reset after mode change
     private FileDescriptor? _currentDescriptor;
 
+    private bool _showOnlyChangedFiles = true;
+
+    private List<IEu5Object> _changedObjects;
+    
+    private List<FileDescriptor> _descriptorsWithChangedFiles;
+    
     #region UI Bindings
 
     public static readonly DependencyProperty SearchResultProperty = DependencyProperty.Register(
@@ -95,15 +100,33 @@ public partial class SaveWindow
 
     #endregion
 
-    public SaveWindow(List<IEu5Object> newObjects)
+    public SaveWindow(List<IEu5Object> newObjects, List<IEu5Object> changedObjects, bool newMode = false)
     {
         _newObjects = newObjects;
+        _changedObjects = changedObjects;
+        _descriptorsWithChangedFiles = _changedObjects
+            .Select(x => x.Source.Descriptor)
+            .Distinct()
+            .ToList();
+        _descriptorsWithChangedFiles.Sort(new FileDescriptorComparer());
+        
+        
         _newFileQuaestor = new(new());
         foreach (var iEu5Object in newObjects)
             _newFileQuaestor.AddToIndex(iEu5Object);
         _newFileQuaestor.RebuildBkTree();
         InitializeComponent();
         SetupUi();
+        if (newMode)
+        {
+            NewObjectModeToggle.IsChecked = true;
+            SetUpNewObjectMode();
+        }
+        else
+        {
+            NewObjectModeToggle.IsChecked = false;
+            SetUpNormalMode();
+        }
     }
 
     private void SetupUi()
@@ -122,15 +145,24 @@ public partial class SaveWindow
 
     private void SetUpNewObjectMode()
     {
+        NewFileMode = true;
+        DescriptorsColumn.MinWidth = 0;
+        DescriptorsColumn.Width = new GridLength(0);
+        SplitterColumn.Width = new GridLength(0);
         ShownFiles.Clear();
         ShownObjects = new(_newObjects);
     }
 
     private void SetUpNormalMode()
     {
+        NewFileMode = false;
+        DescriptorsColumn.MinWidth = 100;
+        DescriptorsColumn.Width = new GridLength(1, GridUnitType.Star);
+        SplitterColumn.Width = GridLength.Auto;
+        _currentDescriptor = null;
         ShownFiles.Clear();
         ShownObjects.Clear();
-        ShownDescriptors = new();
+        ShownDescriptors = new(_descriptorsWithChangedFiles);
     }
 
     private void SearchBoxRequestSearch(string obj)
@@ -200,19 +232,11 @@ public partial class SaveWindow
 
     private void NewObjectModeToggle_OnChecked(object sender, RoutedEventArgs e)
     {
-        NewFileMode = true;
-        DescriptorsColumn.MinWidth = 0;
-        DescriptorsColumn.Width = new GridLength(0);
-        SplitterColumn.Width = new GridLength(0);
         SetUpNewObjectMode();
     }
 
     private void NewObjectModeToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        NewFileMode = false;
-        DescriptorsColumn.MinWidth = 100;
-        DescriptorsColumn.Width = new GridLength(1, GridUnitType.Star);
-        SplitterColumn.Width = GridLength.Auto;
         SetUpNormalMode();
     }
 
@@ -242,6 +266,25 @@ public partial class SaveWindow
 
         _currentDescriptor = selectedDescriptor;
         ShownFiles = new(_savingWrapperManager.GetAllFiles(selectedDescriptor));
+    }
+    
+    private void FileListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if(NewFileMode) return;
+        
+    }
+
+    private void DescriptionListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if(NewFileMode) return;
+        if (DescriptionListView.SelectedItems.Count < 1)
+        {
+            ShownFiles.Clear();
+            _currentDescriptor = null;
+            return;
+        }
+        _currentDescriptor = DescriptionListView.SelectedItem as FileDescriptor ?? throw new InvalidOperationException();
+        ShownFiles = new(_savingWrapperManager.GetAllFiles(_currentDescriptor));
     }
 
     #endregion
@@ -276,7 +319,6 @@ public partial class SaveWindow
 
     private void AddNewFile(object sender, RoutedEventArgs e)
     {
-        if (!NewFileMode) return;
         if (_currentDescriptor is null)
         {
             MBox.Show("Please select a object first to create a new file for it.", "No object selected", icon: MessageBoxImage.Warning, owner:this);

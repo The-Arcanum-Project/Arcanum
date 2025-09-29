@@ -6,7 +6,6 @@ namespace Arcanum.UI.Saving.Backend;
 
 public class SavingWrapperManager
 {
-    //TODO: @MelCo: Check if this is even needed. Since the conversions might not be needed anymore.
     private Dictionary<FileDescriptor, FileDescriptorSavingWrapper> Descriptors { get; } = [];
     private Dictionary<Eu5FileObj, FileSavingWrapper> Files { get; } = [];
 
@@ -49,7 +48,11 @@ public class SavingWrapperManager
 
     public List<Eu5FileObj> GetAllFiles(FileDescriptor descriptor)
     {
-        return TryGetDescriptor(descriptor, out var wrapper) ? wrapper.AllFiles : descriptor.Files;
+        if (TryGetDescriptor(descriptor, out var wrapper))
+            return wrapper.AllFiles;
+        var files = new List<Eu5FileObj>(descriptor.Files);
+        files.Sort(new Eu5FileComparer());
+        return files;
     }
 
 }

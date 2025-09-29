@@ -1,4 +1,5 @@
 ﻿using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.UI.Saving.Backend;
@@ -7,14 +8,7 @@ public class Eu5FileComparer : IComparer<Eu5FileObj>
 {
     public int Compare(Eu5FileObj? x, Eu5FileObj? y)
     {
-        return x switch
-        {
-            null when y is null => 0,
-            null => -1,
-            _ => y is null
-                ? 1
-                : string.Compare(x.Path.RelativePath, y.Path.RelativePath, StringComparison.OrdinalIgnoreCase)
-        };
+        return NaturalStringComparer.Compare(x?.Path.RelativePath, y?.Path.RelativePath);
     }
 }
 
@@ -45,8 +39,7 @@ public class FileDescriptorSavingWrapper : ISearchable
 
     public string GetNamespace => "";
 
-    //TODO: @MelCo: Better name for descriptors
-    public string ResultName  => _descriptor.FileType.TypeName;
+    public string ResultName  => _descriptor.Name;
     public List<string> SearchTerms => [ResultName];
     public void OnSearchSelected()
     {
