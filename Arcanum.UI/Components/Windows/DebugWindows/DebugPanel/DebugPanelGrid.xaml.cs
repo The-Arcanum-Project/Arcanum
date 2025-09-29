@@ -32,7 +32,7 @@ public partial class DebugPanelGrid
    {
       var climates = Globals.Regencies.Values.Cast<IEu5Object>().Take(2).ToList();
       climates.AddRange(Globals.Climates.Values.Take(2));
-      var sw = new Saving.Window.SaveWindow(climates, climates);
+      var sw = new Saving.Window.SaveWindow(climates, [..climates]);
       sw.Show();
    }
 

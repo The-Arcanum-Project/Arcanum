@@ -44,9 +44,11 @@ public partial class SaveWindow
 
     private bool _showOnlyChangedFiles = true;
 
-    private List<IEu5Object> _changedObjects;
+    private readonly HashSet<IEu5Object> _changedObjects;
     
-    private List<FileDescriptor> _descriptorsWithChangedFiles;
+    private readonly HashSet<Eu5FileObj> _relevantFiles = [];
+    
+    private List<FileDescriptor> _descriptorsWithChangedFiles = [];
     
     #region UI Bindings
 
@@ -100,14 +102,18 @@ public partial class SaveWindow
 
     #endregion
 
-    public SaveWindow(List<IEu5Object> newObjects, List<IEu5Object> changedObjects, bool newMode = false)
+    public SaveWindow(List<IEu5Object> newObjects, HashSet<IEu5Object> changedObjects, bool newMode = false)
     {
         _newObjects = newObjects;
         _changedObjects = changedObjects;
-        _descriptorsWithChangedFiles = _changedObjects
-            .Select(x => x.Source.Descriptor)
-            .Distinct()
-            .ToList();
+
+        foreach (var file in changedObjects.Select(changedObject => changedObject.Source))
+        {
+            _relevantFiles.Add(file);
+            _descriptorsWithChangedFiles.Add(file.Descriptor);
+        }
+
+        _descriptorsWithChangedFiles = _descriptorsWithChangedFiles.Distinct().ToList();
         _descriptorsWithChangedFiles.Sort(new FileDescriptorComparer());
         
         
@@ -272,6 +278,13 @@ public partial class SaveWindow
     {
         if(NewFileMode) return;
         
+        if (FileListView.SelectedItems.Count < 1)
+        {
+            ShownObjects.Clear();
+            return;
+        }
+        var file = FileListView.SelectedItem as Eu5FileObj ?? throw new InvalidOperationException();
+        ShownObjects = new(_savingWrapperManager.GetAllRelevantObjects(file, _changedObjects));
     }
 
     private void DescriptionListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -284,7 +297,7 @@ public partial class SaveWindow
             return;
         }
         _currentDescriptor = DescriptionListView.SelectedItem as FileDescriptor ?? throw new InvalidOperationException();
-        ShownFiles = new(_savingWrapperManager.GetAllFiles(_currentDescriptor));
+        ShownFiles = new(_savingWrapperManager.GetAllRelevantFiles(_currentDescriptor, _relevantFiles));
     }
 
     #endregion
