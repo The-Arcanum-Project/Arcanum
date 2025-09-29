@@ -16,6 +16,7 @@
     <Color x:Key = "DimInformationBlueColor"> #2373b8 </Color>
     <Color x:Key = "BlueAccentColor"> #3574f0 </Color>
     <Color x:Key = "GreenColor"> #528d57 </Color>
+    <Color x:Key = "EmbeddedBorderColor"> #800080 </Color>
 
     <SolidColorBrush x:Key = "GreenColorBrush"
                      Color = "{StaticResource GreenColor}" />
@@ -49,40 +50,62 @@
                      Color = "{StaticResource DiwWarningYellowColor}" />
     <SolidColorBrush x:Key = "DimInformationBlueColorBrush"
                      Color = "{StaticResource DimInformationBlueColor}" />
+    <SolidColorBrush x:Key = "EmbeddedBorderColorBrush"
+                     Color = "{StaticResource EmbeddedBorderColor}" />
 
     <LinearGradientBrush x:Key = "AccentGradientBrush"
                          StartPoint = "-0.2,-0.2"
                          EndPoint = "0.6,0.6">
         <!-- Step 1 -->
-        <GradientStop Color="#FF0C2E31" Offset="0.0" />
-        <GradientStop Color="#FF0C2E31" Offset="0.1" />
+        <GradientStop Color = "#FF0C2E31"
+                      Offset = "0.0" />
+        <GradientStop Color = "#FF0C2E31"
+                      Offset = "0.1" />
         <!-- Step 2 -->
-        <GradientStop Color="#FF102D2F" Offset="0.1" />
-        <GradientStop Color="#FF102D2F" Offset="0.2" />
+        <GradientStop Color = "#FF102D2F"
+                      Offset = "0.1" />
+        <GradientStop Color = "#FF102D2F"
+                      Offset = "0.2" />
         <!-- Step 3 -->
-        <GradientStop Color="#FF132B2D" Offset="0.2" />
-        <GradientStop Color="#FF132B2D" Offset="0.3" />
+        <GradientStop Color = "#FF132B2D"
+                      Offset = "0.2" />
+        <GradientStop Color = "#FF132B2D"
+                      Offset = "0.3" />
         <!-- Step 4 -->
-        <GradientStop Color="#FF162A2C" Offset="0.3" />
-        <GradientStop Color="#FF162A2C" Offset="0.4" />
+        <GradientStop Color = "#FF162A2C"
+                      Offset = "0.3" />
+        <GradientStop Color = "#FF162A2C"
+                      Offset = "0.4" />
         <!-- Step 5 -->
-        <GradientStop Color="#FF18282A" Offset="0.4" />
-        <GradientStop Color="#FF18282A" Offset="0.5" />
+        <GradientStop Color = "#FF18282A"
+                      Offset = "0.4" />
+        <GradientStop Color = "#FF18282A"
+                      Offset = "0.5" />
         <!-- Step 6 -->
-        <GradientStop Color="#FF1A2728" Offset="0.5" />
-        <GradientStop Color="#FF1A2728" Offset="0.6" />
+        <GradientStop Color = "#FF1A2728"
+                      Offset = "0.5" />
+        <GradientStop Color = "#FF1A2728"
+                      Offset = "0.6" />
         <!-- Step 7 -->
-        <GradientStop Color="#FF1C2526" Offset="0.6" />
-        <GradientStop Color="#FF1C2526" Offset="0.7" />
+        <GradientStop Color = "#FF1C2526"
+                      Offset = "0.6" />
+        <GradientStop Color = "#FF1C2526"
+                      Offset = "0.7" />
         <!-- Step 8 -->
-        <GradientStop Color="#FF1E2425" Offset="0.7" />
-        <GradientStop Color="#FF1E2425" Offset="0.8" />
+        <GradientStop Color = "#FF1E2425"
+                      Offset = "0.7" />
+        <GradientStop Color = "#FF1E2425"
+                      Offset = "0.8" />
         <!-- Step 9 -->
-        <GradientStop Color="#FF202223" Offset="0.8" />
-        <GradientStop Color="#FF202223" Offset="0.9" />
+        <GradientStop Color = "#FF202223"
+                      Offset = "0.8" />
+        <GradientStop Color = "#FF202223"
+                      Offset = "0.9" />
         <!-- Step 10 -->
-        <GradientStop Color="#FF212121" Offset="0.9" />
-        <GradientStop Color="#FF212121" Offset="1.0" />
+        <GradientStop Color = "#FF212121"
+                      Offset = "0.9" />
+        <GradientStop Color = "#FF212121"
+                      Offset = "1.0" />
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key = "OrangeAccentGradientBrush"

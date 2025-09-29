@@ -1,0 +1,629 @@
+﻿using System.Collections;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Forms;
+using System.Windows.Media;
+using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Registry;
+using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.Components.Windows.PopUp;
+using Arcanum.UI.NUI.Generator;
+using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
+using Arcanum.UI.NUI.UserControls.BaseControls;
+using Common.UI;
+using Common.UI.MBox;
+using Nexus.Core;
+using Binding = System.Windows.Data.Binding;
+using Control = System.Windows.Controls.Control;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using ToolTip = System.Windows.Controls.ToolTip;
+
+namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+
+public static class Eu5UiGen
+{
+   public static Dictionary<Type, Func<object, Enum, int, int, FrameworkElement>> CustomShortInfoGenerators = new()
+   {
+      { typeof(ModValInstance), Nui2Gen.CustomShortInfoGenerators.GetModValInstanceShortInfo },
+   };
+
+   public static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new() { };
+
+   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new() { };
+
+   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new() { };
+
+   public static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new() { };
+
+   public static Dictionary<Enum, bool> IsExpandedCache = new();
+
+   public static void GenerateAndSetView(NavH navh)
+   {
+      var sw = Stopwatch.StartNew();
+      navh.Root.Content = GenerateView(navh);
+      sw.Stop();
+      Console.WriteLine($"Generated view for {navh.Targets[0]} in {sw.ElapsedMilliseconds} ms");
+   }
+
+   public static BaseView GenerateView(NavH navh)
+   {
+      var primary = navh.Targets[0];
+
+      var view = ControlFactory.GetBaseView();
+      view.BaseViewBorder.BorderThickness = new(0);
+      var mainGrid = ControlFactory.GetMainGrid();
+      view.BaseViewBorder.Child = mainGrid;
+
+      GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
+
+      GenerateViewElements(navh, mainGrid, primary);
+
+      return view;
+   }
+
+   private static void GenerateViewElements(NavH navH, Grid mainGrid, IEu5Object primary)
+   {
+      var viewFields = primary.NUISettings.ViewFields;
+      if (Config.Settings.NUIConfig.ListViewsInCustomOrder)
+         viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
+
+      for (var i = 0; i < viewFields.Length; i++)
+      {
+         var nxProp = viewFields[i];
+         var nxPropType = primary.GetNxPropType(nxProp);
+
+         if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
+         {
+            if (navH.GenerateSubViews)
+            {
+               if (navH.Targets.Count > 1)
+               {
+                  // TODO: @Minnator not supported Yet.
+               }
+               else
+               {
+                  GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + 1);
+               }
+            }
+            else
+            {
+               GenerateShortInfo(navH, primary, mainGrid);
+            }
+         }
+         else
+         {
+            BuildCollectionViewOrDefault(navH, primary, mainGrid, nxProp, i + 1);
+         }
+      }
+   }
+
+   private static void GenerateEmbeddedView(NavH navH, IEu5Object primary, Grid mainGrid, Enum nxProp, int rowIndex)
+   {
+      var pevm = new PropertyEditorViewModel(nxProp, navH, primary);
+      var ebv = new EmbeddedView(pevm)
+      {
+         MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
+      };
+      GridManager.AddToGrid(mainGrid, ebv, rowIndex, 0, 2, ControlFactory.EMBEDDED_VIEW_HEIGHT);
+      if (IsExpandedCache.TryGetValue(nxProp, out var isExpanded) && isExpanded)
+         ebv.ViewModel.IsExpanded = true;
+
+      object em = null!;
+      Nx.ForceGet(primary, nxProp, ref em);
+      var embedded = em as IEu5Object ??
+                     throw new InvalidOperationException($"Property {nxProp} is not an embedded IEu5Object.");
+
+      var header = GridManager.GetNavigationHeader(embedded,
+                                                   navH,
+                                                   nxProp.ToString(),
+                                                   ControlFactory.SHORT_INFO_FONT_SIZE + 2,
+                                                   ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                   true);
+
+      ebv.TitleDockPanel.Children.Add(header);
+      DockPanel.SetDock(header, Dock.Left);
+
+      var setButton = NEF.CreateSetButton();
+      ebv.TitleDockPanel.Children.Add(setButton);
+      DockPanel.SetDock(setButton, Dock.Right);
+      setButton.ToolTip = $"Set the '{nxProp}' property for all selected objects to the value inferred from the map.";
+
+      AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
+      AddCustomButtonToPanel(embedded, nxProp, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
+
+      RoutedEventHandler setClick = (_, _) =>
+      {
+         var inferred = MapInferrableRegistry.GetInferredList(primary.GetType(), Selection.SelectedLocations);
+         if (inferred == null)
+            return;
+
+         if (inferred.Count < 1)
+            return;
+
+         Nx.ForceSet(inferred[0], primary, nxProp);
+         // We don't? need this as the PropertyEditorViewModel handles updating all targets.
+         // foreach (var obj in navH.Targets)
+         //    Nx.Set(obj, nxProp, inferred[0]);
+         if (inferred.Count > 1)
+            UIHandle.Instance.PopUpHandle
+                    .ShowMBox($"Multiple inferred values found for {nxProp}. Using the first one ({inferred[0]}).",
+                              "Multiple inferred values");
+      };
+
+      setButton.Click += setClick;
+      setButton.Unloaded += (_, _) => setButton.Click -= setClick;
+   }
+
+   public static void PopulateEmbeddedGrid(Grid grid, NavH navH, IEu5Object embedded, Enum parentProp)
+   {
+      for (var index = 0; index < embedded.NUISettings.EmbeddedFields.Length; index++)
+      {
+         var nxProp = embedded.NUISettings.EmbeddedFields[index];
+         var nxPropType = embedded.GetNxPropType(nxProp);
+
+         if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
+         {
+            object embeddedValue = null!;
+            Nx.ForceGet(embedded, nxProp, ref embeddedValue);
+            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root),
+                                                                            (IEu5Object)embeddedValue,
+                                                                            nxProp,
+                                                                            ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                                            ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                            0,
+                                                                            2);
+
+            GridManager.AddToGrid(grid, ui, 1 + index, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+            continue;
+         }
+
+         BuildCollectionViewOrDefault(navH, embedded, grid, nxProp, index + 1, parentProp);
+      }
+
+      // var embeddedLiner = new Border
+      // {
+      //    BorderBrush = Brushes.Purple,
+      //    BorderThickness = new(1.2, 1.2, 0, 1.2),
+      //    Margin = new(-6, 0, 0, -4),
+      //    VerticalAlignment = VerticalAlignment.Stretch,
+      //    HorizontalAlignment = HorizontalAlignment.Stretch,
+      //    CornerRadius = new(4, 0, 0, 4),
+      // };
+      // grid.Children.Add(embeddedLiner);
+      // Grid.SetRow(embeddedLiner, 0);
+      // Grid.SetColumn(embeddedLiner, 0);
+      // Grid.SetRowSpan(embeddedLiner, int.MaxValue);
+      // Grid.SetColumnSpan(embeddedLiner, int.MaxValue);
+   }
+
+   private static void BuildCollectionViewOrDefault(NavH navH,
+                                                    IEu5Object primary,
+                                                    Grid mainGrid,
+                                                    Enum nxProp,
+                                                    int rowIndex,
+                                                    Enum? parentProp = null)
+   {
+      var itemType = primary.GetNxItemType(nxProp);
+
+      if (itemType == null)
+      {
+         // We have a default property, not a collection.
+         GetTypeSpecificGrid(navH, primary, nxProp, mainGrid, rowIndex, embeddedPropertyTargets: parentProp);
+         return;
+      }
+
+      if (navH.Targets.Count > 1)
+      {
+         GetNotSupportedForMultiSelect(nxProp, mainGrid);
+         return;
+      }
+
+      object collection = null!;
+      Nx.ForceGet(primary, nxProp, ref collection);
+
+      if (collection is not IList modifiableList)
+      {
+         // We have a collection property, but it's not a list we can iterate with our current implementation.
+         GetTypeSpecificGrid(navH, primary, nxProp, mainGrid, rowIndex, embeddedPropertyTargets: parentProp);
+         return;
+      }
+
+      var margin = modifiableList.Count > 0 ? 4 : 0;
+      var collectionGrid = ControlFactory.GetCollectionGrid();
+      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin);
+      GetCollectionPreview(navH,
+                           primary,
+                           collectionGrid,
+                           nxProp,
+                           modifiableList,
+                           1);
+
+      if (modifiableList.Count > 0)
+         GetCollectionLiner(collectionGrid);
+      GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
+   private static void SetCollectionHeaderPanel(Enum nxProp,
+                                                Type itemType,
+                                                IList modifiableList,
+                                                Grid mainGrid,
+                                                IEu5Object primary,
+                                                int row,
+                                                int leftMargin)
+   {
+      var headerPanel = NEF.PropertyTitlePanel(leftMargin);
+
+      GetCollectionTitleTextBox(modifiableList.Count, nxProp, headerPanel, primary, leftMargin, fontSize: 12);
+      GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
+      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, Dock.Left);
+
+      GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
+   private static void GetInferActionButtons(IEu5Object primary,
+                                             Enum nxProp,
+                                             Type nxPropType,
+                                             Type? nxItemType,
+                                             DockPanel panel,
+                                             Dock dock)
+   {
+      // Infer actions are disabled globally
+      if (Config.Settings.NUIConfig.DisableNUIInferFromMapActions)
+         return;
+
+      var targetType = nxItemType ?? nxPropType;
+      Debug.Assert(targetType != null, "targetType != null");
+
+      var inferableInterface = typeof(IMapInferable<>).MakeGenericType(targetType);
+      if (!inferableInterface.IsAssignableFrom(targetType))
+         return;
+
+      // Infer actions for a collection
+      if (nxItemType != null)
+      {
+         var addButton = NEF.CreateAddButton();
+         var removeButton = NEF.CreateRemoveButton();
+
+         RoutedEventHandler addClick = (_, _) =>
+         {
+            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.SelectedLocations);
+            Debug.Assert(enumerable != null, "enumerable != null");
+            foreach (var obj in enumerable)
+               Nx.AddToCollection(primary, nxProp, obj);
+         };
+
+         RoutedEventHandler removeClick = (_, _) =>
+         {
+            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.SelectedLocations);
+            Debug.Assert(enumerable != null, "enumerable != null");
+            foreach (var obj in enumerable)
+               Nx.RemoveFromCollection(primary, nxProp, obj);
+         };
+
+         panel.Children.Add(addButton);
+         panel.Children.Add(removeButton);
+         DockPanel.SetDock(addButton, Dock.Right);
+         DockPanel.SetDock(removeButton, Dock.Right);
+
+         addButton.Click += addClick;
+         removeButton.Click += removeClick;
+         addButton.Unloaded += (_, _) => addButton.Click -= addClick;
+         removeButton.Unloaded += (_, _) => removeButton.Click -= removeClick;
+
+         if (CustomItemTypeButtons.TryGetValue(nxItemType, out var customButtonFunc))
+         {
+            var customButton = customButtonFunc(primary, nxProp);
+            panel.Children.Add(customButton);
+            DockPanel.SetDock(customButton, Dock.Right);
+         }
+      }
+
+      if (!EmptyRegistry.TryGet(targetType, out var item) && !typeof(IEu5Object).IsAssignableFrom(targetType))
+         return;
+
+      // Infer actions for a single embedded object or property
+      AddMapModeButtonToPanel((IEu5Object)item, panel, targetType, Dock.Right);
+      AddCustomButtonToPanel((IEu5Object)item, nxProp, panel, targetType, Dock.Right);
+   }
+
+   private static void AddCustomButtonToPanel(IEu5Object primary,
+                                              Enum nxProp,
+                                              DockPanel panel,
+                                              Type targetType,
+                                              Dock dock)
+   {
+      if (CustomTypeButtons.TryGetValue(targetType, out var customTypeButtonFunc))
+      {
+         var customButton = customTypeButtonFunc(primary, nxProp);
+         panel.Children.Add(customButton);
+         DockPanel.SetDock(customButton, dock);
+      }
+   }
+
+   private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)
+   {
+      if (typeof(IMapMode).IsAssignableFrom(targetType))
+      {
+         var mapModeButton = GetMapModeButton(primary);
+         panel.Children.Add(mapModeButton);
+         DockPanel.SetDock(mapModeButton, dock);
+      }
+   }
+
+   public static BaseButton GetMapModeButton(IEu5Object primary)
+   {
+      var mmType = ((IMapMode)primary).Type;
+      var mapModeButton = new BaseButton
+      {
+         Content = "M",
+         ToolTip = $"Set to '{mmType.ToString()}' Map Mode",
+         Margin = new(1),
+         Width = 20,
+         Height = 20,
+         BorderThickness = new(1),
+      };
+      RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.Activate(mmType); };
+      mapModeButton.Click += mapModeButtonClick;
+      mapModeButton.Unloaded += (_, _) => mapModeButton.Click -= mapModeButtonClick;
+      return mapModeButton;
+   }
+
+   private static void GetCollectionEditorButton(IEu5Object parent,
+                                                 Enum property,
+                                                 Type nxItemType,
+                                                 IList collection,
+                                                 DockPanel panel)
+   {
+      var eyeButton = NEF.GetEyeButton();
+      eyeButton.Margin = new(4, 0, 0, 0);
+      RoutedEventHandler clickHandler;
+
+      if (nxItemType.IsAssignableFrom(typeof(IEu5Object)))
+      {
+         clickHandler = (_, _) =>
+         {
+            var allItems = ((IEu5Object)EmptyRegistry.Empties[nxItemType]).GetGlobalItemsNonGeneric().Values;
+            DualListSelector.CreateWindow(allItems, collection, $"Edit {property} - {parent.UniqueId}").ShowDialog();
+         };
+      }
+      else
+      {
+         if (CustomCollectionEditors.TryGetValue(nxItemType, out var customHandler))
+            clickHandler = customHandler;
+         else
+            clickHandler = (_, _) =>
+            {
+               PrimitiveTypeListView.ShowDialog(collection, collection, $"Edit {property} - {parent.UniqueId}");
+            };
+      }
+
+      eyeButton.Click += clickHandler;
+      eyeButton.Unloaded += (_, _) => eyeButton.Click -= clickHandler;
+      eyeButton.ToolTip = $"Open collection editor for {property}";
+
+      panel.Children.Add(eyeButton);
+   }
+
+   private static void GetCollectionLiner(Grid grid)
+   {
+      var border = new Border
+      {
+         BorderBrush = ControlFactory.AccentBrush,
+         BorderThickness = new(1.2, 0, 0, 1),
+         Margin = new(-2, 6, 0, -2),
+         CornerRadius = new(0, 0, 0, 4),
+         Width = 15,
+         VerticalAlignment = VerticalAlignment.Stretch,
+         HorizontalAlignment = HorizontalAlignment.Left,
+      };
+      grid.Children.Add(border);
+      Grid.SetRow(border, 0);
+      Grid.SetColumn(border, 0);
+      Grid.SetRowSpan(border, int.MaxValue);
+   }
+
+   private static void GetCollectionPreview(NavH navH,
+                                            IEu5Object primary,
+                                            Grid grid,
+                                            Enum nxProp,
+                                            IList modifiableList,
+                                            int rowIndex)
+   {
+      var itemType = primary.GetNxItemType(nxProp);
+
+      if (itemType == null || modifiableList.Count == 0)
+         return;
+
+      for (var i = 0; i < Math.Min(modifiableList.Count, Config.Settings.NUIConfig.MaxCollectionItemsPreviewed); i++)
+      {
+         if (modifiableList[i] is IEu5Object eu5Obj)
+         {
+            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(navH,
+                                                                            eu5Obj,
+                                                                            nxProp,
+                                                                            ControlFactory.SHORT_INFO_ROW_HEIGHT - 4,
+                                                                            ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                            6,
+                                                                            0);
+            GridManager.AddToGrid(grid, ui, rowIndex + i, 0, 0, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+         }
+         else
+         {
+            if (CustomShortInfoGenerators.TryGetValue(itemType, out var generator))
+            {
+               var ui = generator(modifiableList[i]!,
+                                  nxProp,
+                                  ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                  ControlFactory.SHORT_INFO_FONT_SIZE);
+               GridManager.AddToGrid(grid, ui, rowIndex + i, 0, 0, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+            }
+            else
+            {
+               // TODO: @Minnator Fallback window
+            }
+         }
+      }
+
+      if (modifiableList.Count > Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
+      {
+         var moreText = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                          false,
+                                                          $"  ... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more",
+                                                          height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                          alignment: HorizontalAlignment.Left);
+         moreText.FontStyle = FontStyles.Italic;
+         GridManager.AddToGrid(grid,
+                               moreText,
+                               rowIndex + Config.Settings.NUIConfig.MaxCollectionItemsPreviewed,
+                               0,
+                               0,
+                               ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      }
+   }
+
+   private static void GetCollectionTitleTextBox(int count,
+                                                 Enum nxProp,
+                                                 DockPanel panel,
+                                                 IEu5Object primary,
+                                                 int margin,
+                                                 int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE)
+   {
+      var text = $"{nxProp.ToString()} ({count})";
+      var tb = ControlFactory.GetHeaderTextBlock(fontSize,
+                                                 false,
+                                                 text,
+                                                 height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                 alignment: HorizontalAlignment.Left,
+                                                 leftMargin: margin);
+
+      panel.Children.Add(tb);
+      SetCollectionToolTip(primary, nxProp, tb);
+   }
+
+   private static void SetCollectionToolTip(IEu5Object primary, Enum nxProp, TextBlock tb)
+   {
+      var desc = primary.GetDescription(nxProp);
+      if (string.IsNullOrWhiteSpace(desc))
+         return;
+
+      var toolTip = new ToolTip
+      {
+         Content = desc, MaxWidth = 400,
+      };
+      tb.ToolTip = toolTip;
+   }
+
+   private static void GetNotSupportedForMultiSelect(Enum nxProp, Grid mainGrid)
+   {
+      var text = $"{nxProp} (Not supported in multi-select views)";
+   }
+
+   private static void GetTypeSpecificGrid(NavH navH,
+                                           IEu5Object primary,
+                                           Enum nxProp,
+                                           Grid mainGrid,
+                                           int rowIndex,
+                                           int leftMargin = 0,
+                                           Enum? embeddedPropertyTargets = null)
+   {
+      var type = primary.GetNxPropType(nxProp);
+
+      MultiSelectPropertyViewModel propertyViewModel;
+
+      if (embeddedPropertyTargets != null)
+      {
+         List<IEu5Object> targets = [];
+         foreach (var obj in navH.Targets)
+         {
+            object value = null!;
+            Nx.ForceGet(obj, embeddedPropertyTargets, ref value);
+            Debug.Assert(value is IEu5Object, "value is IEu5Object");
+            targets.Add((IEu5Object)value);
+         }
+
+         propertyViewModel = new(targets, nxProp);
+      }
+      else
+         propertyViewModel = new(navH.Targets, nxProp);
+
+      var binding = new Binding(nameof(propertyViewModel.Value))
+      {
+         Source = propertyViewModel,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+      };
+
+      Control element;
+
+      if (type == typeof(float))
+         element = NEF.GetFloatUI(binding);
+      else if (type == typeof(string))
+         element = NEF.GetStringUI(binding);
+      else if (type == typeof(bool))
+         element = NEF.GetBoolUI(binding);
+      else if (type.IsEnum)
+         element = NEF.GetEnumUI(type, binding);
+      else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
+         element = NEF.GetIntUI(binding);
+      else if (type == typeof(double) || type == typeof(decimal))
+         element = NEF.GetDoubleUI(binding);
+      else if (type == typeof(JominiColor))
+      {
+         var temp = JominiColor.Empty;
+         Nx.ForceGet(primary, nxProp, ref temp);
+         element = NEF.GetJominiColorUI(binding, temp);
+      }
+      else if (type == typeof(JominiDate))
+         element = NEF.GetJominiDateUI(binding);
+      else if (type == typeof(object))
+         element = NEF.GetStringUI(binding);
+      else if (CustomUiGenerators.TryGetValue(type, out var generator))
+         element = generator(binding,
+                             ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                             ControlFactory.SHORT_INFO_FONT_SIZE);
+      else
+         throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+
+      element.IsEnabled = !primary.IsReadonly;
+      element.VerticalAlignment = VerticalAlignment.Stretch;
+      element.Height = ControlFactory.SHORT_INFO_ROW_HEIGHT;
+
+      SetTooltipIsAny(primary, nxProp, element);
+
+      var desc = NEF.DescriptorBlock(nxProp);
+      desc.Margin = new(leftMargin, 0, 0, 0);
+
+      SetTooltipIsAny(primary, nxProp, desc);
+
+      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new(), Dock.Left);
+
+      var line = NEF.GenerateDashedLine(leftMargin);
+      RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
+
+      var dockPanel = NEF.PropertyTitlePanel(leftMargin);
+      dockPanel.Children.Add(desc);
+
+      GridManager.AddToGrid(mainGrid, dockPanel, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      GridManager.AddToGrid(mainGrid, line, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      GridManager.AddToGrid(mainGrid, element, rowIndex, 1, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
+   private static void SetTooltipIsAny(IAgs iAgs, Enum nxProp, UIElement element)
+   {
+   }
+
+   private static void GenerateShortInfo(NavH navH, IEu5Object primary, Grid mainGrid)
+   {
+   }
+}

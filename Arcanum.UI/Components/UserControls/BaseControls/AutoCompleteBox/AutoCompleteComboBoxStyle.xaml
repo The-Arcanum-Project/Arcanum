@@ -172,7 +172,7 @@
                                  Value = "True">
                             <Setter TargetName = "ToggleButton"
                                     Property = "BorderBrush"
-                                    Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                    Value = "{StaticResource BlueAccentColorBrush}" />
                         </Trigger>
                         <Trigger Property = "ItemsControl.HasItems"
                                  Value = "False">

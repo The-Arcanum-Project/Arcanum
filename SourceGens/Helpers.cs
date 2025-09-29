@@ -1,6 +1,8 @@
 ﻿// --- START OF FILE Helpers.cs ---
 
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ParserGenerator;
 
@@ -9,6 +11,45 @@ public static class Helpers
    public const string EXPLICIT_PROPERTIES_ATTRIBUTE_STRING = "Nexus.Core.ExplicitPropertiesAttribute";
    public const string IGNORE_MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.IgnoreModifiableAttribute";
    public const string MODIFIABLE_ATTRIBUTE_STRING = "Nexus.Core.AddModifiableAttribute";
+
+   public static IncrementalValueProvider<ImmutableArray<ClassDeclarationSyntax>> CreateClassSyntaxProvider(
+      IncrementalGeneratorInitializationContext context)
+   {
+      return context.SyntaxProvider
+                    .CreateSyntaxProvider(predicate: (node, _) => node is ClassDeclarationSyntax,
+                                          transform: (ctx, _) => (ClassDeclarationSyntax)ctx.Node)
+                    .Collect();
+   }
+
+   public static List<INamedTypeSymbol> FindTypesImplementingInterface(
+      Compilation compilation,
+      ImmutableArray<ClassDeclarationSyntax> classes,
+      string genericInterfaceName)
+   {
+      var emptySymbol = compilation.GetTypeByMetadataName(genericInterfaceName);
+      if (emptySymbol == null)
+         return [];
+
+      List<INamedTypeSymbol> foundTypesByInterface = [];
+
+      foreach (var classSyntax in classes.Distinct())
+      {
+         var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
+
+         if (semanticModel.GetDeclaredSymbol(classSyntax) is not INamedTypeSymbol
+             {
+                TypeKind: TypeKind.Class,
+             } classSymbol ||
+             classSymbol.IsAbstract)
+            continue;
+
+         if (classSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition,
+                                            emptySymbol)))
+            foundTypesByInterface.Add(classSymbol);
+      }
+
+      return foundTypesByInterface;
+   }
 
    public static bool InheritsFrom(this INamedTypeSymbol classSymbol, INamedTypeSymbol baseTypeSymbol)
    {

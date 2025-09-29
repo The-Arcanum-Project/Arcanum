@@ -88,38 +88,42 @@ public sealed class DiagnosticException : Exception
       Severity = severity ?? Descriptor.Severity;
       ReportSeverity = reportSeverity ?? Descriptor.ReportSeverity;
       var ohNoWhatShouldWeDoNow = DiagnosticHandle.Ignore;
-      switch (ReportSeverity)
+
+      if (!DebugConfig.Settings.SuppressAllErrors)
       {
-         case DiagnosticReportSeverity.Silent:
-            break;
-         case DiagnosticReportSeverity.PopupNotify:
-            ohNoWhatShouldWeDoNow =
-               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
-                                                              "Error Encountered",
-                                                              icon: GetMessageBoxIconForSeverity(Severity)));
-            break;
-         case DiagnosticReportSeverity.PopupWarning:
-            ohNoWhatShouldWeDoNow =
-               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
-                                                              "Error Encountered",
-                                                              MBoxButton.OKRetryCancel,
-                                                              GetMessageBoxIconForSeverity(Severity)));
-            break;
-         case DiagnosticReportSeverity.PopupError:
-            ohNoWhatShouldWeDoNow =
-               MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                    .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
-                                                              "Error Encountered",
-                                                              MBoxButton.RetryCancel,
-                                                              GetMessageBoxIconForSeverity(Severity)));
-            break;
-         case DiagnosticReportSeverity.Suppressed:
-            // TODO @Minnator: Write to the Debug log of Arcanum
-            return;
-         default:
-            throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
+         switch (ReportSeverity)
+         {
+            case DiagnosticReportSeverity.Silent:
+               break;
+            case DiagnosticReportSeverity.PopupNotify:
+               ohNoWhatShouldWeDoNow =
+                  MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                       .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
+                                                                 "Error Encountered",
+                                                                 icon: GetMessageBoxIconForSeverity(Severity)));
+               break;
+            case DiagnosticReportSeverity.PopupWarning:
+               ohNoWhatShouldWeDoNow =
+                  MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                       .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                                 "Error Encountered",
+                                                                 MBoxButton.OKRetryCancel,
+                                                                 GetMessageBoxIconForSeverity(Severity)));
+               break;
+            case DiagnosticReportSeverity.PopupError:
+               ohNoWhatShouldWeDoNow =
+                  MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                       .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                                 "Error Encountered",
+                                                                 MBoxButton.RetryCancel,
+                                                                 GetMessageBoxIconForSeverity(Severity)));
+               break;
+            case DiagnosticReportSeverity.Suppressed:
+               // TODO @Minnator: Write to the Debug log of Arcanum
+               return;
+            default:
+               throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
+         }
       }
 
       var diagnostic = new Diagnostic(this, context, action);

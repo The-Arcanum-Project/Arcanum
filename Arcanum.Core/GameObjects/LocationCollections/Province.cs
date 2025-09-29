@@ -36,8 +36,10 @@ public partial class Province : IMapInferable<Province>, IEu5Object<Province>, I
    }
    public static Dictionary<string, Province> GetGlobalItems() => Globals.Provinces;
 
-   static List<Province> IMapInferable<Province>.GetInferredList(IEnumerable<Location> sLocs) => sLocs
-     .Select(loc => (Province)loc.GetFirstParentOfType(LocationCollectionType.Province)!)
+   public static List<Province> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+     .Select(loc => (Province)loc
+               .GetFirstParentOfType(LocationCollectionType
+                                       .Province)!)
      .Distinct()
      .ToList();
 

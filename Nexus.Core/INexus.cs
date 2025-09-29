@@ -72,4 +72,21 @@ public interface INexus
    /// </summary>
    /// <returns></returns>
    List<Enum> GetAllProperties();
+
+   /// <summary>
+   /// Returns the type of the given property.
+   /// </summary>
+   /// <param name="property"></param>
+   Type GetNxPropType(Enum property);
+
+   /// <summary>
+   /// Returns the item type of the given collection property. <br/>
+   /// Returns null if the property is not a collection.
+   /// </summary>
+   Type? GetNxItemType(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property is a collection.
+   /// </summary>
+   bool IsCollection(Enum property);
 }

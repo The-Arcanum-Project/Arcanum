@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Nexus.Core;
@@ -73,6 +74,18 @@ public static class NEF
          Margin = new(leftMargin, 4, 0, 4)
       };
       return info;
+   }
+
+   public static DockPanel PropertyTitlePanel(int leftMargin)
+   {
+      return new()
+      {
+         LastChildFill = false,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+         Margin = new(leftMargin, 0, 0, 0),
+         Height = double.NaN,
+      };
    }
 
    public static Grid CreateGridForProperty()
@@ -461,6 +474,31 @@ public static class NEF
          TextWrapping = TextWrapping.NoWrap,
       };
       textBox.SetBinding(TextBox.TextProperty, binding);
+      return textBox;
+   }
+
+   public static JominiDateTextBox GetJominiDateUI(Binding binding)
+   {
+      var textBox = new JominiDateTextBox
+      {
+         Margin = new(0),
+         BorderThickness = new(1, 1, 1, 1),
+         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+         TextWrapping = TextWrapping.NoWrap,
+      };
+
+      var textBinding = new Binding(binding.Path.Path)
+      {
+         Source = binding.Source,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
+         ValidatesOnExceptions = true,
+         Converter = new JominiDateToStringConverter(),
+      };
+
+      textBox.SetBinding(TextBox.TextProperty, textBinding);
+
       return textBox;
    }
 

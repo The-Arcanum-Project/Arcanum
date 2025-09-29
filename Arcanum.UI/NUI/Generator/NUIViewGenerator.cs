@@ -19,6 +19,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
@@ -45,8 +46,14 @@ public static class NUIViewGenerator
    /// <param name="navHistory"></param>
    public static void GenerateAndSetView(NUINavHistory navHistory)
    {
+      var sw = Stopwatch.StartNew();
       var view = GenerateView(navHistory);
+      sw.Stop();
+      Console.WriteLine($"[NUI] Generated view for {navHistory.PrimaryTarget.GetType().Name} in {sw.ElapsedMilliseconds} ms");
+      sw.Restart();
       navHistory.Root.Content = view;
+      sw.Stop();
+      Console.WriteLine($"[NUI] Set view content in {sw.ElapsedMilliseconds} ms");
    }
 
    /// <summary>
@@ -88,6 +95,9 @@ public static class NUIViewGenerator
 
    private static void GenerateViewElement(NUINavHistory navHistory, INUI target, Grid baseGrid)
    {
+      long embeddedSwTicks = 0;
+      long collectionSwTicks = 0;
+      var sw = Stopwatch.StartNew();
       var viewFields = navHistory.PrimaryTarget.NUISettings.ViewFields;
       if (!Config.Settings.NUIConfig.ListViewsInCustomOrder)
          viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
@@ -113,16 +123,24 @@ public static class NUIViewGenerator
                }
                else
                {
+                  var embeddedSw = Stopwatch.StartNew();
                   INUI value = null!;
                   Nx.ForceGet(target, nxProp, ref value);
                   element = GetEmbeddedView(target, nxProp, value, navHistory);
+                  embeddedSw.Stop();
+                  embeddedSwTicks += embeddedSw.ElapsedTicks;
                }
             }
             else
                element = GenerateShortInfo(target, navHistory);
          }
          else
+         {
+            var collectionSw = Stopwatch.StartNew();
             element = BuildCollectionOrDefaultView(navHistory, type, navHistory.Targets.ToList(), nxProp);
+            collectionSw.Stop();
+            collectionSwTicks += collectionSw.ElapsedTicks;
+         }
 
          element.VerticalAlignment = VerticalAlignment.Stretch;
          baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
@@ -130,6 +148,9 @@ public static class NUIViewGenerator
          Grid.SetRow(element, i + 1);
          Grid.SetColumn(element, 0);
       }
+
+      sw.Stop();
+      Console.WriteLine($"[NUI] View generation for {target.GetType().Name} took {sw.ElapsedMilliseconds} ms \n(Embedded: {new TimeSpan(embeddedSwTicks).TotalMilliseconds} ms \nCollections: {new TimeSpan(collectionSwTicks).TotalMilliseconds} ms)");
    }
 
    private static BaseEmbeddedView GetEmbeddedView<T>(INUI parent,
@@ -215,7 +236,7 @@ public static class NUIViewGenerator
          }
 
          var itemType = target.GetType();
-         if (!isReadonlyProp && TryGetEmpty(itemType, out var emptyInstance))
+         if (!isReadonlyProp && EmptyRegistry.TryGet(itemType, out var emptyInstance))
          {
             var setEmptyButton = NEF.GetSetEmptyButton(itemType,
                                                        property,
@@ -270,7 +291,10 @@ public static class NUIViewGenerator
                                                     Enum nxProp,
                                                     int leftMargin = 0)
    {
-      var itemType = GetCollectionItemType(type) ?? GetArrayItemType(type);
+      var exValue = targets[0];
+      var itemType = exValue.GetNxItemType(nxProp);
+
+      // if it is null we do not have a collection
       if (itemType == null)
          return GetTypeSpecificGrid(navHistory, targets, nxProp, leftMargin);
 
@@ -290,13 +314,7 @@ public static class NUIViewGenerator
          return grid;
       }
 
-      // if we have an abstract class or interface as item type, try to find the concrete type
-      var concreteItemType = GetConcreteCollectionItemType(modifiableList, targets[0].GetType(), nxProp.ToString());
-      if (concreteItemType != null)
-         itemType = concreteItemType;
-
       var inuiItems = modifiableList.OfType<INUI>().ToList();
-
       var textBlock = NEF.CreateItemsCountTextBlock(nxProp, modifiableList);
 
       SetTooltipIsAny(targets[0], nxProp, textBlock);
@@ -320,7 +338,7 @@ public static class NUIViewGenerator
                                               navHistory,
                                               nxProp,
                                               type,
-                                              concreteItemType,
+                                              itemType,
                                               modifiableList);
 
       var headerStack = NEF.CreateHeaderStackPanel();
@@ -471,7 +489,9 @@ public static class NUIViewGenerator
          }
          else
          {
-            shortInfoParts.Add($"{GetFormattedDisplayString(pVal, value, nxProp)}");
+            object? val = null;
+            Nx.ForceGet(value, nxProp, ref val);
+            shortInfoParts.Add($"{val?.ToString() ?? "null"}");
          }
       }
 
@@ -510,7 +530,7 @@ public static class NUIViewGenerator
       {
          object headerValue = null!;
          Nx.ForceGet(value, value.NUISettings.Title, ref headerValue);
-         text = GetFormattedDisplayString(headerValue, value, value.NUISettings.Title);
+         text = value.ToString() ?? "INVALID_VALUE_MUST_NOT_BE_NULL";
       }
 
       header.Text = text;
@@ -782,32 +802,6 @@ public static class NUIViewGenerator
 
    #region Reflection & Type Helpers
 
-   /// <summary>
-   /// Tries to get the static 'Empty' instance from any Type using reflection.
-   /// </summary>
-   /// <param name="type">The Type object to inspect.</param>
-   /// <param name="emptyInstance">When this method returns true, contains the 'Empty' instance as an object.</param>
-   /// <returns>True if the type has a public static property named 'Empty'; otherwise, false.</returns>
-   private static bool TryGetEmpty(Type type, [MaybeNullWhen(false)] out object emptyInstance)
-   {
-      var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
-
-      if (emptyProperty != null)
-         try
-         {
-            emptyInstance = emptyProperty.GetValue(null);
-            return emptyInstance != null;
-         }
-         catch
-         {
-            emptyInstance = null;
-            return false;
-         }
-
-      emptyInstance = null;
-      return false;
-   }
-
    private static void GenerateEmbeddedViewElements<T>(T target,
                                                        NUINavHistory navHistory,
                                                        Enum[] embeddedFields,
@@ -962,33 +956,6 @@ public static class NUIViewGenerator
       }
 
       return null;
-   }
-
-   /// <summary>
-   /// Formats the display string for a property value based on any <see cref="ToStringArgumentsAttribute"/>
-   /// applied to the corresponding property in the INUI target. If no such attribute exists,
-   /// it falls back to the default display string logic.
-   /// </summary>
-   /// <param name="value"></param>
-   /// <param name="target"></param>
-   /// <param name="nxProp"></param>
-   /// <returns></returns>
-   private static string GetFormattedDisplayString(object value, INUI? target, Enum nxProp)
-   {
-      if (value == null! || target == null!)
-         return "null";
-
-      var member = target.GetType().GetMember(nxProp.ToString()).FirstOrDefault();
-
-      if (member != null)
-      {
-         var toStringArgsAttr = member.GetCustomAttribute<ToStringArgumentsAttribute>();
-
-         if (toStringArgsAttr != null && value is IFormattable formattable)
-            return formattable.ToString(toStringArgsAttr.Format, CultureInfo.InvariantCulture);
-      }
-
-      return GetDisplayString(value);
    }
 
    /// <summary>

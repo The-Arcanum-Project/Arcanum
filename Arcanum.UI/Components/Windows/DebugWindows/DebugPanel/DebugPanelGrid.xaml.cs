@@ -50,4 +50,14 @@ public partial class DebugPanelGrid
    {
       new NexusAccessorWindow().Show();
    }
+
+   private void OpenEu5UiGenButton_Click(object sender, RoutedEventArgs e)
+   {
+      new Eu5Gen().Show();
+   }
+
+   private void ColorPickerViewerButton_Click(object sender, RoutedEventArgs e)
+   {
+      new ColorPickerWindow().Show();
+   }
 }

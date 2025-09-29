@@ -62,7 +62,7 @@
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="BorderBrush" Value="{StaticResource SelectedControlBorderColorBrush}"/>
                                         </MultiDataTrigger>
-
+                      
                                         <!-- Focused + Mouse NOT over + Border = 0 -->
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
