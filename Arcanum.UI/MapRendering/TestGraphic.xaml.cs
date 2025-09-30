@@ -25,18 +25,13 @@ using Point = System.Windows.Point;
 
 namespace RenderingPain;
 
-public readonly struct VertexPositionColor
+public readonly struct VertexPositionId2D(in Vector2 position, uint polygonId)
 {
-    public static readonly unsafe uint SizeInBytes = (uint)sizeof(VertexPositionColor);
+    // The size is now smaller
+    public static readonly unsafe uint SizeInBytes = (uint)sizeof(VertexPositionId2D);
 
-    public VertexPositionColor(in Vector3 position, in Color4 color)
-    {
-        Position = position;
-        Color = color;
-    }
-
-    public readonly Vector3 Position;
-    public readonly Color4 Color;
+    public readonly Vector2 Position = position; // Changed from Vector3
+    public readonly uint PolygonId = polygonId;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -66,7 +61,11 @@ public partial class TestGraphic
     private readonly Stopwatch _stopwatch = new();
     private double _lastRenderTime;
 
-    private List<VertexPositionColor> _vertices;
+    private ID3D11Buffer? _colorLookupBuffer;
+    private ID3D11ShaderResourceView? _colorLookupView;
+    private List<VertexPositionId2D> _vertices;
+    private List<Color4> _polygonColors;
+    
     private Vector2 _pan = Vector2.Zero;
     private float _zoom = 1.0f;
     private Point _lastMousePosition;
@@ -75,53 +74,57 @@ public partial class TestGraphic
     public TestGraphic(List<Polygon> polygons, MapTracing tracer)
     {
         imageSize = tracer.ImageSize;
-        _vertices = SetVertices(polygons);
+        SetVertices(polygons);
         InitializeComponent();
     }
     
     private int triangleCounter = 0;
 
-    public List<VertexPositionColor> SetVertices(List<Polygon> polygons)
+    public void SetVertices(List<Polygon> polygons)
     {
-        var vertices = new List<VertexPositionColor>(polygons.Count * 3); // TODO: estimate better
-        var _rand = new Random(0);
+        _vertices = new(polygons.Count * 3); // Initial capacity
+        _polygonColors = new(polygons.Count);
+        var rand = new Random(0);
         var aspectRatio = imageSize.Item2 / (float)imageSize.Item1;
-        foreach (var polygon in polygons)
+        var allPolygonVertices = new System.Collections.Concurrent.ConcurrentBag<(List<VertexPositionId2D> vertices, uint polygonId)>();
+
+        // Pre-calculate colors
+        for (var i = 0; i < polygons.Count; i++)
         {
-            byte r = (byte)_rand.Next(0, 256);
-            byte g = (byte)_rand.Next(0, 256);
-            byte b = (byte)_rand.Next(0, 256);
-            
-            var color = new Color4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-            var color1 = new Color4(1, 0, 0, 1);
-            var color2 = new Color4(0, 1, 0, 1);
-            var color0 = new Color4(0, 0, 1, 1);
+            var r = (byte)rand.Next(0, 256);
+            var g = (byte)rand.Next(0, 256);
+            var b = (byte)rand.Next(0, 256);
+            _polygonColors.Add(new(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f));
+        }
+        
+        for (var index = 0; index < polygons.Count; index++)
+        {
+            var polygon = polygons[index];
             var (triangleVertices, indices) = polygon.Tesselate();
             // Create vertex buffer
             for (var i = 0; i < indices.Count; i += 3)
             {
-                triangleCounter++;
                 var v0 = triangleVertices[indices[i]];
                 var v1 = triangleVertices[indices[i + 1]];
                 var v2 = triangleVertices[indices[i + 2]];
-                vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color));
-                vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color));
-                vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color));
+                _vertices.Add(new(new (v0.X / imageSize.Item1, aspectRatio * (1 - v0.Y / imageSize.Item2)), (uint)index));
+                _vertices.Add(new(new (v1.X / imageSize.Item1, aspectRatio * (1 - v1.Y / imageSize.Item2)), (uint)index));
+                _vertices.Add(new(new (v2.X / imageSize.Item1, aspectRatio * (1 - v2.Y / imageSize.Item2)), (uint)index));
                 //vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color0));
                 //vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color1));
                 //vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color2));
             }
         }
 
-        return vertices;
+        triangleCounter = _vertices.Count / 3;
     }
 
     private void DrawingSurface_LoadContent(object? sender, DrawingSurfaceEventArgs e)
     {
         InputElementDescription[] inputElementDescs =
         [
-            new InputElementDescription("POSITION", 0, Format.R32G32B32_Float, 0, 0),
-            new InputElementDescription("COLOR", 0, Format.R32G32B32A32_Float, 12, 0)
+            new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0),
+            new InputElementDescription("POLYGON_ID", 0, Format.R32_UInt, 8, 0)
         ];
 
         ReadOnlyMemory<byte> vertexShaderByteCode = CompileBytecode("Triangle.hlsl", "VSMain", "vs_5_0");
@@ -133,16 +136,27 @@ public partial class TestGraphic
         _constantBuffer = e.Device.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<Constants>(), BindFlags.ConstantBuffer, ResourceUsage.Dynamic, CpuAccessFlags.Write));
 
         _vertexBuffer = e.Device.CreateBuffer(_vertices.ToArray(), BindFlags.VertexBuffer);
-        
+
+        // Create and bind the color lookup table
+        _colorLookupBuffer = e.Device.CreateBuffer(_polygonColors.ToArray(), 
+            BindFlags.ShaderResource, 
+            miscFlags: ResourceOptionFlags.BufferStructured, 
+            structureByteStride: (uint)Unsafe.SizeOf<Color4>());
+        _colorLookupView = e.Device.CreateShaderResourceView(_colorLookupBuffer);
+
+
         _vertices.Clear();
         _vertices = null!;
-        
+        _polygonColors.Clear();
+        _polygonColors = null;
+
         e.Context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
         e.Context.VSSetShader(_vertexShader);
         e.Context.VSSetConstantBuffer(0, _constantBuffer);
         e.Context.PSSetShader(_pixelShader);
+        e.Context.PSSetShaderResource(0, _colorLookupView); // Set the shader resource
         e.Context.IASetInputLayout(_inputLayout);
-        e.Context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionColor.SizeInBytes);
+        e.Context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionId2D.SizeInBytes);
         e.Context.OMSetBlendState(null);
 
         _stopwatch.Start();
@@ -156,6 +170,8 @@ public partial class TestGraphic
         _inputLayout?.Dispose();
         _vertexBuffer?.Dispose();
         _constantBuffer?.Dispose();
+        _colorLookupBuffer?.Dispose();
+        _colorLookupView?.Dispose();
     }
     int renderCount = 0;
     private void DrawingSurface_Draw(object? sender, DrawEventArgs e)
