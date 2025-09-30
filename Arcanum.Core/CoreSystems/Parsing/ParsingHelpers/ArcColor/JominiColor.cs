@@ -5,6 +5,21 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 
 public abstract record JominiColor : IEmpty<JominiColor>
 {
+   private int? _cachedIntValue;
+
+   /// <summary>
+   /// Gets the ARGB integer representation of the color.
+   /// The expensive conversion is only performed once.
+   /// </summary>
+   public int AsInt()
+   {
+      if (_cachedIntValue.HasValue)
+         return _cachedIntValue.Value;
+
+      var mediaColor = ToMediaColor();
+      return (_cachedIntValue = (mediaColor.A << 24) | (mediaColor.R << 16) | (mediaColor.G << 8) | mediaColor.B).Value;
+   }
+
    public abstract Color ToMediaColor();
    public abstract JominiColorType Type { get; }
 

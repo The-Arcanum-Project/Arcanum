@@ -13,7 +13,8 @@ using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
-public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Location>(dependencies)
+public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<Location>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
@@ -23,6 +24,7 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
                                           ref bool validation,
                                           object? lockObject)
    {
+      var cIndex = 0;
       foreach (var sn in rn.Statements)
       {
          if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
@@ -48,6 +50,7 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
          var key = cn.KeyNode.GetLexeme(source);
          var loc = IEu5Object<Location>.CreateInstance(key, fileObj);
          loc.Color = new JominiColor.Int(hex);
+         loc.ColorIndex = cIndex++;
 
          LUtil.TryAddToGlobals(ctx, cn.KeyNode, key, actionStack, ref validation, loc);
       }

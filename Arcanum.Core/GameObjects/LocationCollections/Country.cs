@@ -20,7 +20,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Country : IEu5Object<Country>, IMapMode
+public partial class Country : IEu5Object<Country>
 {
    #region Nexus
 
@@ -268,13 +268,4 @@ public partial class Country : IEu5Object<Country>, IMapMode
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.CountryAgsSettings;
    public string SavingKey => UniqueId;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
-
-   #region IMapMode
-
-   public string Name => "Country";
-   MapModeManager.MapModeType IMapMode.Type => MapModeManager.MapModeType.Country;
-   public string Description => "Displays countries on the map.";
-   public string? IconSource => null;
-
-   #endregion
 }

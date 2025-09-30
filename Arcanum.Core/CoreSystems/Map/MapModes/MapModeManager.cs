@@ -1,4 +1,7 @@
-﻿namespace Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
+using Arcanum.Core.GameObjects.LocationCollections;
+
+namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
 /// <summary>
 /// An enum containing all available map modes is generated in <see cref="MapModeType"/>. <br/>
@@ -20,7 +23,9 @@ public static partial class MapModeManager
    /// </summary>
    public static void RegisterProvider(Type enumType, IReadOnlyDictionary<Enum, IMapMode> mapModes)
    {
-      if (!enumType.IsEnum) throw new ArgumentException("Provider key must be an enum type.", nameof(enumType));
+      if (!enumType.IsEnum)
+         throw new ArgumentException("Provider key must be an enum type.", nameof(enumType));
+
       Providers.TryAdd(enumType, mapModes);
    }
 
@@ -43,10 +48,27 @@ public static partial class MapModeManager
 
    #endregion
 
+   private static readonly LruCacheManager LruCache = new();
+   public static MapModeType CurrentMode { get; private set; } = MapModeType.BaseMapMode;
+   public static List<MapModeType> RecentModes { get; } = new(25);
+   private static int _maxRecentModes = 25;
+
    public static void Activate(MapModeType type)
    {
-      //TODO:@MelCo @Minnator Implementation for activating the map mode
+      GPUContracts.SetColors(LruCache.GetOrCreateColors(type));
+      CurrentMode = type;
+      AddToRecentHistory(type);
    }
-   
-   
+
+   private static void AddToRecentHistory(MapModeType type)
+   {
+      if (RecentModes.Count > _maxRecentModes)
+         RecentModes.RemoveAt(RecentModes.Count - 1);
+      RecentModes.Insert(0, type);
+   }
+
+   public static void OnLocationDataChanged(Location changedLocation)
+   {
+      LruCache.MarkInvalid(changedLocation);
+   }
 }
