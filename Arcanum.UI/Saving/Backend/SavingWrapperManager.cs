@@ -81,4 +81,15 @@ public class SavingWrapperManager
     {
         return GetAllObjects(fileObj).Where(relevantObjects.Contains).ToList();
     }
+    
+    public List<FileSavingWrapper> GetAllChangedFiles()
+    {
+        return Files.Values.ToList();
+    }
+    
+    public List<FileDescriptorSavingWrapper> GetAllChangedDescriptors()
+    {
+        return Descriptors.Values.ToList();
+    }
+    
 }
