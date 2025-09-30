@@ -15,5 +15,5 @@
                         MouseWheel="DrawingSurface_MouseWheel"
                         MouseLeftButtonDown="DrawingSurface_MouseLeftButtonDown"
                         MouseLeftButtonUp="DrawingSurface_MouseLeftButtonUp"
-                        MouseMove="DrawingSurface_MouseMove" />
+                        MouseMove="DrawingSurface_MouseMove" MouseRightButtonDown="UIElement_OnMouseRightButtonDown"/>
 </styleClasses:BaseWindow>

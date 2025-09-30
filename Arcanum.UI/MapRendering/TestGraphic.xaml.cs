@@ -45,6 +45,7 @@ public struct Constants
 /// </summary>
 public partial class TestGraphic
 {
+    private ID3D11DeviceContext? _context;
     private const int TriangleCount = 5_000_000;
     private const int MaxFps = 60;
     private static readonly double s_minFrameTime = 1.0 / MaxFps;
@@ -65,6 +66,8 @@ public partial class TestGraphic
     private ID3D11ShaderResourceView? _colorLookupView;
     private List<VertexPositionId2D> _vertices;
     private List<Color4> _polygonColors;
+
+    private int _numberOfPolygons = 0;
     
     private Vector2 _pan = Vector2.Zero;
     private float _zoom = 1.0f;
@@ -96,31 +99,47 @@ public partial class TestGraphic
             var b = (byte)rand.Next(0, 256);
             _polygonColors.Add(new(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f));
         }
-        
-        for (var index = 0; index < polygons.Count; index++)
-        {
-            var polygon = polygons[index];
-            var (triangleVertices, indices) = polygon.Tesselate();
-            // Create vertex buffer
-            for (var i = 0; i < indices.Count; i += 3)
-            {
-                var v0 = triangleVertices[indices[i]];
-                var v1 = triangleVertices[indices[i + 1]];
-                var v2 = triangleVertices[indices[i + 2]];
-                _vertices.Add(new(new (v0.X / imageSize.Item1, aspectRatio * (1 - v0.Y / imageSize.Item2)), (uint)index));
-                _vertices.Add(new(new (v1.X / imageSize.Item1, aspectRatio * (1 - v1.Y / imageSize.Item2)), (uint)index));
-                _vertices.Add(new(new (v2.X / imageSize.Item1, aspectRatio * (1 - v2.Y / imageSize.Item2)), (uint)index));
-                //vertices.Add(new VertexPositionColor(new Vector3(v0.X/imageSize.Item1, aspectRatio*(1-v0.Y/imageSize.Item2), 0.0f), color0));
-                //vertices.Add(new VertexPositionColor(new Vector3(v1.X/imageSize.Item1, aspectRatio*(1-v1.Y/imageSize.Item2), 0.0f), color1));
-                //vertices.Add(new VertexPositionColor(new Vector3(v2.X/imageSize.Item1, aspectRatio*(1- v2.Y/imageSize.Item2), 0.0f), color2));
-            }
-        }
+        Parallel.For(
+            0,
+            polygons.Count,
+            // Thread-local initialization
+            () => new List<VertexPositionId2D>(),
 
+            // Loop body
+            (index, state, localList) =>
+            {
+                var polygon = polygons[index];
+                var (triangleVertices, indices) = polygon.Tesselate();
+                // Create vertex buffer
+                for (var i = 0; i < indices.Count; i += 3)
+                {
+                    var v0 = triangleVertices[indices[i]];
+                    var v1 = triangleVertices[indices[i + 1]];
+                    var v2 = triangleVertices[indices[i + 2]];
+                    localList.Add(new(new(v0.X / imageSize.Item1, aspectRatio * (1 - v0.Y / imageSize.Item2)),
+                        (uint)index));
+                    localList.Add(new(new(v1.X / imageSize.Item1, aspectRatio * (1 - v1.Y / imageSize.Item2)),
+                        (uint)index));
+                    localList.Add(new(new(v2.X / imageSize.Item1, aspectRatio * (1 - v2.Y / imageSize.Item2)),
+                        (uint)index));
+                }
+                return localList;
+            },
+
+            // Finalizer: merge into global collection
+            localList =>
+            {
+                lock (_vertices)
+                    _vertices.AddRange(localList);
+            }
+        );
         triangleCounter = _vertices.Count / 3;
+        _numberOfPolygons = polygons.Count;
     }
 
     private void DrawingSurface_LoadContent(object? sender, DrawingSurfaceEventArgs e)
     {
+        _context = e.Context;
         InputElementDescription[] inputElementDescs =
         [
             new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0),
@@ -138,11 +157,32 @@ public partial class TestGraphic
         _vertexBuffer = e.Device.CreateBuffer(_vertices.ToArray(), BindFlags.VertexBuffer);
 
         // Create and bind the color lookup table
-        _colorLookupBuffer = e.Device.CreateBuffer(_polygonColors.ToArray(), 
-            BindFlags.ShaderResource, 
-            miscFlags: ResourceOptionFlags.BufferStructured, 
-            structureByteStride: (uint)Unsafe.SizeOf<Color4>());
+        var colorBufferDesc = new BufferDescription
+        {
+            // Total size of the buffer in bytes.
+            ByteWidth = (uint) (_polygonColors.Count * Unsafe.SizeOf<Color4>()),
+        
+            // This is the key: Usage must be Dynamic to allow mapping.
+            Usage = ResourceUsage.Dynamic,
+        
+            // It's a ShaderResource so the Pixel Shader can read it.
+            BindFlags = BindFlags.ShaderResource,
+        
+            // This is the second key: The CPU must have write access.
+            CPUAccessFlags = CpuAccessFlags.Write,
+        
+            // For StructuredBuffer, these are required.
+            MiscFlags = ResourceOptionFlags.BufferStructured,
+            StructureByteStride = (uint)Unsafe.SizeOf<Color4>()
+        };
+
+        // 2. Create the buffer with the new description.
+        // Note we are NOT providing initial data here. The buffer starts empty.
+        _colorLookupBuffer = e.Device.CreateBuffer(colorBufferDesc);
         _colorLookupView = e.Device.CreateShaderResourceView(_colorLookupBuffer);
+
+        // 3. Populate the buffer with the initial colors using our update method.
+        UpdateColors(_polygonColors);
 
 
         _vertices.Clear();
@@ -258,5 +298,44 @@ public partial class TestGraphic
         _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom));
 
         _lastMousePosition = currentMousePosition;
+    }
+    
+    public void UpdateColors(List<Color4> newColors)
+    {
+        // Ensure the context and buffer have been created and the color count matches.
+        if (_context == null || _colorLookupBuffer == null)
+        {
+            // Or throw an exception
+            return; 
+        }
+    
+        // The Map/Unmap pattern is the most efficient way to update the entire buffer's contents.
+        unsafe
+        {
+            // 1. Map the buffer with WriteDiscard.
+            // This tells the driver you are replacing the entire contents, which avoids GPU stalls.
+            var mapped = _context.Map(_colorLookupBuffer, MapMode.WriteDiscard);
+
+            // 2. Copy the new color data from the C# list into the GPU memory.
+            var colorsArray = newColors.ToArray();
+            fixed (void* pColors = colorsArray)
+            {
+                Unsafe.CopyBlockUnaligned(mapped.DataPointer.ToPointer(), pColors, (uint)(newColors.Count * Unsafe.SizeOf<Color4>()));
+            }
+
+            // 3. Unmap the buffer to commit the changes.
+            _context.Unmap(_colorLookupBuffer);
+        }
+    }
+
+    private void UIElement_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var list = new List<Color4>(_numberOfPolygons);
+        var rand = new Random();
+        for (var i = 0; i < _numberOfPolygons; i++)
+        {
+            list.Add(new(rand.Next(0, 256) / 255.0f, rand.Next(0, 256) / 255.0f, rand.Next(0, 256) / 255.0f, 1.0f));
+        }
+        UpdateColors(list);
     }
 }
