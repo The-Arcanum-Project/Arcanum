@@ -91,8 +91,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 
          if (!IsDropdownOnly)
             ApplyFilter(Text);
-         
-         _isInitialized = true; 
+
+         _isInitialized = true;
       }
 
       private void OnEditableTextBoxKeyDown(object sender, KeyEventArgs e)
@@ -338,11 +338,30 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          _isUpdatingText = false;
       }
 
+      /// <summary>
+      /// Programmatically sets the selected item and explicitly sets the display text,
+      /// ignoring the item's default text representation. Useful for clearing the box
+      /// while setting a non-null "Empty" object.
+      /// </summary>
+      /// <param name="item">The item to select.</param>
+      /// <param name="displayText">The exact text to display in the text box.</param>
+      public void SetSelectedItem(object item, string displayText)
+      {
+         _isUpdatingText = true;
+
+         SelectedItem = item;
+
+         if (EditableTextBox.Text != displayText)
+            EditableTextBox.Text = displayText;
+
+         _isUpdatingText = false;
+      }
+
       private void OnTextChanged(object sender, TextChangedEventArgs e)
       {
          if (!_isInitialized)
             return;
-         
+
          if (IsDropdownOnly)
          {
             Unselect();

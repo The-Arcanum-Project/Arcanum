@@ -10,6 +10,7 @@ using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
@@ -22,18 +23,26 @@ namespace Arcanum.UI.NUI.Generator;
 // ReSharper disable once InconsistentNaming
 public static class NEF
 {
-   public static AutoCompleteComboBox ObjectSelector<T>(T target, IEnumerable allItems, int index) where T : INUI
+   public static AutoCompleteComboBox ObjectSelector<T>(T target, IEnumerable allItems, int index, Enum nxProp)
+      where T : INUI
    {
       var objectSelector = new AutoCompleteComboBox
       {
          FullItemsSource = allItems,
-         SelectedItem = target,
          Height = 23,
          Margin = new(1),
          Padding = new(2, 0, 2, 0),
          FontSize = 11,
          Name = $"AutoComplete_{target.GetType().Name}_{index}",
       };
+      var selectedItemBinding = new Binding(nxProp.ToString())
+      {
+         Source = target,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.Explicit,
+      };
+
+      objectSelector.SetBinding(Selector.SelectedItemProperty, selectedItemBinding);
       return objectSelector;
    }
 

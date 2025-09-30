@@ -24,20 +24,23 @@ public class PropertyEditorViewModel
       NxProp = nxProp;
       NavH = navH;
       Target = target;
+      object embedded = null!;
+      Nx.ForceGet(target, nxProp, ref embedded);
+      Debug.Assert(embedded is IEu5Object, "EmbeddedView can only display IEu5Object values.");
+      Embedded = (IEu5Object)embedded;
 
       var type = target.GetNxPropType(nxProp);
       Debug.Assert(type != null, "type != null");
 
       var itemObj = (IEu5Object)EmptyRegistry.Empties[type];
 
-      Items = itemObj.GetGlobalItemsNonGeneric();
       IsExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
    }
 
    public Enum NxProp { get; }
    public NavH NavH { get; }
-   public IEu5Object Target { get; }
-   public IEnumerable Items { get; }
+   public IEu5Object Target { get; set; }
+   public IEu5Object Embedded { get; }
    private bool _hasRefreshedContent;
 
    public bool IsExpanded

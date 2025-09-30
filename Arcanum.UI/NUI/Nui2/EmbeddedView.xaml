@@ -6,7 +6,6 @@
              xmlns:local = "clr-namespace:Arcanum.UI.NUI.Nui2"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
-             xmlns:autoCompleteBox = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
              mc:Ignorable = "d"
              d:DesignHeight = "300"
              d:DesignWidth = "300"

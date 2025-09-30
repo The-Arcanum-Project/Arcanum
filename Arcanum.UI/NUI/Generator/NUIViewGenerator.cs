@@ -194,7 +194,7 @@ public static class NUIViewGenerator
 
       if (!isReadonlyProp)
       {
-         var objectSelector = NEF.ObjectSelector(target, allItems, _index);
+         var objectSelector = NEF.ObjectSelector(target, allItems, _index, property);
          _index++;
 
          var binding = new Binding(property.ToString())

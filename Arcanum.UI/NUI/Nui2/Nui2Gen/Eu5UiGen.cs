@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Forms;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -22,7 +21,6 @@ using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Common.UI;
-using Common.UI.MBox;
 using Nexus.Core;
 using Binding = System.Windows.Data.Binding;
 using Control = System.Windows.Controls.Control;
@@ -50,10 +48,7 @@ public static class Eu5UiGen
 
    public static void GenerateAndSetView(NavH navh)
    {
-      var sw = Stopwatch.StartNew();
       navh.Root.Content = GenerateView(navh);
-      sw.Stop();
-      Console.WriteLine($"Generated view for {navh.Targets[0]} in {sw.ElapsedMilliseconds} ms");
    }
 
    public static BaseView GenerateView(NavH navh)
