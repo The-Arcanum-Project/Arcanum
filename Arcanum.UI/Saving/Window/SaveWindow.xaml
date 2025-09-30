@@ -12,6 +12,7 @@
                          Title="Advanced Save Window"
                          Height="450"
                          Width="760"
+                         Closed="SaveWindow_OnClosed"
                          ResizeMode="CanMinimize">
 
     <styleClasses:BaseWindow.Resources>
@@ -203,15 +204,53 @@
                           Margin="0,2,0,4"
                           Background="Transparent"
                           ItemsSource="{Binding ShownObjects, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
-                          SelectionChanged="ObjectListView_OnSelectionChanged">
+                          SelectionChanged="ObjectListView_OnSelectionChanged"
+                          PreviewKeyDown="SelectFileTransferKey">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding UniqueId}"
                                        PreviewMouseLeftButtonDown="ObjectLeftButtonPreview"
+                                       PreviewMouseRightButtonDown="ObjectRightButtonPreview"
                                        MouseMove="ObjectLeftButtonMove" />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <Popup Grid.Row="1"
+                       x:Name="MoveObjectPopup"
+                       Placement="MousePoint"
+                       StaysOpen="False"
+                       AllowsTransparency="True">
+                    <Border BorderBrush="{StaticResource DefaultBorderColorBrush}"
+                            BorderThickness="1"
+                            Background="{StaticResource DefaultBackColorBrush}"
+                            CornerRadius="3"
+                            MinWidth="150">
+                       <Grid>
+                           <Grid.RowDefinitions>
+                               <RowDefinition />
+                               <RowDefinition />
+                           </Grid.RowDefinitions>
+                           <userControls:SearchTextBox Width="280"
+                                                       Margin="0,2,0,2"
+                                                       Height="22"
+                                                       VerticalAlignment="Center"
+                                                       Background="Transparent"
+                                                       x:Name="SearchBoxPopout" />
+                           <ListView Grid.Row="1" x:Name="MovableFilesListView"
+                                     SelectionMode="Single"
+                                     ItemsSource="{Binding ValidFiles, RelativeSource={RelativeSource AncestorType=window1:SaveWindow}}"
+                                     MaxHeight="250"
+                                     SelectionChanged="TransferToFileSelectionChanged">
+                               <ListView.ItemTemplate>
+                                   <DataTemplate>
+                                       <!-- Use a TextBlock or a Button for the item -->
+                                       <TextBlock Text="{Binding Path.Filename}"/>
+                                   </DataTemplate>
+                               </ListView.ItemTemplate>
+                           </ListView>
+                       </Grid>
+                    </Border>
+                </Popup>
                 <TextBlock Grid.Row="1"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"

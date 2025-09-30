@@ -19,8 +19,8 @@ public class FileSavingWrapper : ISearchable
 
     public readonly List<IEu5Object> AllObjects;
     
-    private List<IEu5Object> AddedObjects { get; set; } = [];
-    private List<IEu5Object> TransferredObjects { get; set; } = [];
+    public List<IEu5Object> AddedObjects { get; } = [];
+    public List<IEu5Object> TransferredObjects { get; } = [];
     public FileSavingWrapper(Eu5FileObj fileObj)
     {
         AllObjects = new(fileObj.ObjectsInFile);
