@@ -407,4 +407,9 @@ public class NUISettings
                                                                       Enum.GetValues<DefaultMapDefinition.Field>()
                                                                           .Cast<Enum>()
                                                                           .ToArray());
+
+   public NUISetting DynastySettings { get; set; } = new(Dynasty.Field.UniqueId,
+                                                         Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray(),
+                                                         Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray());
 }

@@ -19,6 +19,12 @@ public partial class Language : IEu5Object<Language>
 
    [SaveAs]
    [DefaultValue(false)]
+   [Description("Whether this language requires location names in the genitive case.")]
+   [ParseAs("require_genitive_location_names")]
+   public bool RequiredGenitiveLocationNames { get; set; }
+
+   [SaveAs]
+   [DefaultValue(false)]
    [Description("Whether this language is the default dialect for its parent language.")]
    [ParseAs("default")]
    public bool IsDefaultDialect { get; set; }
