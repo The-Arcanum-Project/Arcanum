@@ -8,7 +8,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-[ParserFor(typeof(Country), ignoredBlockKeys: ["variables"])]
+[ParserFor(typeof(Country), IgnoredBlockKeys = ["variables"])]
 public partial class CountryParsing
 {
    protected internal static void LoadSingleFile(List<StatementNode> sns,

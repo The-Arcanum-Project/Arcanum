@@ -26,19 +26,16 @@ public class ParserClassMetadata
       TargetType = AttributeHelper.GetAttributeArgumentValue<INamedTypeSymbol>(attr, position: 0)?.GetType() ??
                    throw new ArgumentException("TargetType cannot be null");
 
-      // Positional argument at index 1
-      AllowUnknownNodes = AttributeHelper.GetAttributeArgumentValue(attr, position: 1, defaultValue: false);
+      AllowUnknownNodes =
+         AttributeHelper.GetAttributeArgumentValue(attr, name: "AllowUnknownNodes", defaultValue: false);
 
-      // Positional argument at index 2 (an array)
-      IgnoredBlockKeys = AttributeHelper.GetAttributeArgumentValue<string[]>(attr, position: 2) ?? [];
+      IgnoredBlockKeys = AttributeHelper.GetAttributeArgumentValue<string[]>(attr, name: "IgnoredBlockKeys") ?? [];
 
-      // Positional argument at index 3 (an array)
-      IgnoredContentKeys = AttributeHelper.GetAttributeArgumentValue<string[]>(attr, position: 3) ?? [];
+      IgnoredContentKeys = AttributeHelper.GetAttributeArgumentValue<string[]>(attr, name: "IgnoredContentKeys") ?? [];
 
-      // Positional argument at index 4
-      ContainsOnlyChildObjects = AttributeHelper.GetAttributeArgumentValue(attr, position: 4, defaultValue: false);
+      ContainsOnlyChildObjects =
+         AttributeHelper.GetAttributeArgumentValue(attr, name: "ContainsOnlyChildObjects", defaultValue: false);
 
-      // Positional argument at index 5
-      ChildObjectList = AttributeHelper.GetAttributeArgumentValue<string?>(attr, position: 5);
+      ChildObjectList = AttributeHelper.GetAttributeArgumentValue<string?>(attr, name: "ChildObjectList");
    }
 }

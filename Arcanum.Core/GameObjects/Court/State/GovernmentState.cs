@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Nexus.Core;
@@ -117,6 +118,12 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [Description("All estate privileges that are currently enacted.")]
    [ParseAs("privilege", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
+   [DefaultValue(null)]
+   [Description("List of estate attribute definitions associated with this pop type.")]
+   public ObservableRangeCollection<EstateSatisfactionDefinition> EstateAttributes { get; set; } = [];
 
    #region IEu5Object Implementation
 

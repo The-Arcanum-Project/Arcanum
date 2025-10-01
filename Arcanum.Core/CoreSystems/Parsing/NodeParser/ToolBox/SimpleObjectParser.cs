@@ -2,10 +2,13 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.Registry;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;

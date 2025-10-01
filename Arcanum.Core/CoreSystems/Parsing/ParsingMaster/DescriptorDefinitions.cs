@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.Utils.Sorting;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
 using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
@@ -86,13 +87,19 @@ public static class DescriptorDefinitions
           false,
           false);
 
+   public static readonly FileDescriptor EstateDescriptor = new(["game", "in_game", "common", "estates"],
+                                                                new("estates", "txt", "#"),
+                                                                [new EstateParsing([])],
+                                                                false);
+
    public static readonly FileDescriptor PopTypeDescriptor = new(["game", "in_game", "common", "pop_types"],
                                                                  new("01_pop_types", "txt", "#"),
                                                                  ConsequentialLoadingSteps([
                                                                     new PopTypeDiscoverer([]),
-                                                                    new PopTypeParsing([
+                                                                    new PopTypesParsing([
                                                                        ColorParser.LoadingService[0],
                                                                        ModifierDefinitionDescriptor.LoadingService[0],
+                                                                       EstateDescriptor.LoadingService[0],
                                                                     ]),
                                                                  ]),
                                                                  false);
@@ -258,7 +265,7 @@ public static class DescriptorDefinitions
          CountryRankDescriptor, InstitutionsAndReligiousSchools, ReligiousSchoolsDescriptor, InstitutionsDescriptor,
          CultureDescriptor, ColorParser, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
          ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor,
-         DynastyManagerDescriptor,
+         DynastyManagerDescriptor, EstateDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

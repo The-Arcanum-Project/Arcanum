@@ -4,7 +4,7 @@ using Arcanum.Core.GameObjects.Court.State;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(GovernmentState),
-             ignoredContentKeys:
+             IgnoredContentKeys =
              [
                 "centralization_vs_decentralization", "aristocracy_vs_plutocracy", "serfdom_vs_free_subjects",
                 "traditionalist_vs_innovative", "spiritualist_vs_humanist", "mercantilism_vs_free_trade",

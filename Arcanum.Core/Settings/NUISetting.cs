@@ -412,4 +412,29 @@ public class NUISettings
                                                          Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<Dynasty.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting EstateSettings { get; set; } = new(Estate.Field.UniqueId,
+                                                        Enum.GetValues<Estate.Field>().Cast<Enum>().ToArray(),
+                                                        Enum.GetValues<Estate.Field>().Cast<Enum>().ToArray(),
+                                                        Enum.GetValues<Estate.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting EstateAttributeDefinitionSettings { get; set; } = new(EstateAttributeDefinition.Field.UniqueId,
+                                                                           Enum.GetValues<
+                                                                                 EstateAttributeDefinition.Field>()
+                                                                             .Cast<Enum>()
+                                                                             .ToArray(),
+                                                                           Enum.GetValues<
+                                                                                 EstateAttributeDefinition.Field>()
+                                                                             .Cast<Enum>()
+                                                                             .ToArray(),
+                                                                           Enum.GetValues<
+                                                                                 EstateAttributeDefinition.Field>()
+                                                                             .Cast<Enum>()
+                                                                             .ToArray());
+
+   public NUISetting EstateSatisfactionDefinitionSettings { get; set; } =
+      new(EstateSatisfactionDefinition.Field.UniqueId,
+          Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray(),
+          Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray(),
+          Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray());
 }

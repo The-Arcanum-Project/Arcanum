@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Culture;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -82,6 +83,12 @@ public partial class PopType : IEu5Object<PopType>
    public bool HasCap { get; set; }
 
    [SaveAs]
+   [ParseAs("tribal_rules")]
+   [DefaultValue(false)]
+   [Description("If true, this pop type follows tribal rules.")]
+   public bool TribalRules { get; set; }
+
+   [SaveAs]
    [ParseAs("counts_towards_market_language")]
    [DefaultValue(false)]
    [Description("If true, pops of this type count towards the market language requirements.")]
@@ -98,6 +105,18 @@ public partial class PopType : IEu5Object<PopType>
    [DefaultValue(null)]
    [Description("Modifiers affecting the literacy rate of this pop type.")]
    public ObservableRangeCollection<ModValInstance> LiteracyImpact { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("pop_percentage_impact", itemNodeType: AstNodeType.ContentNode)]
+   [DefaultValue(null)]
+   [Description(Globals.REPLACE_DESCRIPTION)]
+   public ObservableRangeCollection<ModValInstance> PopPercentageImpact { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
+   [DefaultValue(null)]
+   [Description("List of estate attribute definitions associated with this pop type.")]
+   public ObservableRangeCollection<EstateAttributeDefinition> EstateAttributes { get; set; } = [];
 
    #endregion
 

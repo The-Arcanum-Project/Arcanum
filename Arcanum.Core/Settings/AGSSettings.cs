@@ -27,6 +27,7 @@ public class AGSSettings
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
    public AgsSettings RulerTermAgsSettings { get; set; } = new();
    public AgsSettings DynastyAgsSettings { get; set; } = new();
+   public AgsSettings EstateAgsSettings { get; set; } = new();
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();
    public AgsSettings InstitutionAgsSettings { get; set; } = new();
    public AgsSettings RegnalNumberAgsSettings { get; set; } = new();
@@ -44,4 +45,6 @@ public class AGSSettings
    public AgsSettings PopDefinitionAgsSettings { get; set; } = new();
    public AgsSettings SoundTollAgsSettings { get; set; } = new();
    public AgsSettings DefaultMapDefinitionAgsSettings { get; set; } = new();
+   public AgsSettings EstateAttributeDefinitionAgsSettings { get; set; } = new();
+   public AgsSettings EstateSatisfactionDefinitionAgsSettings { get; set; } = new();
 }

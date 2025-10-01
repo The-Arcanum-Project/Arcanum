@@ -8,10 +8,12 @@ using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<PopType>(true, dependencies);
+public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies)
+   : DiscoverThenParseLoadingService<PopType>(true, dependencies);
 
 [ParserFor(typeof(PopType))]
-public partial class PopTypeParsing(IEnumerable<IDependencyNode<string>> dependencies) : DiscoverThenParseLoadingService<PopType>(false, dependencies)
+public partial class PopTypesParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : DiscoverThenParseLoadingService<PopType>(false, dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

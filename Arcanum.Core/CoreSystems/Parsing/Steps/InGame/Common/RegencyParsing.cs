@@ -9,8 +9,9 @@ using Regency = Arcanum.Core.GameObjects.Court.Regency;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-[ParserFor(typeof(Regency), ignoredBlockKeys: ["start_effect", "allow"])]
-public partial class RegencyParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Regency>(dependencies)
+[ParserFor(typeof(Regency), IgnoredBlockKeys = ["start_effect", "allow"])]
+public partial class RegencyParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<Regency>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

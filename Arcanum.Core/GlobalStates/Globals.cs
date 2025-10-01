@@ -68,6 +68,7 @@ public static class Globals
    public static Dictionary<string, Regency> Regencies { get; set; } = [];
    public static Dictionary<string, Character> Characters { get; } = [];
    public static Dictionary<string, Dynasty> Dynasties { get; } = [];
+   public static Dictionary<string, Estate> Estates { get; } = [];
 
    #endregion
 

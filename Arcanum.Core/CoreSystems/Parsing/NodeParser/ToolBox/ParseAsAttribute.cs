@@ -24,7 +24,8 @@ public class ParseAsAttribute(string? key,
                               string? customParser = null,
                               bool isShatteredList = false,
                               AstNodeType itemNodeType = AstNodeType.KeyOnlyNode,
-                              bool isEmbedded = false) : Attribute
+                              bool isEmbedded = false,
+                              Type? iEu5KeyType = null) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -44,6 +45,8 @@ public class ParseAsAttribute(string? key,
    /// Instead, all nodes with the same key will be parsed into a list.
    /// </summary>
    public bool IsShatteredList { get; set; } = isShatteredList;
+
+   public Type? IEu5KeyType { get; set; } = iEu5KeyType;
 
    /// <summary>
    /// If we are parsing a list of items, this specifies the node type of each item in the list.
