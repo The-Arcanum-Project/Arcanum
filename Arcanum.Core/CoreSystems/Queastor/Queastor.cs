@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Reflection;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.API.UtilServices.Search.SearchableSetting;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
@@ -53,6 +55,9 @@ public class Queastor : IQueastor
 
    private void InternalAddToIndex(ISearchable item, string term)
    {
+      if (string.IsNullOrWhiteSpace(term))
+         return;
+
       var lowerTerm = term.ToLowerInvariant();
       if (!_invertedIndex.TryGetValue(lowerTerm, out var list))
       {
@@ -115,37 +120,39 @@ public class Queastor : IQueastor
       var sw = Stopwatch.StartNew();
 #endif
       query = query.ToLowerInvariant();
-      var results = new HashSet<ISearchable>();
 
-      results.UnionWith(SearchExact(query));
+      var exact = SearchExact(query);
 
       // If the search mode is ExactMatch, we return only exact matches
       if (Settings.WholeWord)
-         return results.ToList();
+         return exact;
 
-      HashSet<ISearchable> filteredResults = [];
+      HashSet<SearchResult> filteredResults = [];
       // Fuzzy matches via BK-Tree
       foreach (var term in _bkTree.Search(query, Settings.MaxLevinsteinDistance))
          if (_invertedIndex.TryGetValue(term, out var items))
          {
             if (Settings.SearchCategory == IQueastorSearchSettings.Category.All)
             {
-               filteredResults.UnionWith(items);
+               foreach (var item in items)
+                  filteredResults.Add(new(term, item));
                continue;
             }
 
             // Filter by search category if specified
             foreach (var item in items.Where(item => (item.SearchCategory & Settings.SearchCategory) != 0))
-               filteredResults.Add(item);
+               filteredResults.Add(new(term, item));
          }
 #if TIME_QUEASTOR
-      Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {results.Count} exact matches and {filteredResults.Count} fuzzy matches.");
+      Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {exact.Count} exact matches and {filteredResults.Count} fuzzy matches.");
 #endif
 
-      return ApplySorting(filteredResults, query);
+      exact.Sort();
+      var sortedFuzzy = ApplySorting(filteredResults, query);
+      return exact.Concat(sortedFuzzy).ToList();
    }
 
-   private List<ISearchable> ApplySorting(HashSet<ISearchable> results, string query)
+   private List<ISearchable> ApplySorting(HashSet<SearchResult> results, string query)
    {
       if (results.Count == 0 || string.IsNullOrWhiteSpace(query))
          return [];
@@ -156,13 +163,29 @@ public class Queastor : IQueastor
       {
          case IQueastorSearchSettings.SortingOptions.Relevance:
             itemsList.Sort((a, b) =>
-                              -b.GetRelevanceScore(query).CompareTo(a.GetRelevanceScore(query)));
+            {
+               var scoreA = a.Value.GetRelevanceScore(query, a.Key);
+               var scoreB = b.Value.GetRelevanceScore(query, a.Key);
+               var cmp = scoreA.CompareTo(scoreB);
+               if (cmp != 0)
+                  return cmp;
+
+               // If scores are equal, sort by minimum Levinstein distance
+               var distA = MinLevinsteinDistanceToTerms(a.Value, query);
+               var distB = MinLevinsteinDistanceToTerms(b.Value, query);
+               cmp = distA.CompareTo(distB); // Lower distances first
+               if (cmp != 0)
+                  return cmp;
+
+               // If still equal, sort alphabetically
+               return string.Compare(a.Value.ResultName, b.Value.ResultName, StringComparison.Ordinal);
+            });
             break;
          case IQueastorSearchSettings.SortingOptions.Namespace:
             itemsList.Sort((a, b) =>
             {
-               var nsA = a.GetNamespace.Split(a.NamespaceSeparator);
-               var nsB = b.GetNamespace.Split(b.NamespaceSeparator);
+               var nsA = a.Value.GetNamespace.Split(a.Value.NamespaceSeparator);
+               var nsB = b.Value.GetNamespace.Split(b.Value.NamespaceSeparator);
                var len = Math.Min(nsA.Length, nsB.Length);
                for (var i = 0; i < len; i++)
                {
@@ -175,13 +198,13 @@ public class Queastor : IQueastor
             });
             break;
          case IQueastorSearchSettings.SortingOptions.Alphabetical:
-            itemsList.Sort((a, b) => string.Compare(a.ResultName, b.ResultName, StringComparison.Ordinal));
+            itemsList.Sort((a, b) => string.Compare(a.Value.ResultName, b.Value.ResultName, StringComparison.Ordinal));
             break;
          default:
             throw new ArgumentOutOfRangeException(typeof(IQueastorSearchSettings.SortingOptions).ToString());
       }
 
-      return itemsList;
+      return itemsList.Select(x => x.Value).ToList();
    }
 
    public List<ISearchable> SearchExact(string query)
@@ -354,5 +377,15 @@ public class Queastor : IQueastor
       }
 
       return results;
+   }
+
+   public static void AddIEu5ObjectsToQueastor(IQueastor queastor, IReadOnlyList<Type> eu5ObjectTypes)
+   {
+      foreach (var type in eu5ObjectTypes)
+      {
+         var empty = (IEu5Object)EmptyRegistry.Empties[type];
+         foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
+            queastor.AddToIndex((IEu5Object)obj);
+      }
    }
 }

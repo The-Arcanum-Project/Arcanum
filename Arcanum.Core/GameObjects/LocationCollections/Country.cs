@@ -3,7 +3,6 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;

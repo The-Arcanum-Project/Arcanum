@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Sorting;
 using JetBrains.Annotations;
 
@@ -84,7 +85,8 @@ public class ParsingMaster
    /// </summary>
    private static void InitializeSteps()
    {
-      _sortedLoadingSteps = new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
+      _sortedLoadingSteps =
+         new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
    }
 
    public Task<bool> ExecuteAllParsingSteps()
@@ -97,7 +99,7 @@ public class ParsingMaster
       foreach (var loadingStep in _sortedLoadingSteps)
       {
          TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
-         
+
          ParsingStepsChanged?.Invoke(this, loadingStep);
 
          var stepWrapper = loadingStep.GetParsingStep();
@@ -119,6 +121,7 @@ public class ParsingMaster
          return Task.FromResult(false);
 
       var sw = Stopwatch.StartNew();
+      Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);
       var items = Queastor.Queastor.GlobalInstance.BkTreeTerms.Count;
       Queastor.Queastor.GlobalInstance.RebuildBkTree();
       sw.Stop();

@@ -8,9 +8,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.Pops;
 using Common.UI;
@@ -73,7 +71,7 @@ public partial class Location
          return navigations.ToArray()!;
       }
    }
-   public string GetNamespace => throw new NotImplementedException();
+   public string GetNamespace => "Map.Location";
 
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 

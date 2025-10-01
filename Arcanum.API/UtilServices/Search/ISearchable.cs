@@ -35,8 +35,9 @@ public interface ISearchable
    /// By default this is 1f which makes the <see cref="IQueastor"/> sort them after the Levinstein distance.
    /// </summary>
    /// <param name="query"></param>
+   /// <param name="key"></param>
    /// <returns></returns>
-   public float GetRelevanceScore(string query) => 1f;
+   public float GetRelevanceScore(string query, string key) => Math.Abs(query.Length - key.Length);
 
    /// <summary>
    /// The visual representation of the search result in the search results view.
