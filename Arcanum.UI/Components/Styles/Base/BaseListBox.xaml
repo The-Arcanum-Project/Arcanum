@@ -80,6 +80,8 @@
                 Value = "true" />
         <Setter Property = "OverridesDefaultStyle"
                 Value = "true" />
+        <Setter Property = "FocusVisualStyle"
+                Value = "{x:Null}" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "ListBoxItem">
@@ -87,8 +89,8 @@
                             Padding = "0"
                             SnapsToDevicePixels = "true"
                             CornerRadius = "3"
-                            Background = "{TemplateBinding Background}">
-
+                            Background = "{TemplateBinding Background}"
+                            BorderThickness = "1">
                         <ContentPresenter />
                     </Border>
 
@@ -99,6 +101,12 @@
                                     Property = "Background"
                                     Value = "{StaticResource BlueSelectionBackColorBrush}">
                             </Setter>
+                        </Trigger>
+                        <Trigger Property = "IsSelected"
+                                 Value = "true">
+                            <Setter TargetName = "Border"
+                                    Property = "BorderBrush"
+                                    Value = "{StaticResource BlueAccentColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

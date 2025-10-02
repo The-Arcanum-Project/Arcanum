@@ -22,7 +22,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "3*" />
-            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "2*" />
         </Grid.ColumnDefinitions>
 
         <styleClasses:CorneredTextBox x:Name = "NexusTextBox"
@@ -52,7 +52,6 @@
                          ItemsSource = "{Binding Suggestions, RelativeSource={RelativeSource AncestorType=local:NexusAccessor}}"
                          MaxHeight = "200"
                          MinWidth = "{Binding ActualWidth, ElementName=NexusTextBox}"
-                         PreviewMouseDown = "SuggestionsListBox_OnPreviewMouseDown"
                          KeyDown = "SuggestionsListBox_OnKeyDown" />
             </Border>
         </Popup>
@@ -60,7 +59,9 @@
 
         <TextBlock Grid.Column = "1"
                    x:Name = "ValuePreviewTextBloxk"
-                   Text = "{Binding ValuePreview}"
+                   VerticalAlignment = "Center"
+                   HorizontalAlignment = "Stretch"
+                   Text = "{Binding ValuePreview, RelativeSource={RelativeSource AncestorType=local:NexusAccessor}}"
                    FontSize = "14"
                    FontFamily = "{StaticResource DefaultMonospacedFont}">
         </TextBlock>

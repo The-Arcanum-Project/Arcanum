@@ -8,7 +8,7 @@
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          mc:Ignorable = "d"
                          Title = "NexusAccessorWindow"
-                         Width = "800"
+                         Width = "1200"
                          Height = "60"
                          WindowStartupLocation = "CenterScreen"
                          d:DataContext = "{d:DesignInstance local:NexusAccessorWindow}">

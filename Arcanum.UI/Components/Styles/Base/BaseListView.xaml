@@ -54,6 +54,8 @@
                             Value = "Stretch" />
                     <Setter Property = "VerticalContentAlignment"
                             Value = "Center" />
+                    <Setter Property = "FocusVisualStyle"
+                            Value = "{x:Null}" />
                     <Setter Property = "Template">
                         <Setter.Value>
                             <ControlTemplate TargetType = "ListViewItem">
@@ -89,11 +91,8 @@
                                     <Trigger Property = "IsSelected"
                                              Value = "True">
                                         <Setter TargetName = "Bd"
-                                                Property = "Background"
-                                                Value = "{StaticResource BlueSelectionBackColorBrush}" />
-                                        <Setter TargetName = "Bd"
                                                 Property = "BorderBrush"
-                                                Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                                Value = "{StaticResource BlueAccentColorBrush}" />
                                     </Trigger>
                                     <Trigger Property = "IsMouseOver"
                                              Value = "True">
