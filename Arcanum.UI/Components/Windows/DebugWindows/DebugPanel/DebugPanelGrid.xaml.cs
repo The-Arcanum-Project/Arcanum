@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -59,5 +60,10 @@ public partial class DebugPanelGrid
    private void ColorPickerViewerButton_Click(object sender, RoutedEventArgs e)
    {
       new ColorPickerWindow().Show();
+   }
+
+   private void ObjectCreatorButton_Click(object sender, RoutedEventArgs e)
+   {
+      Eu5ObjectCreator.ShowDialog(typeof(Character), out _);
    }
 }

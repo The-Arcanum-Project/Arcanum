@@ -17,6 +17,9 @@ public static class NexusHelpers
 
    private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
 
+   private const string REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.RequiredAttribute";
+   private const string IGNORE_REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.IgnoreRequiredAttribute";
+
    /// <summary>
    /// This transform finds any class that implements INexus.
    /// It's the gatekeeper for both generation steps.
@@ -37,14 +40,25 @@ public static class NexusHelpers
       return null;
    }
 
-   public static void RunPropertyModifierGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
+   public static void RunPropertyModifierGenerator(INamedTypeSymbol classSymbol,
+                                                   SourceProductionContext context,
+                                                   INamedTypeSymbol enumerableSymbol,
+                                                   INamedTypeSymbol ieu5ObjectSymbol)
    {
-      var sourceCode = GeneratePropertyModifierPart(classSymbol, Helpers.FindModifiableMembers(classSymbol, context));
+      var sourceCode = GeneratePropertyModifierPart(classSymbol,
+                                                    Helpers.FindModifiableMembers(classSymbol, context),
+                                                    enumerableSymbol,
+                                                    ieu5ObjectSymbol,
+                                                    context);
       var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
       context.AddSource(hintName, sourceCode);
    }
 
-   private static string GeneratePropertyModifierPart(INamedTypeSymbol classSymbol, List<ISymbol> members)
+   private static string GeneratePropertyModifierPart(INamedTypeSymbol classSymbol,
+                                                      List<ISymbol> members,
+                                                      INamedTypeSymbol enumerableSymbol,
+                                                      INamedTypeSymbol ieu5ObjectSymbol,
+                                                      SourceProductionContext context)
    {
       var readonlyStatuses = new List<bool>();
       var allowsEmpty = new List<bool>();
@@ -65,6 +79,7 @@ public static class NexusHelpers
       builder.AppendLine("using Nexus.Core;");
       builder.AppendLine("using System.Runtime.CompilerServices;");
       builder.AppendLine("using System.ComponentModel;");
+      builder.AppendLine("using Arcanum.Core.Registry;");
 #if DEBUG
       builder.AppendLine("using System.Diagnostics;");
 #endif
@@ -126,6 +141,10 @@ public static class NexusHelpers
 
       builder.AppendLine("    }");
       builder.AppendLine();
+
+      AppendRequiredFilter(builder, classSymbol, members);
+
+      AppendDefaultValues(builder, classSymbol, members, enumerableSymbol, ieu5ObjectSymbol, context);
 
       #region Property Modifiers and acessors
 
@@ -462,5 +481,195 @@ public static class NexusHelpers
       builder.AppendLine("}"); // Close class
 
       return builder.ToString();
+   }
+
+   private static void AppendRequiredFilter(StringBuilder builder, INamedTypeSymbol classSymbol, List<ISymbol> members)
+   {
+      // For each property we are going to look at the attributes including inheritance if it is marked with [Required]
+      // or if the [Required] attribute is overridden with [IgnoreRequired] in a derived class
+      var requiredProperties = new List<bool>();
+      foreach (var member in members)
+      {
+         if (member is not IPropertySymbol propertySymbol)
+            continue;
+
+         var requiredAttribute = Helpers.GetEffectiveAttribute(classSymbol, propertySymbol, REQUIRED_ATTRIBUTE_NAME);
+         var ignoreRequiredAttribute =
+            Helpers.GetEffectiveAttribute(classSymbol, propertySymbol, IGNORE_REQUIRED_ATTRIBUTE_NAME);
+
+         requiredProperties.Add(requiredAttribute != null && ignoreRequiredAttribute == null);
+      }
+
+      // ------- Required Property Array -------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array indicating whether a property is required.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+
+      var arrayInitializer = string.Join(", ", requiredProperties.Select(s => s.ToString().ToLower()));
+      builder.AppendLine($"    private static readonly bool[] _isRequired = {{ {arrayInitializer} }};");
+      builder.AppendLine();
+
+      // --- Generate a public accessor method for the required status ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Checks if a property is marked as required.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public bool IsRequired(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        return _isRequired[(int)((Field)property)];");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+   }
+
+   private static void AppendDefaultValues(StringBuilder builder,
+                                           INamedTypeSymbol classSymbol,
+                                           List<ISymbol> members,
+                                           INamedTypeSymbol enumerableSymbol,
+                                           INamedTypeSymbol ieu5ObjectSymbol,
+                                           SourceProductionContext context)
+   {
+      // For each property we are going to look at the attributes including inheritance if it is marked with [DefaultValue]
+      // if it does not exist we set it to null.
+      // if it is null for a collection we set it to an empty collection of the right type.
+      // if it is null for an object of the IEu5Object type we set it to it's empty value.
+      var defaultValues = new List<string>();
+      foreach (var member in members)
+      {
+         if (member is not IPropertySymbol propertySymbol)
+         {
+            defaultValues.Add("null");
+            continue;
+         }
+
+         var defaultValueAttribute =
+            Helpers.GetEffectiveAttribute(classSymbol, propertySymbol, "System.ComponentModel.DefaultValueAttribute");
+         if (defaultValueAttribute is not { ConstructorArguments.Length: 1 })
+         {
+            defaultValues.Add("CAN_NOT_DETERMINE_DEFAULT_VALUE");
+            // add a warning here
+            context.ReportDiagnostic(Diagnostic.Create(new("NEXUSGEN002",
+                                                           "Missing or invalid DefaultValue attribute",
+                                                           $"Property '{propertySymbol.Name}' is missing a DefaultValue attribute or it is invalid. The default value will be set to null.",
+                                                           "NexusGenerator",
+                                                           DiagnosticSeverity.Warning,
+                                                           true),
+                                                       Location.None));
+            continue;
+         }
+
+         var arg = defaultValueAttribute.ConstructorArguments[0];
+         if (arg.Value == null)
+         {
+            // If the value is null we need to check the type of the property
+            var propertyType = propertySymbol.Type;
+            if (propertyType.TypeKind is TypeKind.Class or TypeKind.Interface)
+            {
+               // We have to check if it is of the ieu5ObjectSymbol type
+               if (ieu5ObjectSymbol != null &&
+                   propertyType.AllInterfaces.Contains(ieu5ObjectSymbol,
+                                                       SymbolEqualityComparer.Default))
+               {
+                  // For IEu5Object types we get the empty value from the registry
+                  var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                  defaultValues.Add($"EmptyRegistry.Empties[typeof({typeName})] as {typeName}");
+               }
+               else if (Helpers.IsGenericCollection(propertyType, out _))
+               {
+                  var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                  defaultValues.Add($"new {fullCollectionTypeName}()");
+               }
+               else
+               {
+                  // For reference types we can just use null
+                  defaultValues.Add("null");
+               }
+            }
+            else
+            {
+               // For other value types we use the default literal
+               var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               defaultValues.Add($"default({typeName})");
+            }
+         }
+         else if (arg.Type != null)
+         {
+            if (propertySymbol.Type.BaseType?.ToDisplayString() == "System.Enum")
+            {
+               var enumTypeName = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               var enumValue = arg.Value?.ToString() ?? "0";
+
+               defaultValues.Add($"({enumTypeName}){enumValue}");
+               continue;
+            }
+
+            // We have to format the value based on its type
+            var formattedValue = arg.Type.SpecialType switch
+            {
+               SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? string.Empty, true),
+               SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
+               SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
+               SpecialType.System_Single => $"{arg.Value}f",
+               SpecialType.System_Double => $"{arg.Value}d",
+               SpecialType.System_Decimal => $"{arg.Value}m",
+               SpecialType.System_Int64 => $"{arg.Value}L",
+               SpecialType.System_UInt64 => $"{arg.Value}UL",
+               SpecialType.System_Int32
+               or SpecialType.System_UInt32
+               or SpecialType.System_Int16
+               or SpecialType.System_UInt16
+               or SpecialType.System_Byte
+               or SpecialType.System_SByte => arg.Value?.ToString() ?? "0",
+               _ => arg.Value != null
+                       ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
+                       : "null",
+            };
+            defaultValues.Add(formattedValue);
+         }
+         else
+         {
+            defaultValues.Add("null");
+         }
+      }
+
+      // ------- Default Value Array -------
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// A pre-generated array containing the default value of each property, if any.");
+      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    private static readonly object?[] _defaultValues = {");
+      foreach (var def in defaultValues)
+         builder.AppendLine($"        {def},");
+      builder.AppendLine("    };");
+
+      builder.AppendLine();
+
+      // --- Generate a public accessor method for the default value ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Gets the default value of a property, if any.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public object GetDefaultValue(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
+      builder.AppendLine("        var value = _defaultValues[(int)((Field)property)]!;");
+      builder.AppendLine("        Debug.Assert(value?.GetType() == GetNxPropType(property), $\"The default value of {property.ToString()} does not match it's type!\");");
+      builder.AppendLine("        if (value != null && value.ToString() == \"CAN_NOT_DETERMINE_DEFAULT_VALUE\")");
+      builder.AppendLine("            throw new InvalidOperationException($\"The default value for property '{property}' could not be determined. Please ensure it has a valid DefaultValue attribute.\");");
+      builder.AppendLine("        return value!;");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+      // --- Generate a public generic accessor method for the default value ---
+      builder.AppendLine("    /// <summary>");
+      builder.AppendLine("    /// Gets the default value of a property, if any, casted to the specified type.");
+      builder.AppendLine("    /// </summary>");
+      builder.AppendLine("    public T GetDefaultValue<T>(Enum property)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        var value = GetDefaultValue(property);");
+      builder.AppendLine("        if (value == null)");
+      builder.AppendLine("            return default!;");
+      builder.AppendLine("        Debug.Assert(value is T, $\"The default value of {property.ToString()} is not of type {typeof(T).FullName}!\");");
+      builder.AppendLine("        return (T)value;");
+      builder.AppendLine("    }");
+      builder.AppendLine();
    }
 }

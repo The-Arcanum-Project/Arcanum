@@ -12,6 +12,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.Pops;
 using Common.UI;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
@@ -24,6 +25,7 @@ public partial class Location
    [SuppressAgs]
    [ToStringArguments("X")]
    [Description("The color of the location in the map data.")]
+   [DefaultValue(null)]
    public JominiColor Color { get; set; } = JominiColor.Empty;
 
    #endregion
@@ -38,6 +40,7 @@ public partial class Location
 
    [SuppressAgs]
    [Description("The pops residing in this location.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];
 
    #endregion
@@ -86,6 +89,7 @@ public partial class Location
    #region Map Management
 
    [SuppressAgs]
+   [IgnoreModifiable]
    public int ColorIndex { get; set; } = -1;
 
    #endregion

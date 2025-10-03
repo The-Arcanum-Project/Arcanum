@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
@@ -11,9 +12,20 @@ public partial class Pop(PopType type,
                          string religion)
    : INUI, ICollectionProvider<Pop>, IEmpty<Pop>
 {
+   [Description("The type of this pop.")]
+   [DefaultValue(null)]
    public PopType Type { get; set; } = type;
+
+   [Description("The size of this pop.")]
+   [DefaultValue(0f)]
    public float Size { get; set; } = size;
+
+   [Description("The culture of this pop.")]
+   [DefaultValue("")]
    public string Culture { get; set; } = culture;
+
+   [Description("The religion of this pop.")]
+   [DefaultValue("")]
    public string Religion { get; set; } = religion;
 
    public override string ToString()

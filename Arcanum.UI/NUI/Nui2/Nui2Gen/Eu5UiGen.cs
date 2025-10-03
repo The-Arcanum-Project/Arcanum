@@ -36,47 +36,51 @@ public static class Eu5UiGen
       { typeof(ModValInstance), Nui2Gen.CustomShortInfoGenerators.GetModValInstanceShortInfo },
    };
 
-   public static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new() { };
+   public static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
 
-   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new() { };
+   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new();
 
-   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new() { };
+   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new();
 
-   public static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new() { };
+   public static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new();
 
    public static Dictionary<Enum, bool> IsExpandedCache = new();
 
-   public static void GenerateAndSetView(NavH navh)
+   public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true)
    {
-      navh.Root.Content = GenerateView(navh);
+      navh.Root.Content = GenerateView(navh, markedProps ?? [], hasHeader);
    }
 
-   public static BaseView GenerateView(NavH navh)
+   public static BaseView GenerateView(NavH navh, List<Enum> markedProps, bool hasHeader = true)
    {
       var primary = navh.Targets[0];
-
       var view = ControlFactory.GetBaseView();
       view.BaseViewBorder.BorderThickness = new(0);
       var mainGrid = ControlFactory.GetMainGrid();
       view.BaseViewBorder.Child = mainGrid;
 
-      GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
+      if (hasHeader)
+         GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
 
-      GenerateViewElements(navh, mainGrid, primary);
+      GenerateViewElements(navh, mainGrid, primary, markedProps, hasHeader ? 1 : 0);
 
       return view;
    }
 
-   private static void GenerateViewElements(NavH navH, Grid mainGrid, IEu5Object primary)
+   private static void GenerateViewElements(NavH navH,
+                                            Grid mainGrid,
+                                            IEu5Object primary,
+                                            List<Enum> markedProps,
+                                            int startRow = 1)
    {
-      var viewFields = primary.NUISettings.ViewFields;
-      if (Config.Settings.NUIConfig.ListViewsInCustomOrder)
-         viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
+      var viewFields = SortViewFieldsByConfig(primary, markedProps);
 
       for (var i = 0; i < viewFields.Length; i++)
       {
          var nxProp = viewFields[i];
          var nxPropType = primary.GetNxPropType(nxProp);
+
+         var isMarked = markedProps.Contains(nxProp);
 
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
          {
@@ -88,22 +92,42 @@ public static class Eu5UiGen
                }
                else
                {
-                  GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + 1);
+                  GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + startRow, isMarked);
                }
             }
             else
             {
-               GenerateShortInfo(navH, primary, mainGrid);
+               GenerateShortInfo(navH, primary, mainGrid, isMarked);
             }
          }
          else
          {
-            BuildCollectionViewOrDefault(navH, primary, mainGrid, nxProp, i + 1);
+            BuildCollectionViewOrDefault(navH, primary, mainGrid, nxProp, i + startRow, isMarked: isMarked);
          }
       }
    }
 
-   private static void GenerateEmbeddedView(NavH navH, IEu5Object primary, Grid mainGrid, Enum nxProp, int rowIndex)
+   private static Enum[] SortViewFieldsByConfig(IEu5Object primary, List<Enum> markedProps)
+   {
+      var viewFields = primary.NUISettings.ViewFields.Except(markedProps);
+      if (Config.Settings.NUIConfig.ListViewsInCustomOrder)
+         viewFields = viewFields.OrderBy(f => f.ToString()).ToArray();
+
+      if (markedProps.Count <= 0)
+         return viewFields.ToArray();
+
+      markedProps = markedProps.OrderBy(f => f.ToString()).ToList();
+      viewFields = markedProps.Concat(viewFields);
+
+      return viewFields.ToArray();
+   }
+
+   private static void GenerateEmbeddedView(NavH navH,
+                                            IEu5Object primary,
+                                            Grid mainGrid,
+                                            Enum nxProp,
+                                            int rowIndex,
+                                            bool isMarked)
    {
       var pevm = new PropertyEditorViewModel(nxProp, navH, primary);
       var ebv = new EmbeddedView(pevm)
@@ -125,6 +149,9 @@ public static class Eu5UiGen
                                                    ControlFactory.SHORT_INFO_FONT_SIZE + 2,
                                                    ControlFactory.SHORT_INFO_ROW_HEIGHT,
                                                    true);
+
+      if (isMarked)
+         header.Background = ControlFactory.MarkedBrush;
 
       ebv.TitleDockPanel.Children.Add(header);
       DockPanel.SetDock(header, Dock.Left);
@@ -183,7 +210,7 @@ public static class Eu5UiGen
             continue;
          }
 
-         BuildCollectionViewOrDefault(navH, embedded, grid, nxProp, index + 1, parentProp);
+         BuildCollectionViewOrDefault(navH, embedded, grid, nxProp, index + 1, parentProp: parentProp, isMarked: false);
       }
 
       // var embeddedLiner = new Border
@@ -207,6 +234,7 @@ public static class Eu5UiGen
                                                     Grid mainGrid,
                                                     Enum nxProp,
                                                     int rowIndex,
+                                                    bool isMarked,
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
@@ -214,7 +242,13 @@ public static class Eu5UiGen
       if (itemType == null)
       {
          // We have a default property, not a collection.
-         GetTypeSpecificGrid(navH, primary, nxProp, mainGrid, rowIndex, embeddedPropertyTargets: parentProp);
+         GetTypeSpecificGrid(navH,
+                             primary,
+                             nxProp,
+                             mainGrid,
+                             rowIndex,
+                             isMarked: isMarked,
+                             embeddedPropertyTargets: parentProp);
          return;
       }
 
@@ -230,13 +264,19 @@ public static class Eu5UiGen
       if (collection is not IList modifiableList)
       {
          // We have a collection property, but it's not a list we can iterate with our current implementation.
-         GetTypeSpecificGrid(navH, primary, nxProp, mainGrid, rowIndex, embeddedPropertyTargets: parentProp);
+         GetTypeSpecificGrid(navH,
+                             primary,
+                             nxProp,
+                             mainGrid,
+                             rowIndex,
+                             isMarked: isMarked,
+                             embeddedPropertyTargets: parentProp);
          return;
       }
 
       var margin = modifiableList.Count > 0 ? 4 : 0;
       var collectionGrid = ControlFactory.GetCollectionGrid();
-      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin);
+      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked);
       GetCollectionPreview(navH,
                            primary,
                            collectionGrid,
@@ -255,13 +295,20 @@ public static class Eu5UiGen
                                                 Grid mainGrid,
                                                 IEu5Object primary,
                                                 int row,
-                                                int leftMargin)
+                                                int leftMargin,
+                                                bool isMarked)
    {
       var headerPanel = NEF.PropertyTitlePanel(leftMargin);
 
-      GetCollectionTitleTextBox(modifiableList.Count, nxProp, headerPanel, primary, leftMargin, fontSize: 12);
+      GetCollectionTitleTextBox(modifiableList.Count,
+                                nxProp,
+                                headerPanel,
+                                primary,
+                                leftMargin,
+                                isMarked: isMarked,
+                                fontSize: 12);
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
-      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, Dock.Left);
+      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel);
 
       GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
@@ -270,8 +317,7 @@ public static class Eu5UiGen
                                              Enum nxProp,
                                              Type nxPropType,
                                              Type? nxItemType,
-                                             DockPanel panel,
-                                             Dock dock)
+                                             DockPanel panel)
    {
       // Infer actions are disabled globally
       if (Config.Settings.NUIConfig.DisableNUIInferFromMapActions)
@@ -492,6 +538,7 @@ public static class Eu5UiGen
                                                  DockPanel panel,
                                                  IEu5Object primary,
                                                  int margin,
+                                                 bool isMarked,
                                                  int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE)
    {
       var text = $"{nxProp.ToString()} ({count})";
@@ -501,6 +548,9 @@ public static class Eu5UiGen
                                                  height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
                                                  alignment: HorizontalAlignment.Left,
                                                  leftMargin: margin);
+
+      if (isMarked)
+         tb.Background = ControlFactory.MarkedBrush;
 
       panel.Children.Add(tb);
       SetCollectionToolTip(primary, nxProp, tb);
@@ -529,8 +579,9 @@ public static class Eu5UiGen
                                            Enum nxProp,
                                            Grid mainGrid,
                                            int rowIndex,
-                                           int leftMargin = 0,
-                                           Enum? embeddedPropertyTargets = null)
+                                           bool isMarked,
+                                           Enum? embeddedPropertyTargets = null,
+                                           int leftMargin = 0)
    {
       var type = primary.GetNxPropType(nxProp);
 
@@ -598,10 +649,12 @@ public static class Eu5UiGen
 
       var desc = NEF.DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
+      if (isMarked)
+         desc.Background = ControlFactory.MarkedBrush;
 
       SetTooltipIsAny(primary, nxProp, desc);
 
-      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new(), Dock.Left);
+      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new());
 
       var line = NEF.GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
@@ -618,7 +671,7 @@ public static class Eu5UiGen
    {
    }
 
-   private static void GenerateShortInfo(NavH navH, IEu5Object primary, Grid mainGrid)
+   private static void GenerateShortInfo(NavH navH, IEu5Object primary, Grid mainGrid, bool isMarked)
    {
    }
 }

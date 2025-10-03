@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -45,8 +47,12 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
 
 public interface IEu5Object : ISearchable, INUI, IAgs
 {
+   [Required]
    [SuppressAgs]
    [AddModifiable]
+   [ReadonlyNexus]
+   [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
+   [DefaultValue("")]
    public string UniqueId { get; set; }
 
    [SuppressAgs]

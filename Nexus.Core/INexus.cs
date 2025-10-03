@@ -89,4 +89,27 @@ public interface INexus
    /// Returns whether the given property is a collection.
    /// </summary>
    bool IsCollection(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property is required to have a non-empty value.
+   /// </summary>
+   /// <param name="property"></param>
+   /// <returns></returns>
+   bool IsRequired(Enum property);
+
+   /// <summary>
+   /// Gets the default value for the given property.
+   /// </summary>
+   /// <param name="property"></param>
+   /// <typeparam name="T"></typeparam>
+   /// <returns></returns>
+   T GetDefaultValue<T>(Enum property);
+
+   /// <summary>
+   /// Gets the default value for the given property as an object. <br/>
+   /// Use <see cref="GetDefaultValue{T}(Enum)"/> to get the typed version.
+   /// </summary>
+   /// <param name="property"></param>
+   /// <returns></returns>
+   object GetDefaultValue(Enum property);
 }

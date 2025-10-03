@@ -16,7 +16,10 @@ public partial class AudioTag : INUI, IEmpty<AudioTag>, IModifierPattern
    public string UniqueId { get; set; } = null!;
 
    [Description("The factor by which this audio tag influences sound effects. Default is 1.0.")]
+   [DefaultValue(1f)]
    public object Value { get; set; } = 1f;
+   [Description("The type of modifier this audio tag represents.")]
+   [DefaultValue(ModifierType.Float)]
    public ModifierType Type { get; set; } = ModifierType.Float;
 
    public bool IsReadonly => true;

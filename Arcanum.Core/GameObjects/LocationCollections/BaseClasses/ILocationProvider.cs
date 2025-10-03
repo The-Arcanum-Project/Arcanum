@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.NUI;
+﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -11,15 +12,20 @@ public interface ILocationCollection<T> where T : ILocation
    [SuppressAgs]
    [ParseAs("THIS_SHOULD_NEVER_BE_USED")]
    [AddModifiable]
+   [Description("The child locations of this location.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<T> LocationChildren { get; set; }
 }
 
 public interface ILocation : IEu5Object
 {
    public ICollection<Location> GetLocations();
+
    public LocationCollectionType LcType { get; }
 
    [SuppressAgs]
    [AddModifiable]
+   [Description("The parent locations of this location.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<ILocation> Parents { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Jomini.Scopes;
 using Arcanum.Core.CoreSystems.NUI;
 
@@ -6,13 +7,36 @@ namespace Arcanum.Core.CoreSystems.Jomini.Effects;
 
 public partial class EffectDefinition(string name) : INUI, ICollectionProvider<EffectDefinition>
 {
+   [Description("The type of modifier this effect represents.")]
+   [DefaultValue(ModifierType.ScriptedValue)]
    public ModifierType ModifierType { get; set; } = ModifierType.ScriptedValue;
+
+   [Description("Unique name of this effect definition. Must be unique among all objects of this type.")]
+   [DefaultValue("")]
    public string Name { get; set; } = name;
+
+   [Description("A description of what this effect does.")]
+   [DefaultValue("")]
    public string Description { get; set; } = string.Empty;
+
+   [Description("Instructions on how to use this effect.")]
+   [DefaultValue("")]
    public string Usage { get; set; } = string.Empty;
+
+   [Description("Whether this effect reads the game state for all scopes when applied.")]
+   [DefaultValue(false)]
    public bool ReadsGameStateForAllScopes { get; set; }
+
+   [Description("Traits associated with this effect.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<string> Traits { get; set; } = [];
+
+   [Description("Scopes where this effect can be applied.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<ScopeType> Scopes { get; set; } = [];
+
+   [Description("Targets that this effect can affect.")]
+   [DefaultValue(null)]
    public ObservableRangeCollection<ScopeType> Targets { get; set; } = [];
 
    public EffectDefinition(string name,

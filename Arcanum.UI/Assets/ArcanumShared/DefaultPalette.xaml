@@ -17,6 +17,7 @@
     <Color x:Key = "BlueAccentColor"> #3574f0 </Color>
     <Color x:Key = "GreenColor"> #528d57 </Color>
     <Color x:Key = "EmbeddedBorderColor"> #800080 </Color>
+    <Color x:Key = "MarkedColor"> #663b0a </Color>
 
     <SolidColorBrush x:Key = "GreenColorBrush"
                      Color = "{StaticResource GreenColor}" />
@@ -52,6 +53,8 @@
                      Color = "{StaticResource DimInformationBlueColor}" />
     <SolidColorBrush x:Key = "EmbeddedBorderColorBrush"
                      Color = "{StaticResource EmbeddedBorderColor}" />
+    <SolidColorBrush x:Key = "MarkedColorBrush"
+                     Color = "{StaticResource MarkedColor}" />
 
     <LinearGradientBrush x:Key = "AccentGradientBrush"
                          StartPoint = "-0.2,-0.2"

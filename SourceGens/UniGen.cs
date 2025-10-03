@@ -13,22 +13,36 @@ public class UniGen : IIncrementalGenerator
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
-      var nexusClassesProvider = context.SyntaxProvider.CreateSyntaxProvider(predicate: (node, _)
-                                                                                => node is ClassDeclarationSyntax cds &&
-                                                                                   cds.Modifiers
-                                                                                     .Any(m => m.IsKind(SyntaxKind
-                                                                                                .PartialKeyword)),
-                                                                             transform: NexusHelpers
-                                                                               .GetNexusClassSymbol)
+      var nexusClassesProvider = context.SyntaxProvider
+                                        .CreateSyntaxProvider(predicate: (node, _)
+                                                                 => node is ClassDeclarationSyntax cds &&
+                                                                    cds.Modifiers.Any(m => m.IsKind(SyntaxKind
+                                                                              .PartialKeyword)),
+                                                              transform: NexusHelpers.GetNexusClassSymbol)
                                         .Where(s => s is not null);
 
-      context.RegisterSourceOutput(nexusClassesProvider.Collect(),
-                                   (spc, nexusClasses) => Execute(nexusClasses, spc));
+      var combined = nexusClassesProvider.Collect()
+                                         .Combine(context.CompilationProvider);
+
+      context.RegisterSourceOutput(combined,
+                                   (spc, tuple) =>
+                                   {
+                                      var (nexusClasses, compilation) = tuple;
+
+                                      Execute(nexusClasses, spc, compilation);
+                                   });
    }
 
-   private static void Execute(ImmutableArray<INamedTypeSymbol?> nexusClasses, SourceProductionContext context)
+   private static void Execute(ImmutableArray<INamedTypeSymbol?> nexusClasses,
+                               SourceProductionContext context,
+                               Compilation compilation)
    {
       if (nexusClasses.IsDefaultOrEmpty)
+         return;
+
+      var enumerableSymbol = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
+      var ieu5ObjectSymbol = compilation.GetTypeByMetadataName("Arcanum.Core.GameObjects.BaseTypes.IEu5Object");
+      if (enumerableSymbol is null || ieu5ObjectSymbol is null)
          return;
 
       AgsHelper.EnumAnalysisCache = [];
@@ -36,7 +50,7 @@ public class UniGen : IIncrementalGenerator
       foreach (var nexusClassSymbol in nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
          try
          {
-            NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol, context);
+            NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol, context, enumerableSymbol, ieu5ObjectSymbol);
             if (nexusClassSymbol.AllInterfaces.Any(i => i.ToDisplayString() == IAGS_INTERFACE))
                AgsHelper.RunSavingGenerator(nexusClassSymbol, context);
          }

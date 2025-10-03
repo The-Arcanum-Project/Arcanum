@@ -21,22 +21,39 @@ public partial class Adjacency(Location from,
                                int endY) : INUI, ICollectionProvider<Adjacency>, IEmpty<Adjacency>
 {
    [Description("The location this adjacency starts from.")]
+   [DefaultValue(null)]
    public Location From { get; set; } = from;
+
    [Description("The location this adjacency goes to.")]
+   [DefaultValue(null)]
    public Location To { get; set; } = to;
+
    [Description("The type of adjacency.\nValid types: Sea, ")]
+   [DefaultValue(AdjacencyType.Sea)]
    public AdjacencyType Type { get; set; } = type;
+
    [Description("The unique name of this adjacency.")]
+   [DefaultValue("")]
    public string Name { get; set; } = name;
+
    [Description("A comment about this adjacency.")]
+   [DefaultValue("")]
    public string Comment { get; set; } = comment;
+
    [Description("The starting X coordinate of this adjacency on the map.")]
+   [DefaultValue(0)]
    public int StartX { get; set; } = startX;
+
    [Description("The starting Y coordinate of this adjacency on the map.")]
+   [DefaultValue(0)]
    public int StartY { get; set; } = startY;
+
    [Description("The ending X coordinate of this adjacency on the map.")]
+   [DefaultValue(0)]
    public int EndX { get; set; } = endX;
+
    [Description("The ending Y coordinate of this adjacency on the map.")]
+   [DefaultValue(0)]
    public int EndY { get; set; } = endY;
 
    public int GetLength()

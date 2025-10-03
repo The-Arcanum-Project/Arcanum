@@ -198,7 +198,7 @@ public partial class Character : IEu5Object<Character>
    public Location BirthPlace { get; set; } = Location.Empty;
 
    [SaveAs]
-   [DefaultValue(null)]
+   [DefaultValue("")]
    [ParseAs("dynasty")]
    [Description("The dynasty of this character")]
    public string Dynasty { get; set; } = string.Empty;

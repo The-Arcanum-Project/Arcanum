@@ -104,7 +104,10 @@ public static class Helpers
 
       var interfaceMembers = classSymbol.AllInterfaces
                                         .SelectMany(i => i.GetMembers())
-                                        .ToDictionary(m => m.Name, m => m);
+                                        .Where(m => m is IPropertySymbol)
+                                        .GroupBy(m => m.Name)
+                                        .ToDictionary(g => g.Key, g => g.First());
+      // It's good practice to ensure FilterModifiableMembers also filters for properties/fields
       FilterModifiableMembers(classSymbol, context, interfaceMembers, inclusive, finalMembers, checkedMembers, true);
 
       var potentialMembers = new Dictionary<string, ISymbol>();
@@ -115,6 +118,11 @@ public static class Helpers
       {
          foreach (var member in currentType.GetMembers())
          {
+            if (member.IsStatic ||
+                member.IsImplicitlyDeclared ||
+                member is not IPropertySymbol && member is not IFieldSymbol)
+               continue;
+
             // Prioritize members from the most derived class.
             // If a member with the same name exists (due to 'new'), it's already been added.
             if (potentialMembers.ContainsKey(member.Name) || checkedMembers.Contains(member.Name))
@@ -225,6 +233,46 @@ public static class Helpers
 
    /// <summary>
    /// For a given member name, walks up the type hierarchy of a class (including interfaces)
+   /// to find the most-derived declaration attribute.
+   /// </summary>
+   public static AttributeData? GetEffectiveAttribute(
+      INamedTypeSymbol classSymbol,
+      IPropertySymbol member,
+      string attributeFullName)
+   {
+      AttributeData? data = null;
+
+      var symbolName = member.Name;
+
+      var currentType = classSymbol;
+      while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+      {
+         var memberOnType = currentType.GetMembers(symbolName).FirstOrDefault();
+         if (memberOnType != null)
+            data ??= memberOnType.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                       attributeFullName);
+
+         currentType = currentType.BaseType;
+      }
+
+      if (data != null)
+         return data;
+
+      foreach (var interFace in classSymbol.AllInterfaces)
+      {
+         var interfaceMembers = interFace.GetMembers(symbolName).FirstOrDefault();
+         if (interfaceMembers != null)
+            data ??= interfaceMembers.GetAttributes()
+                                     .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                                                           attributeFullName);
+      }
+
+      return data;
+   }
+
+   /// <summary>
+   /// For a given member name, walks up the type hierarchy of a class (including interfaces)
    /// to find the most-derived declaration and its [IgnoreModifiable] or [AddModifiable] attributes.
    /// </summary>
    private static (AttributeData? Ignore, AttributeData? Add) FindEffectiveAttributes(
@@ -282,9 +330,7 @@ public static class Helpers
       if (symbol is IPropertySymbol propertySymbol)
       {
          while (propertySymbol.OverriddenProperty != null)
-         {
             propertySymbol = propertySymbol.OverriddenProperty;
-         }
 
          return propertySymbol;
       }
@@ -339,5 +385,65 @@ public static class Helpers
             return true;
 
       return false;
+   }
+
+   public static bool IsGenericCollection(ITypeSymbol typeSymbol, out INamedTypeSymbol? itemType)
+   {
+      itemType = null;
+      if (typeSymbol is not INamedTypeSymbol namedType)
+      {
+         return false;
+      }
+
+      // Find the implementation of IEnumerable<T>
+      var ienumerable = namedType.AllInterfaces.FirstOrDefault(i =>
+                                                                  i.OriginalDefinition.ToDisplayString() ==
+                                                                  "System.Collections.Generic.IEnumerable<T>");
+
+      if (ienumerable != null && ienumerable.TypeArguments.Length == 1)
+      {
+         // We found it, extract the item type T
+         itemType = ienumerable.TypeArguments[0] as INamedTypeSymbol;
+         return itemType != null;
+      }
+
+      return false;
+   }
+
+   public static bool IsCollectionOfObjects(IPropertySymbol property, out INamedTypeSymbol? itemType)
+   {
+      itemType = null;
+      var type = property.Type;
+
+      // Handle string first, as it's a common edge case (implements IEnumerable<char>) ---
+      if (type.SpecialType == SpecialType.System_String)
+         return false;
+
+      // --- 2. Handle Arrays: T[] ---
+      if (type is IArrayTypeSymbol arrayType)
+      {
+         if (arrayType.ElementType is not INamedTypeSymbol { TypeKind: TypeKind.Class } elementAsNamedType1 ||
+             elementAsNamedType1.SpecialType == SpecialType.System_String)
+            return false;
+
+         itemType = elementAsNamedType1;
+         return true;
+      }
+
+      // --- Handle Generic Collections: List<T>, HashSet<T>, etc. ---
+      // We look for an implementation of IEnumerable<T>.
+      var ienumerableInterface = type.AllInterfaces
+                                     .FirstOrDefault(i => i.IsGenericType &&
+                                                          i.OriginalDefinition.SpecialType ==
+                                                          SpecialType.System_Collections_Generic_IEnumerable_T);
+
+      var typeArgument = ienumerableInterface?.TypeArguments.FirstOrDefault();
+
+      if (typeArgument is not INamedTypeSymbol { TypeKind: TypeKind.Class } elementAsNamedType ||
+          elementAsNamedType.SpecialType == SpecialType.System_String)
+         return false;
+
+      itemType = elementAsNamedType;
+      return true;
    }
 }
