@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using Arcanum.Core.CoreSystems.NUI;
+using System.Diagnostics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Nexus.Core;
@@ -93,12 +93,56 @@ public class PathAccessor
       return $"Type: {currentObj.GetType().Name} -:- Id: {currentObj.UniqueId}";
    }
 
-   public static List<string> GetPathOptions(PathAccessor accessor)
+   public object GetValueForSorting(IEu5Object target)
    {
-      return GetPathOptions(accessor.RawPath);
+      const string typeNullIdNull = "null";
+      var parts = Segments;
+
+      if (parts.Length <= 0)
+         return typeNullIdNull;
+
+      if (parts.Length == 1)
+         return target.UniqueId;
+
+      var currentObj = target;
+      // Traverse the path to get the final property type
+      for (var i = 1; i < parts.Length; i++)
+      {
+         var enums = currentObj.GetAllProperties();
+         var nxProp =
+            enums.FirstOrDefault(p => string.Equals(p.ToString(), parts[i], StringComparison.OrdinalIgnoreCase));
+         if (nxProp == null)
+            return "null";
+
+         var propType = currentObj.GetNxPropType(nxProp);
+
+         if (typeof(IEu5Object).IsAssignableFrom(propType))
+         {
+            Nx.ForceGet(currentObj, nxProp, ref currentObj);
+         }
+         else if (currentObj.IsCollection(nxProp))
+         {
+            // Collections are not supported for sortingValueRetrieval
+            return "null";
+         }
+         else
+         {
+            object value = null!;
+            Nx.ForceGet(currentObj, nxProp, ref value);
+            Debug.Assert(value != null, nameof(value) + " != null");
+            return value;
+         }
+      }
+
+      return $"Type: {currentObj.GetType().Name} -:- Id: {currentObj.UniqueId}";
    }
 
-   public static List<string> GetPathOptions(string path)
+   public static List<Enum> GetPathOptions(PathAccessor accessor, bool suggestionSource)
+   {
+      return GetPathOptions(accessor.RawPath, suggestionSource);
+   }
+
+   public static List<Enum> GetPathOptions(string path, bool includeCollections)
    {
       if (string.IsNullOrWhiteSpace(path))
          return [];
@@ -129,10 +173,15 @@ public class PathAccessor
             {
                currentInstance = (IEu5Object)empty!;
                if (i == parts.Length - 1)
-                  return currentInstance.GetAllProperties()
-                                        .Select(p => p.ToString())
-                                        .OrderBy(name => name)
-                                        .ToList();
+               {
+                  var props = currentInstance.GetAllProperties()
+                                             .OrderBy(name => name)
+                                             .ToList();
+
+                  if (!includeCollections)
+                     props = props.Where(p => !currentInstance.IsCollection(p)).ToList();
+                  return props;
+               }
 
                continue;
             }
@@ -150,10 +199,19 @@ public class PathAccessor
 
       object value = null!;
       Nx.ForceGet(currentInstance, currentInstance.GetAllProperties().First(), ref value);
-      return value.GetType().GetProperties().Select(p => p.Name).ToList();
+      var prop = currentInstance.GetAllProperties()
+                                .OrderBy(name => name)
+                                .ToList();
+
+      if (!includeCollections)
+         prop = prop.Where(p => !currentInstance.IsCollection(p)).ToList();
+      return prop;
    }
 
-   public static List<string> GetSuggestions(string text, out bool isOpen, bool forceShowAll = false)
+   public static List<string> GetSuggestions(string text,
+                                             out bool isOpen,
+                                             bool forceShowAll = false,
+                                             bool includeCollections = true)
    {
       List<string> suggestions = [];
       if (!forceShowAll && string.IsNullOrWhiteSpace(text))
@@ -177,7 +235,7 @@ public class PathAccessor
          var path = text[..lastDotIndex];
          filterText = text[(lastDotIndex + 1)..];
 
-         suggestionSource = GetPathOptions(path);
+         suggestionSource = GetPathOptions(path, includeCollections).Select(e => e.ToString()).ToList();
       }
 
       var filteredSuggestions = suggestionSource
