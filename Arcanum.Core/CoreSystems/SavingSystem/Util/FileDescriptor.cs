@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -6,7 +7,7 @@ using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-public class FileDescriptor : IEmpty<FileDescriptor>
+public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
 {
    public string Name => FileType.TypeName;
    public string[] LocalPath { get; }
@@ -26,6 +27,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>
       {
          fileLoadingService.Descriptor = this;
       }
+
       LocalPath = localPath;
       FileType = fileType;
       LoadingService = loadingService;
@@ -63,4 +65,16 @@ public class FileDescriptor : IEmpty<FileDescriptor>
    {
       return FilePath.GetHashCode();
    }
+
+   public string GetNamespace => "Backend.FileDescriptor";
+   public string ResultName => Name;
+   public List<string> SearchTerms => [Name];
+
+   public void OnSearchSelected()
+   {
+      throw new NotImplementedException();
+   }
+
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, ResultName, GetNamespace);
+   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
 }

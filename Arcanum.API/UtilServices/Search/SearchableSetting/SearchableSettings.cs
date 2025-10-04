@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Arcanum.API.Attributes;
 
 namespace Arcanum.API.UtilServices.Search.SearchableSetting;
@@ -14,7 +13,7 @@ public abstract partial class SearchableSettings : ISearchable
    {
       _topLevelType = topLevelType ?? throw new ArgumentNullException(nameof(topLevelType));
       GetNamespace = BuildNameSpace(topLevelType, GetType().FullName!, ((ISearchable)this).NamespaceSeparator);
-      SearchTerms = searchTerms ?? GenerateSearchTerms(GetType().Name);
+      SearchTerms = searchTerms ?? SearchHelper.GenerateSearchTerms(GetType().Name);
       _root = root;
    }
 
@@ -31,7 +30,7 @@ public abstract partial class SearchableSettings : ISearchable
          if (pd.GetCustomAttribute<IgnoreSettingPropertyAttribute>() != null)
             continue;
 
-         var searchTerms = GenerateSearchTerms(pd.Name);
+         var searchTerms = SearchHelper.GenerateSearchTerms(pd.Name);
          var nameSpace = BuildNameSpace(topLevelType,
                                         $"{pd.DeclaringType?.FullName}.{pd.Name}",
                                         ((ISearchable)this).NamespaceSeparator);
@@ -50,25 +49,6 @@ public abstract partial class SearchableSettings : ISearchable
       }
 
       return searchables;
-   }
-
-   /// <summary>
-   /// We also want to add each part of the camelCase name as a search term and
-   /// a substring of the full name getting longer with each camelCase part <br/>
-   /// example: ThisIsAnExample -> this, is, an, example, thisIs, thisIsAn, thisIsAnExample
-   /// </summary>
-   /// <returns></returns>
-   private static List<string> GenerateSearchTerms(string desc)
-   {
-      var parts = CamelCaseSplitter().Split(desc);
-
-      List<string> terms = [..parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.ToLower())];
-
-      // Build progressive substrings
-      for (var i = 2; i <= parts.Length; i++) // start at 2 to avoid first match being empty
-         terms.Add(string.Join("", parts[..i]));
-
-      return terms;
    }
 
    private static string BuildNameSpace(Type topLevelType, string targetNameSpace, char separator)
@@ -108,9 +88,6 @@ public abstract partial class SearchableSettings : ISearchable
    [IgnoreSettingProperty]
    [IgnoreInPropertyGrid]
    public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.Settings;
-
-   [GeneratedRegex("(?=[A-Z])")]
-   private static partial Regex CamelCaseSplitter();
 
    public abstract float GetRelevanceScore(string query);
 }
