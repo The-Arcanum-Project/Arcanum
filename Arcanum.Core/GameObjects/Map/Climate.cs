@@ -118,8 +118,8 @@ public partial class Climate : IEu5Object<Climate>
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion
 

@@ -39,7 +39,7 @@ public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactio
    public string GetNamespace => $"Court.GovernmentState.{nameof(EstateSatisfactionDefinition)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateSatisfactionDefinitionSettings;
    public INUINavigation[] Navigations => [];

@@ -16,7 +16,7 @@ public class SearchableSettingsProperty(string? iconPath,
    public string GetNamespace { get; } = nSpace;
    [IgnoreSettingProperty]
    public string ResultName { get; } = resultName;
-   
+
    [IgnoreSettingProperty]
    public List<string> SearchTerms { get; set; } = searchTerms;
 
@@ -25,7 +25,7 @@ public class SearchableSettingsProperty(string? iconPath,
       var info = parent.GetType().GetProperty(propName);
       if (info == null)
          throw new InvalidOperationException($"Property '{propName}' not found in type '{parent.GetType().Name}'.");
-      
+
       var path = PropertyPathBuilder.GetPathToProperty(root, info);
       UIHandle.Instance.PopUpHandle.NavigateToSetting(path);
    }
@@ -34,5 +34,5 @@ public class SearchableSettingsProperty(string? iconPath,
    public ISearchResult VisualRepresentation => new SearchResultItem(iconPath, ResultName, GetNamespace);
 
    [IgnoreSettingProperty]
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.Settings;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.Settings;
 }

@@ -78,6 +78,6 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Definition.UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstanceAgsSettings;
 }

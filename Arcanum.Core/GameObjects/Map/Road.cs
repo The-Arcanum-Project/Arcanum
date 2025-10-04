@@ -42,8 +42,8 @@ public partial class Road : IEu5Object<Road>
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Road", string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.RoadAgsSettings;
    public string SavingKey => string.Empty;
    public string UniqueId

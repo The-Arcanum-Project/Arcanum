@@ -32,5 +32,5 @@ public abstract class OldNameKeyDefined(string name) : ISearchable
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, name, string.Empty);
-   public virtual IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public virtual Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 }

@@ -74,5 +74,5 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Name, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 }

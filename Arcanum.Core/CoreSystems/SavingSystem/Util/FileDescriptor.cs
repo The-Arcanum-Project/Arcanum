@@ -76,5 +76,5 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, ResultName, GetNamespace);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.AbstractObjects;
 }

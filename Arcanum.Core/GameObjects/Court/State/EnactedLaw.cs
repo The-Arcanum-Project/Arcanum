@@ -37,7 +37,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Key, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    public static Dictionary<string, EnactedLaw> GetGlobalItems() => [];
 }

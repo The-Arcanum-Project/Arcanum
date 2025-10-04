@@ -79,8 +79,8 @@ public partial class Location
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.GameObjects | IQueastorSearchSettings.Category.MapObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects |
+                                 IQueastorSearchSettings.DefaultCategories.MapObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

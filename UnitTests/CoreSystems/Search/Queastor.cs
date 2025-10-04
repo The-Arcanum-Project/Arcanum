@@ -15,7 +15,7 @@ public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISe
 
    public float GetRelevanceScore(string query) => relevance;
    public ISearchResult VisualRepresentation { get; } = null!;
-   public IQueastorSearchSettings.Category SearchCategory { get; } = IQueastorSearchSettings.Category.All;
+   public Enum SearchCategory { get; } = IQueastorSearchSettings.DefaultCategories.All;
 }
 
 [TestFixture]
@@ -24,8 +24,8 @@ public class QueastorTests
    [Test]
    public void AddToIndex_And_ExactSearch_Works()
    {
-      var queastor = new Queastor(new ());
-      var obj = new MockSearchable(terms:"Button");
+      var queastor = new Queastor(new());
+      var obj = new MockSearchable(terms: "Button");
 
       queastor.AddToIndex(obj);
 
@@ -36,8 +36,8 @@ public class QueastorTests
    [Test]
    public void FuzzySearch_FindsCloseMatch()
    {
-      var queastor = new Queastor(new (){MaxLevinsteinDistance = 1});
-      var obj = new MockSearchable(terms:"Renderer");
+      var queastor = new Queastor(new() { MaxLevinsteinDistance = 1 });
+      var obj = new MockSearchable(terms: "Renderer");
 
       queastor.AddToIndex(obj);
 
@@ -48,9 +48,9 @@ public class QueastorTests
    [Test]
    public void NoFalsePositives_OnSearch()
    {
-      var queastor = new Queastor(new ());
-      var obj1 = new MockSearchable(terms:"Parser");
-      var obj2 = new MockSearchable(terms:"Button");
+      var queastor = new Queastor(new());
+      var obj1 = new MockSearchable(terms: "Parser");
+      var obj2 = new MockSearchable(terms: "Button");
 
       queastor.AddToIndex(obj1);
       queastor.AddToIndex(obj2);
@@ -62,7 +62,7 @@ public class QueastorTests
    [Test]
    public void MultipleTerms_MappedCorrectly()
    {
-      var queastor = new Queastor(new ());
+      var queastor = new Queastor(new());
       var obj = new MockSearchable(1f, "Button", "Control", "Widget");
 
       queastor.AddToIndex(obj);
@@ -83,7 +83,7 @@ public class QueastorTests
    [Test]
    public void RemoveFromIndex_RemovesItemCompletely()
    {
-      var queastor = new Queastor(new ());
+      var queastor = new Queastor(new());
       var item = new MockSearchable(1f, "Alpha", "Beta");
       queastor.AddToIndex(item);
 
@@ -99,16 +99,16 @@ public class QueastorTests
    [Test]
    public void RemoveFromIndex_DoesNothingIfItemNotPresent()
    {
-      var queastor = new Queastor(new ());
-      var item = new MockSearchable(terms:"Alpha");
+      var queastor = new Queastor(new());
+      var item = new MockSearchable(terms: "Alpha");
       queastor.RemoveFromIndex(item); // Should not throw
    }
 
    [Test]
    public void ModifyInIndex_UpdatesTermsCorrectly_AddsNewTerms()
    {
-      var queastor = new Queastor(new ());
-      var item = new MockSearchable(terms:"Alpha");
+      var queastor = new Queastor(new());
+      var item = new MockSearchable(terms: "Alpha");
       queastor.AddToIndex(item);
 
       item.SearchTerms.Clear();
@@ -127,7 +127,7 @@ public class QueastorTests
    [Test]
    public void ModifyInIndex_UpdatesTermsCorrectly_RemovesObsoleteTerms()
    {
-      var queastor = new Queastor(new ());
+      var queastor = new Queastor(new());
       var item = new MockSearchable(1f, "Alpha", "Beta");
       queastor.AddToIndex(item);
 
@@ -148,7 +148,7 @@ public class QueastorTests
    [Test]
    public void ModifyInIndex_HandlesNoChangesGracefully()
    {
-      var queastor = new Queastor(new ());
+      var queastor = new Queastor(new());
       var item = new MockSearchable(1f, "Alpha", "Beta");
       queastor.AddToIndex(item);
 
@@ -160,22 +160,26 @@ public class QueastorTests
       results = queastor.Search("Beta");
       Assert.That(results, Does.Contain(item));
    }
-   
 
-    [Test]
-    public void GetClosestMatch_ReturnsClosestTerm()
-    {
-       var queastor = new Queastor(new ());
-        var terms = new List<string> { "apple", "apply", "ape" };
-        var closest = queastor.GetClosestMatch("appl", terms);
-        Assert.That(closest, Is.EqualTo("apple"));
-    }
+   [Test]
+   public void GetClosestMatch_ReturnsClosestTerm()
+   {
+      var queastor = new Queastor(new());
+      var terms = new List<string>
+      {
+         "apple",
+         "apply",
+         "ape"
+      };
+      var closest = queastor.GetClosestMatch("appl", terms);
+      Assert.That(closest, Is.EqualTo("apple"));
+   }
 
-    [Test]
-    public void GetClosestMatch_ReturnsEmptyForNoTerms()
-    {
-       var queastor = new Queastor(new ());
-        var closest = queastor.GetClosestMatch("test", []);
-        Assert.That(closest, Is.EqualTo(string.Empty));
-    }
+   [Test]
+   public void GetClosestMatch_ReturnsEmptyForNoTerms()
+   {
+      var queastor = new Queastor(new());
+      var closest = queastor.GetClosestMatch("test", []);
+      Assert.That(closest, Is.EqualTo(string.Empty));
+   }
 }

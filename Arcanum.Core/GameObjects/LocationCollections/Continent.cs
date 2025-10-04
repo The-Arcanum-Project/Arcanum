@@ -33,8 +33,8 @@ public partial class Continent
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ContinentAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

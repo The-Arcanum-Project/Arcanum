@@ -89,7 +89,7 @@ public partial class LocationRank : IEu5Object<LocationRank>
    public string GetNamespace => $"Map.{nameof(LocationRank)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationRankSettings;
    public INUINavigation[] Navigations => [];

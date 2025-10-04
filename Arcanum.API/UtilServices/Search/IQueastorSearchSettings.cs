@@ -22,7 +22,7 @@ public class IQueastorSearchSettings
    }
 
    [Flags]
-   public enum Category
+   public enum DefaultCategories
    {
       None = 0,
       Settings = 1 << 0, // 1
@@ -35,7 +35,7 @@ public class IQueastorSearchSettings
 
    public SearchModes SearchMode { get; set; } = SearchModes.Default;
    public SortingOptions SortingOption { get; set; } = SortingOptions.Relevance;
-   public Category SearchCategory { get; set; } = Category.All;
+   public Enum SearchCategory { get; set; } = DefaultCategories.All;
    public bool WholeWord { get; set; }
    public int MaxLevinsteinDistance { get; set; } = 2;
 }

@@ -87,7 +87,7 @@ public abstract partial class SearchableSettings : ISearchable
    [JsonIgnore]
    [IgnoreSettingProperty]
    [IgnoreInPropertyGrid]
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.Settings;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.Settings;
 
    public abstract float GetRelevanceScore(string query);
 }

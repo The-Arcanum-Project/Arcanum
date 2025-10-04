@@ -70,8 +70,8 @@ public class SearchableMenuItem : MenuItem, ISearchable
 
    public ISearchResult VisualRepresentation
       => new SearchResultItem(null, Header?.ToString() ?? string.Empty, GetNamespaceCombined());
-   
-   public IQueastorSearchSettings.Category SearchCategory { get; } = IQueastorSearchSettings.Category.UiElements;
+
+   public Enum SearchCategory { get; } = IQueastorSearchSettings.DefaultCategories.UiElements;
 
    private string GetParentAsNamespace()
    {

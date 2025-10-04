@@ -37,7 +37,7 @@ public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
 
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Type, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    public static Dictionary<string, ParliamentDefinition> GetGlobalItems() => [];
 }

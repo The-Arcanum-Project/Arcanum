@@ -46,7 +46,7 @@ public partial class InstitutionState : IEu5Object<InstitutionState>
    public string GetNamespace => $"MainMenu.State.{nameof(InstitutionState)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionStateSettings;
    public INUINavigation[] Navigations => [];

@@ -150,8 +150,8 @@ public partial class Topography : IEu5Object<Topography>
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion
 

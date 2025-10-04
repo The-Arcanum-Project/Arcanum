@@ -226,7 +226,7 @@ public partial class Character : IEu5Object<Character>
    public string GetNamespace => $"Court.{nameof(Character)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterSettings;
    public INUINavigation[] Navigations => [];

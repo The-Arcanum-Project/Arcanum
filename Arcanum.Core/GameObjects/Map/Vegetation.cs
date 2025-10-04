@@ -92,8 +92,8 @@ public partial class Vegetation : IEu5Object<Vegetation>
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Vegetation", string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory
-      => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion
 

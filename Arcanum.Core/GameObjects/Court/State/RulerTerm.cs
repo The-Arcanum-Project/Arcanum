@@ -51,7 +51,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public string GetNamespace => $"Court.{nameof(RulerTerm)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RulerTermSettings;
    public INUINavigation[] Navigations { get; } = [];

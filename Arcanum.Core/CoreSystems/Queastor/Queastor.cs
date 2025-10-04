@@ -28,6 +28,7 @@ public class Queastor : IQueastor
 
    public static readonly Queastor GlobalInstance = new(new QueastorSearchSettings());
 
+   public bool UsesDefaultEnum { get; set; } = true;
    public IQueastorSearchSettings Settings { get; set; }
 
    public void AddToIndex(ISearchable item)
@@ -130,24 +131,34 @@ public class Queastor : IQueastor
       HashSet<SearchResult> filteredResults = [];
       // Fuzzy matches via BK-Tree
       foreach (var term in _bkTree.Search(query, Settings.MaxLevinsteinDistance))
-         if (_invertedIndex.TryGetValue(term, out var items))
+      {
+         if (UsesDefaultEnum)
          {
-            if (Settings.SearchCategory == IQueastorSearchSettings.Category.All)
+            if (_invertedIndex.TryGetValue(term, out var items))
             {
-               foreach (var item in items)
-                  filteredResults.Add(new(term, item));
-               continue;
-            }
+               if ((IQueastorSearchSettings.DefaultCategories)Settings.SearchCategory ==
+                   IQueastorSearchSettings.DefaultCategories.All)
+               {
+                  foreach (var item in items)
+                     filteredResults.Add(new(term, item));
+                  continue;
+               }
 
-            // Filter by search category if specified
-            foreach (var item in items.Where(item => (item.SearchCategory & Settings.SearchCategory) != 0))
-               filteredResults.Add(new(term, item));
+               // Filter by search category if specified
+               foreach (var item in items)
+                  if ((Convert.ToInt64(Settings.SearchCategory) & Convert.ToInt64(item.SearchCategory)) != 0)
+                     filteredResults.Add(new(term, item));
+            }
          }
+      }
+
 #if TIME_QUEASTOR
-      Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {exact.Count} exact matches and {filteredResults.Count} fuzzy matches.");
+      Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {exact.Count} exact matches and {filteredResults
+        .Count} fuzzy matches.");
 #endif
 
       exact.Sort();
+
       var sortedFuzzy = ApplySorting(filteredResults, query);
       return exact.Concat(sortedFuzzy).ToList();
    }
@@ -298,12 +309,12 @@ public class Queastor : IQueastor
       return previousRow[n];
    }
 
-   public Dictionary<IQueastorSearchSettings.Category, int> GetEntriesPerCategory()
+   public Dictionary<IQueastorSearchSettings.DefaultCategories, int> GetEntriesPerCategory()
    {
-      var categoryCounts = new Dictionary<IQueastorSearchSettings.Category, int>();
+      var categoryCounts = new Dictionary<IQueastorSearchSettings.DefaultCategories, int>();
       foreach (var entry in _invertedIndex)
       {
-         var category = (IQueastorSearchSettings.Category)entry.Value.FirstOrDefault()?.SearchCategory!;
+         var category = (IQueastorSearchSettings.DefaultCategories)entry.Value.FirstOrDefault()?.SearchCategory!;
          var count = categoryCounts.GetValueOrDefault(category, 0);
 
          categoryCounts[category] = count + entry.Value.Count;

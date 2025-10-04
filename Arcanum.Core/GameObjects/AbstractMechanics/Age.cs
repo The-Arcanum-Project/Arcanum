@@ -96,7 +96,7 @@ public partial class Age : IEu5Object<Age>
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Age", string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.GameObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion
 

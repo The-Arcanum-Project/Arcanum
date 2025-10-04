@@ -47,7 +47,7 @@ public interface ISearchable
    /// The Category of the search result. <br/>
    /// This is used to group and or filter search results in the search results view.
    /// </summary>
-   public IQueastorSearchSettings.Category SearchCategory { get; }
+   public Enum SearchCategory { get; }
    /// <summary>
    /// The separator used to denote namespaces in the search results. 
    /// </summary>

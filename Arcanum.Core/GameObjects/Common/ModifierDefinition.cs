@@ -162,7 +162,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
-   public IQueastorSearchSettings.Category SearchCategory => IQueastorSearchSettings.Category.AbstractObjects;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.AbstractObjects;
 
    #endregion
 
