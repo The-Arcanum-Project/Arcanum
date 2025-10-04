@@ -59,6 +59,11 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "ColorPickerViewerButton_Click" />
+
+            <styleClasses:BaseButton Content = "Object Creator"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "ObjectCreatorButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

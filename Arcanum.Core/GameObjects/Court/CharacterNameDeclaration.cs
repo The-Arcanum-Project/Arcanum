@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -22,12 +23,18 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    public string Name { get; set; } = string.Empty;
 
    [SuppressAgs]
+   [DefaultValue(false)]
+   [Description("Is this name randomly generated?")]
    public bool IsRandom { get; set; }
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterNameDeclarationNUISettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterNameDeclarationAgsSettings;
+
+   [ReadonlyNexus]
+   [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
+   [DefaultValue("")]
    public string UniqueId
    {
       get => ToString() ?? string.Empty;

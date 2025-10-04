@@ -12,12 +12,12 @@ public partial class CultureOpinionValue : IEmpty<CultureOpinionValue>, IIagsEnu
 #pragma warning restore ARC002
 {
    [SuppressAgs]
-   [DefaultValue("")]
+   [DefaultValue(null)]
    [Description("The culture this opinion is about.")]
    public Culture Key { get; set; } = Culture.Empty;
 
    [SuppressAgs]
-   [DefaultValue("")]
+   [DefaultValue(Opinion.Neutral)]
    [Description("The opinion value.")]
    public Opinion Value { get; set; } = Opinion.Neutral;
 

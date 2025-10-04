@@ -15,8 +15,12 @@ public partial class AiTag : INUI, IEmpty<AiTag>, IModifierPattern
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    public string UniqueId { get; set; } = null!;
 
+   [DefaultValue(1f)]
    [Description("The factor by which the AI will modify its behavior.")]
    public object Value { get; set; } = 1f;
+
+   [DefaultValue(ModifierType.Float)]
+   [Description("The type of modifier this AI tag represents.")]
    public ModifierType Type { get; set; } = ModifierType.Float;
 
    public bool IsReadonly => true;

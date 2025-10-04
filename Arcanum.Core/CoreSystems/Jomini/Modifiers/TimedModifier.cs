@@ -31,13 +31,13 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
 
    [SaveAs]
    [ParseAs("start_date")]
-   [DefaultValue(typeof(JominiDate), "0.0.0")]
+   [DefaultValue(null)]
    [Description("The date at which this modifier starts to apply.")]
    public JominiDate StartDate { get; set; } = JominiDate.Empty;
 
    [SaveAs]
    [ParseAs("date")]
-   [DefaultValue(typeof(JominiDate), "0.0.0")]
+   [DefaultValue(null)]
    [Description("The date at which this modifier stops applying.")]
    public JominiDate EndDate { get; set; } = JominiDate.Empty;
 

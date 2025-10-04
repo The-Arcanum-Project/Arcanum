@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -28,13 +29,13 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public string RegnalName { get; set; } = string.Empty;
 
    [SaveAs]
-   [DefaultValue(0)]
+   [DefaultValue(null)]
    [Description("The starting year of this ruler term.")]
    [ParseAs("start_date")]
    public JominiDate StartDate { get; set; } = JominiDate.Empty;
 
    [SaveAs]
-   [DefaultValue(0)]
+   [DefaultValue(null)]
    [Description("The ending year of this ruler term.")]
    [ParseAs("end_date")]
    public JominiDate EndDate { get; set; } = JominiDate.Empty;
@@ -55,6 +56,10 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RulerTermSettings;
    public INUINavigation[] Navigations { get; } = [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.RulerTermAgsSettings;
+
+   [ReadonlyNexus]
+   [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
+   [DefaultValue("")]
    public string UniqueId
    {
       get => CharacterId;

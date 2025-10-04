@@ -30,7 +30,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
 
    [SaveAs]
    [ParseAs("religion")]
-   [DefaultValue(null)]
+   [DefaultValue("")]
    [Description("The religion associated with this PopDefinition.")]
    public string Religion { get; set; } = string.Empty;
 

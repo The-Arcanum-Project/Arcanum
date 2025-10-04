@@ -1,7 +1,9 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -53,6 +55,10 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
    public IQueastorSearchSettings.Category SearchCategory
       => IQueastorSearchSettings.Category.MapObjects | IQueastorSearchSettings.Category.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.AreaAgsSettings;
+
+   [ReadonlyNexus]
+   [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
+   [DefaultValue("")]
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public static Area Empty { get; } = new() { UniqueId = "Arcanum_Empty_Area" };

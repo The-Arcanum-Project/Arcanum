@@ -15,8 +15,12 @@ public partial class CurrencyData : INUI, IEmpty<CurrencyData>, IModifierPattern
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    public string UniqueId { get; set; } = null!;
 
+   [DefaultValue(1)]
    [Description("The amount of this currency being added or removed.")]
    public object Value { get; set; } = 1;
+
+   [DefaultValue(ModifierType.Float)]
+   [Description("The type of modifier this currency data represents.")]
    public ModifierType Type { get; set; } = ModifierType.Float;
 
    public bool IsReadonly => true;

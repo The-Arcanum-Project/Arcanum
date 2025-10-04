@@ -14,12 +14,12 @@ public partial class ReligiousSchoolOpinionValue
 #pragma warning restore ARC002
 {
    [SuppressAgs]
-   [DefaultValue("")]
+   [DefaultValue(null)]
    [Description("The culture this opinion is about.")]
    public ReligiousSchool Key { get; set; } = ReligiousSchool.Empty;
 
    [SuppressAgs]
-   [DefaultValue("")]
+   [DefaultValue(Opinion.Neutral)]
    [Description("The opinion value.")]
    public Opinion Value { get; set; } = Opinion.Neutral;
 

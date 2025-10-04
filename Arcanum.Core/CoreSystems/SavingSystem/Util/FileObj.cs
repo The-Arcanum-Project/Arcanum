@@ -27,4 +27,7 @@ public class Eu5FileObj(PathObj path, FileDescriptor descriptor)
    }
 
    public override int GetHashCode() => HashCode.Combine(Descriptor, Path);
+
+   public static bool operator ==(Eu5FileObj? left, Eu5FileObj? right) => Equals(left, right);
+   public static bool operator !=(Eu5FileObj? left, Eu5FileObj? right) => !Equals(left, right);
 }
