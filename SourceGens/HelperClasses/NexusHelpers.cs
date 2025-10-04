@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -572,7 +573,7 @@ public static class NexusHelpers
                {
                   // For IEu5Object types we get the empty value from the registry
                   var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                  defaultValues.Add($"EmptyRegistry.Empties[typeof({typeName})] as {typeName}");
+                  defaultValues.Add($"EmptyRegistry.Empties[typeof({typeName})]");
                }
                else if (Helpers.IsGenericCollection(propertyType, out _))
                {
@@ -582,7 +583,7 @@ public static class NexusHelpers
                else
                {
                   // For reference types we can just use null
-                  defaultValues.Add("null");
+                  defaultValues.Add("null!");
                }
             }
             else
@@ -606,12 +607,12 @@ public static class NexusHelpers
             // We have to format the value based on its type
             var formattedValue = arg.Type.SpecialType switch
             {
-               SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? string.Empty, true),
+               SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? "string.Empty", true),
                SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
                SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
-               SpecialType.System_Single => $"{arg.Value}f",
-               SpecialType.System_Double => $"{arg.Value}d",
-               SpecialType.System_Decimal => $"{arg.Value}m",
+               SpecialType.System_Single => ((float?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "f",
+               SpecialType.System_Double => ((double?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "d",
+               SpecialType.System_Decimal => ((decimal?)arg.Value)?.ToString(CultureInfo.InvariantCulture) + "m",
                SpecialType.System_Int64 => $"{arg.Value}L",
                SpecialType.System_UInt64 => $"{arg.Value}UL",
                SpecialType.System_Int32
@@ -624,6 +625,9 @@ public static class NexusHelpers
                        ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
                        : "null",
             };
+            if (arg.Type.SpecialType == SpecialType.System_String &&
+                string.IsNullOrWhiteSpace(formattedValue.Substring(1, formattedValue.Length - 2)))
+               formattedValue = "string.Empty";
             defaultValues.Add(formattedValue);
          }
          else
@@ -632,30 +636,29 @@ public static class NexusHelpers
          }
       }
 
-      // ------- Default Value Array -------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array containing the default value of each property, if any.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    private static readonly object?[] _defaultValues = {");
-      foreach (var def in defaultValues)
-         builder.AppendLine($"        {def},");
-      builder.AppendLine("    };");
-
-      builder.AppendLine();
-
       // --- Generate a public accessor method for the default value ---
       builder.AppendLine("    /// <summary>");
       builder.AppendLine("    /// Gets the default value of a property, if any.");
       builder.AppendLine("    /// </summary>");
       builder.AppendLine("    public object GetDefaultValue(Enum property)");
       builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        var value = _defaultValues[(int)((Field)property)]!;");
-      builder.AppendLine("        Debug.Assert(value?.GetType() == GetNxPropType(property), $\"The default value of {property.ToString()} does not match it's type!\");");
-      builder.AppendLine("        if (value != null && value.ToString() == \"CAN_NOT_DETERMINE_DEFAULT_VALUE\")");
-      builder.AppendLine("            throw new InvalidOperationException($\"The default value for property '{property}' could not be determined. Please ensure it has a valid DefaultValue attribute.\");");
-      builder.AppendLine("        return value!;");
+      // a switch to return the value
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      for (var i = 0; i < members.Count; i++)
+      {
+         var member = members[i];
+         var defaultValue = defaultValues[i];
+         builder.AppendLine($"            case Field.{member.Name}:");
+         if (defaultValue != "CAN_NOT_DETERMINE_DEFAULT_VALUE")
+            builder.AppendLine($"                return {defaultValue};");
+         else
+            builder.AppendLine("                return ; // Default value could not be determined");
+      }
+
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
+      builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
       // --- Generate a public generic accessor method for the default value ---
@@ -664,11 +667,7 @@ public static class NexusHelpers
       builder.AppendLine("    /// </summary>");
       builder.AppendLine("    public T GetDefaultValue<T>(Enum property)");
       builder.AppendLine("    {");
-      builder.AppendLine("        var value = GetDefaultValue(property);");
-      builder.AppendLine("        if (value == null)");
-      builder.AppendLine("            return default!;");
-      builder.AppendLine("        Debug.Assert(value is T, $\"The default value of {property.ToString()} is not of type {typeof(T).FullName}!\");");
-      builder.AppendLine("        return (T)value;");
+      builder.AppendLine("        return (T)GetDefaultValue(property);");
       builder.AppendLine("    }");
       builder.AppendLine();
    }

@@ -10,7 +10,8 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Language))]
-public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Language>(dependencies)
+public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<Language>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
@@ -38,5 +39,13 @@ public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> depend
             if (!Globals.Languages.TryGetValue(dialect.UniqueId, out _))
                Globals.Dialects.Add(dialect.UniqueId, dialect);
       return true;
+   }
+
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   {
+      Globals.Dialects.Clear();
+      var returnVal = base.UnloadSingleFileContent(fileObj, descriptor, lockObject);
+      AfterLoadingStep(descriptor);
+      return returnVal;
    }
 }

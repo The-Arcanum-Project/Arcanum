@@ -155,7 +155,7 @@ public class ParsingMaster
 
       for (var i = 1; i < groupingNodeNames.Length; i++)
       {
-         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, out var bn))
+         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
          if (!SimpleObjectParser.StripGroupingNodes(bn!,
@@ -169,5 +169,15 @@ public class ParsingMaster
       }
 
       return true;
+   }
+
+   public static void UnloadAll()
+   {
+      foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
+      {
+         foreach (var file in descriptor.Files)
+            foreach (var ls in descriptor.LoadingService)
+               ls.UnloadSingleFileContent(file, descriptor, null);
+      }
    }
 }

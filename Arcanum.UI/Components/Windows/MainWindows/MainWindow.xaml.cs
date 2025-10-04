@@ -13,6 +13,7 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
+using Common.UI;
 using Application = System.Windows.Application;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
@@ -62,11 +63,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
-      var mw = new MainMenuScreen { MainMenuViewModel = { TargetedView = MainMenuScreen.MainMenuScreenView.Arcanum } };
-      Application.Current.MainWindow = mw;
-      Application.Current.MainWindow.Show();
-      mw.Activate();
-      Close();
+      UIHandle.Instance.MainWindowsHandle.TransferToMainMenuScreen(this, MainMenuScreen.MainMenuScreenView.Arcanum);
    }
 
    private void CommandCanAlwaysExecute(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = true;

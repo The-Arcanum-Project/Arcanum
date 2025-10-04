@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.UI;
 using Common.UI.Interfaces;
@@ -23,5 +24,16 @@ public class MainWindowHandleImpl : IMainWindowsHandle
             ((Window)window).Close();
       UIHandle.Instance.UIUtils.OpenWindowOnSTAThread(mainMenu, false);
       mainMenu.Activate();
+   }
+
+   public void TransferToMainMenuScreen(Window sender,
+                                        Enum view)
+   {
+      ParsingMaster.UnloadAll();
+      var mw = new MainMenuScreen { MainMenuViewModel = { TargetedView = (MainMenuScreen.MainMenuScreenView)view } };
+      Application.Current.MainWindow = mw;
+      Application.Current.MainWindow.Show();
+      mw.Activate();
+      sender.Close();
    }
 }

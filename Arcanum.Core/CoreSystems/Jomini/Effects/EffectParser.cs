@@ -7,6 +7,9 @@ public static class EffectParser
 {
    public static void ParseEffectDefinitions()
    {
+      if (EffectRegistry.Effects.Count > 0)
+         return;
+
       var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData/effects.log");
       var lines = File.ReadAllLines(path);
       if (lines == null! || lines.Length == 0)

@@ -46,11 +46,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
       get => Definition.UniqueId;
       set => Definition.UniqueId = value;
    }
-   public Eu5FileObj Source
-   {
-      get => throw new NotImplementedException();
-      set => throw new NotImplementedException();
-   }
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    /// <summary>
    /// The value of the modifier.
    /// </summary>
@@ -64,7 +60,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
    [DefaultValue(ModifierType.Float)]
    public ModifierType Type { get; set; }
 
-   public static Dictionary<string, ModValInstance> GetGlobalItems() => throw new NotImplementedException();
+   public static Dictionary<string, ModValInstance> GetGlobalItems() => [];
 
    public override string ToString()
    {
