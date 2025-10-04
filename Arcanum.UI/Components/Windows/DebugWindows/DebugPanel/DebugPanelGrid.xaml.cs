@@ -1,6 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GlobalStates;

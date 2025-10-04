@@ -1,10 +1,9 @@
 ﻿using System.Windows;
-using System.Windows.Input;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
+using Common.UI.MBox;
 using Nexus.Core;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -20,7 +19,7 @@ public partial class Eu5ObjectCreator
    public string ObjectTitle
    {
       get => (string)GetValue(ObjectTitleProperty);
-      set => SetValue(ObjectTitleProperty, value);
+      init => SetValue(ObjectTitleProperty, value);
    }
 
    public static readonly DependencyProperty ObjectUIProperty =
@@ -35,9 +34,7 @@ public partial class Eu5ObjectCreator
       set => SetValue(ObjectUIProperty, value);
    }
 
-   public Type? Eu5ObjectType { get; set; }
-
-   public IEu5Object? CreatedObject { get; set; }
+   private IEu5Object? CreatedObject { get; init; }
 
    public Eu5ObjectCreator()
    {
@@ -46,28 +43,39 @@ public partial class Eu5ObjectCreator
 
    private void CreateButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      DialogResult = true;
+      if (!AreRequiredFieldsFilled(out var missingFields))
+      {
+         var fieldNames = string.Join(", ", missingFields.Select(f => f.ToString()));
+         var result =
+            MBox.Show($"Please fill in all required fields before creating the object. Missing fields: {fieldNames}\n\nObject will not be created.",
+                      "Missing Required Fields",
+                      MBoxButton.OKCancel,
+                      MessageBoxImage.Warning);
+         if (result == MBoxResult.Cancel)
+            return;
+      }
+
       Close();
    }
 
    private void CancelButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      DialogResult = false;
       Close();
    }
 
-   public static bool ShowDialog(Type eu5ObjectType, out IEu5Object? newObject)
+   public static bool ShowDialog(Type eu5ObjectType, out IEu5Object? newObject, bool addToGlobals = false)
    {
       var window = new Eu5ObjectCreator
       {
          Owner = Application.Current.MainWindow,
          ObjectTitle = $"Create New {eu5ObjectType.Name}",
-         Eu5ObjectType = eu5ObjectType,
-         CreatedObject = (IEu5Object?)Activator.CreateInstance(eu5ObjectType)
+         CreatedObject = (IEu5Object?)Activator.CreateInstance(eu5ObjectType),
       };
       window.MarkRequiredFields();
 
       newObject = window.CreatedObject;
+      if (addToGlobals)
+         newObject?.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
       return window.ShowDialog() == true;
    }
 
@@ -81,7 +89,7 @@ public partial class Eu5ObjectCreator
          if (CreatedObject.IsRequired(prop))
             requiredProps.Add(prop);
 
-      ObjectUI = Eu5UiGen.GenerateView(new(CreatedObject, false, ContentPresenter), requiredProps, false);
+      ObjectUI = Eu5UiGen.GenerateView(new(CreatedObject, false, ContentPresenter), requiredProps, false, true);
    }
 
    private bool AreRequiredFieldsFilled(out List<Enum> missingFields)

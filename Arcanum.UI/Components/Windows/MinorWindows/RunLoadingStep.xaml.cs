@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.UI.Components.StyleClasses;
 using Common.UI;
 
@@ -20,7 +19,7 @@ public partial class RunLoadingStep
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
       // Execute the selected LoadingStep
-      if (sender is BaseButton { Tag: FileLoadingService service})
+      if (sender is BaseButton { Tag: FileLoadingService service })
       {
          var descriptor = service.Descriptor;
          var step = service.GetParsingStep();
@@ -40,7 +39,7 @@ public partial class RunLoadingStep
    private void DoublePlay_OnClick(object sender, RoutedEventArgs e)
    {
       const int numOfExecutions = 10;
-      if (sender is BaseButton { Tag: FileLoadingService service})
+      if (sender is BaseButton { Tag: FileLoadingService service })
       {
          var descriptor = service.Descriptor;
          var step = service.GetParsingStep();

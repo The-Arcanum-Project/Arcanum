@@ -9,7 +9,8 @@ namespace Arcanum.UI.NUI.Generator;
 /// A ViewModel that represents a single property across multiple selected INUI objects.
 /// It handles checking for common values and applying changes to all objects.
 /// </summary>
-public class MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property) : INotifyPropertyChanged
+public class MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property, bool allowReadonlyWrite = false)
+   : INotifyPropertyChanged
 {
    /// <summary>
    /// Gets or sets the value for the property.
@@ -34,7 +35,7 @@ public class MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum prop
       }
       set
       {
-         if (targets[0].IsPropertyReadOnly(property))
+         if (targets[0].IsPropertyReadOnly(property) && !allowReadonlyWrite)
             return;
 
          // Apply the new value to every selected object.

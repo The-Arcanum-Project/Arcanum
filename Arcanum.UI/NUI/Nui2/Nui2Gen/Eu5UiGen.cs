@@ -51,7 +51,10 @@ public static class Eu5UiGen
       navh.Root.Content = GenerateView(navh, markedProps ?? [], hasHeader);
    }
 
-   public static BaseView GenerateView(NavH navh, List<Enum> markedProps, bool hasHeader = true)
+   public static BaseView GenerateView(NavH navh,
+                                       List<Enum> markedProps,
+                                       bool hasHeader = true,
+                                       bool allowReadOnlyEditing = false)
    {
       var primary = navh.Targets[0];
       var view = ControlFactory.GetBaseView();
@@ -62,7 +65,7 @@ public static class Eu5UiGen
       if (hasHeader)
          GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
 
-      GenerateViewElements(navh, mainGrid, primary, markedProps, hasHeader ? 1 : 0);
+      GenerateViewElements(navh, mainGrid, primary, markedProps, allowReadOnlyEditing, hasHeader ? 1 : 0);
 
       return view;
    }
@@ -71,6 +74,7 @@ public static class Eu5UiGen
                                             Grid mainGrid,
                                             IEu5Object primary,
                                             List<Enum> markedProps,
+                                            bool allowReadOnlyEditing,
                                             int startRow = 1)
    {
       var viewFields = SortViewFieldsByConfig(primary, markedProps);
@@ -102,7 +106,13 @@ public static class Eu5UiGen
          }
          else
          {
-            BuildCollectionViewOrDefault(navH, primary, mainGrid, nxProp, i + startRow, isMarked: isMarked);
+            BuildCollectionViewOrDefault(navH,
+                                         primary,
+                                         mainGrid,
+                                         nxProp,
+                                         i + startRow,
+                                         isMarked: isMarked,
+                                         allowReadOnlyEditing: allowReadOnlyEditing);
          }
       }
    }
@@ -212,21 +222,6 @@ public static class Eu5UiGen
 
          BuildCollectionViewOrDefault(navH, embedded, grid, nxProp, index + 1, parentProp: parentProp, isMarked: false);
       }
-
-      // var embeddedLiner = new Border
-      // {
-      //    BorderBrush = Brushes.Purple,
-      //    BorderThickness = new(1.2, 1.2, 0, 1.2),
-      //    Margin = new(-6, 0, 0, -4),
-      //    VerticalAlignment = VerticalAlignment.Stretch,
-      //    HorizontalAlignment = HorizontalAlignment.Stretch,
-      //    CornerRadius = new(4, 0, 0, 4),
-      // };
-      // grid.Children.Add(embeddedLiner);
-      // Grid.SetRow(embeddedLiner, 0);
-      // Grid.SetColumn(embeddedLiner, 0);
-      // Grid.SetRowSpan(embeddedLiner, int.MaxValue);
-      // Grid.SetColumnSpan(embeddedLiner, int.MaxValue);
    }
 
    private static void BuildCollectionViewOrDefault(NavH navH,
@@ -235,6 +230,7 @@ public static class Eu5UiGen
                                                     Enum nxProp,
                                                     int rowIndex,
                                                     bool isMarked,
+                                                    bool allowReadOnlyEditing = false,
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
@@ -242,13 +238,14 @@ public static class Eu5UiGen
       if (itemType == null)
       {
          // We have a default property, not a collection.
-         GetTypeSpecificGrid(navH,
-                             primary,
-                             nxProp,
-                             mainGrid,
-                             rowIndex,
-                             isMarked: isMarked,
-                             embeddedPropertyTargets: parentProp);
+         GetTypeSpecificUI(navH,
+                           primary,
+                           nxProp,
+                           mainGrid,
+                           rowIndex,
+                           isMarked: isMarked,
+                           embeddedPropertyTargets: parentProp,
+                           allowReadOnlyEditing: allowReadOnlyEditing);
          return;
       }
 
@@ -264,13 +261,14 @@ public static class Eu5UiGen
       if (collection is not IList modifiableList)
       {
          // We have a collection property, but it's not a list we can iterate with our current implementation.
-         GetTypeSpecificGrid(navH,
-                             primary,
-                             nxProp,
-                             mainGrid,
-                             rowIndex,
-                             isMarked: isMarked,
-                             embeddedPropertyTargets: parentProp);
+         GetTypeSpecificUI(navH,
+                           primary,
+                           nxProp,
+                           mainGrid,
+                           rowIndex,
+                           isMarked: isMarked,
+                           embeddedPropertyTargets: parentProp,
+                           allowReadOnlyEditing: allowReadOnlyEditing);
          return;
       }
 
@@ -574,14 +572,15 @@ public static class Eu5UiGen
       var text = $"{nxProp} (Not supported in multi-select views)";
    }
 
-   private static void GetTypeSpecificGrid(NavH navH,
-                                           IEu5Object primary,
-                                           Enum nxProp,
-                                           Grid mainGrid,
-                                           int rowIndex,
-                                           bool isMarked,
-                                           Enum? embeddedPropertyTargets = null,
-                                           int leftMargin = 0)
+   private static void GetTypeSpecificUI(NavH navH,
+                                         IEu5Object primary,
+                                         Enum nxProp,
+                                         Grid mainGrid,
+                                         int rowIndex,
+                                         bool isMarked,
+                                         Enum? embeddedPropertyTargets = null,
+                                         int leftMargin = 0,
+                                         bool allowReadOnlyEditing = false)
    {
       var type = primary.GetNxPropType(nxProp);
 
@@ -598,10 +597,10 @@ public static class Eu5UiGen
             targets.Add((IEu5Object)value);
          }
 
-         propertyViewModel = new(targets, nxProp);
+         propertyViewModel = new(targets, nxProp, allowReadOnlyEditing);
       }
       else
-         propertyViewModel = new(navH.Targets, nxProp);
+         propertyViewModel = new(navH.Targets, nxProp, allowReadOnlyEditing);
 
       var binding = new Binding(nameof(propertyViewModel.Value))
       {
@@ -641,7 +640,8 @@ public static class Eu5UiGen
       else
          throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
 
-      element.IsEnabled = !primary.IsReadonly;
+      if (!allowReadOnlyEditing && primary.IsReadonly)
+         element.IsEnabled = false;
       element.VerticalAlignment = VerticalAlignment.Stretch;
       element.Height = ControlFactory.SHORT_INFO_ROW_HEIGHT;
 

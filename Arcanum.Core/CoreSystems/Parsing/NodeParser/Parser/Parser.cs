@@ -10,6 +10,7 @@ public class Parser(LexerResult lexerResult)
 {
    private readonly string _source = lexerResult.Source;
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
+   private readonly int _tokensCount = lexerResult.Tokens.Count;
    private int _current;
    private static Eu5FileObj _fileObj = null!;
 
@@ -286,10 +287,10 @@ public class Parser(LexerResult lexerResult)
    }
 
    private Token Current() => _tokens[_current];
-   private Token PeekNext() => _current + 1 >= _tokens.Count ? _tokens[^1] : _tokens[_current + 1];
+   private Token PeekNext() => _current + 1 >= _tokensCount ? _tokens[^1] : _tokens[_current + 1];
    private Token Previous() => _tokens[_current - 1];
    private bool Check(TokenType type) => !IsAtEnd() && Peek().Type == type;
-   private Token PeekAt(int offset) => _current + offset >= _tokens.Count ? _tokens[^1] : _tokens[_current + offset];
+   private Token PeekAt(int offset) => _current + offset >= _tokensCount ? _tokens[^1] : _tokens[_current + offset];
    private bool CheckNext(TokenType type) => !IsAtEnd() && PeekNext().Type == type;
    private bool CheckAt(int offset, TokenType type) => !IsAtEnd() && PeekAt(offset).Type == type;
 
@@ -314,11 +315,13 @@ public class Parser(LexerResult lexerResult)
    private void SkipUnexpectedTokens()
    {
       while (_tokens[_current].Type == TokenType.Unexpected)
-         if (_current < _tokens.Count - 1)
+      {
+         if (_current < _tokensCount)
             _current++;
          else
             // The last token is always EOF, which is not Unexpected.
             break;
+      }
    }
 
    #endregion

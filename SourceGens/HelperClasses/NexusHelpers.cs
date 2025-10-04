@@ -269,9 +269,6 @@ public static class NexusHelpers
       // 2. Generate the SetValue method
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
-      // Check if the property is readonly
-      builder.AppendLine("        Debug.Assert(!IsPropertyReadOnly(property), \"Attempting to set a readonly property\");");
-
       builder.AppendLine("        switch (property)");
       builder.AppendLine("        {");
       foreach (var member in members)
