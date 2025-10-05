@@ -81,9 +81,8 @@ public static class NexusHelpers
       builder.AppendLine("using System.Runtime.CompilerServices;");
       builder.AppendLine("using System.ComponentModel;");
       builder.AppendLine("using Arcanum.Core.Registry;");
-#if DEBUG
       builder.AppendLine("using System.Diagnostics;");
-#endif
+
       builder.AppendLine($"namespace {namespaceName};");
       builder.AppendLine();
       builder.AppendLine($"public partial class {className}");

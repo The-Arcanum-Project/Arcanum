@@ -114,7 +114,7 @@ public class LifecycleManager
       {
          var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
                                                                                Config.CONFIG_FILE_PATH));
-         Config.Settings = parsedObj!;
+         Config.Settings = parsedObj ?? new();
       }
       catch (Exception)
       {

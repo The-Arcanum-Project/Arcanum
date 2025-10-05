@@ -88,9 +88,10 @@ public sealed class DiagnosticException : Exception
       Severity = severity ?? Descriptor.Severity;
       ReportSeverity = reportSeverity ?? Descriptor.ReportSeverity;
       var ohNoWhatShouldWeDoNow = DiagnosticHandle.Ignore;
-
+#if DEBUG
       if (!DebugConfig.Settings.SuppressAllErrors)
       {
+#endif
          switch (ReportSeverity)
          {
             case DiagnosticReportSeverity.Silent:
@@ -124,7 +125,9 @@ public sealed class DiagnosticException : Exception
             default:
                throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
          }
+#if DEBUG
       }
+#endif
 
       var diagnostic = new Diagnostic(this, context, action);
       ErrorManager.AddToLog(diagnostic);
