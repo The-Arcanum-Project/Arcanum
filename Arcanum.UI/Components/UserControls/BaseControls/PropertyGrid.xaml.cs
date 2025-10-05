@@ -11,21 +11,25 @@ using Arcanum.Core.Utils.DelayedEvents;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
 public partial class PropertyGrid
 {
+   // Keep track of all open property grids to avoid opening multiple windows for the same object
+   public static List<object> OpenEditorsStack { get; } = [];
+
    // We only trigger this event after a delay to avoid flooding the UI with events
    public readonly PropGridDelayEvent PropertyValueChanged = new(250);
    public event EventHandler<SelectionChangedEventArgs>? PropertySelected = delegate { };
    public PropertyGrid? InlinedPropertyGrid;
-   
+
    public bool HasInlinedPropertyGrid => InlinedPropertyGrid != null;
 
    public static Dictionary<Type, Func<object, string>> CustomTypeConverters { get; } = new()
    {
-      [typeof(KeyGesture)] = (obj)
+      [typeof(KeyGesture)] = obj
          => ((KeyGesture)obj).GetDisplayStringForCulture(CultureInfo.CurrentCulture) ?? string.Empty,
    };
 
@@ -37,6 +41,36 @@ public partial class PropertyGrid
       Margin = new(2);
       PropertyList.SelectionChanged += OnPropertySelected;
       PropertyList.SelectionChanged += OnPropertyListOnSelectionChanged;
+   }
+
+   public static bool CanOpenEditorFor(object obj)
+   {
+      if (obj == null!)
+         return false;
+
+      var type = obj.GetType();
+      if (type.IsPrimitive || type == typeof(string) || type.IsEnum)
+         return false;
+
+      if (typeof(ICollection).IsAssignableFrom(type))
+         return false;
+
+      if (OpenEditorsStack.Contains(obj))
+         return false;
+
+      return true;
+   }
+
+   public static bool InformIfEditorAvailable(object obj)
+   {
+      if (CanOpenEditorFor(obj))
+         return true;
+
+      MBox.Show("The selected object cannot be edited in a property grid or is already open in another window.",
+                "Cannot Open Property Grid",
+                MBoxButton.OK,
+                MessageBoxImage.Warning);
+      return false;
    }
 
    public PropertyItem? SelectedPropertyItem
@@ -109,7 +143,7 @@ public partial class PropertyGrid
          ShowGridEmbedded = true;
 
          InlinedPropertyGrid.Description = prop.GetCustomAttribute<DescriptionAttribute>()?.Description ??
-                                            $"No description for {item.PropertyInfo.Name}";
+                                           $"No description for {item.PropertyInfo.Name}";
          Description = string.Empty;
       }
       else
@@ -249,6 +283,9 @@ public partial class PropertyGrid
       if (item.Value == null!)
          return;
 
+      if (!InformIfEditorAvailable(item.Value))
+         return;
+
       var objectView =
          new PropertyGridWindow(item.Value) { WindowStartupLocation = WindowStartupLocation.CenterOwner, };
       objectView.ShowDialog();
@@ -308,7 +345,7 @@ public partial class PropertyGrid
                                           .Select(value => Enum.Parse(enumArray.GetValue(0)!.GetType(), value))
                                           .Cast<Enum>()
                                           .ToArray();
-      
+
       item.Value = selectedItems;
       item.RefreshValue();
    }

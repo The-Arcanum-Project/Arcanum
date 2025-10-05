@@ -127,6 +127,9 @@ public partial class Eu5ObjectCreator
       };
       window.MarkRequiredFields();
       window.WindowStyle = WindowStyle.ToolWindow;
+      window.HeaderHeight = new(0);
+      window.BorderThickness = new(2);
+      window.BorderBrush = System.Windows.Media.Brushes.Gray;
 
       window.ShowDialog();
 

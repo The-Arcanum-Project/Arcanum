@@ -35,22 +35,22 @@ public partial class SettingsWindow
       {
          var subMenuName = GetSubMenuName(property);
          var isSubItem = subMenuName != null;
-         var tabItem = new TabItem
-         {
-            Header = subMenuName ?? property.Name,
-            Content = isSubItem
-                         ? GenerateSubMenu(property.GetValue(obj)!)
-                         : new PropertyGrid
-                         {
-                            LabelWidth = subMenuName != null ? 100 : 250,
-                            SelectedObject = property.GetValue(obj),
-                            Name = property.Name,
-                            Margin = new(0),
-                            Padding = new(0),
-                            ForceInlinePropertyGrid =
-                               property.GetCustomAttribute<SettingsForceInlinePropertyGrid>() != null,
-                         },
-         };
+         var tabItem = new TabItem { Header = subMenuName ?? property.Name, };
+
+         if (isSubItem)
+            tabItem.Content = GenerateSubMenu(property.GetValue(obj)!);
+         else if (PropertyGrid.InformIfEditorAvailable(obj))
+            tabItem.Content = new PropertyGrid
+            {
+               LabelWidth = subMenuName != null ? 100 : 250,
+               SelectedObject = property.GetValue(obj),
+               Name = property.Name,
+               Margin = new(0),
+               Padding = new(0),
+               ForceInlinePropertyGrid =
+                  property.GetCustomAttribute<SettingsForceInlinePropertyGrid>() != null,
+            };
+
          tc.Items.Add(tabItem);
       }
    }
