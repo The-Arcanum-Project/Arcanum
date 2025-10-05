@@ -10,7 +10,6 @@ using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
@@ -161,6 +160,24 @@ public static class NEF
       };
    }
 
+   public static BaseButton GetCreateNewButton()
+   {
+      return new()
+      {
+         Margin = new(2),
+         Height = 20,
+         Width = 20,
+         HorizontalAlignment = HorizontalAlignment.Left,
+         BorderThickness = new(1),
+         Content = new Image
+         {
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png",
+                                         UriKind.RelativeOrAbsolute)),
+            Stretch = Stretch.UniformToFill,
+         },
+      };
+   }
+
    public static BaseButton GetCollapseButton(bool isExpanded)
    {
       const string arrowPathData = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z";
@@ -250,7 +267,12 @@ public static class NEF
    {
       var setButton = new BaseButton
       {
-         Content = "S",
+         Content = new Image
+         {
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/InferMap20x20.png",
+                                         UriKind.RelativeOrAbsolute)),
+            Stretch = Stretch.UniformToFill,
+         },
          ToolTip = "Set item from inferred list (chooses first)",
          Margin = new(1),
          Width = 20,

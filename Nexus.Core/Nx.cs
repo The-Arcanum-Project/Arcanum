@@ -17,6 +17,13 @@ public static class Nx
       target._setValue(e, value!);
    }
 
+   /// <summary>
+   /// ONLY USE THIS IF YOU WANT TO TRIGGER UI UPDATES
+   /// </summary>
+   /// <param name="value"></param>
+   /// <param name="target"></param>
+   /// <param name="e"></param>
+   /// <typeparam name="T"></typeparam>
    public static void ForceSet<T>(T value,
                                   INexus target,
                                   Enum e)

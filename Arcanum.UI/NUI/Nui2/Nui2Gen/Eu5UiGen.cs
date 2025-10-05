@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,6 +17,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
@@ -29,22 +31,21 @@ using ToolTip = System.Windows.Controls.ToolTip;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
 
+[SuppressMessage("ReSharper", "CollectionNeverUpdated.Global")]
 public static class Eu5UiGen
 {
-   public static Dictionary<Type, Func<object, Enum, int, int, FrameworkElement>> CustomShortInfoGenerators = new()
-   {
-      { typeof(ModValInstance), Nui2Gen.CustomShortInfoGenerators.GetModValInstanceShortInfo },
-   };
+   public readonly static Dictionary<Type, Func<object, Enum, int, int, FrameworkElement>> CustomShortInfoGenerators =
+      new() { { typeof(ModValInstance), Nui2Gen.CustomShortInfoGenerators.GetModValInstanceShortInfo }, };
 
-   public static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
+   public readonly static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
 
-   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new();
+   public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new();
 
-   public static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new();
+   public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new();
 
-   public static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new();
+   public readonly static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new();
 
-   public static Dictionary<Enum, bool> IsExpandedCache = new();
+   public static readonly Dictionary<Enum, bool> IsExpandedCache = new();
 
    public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true)
    {
@@ -173,6 +174,7 @@ public static class Eu5UiGen
 
       AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
       AddCustomButtonToPanel(embedded, nxProp, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
+      AddCreateNewEu5ObjectButton(primary, nxProp, ebv.TitleDockPanel, Dock.Right);
 
       RoutedEventHandler setClick = (_, _) =>
       {
@@ -388,6 +390,52 @@ public static class Eu5UiGen
          panel.Children.Add(customButton);
          DockPanel.SetDock(customButton, dock);
       }
+   }
+
+   private static void AddCreateNewEu5ObjectButton(IEu5Object primary, Enum nxProp, DockPanel panel, Dock dock)
+   {
+      var createNewButton = NEF.GetCreateNewButton();
+
+      RoutedEventHandler createNewClick = (_, _) =>
+      {
+         Type type;
+         if (primary.IsCollection(nxProp))
+         {
+            type = primary.GetNxItemType(nxProp) ??
+                   throw new
+                      InvalidOperationException($"Property {nxProp} does not have an item type but is a collection.");
+         }
+         else
+         {
+            type = primary.GetNxPropType(nxProp) ??
+                   throw new InvalidOperationException($"Property {nxProp} does not have a type.");
+         }
+
+         Eu5ObjectCreator.ShowPopUp(type,
+                                    newObj =>
+                                    {
+                                       if (primary.IsCollection(nxProp))
+                                          Nx.AddToCollection(primary, nxProp, newObj);
+                                       else
+                                          Nx.ForceSet(newObj, primary, nxProp);
+
+                                       // Find the first parent of type EmbeddedView of the createNewButton and refresh its selector
+                                       var parent = VisualTreeHelper.GetParent(createNewButton);
+                                       while (parent != null && parent is not EmbeddedView)
+                                          parent = VisualTreeHelper.GetParent(parent);
+
+                                       if (parent is EmbeddedView ev)
+                                          ev.RefreshSelector();
+                                    });
+      };
+
+      createNewButton.Click += createNewClick;
+      createNewButton.Unloaded += (_, _) => createNewButton.Click -= createNewClick;
+      createNewButton.ToolTip =
+         $"Create a new {primary.GetNxItemType(nxProp)?.Name ?? primary.GetNxPropType(nxProp).Name} and set it to the '{nxProp}' property.";
+
+      panel.Children.Add(createNewButton);
+      DockPanel.SetDock(createNewButton, dock);
    }
 
    private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)

@@ -267,6 +267,7 @@ public static class NexusHelpers
       #region Get and Set Value methods
 
       // 2. Generate the SetValue method
+      // with an on property changed call and a check if the value actually changed
       builder.AppendLine("    public void _setValue(Enum property, object value)");
       builder.AppendLine("    {");
       builder.AppendLine("        switch (property)");
@@ -275,11 +276,31 @@ public static class NexusHelpers
       {
          var memberType = member is IPropertySymbol p ? p.Type : ((IFieldSymbol)member).Type;
          var typeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
          builder.AppendLine($"            case Field.{member.Name}:");
 #if DEBUG
          builder.AppendLine($"                Debug.Assert(value is {typeName}, \"{member.Name} needs to be a {typeName}\");");
 #endif
-         builder.AppendLine($"                this.{member.Name} = ({typeName})value;");
+         if (collectionMembers.Contains(member))
+         {
+            var itemType = memberType.SpecialType == SpecialType.System_String
+                              ? "string"
+                              : (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault()?.ToDisplayString();
+            builder.AppendLine($"                 if (this.{member.Name}.SequenceEqual((System.Collections.Generic.ICollection<{itemType}>)value))");
+            builder.AppendLine("                 {");
+            builder.AppendLine($"                     this.{member.Name} = ({typeName})value;");
+            builder.AppendLine("                     OnPropertyChanged(nameof(this." + member.Name + "));");
+            builder.AppendLine("                 }");
+         }
+         else
+         {
+            builder.AppendLine($"                if (!EqualityComparer<{typeName}>.Default.Equals(this.{member.Name}, ({typeName})value))");
+            builder.AppendLine("                {");
+            builder.AppendLine($"                    this.{member.Name} = ({typeName})value;");
+            builder.AppendLine("                    OnPropertyChanged(nameof(this." + member.Name + "));");
+            builder.AppendLine("                }");
+         }
+
          builder.AppendLine("                break;");
       }
 

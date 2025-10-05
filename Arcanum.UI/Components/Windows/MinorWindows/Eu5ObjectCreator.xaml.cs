@@ -34,7 +34,7 @@ public partial class Eu5ObjectCreator
       set => SetValue(ObjectUIProperty, value);
    }
 
-   private IEu5Object? CreatedObject { get; init; }
+   private IEu5Object? CreatedObject { get; set; }
 
    public Eu5ObjectCreator()
    {
@@ -52,14 +52,20 @@ public partial class Eu5ObjectCreator
                       MBoxButton.OKCancel,
                       MessageBoxImage.Warning);
          if (result == MBoxResult.Cancel)
-            return;
+         {
+            CreatedObject = null;
+            Close();
+         }
       }
-
-      Close();
+      else
+      {
+         Close();
+      }
    }
 
    private void CancelButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
+      CreatedObject = null;
       Close();
    }
 
@@ -109,5 +115,27 @@ public partial class Eu5ObjectCreator
          }
 
       return missingFields.Count == 0;
+   }
+
+   public static void ShowPopUp(Type type, Action<object> action, bool addToGlobals = true)
+   {
+      var window = new Eu5ObjectCreator
+      {
+         Owner = Application.Current.MainWindow,
+         ObjectTitle = $"Create New {type.Name}",
+         CreatedObject = (IEu5Object?)Activator.CreateInstance(type),
+      };
+      window.MarkRequiredFields();
+      window.WindowStyle = WindowStyle.ToolWindow;
+
+      window.ShowDialog();
+
+      if (window.CreatedObject != null)
+      {
+         var newObject = window.CreatedObject!;
+         if (addToGlobals)
+            newObject.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
+         action(newObject);
+      }
    }
 }

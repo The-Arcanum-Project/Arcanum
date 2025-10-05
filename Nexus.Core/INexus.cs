@@ -1,6 +1,8 @@
-﻿namespace Nexus.Core;
+﻿using System.ComponentModel;
 
-public interface INexus
+namespace Nexus.Core;
+
+public interface INexus : INotifyPropertyChanged
 {
    /// <summary>
    /// Gets the value of a property by its enum key. <br/>

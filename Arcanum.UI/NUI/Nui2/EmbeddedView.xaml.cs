@@ -39,6 +39,12 @@ public partial class EmbeddedView
       Unloaded += (_, _) => Selector.SelectionChanged -= selectionChanged;
    }
 
+   public void RefreshSelector()
+   {
+      Selector.ItemsSource = ViewModel.Embedded.GetGlobalItemsNonGeneric().Values;
+      Selector.GetBindingExpression(System.Windows.Controls.Primitives.Selector.SelectedItemProperty)?.UpdateTarget();
+   }
+
    private void SetEmptyButton_Click(object sender, RoutedEventArgs e)
    {
       var empty = EmptyRegistry.Empties[ViewModel.Target.GetNxPropType(ViewModel.NxProp)];

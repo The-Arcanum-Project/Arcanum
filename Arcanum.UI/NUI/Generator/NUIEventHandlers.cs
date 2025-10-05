@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.Selection;
 
 namespace Arcanum.UI.NUI.Generator;
 
