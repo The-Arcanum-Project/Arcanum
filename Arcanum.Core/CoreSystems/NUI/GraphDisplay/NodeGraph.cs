@@ -52,22 +52,26 @@ public class NodeGraph
 
       foreach (var node in Nodes)
       {
-         var tempTextBlock = new TextBlock
-         {
-            Text = node.Name,
-            Foreground = Brushes.White,
-            FontSize = 12,
-         };
+         if (node.Label == null)
+            node.Label = new()
+            {
+               Text = node.Name,
+               FontSize = 12,
+               Foreground = ForeColorBrush,
+               TextWrapping = TextWrapping.Wrap,
+            };
+         else
+            node.Label.Text = node.Name;
 
-         tempTextBlock.Measure(new(double.PositiveInfinity, double.PositiveInfinity));
+         node.Label.Measure(new(double.PositiveInfinity, double.PositiveInfinity));
 
-         var textWidth = tempTextBlock.DesiredSize.Width + 10;
-         var textHeight = tempTextBlock.DesiredSize.Height + 10;
+         var textWidth = node.Label.DesiredSize.Width + 10;
+         var textHeight = node.Label.DesiredSize.Height + 10;
 
          var nodeWidth = Math.Max(60, textWidth);
          var nodeHeight = Math.Max(30, textHeight);
 
-         nodeVisualData[node] = (nodeWidth, nodeHeight, tempTextBlock);
+         nodeVisualData[node] = (nodeWidth, nodeHeight, node.Label);
       }
 
       foreach (var edge in Edges)

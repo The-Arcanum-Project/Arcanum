@@ -160,6 +160,23 @@ public static class NEF
       };
    }
 
+   public static BaseButton GetGraphButton()
+   {
+      return new()
+      {
+         Margin = new(2),
+         Height = 20,
+         Width = 20,
+         BorderThickness = new(1),
+         Content = new Image
+         {
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Graph20x20.png",
+                                         UriKind.RelativeOrAbsolute)),
+            Stretch = Stretch.UniformToFill,
+         },
+      };
+   }
+
    public static BaseButton GetCreateNewButton()
    {
       return new()

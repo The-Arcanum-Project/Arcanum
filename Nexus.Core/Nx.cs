@@ -128,4 +128,9 @@ public static class Nx
    {
       return target.GetAllProperties().Where(prop => target.GetNxPropType(prop) == type).ToArray();
    }
+
+   public static Enum[] GetGraphableProperties(INexus target)
+   {
+      return GetPropertiesOfType(target, target.GetType());
+   }
 }

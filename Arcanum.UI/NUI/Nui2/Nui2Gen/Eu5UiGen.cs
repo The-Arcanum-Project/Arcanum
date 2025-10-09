@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
@@ -23,6 +24,7 @@ using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Common.UI;
+using Common.UI.MBox;
 using Nexus.Core;
 using Binding = System.Windows.Data.Binding;
 using Control = System.Windows.Controls.Control;
@@ -174,6 +176,7 @@ public static class Eu5UiGen
 
       AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
       AddCustomButtonToPanel(embedded, nxProp, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
+      CreateGraphViewerButton(embedded, navH, ebv.TitleDockPanel);
       AddCreateNewEu5ObjectButton(primary, nxProp, ebv.TitleDockPanel, Dock.Right);
 
       RoutedEventHandler setClick = (_, _) =>
@@ -276,7 +279,7 @@ public static class Eu5UiGen
 
       var margin = modifiableList.Count > 0 ? 4 : 0;
       var collectionGrid = ControlFactory.GetCollectionGrid();
-      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked);
+      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked, navH);
       GetCollectionPreview(navH,
                            primary,
                            collectionGrid,
@@ -296,7 +299,8 @@ public static class Eu5UiGen
                                                 IEu5Object primary,
                                                 int row,
                                                 int leftMargin,
-                                                bool isMarked)
+                                                bool isMarked,
+                                                NavH navh)
    {
       var headerPanel = NEF.PropertyTitlePanel(leftMargin);
 
@@ -308,7 +312,7 @@ public static class Eu5UiGen
                                 isMarked: isMarked,
                                 fontSize: 12);
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
-      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel);
+      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
       GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
@@ -317,7 +321,8 @@ public static class Eu5UiGen
                                              Enum nxProp,
                                              Type nxPropType,
                                              Type? nxItemType,
-                                             DockPanel panel)
+                                             DockPanel panel,
+                                             NavH navh)
    {
       // Infer actions are disabled globally
       if (Config.Settings.NUIConfig.DisableNUIInferFromMapActions)
@@ -375,6 +380,7 @@ public static class Eu5UiGen
 
       // Infer actions for a single embedded object or property
       AddMapModeButtonToPanel((IEu5Object)item, panel, targetType, Dock.Right);
+      CreateGraphViewerButton((IEu5Object)item, navh, panel);
       AddCustomButtonToPanel((IEu5Object)item, nxProp, panel, targetType, Dock.Right);
    }
 
@@ -686,7 +692,14 @@ public static class Eu5UiGen
                              ControlFactory.SHORT_INFO_ROW_HEIGHT,
                              ControlFactory.SHORT_INFO_FONT_SIZE);
       else
-         throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+      {
+         UIHandle.Instance.PopUpHandle.ShowMBox($"Type {type} is not supported for property {nxProp}.",
+                                                "Type Not Supported",
+                                                MBoxButton.OK,
+                                                MessageBoxImage.Warning);
+         return;
+         // throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
+      }
 
       if (!allowReadOnlyEditing && primary.IsReadonly)
          element.IsEnabled = false;
@@ -702,7 +715,7 @@ public static class Eu5UiGen
 
       SetTooltipIsAny(primary, nxProp, desc);
 
-      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new());
+      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
 
       var line = NEF.GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
@@ -721,5 +734,28 @@ public static class Eu5UiGen
 
    private static void GenerateShortInfo(NavH navH, IEu5Object primary, Grid mainGrid, bool isMarked)
    {
+   }
+
+   public static void CreateGraphViewerButton(IEu5Object primary, NavH navh, DockPanel panel)
+   {
+      if (Nx.GetGraphableProperties(primary).Length == 0)
+         return;
+
+      var graphButton = NEF.GetGraphButton();
+      graphButton.ToolTip = "Open Graph Viewer for this object and its relations.";
+      RoutedEventHandler graphClick = (_, _) =>
+      {
+         var graph = primary.CreateGraph();
+         foreach (var node in graph.Nodes)
+            node.Label = GridManager.GetNavigationHeader(node.LinkedObject, navh, node.Name, 12, 30, true);
+
+         GraphWindow.ShowWindow(graph);
+      };
+
+      graphButton.Click += graphClick;
+      graphButton.Unloaded += (_, _) => graphButton.Click -= graphClick;
+
+      panel.Children.Add(graphButton);
+      DockPanel.SetDock(graphButton, Dock.Right);
    }
 }

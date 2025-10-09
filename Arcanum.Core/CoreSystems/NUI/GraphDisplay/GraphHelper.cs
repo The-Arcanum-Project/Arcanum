@@ -33,6 +33,7 @@ public static class GraphHelper
             X = Random.Shared.NextSingle() * 100,
             Y = Random.Shared.NextSingle() * 100,
             Displacement = new(0, 0),
+            LinkedObject = obj,
          };
          nodes[obj] = node;
       }
