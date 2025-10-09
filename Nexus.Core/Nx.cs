@@ -59,6 +59,13 @@ public static class Nx
       returnValue = (T)target._getValue(e);
    }
 
+   public static T ForceGetAs<T>(
+      INexus target,
+      Enum e)
+   {
+      return (T)target._getValue(e);
+   }
+
    public static Type TypeOf(INexus _,
                              [LinkedPropertyEnum(nameof(_))] Enum e)
    {
@@ -111,5 +118,14 @@ public static class Nx
       target._clearCollection(e);
    }
 
-   // Indexer wrapper for INexus[enum] = value;
+   /// <summary>
+   /// Returns all Nexus Properties of a specific type.
+   /// </summary>
+   /// <param name="target"></param>
+   /// <param name="type"></param>
+   /// <returns></returns>
+   public static Enum[] GetPropertiesOfType(INexus target, Type type)
+   {
+      return target.GetAllProperties().Where(prop => target.GetNxPropType(prop) == type).ToArray();
+   }
 }

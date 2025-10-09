@@ -64,4 +64,18 @@ public partial class DebugPanelGrid
    {
       Eu5ObjectCreator.ShowDialog(typeof(Character), out _);
    }
+
+   private void ModifierCreatorButton_Click(object sender, RoutedEventArgs e)
+   {
+      var modCreator = new ModifierCreator();
+      modCreator.ShowDialog();
+
+      if (modCreator.CreatedInstance != null)
+         Console.WriteLine($"Created modifier instance: {modCreator.CreatedInstance}");
+   }
+
+   private void GraphViewerButton_Click(object sender, RoutedEventArgs e)
+   {
+      new GraphViewer().Show();
+   }
 }

@@ -180,7 +180,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       public IEnumerable FullItemsSource
       {
          get => (IEnumerable)GetValue(FullItemsSourceProperty);
-         init => SetValue(FullItemsSourceProperty, value);
+         set => SetValue(FullItemsSourceProperty, value);
       }
 
       static AutoCompleteComboBox()

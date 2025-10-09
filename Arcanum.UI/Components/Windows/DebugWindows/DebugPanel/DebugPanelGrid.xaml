@@ -64,6 +64,16 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "ObjectCreatorButton_Click" />
+
+            <styleClasses:BaseButton Content = "Modifier Creator"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "ModifierCreatorButton_Click" />
+
+            <styleClasses:BaseButton Content = "Graph Viewer"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "GraphViewerButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

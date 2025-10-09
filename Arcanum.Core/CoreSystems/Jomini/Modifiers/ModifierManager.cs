@@ -1,11 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.Common;
+using Common.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
@@ -302,4 +305,74 @@ public static class ModifierManager
    }
 
    #endregion
+
+   public static bool IsModifierValueInStandardRange(object value, ModifierType type)
+   {
+      if (type == ModifierType.Boolean && value is bool)
+         return true;
+
+      switch (type)
+      {
+         case ModifierType.Integer:
+            // For now we assume all integer values are valid
+            break;
+         case ModifierType.Float:
+            // We consider any value bigger than 0.4 or smaller than -0.4 as non-standard
+            if (value is float and (> 0.4f or < -0.4f))
+               return WarnForNonStandardModifierValue(value, type, "-0.4 to 0.4");
+
+            break;
+         case ModifierType.Percentage:
+            // We consider any value bigger than 40% or smaller than -40% as non-standard
+            if (value is float and (> 40f or < -40f))
+               return WarnForNonStandardModifierValue(value, type, "-40 to 40");
+
+            break;
+         case ModifierType.ScriptedValue:
+            // For now we assume all scripted values are valid
+            // Later we want to resolve the the value to a number and check its range for the inferred type if not string.
+            break;
+         default:
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
+      }
+
+      return true;
+   }
+
+   private static bool WarnForNonStandardModifierValue(object value, ModifierType type, string range)
+   {
+      var result =
+         UIHandle.Instance.PopUpHandle
+                 .ShowMBox($"The modifier value '{value}' for type '{type}' is outside the standard range of '{range}'. Do you want to proceed?",
+                           "Warning",
+                           MBoxButton.OKCancel,
+                           MessageBoxImage.Warning);
+
+      return result == MBoxResult.OK;
+   }
+
+   private static List<string> GetDefaultValuesForModifier(string modifierKey)
+   {
+      if (!Globals.ModifierDefinitions.TryGetValue(modifierKey, out var definition))
+         return [];
+
+      return GetDefaultValuesForModifier(definition);
+   }
+
+   public static List<string> GetDefaultValuesForModifier(ModifierDefinition definition)
+   {
+      var type = InferModifierType(definition, out var inferredType) ? inferredType : null;
+      if (type is null)
+         return [];
+
+      return type switch
+      {
+         ModifierType.Boolean => ["yes", "no"],
+         ModifierType.Integer => ["0", "1", "-1", "2", "-2", "5", "-5"],
+         ModifierType.Float => ["0.0", "0.1", "-0.1", "0.5", "-0.5", "1.0", "-1.0"],
+         ModifierType.Percentage => ["0%", "10%", "-10%", "15%", "-15%", "20%", "-20%"],
+         ModifierType.ScriptedValue => ["some_value", "another_value"],
+         _ => [],
+      };
+   }
 }
