@@ -8,5 +8,8 @@
                          Title = "GraphWindow"
                          Height = "450"
                          Width = "800">
-    <Canvas x:Name = "MainCanvas"> </Canvas>
+    <Canvas x:Name = "MainCanvas"
+            HorizontalAlignment = "Stretch"
+            VerticalAlignment = "Stretch">
+    </Canvas>
 </styleClasses:BaseWindow>

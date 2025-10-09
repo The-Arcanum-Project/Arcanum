@@ -170,7 +170,7 @@ public static class NEF
          BorderThickness = new(1),
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Graph20x20.png",
+            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Link20x20.png",
                                          UriKind.RelativeOrAbsolute)),
             Stretch = Stretch.UniformToFill,
          },

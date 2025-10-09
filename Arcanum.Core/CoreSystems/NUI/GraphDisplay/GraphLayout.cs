@@ -15,6 +15,16 @@ public static class GraphLayout
                                                float height,
                                                int iterations = 500)
    {
+      if (nodes.Count == 0)
+         return;
+
+      if (nodes.Count <= 4)
+      {
+         HandleSmallGraphLayout(nodes, edges, width, height);
+         PostLayoutLayout(nodes, width, height); // Still center it
+         return;
+      }
+
       // Parameters
       var k = (float)Math.Sqrt(width * height / nodes.Count);
       var temperature = width / 10; // Initial temperature
@@ -104,6 +114,67 @@ public static class GraphLayout
 
       // Post-layout adjustment: Center the graph within the canvas
       PostLayoutLayout(nodes, width, height);
+   }
+
+   /// <summary>
+   /// Handles specialized layouts for very small graphs (2-4 nodes).
+   /// </summary>
+   private static void HandleSmallGraphLayout(List<GraphNode> nodes, List<Edge> edges, float width, float height)
+   {
+      // Define a base spacing unit. This ensures small graphs are not too cramped or too spread out.
+      var spacing = Math.Min(width, height) / (nodes.Count + 1);
+
+      switch (nodes.Count)
+      {
+         case 2:
+            // Simple horizontal or vertical alignment
+            // If there's an edge, draw it horizontally.
+            if (edges.Count > 0)
+            {
+               // Source on left, Target on right
+               nodes[0].X = width / 2 - spacing / 2;
+               nodes[0].Y = height / 2;
+               nodes[1].X = width / 2 + spacing / 2;
+               nodes[1].Y = height / 2;
+            }
+            else // Two disconnected nodes
+            {
+               nodes[0].X = width / 2 - spacing / 2;
+               nodes[0].Y = height / 2 - spacing / 4;
+               nodes[1].X = width / 2 + spacing / 2;
+               nodes[1].Y = height / 2 + spacing / 4;
+            }
+
+            break;
+
+         case 3:
+            // Arrange in a triangle for general case, or a line for a simple chain.
+            // Let's go for a simple triangular pattern.
+            nodes[0].X = width / 2;
+            nodes[0].Y = height / 2 - spacing; // Top node
+
+            nodes[1].X = width / 2 - spacing;
+            nodes[1].Y = height / 2 + spacing; // Bottom-left
+
+            nodes[2].X = width / 2 + spacing;
+            nodes[2].Y = height / 2 + spacing; // Bottom-right
+            break;
+
+         case 4:
+            // Arrange in a square/diamond pattern
+            nodes[0].X = width / 2 - spacing;
+            nodes[0].Y = height / 2 - spacing / 2;
+
+            nodes[1].X = width / 2 + spacing;
+            nodes[1].Y = height / 2 - spacing / 2;
+
+            nodes[2].X = width / 2 - spacing;
+            nodes[2].Y = height / 2 + spacing / 2;
+
+            nodes[3].X = width / 2 + spacing;
+            nodes[3].Y = height / 2 + spacing / 2;
+            break;
+      }
    }
 
    private static void PostLayoutLayout(List<GraphNode> nodes, float width, float height)
