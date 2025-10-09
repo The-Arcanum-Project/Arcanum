@@ -35,4 +35,23 @@ public static class EventHandlers
       tb.MouseUp += handler;
       tb.Unloaded += (_, _) => tb.MouseUp -= handler;
    }
+
+   public static MouseButtonEventHandler GetSimpleNavigationHandler(NavH navh, IEu5Object target)
+   {
+      return (_, args) =>
+      {
+         if (args.ChangedButton == MouseButton.Left)
+         {
+            navh.NavigateTo(target);
+         }
+         else
+         {
+            var navs = navh.GetNavigations();
+            if (navs.Length < 1)
+               return;
+
+            args.Handled = true;
+         }
+      };
+   }
 }

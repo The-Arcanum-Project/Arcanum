@@ -66,9 +66,17 @@ public static class GridManager
                                                int fontSize,
                                                int height,
                                                bool isNavigation,
-                                               HorizontalAlignment alignment = HorizontalAlignment.Center)
+                                               HorizontalAlignment alignment = HorizontalAlignment.Center,
+                                               bool pureHeader = false)
+
    {
-      var header = ControlFactory.GetHeaderTextBlock(fontSize, true, headerText, height: height, alignment: alignment);
+      var header = pureHeader
+                      ? ControlFactory.PureHeaderTextBlock(isNavigation)
+                      : ControlFactory.GetHeaderTextBlock(fontSize,
+                                                          true,
+                                                          headerText,
+                                                          height: height,
+                                                          alignment: alignment);
       if (isNavigation)
       {
          EventHandlers.SetOnMouseUpHandler(header, navH, primary);

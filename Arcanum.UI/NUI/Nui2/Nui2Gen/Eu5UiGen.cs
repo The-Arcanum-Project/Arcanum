@@ -747,7 +747,7 @@ public static class Eu5UiGen
       {
          var graph = primary.CreateGraph();
          foreach (var node in graph.Nodes)
-            node.Label = GridManager.GetNavigationHeader(node.LinkedObject, navh, node.Name, 12, 30, true);
+            node.NavigationHandler = EventHandlers.GetSimpleNavigationHandler(navh, primary);
 
          GraphWindow.ShowWindow(graph);
       };

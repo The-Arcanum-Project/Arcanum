@@ -52,26 +52,34 @@ public class NodeGraph
 
       foreach (var node in Nodes)
       {
-         if (node.Label == null)
-            node.Label = new()
-            {
-               Text = node.Name,
-               FontSize = 12,
-               Foreground = ForeColorBrush,
-               TextWrapping = TextWrapping.Wrap,
-            };
-         else
-            node.Label.Text = node.Name;
+         TextBlock label = new()
+         {
+            Text = node.Name,
+            FontSize = 12,
+            Foreground = ForeColorBrush,
+            TextWrapping = TextWrapping.Wrap,
+            Width = double.NaN,
+            Height = double.NaN,
+            MinHeight = 0,
+            MaxHeight = double.PositiveInfinity,
+         };
 
-         node.Label.Measure(new(double.PositiveInfinity, double.PositiveInfinity));
+         if (node.NavigationHandler != null)
+         {
+            label.MouseDown += node.NavigationHandler;
+            label.Unloaded += (_, _) => label.MouseDown -= node.NavigationHandler;
+            label.Cursor = System.Windows.Input.Cursors.Hand;
+         }
 
-         var textWidth = node.Label.DesiredSize.Width + 10;
-         var textHeight = node.Label.DesiredSize.Height + 10;
+         label.Measure(new(double.PositiveInfinity, double.PositiveInfinity));
+
+         var textWidth = label.DesiredSize.Width + 10;
+         var textHeight = label.DesiredSize.Height + 10;
 
          var nodeWidth = Math.Max(60, textWidth);
          var nodeHeight = Math.Max(30, textHeight);
 
-         nodeVisualData[node] = (nodeWidth, nodeHeight, node.Label);
+         nodeVisualData[node] = (nodeWidth, nodeHeight, label);
       }
 
       foreach (var edge in Edges)
@@ -127,7 +135,7 @@ public class NodeGraph
 
          // Text Label
          text.TextAlignment = TextAlignment.Center;
-         text.VerticalAlignment = VerticalAlignment.Center;
+
          text.Width = nodeWidth;
          text.Height = nodeHeight;
 

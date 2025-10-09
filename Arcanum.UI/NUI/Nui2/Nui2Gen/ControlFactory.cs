@@ -15,7 +15,7 @@ public static class ControlFactory
    public const int SHORT_INFO_FONT_SIZE = 11;
    public const int EMBEDDED_VIEW_HEIGHT = 25;
 
-   private static readonly Brush BlueBrush = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!;
+   public static readonly Brush BlueBrush = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!;
    private static readonly Brush ForegroundBrush = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!;
    public static readonly Brush AccentBrush = (Brush)Application.Current.FindResource("LightAccentBackColorBrush")!;
    public static readonly Brush MarkedBrush = (Brush)Application.Current.FindResource("MarkedColorBrush")!;
@@ -66,6 +66,16 @@ public static class ControlFactory
          SnapsToDevicePixels = true,
       };
       return header;
+   }
+
+   public static TextBlock PureHeaderTextBlock(bool isNavigationHeader)
+   {
+      return new()
+      {
+         FontSize = 12,
+         Foreground = isNavigationHeader ? BlueBrush : ForegroundBrush,
+         TextWrapping = TextWrapping.Wrap,
+      };
    }
 
    public static ContextMenu GetContextMenu(INUINavigation?[] navs, NavH navH)
