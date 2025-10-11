@@ -19,7 +19,7 @@ public interface ILocationCollection<T> where T : ILocation
 
 public interface ILocation : IEu5Object
 {
-   public ICollection<Location> GetLocations();
+   public List<Location> GetLocations();
 
    public LocationCollectionType LcType { get; }
 

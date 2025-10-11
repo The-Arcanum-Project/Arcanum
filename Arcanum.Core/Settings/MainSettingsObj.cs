@@ -10,12 +10,15 @@ public class MainSettingsObj
 {
    public GeneralNUISettings NUIConfig { get; set; } = new();
 
-   [IsSubMenu("NUI Settings")]
+   [IsSubMenu("UI")]
    [JsonConverter(typeof(IgnoreDeserializationAndCreateNewConverter<NUISettings>))]
    public NUISettings NUIObjectSettings { get; set; } = new();
 
-   [IsSubMenu("AGS Settings")]
+   [IsSubMenu("Saving")]
    public AGSSettings AgsSettings { get; set; } = new();
+
+   [IsSubMenu("Map")]
+   public MapSettingsObj MapSettings { get; set; } = new();
 
    public AgsConfig AgsConfig { get; set; } = new();
 
@@ -25,7 +28,7 @@ public class MainSettingsObj
 
    public ErrorLogExportOptions ErrorLogExportOptions { get; set; } = new();
 
-   [IsSubMenu("Key Binds")]
+   [IsSubMenu("Keymap")]
    public UserKeyBinds UserKeyBinds { get; set; } = new();
 
 #if DEBUG

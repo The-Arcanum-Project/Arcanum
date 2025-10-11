@@ -46,7 +46,7 @@ public partial class Location
    #endregion
 
    public override string ToString() => UniqueId;
-   public ICollection<Location> GetLocations() => throw new NotImplementedException();
+   public List<Location> GetLocations() => throw new NotImplementedException();
 
    public LocationCollectionType LcType => LocationCollectionType.Location;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];

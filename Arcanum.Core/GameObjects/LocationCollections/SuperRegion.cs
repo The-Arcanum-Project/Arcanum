@@ -71,7 +71,7 @@ public partial class SuperRegion
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static SuperRegion Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
-   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
+   public List<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 

@@ -614,7 +614,7 @@ public static class NUIViewGenerator
          var addButton = NEF.CreateAddButton();
          addButton.Click += (_, _) =>
          {
-            var selectedLocations = Selection.SelectedLocations;
+            var selectedLocations = Selection.GetSelectedLocations;
             if (selectedLocations.Count == 0)
                return;
 
@@ -640,7 +640,7 @@ public static class NUIViewGenerator
          var removeButton = NEF.CreateRemoveButton();
          removeButton.Click += (_, _) =>
          {
-            var selectedLocations = Selection.SelectedLocations;
+            var selectedLocations = Selection.GetSelectedLocations;
             if (selectedLocations.Count == 0)
                return;
 
@@ -659,7 +659,7 @@ public static class NUIViewGenerator
          var setButton = NEF.CreateSetButton();
          setButton.Click += (_, _) =>
          {
-            var selectedLocations = Selection.SelectedLocations;
+            var selectedLocations = Selection.GetSelectedLocations;
             if (selectedLocations.Count == 0)
                return;
 

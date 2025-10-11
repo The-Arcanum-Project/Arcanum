@@ -51,7 +51,7 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
       return locations.Distinct().ToList();
    }
 
-   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
+   public List<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
    public string GetNamespace => "Map.Region";
 

@@ -64,7 +64,7 @@ public partial class Province : IMapInferable<Province>, IEu5Object<Province>, I
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public ICollection<Location> GetLocations() => LocationChildren;
+   public List<Location> GetLocations() => LocationChildren.ToList();
 
    public LocationCollectionType LcType => LocationCollectionType.Province;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];

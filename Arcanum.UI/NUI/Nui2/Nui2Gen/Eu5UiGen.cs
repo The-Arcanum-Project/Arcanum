@@ -220,7 +220,7 @@ public static class Eu5UiGen
 
       RoutedEventHandler setClick = (_, _) =>
       {
-         var inferred = MapInferrableRegistry.GetInferredList(primary.GetType(), Selection.SelectedLocations);
+         var inferred = MapInferrableRegistry.GetInferredList(primary.GetType(), Selection.GetSelectedLocations);
          if (inferred == null)
             return;
 
@@ -387,7 +387,7 @@ public static class Eu5UiGen
 
          RoutedEventHandler addClick = (_, _) =>
          {
-            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.SelectedLocations);
+            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
             foreach (var obj in enumerable)
                Nx.AddToCollection(primary, nxProp, obj);
@@ -395,7 +395,7 @@ public static class Eu5UiGen
 
          RoutedEventHandler removeClick = (_, _) =>
          {
-            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.SelectedLocations);
+            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
             foreach (var obj in enumerable)
                Nx.RemoveFromCollection(primary, nxProp, obj);

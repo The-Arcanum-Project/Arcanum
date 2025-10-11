@@ -71,7 +71,7 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Area Empty { get; } = new() { UniqueId = "Arcanum_Empty_Area" };
-   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(p => p.GetLocations()).ToList();
+   public List<Location> GetLocations() => LocationChildren.SelectMany(p => p.GetLocations()).ToList();
 
    public LocationCollectionType LcType => LocationCollectionType.Area;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];

@@ -48,7 +48,7 @@ public partial class Continent
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Continent Empty => new() { UniqueId = "Arcanum_Empty_Continent" };
-   public ICollection<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
+   public List<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.Continent;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(isEmbeddedObject: true)]
