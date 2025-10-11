@@ -63,6 +63,13 @@ public class Node
     {
     }
 
+    public static Node GetFourWayNode(int xPos, int yPos, Direction dir) => new ([
+        new(null, null, dir.Invert()),
+        new(null, null, dir.RotateRight()),
+        new(null, null, dir.RotateLeft()),
+        new(null, null, dir)
+    ], xPos, yPos);
+    
     /// <summary>
     /// Adds the node's position as a <see cref="Point"/> to the provided list.
     /// </summary>

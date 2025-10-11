@@ -1,10 +1,26 @@
 ﻿using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
 
 public static class DirectionHelper
 {
+    public struct PointSet(int xl, int yl, int xr, int yr, int xpos, int ypos)
+    {
+        public int Xl = xl;
+        public int Yl = yl;
+        public int Xr = xr;
+        public int Yr = yr;
+        public int Xpos = xpos;
+        public int Ypos = ypos;
+    }
+    
+    public static Vector2 GetPosition(this PointSet ps)
+    {
+        return new (ps.Xpos, ps.Ypos);
+    }
+    
     // Slightly overengineered in terms of performance
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Direction RotateRight(this Direction d)
@@ -22,33 +38,57 @@ public static class DirectionHelper
     {
         return (Direction)(((int)d + 2) & 3);
     }
-    
-    
-    // Can maybe be optimized further, but this is fine for now
-    public static (bool, bool) GetDeltaMove(this Direction d)
+
+
+    public static void Move(this Direction d, ref PointSet ps, out int cachePos, out bool xaxis)
     {
-        return d switch
+        switch (d)
         {
-            Direction.North => (false, false),
-            Direction.East => (true, true),
-            Direction.South => (false, true),
-            Direction.West => (true, false),
-            _ => throw new ArgumentOutOfRangeException(nameof(d), d, null)
-        };
+            case Direction.North:
+                cachePos = ps.Yl;
+                ps.Yl--;
+                ps.Yr--;
+                ps.Ypos--;
+                xaxis = false;
+                break;
+            case Direction.East:
+                cachePos = ps.Xl;
+                ps.Xl++;
+                ps.Xr++;
+                ps.Xpos++;
+                xaxis = true;
+                break;
+            case Direction.South:
+                cachePos = ps.Yl;
+                ps.Yl++;
+                ps.Yr++;
+                ps.Ypos++;
+                xaxis = false;
+                break;
+            case Direction.West:
+                cachePos = ps.Xl;
+                ps.Xl--;
+                ps.Xr--;
+                ps.Xpos--;
+                xaxis = true;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(d), d, null);
+        }
     }
-    
+
     /// <summary>
     /// Given the current position in Grid Coordinates and a direction,
     /// calculates the pixel coordinates to the left and right of the current position.
     /// </summary>
-    public static (int, int, int, int) GetStartPos(int xGrid, int yGrid, Direction d)
+    public static PointSet GetStartPos(int xGrid, int yGrid, Direction d)
     {
         return d switch
         {
-            Direction.North => (xGrid - 1, yGrid - 1, xGrid, yGrid - 1),
-            Direction.East => (xGrid, yGrid - 1, xGrid, yGrid),
-            Direction.South => (xGrid, yGrid, xGrid - 1, yGrid),
-            Direction.West => (xGrid - 1, yGrid, xGrid - 1, yGrid - 1),
+            Direction.North => new (xGrid - 1, yGrid - 1, xGrid, yGrid - 1, xGrid, yGrid),
+            Direction.East => new (xGrid, yGrid - 1, xGrid, yGrid, xGrid, yGrid),
+            Direction.South => new (xGrid, yGrid, xGrid - 1, yGrid, xGrid, yGrid),
+            Direction.West => new (xGrid - 1, yGrid, xGrid - 1, yGrid - 1, xGrid, yGrid),
             _ => throw new ArgumentOutOfRangeException(nameof(d), d, null)
         };
     }
