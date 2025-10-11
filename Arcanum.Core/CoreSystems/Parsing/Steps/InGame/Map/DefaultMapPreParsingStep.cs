@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
 using Common;
@@ -13,7 +14,8 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 /// This class loads the header of the default.map file and provides fields to get the parsed data.
 /// If this fails we abort the entire loading process as everything depends on this file.
 /// </summary>
-public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<DefaultMapDefinition>(dependencies)
+public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<DefaultMapDefinition>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
@@ -23,7 +25,8 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
                                           ref bool validation,
                                           object? lockObject)
    {
-      var dmd = new DefaultMapDefinition { Source = fileObj, };
+      var dmd = new DefaultMapDefinition { Source = fileObj };
+      FileStateManager.RegisterPath(fileObj.Path);
 
       foreach (var sn in rn.Statements)
          if (sn is ContentNode cn)

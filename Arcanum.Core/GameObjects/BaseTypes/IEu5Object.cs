@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Nexus.Core;
 
@@ -41,6 +42,7 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
          UniqueId = uniqueId, Source = source,
       };
       source.ObjectsInFile.Add(instance);
+      FileStateManager.RegisterPath(source.Path);
       return instance;
    }
 }
