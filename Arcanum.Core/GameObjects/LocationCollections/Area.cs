@@ -40,9 +40,9 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
 
    public static List<Area> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                            .Select(loc => (Area)
-                                                                               loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                    .Area)!)
+                                                                                   loc
+                                                                                     .GetFirstParentOfType(LocationCollectionType
+                                                                                            .Area)!)
                                                                            .Distinct()
                                                                            .ToList();
 
@@ -69,6 +69,7 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
    [DefaultValue("")]
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Area Empty { get; } = new() { UniqueId = "Arcanum_Empty_Area" };
    public ICollection<Location> GetLocations() => LocationChildren.SelectMany(p => p.GetLocations()).ToList();
 
