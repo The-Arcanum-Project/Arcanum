@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Jomini.Date;
@@ -316,7 +317,7 @@ public static class Eu5UiGen
          return;
       }
 
-      var margin = modifiableList.Count > 4 ? 14 : 8;
+      var margin = 8;
       var collectionGrid = ControlFactory.GetCollectionGrid();
       SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked, navH);
       GetCollectionPreview(navH,
@@ -582,9 +583,70 @@ public static class Eu5UiGen
       if (itemType == null || modifiableList.Count == 0)
          return;
 
-      for (var i = 0; i < Math.Min(modifiableList.Count, Config.Settings.NUIConfig.MaxCollectionItemsPreviewed); i++)
+      var maxPreviewCount = Config.Settings.NUIConfig.MaxCollectionItemsPreviewed;
+      var itemsToPreview = modifiableList.Cast<object>().Take(maxPreviewCount);
+
+      PopulateCollectionGridWithItems(navH, primary, grid, nxProp, itemsToPreview, rowIndex, margin);
+
+      if (modifiableList.Count <= Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
+         return;
+
+      var moreText = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                       false,
+                                                       $"  ... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more",
+                                                       height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                       alignment: HorizontalAlignment.Left);
+      moreText.FontStyle = FontStyles.Italic;
+      moreText.Cursor = Cursors.Hand;
+      moreText.TextDecorations = TextDecorations.Underline;
+      moreText.Foreground = Brushes.CornflowerBlue;
+      moreText.ToolTip = "Click to expand the full collection";
+
+      MouseButtonEventHandler clickHandler = null!;
+      clickHandler = (_, _) =>
       {
-         if (modifiableList[i] is IEu5Object eu5Obj)
+         moreText.MouseLeftButtonUp -= clickHandler;
+         ClearCollectionPreview(grid, rowIndex);
+         PopulateCollectionGridWithItems(navH, primary, grid, nxProp, modifiableList, rowIndex, margin);
+      };
+
+      moreText.MouseLeftButtonUp += clickHandler;
+
+      GridManager.AddToGrid(grid,
+                            moreText,
+                            rowIndex + Config.Settings.NUIConfig.MaxCollectionItemsPreviewed,
+                            0,
+                            0,
+                            ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                            leftMargin: margin + 4);
+   }
+
+   private static void ClearCollectionPreview(Grid grid, int startingRow)
+   {
+      for (var i = grid.Children.Count - 1; i >= 0; i--)
+      {
+         var child = grid.Children[i];
+         if (Grid.GetRow(child) >= startingRow)
+            grid.Children.RemoveAt(i);
+      }
+   }
+
+   private static void PopulateCollectionGridWithItems(NavH navH,
+                                                       IEu5Object primary,
+                                                       Grid grid,
+                                                       Enum nxProp,
+                                                       IEnumerable items,
+                                                       int rowIndex,
+                                                       int margin)
+   {
+      var itemType = primary.GetNxItemType(nxProp);
+      if (itemType == null)
+         return;
+
+      var i = 0;
+      foreach (var item in items)
+      {
+         if (item is IEu5Object eu5Obj)
          {
             var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(navH,
                                                                             eu5Obj,
@@ -599,7 +661,7 @@ public static class Eu5UiGen
          {
             if (CustomShortInfoGenerators.TryGetValue(itemType, out var generator))
             {
-               var ui = generator(modifiableList[i]!,
+               var ui = generator(item!,
                                   nxProp,
                                   ControlFactory.SHORT_INFO_ROW_HEIGHT,
                                   ControlFactory.SHORT_INFO_FONT_SIZE);
@@ -610,22 +672,8 @@ public static class Eu5UiGen
                // TODO: @Minnator Fallback window
             }
          }
-      }
 
-      if (modifiableList.Count > Config.Settings.NUIConfig.MaxCollectionItemsPreviewed)
-      {
-         var moreText = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                          false,
-                                                          $"  ... and {modifiableList.Count - Config.Settings.NUIConfig.MaxCollectionItemsPreviewed} more",
-                                                          height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
-                                                          alignment: HorizontalAlignment.Left);
-         moreText.FontStyle = FontStyles.Italic;
-         GridManager.AddToGrid(grid,
-                               moreText,
-                               rowIndex + Config.Settings.NUIConfig.MaxCollectionItemsPreviewed,
-                               0,
-                               0,
-                               ControlFactory.SHORT_INFO_ROW_HEIGHT);
+         i++;
       }
    }
 

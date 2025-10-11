@@ -163,7 +163,7 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 
    public string GetNamespace =&gt; $"$Namespace$.{nameof($ClassName$)}";
    public void OnSearchSelected() =&gt; UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
-   public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, UniqueId, string.Empty);
+   public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '&gt;'));
    public IQueastorSearchSettings.Category SearchCategory =&gt; IQueastorSearchSettings.Category.GameObjects;
    public bool IsReadonly =&gt; true;
    public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$ClassName$Settings;

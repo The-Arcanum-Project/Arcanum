@@ -16,13 +16,14 @@ public class DataSpace
       Path = [];
       Name = string.Empty;
    }
+
    public enum AccessType
    {
       ReadOnly,
       ReadWrite,
    }
 
-   public static readonly DataSpace Empty = new(string.Empty, ["ThisShouldNotExist"], AccessType.ReadOnly);
+   public static readonly DataSpace Empty = new(string.Empty, ["EmptyDataSpace"], AccessType.ReadOnly);
 
    public AccessType Access { get; set; }
    public string[] Path { get; set; }
@@ -43,7 +44,7 @@ public class DataSpace
 
    [System.Text.Json.Serialization.JsonIgnore]
    public string FullPath => System.IO.Path.Combine(Path);
-   
+
    [System.Text.Json.Serialization.JsonIgnore]
    public bool IsValid => Path.Length != 0 &&
                           !Path.Any(string.IsNullOrEmpty) &&
