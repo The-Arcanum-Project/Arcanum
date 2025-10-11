@@ -23,11 +23,11 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
    /// <summary>
    /// The overall character position in the file where this object starts.
    /// </summary>
-   public int OverallPos { get; set; } = charPos;
+   public int CharPos { get; set; } = charPos;
 
    public override string ToString()
    {
-      return $"Line {Line}, Char {Column}, Length {Length}, Overall Pos {OverallPos}";
+      return $"Line {Line}, Char {Column}, Length {Length}, Overall Pos {CharPos}";
    }
 
    public static Eu5ObjectLocation Empty => new(-1, -1, -1, -1);

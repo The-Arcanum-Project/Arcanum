@@ -26,6 +26,7 @@ public class Parser(LexerResult lexerResult)
    public static RootNode Parse(Eu5FileObj fileObj, out string source)
    {
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
+      fileObj.GenerateChecksum();
       if (string.IsNullOrWhiteSpace(source))
       {
          DiagnosticException.CreateAndHandle(new(1, 1, _fileObj.Path.FullPath),

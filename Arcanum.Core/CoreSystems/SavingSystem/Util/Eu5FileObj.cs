@@ -1,17 +1,29 @@
-﻿using Arcanum.Core.GameObjects.BaseTypes;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
-public class Eu5FileObj(PathObj path, FileDescriptor descriptor)
+public class Eu5FileObj
 {
-   public FileDescriptor Descriptor { get; } = descriptor;
-   public PathObj Path { get; } = path;
+   public Eu5FileObj(PathObj path, FileDescriptor descriptor)
+   {
+      Descriptor = descriptor;
+      Path = path;
+      FileWatcher.FileWatcher.RegisterPath(path);
+   }
 
+   public FileDescriptor Descriptor { get; }
+   public PathObj Path { get; }
    public HashSet<IEu5Object> ObjectsInFile { get; } = [];
-
    public static Eu5FileObj Empty { get; } = new(PathObj.Empty, FileDescriptor.Empty);
-   protected bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);
+   public static byte[] Checksum { get; private set; }
 
+   public void GenerateChecksum()
+   {
+      Checksum = Task.Run(() => FileWatcher.FileWatcher.CalculateSha256(Path.FullPath)).Result;
+   }
+
+   private bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);
    public override string ToString() => $"{Descriptor} @ {Path}";
 
    public override bool Equals(object? obj)
@@ -27,7 +39,6 @@ public class Eu5FileObj(PathObj path, FileDescriptor descriptor)
    }
 
    public override int GetHashCode() => HashCode.Combine(Descriptor, Path);
-
    public static bool operator ==(Eu5FileObj? left, Eu5FileObj? right) => Equals(left, right);
    public static bool operator !=(Eu5FileObj? left, Eu5FileObj? right) => !Equals(left, right);
 }
