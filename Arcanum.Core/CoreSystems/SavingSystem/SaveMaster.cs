@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -33,6 +34,11 @@ public static class SaveMaster
    public static void SaveAll(bool onlyModified = true)
    {
       Save([..Enum.GetValues<SaveableType>()], onlyModified);
+   }
+
+   public static ObjState GetState(IEu5Object obj)
+   {
+      return ObjState.Unchanged;
    }
 
    public static void Save(List<SaveableType> saveableTypes, bool onlyModified = true)

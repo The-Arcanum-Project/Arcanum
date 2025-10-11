@@ -5,12 +5,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -66,11 +68,47 @@ public static class Eu5UiGen
       view.BaseViewBorder.Child = mainGrid;
 
       if (hasHeader)
+      {
+         SetStatusEllipse(mainGrid, primary, 0, 0, 0);
          GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
+      }
 
       GenerateViewElements(navh, mainGrid, primary, markedProps, allowReadOnlyEditing, hasHeader ? 1 : 0);
 
       return view;
+   }
+
+   // Depending on the editing state we will put in a green, yellow or red ellipse on the left vertically centered
+   private static void SetStatusEllipse(Grid mainGrid, IEu5Object primary, int row, int column, int columnSpan)
+   {
+      var state = SaveMaster.GetState(primary);
+
+      var ellipse = new Ellipse
+      {
+         Width = 8,
+         Height = 8,
+         VerticalAlignment = VerticalAlignment.Center,
+         HorizontalAlignment = HorizontalAlignment.Left,
+         Margin = new(4, 0, 0, 0),
+      };
+
+      ellipse.ToolTip = state switch
+      {
+         ObjState.Unchanged => $"{primary.UniqueId} is Unchanged",
+         ObjState.Modified => $"{primary.UniqueId} is Modified",
+         ObjState.New => $"{primary.UniqueId} is New",
+         _ => "Unknown State",
+      };
+
+      ellipse.Fill = state switch
+      {
+         ObjState.Unchanged => Brushes.Green,
+         ObjState.Modified => Brushes.Yellow,
+         ObjState.New => Brushes.Blue,
+         _ => Brushes.Gray
+      };
+
+      GridManager.AddToGrid(mainGrid, ellipse, row, column, columnSpan, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
    private static void GenerateViewElements(NavH navH,
@@ -250,6 +288,7 @@ public static class Eu5UiGen
                            rowIndex,
                            isMarked: isMarked,
                            embeddedPropertyTargets: parentProp,
+                           leftMargin: 6,
                            allowReadOnlyEditing: allowReadOnlyEditing);
          return;
       }
@@ -277,7 +316,7 @@ public static class Eu5UiGen
          return;
       }
 
-      var margin = modifiableList.Count > 0 ? 4 : 0;
+      var margin = modifiableList.Count > 4 ? 14 : 8;
       var collectionGrid = ControlFactory.GetCollectionGrid();
       SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked, navH);
       GetCollectionPreview(navH,
@@ -285,10 +324,11 @@ public static class Eu5UiGen
                            collectionGrid,
                            nxProp,
                            modifiableList,
-                           1);
+                           1,
+                           margin);
 
       if (modifiableList.Count > 0)
-         GetCollectionLiner(collectionGrid);
+         GetCollectionLiner(collectionGrid, margin);
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
@@ -314,7 +354,10 @@ public static class Eu5UiGen
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
       GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
+      var marker = GetPropertyMarker(primary, nxProp);
+
       GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      GridManager.AddToGrid(mainGrid, marker, row, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
    private static void GetInferActionButtons(IEu5Object primary,
@@ -508,13 +551,13 @@ public static class Eu5UiGen
       panel.Children.Add(eyeButton);
    }
 
-   private static void GetCollectionLiner(Grid grid)
+   private static void GetCollectionLiner(Grid grid, int margin)
    {
       var border = new Border
       {
          BorderBrush = ControlFactory.AccentBrush,
          BorderThickness = new(1.2, 0, 0, 1),
-         Margin = new(-2, 6, 0, -2),
+         Margin = new(margin - 2, 6, 0, -2),
          CornerRadius = new(0, 0, 0, 4),
          Width = 15,
          VerticalAlignment = VerticalAlignment.Stretch,
@@ -531,7 +574,8 @@ public static class Eu5UiGen
                                             Grid grid,
                                             Enum nxProp,
                                             IList modifiableList,
-                                            int rowIndex)
+                                            int rowIndex,
+                                            int margin)
    {
       var itemType = primary.GetNxItemType(nxProp);
 
@@ -547,7 +591,7 @@ public static class Eu5UiGen
                                                                             nxProp,
                                                                             ControlFactory.SHORT_INFO_ROW_HEIGHT - 4,
                                                                             ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                                            6,
+                                                                            margin + 6,
                                                                             0);
             GridManager.AddToGrid(grid, ui, rowIndex + i, 0, 0, ControlFactory.SHORT_INFO_ROW_HEIGHT);
          }
@@ -723,9 +767,49 @@ public static class Eu5UiGen
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
 
+      var propertyMarker = GetPropertyMarker(primary, nxProp);
+
       GridManager.AddToGrid(mainGrid, dockPanel, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
-      GridManager.AddToGrid(mainGrid, line, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      GridManager.AddToGrid(mainGrid,
+                            line,
+                            rowIndex,
+                            0,
+                            1,
+                            ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                            leftMargin: leftMargin);
       GridManager.AddToGrid(mainGrid, element, rowIndex, 1, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
+   private static Ellipse GetPropertyMarker(IEu5Object primary, Enum nxProp)
+   {
+      var value = Nx.ForceGetAs<object>(primary, nxProp);
+      var defaultValue = primary.GetDefaultValue(nxProp);
+
+      var isSaved = !Equals(value, defaultValue);
+
+      if (!primary.AgsSettings.SkipDefaultValues && isSaved)
+         isSaved = false;
+
+      if (primary.AgsSettings.WriteEmptyCollectionHeader &&
+          primary.IsCollection(nxProp) &&
+          value is IList { Count: 0 })
+         isSaved = true;
+
+      var ellipse = new Ellipse
+      {
+         Width = 4,
+         Height = 4,
+         VerticalAlignment = VerticalAlignment.Center,
+         HorizontalAlignment = HorizontalAlignment.Left,
+         Margin = new(-2, 0, 0, 0),
+         Fill = isSaved ? Brushes.Green : Brushes.Transparent,
+         ToolTip = isSaved
+                      ? $"{nxProp} is set to a non-default value."
+                      : $"{nxProp} is set to its default value.",
+      };
+
+      return ellipse;
    }
 
    private static void SetTooltipIsAny(IAgs iAgs, Enum nxProp, UIElement element)

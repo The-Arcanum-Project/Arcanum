@@ -42,13 +42,14 @@ public static class DescriptorDefinitions
    public static readonly FileDescriptor ModifierDefinitionDescriptor =
       new(["game", "main_menu", "common", "modifier_type_definitions"],
           new("modifiers", "txt", "#"),
-          [new Steps.MainMenu.Common.ModifierParsing([ColorParser.LoadingService[0]])],
+          [new ModifierParsing([ColorParser.LoadingService[0]])],
           false);
 
    public static readonly FileDescriptor DefaultMapPreDescriptor = new(["game", "in_game", "map_data", "default.map"],
                                                                        new("default.map", "map", "#"),
                                                                        ConsequentialLoadingSteps([
-                                                                          new DefaultMapPreParsingStep([]),
+                                                                          new DefaultMapPreParsingStep([
+                                                                          ]), // TODO @Melco how to resolve this circular dependency? : LocationDescriptor.LoadingService[0]
                                                                           new DefaultMapParsing([]),
                                                                        ]),
                                                                        false);

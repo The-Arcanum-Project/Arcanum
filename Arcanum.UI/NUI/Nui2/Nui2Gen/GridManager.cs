@@ -19,14 +19,18 @@ public static class GridManager
                                 int row,
                                 int column,
                                 int columnSpan = 0,
-                                int rowHeight = DEFAULT_ROW_HEIGHT)
+                                int rowHeight = DEFAULT_ROW_HEIGHT,
+                                int topMargin = DEFAULT_TOP_MARGIN,
+                                int bottomMargin = DEFAULT_BOTTOM_MARGIN,
+                                int leftMargin = DEFAULT_LEFT_MARGIN,
+                                int rightMargin = DEFAULT_RIGHT_MARGIN)
    {
       mainGrid.Children.Add(element);
 
       while (row >= mainGrid.RowDefinitions.Count)
          mainGrid.RowDefinitions.Add(new() { Height = new(rowHeight, GridUnitType.Auto) });
 
-      element.Margin = new(DEFAULT_LEFT_MARGIN, DEFAULT_TOP_MARGIN, DEFAULT_RIGHT_MARGIN, DEFAULT_BOTTOM_MARGIN);
+      element.Margin = new(leftMargin, topMargin, rightMargin, bottomMargin);
 
       Grid.SetRow(element, row);
       Grid.SetColumn(element, column);
