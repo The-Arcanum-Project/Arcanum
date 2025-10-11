@@ -80,7 +80,7 @@ public partial class Location
 
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects |
                                  IQueastorSearchSettings.DefaultCategories.MapObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationAgsSettings;

@@ -157,8 +157,6 @@ public class Queastor : IQueastor
         .Count} fuzzy matches.");
 #endif
 
-      exact.Sort();
-
       var sortedFuzzy = ApplySorting(filteredResults, query);
       return exact.Concat(sortedFuzzy).ToList();
    }

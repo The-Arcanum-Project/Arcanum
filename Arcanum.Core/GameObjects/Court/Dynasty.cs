@@ -79,7 +79,7 @@ public partial class Dynasty : IEu5Object<Dynasty>
 
    public string GetNamespace => $"Court.{nameof(Dynasty)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DynastySettings;

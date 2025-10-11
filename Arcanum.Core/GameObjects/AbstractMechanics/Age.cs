@@ -96,7 +96,7 @@ public partial class Age : IEu5Object<Age>
       UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    }
 
-   public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Age", string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion

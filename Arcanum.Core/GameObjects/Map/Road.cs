@@ -42,7 +42,7 @@ public partial class Road : IEu5Object<Road>
       UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    }
 
-   public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Road", string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.RoadAgsSettings;

@@ -126,7 +126,7 @@ public partial class Culture : IEu5Object<Culture>
 
    public string GetNamespace => $"{nameof(Culture)}";
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;

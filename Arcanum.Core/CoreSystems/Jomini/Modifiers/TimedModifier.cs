@@ -53,7 +53,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public List<string> SearchTerms => [UniqueId];
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
 
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, string.Empty);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.TimedModifierSettings;
