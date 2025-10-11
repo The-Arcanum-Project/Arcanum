@@ -11,7 +11,7 @@ public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direct
     public Node? Node = node;
 }
 
-public class Node
+public class Node : ICoordinateAdder
 {
 #if DEBUG
     private static int _totalNodes;
@@ -24,7 +24,7 @@ public class Node
 
 #endif
 
-    public readonly Point Position;
+    public readonly Vector2 Position;
     public int XPos => Position.X;
     public int YPos => Position.Y;
 
@@ -74,9 +74,9 @@ public class Node
     /// Adds the node's position as a <see cref="Point"/> to the provided list.
     /// </summary>
     /// <param name="points">The list to add the point to.</param>
-    public void AddTo(List<Point> points)
+    public void AddTo(List<Vector2> points)
     {
-        points.Add(new Point(XPos, YPos));
+        points.Add(new (XPos, YPos));
     }
 
 
@@ -145,14 +145,14 @@ public class Node
     /// <param name="node">The node the segment leads to, if any.</param>
     /// <returns>True if a segment and node were found; otherwise, false.</returns>
     public bool Visit(ref Direction direction, BorderSegmentDirectional input,
-        out BorderSegmentDirectional segment, [MaybeNullWhen(false)] out Node node)
+        [MaybeNullWhen(false)] out CacheNodeInfo segment, [MaybeNullWhen(false)] out Node node)
     {
         if (input.Segment.Points.Count == 0)
         {
             return Visit(ref direction, out segment, out node);
         }
 
-        // Get last point based on direction
+        // Get last point based on the direction
         var point = input.IsForward ? input.Segment.Points[^1] : input.Segment.Points[0];
 
         return Visit(ref direction, point.X, point.Y, out segment, out node);
@@ -168,7 +168,7 @@ public class Node
     /// <param name="node">The node the segment leads to, if any.</param>
     /// <returns>True if a segment and node were found; otherwise, false.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the movement between points is invalid, so not in a straight line.</exception>
-    private bool Visit(ref Direction direction, int x, int y, out BorderSegmentDirectional segment,
+    private bool Visit(ref Direction direction, int x, int y, [MaybeNullWhen(false)] out CacheNodeInfo segment,
         [MaybeNullWhen(false)] out Node node)
     {
         // Get direction based of the difference between the two points
@@ -193,7 +193,7 @@ public class Node
     /// <param name="segment">The found border segment, if any.</param>
     /// <param name="node">The node the segment leads to, if any.</param>
     /// <returns>True if a segment and node were found; otherwise, false.</returns>
-    private bool Visit(ref Direction direction, out BorderSegmentDirectional segment,
+    private bool Visit(ref Direction direction,[MaybeNullWhen(false)] out CacheNodeInfo segment,
         [MaybeNullWhen(false)] out Node node)
     {
         // Not only check the right direction, since it is a T-shaped intersection a possible path is straight ahead.
@@ -209,12 +209,12 @@ public class Node
 
         if (cache.Segment.HasValue)
         {
-            segment = cache.Segment.Value;
+            segment = cache;
             node = cache.Node!;
             return true;
         }
 
-        segment = default;
+        segment = null;
         node = null;
         return false;
     }

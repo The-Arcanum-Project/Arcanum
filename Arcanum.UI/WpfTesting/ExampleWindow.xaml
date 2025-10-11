@@ -16,11 +16,7 @@
                   VerticalScrollBarVisibility="Auto"
                   PanningMode="Both"
                   Background="LightGray">
-        <Canvas Name="DrawingCanvas" Background="White" Margin="10" MaxHeight="888" MaxWidth="736"
-                MouseWheel="Window_MouseWheel"
-                MouseDown="Window_MouseDown"
-                MouseUp="Window_MouseUp"
-                MouseMove="Window_MouseMove">
+        <Canvas Name="DrawingCanvas" Background="White" Margin="10" MaxHeight="888" MaxWidth="736">
             <Canvas.LayoutTransform>
                 <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1"/>
             </Canvas.LayoutTransform>
