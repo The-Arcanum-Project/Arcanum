@@ -9,7 +9,6 @@ public class Eu5FileObj
    {
       Descriptor = descriptor;
       Path = path;
-      FileStateManager.RegisterPath(path);
    }
 
    public FileDescriptor Descriptor { get; }
