@@ -47,6 +47,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
       set => Definition.UniqueId = value;
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    /// <summary>
    /// The value of the modifier.
    /// </summary>

@@ -154,6 +154,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    #region ISearchable
 
    public string GetNamespace => nameof(ModifierDefinition);
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 

@@ -46,6 +46,14 @@ public partial class SuperRegion
      .Distinct()
      .ToList();
 
+   public static List<Location> GetRelevantLocations(IEnumerable<SuperRegion> items)
+   {
+      List<Location> locations = [];
+      foreach (var item in items)
+         locations.AddRange(item.GetLocations());
+      return locations.Distinct().ToList();
+   }
+
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
    public string GetNamespace => "Map.Superregion";
 
@@ -61,6 +69,7 @@ public partial class SuperRegion
    [DefaultValue("")]
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static SuperRegion Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
    public ICollection<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;

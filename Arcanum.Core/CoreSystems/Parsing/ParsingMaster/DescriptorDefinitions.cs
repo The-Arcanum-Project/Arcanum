@@ -45,24 +45,27 @@ public static class DescriptorDefinitions
           [new ModifierParsing([ColorParser.LoadingService[0]])],
           false);
 
-   public static readonly FileDescriptor DefaultMapPreDescriptor = new(["game", "in_game", "map_data", "default.map"],
-                                                                       new("default.map", "map", "#"),
-                                                                       ConsequentialLoadingSteps([
-                                                                          new DefaultMapPreParsingStep([
-                                                                          ]), // TODO @Melco how to resolve this circular dependency? : LocationDescriptor.LoadingService[0]
-                                                                          new DefaultMapParsing([]),
-                                                                       ]),
-                                                                       false);
+   private static readonly DefaultMapPreParsingStep DefaultMapPreParsing = new([]);
 
    public static readonly FileDescriptor LocationDescriptor = new(["game", "in_game", "map_data", "named_locations"],
                                                                   new("LocationsDefinition", "txt", "#"),
                                                                   [
                                                                      new LocationFileLoading([
-                                                                        DefaultMapPreDescriptor.LoadingService[0],
+                                                                        DefaultMapPreParsing,
                                                                         ColorParser.LoadingService[0],
                                                                      ]),
                                                                   ],
                                                                   false);
+
+   public static readonly FileDescriptor DefaultMapPreDescriptor = new(["game", "in_game", "map_data", "default.map"],
+                                                                       new("default.map", "map", "#"),
+                                                                       ConsequentialLoadingSteps([
+                                                                          DefaultMapPreParsing,
+                                                                          new DefaultMapParsing([
+                                                                             LocationDescriptor.LoadingService[0],
+                                                                          ]),
+                                                                       ]),
+                                                                       false);
 
    public static readonly FileDescriptor DefinitionsDescriptor = new(["game", "in_game", "map_data", "definitions.txt"],
                                                                      new("definitions", "txt", "#"),

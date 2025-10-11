@@ -83,6 +83,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
    #region ISearchable
 
    public string GetNamespace => $"Map.{nameof(Vegetation)}";
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 

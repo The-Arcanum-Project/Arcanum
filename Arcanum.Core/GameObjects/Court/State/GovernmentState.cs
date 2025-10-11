@@ -137,6 +137,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    public INUINavigation[] Navigations { get; } = [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.GovernmentStateAgsSettings;
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => "government";
 
    private string _privateKey = string.Empty;

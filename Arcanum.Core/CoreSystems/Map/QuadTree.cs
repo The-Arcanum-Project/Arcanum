@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 
+// Make sure you have a using statement for your PointF and RectangleF,
+// e.g., using System.Drawing;
+
 namespace Arcanum.Core.CoreSystems.Map;
 
 public sealed class QuadTree
@@ -20,12 +23,8 @@ public sealed class QuadTree
    }
 
    /// <summary>
-   /// Inserts a polygon into the quadtree.
-   /// If the polygon's bounds do not intersect with the quadtree's bounds, it will not be inserted.
-   /// If the quadtree has reached its maximum number of polygons and depth, it will subdivide and
-   /// redistribute the polygons.
+   /// Inserts a polygon into the quadtree. This method remains unchanged.
    /// </summary>
-   /// <param name="poly"></param>
    public void Insert(Polygon poly)
    {
       if (!Bounds.IntersectsWith(poly.Bounds))
@@ -40,50 +39,38 @@ public sealed class QuadTree
 
       Polygons.Add(poly);
 
-      if (Polygons.Count > MAX_POLYGONS && _depth < MAX_DEPTH)
+      if (Polygons.Count <= MAX_POLYGONS || _depth >= MAX_DEPTH)
+         return;
+
+      Subdivide();
+      foreach (var p in Polygons)
       {
-         Subdivide();
-         foreach (var p in Polygons)
-         {
-            Debug.Assert(_children != null, nameof(_children) + " != null");
+         Debug.Assert(_children != null, nameof(_children) + " != null");
 
-            foreach (var child in _children)
-               child.Insert(p);
-         }
-
-         Polygons.Clear();
+         foreach (var child in _children)
+            child.Insert(p);
       }
+
+      Polygons.Clear();
    }
 
    /// <summary>
-   /// Queries the quadtree for polygons that contain the specified point.
-   /// If the point is outside the bounds of the quadtree, no polygons will be returned.
-   /// If the quadtree has children, it will recursively query them.
-   /// If the quadtree has no children, it will check each polygon's bounds to see if it contains the point,
-   /// and add it to the results if it does.
+   /// Queries the quadtree for the single polygon that contains the specified point.
+   /// Because polygons do not overlap, this method returns the first and only match found.
    /// </summary>
-   /// <param name="point"></param>
-   /// <param name="results"></param>
-   public void Query(PointF point, List<Polygon> results)
+   /// <param name="point">The point to check.</param>
+   /// <returns>The Polygon containing the point, or null if no polygon is found.</returns>
+   public Polygon? Query(PointF point)
    {
       if (!Bounds.Contains(point))
-         return;
+         return null;
 
       if (_children != null)
-      {
-         foreach (var child in _children)
-            if (child.Bounds.Contains(point))
-            {
-               child.Query(point, results);
-               break;
-            }
-      }
-      else
-      {
-         foreach (var p in Polygons)
-            if (p.Bounds.Contains(point))
-               results.Add(p);
-      }
+         return (from child in _children
+                 where child.Bounds.Contains(point)
+                 select child.Query(point)).FirstOrDefault();
+
+      return Polygons.FirstOrDefault(p => p.Contains(point));
    }
 
    private void Subdivide()

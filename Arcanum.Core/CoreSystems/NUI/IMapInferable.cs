@@ -14,4 +14,11 @@ public interface IMapInferable<T> : IHasMapMode
    /// </summary>
    /// <returns></returns>
    public static abstract List<T> GetInferredList(IEnumerable<Location> sLocs);
+
+   /// <summary>
+   /// Returns a list of locations relevant to the provided items of type T.
+   /// </summary>
+   /// <param name="items"></param>
+   /// <returns></returns>
+   public static abstract List<Location> GetRelevantLocations(IEnumerable<T> items);
 }

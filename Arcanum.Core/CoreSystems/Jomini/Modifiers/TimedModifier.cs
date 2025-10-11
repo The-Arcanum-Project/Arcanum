@@ -21,6 +21,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
    [SaveAs]

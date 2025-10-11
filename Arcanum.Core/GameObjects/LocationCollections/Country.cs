@@ -253,6 +253,7 @@ public partial class Country : IEu5Object<Country>
    public override string ToString() => UniqueId;
    public static Country Empty { get; } = new() { UniqueId = "Arcanum_EMPTY_Country" };
    public string GetNamespace => "Map.Country";
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 

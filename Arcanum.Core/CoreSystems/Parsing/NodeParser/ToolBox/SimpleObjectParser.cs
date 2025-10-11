@@ -137,6 +137,7 @@ public static class SimpleObjectParser
       }
 
       eu5Obj = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
+      eu5Obj.FileLocation = bn.GetFileLocation();
       return true;
    }
 
@@ -159,7 +160,7 @@ public static class SimpleObjectParser
             continue;
 
          var instance = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
-
+         instance.FileLocation = bn.GetFileLocation();
          Debug.Assert(instance.Source != null, "instance.Source != null");
 
          if (lockObject != null)

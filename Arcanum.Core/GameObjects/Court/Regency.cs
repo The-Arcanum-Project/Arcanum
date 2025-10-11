@@ -39,6 +39,7 @@ public partial class Regency : IEu5Object<Regency>
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
    public string GetNamespace => $"Character.{nameof(Regency)}";

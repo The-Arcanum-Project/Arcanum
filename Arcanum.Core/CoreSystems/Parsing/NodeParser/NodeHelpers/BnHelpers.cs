@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -82,5 +83,10 @@ public static class BnHelpers
          var identifier = kn.KeyNode.GetLexeme(source);
          Nx.AddToCollection(target, nxProp, identifier);
       }
+   }
+
+   public static Eu5ObjectLocation GetFileLocation(this BlockNode bn)
+   {
+      return new(bn.KeyNode.Column, bn.KeyNode.Line, bn.GetEndLocation().charPos, bn.KeyNode.Start);
    }
 }

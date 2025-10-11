@@ -54,6 +54,8 @@ public partial class Location
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
    public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.ToList();
+   public static List<Location> GetRelevantLocations(IEnumerable<Location> items) => items.ToList();
+
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
 
    public bool IsReadonly => false;
@@ -84,6 +86,7 @@ public partial class Location
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" };
 
    #region Map Management

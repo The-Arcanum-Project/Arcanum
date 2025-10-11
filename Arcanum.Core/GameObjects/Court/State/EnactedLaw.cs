@@ -30,6 +30,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.EnactedLawAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => string.Empty;
    public static EnactedLaw Empty { get; } = new() { Key = string.Empty, Value = string.Empty };
    public string GetNamespace => $"Court.GovernmentState.{nameof(EnactedLaw)}";

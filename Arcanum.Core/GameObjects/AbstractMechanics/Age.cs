@@ -87,6 +87,7 @@ public partial class Age : IEu5Object<Age>
    #region ISearchable
 
    public string GetNamespace => $"AbstractMechanics.{nameof(Age)}";
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 

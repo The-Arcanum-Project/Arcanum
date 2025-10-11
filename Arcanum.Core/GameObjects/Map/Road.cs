@@ -33,6 +33,7 @@ public partial class Road : IEu5Object<Road>
    public static Dictionary<string, Road> GetGlobalItems() => Globals.Roads;
    public static Road Empty { get; } = new() { StartLocation = Location.Empty, EndLocation = Location.Empty };
    public string GetNamespace => "Map.Roads";
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [StartLocation.UniqueId, EndLocation.UniqueId];
 

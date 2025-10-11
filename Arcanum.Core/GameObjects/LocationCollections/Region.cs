@@ -38,10 +38,18 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
 
    public static List<Region> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                              .Select(loc => (Region)loc
-                                                                                .GetFirstParentOfType(LocationCollectionType
-                                                                                   .Area)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                           .Area)!)
                                                                              .Distinct()
                                                                              .ToList();
+
+   public static List<Location> GetRelevantLocations(IEnumerable<Region> items)
+   {
+      List<Location> locations = [];
+      foreach (var item in items)
+         locations.AddRange(item.GetLocations());
+      return locations.Distinct().ToList();
+   }
 
    public ICollection<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
@@ -55,6 +63,7 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegionAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Region Empty { get; } = new() { UniqueId = "Arcanum_Empty_Region" };
 
    public LocationCollectionType LcType => LocationCollectionType.Region;

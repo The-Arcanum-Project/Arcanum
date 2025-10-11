@@ -119,6 +119,7 @@ public class Parser(LexerResult lexerResult)
          block.Children.Add(ParseStatement());
 
       Expect(TokenType.RightBrace, "'}' to close anonymous block.");
+      block.ClosingToken = Previous();
       return block;
    }
 
@@ -154,6 +155,7 @@ public class Parser(LexerResult lexerResult)
          block.Children.Add(ParseStatement());
 
       Expect(TokenType.RightBrace, "'}' to close the block.");
+      block.ClosingToken = Previous();
       return block;
    }
 
@@ -175,11 +177,12 @@ public class Parser(LexerResult lexerResult)
       // A block used as a value, e.g., OR = { ... }
       if (Match(TokenType.LeftBrace))
       {
-         var blockValue = new BlockValueNode();
+         var blockValue = new BlockValueNode(Current());
          while (!Check(TokenType.RightBrace) && !IsAtEnd())
             blockValue.Children.Add(ParseStatement());
 
          Expect(TokenType.RightBrace, "'}' to close block value.");
+         blockValue.ClosingToken = Previous();
          return blockValue;
       }
 
@@ -309,6 +312,7 @@ public class Parser(LexerResult lexerResult)
          node.Children.Add(ParseStatement());
 
       Expect(TokenType.RightBrace, "Expected '}' to close scripted statement block.");
+      node.ClosingToken = Previous();
       return node;
    }
 

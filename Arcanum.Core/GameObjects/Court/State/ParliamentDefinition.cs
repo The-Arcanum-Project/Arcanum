@@ -31,6 +31,7 @@ public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
       set { }
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => string.Empty;
    public static ParliamentDefinition Empty { get; } = new() { Type = "Arcanum_empty_parliament_definition" };
    public string GetNamespace => "Court.parliament_definition";

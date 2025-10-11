@@ -41,6 +41,7 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
       set { }
    }
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey { get; set; } = string.Empty;
    public static CharacterNameDeclaration Empty { get; } = new() { Name = "Arcanum_CharacterNameDeclaration_Empty", };
 

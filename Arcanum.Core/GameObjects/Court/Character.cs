@@ -219,6 +219,7 @@ public partial class Character : IEu5Object<Character>
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
    #region IEu5Object
