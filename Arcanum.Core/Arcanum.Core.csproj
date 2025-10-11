@@ -17,6 +17,7 @@
     <ItemGroup>
         <Folder Include="CoreSystems\Jomini\Scopes\"/>
         <Folder Include="CoreSystems\Jomini\Triggers\"/>
+        <Folder Include="CoreSystems\Parsing\MapParsing\Smoothing\" />
         <Folder Include="CoreSystems\Parsing\Steps\InGame\"/>
         <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
         <Folder Include="Utils\SearchingAlgorithms\"/>
