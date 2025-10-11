@@ -13,5 +13,6 @@ public static class UiHandlesInjector
       UIHandle.Instance.UIUtils = new UIUtilsImpl();
       UIHandle.Instance.PopUpHandle = new PopUpHandleImpl();
       UIHandle.Instance.MainWindowsHandle = new MainWindowHandleImpl();
+      UIHandle.Instance.MapHandle = new MapHandleImpl();
    }
 }

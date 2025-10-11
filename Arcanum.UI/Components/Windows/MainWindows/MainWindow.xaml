@@ -407,8 +407,7 @@
 
         </GridSplitter>
 
-        <Image Grid.Column = "2"
-               Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapFiller.png" />
+        <uc:MapControl x:Name="MainMap" Grid.Column="2"></uc:MapControl>
 
         <GridSplitter Grid.Column = "3"
                       Width = "4"

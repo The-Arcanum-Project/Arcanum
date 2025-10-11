@@ -3,15 +3,11 @@
 public class Polygon(int color)
 {
     public int Color { get; } = color;
-    private List<BorderSegmentDirectional> Segments { get; } = [];
+    public List<ICoordinateAdder> Segments { get; } = [];
     public List<Polygon> Holes { get; } = [];
+}
 
-    public List<Vector2> GetAllPoints()
-    {
-        var points = new List<Vector2>();
-        foreach (var segment in Segments)
-            segment.AddToList(points);
-
-        return points;
-    }
+public interface ICoordinateAdder
+{
+    public void AddTo(List<Vector2> points);
 }

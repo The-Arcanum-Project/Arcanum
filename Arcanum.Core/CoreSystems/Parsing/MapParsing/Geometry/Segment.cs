@@ -5,12 +5,12 @@ public class BorderSegment
     public List<Vector2> Points { get; } = [];
 }
 
-public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isForward)
+public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isForward) : ICoordinateAdder
 {
     public readonly BorderSegment Segment = segment;
     public readonly bool IsForward = isForward;
 
-    public void AddToList(List<Vector2> points)
+    public void AddTo(List<Vector2> points)
     {
         if (IsForward)
             points.AddRange(Segment.Points);
