@@ -12,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SavingUtil
 {
-   public static string FormatFilesMultithreadedIf(List<IEu5Object> items, int minComplexity = 3)
+   public static IndentedStringBuilder FormatFilesMultithreadedIf(List<IEu5Object> items, int minComplexity = 3)
    {
       // We clear the cache to ensure that property order is recalculated for each run.
 
@@ -23,7 +23,7 @@ public static class SavingUtil
          var sb = new IndentedStringBuilder();
          foreach (var item in items)
             item.ToAgsContext().BuildContext(sb);
-         return sb.ToString();
+         return sb;
       }
 
       var partitioner = Partitioner.Create(0, items.Count);
@@ -43,12 +43,12 @@ public static class SavingUtil
 
       var orderedResults = chunkResults.OrderBy(kvp => kvp.Key).ToList();
       var totalCapacity = orderedResults.Sum(kvp => kvp.Value.InnerBuilder.Length);
-      var finalBuilder = new StringBuilder(totalCapacity);
+      var finalBuilder = new IndentedStringBuilder(totalCapacity);
 
       foreach (var kvp in orderedResults)
          kvp.Value.Merge(finalBuilder);
 
-      return finalBuilder.ToString();
+      return finalBuilder;
    }
 
    /// <summary>

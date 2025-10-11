@@ -134,7 +134,7 @@ public partial class AgsWindow
       string formattedStr;
       if (AllowMultithreadedCheckBox.IsChecked == true)
       {
-         formattedStr = SavingUtil.FormatFilesMultithreadedIf(objs.ToList());
+         formattedStr = SavingUtil.FormatFilesMultithreadedIf(objs.ToList()).ToString();
          sw.Stop();
       }
       else

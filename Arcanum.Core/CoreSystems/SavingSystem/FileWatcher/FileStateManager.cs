@@ -7,7 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
-public static class FileWatcher
+public static class FileStateManager
 {
    public static event EventHandler<FileChangedEventArgs>? FileChanged;
 
@@ -164,6 +164,11 @@ public static class FileWatcher
 #if IS_DEBUG
       Console.WriteLine($"[Error] FileSystemWatcher error: {e.GetException().Message}");
 #endif
+   }
+
+   public static byte[] CalculateSha256(Eu5FileObj fo)
+   {
+      return CalculateSha256(fo.Path.FullPath);
    }
 
    public static byte[] CalculateSha256(string filePath)

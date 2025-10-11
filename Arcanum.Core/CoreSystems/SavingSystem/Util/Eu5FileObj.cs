@@ -9,18 +9,18 @@ public class Eu5FileObj
    {
       Descriptor = descriptor;
       Path = path;
-      FileWatcher.FileWatcher.RegisterPath(path);
+      FileStateManager.RegisterPath(path);
    }
 
    public FileDescriptor Descriptor { get; }
    public PathObj Path { get; }
    public HashSet<IEu5Object> ObjectsInFile { get; } = [];
    public static Eu5FileObj Empty { get; } = new(PathObj.Empty, FileDescriptor.Empty);
-   public static byte[] Checksum { get; private set; }
+   public byte[] Checksum { get; private set; } = [];
 
    public void GenerateChecksum()
    {
-      Checksum = Task.Run(() => FileWatcher.FileWatcher.CalculateSha256(Path.FullPath)).Result;
+      Checksum = Task.Run(() => FileStateManager.CalculateSha256(Path.FullPath)).Result;
    }
 
    private bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);

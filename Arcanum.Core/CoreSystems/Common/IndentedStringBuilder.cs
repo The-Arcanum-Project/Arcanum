@@ -10,13 +10,32 @@ namespace Arcanum.Core.CoreSystems.Common;
 public class IndentedStringBuilder
 {
    private readonly StringBuilder _builder = new();
-   private readonly string _indentString;
+   private string _indentString = "   "; // 3 spaces per indent level
    private readonly StringBuilder _indentCacheBuilder = new();
    private bool _isAtStartOfLine = true;
 
-   public IndentedStringBuilder(string indentString = "    ")
+   public IndentedStringBuilder(int initialCapacity = 256)
    {
-      _indentString = indentString;
+      _builder.EnsureCapacity(initialCapacity);
+      _indentCacheBuilder.EnsureCapacity(32); // Preallocate some space for indentation levels
+   }
+
+   public void SetIndent(int spaceCount) => _indentString = new(' ', spaceCount);
+
+   /// <summary>
+   /// Sets the indentation to a specific level, overriding the current indentation.
+   /// </summary>
+   /// <param name="level">The desired number of indentation levels (0 for no indent).</param>
+   public void SetIndentLevel(int level)
+   {
+      if (level < 0)
+         level = 0;
+
+      _indentCacheBuilder.Clear();
+
+      // Rebuild the cache by appending the indent string 'level' times.
+      for (var i = 0; i < level; i++)
+         _indentCacheBuilder.Append(_indentString);
    }
 
    public StringBuilder InnerBuilder => _builder;
