@@ -37,7 +37,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
         Task.Run(() =>
         {
-            int maxThreads = Math.Max(1, (Environment.ProcessorCount/2));
+            var maxThreads = Math.Max(1, (Environment.ProcessorCount/2));
 
             var options = new ParallelOptions
             {
@@ -48,6 +48,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             lock (this)
             {
                 finishedTesselation = true;
+                UIHandle.Instance.MapHandle.NotifyMapLoaded();
                 Console.WriteLine("Finished tesselation of map polygons.");
             }
 

@@ -9,6 +9,7 @@ using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
+using Color = System.Windows.Media.Color;
 
 namespace Arcanum.UI.DirectX;
 
@@ -29,8 +30,10 @@ public struct Constants
 }
 
 
-public class LocationRenderer : ID3DRenderer
+public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRenderer
 {
+    private static readonly Color4 ClearColor;
+    
     private ID3D11Device? _device;
     private ID3D11DeviceContext? _context;
     private IDXGISwapChain? _swapChain;
@@ -47,28 +50,31 @@ public class LocationRenderer : ID3DRenderer
     private ID3D11Buffer? _colorLookupBuffer;
     private ID3D11ShaderResourceView? _colorLookupView;
     
-    private VertexPositionId2D[] _vertices;
-    private Color4[] _polygonColors;
+    private VertexPositionId2D[]? _vertices;
+    private Color4[] _polygonColors = new Color4[polygons.Length];
 
-    private Vector2 _pan;
+    private Vector2 _pan = new(-0.5f, -0.25f);
     private float _zoom = 1.75f;
     private Point _lastMousePosition;
     private bool _isPanning;
-    private readonly (int,int) _imageSize;
-    private readonly Polygon[] _polygons;
 
     private Border? _parent;
     private uint _vertexCount;
 
-    public LocationRenderer(Polygon[] polygons, (int,int) imageSize)
+    static LocationRenderer()
     {
-        _imageSize = imageSize;
-        _pan = new(-0.5f, -0.25f);
-        _polygons = polygons;
-        _polygonColors = new Color4[polygons.Length];
-        //TODO init vertices asynchronously
+        if (Application.Current.Resources["DefaultBackColor"] is Color color)
+        {
+            ClearColor = new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+        }
+        else
+        {
+            ClearColor = new(1f, 0f, 1f);
+        }
     }
-    
+
+    //TODO init vertices asynchronously
+
     public static async Task<LocationRenderer> CreateAsync(Polygon[] polygons, (int,int) imageSize)
     {
         var renderer = new LocationRenderer(polygons, imageSize);
@@ -81,12 +87,12 @@ public class LocationRenderer : ID3DRenderer
 
     public List<VertexPositionId2D> GetVertices()
     {
-        var vertices = new List<VertexPositionId2D>(3 * _polygons.Length);
-        var aspectRatio = _imageSize.Item2 / (float)_imageSize.Item1;
+        var vertices = new List<VertexPositionId2D>(3 * polygons.Length);
+        var aspectRatio = imageSize.Item2 / (float)imageSize.Item1;
         var random = new Random(0);
-        for (var i = 0; i < _polygons.Length; i++)
+        for (var i = 0; i < polygons.Length; i++)
         {
-            var polygon = _polygons[i];
+            var polygon = polygons[i];
             // Generate a random color for the polygon
             _polygonColors[i] = new(
                 random.NextSingle(),
@@ -102,11 +108,11 @@ public class LocationRenderer : ID3DRenderer
                 var v0 = triangleVertices[indices[j]];
                 var v1 = triangleVertices[indices[j + 1]];
                 var v2 = triangleVertices[indices[j + 2]];
-                vertices.Add(new(new(v0.X / _imageSize.Item1, aspectRatio * (1 - v0.Y / _imageSize.Item2)),
+                vertices.Add(new(new(v0.X / imageSize.Item1, aspectRatio * (1 - v0.Y / imageSize.Item2)),
                     (uint)i));
-                vertices.Add(new(new(v1.X / _imageSize.Item1, aspectRatio * (1 - v1.Y / _imageSize.Item2)),
+                vertices.Add(new(new(v1.X / imageSize.Item1, aspectRatio * (1 - v1.Y / imageSize.Item2)),
                     (uint)i));
-                vertices.Add(new(new(v2.X / _imageSize.Item1, aspectRatio * (1 - v2.Y / _imageSize.Item2)),
+                vertices.Add(new(new(v2.X / imageSize.Item1, aspectRatio * (1 - v2.Y / imageSize.Item2)),
                     (uint)i));
             }
         }
@@ -115,6 +121,9 @@ public class LocationRenderer : ID3DRenderer
 
     public void Initialize(IntPtr hwnd, int width, int height)
     {
+        if(_vertices == null)
+            throw new InvalidOperationException("Vertices not initialized. Call CreateAsync to initialize vertices before calling Initialize.");
+        
         if (width <= 0 || height <= 0)
         {
             return;
@@ -207,17 +216,17 @@ public class LocationRenderer : ID3DRenderer
         unsafe
         {
             if (_renderTargetView == null || _context == null || _swapChain == null || _parent == null) return;
-
+            Console.WriteLine("Rendering frame...");
             var aspectRatio = (float)(_parent.ActualWidth / _parent.ActualHeight);
             var view = Matrix4x4.CreateTranslation(_pan.X, _pan.Y, 0);
             var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / _zoom, 2.0f / _zoom, -1.0f, 1.0f);
             _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
 
-            var mapped = _context.Map(_constantBuffer, MapMode.WriteDiscard);
+            var mapped = _context.Map(_constantBuffer!, MapMode.WriteDiscard);
             Unsafe.Write(mapped.DataPointer.ToPointer(), _constants);
-            _context.Unmap(_constantBuffer);
+            _context.Unmap(_constantBuffer!);
 
-            _context.ClearRenderTargetView(_renderTargetView, new (0.1f, 0.1f, 0.1f));
+            _context.ClearRenderTargetView(_renderTargetView, ClearColor);
 
             _context!.OMSetRenderTargets(_renderTargetView);
             _context.Draw(_vertexCount,0);
@@ -257,7 +266,7 @@ public class LocationRenderer : ID3DRenderer
         }
 
         // 4. Set the new viewport
-        _context.RSSetViewport(new Viewport(width, height));
+        _context.RSSetViewport(new (width, height));
     }
     
     private void MouseWheel(object sender, MouseWheelEventArgs e)
@@ -297,16 +306,16 @@ public class LocationRenderer : ID3DRenderer
 
     private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        var list = new Color4[_polygons.Length];
+        var list = new Color4[polygons.Length];
         var rand = new Random();
-        for (var i = 0; i < _polygons.Length; i++)
+        for (var i = 0; i < polygons.Length; i++)
         {
            list[i] = new (rand.NextSingle(), rand.NextSingle(), rand.NextSingle());
         }
         UpdateColors(list);
     }
-    
-    public void UpdateColors(Color4[] newColors)
+
+    private void UpdateColors(Color4[] newColors)
     {
         // Ensure the context and buffer have been created and the color count matches.
         if (_context == null || _colorLookupBuffer == null)

@@ -12,51 +12,37 @@ public partial class D3D11HwndHost : HwndHost
 {
     private readonly ID3DRenderer _renderer;
     private IntPtr _hwnd;
-    private bool _isRendererInitialized;
+    private readonly Border _parent;
 
-    private readonly Stopwatch _stopwatch = new();
-    private long _lastFrameTime;
-    private int _frameCount;
-
-    public static readonly DependencyProperty FpsProperty = DependencyProperty.Register(
-        nameof(Fps), typeof(double), typeof(D3D11HwndHost), new(.0));
-
-    public double Fps
-    {
-        get => (double)GetValue(FpsProperty);
-        set => SetValue(FpsProperty, value);
-    }
-
-    public static readonly DependencyProperty FrameTimeProperty = DependencyProperty.Register(
-        nameof(FrameTime), typeof(double), typeof(D3D11HwndHost), new(.0));
-
-    public double FrameTime
-    {
-        get => (double)GetValue(FrameTimeProperty);
-        set => SetValue(FrameTimeProperty, value);
-    }
-    
     // P/Invoke for SetWindowPos to resize the native window
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+    private static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy,
+        uint uFlags);
 
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOZORDER = 0x0004;
 
-    private readonly DispatcherTimer resizeTimer;
-
+    private readonly DispatcherTimer _resizeTimer;
+    private SizeChangedInfo _currentSizeInfo = null!;
 
     public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer)
     {
         _renderer = renderer;
+        _parent = hwndHostContainer;
         _renderer.SetupEvents(hwndHostContainer);
         Unloaded += OnUnloaded;
-        resizeTimer = new ()
+        Loaded += OnLoaded;
+        _resizeTimer = new()
         {
             Interval = TimeSpan.FromMilliseconds(100)
         };
-        resizeTimer.Tick += ResizeRenderer;
+        _resizeTimer.Tick += ResizeRenderer;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        _renderer.Initialize(_hwnd, (int)_parent.ActualWidth, (int)_parent.ActualHeight);
     }
 
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
@@ -69,11 +55,7 @@ public partial class D3D11HwndHost : HwndHost
             0, 0, 1, 1, // Start with 1x1 size
             hwndParent.Handle,
             IntPtr.Zero, IntPtr.Zero, 0);
-
-        // Start the rendering loop. The Render() method has null checks,
-        // so it won't do anything until the renderer is initialized.
-        _stopwatch.Start();
-        _lastFrameTime = _stopwatch.ElapsedMilliseconds;
+        
         CompositionTarget.Rendering += OnRendering;
 
         return new HandleRef(this, _hwnd);
@@ -81,41 +63,27 @@ public partial class D3D11HwndHost : HwndHost
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        // This will be called on every frame, but will only draw
-        // after _isRendererInitialized is true.
-        long currentTime = _stopwatch.ElapsedMilliseconds;
-        long delta = currentTime - _lastFrameTime;
-        _frameCount++;
-        
-        if (delta >= 1000) // Update once per second
-        {
-            Fps = _frameCount;
-            FrameTime = (double)delta / _frameCount; // Average frame time over the last second
-            _frameCount = 0;
-            _lastFrameTime = currentTime;
-        }
         _renderer.Render();
     }
 
-    private SizeChangedInfo currentSizeInfo;
-    
     private void ResizeRenderer(object? sender, EventArgs eventArgs)
     {
-        if (currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
+        if (_currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
         {
-            _renderer.Resize((int)currentSizeInfo.NewSize.Width, (int)currentSizeInfo.NewSize.Height);
+            _renderer.Resize((int)_currentSizeInfo.NewSize.Width, (int)_currentSizeInfo.NewSize.Height);
+            _renderer.Render();
         }
-        resizeTimer.Stop();
+        _resizeTimer.Stop();
     }
-    
+
     protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
     {
         base.OnRenderSizeChanged(sizeInfo);
-        currentSizeInfo = sizeInfo;
+        _currentSizeInfo = sizeInfo;
 
         var newWidth = (int)sizeInfo.NewSize.Width;
         var newHeight = (int)sizeInfo.NewSize.Height;
-        
+
         // Ensure we have a valid size
         if (newWidth <= 0 || newHeight <= 0)
             return;
@@ -124,20 +92,11 @@ public partial class D3D11HwndHost : HwndHost
         if (!SetWindowPos(_hwnd, IntPtr.Zero, 0, 0, newWidth, newHeight, SWP_NOMOVE | SWP_NOZORDER))
         {
             Debugger.Break();
-            return;   
+            return;
         }
-
-        if (!_isRendererInitialized)
-        {
-            // First time a valid size is received, initialize the renderer.
-            _renderer.Initialize(_hwnd, newWidth, newHeight);
-            _isRendererInitialized = true;
-        }
-        else
-        {
-           resizeTimer.Stop();
-           resizeTimer.Start();
-        }
+        
+        _resizeTimer.Stop();
+        _resizeTimer.Start();
     }
 
     protected override void DestroyWindowCore(HandleRef hwnd)
@@ -162,7 +121,8 @@ public partial class D3D11HwndHost : HwndHost
     }
 
     [LibraryImport("user32.dll", EntryPoint = "CreateWindowExW", StringMarshalling = StringMarshalling.Utf16)]
-    private static partial IntPtr CreateWindowEx(int dwExStyle, string lpszClassName, string lpszWindowName, int style, int x, int y, int width, int height, IntPtr hwndParent, IntPtr hMenu, IntPtr hInst, IntPtr pvParam);
+    private static partial IntPtr CreateWindowEx(int dwExStyle, string lpszClassName, string lpszWindowName, int style,
+        int x, int y, int width, int height, IntPtr hwndParent, IntPtr hMenu, IntPtr hInst, IntPtr pvParam);
 
     [LibraryImport("user32.dll", EntryPoint = "DestroyWindow")]
     [return: MarshalAs(UnmanagedType.Bool)]
