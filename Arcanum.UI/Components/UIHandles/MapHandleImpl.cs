@@ -10,7 +10,7 @@ public class MapHandleImpl : IMapHandle
     {
         if (Application.Current.MainWindow is MainWindow mainWindow)
         {
-            // Load data: mainWindow.MainMap;
+            mainWindow.MainMap.SetupRendering();
         }
     }
 }

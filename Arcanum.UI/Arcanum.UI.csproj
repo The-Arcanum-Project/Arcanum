@@ -315,7 +315,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl" />
+      <EmbeddedResource Include="DirectX\Shaders\ExampleTriangle.hlsl" />
     </ItemGroup>
 
 </Project>

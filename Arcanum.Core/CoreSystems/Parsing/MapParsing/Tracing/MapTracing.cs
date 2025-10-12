@@ -15,7 +15,7 @@ public unsafe class MapTracing : IDisposable
     private Bitmap _bitmap;
     private BitmapData _bitmapData;
 
-    private Dictionary<Vector2, Node> NodeCache { get; } = new();
+    private Dictionary<Vector2I, Node> NodeCache { get; } = new();
 
     public MapTracing(Bitmap bmp)
     {
@@ -41,7 +41,7 @@ public unsafe class MapTracing : IDisposable
                row[xTimesThree];
     }
 
-    private int GetColor(Vector2 pos)
+    private int GetColor(Vector2I pos)
     {
         return GetColor(pos.X, pos.Y);
     }
@@ -56,7 +56,7 @@ public unsafe class MapTracing : IDisposable
         return GetColor(x, y);
     }
 
-    private int GetColorWithOutsideCheck(Vector2 pos)
+    private int GetColorWithOutsideCheck(Vector2I pos)
     {
         return GetColorWithOutsideCheck(pos.X, pos.Y);
     }
@@ -85,30 +85,55 @@ public unsafe class MapTracing : IDisposable
 
         var currentSegment = firstSegment;
 
-        int x = 0, y = 1;
-
         // Left Edge (top to bottom)
-        while (y < _height)
-            FinalizeSegment(x, y++, Direction.East);
+        for (var y = 1; y <= _height - 1; y++)
+        {
+            var color = GetColor(0, y);
+            if (color != lastColor)
+            {
+                FinalizeSegment(0, y, color, Direction.East);
+            }
+        }
 
-        currentSegment.Points.Add(new(x, y));
+        // Bottom Left Corner
+        currentSegment.Points.Add(new (0, _height));
 
         // Bottom Edge (left to right)
-        while (x < _width)
-            FinalizeSegment(x++, y, Direction.North);
+        for (var x = 1; x <= _width - 1; x++)
+        {
+            var color = GetColor(x, _height - 1);
+            if (color != lastColor)
+            {
+                FinalizeSegment(x, _height, color, Direction.North);
+            }
+        }
 
-        currentSegment.Points.Add(new(x, y));
+        // Bottom Right Corner
+        currentSegment.Points.Add(new (_width, _height));
 
         // Right Edge (bottom to top)
-        while (y > 0)
-            FinalizeSegment(x, y--, Direction.West);
+        for (var y = _height - 1; y > 0; y--)
+        {
+            var color = GetColor(_width - 1, y - 1);
+            if (color != lastColor)
+            {
+                FinalizeSegment(_width, y, color, Direction.West);
+            }
+        }
 
-        currentSegment.Points.Add(new(x, y));
+        // Top Right Corner
+        currentSegment.Points.Add(new(_width, 0));
 
         // Top Edge (right to left)
-        while (x > 0)
-            FinalizeSegment(x--, y, Direction.South);
-
+        for (var x = _width - 1; x > 0; x--)
+        {
+            var color = GetColor(x - 1, 0);
+            if (color != lastColor)
+            {
+                FinalizeSegment(x, 0, color, Direction.South);
+            }
+        }
+        
         currentSegment.Points.AddRange(firstSegment.Points);
 
         //TODO: @MelCo: This currently does not handle the case where there are no nodes on the border.
@@ -122,13 +147,8 @@ public unsafe class MapTracing : IDisposable
 
         return;
 
-        void FinalizeSegment(int xPos, int yPos, Direction direction)
+        void FinalizeSegment(int xPos, int yPos, int color, Direction direction)
         {
-            var color = GetColor(xPos, yPos);
-
-            if (lastColor == color)
-                return;
-
             // Color changed, finalize the current segment and start a new one
 
             var newSegment = new BorderSegment();
@@ -156,7 +176,7 @@ public unsafe class MapTracing : IDisposable
     /// </summary>
     /// <param name="startNode"></param>
     /// <param name="startDirection"></param>
-    private void TraceEdgeStartNodeWithOutsideCheck(Node startNode,
+    private Node TraceEdgeStartNodeWithOutsideCheck(Node startNode,
         Direction startDirection)
     {
         // Get pixel positions to the left and right of the start node in the given direction
@@ -176,7 +196,7 @@ public unsafe class MapTracing : IDisposable
                 continue;
 
             // Right turn
-            if (lTest == lColor || rTest == lColor)
+            if (lTest == lColor && rTest == lColor)
             {
                 points.Xl = points.Xr;
                 points.Yl = points.Yr;
@@ -184,7 +204,7 @@ public unsafe class MapTracing : IDisposable
                     points.Xr = cachePos;
                 else
                     points.Yr = cachePos;
-                currentDirection.RotateRight();
+                currentDirection = currentDirection.RotateRight();
                 lColor = lTest;
                 currentSegment.Points.Add(points.GetPosition());
                 continue;
@@ -195,10 +215,10 @@ public unsafe class MapTracing : IDisposable
                 points.Xr = points.Xl;
                 points.Yr = points.Yl;
                 if (xaxis)
-                    points.Xr = cachePos;
+                    points.Xl = cachePos;
                 else
-                    points.Yr = cachePos;
-                currentDirection.RotateLeft();
+                    points.Yl = cachePos;
+                currentDirection = currentDirection.RotateLeft();
                 rColor = lTest;
                 currentSegment.Points.Add(points.GetPosition());
                 continue;
@@ -209,117 +229,35 @@ public unsafe class MapTracing : IDisposable
 
             if (!NodeCache.TryGetValue(points.GetPosition(), out var node))
             {
-                var dir2 = currentDirection;
-                // lTest == lColor || rTest == rColor || rTest == lTest condition for a three-way node
-                var isThreeWayNode = rTest == rColor;
+                var dir = arriveDirection;
+                var isThreeWayNode = rTest == lTest;
 
-                if (lTest == lColor || rTest == lTest)
+                if (lTest == lColor)
                 {
-                    dir2 = currentDirection.RotateRight();
+                    dir = currentDirection.RotateRight();
+                    isThreeWayNode = true;
+                }
+                else if (rTest == rColor)
+                {
+                    dir = currentDirection.RotateLeft();
                     isThreeWayNode = true;
                 }
 
+
                 node = isThreeWayNode
-                    ? new(points.Xpos, points.Ypos, dir2)
+                    ? new(points.Xpos, points.Ypos, dir)
                     : Node.GetFourWayNode(points.Xpos, points.Ypos, currentDirection);
-
-
-                node.Segments[0].Node = startNode;
-                node.Segments[0].Segment = new(currentSegment, false);
+                
+                var segment = node.GetSegment(arriveDirection);
+                segment.Node = startNode;
+                segment.Segment = new(currentSegment, false);
 
                 NodeCache.Add(points.GetPosition(), node);
             }
             else
             {
                 var cache = node.GetSegment(arriveDirection);
-                cache.Node = node;
-                cache.Segment = new(currentSegment, false);
-            }
-
-            var startCache = startNode.GetSegment(startDirection);
-            startCache.Node = node;
-            startCache.Segment = new(currentSegment, true);
-            break;
-        }
-    }
-
-    private Node TraceEdgeStartNode(Node startNode,
-        Direction startDirection)
-    {
-        // Get pixel positions to the left and right of the start node in the given direction
-        var points = DirectionHelper.GetStartPos(startNode.XPos, startNode.YPos, startDirection);
-        var lColor = GetColor(points.Xl, points.Yl);
-        var rColor = GetColor(points.Xr, points.Yr);
-
-        var currentDirection = startDirection;
-        var currentSegment = new BorderSegment();
-
-        while (true)
-        {
-            currentDirection.Move(ref points, out var cachePos, out var xaxis);
-            var lTest = GetColor(points.Xl, points.Yl);
-            var rTest = GetColor(points.Xr, points.Yr);
-            if (lTest == lColor && rTest == rColor)
-                continue;
-
-            // Right turn
-            if (lTest == lColor || rTest == lColor)
-            {
-                points.Xl = points.Xr;
-                points.Yl = points.Yr;
-                if (xaxis)
-                    points.Xr = cachePos;
-                else
-                    points.Yr = cachePos;
-                currentDirection.RotateRight();
-                lColor = lTest;
-                currentSegment.Points.Add(points.GetPosition());
-                continue;
-            } // Left turn
-
-            if (lTest == rColor && rTest == rColor)
-            {
-                points.Xr = points.Xl;
-                points.Yr = points.Yl;
-                if (xaxis)
-                    points.Xr = cachePos;
-                else
-                    points.Yr = cachePos;
-                currentDirection.RotateLeft();
-                rColor = lTest;
-                currentSegment.Points.Add(points.GetPosition());
-                continue;
-            }
-
-            // Node found
-            var arriveDirection = currentDirection.Invert();
-
-            if (!NodeCache.TryGetValue(points.GetPosition(), out var node))
-            {
-                var dir2 = currentDirection;
-                // lTest == lColor || rTest == rColor || rTest == lTest condition for a three-way node
-                var isThreeWayNode = rTest == rColor;
-
-                if (lTest == lColor || rTest == lTest)
-                {
-                    dir2 = currentDirection.RotateRight();
-                    isThreeWayNode = true;
-                }
-
-                node = isThreeWayNode
-                    ? new(points.Xpos, points.Ypos, dir2)
-                    : Node.GetFourWayNode(points.Xpos, points.Ypos, currentDirection);
-
-
-                node.Segments[0].Node = startNode;
-                node.Segments[0].Segment = new(currentSegment, false);
-
-                NodeCache.Add(points.GetPosition(), node);
-            }
-            else
-            {
-                var cache = node.GetSegment(arriveDirection);
-                cache.Node = node;
+                cache.Node = startNode;
                 cache.Segment = new(currentSegment, false);
             }
 
@@ -329,7 +267,6 @@ public unsafe class MapTracing : IDisposable
             return node;
         }
     }
-
     /// <summary>
     /// Traces from every edge node into the image
     /// </summary>
@@ -345,9 +282,9 @@ public unsafe class MapTracing : IDisposable
         }
     }
 
-    private Polygon TraceFromNode(Node startNode, Direction startDirection)
+    private PolygonParsing TraceFromNode(Node startNode, Direction startDirection)
     {
-        var polygon = new Polygon(0);
+        var polygon = new PolygonParsing(0);
         var currentNode = startNode;
         var currentDirection = startDirection;
 
@@ -359,8 +296,9 @@ public unsafe class MapTracing : IDisposable
 
         if (firstCache.Segment == null)
         {
-            currentNode = TraceEdgeStartNode(currentNode, currentDirection);
+            var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
             currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
+            currentNode = newNode;
         }
         else
         {
@@ -391,8 +329,10 @@ public unsafe class MapTracing : IDisposable
             {
                 polygon.Segments.Add(currentNode);
                 currentNode.SetDirection(currentDirection);
-                currentNode = TraceEdgeStartNode(currentNode, currentDirection);
+                var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
                 currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
+                currentNode = newNode;
+                polygon.Segments.Add(currentNode);
             }
         }
 
@@ -405,14 +345,17 @@ public unsafe class MapTracing : IDisposable
     /// </summary>
     /// <param name="node"></param>
     /// <param name="polygons"></param>
-    private void VisitNode(Node node, List<Polygon> polygons) =>
+    private void VisitNode(Node node, List<PolygonParsing> polygons) =>
         polygons.AddRange(from direction in node.Segments.Select(s => s.Dir)
             where !node.TestDirection(direction)
             select TraceFromNode(node, direction));
 
-    public List<Polygon> Trace()
+    public List<PolygonParsing> Trace()
     {
-        List<Polygon> polygons = [];
+        TraceImageEdges();
+        TraceEdgeStubs();
+
+        List<PolygonParsing> polygons = [];
         while (NodeCache.Count > 0)
         {
             var node = NodeCache.First();

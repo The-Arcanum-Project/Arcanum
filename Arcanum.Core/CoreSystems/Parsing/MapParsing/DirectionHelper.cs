@@ -14,9 +14,14 @@ public static class DirectionHelper
         public int Yr = yr;
         public int Xpos = xpos;
         public int Ypos = ypos;
+
+        public override string ToString()
+        {
+            return $"L:({Xl},{Yl}) R:({Xr},{Yr}) P:({Xpos},{Ypos})";
+        }
     }
     
-    public static Vector2 GetPosition(this PointSet ps)
+    public static Vector2I GetPosition(this PointSet ps)
     {
         return new (ps.Xpos, ps.Ypos);
     }

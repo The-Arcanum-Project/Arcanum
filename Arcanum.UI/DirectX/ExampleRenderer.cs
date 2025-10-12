@@ -70,8 +70,8 @@ public class ExampleRenderer : ID3DRenderer
             new("COLOR", 0, Format.R32G32B32A32_Float, 12, 0)
         ];
 
-        var vertexShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "VSMain", "vs_5_0");
-        var pixelShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "PSMain", "ps_5_0");
+        var vertexShaderByteCode = ID3DRenderer.CompileBytecode("ExampleTriangle.hlsl", "VSMain", "vs_5_0");
+        var pixelShaderByteCode = ID3DRenderer.CompileBytecode("ExampleTriangle.hlsl", "PSMain", "ps_5_0");
 
         _vertexShader = _device.CreateVertexShader(vertexShaderByteCode.Span);
         _pixelShader = _device.CreatePixelShader(pixelShaderByteCode.Span);
