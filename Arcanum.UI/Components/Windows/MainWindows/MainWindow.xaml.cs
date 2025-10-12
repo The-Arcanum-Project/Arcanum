@@ -88,14 +88,13 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
       
       // Load map if data ready
-      var mapDataParser = DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] as LocationMapTracing;
-      if (mapDataParser == null)
+      if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");
 
       lock (mapDataParser)
       {
          if(mapDataParser.finishedTesselation)
-            MainMap.SetupRendering(mapDataParser.polygons);
+            MainMap.SetupRendering(mapDataParser.polygons, mapDataParser.mapSize);
       }
 
    }

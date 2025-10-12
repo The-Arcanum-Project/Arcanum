@@ -318,4 +318,8 @@
       <EmbeddedResource Include="DirectX\Shaders\ExampleTriangle.hlsl" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl" />
+    </ItemGroup>
+
 </Project>

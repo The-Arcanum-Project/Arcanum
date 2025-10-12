@@ -14,7 +14,7 @@ public class MapHandleImpl : IMapHandle
         if (Application.Current.MainWindow is not MainWindow mainWindow) return;
         if(DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
             throw new ApplicationException("MapHandleImpl.NotifyMapLoaded");
-        mainWindow.MainMap.SetupRendering(tracing.polygons);
+        mainWindow.MainMap.SetupRendering(tracing.polygons, tracing.mapSize);
     }
 
     public void NotifyMapLoaded()

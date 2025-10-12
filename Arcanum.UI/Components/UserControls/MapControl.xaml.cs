@@ -15,13 +15,13 @@ public partial class MapControl : UserControl
         InitializeComponent();
     }
 
-    public void SetupRendering(Polygon[] polygons)
+    public void SetupRendering(Polygon[] polygons, (int, int) imageSize)
     {
         if (!IsLoaded)
         {
             throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
         }
-        _d3dHost = new (new ExampleRenderer());
+        _d3dHost = new (new LocationRenderer(polygons, imageSize), HwndHostContainer);
         HwndHostContainer.Child = _d3dHost;
 
         //_overlay = new OverlayWindow { Owner = this };

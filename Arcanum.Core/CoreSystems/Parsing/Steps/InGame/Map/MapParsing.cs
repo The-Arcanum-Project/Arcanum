@@ -14,6 +14,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
     public List<PolygonParsing> ParsingPolygons = [];
     public Polygon[] polygons;
     public bool finishedTesselation = false;
+    public (int, int) mapSize;
 
     public override string GetFileDataDebugInfo()
     {
@@ -30,6 +31,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             {
                 ParsingPolygons = tracing.Trace();
                 polygons = new Polygon[ParsingPolygons.Count];
+                mapSize = (bitmap.Width, bitmap.Height);
             }
         }
 

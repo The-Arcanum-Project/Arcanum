@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Numerics;
 using System.Reflection;
+using System.Windows.Controls;
 using Vortice.D3DCompiler;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -150,9 +151,23 @@ public class ExampleRenderer : ID3DRenderer
         _context.Draw(_vertexCount, 0);
         _swapChain!.Present(1, PresentFlags.None);
     }
+
+    public void SetupEvents(Border parent)
+    {
+        parent.MouseLeftButtonDown += (s, e) =>
+        {
+            ignoreResize = !ignoreResize;
+        };
+    }
+
+    private bool ignoreResize = false;
+    
+    
     
     public void Resize(int width, int height)
     {
+        if (ignoreResize) return;
+        
         // Guard against invalid size or uninitialized state
         if (width <= 0 || height <= 0 || _context == null || _swapChain == null || _device == null)
         {
