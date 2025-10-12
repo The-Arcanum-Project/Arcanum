@@ -62,6 +62,12 @@ public class Node : ICoordinateAdder
     ], xPos, yPos)
     {
     }
+    
+    public static Node GetThreeWayNode(int xPos, int yPos, Direction dir) => new ([
+        new(null, null, dir.RotateRight()),
+        new(null, null, dir),
+        new(null, null, dir.RotateLeft())
+    ], xPos, yPos);
 
     public static Node GetFourWayNode(int xPos, int yPos, Direction dir) => new ([
         new(null, null, dir.Invert()),

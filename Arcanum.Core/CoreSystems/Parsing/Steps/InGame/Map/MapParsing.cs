@@ -25,7 +25,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
     {
         using (var bitmap =
                new Bitmap(
-                   "D:\\SteamLibrary\\steamapps\\common\\Project Caesar Review\\game\\in_game\\map_data\\provinces_small.bmp"))
+                   fileObj.Path.FullPath))
         {
             using (MapTracing tracing = new(bitmap))
             {
@@ -37,7 +37,14 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
         Task.Run(() =>
         {
-            Parallel.For(0, ParsingPolygons.Count, i => { polygons[i] = ParsingPolygons[i].Tesselate(); });
+            int maxThreads = Math.Max(1, (Environment.ProcessorCount/2));
+
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = maxThreads
+            };
+            
+            Parallel.For(0, ParsingPolygons.Count, options, i => { polygons[i] = ParsingPolygons[i].Tesselate(); });
             lock (this)
             {
                 finishedTesselation = true;
