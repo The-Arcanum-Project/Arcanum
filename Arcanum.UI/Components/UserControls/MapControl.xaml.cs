@@ -38,5 +38,6 @@ public partial class MapControl : UserControl
 
         // Use LayoutUpdated for initial positioning and then rely on location/size changed events
         DataContext = _d3dHost;
+        LoadingPanel.Visibility = Visibility.Collapsed;
     }
 }

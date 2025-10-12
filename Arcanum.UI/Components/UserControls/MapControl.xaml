@@ -37,7 +37,8 @@
             </Border.ContextMenu>
         </Border>
 
-        <StackPanel HorizontalAlignment="Center"
+        <StackPanel x:Name="LoadingPanel" 
+            HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <TextBlock Text="Loading map..."
                        Foreground="{StaticResource GreyedOutForeColorBrush}"

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Arcanum.UI.DirectX;
 
@@ -43,11 +44,19 @@ public partial class D3D11HwndHost : HwndHost
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOZORDER = 0x0004;
 
+    private readonly DispatcherTimer resizeTimer;
+
+
     public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer)
     {
         _renderer = renderer;
         _renderer.SetupEvents(hwndHostContainer);
         Unloaded += OnUnloaded;
+        resizeTimer = new ()
+        {
+            Interval = TimeSpan.FromMilliseconds(100)
+        };
+        resizeTimer.Tick += ResizeRenderer;
     }
 
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
@@ -88,9 +97,21 @@ public partial class D3D11HwndHost : HwndHost
         _renderer.Render();
     }
 
+    private SizeChangedInfo currentSizeInfo;
+    
+    private void ResizeRenderer(object? sender, EventArgs eventArgs)
+    {
+        if (currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
+        {
+            _renderer.Resize((int)currentSizeInfo.NewSize.Width, (int)currentSizeInfo.NewSize.Height);
+        }
+        resizeTimer.Stop();
+    }
+    
     protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
     {
         base.OnRenderSizeChanged(sizeInfo);
+        currentSizeInfo = sizeInfo;
 
         var newWidth = (int)sizeInfo.NewSize.Width;
         var newHeight = (int)sizeInfo.NewSize.Height;
@@ -114,7 +135,8 @@ public partial class D3D11HwndHost : HwndHost
         }
         else
         {
-           _renderer.Resize(newWidth, newHeight);
+           resizeTimer.Stop();
+           resizeTimer.Start();
         }
     }
 

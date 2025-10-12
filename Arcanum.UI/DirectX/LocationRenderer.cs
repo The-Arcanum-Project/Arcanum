@@ -262,7 +262,8 @@ public class LocationRenderer : ID3DRenderer
     
     private void MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        _zoom *= e.Delta > 0 ? 1.1f : 1 / 1.1f;
+        _zoom *= e.Delta > 0 ? 1.2f : 1 / 1.2f;
+        Render();
     }
 
     private void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -290,9 +291,8 @@ public class LocationRenderer : ID3DRenderer
         _pan.X += (float)(delta.X * 2 / (surface.ActualWidth * _zoom));
         _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom));
         
-        Console.WriteLine(_pan.X + " " + _pan.Y + " " + _zoom);
-        
         _lastMousePosition = currentMousePosition;
+        Render();
     }
 
     private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
