@@ -120,6 +120,55 @@ public sealed class Polygon
       return false;
    }
 
+   public bool Contains(RectangleF rect)
+   {
+      var corners = new[]
+      {
+         new PointF(rect.Left, rect.Top), new PointF(rect.Right, rect.Top), new PointF(rect.Right, rect.Bottom),
+         new PointF(rect.Left, rect.Bottom),
+      };
+
+      foreach (var corner in corners)
+         if (!Contains(corner))
+            return false;
+
+      return true;
+   }
+
+   public bool Intersects(Polygon b)
+   {
+      if (!Bounds.IntersectsWith(b.Bounds))
+         return false;
+
+      foreach (var vertex in Vertices)
+         if (b.Contains(vertex))
+            return true;
+
+      foreach (var vertex in b.Vertices)
+         if (Contains(vertex))
+            return true;
+
+      return false;
+   }
+
+   public bool Intersects(IEnumerable<Polygon> others)
+   {
+      foreach (var other in others)
+         if (Intersects(other))
+            return true;
+
+      return false;
+   }
+
+   public bool Contains(Polygon other)
+   {
+      foreach (var vertex in other.Vertices)
+         if (!Contains(vertex))
+            return false;
+
+      return true;
+   }
+
    private static bool PointInTriangle(PointF p, PointF a, PointF b, PointF c)
    {
       var v0 = new PointF(c.X - a.X, c.Y - a.Y);
@@ -136,6 +185,6 @@ public sealed class Polygon
       var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
       var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-      return u >= 0 && v >= 0 && (u + v) <= 1;
+      return u >= 0 && v >= 0 && u + v <= 1;
    }
 }

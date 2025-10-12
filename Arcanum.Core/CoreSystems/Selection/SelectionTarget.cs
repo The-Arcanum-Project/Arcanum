@@ -5,4 +5,5 @@ public enum SelectionTarget
    Hover,
    Highlight,
    Selection,
+   SelectionPreview,
 }

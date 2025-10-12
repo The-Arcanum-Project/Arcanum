@@ -88,4 +88,58 @@ public sealed class QuadTree
          new(new(x + halfWidth, y + halfHeight, halfWidth, halfHeight), _depth + 1),
       ];
    }
+
+   public List<Polygon> GetAllPolygonsInRectangle(RectangleF area)
+   {
+      var results = new List<Polygon>();
+      var candidatePolygons = QueryRange(area);
+
+      foreach (var candidate in candidatePolygons)
+         if (area.Contains(candidate.Bounds))
+            results.Add(candidate);
+
+      return results;
+   }
+
+   public List<Polygon> FindPolygonsIn(Polygon containerPolygon)
+   {
+      var results = new List<Polygon>();
+      var candidatePolygons = QueryRange(containerPolygon.Bounds);
+
+      foreach (var candidate in candidatePolygons)
+      {
+         if (!containerPolygon.Bounds.Contains(candidate.Bounds))
+            continue;
+
+         if (containerPolygon.Contains(candidate))
+            results.Add(candidate);
+      }
+
+      return results;
+   }
+
+   public List<Polygon> QueryRange(RectangleF range)
+   {
+      var foundPolygons = new HashSet<Polygon>();
+      QueryRangeRecursive(range, foundPolygons);
+      return [..foundPolygons];
+   }
+
+   private void QueryRangeRecursive(RectangleF range, HashSet<Polygon> foundPolygons)
+   {
+      if (!Bounds.IntersectsWith(range))
+         return;
+
+      if (_children == null)
+      {
+         foreach (var poly in Polygons)
+            if (poly.Bounds.IntersectsWith(range))
+               foundPolygons.Add(poly);
+      }
+      else
+      {
+         foreach (var child in _children)
+            child.QueryRangeRecursive(range, foundPolygons);
+      }
+   }
 }
