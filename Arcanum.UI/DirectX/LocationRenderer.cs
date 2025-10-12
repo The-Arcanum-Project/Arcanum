@@ -43,7 +43,6 @@ public class LocationRenderer : ID3DRenderer
     private ID3D11Buffer? _constantBuffer;
     private ID3D11Buffer? _vertexBuffer;
     private Constants _constants;
-    private uint _vertexCount;
     
     private ID3D11Buffer? _colorLookupBuffer;
     private ID3D11ShaderResourceView? _colorLookupView;
@@ -59,7 +58,8 @@ public class LocationRenderer : ID3DRenderer
     private readonly Polygon[] _polygons;
 
     private Border? _parent;
-    
+    private uint _vertexCount;
+
     public LocationRenderer(Polygon[] polygons, (int,int) imageSize)
     {
         _imageSize = imageSize;
@@ -78,9 +78,9 @@ public class LocationRenderer : ID3DRenderer
             var polygon = _polygons[i];
             // Generate a random color for the polygon
             _polygonColors[i] = new(
-                random.Next(),
-                random.Next(),
-                random.Next()); // Full opacity
+                random.NextSingle(),
+                random.NextSingle(),
+                random.NextSingle()); // Full opacity
 
             // Triangulate the polygon using a simple fan method
             var indices = polygon.Indices;
@@ -176,7 +176,7 @@ public class LocationRenderer : ID3DRenderer
         UpdateColors(_polygonColors);
 
 
-
+        _vertexCount = (uint)_vertices.Length;
         _vertices = null!;
         _polygonColors = null!;
         
@@ -196,7 +196,7 @@ public class LocationRenderer : ID3DRenderer
         unsafe
         {
             if (_renderTargetView == null || _context == null || _swapChain == null || _parent == null) return;
-        
+
             var aspectRatio = (float)(_parent.ActualWidth / _parent.ActualHeight);
             var view = Matrix4x4.CreateTranslation(_pan.X, _pan.Y, 0);
             var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / _zoom, 2.0f / _zoom, -1.0f, 1.0f);
@@ -207,10 +207,9 @@ public class LocationRenderer : ID3DRenderer
             _context.Unmap(_constantBuffer);
 
             _context.ClearRenderTargetView(_renderTargetView, new (0.1f, 0.1f, 0.1f));
-        
+
             _context!.OMSetRenderTargets(_renderTargetView);
-            //_context!.ClearRenderTargetView(_renderTargetView, new(0f, 0f, 0f, 0f));
-            _context.Draw(_vertexCount, 0);
+            _context.Draw(_vertexCount,0);
             _swapChain!.Present(1, PresentFlags.None);
         }
     }
@@ -221,6 +220,7 @@ public class LocationRenderer : ID3DRenderer
         parent.MouseLeftButtonDown += MouseLeftButtonDown;
         parent.MouseLeftButtonUp += MouseLeftButtonUp;
         parent.MouseMove += MouseMove;
+        parent.MouseRightButtonDown += OnMouseRightButtonDown;
         _parent = parent;
     }
 
@@ -282,6 +282,17 @@ public class LocationRenderer : ID3DRenderer
         _lastMousePosition = currentMousePosition;
     }
 
+    private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var list = new Color4[_polygons.Length];
+        var rand = new Random();
+        for (var i = 0; i < _polygons.Length; i++)
+        {
+           list[i] = new (rand.NextSingle(), rand.NextSingle(), rand.NextSingle());
+        }
+        UpdateColors(list);
+    }
+    
     public void UpdateColors(Color4[] newColors)
     {
         // Ensure the context and buffer have been created and the color count matches.
