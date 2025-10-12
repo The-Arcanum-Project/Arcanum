@@ -9,12 +9,17 @@ namespace Arcanum.UI.Components.UIHandles;
 public class MapHandleImpl : IMapHandle
 {
 
-    private void NotifyMapLoadedInternal()
+    private static void NotifyMapLoadedInternal()
     {
         if (Application.Current.MainWindow is not MainWindow mainWindow) return;
         if(DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
             throw new ApplicationException("MapHandleImpl.NotifyMapLoaded");
-        mainWindow.MainMap.SetupRendering(tracing.polygons, tracing.mapSize);
+        mainWindow.MainMap.SetupRenderingAsync(tracing.polygons, tracing.mapSize);
+    }
+
+    public static void LoadMap()
+    {
+        Application.Current.Dispatcher.Invoke(NotifyMapLoadedInternal);
     }
 
     public void NotifyMapLoaded()

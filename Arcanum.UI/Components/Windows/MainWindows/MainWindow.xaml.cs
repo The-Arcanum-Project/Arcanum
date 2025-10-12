@@ -11,6 +11,7 @@ using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
+using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -137,7 +138,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       lock (mapDataParser)
       {
          if(mapDataParser.finishedTesselation)
-            MainMap.SetupRendering(mapDataParser.polygons, mapDataParser.mapSize);
+            MainMap.SetupRenderingAsync(mapDataParser.polygons, mapDataParser.mapSize);
       }
 
    }
