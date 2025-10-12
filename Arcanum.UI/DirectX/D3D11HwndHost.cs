@@ -71,7 +71,6 @@ public partial class D3D11HwndHost : HwndHost
         if (_currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
         {
             _renderer.Resize((int)_currentSizeInfo.NewSize.Width, (int)_currentSizeInfo.NewSize.Height);
-            _renderer.Render();
         }
         _resizeTimer.Stop();
     }

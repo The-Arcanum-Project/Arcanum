@@ -216,7 +216,6 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
         unsafe
         {
             if (_renderTargetView == null || _context == null || _swapChain == null || _parent == null) return;
-            Console.WriteLine("Rendering frame...");
             var aspectRatio = (float)(_parent.ActualWidth / _parent.ActualHeight);
             var view = Matrix4x4.CreateTranslation(_pan.X, _pan.Y, 0);
             var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / _zoom, 2.0f / _zoom, -1.0f, 1.0f);
