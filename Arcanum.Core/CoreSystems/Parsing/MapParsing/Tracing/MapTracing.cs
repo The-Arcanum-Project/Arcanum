@@ -332,7 +332,7 @@ public unsafe class MapTracing : IDisposable
                 var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
                 currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
                 currentNode = newNode;
-                polygon.Segments.Add(currentNode);
+                polygon.Segments.Add(currentSegment);
             }
         }
 
@@ -362,7 +362,7 @@ public unsafe class MapTracing : IDisposable
             VisitNode(node.Value, polygons);
             NodeCache.Remove(node.Key);
         }
-
+        
         return polygons;
     }
 

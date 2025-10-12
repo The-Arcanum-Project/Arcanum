@@ -9,7 +9,7 @@ public class PolygonParsing(int color)
     public List<ICoordinateAdder> Segments { get; } = [];
     public List<PolygonParsing> Holes { get; } = [];
     
-    private List<Vector2I> GetAllPoints()
+    public List<Vector2I> GetAllPoints()
     {
         var points = new List<Vector2I>();
         foreach (var segment in Segments)
@@ -39,7 +39,10 @@ public class PolygonParsing(int color)
             var pos = tess.Vertices[i].Position;
             vertices[i] = new (pos.X, pos.Y);
         }
-            
+        
+        Console.WriteLine("Polygon:");
+        Console.WriteLine(string.Join(", ", vertices));
+        Console.WriteLine(string.Join(", ", tess.Elements));
 
         return new(vertices, tess.Elements);
     }

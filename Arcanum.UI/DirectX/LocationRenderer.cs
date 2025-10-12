@@ -81,6 +81,7 @@ public class LocationRenderer : ID3DRenderer
                 random.NextSingle(),
                 random.NextSingle(),
                 random.NextSingle()); // Full opacity
+            //_polygonColors[i] = new(255,255,255, 100);
 
             // Triangulate the polygon using a simple fan method
             var indices = polygon.Indices;
@@ -187,7 +188,7 @@ public class LocationRenderer : ID3DRenderer
         _context.PSSetShader(_pixelShader);
         _context.PSSetShaderResource(0, _colorLookupView);
         _context.IASetInputLayout(_inputLayout);
-        _context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionColor.SizeInBytes);
+        _context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionId2D.SizeInBytes);
         _context.OMSetBlendState(null);
     }
 
