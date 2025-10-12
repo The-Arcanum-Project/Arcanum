@@ -49,9 +49,9 @@ public class LocationRenderer : ID3DRenderer
     
     private VertexPositionId2D[] _vertices;
     private Color4[] _polygonColors;
-    
-    private Vector2 _pan = Vector2.Zero;
-    private float _zoom = 1.0f;
+
+    private Vector2 _pan;
+    private float _zoom = 1.75f;
     private Point _lastMousePosition;
     private bool _isPanning;
     private readonly (int,int) _imageSize;
@@ -63,9 +63,20 @@ public class LocationRenderer : ID3DRenderer
     public LocationRenderer(Polygon[] polygons, (int,int) imageSize)
     {
         _imageSize = imageSize;
+        _pan = new(-0.5f, -0.25f);
         _polygons = polygons;
         _polygonColors = new Color4[polygons.Length];
-        _vertices = GetVertices().ToArray();
+        //TODO init vertices asynchronously
+    }
+    
+    public static async Task<LocationRenderer> CreateAsync(Polygon[] polygons, (int,int) imageSize)
+    {
+        var renderer = new LocationRenderer(polygons, imageSize);
+
+        // Generate vertices asynchronously
+        renderer._vertices = await Task.Run(() => renderer.GetVertices().ToArray());
+
+        return renderer;
     }
 
     public List<VertexPositionId2D> GetVertices()
@@ -99,7 +110,6 @@ public class LocationRenderer : ID3DRenderer
                     (uint)i));
             }
         }
-
         return vertices;
     }
 
@@ -279,7 +289,9 @@ public class LocationRenderer : ID3DRenderer
 
         _pan.X += (float)(delta.X * 2 / (surface.ActualWidth * _zoom));
         _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom));
-
+        
+        Console.WriteLine(_pan.X + " " + _pan.Y + " " + _zoom);
+        
         _lastMousePosition = currentMousePosition;
     }
 

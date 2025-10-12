@@ -48,7 +48,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             lock (this)
             {
                 finishedTesselation = true;
-                UIHandle.Instance.MapHandle.NotifyMapLoaded();
+                Console.WriteLine("Finished tesselation of map polygons.");
             }
 
         });
