@@ -243,15 +243,17 @@ public unsafe class MapTracing : IDisposable
                     isThreeWayNode = true;
                 }
 
-
+                
                 node = isThreeWayNode
-                    ? new(points.Xpos, points.Ypos, dir)
+                    ? Node.GetThreeWayNode(points.Xpos, points.Ypos, dir)
                     : Node.GetFourWayNode(points.Xpos, points.Ypos, currentDirection);
+                
+                
                 
                 var segment = node.GetSegment(arriveDirection);
                 segment.Node = startNode;
                 segment.Segment = new(currentSegment, false);
-
+                
                 NodeCache.Add(points.GetPosition(), node);
             }
             else
@@ -294,6 +296,7 @@ public unsafe class MapTracing : IDisposable
 
         BorderSegmentDirectional currentSegment;
 
+        polygon.Segments.Add(currentNode);
         if (firstCache.Segment == null)
         {
             var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
@@ -302,12 +305,10 @@ public unsafe class MapTracing : IDisposable
         }
         else
         {
-            polygon.Segments.Add(currentNode);
-            polygon.Segments.Add(firstCache.Segment.Value);
             currentNode = firstCache.Node;
             currentSegment = firstCache.Segment.Value;
         }
-
+        polygon.Segments.Add(currentSegment);
         while (true)
         {
             // We have arrived at the start node, so we are done
@@ -332,7 +333,7 @@ public unsafe class MapTracing : IDisposable
                 var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
                 currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
                 currentNode = newNode;
-                polygon.Segments.Add(currentNode);
+                polygon.Segments.Add(currentSegment);
             }
         }
 
@@ -345,11 +346,24 @@ public unsafe class MapTracing : IDisposable
     /// </summary>
     /// <param name="node"></param>
     /// <param name="polygons"></param>
-    private void VisitNode(Node node, List<PolygonParsing> polygons) =>
-        polygons.AddRange(from direction in node.Segments.Select(s => s.Dir)
-            where !node.TestDirection(direction)
-            select TraceFromNode(node, direction));
+    private void VisitNode(Node node, List<PolygonParsing> polygons)
+    {
+        var dirs = node.Segments.Select(s => s.Dir);
 
+        foreach (var direction in dirs)
+        {
+            if (node.TestDirection(direction))
+                continue;
+            var polygon = TraceFromNode(node, direction);
+            polygons.Add(polygon);
+        }
+    }
+
+    /*=>
+    polygons.AddRange(from direction in node.Segments.Select(s => s.Dir)
+        where !node.TestDirection(direction)
+        select TraceFromNode(node, direction));
+*/
     public List<PolygonParsing> Trace()
     {
         TraceImageEdges();
@@ -362,7 +376,7 @@ public unsafe class MapTracing : IDisposable
             VisitNode(node.Value, polygons);
             NodeCache.Remove(node.Key);
         }
-
+        
         return polygons;
     }
 

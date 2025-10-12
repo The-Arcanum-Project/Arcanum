@@ -29,4 +29,9 @@ public readonly struct BorderSegmentDirectional : ICoordinateAdder
     {
         return new(Segment, !IsForward);
     }
+
+    public override string ToString()
+    {
+        return string.Join(", ", IsForward ? Segment.Points : Segment.Points.AsEnumerable().Reverse());
+    }
 }

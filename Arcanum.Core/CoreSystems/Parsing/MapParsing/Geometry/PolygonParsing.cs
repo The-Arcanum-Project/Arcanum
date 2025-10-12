@@ -9,7 +9,7 @@ public class PolygonParsing(int color)
     public List<ICoordinateAdder> Segments { get; } = [];
     public List<PolygonParsing> Holes { get; } = [];
     
-    private List<Vector2I> GetAllPoints()
+    public List<Vector2I> GetAllPoints()
     {
         var points = new List<Vector2I>();
         foreach (var segment in Segments)
@@ -39,9 +39,30 @@ public class PolygonParsing(int color)
             var pos = tess.Vertices[i].Position;
             vertices[i] = new (pos.X, pos.Y);
         }
-            
 
         return new(vertices, tess.Elements);
+    }
+    
+    public Rectangle GetBoundingBox()
+    {
+        var points = GetAllPoints();
+        if (points.Count == 0)
+            return new Rectangle(0, 0, 0, 0);
+        
+        var minX = points[0].X;
+        var maxX = points[0].X;
+        var minY = points[0].Y;
+        var maxY = points[0].Y;
+
+        foreach (var point in points)
+        {
+            if (point.X < minX) minX = point.X;
+            if (point.X > maxX) maxX = point.X;
+            if (point.Y < minY) minY = point.Y;
+            if (point.Y > maxY) maxY = point.Y;
+        }
+
+        return new (minX, minY, maxX - minX, maxY - minY);
     }
 }
 
