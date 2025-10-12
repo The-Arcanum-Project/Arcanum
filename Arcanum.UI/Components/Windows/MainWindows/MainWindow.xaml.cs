@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
+using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -25,6 +26,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private string _ramUsage = "RAM: [0 MB]";
    private string _cpuUsage = "CPU: [0%]";
+   private string _gpuUsage = "GPU: [0%]";
+   private string _vramUsage = "VRAM: [0 MB]";
+   private string _fps = "FPS: [0]";
 
    #region Properties
 
@@ -49,6 +53,45 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
             return;
 
          _cpuUsage = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public string GpuUsage
+   {
+      get => _gpuUsage;
+      private set
+      {
+         if (value == _gpuUsage)
+            return;
+
+         _gpuUsage = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public string VramUsage
+   {
+      get => _vramUsage;
+      private set
+      {
+         if (value == _vramUsage)
+            return;
+
+         _vramUsage = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public string Fps
+   {
+      get => _fps;
+      private set
+      {
+         if (value == _fps)
+            return;
+
+         _fps = value;
          OnPropertyChanged();
       }
    }
@@ -131,6 +174,30 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          return;
 
       RamUsage = memoryUsage;
+   }
+
+   public void SetGpuUsage(string gpuUsage)
+   {
+      if (string.Equals(gpuUsage, GpuUsage, StringComparison.Ordinal))
+         return;
+
+      GpuUsage = gpuUsage;
+   }
+
+   public void SetVramUsage(string vramUsage)
+   {
+      if (string.Equals(vramUsage, VramUsage, StringComparison.Ordinal))
+         return;
+
+      VramUsage = vramUsage;
+   }
+
+   public void SetFps(string fps)
+   {
+      if (string.Equals(fps, Fps, StringComparison.Ordinal))
+         return;
+
+      Fps = fps;
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
