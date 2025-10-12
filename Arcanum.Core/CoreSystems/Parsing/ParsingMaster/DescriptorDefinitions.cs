@@ -183,16 +183,23 @@ public static class DescriptorDefinitions
 
    private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
 
-   public static readonly FileDescriptor RoadsAndCountriesDescriptor =
-      new(["game", "main_menu", "setup", "start", "10_countries_and_roads.txt"],
-          new("10_countries_and_roads", "txt", "#"),
+   public static readonly FileDescriptor CountriesDescriptor =
+      new(["game", "main_menu", "setup", "start", "10_countries.txt"],
+          new("10_countries", "txt", "#"),
           [
-             new RoadsAndCountriesParsing([
+             new CountryParsing([
                 LocationDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
                 ReligiousSchoolsDescriptor.LoadingService[0], ColorParser.LoadingService[0], CharacterDiscovery,
                 LanguageDescriptor.LoadingService[0],
              ]),
           ],
+          false,
+          false);
+
+   public static readonly FileDescriptor RoadsDescriptor =
+      new(["game", "main_menu", "setup", "start", "09_roads.txt"],
+          new("09_roads", "txt", "#"),
+          [new RoadsParsing([LocationDescriptor.LoadingService[0],]),],
           false,
           false);
 
@@ -203,7 +210,7 @@ public static class DescriptorDefinitions
              CharacterDiscovery,
              new CharacterPropertiesParsing([
                 ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
-                RoadsAndCountriesDescriptor.LoadingService[0],
+                CountriesDescriptor.LoadingService[0],
              ]),
           ]),
           false);
@@ -265,7 +272,7 @@ public static class DescriptorDefinitions
       FileDescriptors =
       [
          DefaultMapPreDescriptor, LocationDescriptor, DefinitionsDescriptor, AdjacenciesDescriptor, MarketDescriptor,
-         PopTypeDescriptor, PopDescriptor, LocationRankDescriptor, RoadsAndCountriesDescriptor,
+         PopTypeDescriptor, PopDescriptor, LocationRankDescriptor, RoadsDescriptor, CountriesDescriptor,
          CountryRankDescriptor, InstitutionsAndReligiousSchools, ReligiousSchoolsDescriptor, InstitutionsDescriptor,
          CultureDescriptor, ColorParser, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,
          ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor, CharactersDiscoveryDescriptor,
