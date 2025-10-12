@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
@@ -65,5 +66,28 @@ public static class SelectionHelpers
          LocationCollectionType.SuperRegion => loc.GetFirstParentOfType(LocationCollectionType.Continent),
          _ => null,
       };
+   }
+
+   // TODO: @Melco our polygons have to carry an index or smth to be able to resolve them.
+   public static Location PolygonToLocation(Polygon polygon)
+   {
+      return Location.Empty;
+   }
+
+   public static Location[] PolygonsToLocations(Polygon[] polygons)
+   {
+      var locs = new Location[polygons.Length];
+      for (var i = 0; i < polygons.Length; i++)
+         locs[i] = PolygonToLocation(polygons[i]);
+      return locs;
+   }
+
+   public static Location[] PolygonsToLocations(ICollection<Polygon> polygons)
+   {
+      var locs = new Location[polygons.Count];
+      var i = 0;
+      foreach (var polygon in polygons)
+         locs[i++] = PolygonToLocation(polygon);
+      return locs;
    }
 }

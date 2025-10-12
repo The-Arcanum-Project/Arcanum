@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -94,6 +95,9 @@ public partial class Location
    [SuppressAgs]
    [IgnoreModifiable]
    public int ColorIndex { get; set; } = -1;
+
+   public Polygon[] Polygons { get; set; } = [];
+   public RectangleF Bounds { get; set; } = RectangleF.Empty;
 
    #endregion
 }

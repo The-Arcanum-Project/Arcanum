@@ -1,4 +1,8 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using System.Diagnostics;
+using System.Numerics;
+using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Geometry;
 using Timer = System.Threading.Timer;
 
 namespace Arcanum.Core.CoreSystems.Selection;
@@ -36,10 +40,19 @@ public static class Selection
    private static HashSet<Location> SelectedLocations { get; } = [];
    private static HashSet<Location> HoveredLocations { get; } = [];
    private static HashSet<Location> HighlightedLocations { get; } = [];
+   private static HashSet<Location> SelectionPreview { get; } = [];
 
    // List to keep alive to reduce allocations when adding/removing multiple locations at once or via drag selection
    private static List<Location> AddCache { get; } = [];
    private static List<Location> RemoveCache { get; } = [];
+
+   // State Variables for drag selection
+   public static bool IsDragging { get; set; }
+   public static List<Vector2> DragPath { get; set; } = [];
+   private static RectangleF DragArea { get; set; } = RectangleF.Empty;
+
+   private static QuadTree QuadTree { get; set; } =
+      new(new(0, 0, 10000, 10000)); // Placeholder, will be set by Map system
 
    #region Convenience Getter
 
@@ -59,7 +72,7 @@ public static class Selection
    /// and locations that are not present will be added instead of removed. <br/>
    /// </summary>
    public static void Modify(SelectionTarget target,
-                             List<Location> locations,
+                             IEnumerable<Location> locations,
                              bool additive = false,
                              bool invert = true)
    {
@@ -93,11 +106,11 @@ public static class Selection
    {
       var targetSet = GetTarget(target);
 
-      AddTo(target, locations.Except(targetSet).ToList());
-      RemoveFrom(target, targetSet.Except(locations).ToList());
+      AddTo(target, locations.Except(targetSet));
+      RemoveFrom(target, targetSet.Except(locations));
    }
 
-   private static void AddTo(SelectionTarget target, List<Location> locations)
+   private static void AddTo(SelectionTarget target, IEnumerable<Location> locations)
    {
       var targetSet = GetTarget(target);
       targetSet.UnionWith(locations);
@@ -106,7 +119,7 @@ public static class Selection
       AddCache.Clear();
    }
 
-   private static void RemoveFrom(SelectionTarget target, List<Location> locations)
+   private static void RemoveFrom(SelectionTarget target, IEnumerable<Location> locations)
    {
       var targetSet = GetTarget(target);
       targetSet.ExceptWith(locations);
@@ -158,6 +171,129 @@ public static class Selection
    #endregion
 
    #region LMB Selection
+
+   public static void UpdateDragSelection(Vector2 mousePos, bool isDragging, bool isLasso)
+   {
+      // Dragging just started
+      if (isDragging && !IsDragging)
+      {
+         DragPath.Clear();
+         SelectionPreview.Clear();
+      }
+      // Dragging just ended
+      else if (!isDragging && IsDragging)
+      {
+         // Perform the final selection
+         Modify(SelectionTarget.Selection, SelectionPreview, true, false);
+      }
+
+      IsDragging = isDragging;
+      if (!isDragging)
+         return;
+
+      DragPath.Add(mousePos);
+
+      switch (isLasso)
+      {
+         case true when DragPath.Count > 2:
+            SetLassoLocations(DragPath[^3..].Select(v => new PointF(v.X, v.Y)).ToList());
+            break;
+         case false when DragPath.Count > 1:
+            SetRectanglePreviewLocations(DragPath.First(), DragPath.Last());
+            break;
+      }
+   }
+
+   private static void SetRectanglePreviewLocations(Vector2 first, Vector2 last)
+   {
+      // We just started dragging, so we need to initialize the drag area
+      if (DragArea == RectangleF.Empty)
+      {
+         DragArea = new(Math.Min(first.X, last.X),
+                        Math.Min(first.Y, last.Y),
+                        Math.Abs(first.X - last.X),
+                        Math.Abs(first.Y - last.Y));
+      }
+      // We are dragging, so we need to update the drag area
+      else
+      {
+         // Calculate the newly added area to the drag area and only check locations in that area
+         var newArea = RectangleF.Union(new(Math.Min(first.X, last.X),
+                                            Math.Min(first.Y, last.Y),
+                                            Math.Abs(first.X - last.X),
+                                            Math.Abs(first.Y - last.Y)),
+                                        DragArea);
+
+         var (horizontalRect, verticalRect) = GeoRect.RectDiff(DragArea, newArea);
+
+         AddLocationsFromRectangle(horizontalRect);
+         AddLocationsFromRectangle(verticalRect);
+      }
+   }
+
+   private static void AddLocationsFromRectangle(RectangleF rect)
+   {
+      if (GeoRect.IsRectangleContained(rect, DragArea))
+      {
+         // Add all locations in the verticalRect to the SelectionPreview
+         var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
+         Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), invert: false);
+      }
+      else
+      {
+         // Add all locations in the horizontalRect to the SelectionPreview
+         var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
+         Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), true, false);
+      }
+   }
+
+   private static void SetLassoLocations(List<PointF> vector2S)
+   {
+      var polygon = new Polygon(vector2S.Select(v => new PointF(v.X, v.Y)).ToList());
+
+      var sw = new Stopwatch();
+      sw.Start();
+
+      var locList = Globals.Locations.Values.ToList();
+      List<Location> addToPreview = [];
+      List<Location> rmvfrPreview = [];
+
+      // The line connecting the last two points
+      var locsOnLine = GeoRect.GetLocationsOnLine(vector2S[^2], vector2S[^1], locList);
+      foreach (var prov in locsOnLine)
+         addToPreview.Add(prov);
+
+      // The line connecting the first and last point to close the lasso
+      locsOnLine = GeoRect.GetLocationsOnLine(vector2S[0], vector2S[^1], locList);
+      foreach (var prov in locsOnLine)
+         addToPreview.Add(prov);
+
+      // The line connecting the first two points
+      locsOnLine = GeoRect.GetLocationsOnLine(vector2S[^2], vector2S[0], locList);
+      foreach (var prov in locsOnLine)
+      {
+         if (polygon.Contains(prov.Polygons[0].Vertices[0])) //TODO: Crash potential if a location has no vertices
+            addToPreview.Add(prov);
+         else
+            rmvfrPreview.Add(prov);
+      }
+
+      locsOnLine = GeoRect.GetLocationsInPolygon(polygon, locList);
+
+      foreach (var prov in locsOnLine)
+      {
+         if (SelectionPreview.Contains(prov))
+            addToPreview.Add(prov);
+         else
+            rmvfrPreview.Add(prov);
+      }
+
+      sw.Stop();
+      Debug.WriteLine($"Checks: {sw.ElapsedTicks} nano seconds");
+
+      Modify(SelectionTarget.SelectionPreview, addToPreview, true, false);
+      Modify(SelectionTarget.SelectionPreview, rmvfrPreview, false, false);
+   }
 
    /// <summary>
    /// LMB Select a single location. <br/>
