@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Windows.Threading;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -12,7 +13,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
     public override List<Type> ParsedObjects { get; }
     public List<PolygonParsing> ParsingPolygons = [];
     public Polygon[] polygons;
-    bool finishedTesselation = false;
+    public bool finishedTesselation = false;
 
     public override string GetFileDataDebugInfo()
     {
@@ -36,8 +37,11 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
         {
             Parallel.For(0, ParsingPolygons.Count, i => { polygons[i] = ParsingPolygons[i].Tesselate(); });
             lock (this)
+            {
                 finishedTesselation = true;
-            UIHandle.Instance.MapHandle.NotifyMapLoaded();
+                UIHandle.Instance.MapHandle.NotifyMapLoaded();
+            }
+
         });
         return true;
     }

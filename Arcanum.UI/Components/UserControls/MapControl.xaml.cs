@@ -13,7 +13,6 @@ public partial class MapControl : UserControl
     public MapControl()
     {
         InitializeComponent();
-        Loaded += MainWindow_Loaded;
     }
 
     public void SetupRendering(Polygon[] polygons)
@@ -30,11 +29,6 @@ public partial class MapControl : UserControl
         // Use LayoutUpdated for initial positioning and then rely on location/size changed events
         DataContext = _d3dHost;
         //_overlay.Show();
-    }
-
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-    {
-        // TODO check for data
     }
     
     private void HwndHostContainer_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
