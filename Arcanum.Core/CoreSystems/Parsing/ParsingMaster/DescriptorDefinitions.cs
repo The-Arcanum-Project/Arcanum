@@ -56,7 +56,7 @@ public static class DescriptorDefinitions
                                                                      ]),
                                                                   ],
                                                                   false);
-
+   
    public static readonly FileDescriptor DefaultMapPreDescriptor = new(["game", "in_game", "map_data", "default.map"],
                                                                        new("default.map", "map", "#"),
                                                                        ConsequentialLoadingSteps([
@@ -67,6 +67,14 @@ public static class DescriptorDefinitions
                                                                        ]),
                                                                        false);
 
+   public static readonly FileDescriptor MapTracingDescriptor = new(["game", "in_game", "map_data", "provinces.png"],
+      new("LocationMap", "png", ""),
+      [new LocationMapTracing([
+         DefaultMapPreParsing,
+         LocationDescriptor.LoadingService[0],
+      ])],
+      false);
+   
    public static readonly FileDescriptor DefinitionsDescriptor = new(["game", "in_game", "map_data", "definitions.txt"],
                                                                      new("definitions", "txt", "#"),
                                                                      [
@@ -271,7 +279,7 @@ public static class DescriptorDefinitions
    {
       FileDescriptors =
       [
-         DefaultMapPreDescriptor, LocationDescriptor, DefinitionsDescriptor, AdjacenciesDescriptor, MarketDescriptor,
+         DefaultMapPreDescriptor, LocationDescriptor,MapTracingDescriptor, DefinitionsDescriptor, AdjacenciesDescriptor, MarketDescriptor,
          PopTypeDescriptor, PopDescriptor, LocationRankDescriptor, RoadsDescriptor, CountriesDescriptor,
          CountryRankDescriptor, InstitutionsAndReligiousSchools, ReligiousSchoolsDescriptor, InstitutionsDescriptor,
          CultureDescriptor, ColorParser, LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor,

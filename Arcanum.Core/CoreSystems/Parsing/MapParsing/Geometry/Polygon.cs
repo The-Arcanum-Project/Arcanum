@@ -1,13 +1,9 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Numerics;
 
-public class Polygon(int color)
-{
-    public int Color { get; } = color;
-    public List<ICoordinateAdder> Segments { get; } = [];
-    public List<Polygon> Holes { get; } = [];
-}
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
-public interface ICoordinateAdder
+public class Polygon(Vector2[] vertices, int[] indices)
 {
-    public void AddTo(List<Vector2> points);
+    public Vector2[] Vertices { get; } = vertices;
+    public int[] Indices { get; } = indices;
 }

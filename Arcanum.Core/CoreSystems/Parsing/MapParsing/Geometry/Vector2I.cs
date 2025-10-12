@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 [Serializable]
-public struct Vector2(int x, int y) : IEquatable<Vector2>
+public struct Vector2I(int x, int y) : IEquatable<Vector2I>
 {
     public int X = x;
     public int Y = y;
@@ -21,12 +21,12 @@ public struct Vector2(int x, int y) : IEquatable<Vector2>
         get => X * X + Y * Y;
     }
 
-    public static Vector2 Zero { get; } = new Vector2(0, 0);
-    public static Vector2 One { get; } = new Vector2(1, 1);
-    public static Vector2 Up { get; } = new Vector2(0, 1);
-    public static Vector2 Down { get; } = new Vector2(0, -1);
-    public static Vector2 Left { get; } = new Vector2(-1, 0);
-    public static Vector2 Right { get; } = new Vector2(1, 0);
+    public static Vector2I Zero { get; } = new Vector2I(0, 0);
+    public static Vector2I One { get; } = new Vector2I(1, 1);
+    public static Vector2I Up { get; } = new Vector2I(0, 1);
+    public static Vector2I Down { get; } = new Vector2I(0, -1);
+    public static Vector2I Left { get; } = new Vector2I(-1, 0);
+    public static Vector2I Right { get; } = new Vector2I(1, 0);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Set(int x, int y)
@@ -36,7 +36,7 @@ public struct Vector2(int x, int y) : IEquatable<Vector2>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Distance(Vector2 a, Vector2 b)
+    public static float Distance(Vector2I a, Vector2I b)
     {
         int dx = b.X - a.X;
         int dy = b.Y - a.Y;
@@ -44,32 +44,32 @@ public struct Vector2(int x, int y) : IEquatable<Vector2>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 Min(Vector2 a, Vector2 b)
+    public static Vector2I Min(Vector2I a, Vector2I b)
     {
-        return new Vector2(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y));
+        return new Vector2I(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 Max(Vector2 a, Vector2 b)
+    public static Vector2I Max(Vector2I a, Vector2I b)
     {
-        return new Vector2(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y));
+        return new Vector2I(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 Scale(Vector2 a, Vector2 b)
+    public static Vector2I Scale(Vector2I a, Vector2I b)
     {
-        return new Vector2(a.X * b.X, a.Y * b.Y);
+        return new Vector2I(a.X * b.X, a.Y * b.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Scale(Vector2 scale)
+    public void Scale(Vector2I scale)
     {
         X *= scale.X;
         Y *= scale.Y;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Clamp(Vector2 min, Vector2 max)
+    public void Clamp(Vector2I min, Vector2I max)
     {
         X = Math.Max(min.X, X);
         X = Math.Min(max.X, X);
@@ -78,49 +78,49 @@ public struct Vector2(int x, int y) : IEquatable<Vector2>
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator +(Vector2 a, Vector2 b)
+    public static Vector2I operator +(Vector2I a, Vector2I b)
     {
-        return new Vector2(a.X + b.X, a.Y + b.Y);
+        return new Vector2I(a.X + b.X, a.Y + b.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator -(Vector2 a, Vector2 b)
+    public static Vector2I operator -(Vector2I a, Vector2I b)
     {
-        return new Vector2(a.X - b.X, a.Y - b.Y);
+        return new Vector2I(a.X - b.X, a.Y - b.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator *(Vector2 a, Vector2 b)
+    public static Vector2I operator *(Vector2I a, Vector2I b)
     {
-        return new Vector2(a.X * b.X, a.Y * b.Y);
+        return new Vector2I(a.X * b.X, a.Y * b.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator *(int a, Vector2 b)
+    public static Vector2I operator *(int a, Vector2I b)
     {
-        return new Vector2(a * b.X, a * b.Y);
+        return new Vector2I(a * b.X, a * b.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator *(Vector2 a, int b)
+    public static Vector2I operator *(Vector2I a, int b)
     {
-        return new Vector2(a.X * b, a.Y * b);
+        return new Vector2I(a.X * b, a.Y * b);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 operator /(Vector2 a, int b)
+    public static Vector2I operator /(Vector2I a, int b)
     {
-        return new Vector2(a.X / b, a.Y / b);
+        return new Vector2I(a.X / b, a.Y / b);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(Vector2 lhs, Vector2 rhs)
+    public static bool operator ==(Vector2I lhs, Vector2I rhs)
     {
         return lhs.X == rhs.X && lhs.Y == rhs.Y;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(Vector2 lhs, Vector2 rhs)
+    public static bool operator !=(Vector2I lhs, Vector2I rhs)
     {
         return !(lhs == rhs);
     }
@@ -128,11 +128,11 @@ public struct Vector2(int x, int y) : IEquatable<Vector2>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? other)
     {
-        return other is Vector2 vector2 && Equals(vector2);
+        return other is Vector2I vector2 && Equals(vector2);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(Vector2 other)
+    public bool Equals(Vector2I other)
     {
         return X == other.X && Y == other.Y;
     }

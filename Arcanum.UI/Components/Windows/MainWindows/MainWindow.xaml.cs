@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
@@ -127,6 +129,17 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          Width = screen.WorkingArea.Width * 0.8;
          WindowState = WindowState.Maximized;
       }
+      
+      // Load map if data ready
+      if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
+         throw new ApplicationException("Could not load location map tracing descriptor.");
+
+      lock (mapDataParser)
+      {
+         if(mapDataParser.finishedTesselation)
+            MainMap.SetupRendering(mapDataParser.polygons, mapDataParser.mapSize);
+      }
+
    }
 
    private void OpenPluginSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)

@@ -1,30 +1,34 @@
-﻿struct VS_INPUT
+cbuffer Constants : register(b0)
 {
-    float3 position : POSITION;
-    float4 color : COLOR;
+    float4x4 WorldViewProjection;
 };
 
-struct PS_INPUT
+// The new structured buffer for our color lookup table
+StructuredBuffer<float4> ColorLookup : register(t0);
+
+struct VSInput
 {
-    float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float2 Position   : POSITION;
+    uint   PolygonId  : POLYGON_ID; // Changed from Color
 };
 
-PS_INPUT VSMain(VS_INPUT input)
+struct PSInput
 {
-    PS_INPUT output;
-    // Pass the position directly to the rasterizer.
-    // The 'w' component of 1.0f is important.
-    output.position = float4(input.position, 1.0f);
-    
-    // Pass the color to the pixel shader.
-    output.color = input.color;
-    
-    return output;
+    float4 Position   : SV_POSITION;
+    uint   PolygonId  : POLYGON_ID; // Pass the ID to the pixel shader
+};
+
+PSInput VSMain(VSInput input)
+{
+    PSInput result;
+    float4 pos = float4(input.Position.x, input.Position.y, 0.0f, 1.0f);
+    result.Position = mul(pos, WorldViewProjection);
+    result.PolygonId = input.PolygonId;
+    return result;
 }
 
-float4 PSMain(PS_INPUT input) : SV_TARGET
+float4 PSMain(PSInput input) : SV_TARGET
 {
-    // Return the interpolated color from the vertex shader.
-    return input.color;
+    // Look up the color from the buffer using the PolygonId
+    return ColorLookup[input.PolygonId];
 }

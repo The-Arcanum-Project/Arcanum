@@ -44,6 +44,7 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
       //DescriptorDefinitions.HeightMapDescriptor.LocalPath[^1] = dmd.HeightMap.TrimQuotes();
       DescriptorDefinitions.AdjacenciesDescriptor.SetPathFileName(dmd.Adjacencies.TrimQuotes());
       DescriptorDefinitions.DefinitionsDescriptor.SetPathFileName(dmd.Setup.TrimQuotes());
+      DescriptorDefinitions.MapTracingDescriptor.SetPathFileName(dmd.ProvinceFileName.TrimQuotes());
       //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports.TrimQuotes();
       //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates.TrimQuotes();
 

@@ -24,7 +24,7 @@ public class Node : ICoordinateAdder
 
 #endif
 
-    public readonly Vector2 Position;
+    public readonly Vector2I Position;
     public int XPos => Position.X;
     public int YPos => Position.Y;
 
@@ -74,7 +74,7 @@ public class Node : ICoordinateAdder
     /// Adds the node's position as a <see cref="Point"/> to the provided list.
     /// </summary>
     /// <param name="points">The list to add the point to.</param>
-    public void AddTo(List<Vector2> points)
+    public void AddTo(List<Vector2I> points)
     {
         points.Add(new (XPos, YPos));
     }

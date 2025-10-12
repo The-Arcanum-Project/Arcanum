@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 
@@ -42,9 +43,10 @@ public partial class D3D11HwndHost : HwndHost
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOZORDER = 0x0004;
 
-    public D3D11HwndHost(ID3DRenderer renderer)
+    public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer)
     {
         _renderer = renderer;
+        _renderer.SetupEvents(hwndHostContainer);
         Unloaded += OnUnloaded;
     }
 

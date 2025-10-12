@@ -2,15 +2,21 @@
 
 public class BorderSegment
 {
-    public List<Vector2> Points { get; } = [];
+    public List<Vector2I> Points { get; } = [];
 }
 
-public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isForward) : ICoordinateAdder
+public readonly struct BorderSegmentDirectional : ICoordinateAdder
 {
-    public readonly BorderSegment Segment = segment;
-    public readonly bool IsForward = isForward;
+    public readonly BorderSegment Segment;
+    public readonly bool IsForward;
 
-    public void AddTo(List<Vector2> points)
+    public BorderSegmentDirectional(BorderSegment segment, bool isForward)
+    {
+        Segment = segment;
+        IsForward = isForward;
+    }
+
+    public void AddTo(List<Vector2I> points)
     {
         if (IsForward)
             points.AddRange(Segment.Points);

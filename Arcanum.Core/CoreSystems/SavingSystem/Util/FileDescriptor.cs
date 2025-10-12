@@ -15,7 +15,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public FileLoadingService[] LoadingService { get; }
    public readonly bool AllowMultipleInstances;
 
-   public List<Eu5FileObj> Files { get; }
+   public List<Eu5FileObj> Files { get; private set; }
 
    public FileDescriptor(string[] localPath,
                          FileTypeInformation fileType,
@@ -40,8 +40,9 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    {
       if (string.IsNullOrWhiteSpace(newFileName))
          throw new ArgumentException("File name cannot be null or empty.", nameof(newFileName));
-
+      
       LocalPath[^1] = newFileName;
+      Files = FileManager.GetAllFileInfosForDirectory(this);
    }
 
    public string FilePath => Path.Combine(LocalPath);

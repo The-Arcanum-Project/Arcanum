@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.UI.DirectX;
 
 namespace Arcanum.UI.Components.UserControls;
@@ -9,17 +10,18 @@ public partial class MapControl : UserControl
 {
     private D3D11HwndHost _d3dHost;
     
-    
-    
     public MapControl()
     {
         InitializeComponent();
-        Loaded += MainWindow_Loaded;
     }
 
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    public void SetupRendering(Polygon[] polygons, (int, int) imageSize)
     {
-        _d3dHost = new D3D11HwndHost(new ExampleRenderer());
+        if (!IsLoaded)
+        {
+            throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
+        }
+        _d3dHost = new (new LocationRenderer(polygons, imageSize), HwndHostContainer);
         HwndHostContainer.Child = _d3dHost;
 
         //_overlay = new OverlayWindow { Owner = this };
@@ -28,6 +30,7 @@ public partial class MapControl : UserControl
         DataContext = _d3dHost;
         //_overlay.Show();
     }
+    
     private void HwndHostContainer_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
         Console.WriteLine("Right click");
