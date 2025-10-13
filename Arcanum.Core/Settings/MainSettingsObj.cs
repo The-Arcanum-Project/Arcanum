@@ -17,7 +17,6 @@ public class MainSettingsObj
    [IsSubMenu("Saving")]
    public AGSSettings AgsSettings { get; set; } = new();
 
-   [IsSubMenu("Map")]
    public MapSettingsObj MapSettings { get; set; } = new();
 
    public AgsConfig AgsConfig { get; set; } = new();

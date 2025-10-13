@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+using Arcanum.Core.GlobalStates;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -302,16 +303,22 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
         var pos = ScreenToMap(e.GetPosition(_parent));
         
         var zoomFactor = e.Delta > 0 ? 1.2f : 1 / 1.2f;
-    
         
-        _zoom *= zoomFactor;
+        var newZoom = _zoom * zoomFactor;
 
-        Console.WriteLine(_zoom);
+        
+        if(newZoom < Config.Settings.MapSettings.MinZoomLevel || newZoom > Config.Settings.MapSettings.MaxZoomLevel)
+            return;
+
+        _zoom = newZoom;
+        
         var delta = new Vector2(pos.X - _pan.X, pos.Y - _pan.Y);
         
         delta /= zoomFactor;
 
-        _pan = pos - delta;
+        var newPan = pos - delta;
+        PanTo(newPan.X,newPan.Y);
+        
         
         Render();
     }
@@ -331,6 +338,12 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
         surface.ReleaseMouseCapture();
     }
 
+    private void PanTo(float x, float y)
+    {
+        _pan.X = Math.Clamp(x, -0.1f, 1.1f);
+        _pan.Y = Math.Clamp(y, -0.1f, 1.1f);
+    }
+
     private void MouseMove(object sender, MouseEventArgs e)
     {
         if (!_isPanning || sender is not FrameworkElement surface) return;
@@ -340,8 +353,11 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
 
         var aspectRatio = (float)(_parent!.ActualWidth / _parent.ActualHeight);
         
-        _pan.X -= (float)(delta.X * 2 / (surface.ActualWidth * _zoom)) * aspectRatio;
-        _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom)) / _imageAspectRatio;
+        var x = _pan.X - (float)(delta.X * 2 / (surface.ActualWidth * _zoom)) * aspectRatio;
+        var y = _pan.Y - (float)(delta.Y * 2 / (surface.ActualHeight * _zoom)) / _imageAspectRatio;
+
+        PanTo(x,y);
+        
         _lastMousePosition = currentMousePosition;
         Render();
     }
