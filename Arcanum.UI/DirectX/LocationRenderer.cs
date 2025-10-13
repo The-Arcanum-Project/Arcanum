@@ -53,11 +53,13 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
     private VertexPositionId2D[]? _vertices;
     private Color4[] _polygonColors = new Color4[polygons.Length];
 
-    private Vector2 _pan = new(-0.5f, -0.25f);
+    private Vector2 _pan = new(0.5f, 0.5f);
     private float _zoom = 1.75f;
     private Point _lastMousePosition;
     private bool _isPanning;
 
+    private float _imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
+    
     private Border? _parent;
     private uint _vertexCount;
 
@@ -88,7 +90,6 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
     public List<VertexPositionId2D> GetVertices()
     {
         var vertices = new List<VertexPositionId2D>(3 * polygons.Length);
-        var aspectRatio = imageSize.Item2 / (float)imageSize.Item1;
         var random = new Random(0);
         for (var i = 0; i < polygons.Length; i++)
         {
@@ -108,11 +109,11 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
                 var v0 = triangleVertices[indices[j]];
                 var v1 = triangleVertices[indices[j + 1]];
                 var v2 = triangleVertices[indices[j + 2]];
-                vertices.Add(new(new(v0.X / imageSize.Item1, aspectRatio * (1 - v0.Y / imageSize.Item2)),
+                vertices.Add(new(new(v0.X / imageSize.Item1, _imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
                     (uint)i));
-                vertices.Add(new(new(v1.X / imageSize.Item1, aspectRatio * (1 - v1.Y / imageSize.Item2)),
+                vertices.Add(new(new(v1.X / imageSize.Item1, _imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
                     (uint)i));
-                vertices.Add(new(new(v2.X / imageSize.Item1, aspectRatio * (1 - v2.Y / imageSize.Item2)),
+                vertices.Add(new(new(v2.X / imageSize.Item1, _imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
                     (uint)i));
             }
         }
@@ -217,7 +218,8 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
         {
             if (_renderTargetView == null || _context == null || _swapChain == null || _parent == null) return;
             var aspectRatio = (float)(_parent.ActualWidth / _parent.ActualHeight);
-            var view = Matrix4x4.CreateTranslation(_pan.X, _pan.Y, 0);
+            
+            var view = Matrix4x4.CreateTranslation( -1 * _pan.X,(_pan.Y - 1) * _imageAspectRatio, 0);
             var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / _zoom, 2.0f / _zoom, -1.0f, 1.0f);
             _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
 
@@ -231,6 +233,36 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
             _context.Draw(_vertexCount,0);
             _swapChain!.Present(1, PresentFlags.None);
         }
+    }
+    
+    public Point ScreenToMap(Point screenPoint)
+    {
+        if (_parent == null)
+            throw new InvalidOperationException("Parent not set. Call SetupEvents first.");
+
+        double width = _parent.ActualWidth;
+        double height = _parent.ActualHeight;
+        float aspectRatio = (float)(width / height);
+
+        // Step 1. Convert screen coordinates (pixels) to normalized device coordinates (-1..1)
+        float ndcX = (float)((screenPoint.X / width) * 2.0 - 1.0);
+        float ndcY = (float)(1.0 - (screenPoint.Y / height) * 2.0); // flip Y
+
+        // Step 2. Undo projection scaling
+        float worldX = ndcX * (aspectRatio / _zoom);
+        float worldY = ndcY * (1.0f / _zoom);
+
+        // Step 3. Undo view translation
+        worldX += _pan.X;
+        worldY += (1 - _pan.Y) * _imageAspectRatio;
+
+        // Step 4. Convert world coordinates back to normalized map coordinates
+        // X: already 0..1 in map space
+        // Y: invert same way as when creating vertices (1 - normalizedY)
+        float mapX = worldX;
+        float mapY = 1.0f - (worldY / _imageAspectRatio);
+
+        return new Point(mapX, mapY);
     }
 
     public void SetupEvents(Border parent)
@@ -270,7 +302,19 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
     
     private void MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        _zoom *= e.Delta > 0 ? 1.2f : 1 / 1.2f;
+        var pos = ScreenToMap(e.GetPosition(_parent));
+        
+        var zoomFactor = e.Delta > 0 ? 1.2f : 1 / 1.2f;
+
+        _zoom *= zoomFactor;
+
+        var delta = new Vector2((float)pos.X - _pan.X, (float)pos.Y - _pan.Y);
+        
+        delta /= zoomFactor;
+        
+        _pan.X = (float)pos.X - delta.X;
+        _pan.Y = (float)pos.Y - delta.Y;
+        
         Render();
     }
 
@@ -296,9 +340,10 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
         var currentMousePosition = e.GetPosition(surface);
         var delta = currentMousePosition - _lastMousePosition;
 
-        _pan.X += (float)(delta.X * 2 / (surface.ActualWidth * _zoom));
-        _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom));
+        var aspectRatio = (float)(_parent!.ActualWidth / _parent.ActualHeight);
         
+        _pan.X -= (float)(delta.X * 2 / (surface.ActualWidth * _zoom)) * aspectRatio;
+        _pan.Y -= (float)(delta.Y * 2 / (surface.ActualHeight * _zoom)) / _imageAspectRatio;
         _lastMousePosition = currentMousePosition;
         Render();
     }
