@@ -14,6 +14,8 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public partial class CountryParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Country>(dependencies)
 {
+   public override bool IsHeavyStep => true;
+
    private static void ValidateAndParseCountries(BlockNode rootBn,
                                                  LocationContext ctx,
                                                  string source,

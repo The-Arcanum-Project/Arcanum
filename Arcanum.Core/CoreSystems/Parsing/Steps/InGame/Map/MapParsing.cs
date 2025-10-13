@@ -10,56 +10,59 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
-    public override List<Type> ParsedObjects { get; }
-    public List<PolygonParsing> ParsingPolygons = [];
-    public Polygon[] polygons;
-    public bool finishedTesselation = false;
-    public (int, int) mapSize;
+   public override List<Type> ParsedObjects { get; }
+   public List<PolygonParsing> ParsingPolygons = [];
+   public Polygon[] polygons;
+   public bool finishedTesselation = false;
+   public (int, int) mapSize;
+   public override bool IsHeavyStep => true;
+   public override bool HasPriority { get; set; } = true;
 
-    public override string GetFileDataDebugInfo()
-    {
-        return $"Number of polygons: {ParsingPolygons.Count}";
-    }
+   public override string GetFileDataDebugInfo()
+   {
+      return $"Number of polygons: {ParsingPolygons.Count}";
+   }
 
-    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-    {
-        using (var bitmap =
-               new Bitmap(
-                   fileObj.Path.FullPath))
-        {
-            using (MapTracing tracing = new(bitmap))
-            {
-                ParsingPolygons = tracing.Trace();
-                polygons = new Polygon[ParsingPolygons.Count];
-                mapSize = (bitmap.Width, bitmap.Height);
-            }
-        }
+   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   {
+      using (var bitmap =
+             new Bitmap(fileObj.Path.FullPath))
+      {
+         using (MapTracing tracing = new(bitmap))
+         {
+            ParsingPolygons = tracing.Trace();
+            polygons = new Polygon[ParsingPolygons.Count];
+            mapSize = (bitmap.Width, bitmap.Height);
+         }
+      }
 
-        Task.Run(() =>
-        {
-            var maxThreads = Math.Max(1, (Environment.ProcessorCount/2));
+      Task.Run(() =>
+      {
+         // var maxThreads = Math.Max(1, (Environment.ProcessorCount / 2));
+         //
+         // var options = new ParallelOptions { MaxDegreeOfParallelism = maxThreads, };
+         //
+         // Parallel.For(0, ParsingPolygons.Count, options, i => { polygons[i] = ParsingPolygons[i].Tesselate();});
 
-            var options = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = maxThreads
-            };
-            
-            Parallel.For(0, ParsingPolygons.Count, options, i => { polygons[i] = ParsingPolygons[i].Tesselate(); });
-            lock (this)
-            {
-                finishedTesselation = true;
-                UIHandle.Instance.MapHandle.NotifyMapLoaded();
-                Console.WriteLine("Finished tesselation of map polygons.");
-            }
+         ParsingMaster.ParsingMaster.Instance.Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
+                                                                               i => polygons[i] =
+                                                                                     ParsingPolygons[i].Tesselate());
 
-        });
-        return true;
-    }
+         lock (this)
+         {
+            finishedTesselation = true;
+         }
 
-    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-    {
-        // We do not really unload map data
-        // TODO: @MelCo: Implement unloading of map data if necessary
-        return true;
-    }
+         UIHandle.Instance.MapHandle.NotifyMapLoaded();
+         Console.WriteLine("Finished tesselation of map polygons.");
+      });
+      return true;
+   }
+
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   {
+      // We do not really unload map data
+      // TODO: @MelCo: Implement unloading of map data if necessary
+      return true;
+   }
 }

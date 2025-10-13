@@ -13,8 +13,11 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
 [ParserFor(typeof(PopDefinition))]
-public partial class PopsParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<PopDefinition>(dependencies)
+public partial class PopsParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<PopDefinition>(dependencies)
 {
+   public override bool IsHeavyStep => true;
+
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,

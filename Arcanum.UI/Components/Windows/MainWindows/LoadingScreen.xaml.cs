@@ -78,7 +78,7 @@ public partial class LoadingScreen : INotifyPropertyChanged
          _subProgressPercentage = args.percentage;
          FormatLoadingText();
       };
-      
+
       ParsingMaster.Instance.TotalProgressChanged += (_, percentage) =>
       {
          _totalProgressPercentage = percentage;
@@ -97,17 +97,15 @@ public partial class LoadingScreen : INotifyPropertyChanged
    private void FormatLoadingText()
    {
       // First, construct the string. This can be done on any thread.
-      var newText = $"Loading: {_stepName} {_totalProgressPercentage:F0}% ({ParsingMaster.Instance.ParsingStepsDone}/{ParsingMaster.Instance.ParsingSteps})" +
-                    (_estimatedTime != TimeSpan.Zero
-                        ? $" Estimated time: {_estimatedTime.TotalSeconds:F2} s ({_subProgressPercentage:F0}% done)"
-                        : "");
+      var newText =
+         $"{_stepName} {_totalProgressPercentage:F0}% ({ParsingMaster.Instance.ParsingStepsDone}/{ParsingMaster.Instance.ParsingSteps})" +
+         (_estimatedTime != TimeSpan.Zero
+             ? $" Estimated time: {_estimatedTime.TotalSeconds:F2} s ({_subProgressPercentage:F0}% done)"
+             : "");
 
       // Now, use the Dispatcher to set the property on the UI thread.
       // This is the crucial part.
-      Dispatcher.InvokeAsync(() =>
-      {
-         LoadingText = newText;
-      });
+      Dispatcher.InvokeAsync(() => { LoadingText = newText; });
    }
 
    private void UpdateTip()
@@ -119,6 +117,6 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    private void OnPropertyChanged([CallerMemberName] string propertyName = null!)
    {
-      PropertyChanged?.Invoke(this, new (propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 }

@@ -24,16 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Nexus.Analyzer\Nexus.Analyzer.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Nexus.Analyzer\Nexus.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj"/>
-        <ProjectReference Include="..\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\CodeFixers\CodeFixers.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\CodeFixers\CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\SourceGens\SourceGens.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
@@ -42,6 +36,7 @@
         <PackageReference Include="LibTessDotNet" Version="1.1.15" />
         <PackageReference Include="Octokit" Version="14.0.0"/>
         <PackageReference Include="Pfim" Version="0.11.3"/>
+        <PackageReference Include="System.Management" Version="9.0.9"/>
     </ItemGroup>
 
 </Project>

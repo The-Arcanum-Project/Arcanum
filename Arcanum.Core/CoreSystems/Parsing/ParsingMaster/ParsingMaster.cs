@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Registry;
+using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using JetBrains.Annotations;
 
@@ -29,6 +30,9 @@ public class ParsingMaster
    public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
+
+   public Scheduler Scheduler = new();
+
    public static List<(string, TimeSpan)> StepDurationsByName => _sortedLoadingSteps
                                                                 .Select(loading
                                                                            => (loading.Name,
@@ -85,49 +89,159 @@ public class ParsingMaster
    /// </summary>
    private static void InitializeSteps()
    {
-      _sortedLoadingSteps =
-         new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
+      //_sortedLoadingSteps =
+      //   new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
+
+      var (s1, s2) = PartitionStepsByPriority(DescriptorDefinitions.LoadingStepsList);
+
+      var sortedPrioritySteps = TopologicalSort.Sort<string, FileLoadingService>(s1);
+      var sortedRemainingSteps =
+         TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList);
+      sortedRemainingSteps = sortedRemainingSteps.Except(sortedPrioritySteps).ToList();
+
+      var finalList = sortedPrioritySteps.Concat(sortedRemainingSteps);
+      _sortedLoadingSteps = new(finalList);
    }
 
-   public Task<bool> ExecuteAllParsingSteps()
+   /// <summary>
+   /// Partitions a given list of steps into two lists: one for priority tasks (including their dependencies)
+   /// and one for all remaining tasks.
+   /// </summary>
+   /// <param name="allAvailableSteps">The complete, unsorted list of all loading steps.</param>
+   private static (List<FileLoadingService> priority, List<FileLoadingService> remaining) PartitionStepsByPriority(
+      IEnumerable<FileLoadingService> allAvailableSteps)
    {
+      var allStepsList = allAvailableSteps.ToList();
+      var prioritySet = new HashSet<FileLoadingService>();
+
+      foreach (var step in allStepsList)
+         if (step.HasPriority)
+         {
+            prioritySet.Add(step);
+            var dependencies = TopologicalSort.GetAllDependencies<string, FileLoadingService>(step, allStepsList);
+            foreach (var dep in dependencies)
+               prioritySet.Add(dep);
+         }
+
+      var prioritySteps = allStepsList.Where(s => prioritySet.Contains(s)).ToList();
+      var remainingSteps = allStepsList.Where(s => !prioritySet.Contains(s)).ToList();
+
+      return (prioritySteps, remainingSteps);
+   }
+
+   public async Task<bool> ExecuteAllParsingSteps()
+   {
+      var sw = Stopwatch.StartNew();
       EffectParser.ParseEffectDefinitions();
 
       InitializeSteps();
 
       ParsingStepsDone = 0;
-      foreach (var loadingStep in _sortedLoadingSteps)
+      var steps = _sortedLoadingSteps.ToList();
+      var lockObj = new object();
+      var cts = new CancellationTokenSource();
+
+      while (ParsingStepsDone < ParsingSteps)
       {
-         TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
+         var hasPrioSteps = steps.Any(s => s.HasPriority);
+         var readySteps = hasPrioSteps ? [steps[0]] : LookAheadSteps(steps);
+         foreach (var step in readySteps)
+            steps.Remove(step);
 
-         ParsingStepsChanged?.Invoke(this, loadingStep);
-
-         var stepWrapper = loadingStep.GetParsingStep();
-
-         stepWrapper.SubStepCompleted += (_, _) =>
+         if (readySteps.Count == 0)
          {
-            StepProcessChanged?.Invoke(this, (stepWrapper.SubPercentageCompleted, stepWrapper.SubStepsDone));
-            StepDurationEstimationChanged?.Invoke(this, stepWrapper.EstimatedRemaining ?? TimeSpan.Zero);
-         };
+            // Deadlock check: No steps can run, but we are not finished.
+            if (ParsingStepsDone < ParsingSteps)
+               throw new
+                  InvalidOperationException($"Deadlock detected. No steps can be executed, but {ParsingSteps - ParsingStepsDone} steps remain.");
 
-         if (!stepWrapper.Execute())
             break;
+         }
 
-         StepDurations.Add(stepWrapper.Duration);
-         ParsingStepsDone++;
+         List<Task<bool>> currentBatchTasks = [];
+         foreach (var step in readySteps)
+         {
+            if (step.IsHeavyStep)
+               currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
+                                                              {
+                                                                 var wrapper = step.GetParsingStep();
+                                                                 var result = wrapper.Execute();
+                                                                 lock (lockObj)
+                                                                    if (result)
+                                                                    {
+                                                                       ParsingStepsDone++;
+                                                                       StepDurations.Add(wrapper.Duration);
+                                                                       ParsingStepsChanged?.Invoke(this, step);
+                                                                    }
+
+                                                                 return result;
+                                                              },
+                                                              cts.Token));
+            else
+               currentBatchTasks.Add(Scheduler.QueueLightWork(() =>
+                                                              {
+                                                                 var wrapper = step.GetParsingStep();
+                                                                 var result = wrapper.Execute();
+                                                                 lock (lockObj)
+                                                                    if (result)
+                                                                    {
+                                                                       ParsingStepsDone++;
+                                                                       StepDurations.Add(wrapper.Duration);
+                                                                       ParsingStepsChanged?.Invoke(this, step);
+                                                                    }
+
+                                                                 return result;
+                                                              },
+                                                              cts.Token));
+         }
+
+         while (currentBatchTasks.Count > 0)
+         {
+            var finishedTask = await Task.WhenAny(currentBatchTasks);
+            currentBatchTasks.Remove(finishedTask);
+
+            if (await finishedTask)
+               continue;
+
+            // A task failed. Cancel all other running tasks and stop.
+            await cts.CancelAsync();
+            return false;
+         }
+
+         TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
       }
 
-      if (ParsingSteps != ParsingStepsDone)
-         return Task.FromResult(false);
-
-      var sw = Stopwatch.StartNew();
       Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);
-      var items = Queastor.Queastor.GlobalInstance.BkTreeTerms.Count;
       Queastor.Queastor.GlobalInstance.RebuildBkTree();
-      sw.Stop();
-      Debug.WriteLine($"[Queastor] Rebuilt BK-Tree in {sw.ElapsedMilliseconds} ms for {items} words.");
 
-      return Task.FromResult(true);
+      sw.Stop();
+      Console.WriteLine($"Finished all parsing steps in {sw.Elapsed.TotalSeconds:F2} seconds.");
+
+      return await Task.FromResult(true);
+   }
+
+   /// Looks ahead in the parsing steps queue to check if the next steps dependencies are already loaded to load them in parallel
+   public List<FileLoadingService> LookAheadSteps(List<FileLoadingService> steps)
+   {
+      if (!Scheduler.IsHyperThreaded)
+         return [steps[0]];
+
+      List<FileLoadingService> lookAheadSteps = [];
+
+      for (var i = steps.Count - 1; i >= 0; i--)
+      {
+         var step = steps[i];
+         if (AreDependenciesLoaded(step) && !step.IsHeavyStep ||
+             step.IsHeavyStep && lookAheadSteps.Count == 0 && AreDependenciesLoaded(step))
+         {
+            lookAheadSteps.Add(step);
+            steps.RemoveAt(i);
+         }
+         else if (step.IsHeavyStep && lookAheadSteps.Count > 0)
+            break;
+      }
+
+      return lookAheadSteps;
    }
 
    public static bool RemoveAllGroupingNodes(RootNode rn,
