@@ -134,7 +134,9 @@
                     BorderThickness = "0"
                     Padding = "0"
                     HorizontalAlignment = "Stretch"
-                    VerticalAlignment = "Stretch" />
+                    VerticalAlignment = "Stretch"
+                    MaxValue = "{x:Static sys:Decimal.MaxValue}"
+                    MinValue = "{x:Static sys:Decimal.MinValue}" />
             </DataTemplate>
 
             <DataTemplate x:Key = "FloatTemplate"
@@ -146,7 +148,9 @@
                     BorderThickness = "0"
                     Padding = "0"
                     HorizontalAlignment = "Stretch"
-                    VerticalAlignment = "Stretch" />
+                    VerticalAlignment = "Stretch"
+                    MaxValue = "{x:Static sys:Single.MaxValue}"
+                    MinValue = "{x:Static sys:Single.MinValue}" />
             </DataTemplate>
 
             <DataTemplate x:Key = "ObjectTemplate"
