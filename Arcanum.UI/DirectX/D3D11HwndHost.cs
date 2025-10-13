@@ -56,14 +56,14 @@ public partial class D3D11HwndHost : HwndHost
             hwndParent.Handle,
             IntPtr.Zero, IntPtr.Zero, 0);
         
-        CompositionTarget.Rendering += OnRendering;
+        //CompositionTarget.Rendering += OnRendering;
 
         return new HandleRef(this, _hwnd);
     }
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        _renderer.Render();
+        //_renderer.Render();
     }
 
     private void ResizeRenderer(object? sender, EventArgs eventArgs)
@@ -71,6 +71,7 @@ public partial class D3D11HwndHost : HwndHost
         if (_currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
         {
             _renderer.Resize((int)_currentSizeInfo.NewSize.Width, (int)_currentSizeInfo.NewSize.Height);
+            _renderer.Render();
         }
         _resizeTimer.Stop();
     }
@@ -78,6 +79,7 @@ public partial class D3D11HwndHost : HwndHost
     protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
     {
         base.OnRenderSizeChanged(sizeInfo);
+
         _currentSizeInfo = sizeInfo;
 
         var newWidth = (int)sizeInfo.NewSize.Width;
@@ -86,13 +88,7 @@ public partial class D3D11HwndHost : HwndHost
         // Ensure we have a valid size
         if (newWidth <= 0 || newHeight <= 0)
             return;
-
-        // Resize the native window to match the HwndHost control size
-        if (!SetWindowPos(_hwnd, IntPtr.Zero, 0, 0, newWidth, newHeight, SWP_NOMOVE | SWP_NOZORDER))
-        {
-            Debugger.Break();
-            return;
-        }
+        
         
         _resizeTimer.Stop();
         _resizeTimer.Start();
@@ -112,9 +108,30 @@ public partial class D3D11HwndHost : HwndHost
     {
         Dispose();
     }
+    private const int WM_SIZE = 0x0005;
+    private const int WM_ERASEBKGND = 0x0014;
+    private const int WM_NCPAINT = 0x0085;
+    private const int WM_PAINT = 0x000F;
+    private static int HIWORD(int n) => (n >> 16) & 0xffff;
+    private static int LOWORD(int n) => n & 0xffff;
 
+    private static int count = 0;
+    
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ValidateRect(IntPtr hWnd, IntPtr lpRect);
+    
     protected override IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        switch (msg)
+        {
+            case WM_PAINT:
+                handled = true;
+                ValidateRect(hwnd, IntPtr.Zero);
+                _renderer.Render();
+                return IntPtr.Zero;
+        }
+        
         handled = false;
         return IntPtr.Zero;
     }
