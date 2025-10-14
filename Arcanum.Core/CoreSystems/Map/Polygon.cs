@@ -141,6 +141,9 @@ public sealed class Polygon
 
    public bool Contains(RectangleF rect)
    {
+      if (!Bounds.Contains(rect))
+         return false;
+
       var corners = new[]
       {
          new Vector2(rect.Left, rect.Top), new Vector2(rect.Right, rect.Top), new Vector2(rect.Right, rect.Bottom),

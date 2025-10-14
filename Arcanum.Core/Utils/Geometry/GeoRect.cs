@@ -76,16 +76,25 @@ public static class GeoRect
 
    private static bool LineIntersectsPolygon(Vector2 start, Vector2 end, Polygon polygon)
    {
-      var vertices = polygon.Vertices;
-      for (var i = 0; i < vertices.Length; i++)
-      {
-         var a = vertices[i];
-         var b = vertices[(i + 1) % vertices.Length]; // Wrap around to the first vertex
-         if (LinesIntersect(start, end, a, b))
-            return true;
-      }
+      if (LineIntersectsRectangle(start, end, polygon.Bounds))
+         return false;
 
-      return false;
+      var vertices = polygon.Vertices;
+      var count = vertices.Length;
+
+      for (var i = 0; i < count - 1; i++)
+         if (LinesIntersect(start, end, vertices[i], vertices[i + 1]))
+            return true;
+
+      return LinesIntersect(start, end, vertices[count - 1], vertices[0]);
+   }
+
+   public static bool LineIntersectsRectangle(Vector2 start, Vector2 end, RectangleF bounds)
+   {
+      return MathF.Max(start.X, end.X) < bounds.Left ||
+             MathF.Min(start.X, end.X) > bounds.Right ||
+             MathF.Max(start.Y, end.Y) < bounds.Top ||
+             MathF.Min(start.Y, end.Y) > bounds.Bottom;
    }
 
    // manual implementation of Contains for Vector2
@@ -121,10 +130,21 @@ public static class GeoRect
       return result;
    }
 
+   private static bool LinesIntersect_WithBoundingBoxCheck(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
+   {
+      if (MathF.Max(p1.X, p2.X) < MathF.Min(p3.X, p4.X) ||
+          MathF.Max(p3.X, p4.X) < MathF.Min(p1.X, p2.X) ||
+          MathF.Max(p1.Y, p2.Y) < MathF.Min(p3.Y, p4.Y) ||
+          MathF.Max(p3.Y, p4.Y) < MathF.Min(p1.Y, p2.Y))
+         return false;
+
+      return LinesIntersect(p1, p2, p3, p4);
+   }
+
    private static bool LinesIntersect(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
    {
       var d = (p4.Y - p3.Y) * (p2.X - p1.X) - (p4.X - p3.X) * (p2.Y - p1.Y);
-      if (Math.Abs(d) < 1e-6f)
+      if (MathF.Abs(d) < 1e-6f)
          return false;
 
       var uA = ((p4.X - p3.X) * (p1.Y - p3.Y) - (p4.Y - p3.Y) * (p1.X - p3.X)) / d;
