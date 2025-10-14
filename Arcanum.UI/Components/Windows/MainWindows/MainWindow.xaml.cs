@@ -7,7 +7,10 @@ using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
@@ -17,6 +20,7 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
+using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Common.UI;
 using Application = System.Windows.Application;
 
@@ -130,17 +134,23 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          Width = screen.WorkingArea.Width * 0.8;
          WindowState = WindowState.Maximized;
       }
-      
+
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");
 
       lock (mapDataParser)
-      {
-         if(mapDataParser.finishedTesselation)
+         if (mapDataParser.finishedTesselation)
             MainMap.SetupRenderingAsync(mapDataParser.polygons, mapDataParser.mapSize);
-      }
 
+      Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
+
+      Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
+   }
+
+   private void SelectionOnLocationSelectionChanged(List<Location> locations)
+   {
+      Eu5UiGen.GenerateAndSetView(new([..locations], true, UiPresenter));
    }
 
    private void OpenPluginSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -343,9 +353,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var location = Globals.Locations["stockholm"];
-      var ui = NUIViewGenerator.GenerateView(new(location, true, UiPresenter));
-      UiPresenter.Content = ui;
+      Eu5UiGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)].Value,
+                                      true,
+                                      UiPresenter));
    }
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)

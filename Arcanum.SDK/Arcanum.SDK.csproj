@@ -16,6 +16,7 @@
         <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj"/>
     </ItemGroup>
     <ItemGroup>
+        <Folder Include="DTOs\"/>
         <Folder Include="UI\"/>
     </ItemGroup>
 </Project>

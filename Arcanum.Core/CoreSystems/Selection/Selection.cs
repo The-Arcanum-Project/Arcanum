@@ -54,6 +54,91 @@ public static class Selection
    private static QuadTree QuadTree { get; set; } =
       new(new(0, 0, 10000, 10000)); // Placeholder, will be set by Map system
 
+   #region Events
+
+   public static event Action<List<Location>>? LocationSelected;
+   public static event Action<List<Location>>? LocationDeselected;
+   public static event Action<List<Location>>? LocationHovered;
+   public static event Action<List<Location>>? LocationUnhovered;
+   public static event Action<List<Location>>? LocationHighlighted;
+   public static event Action<List<Location>>? LocationUnhighlighted;
+   public static event Action<List<Location>>? LocationSelectionChanged;
+
+   private static void OnLocationSelected(List<Location> locations)
+   {
+      LocationSelected?.Invoke(locations);
+      LocationSelectionChanged?.Invoke(GetSelectedLocations);
+   }
+
+   private static void OnLocationDeselected(List<Location> locations)
+   {
+      LocationDeselected?.Invoke(locations);
+      LocationSelectionChanged?.Invoke(GetSelectedLocations);
+   }
+
+   private static void OnLocationHovered(List<Location> locations)
+   {
+      LocationHovered?.Invoke(locations);
+   }
+
+   private static void OnLocationUnhovered(List<Location> locations)
+   {
+      LocationUnhovered?.Invoke(locations);
+   }
+
+   private static void OnLocationHighlighted(List<Location> locations)
+   {
+      LocationHighlighted?.Invoke(locations);
+   }
+
+   private static void OnLocationUnhighlighted(List<Location> locations)
+   {
+      LocationUnhighlighted?.Invoke(locations);
+   }
+
+   private static void TriggerEvents(SelectionTarget target, List<Location> added, List<Location> removed)
+   {
+      if (added.Count > 0)
+         switch (target)
+         {
+            case SelectionTarget.Selection:
+               OnLocationSelected(added);
+               break;
+            case SelectionTarget.Hover:
+               OnLocationHovered(added);
+               break;
+            case SelectionTarget.Highlight:
+               OnLocationHighlighted(added);
+               break;
+            case SelectionTarget.SelectionPreview:
+               // No event for preview changes
+               break;
+            default:
+               throw new ArgumentOutOfRangeException(nameof(target), target, null);
+         }
+
+      if (removed.Count > 0)
+         switch (target)
+         {
+            case SelectionTarget.Selection:
+               OnLocationDeselected(removed);
+               break;
+            case SelectionTarget.Hover:
+               OnLocationUnhovered(removed);
+               break;
+            case SelectionTarget.Highlight:
+               OnLocationUnhighlighted(removed);
+               break;
+            case SelectionTarget.SelectionPreview:
+               // No event for preview changes
+               break;
+            default:
+               throw new ArgumentOutOfRangeException(nameof(target), target, null);
+         }
+   }
+
+   #endregion
+
    #region Convenience Getter
 
    public static List<Location> GetSelectedLocations => SelectedLocations.ToList();

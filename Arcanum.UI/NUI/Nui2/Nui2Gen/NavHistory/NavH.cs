@@ -27,7 +27,7 @@ public class NavH
       GenerateSubViews = generateSubViews;
       Root = root;
 
-      // TODO: @Minnator NUINavigation.Instance.Navigate(this);
+      NUINavigation.Instance.Navigate(this);
    }
 
    public NavH(IEu5Object target, bool generateSubViews, ContentPresenter root)

@@ -27,7 +27,7 @@ public class NUINavHistory
       GenerateSubViews = generateSubViews;
       Root = root;
 
-      NUINavigation.Instance.Navigate(this);
+      //NUINavigation.Instance.Navigate(this);
    }
 
    public NUINavHistory(INUI target, bool generateSubViews, ContentPresenter root)
@@ -48,7 +48,7 @@ public class NUINavHistory
       List<INUINavigation> combinedNavigations = [];
       foreach (var target in Targets)
          combinedNavigations.Add(new Core.CoreSystems.NUI.NUINavigation(target, target.ToString() ?? "??object"));
-      
+
       return combinedNavigations.Distinct().ToArray();
    }
 

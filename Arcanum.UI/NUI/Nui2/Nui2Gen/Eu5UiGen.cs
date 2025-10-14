@@ -62,8 +62,11 @@ public static class Eu5UiGen
                                        bool hasHeader = true,
                                        bool allowReadOnlyEditing = false)
    {
-      var primary = navh.Targets[0];
       var view = ControlFactory.GetBaseView();
+      if (navh.Targets.Count < 1)
+         return view;
+
+      var primary = navh.Targets[0];
       view.BaseViewBorder.BorderThickness = new(0);
       var mainGrid = ControlFactory.GetMainGrid();
       view.BaseViewBorder.Child = mainGrid;
