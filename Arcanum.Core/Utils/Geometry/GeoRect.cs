@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Map;
+﻿using System.Numerics;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.Utils.Geometry;
@@ -57,7 +58,7 @@ public static class GeoRect
              outer.Bottom >= inner.Bottom;
    }
 
-   public static List<Location> GetLocationsOnLine(PointF start, PointF end, List<Location> locations)
+   public static List<Location> GetLocationsOnLine(Vector2 start, Vector2 end, List<Location> locations)
    {
       var result = new List<Location>();
       var lineRect = new RectangleF(Math.Min(start.X, end.X),
@@ -73,18 +74,27 @@ public static class GeoRect
       return result;
    }
 
-   private static bool LineIntersectsPolygon(PointF start, PointF end, Polygon polygon)
+   private static bool LineIntersectsPolygon(Vector2 start, Vector2 end, Polygon polygon)
    {
       var vertices = polygon.Vertices;
-      for (var i = 0; i < vertices.Count; i++)
+      for (var i = 0; i < vertices.Length; i++)
       {
          var a = vertices[i];
-         var b = vertices[(i + 1) % vertices.Count]; // Wrap around to the first vertex
+         var b = vertices[(i + 1) % vertices.Length]; // Wrap around to the first vertex
          if (LinesIntersect(start, end, a, b))
             return true;
       }
 
       return false;
+   }
+
+   // manual implementation of Contains for Vector2
+   public static bool ContainsVec2(this RectangleF polygon, Vector2 point)
+   {
+      return polygon.X <= point.X &&
+             polygon.Y <= point.Y &&
+             polygon.Right >= point.X &&
+             polygon.Bottom >= point.Y;
    }
 
    public static List<Location> GetLocationsInPolygon(Polygon polygon, List<Location> locations)
@@ -111,7 +121,7 @@ public static class GeoRect
       return result;
    }
 
-   private static bool LinesIntersect(PointF p1, PointF p2, PointF p3, PointF p4)
+   private static bool LinesIntersect(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
    {
       var d = (p4.Y - p3.Y) * (p2.X - p1.X) - (p4.X - p3.X) * (p2.Y - p1.Y);
       if (Math.Abs(d) < 1e-6f)

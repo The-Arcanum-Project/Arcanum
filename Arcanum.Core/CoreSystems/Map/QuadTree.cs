@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
+using Arcanum.Core.Utils.Geometry;
 
 // Make sure you have a using statement for your PointF and RectangleF,
 // e.g., using System.Drawing;
@@ -60,14 +62,14 @@ public sealed class QuadTree
    /// </summary>
    /// <param name="point">The point to check.</param>
    /// <returns>The Polygon containing the point, or null if no polygon is found.</returns>
-   public Polygon? Query(PointF point)
+   public Polygon? Query(Vector2 point)
    {
-      if (!Bounds.Contains(point))
+      if (!Bounds.ContainsVec2(point))
          return null;
 
       if (_children != null)
          return (from child in _children
-                 where child.Bounds.Contains(point)
+                 where child.Bounds.ContainsVec2(point)
                  select child.Query(point)).FirstOrDefault();
 
       return Polygons.FirstOrDefault(p => p.Contains(point));

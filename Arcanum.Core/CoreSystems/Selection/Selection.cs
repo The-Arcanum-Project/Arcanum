@@ -29,8 +29,8 @@ public static class Selection
     *
     * ## COMPLEX SELECTION (requires holding down of buttons and moving the mouse)
     *
-    * Ctrl + LMB + Drag: Rectangle select (add to selection if not selected or remove from selection if selected)
-    * ALT + LMB + Drag: Lasso select (add to selection if not selected or remove from selection if selected)
+    * x Ctrl + LMB + Drag: Rectangle select (add to selection if not selected or remove from selection if selected)
+    * x ALT + LMB + Drag: Lasso select (add to selection if not selected or remove from selection if selected)
     */
 
    // Used to e.g. make a province flash for a short time when it is selected via a script or event
@@ -196,7 +196,7 @@ public static class Selection
       switch (isLasso)
       {
          case true when DragPath.Count > 2:
-            SetLassoLocations(DragPath[^3..].Select(v => new PointF(v.X, v.Y)).ToList());
+            SetLassoLocations(DragPath[^3..].Select(v => new Vector2(v.X, v.Y)).ToArray());
             break;
          case false when DragPath.Count > 1:
             SetRectanglePreviewLocations(DragPath.First(), DragPath.Last());
@@ -247,9 +247,9 @@ public static class Selection
       }
    }
 
-   private static void SetLassoLocations(List<PointF> vector2S)
+   private static void SetLassoLocations(Vector2[] vector2S)
    {
-      var polygon = new Polygon(vector2S.Select(v => new PointF(v.X, v.Y)).ToList());
+      var polygon = new Polygon(vector2S.Select(v => new Vector2(v.X, v.Y)).ToArray(), []);
 
       var sw = new Stopwatch();
       sw.Start();
