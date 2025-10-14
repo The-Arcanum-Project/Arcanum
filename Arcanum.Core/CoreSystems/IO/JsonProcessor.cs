@@ -13,7 +13,7 @@ namespace Arcanum.Core.CoreSystems.IO;
 /// <summary>
 /// Implements IJsonProcessor using System.Text.Json.
 /// </summary>
-internal static class JsonProcessor
+public static class JsonProcessor
 {
    private static readonly JsonSerializerOptions DefaultSerializerOptions;
    private static readonly JsonSerializerOptions DefaultDeserializerOptions;
@@ -23,8 +23,8 @@ internal static class JsonProcessor
       // --- START OF FIX ---
 
       // Create ONE set of default rules that includes your required converters.
-      var defaultSerializationRules = new JsonSerializationRules 
-      { 
+      var defaultSerializationRules = new JsonSerializationRules
+      {
          WriteIndented = true,
          // THIS IS THE CRITICAL CHANGE:
          // Ensure the custom converter is part of the default rules.
@@ -33,7 +33,7 @@ internal static class JsonProcessor
 
       var defaultDeserializationRules = new JsonDeserializationRules
       {
-         PropertyNameCaseInsensitive = true, 
+         PropertyNameCaseInsensitive = true,
          AllowTrailingCommas = true,
          // Also add it here for symmetry and clarity.
          Converters = { new EnumJsonConverter() }
@@ -101,7 +101,7 @@ internal static class JsonProcessor
             continue;
 
          if (options.Converters.Any(c => c.GetType() == converter.GetType()))
-            continue; 
+            continue;
 
          options.Converters.Add(converter);
       }
@@ -132,7 +132,6 @@ internal static class JsonProcessor
       var hasCustomEnumConverter = options.Converters.Any(c => c is EnumJsonConverter) ||
                                    (rules.Converters.Any(c => c is EnumJsonConverter));
 
-
       var stringEnumConverterAdded = false;
       // ONLY add the standard string enum converter if our special one is NOT being used.
       if (!hasCustomEnumConverter && rules.EnumDeserialization != JsonStringEnumConverterOptions.SerializeAsNumber)
@@ -151,9 +150,8 @@ internal static class JsonProcessor
          if (stringEnumConverterAdded && converter is JsonStringEnumConverter)
             continue;
 
-         
          if (options.Converters.Any(c => c.GetType() == converter.GetType()))
-            continue; 
+            continue;
 
          options.Converters.Add(converter);
       }
@@ -207,7 +205,7 @@ internal static class JsonProcessor
          return default;
 
       var options = rules == null
-                       ? DefaultDeserializerOptions 
+                       ? DefaultDeserializerOptions
                        : CreateDeserializerOptions(rules);
       try
       {

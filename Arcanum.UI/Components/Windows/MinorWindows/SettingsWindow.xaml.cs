@@ -1,10 +1,12 @@
 ﻿#define DEBUG_OBJ
 
 using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Arcanum.API.Attributes;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings;
 using Arcanum.UI.Components.UserControls.BaseControls;
@@ -13,6 +15,15 @@ namespace Arcanum.UI.Components.Windows.MinorWindows;
 
 public partial class SettingsWindow
 {
+   private static readonly UIElement LoadingPlaceholder = new TextBlock
+   {
+      Text = "Loading...",
+      HorizontalAlignment = HorizontalAlignment.Center,
+      VerticalAlignment = VerticalAlignment.Center,
+   };
+
+   public static string LastSelectedProperty { get; set; } = string.Empty;
+
    public SettingsWindow()
    {
       InitializeComponent();
@@ -21,9 +32,100 @@ public partial class SettingsWindow
    public static SettingsWindow ShowSettingsWindow()
    {
       var settingsWindow = new SettingsWindow();
-      settingsWindow.InitTabs(settingsWindow.SettingsTabControl, Config.Settings);
+
+      settingsWindow.SettingsTabControl.SelectionChanged += settingsWindow.TabControl_SelectionChanged;
+      CreateTabsLazily(settingsWindow.SettingsTabControl, Config.Settings);
+
       settingsWindow.Show();
+      if (!string.IsNullOrEmpty(LastSelectedProperty))
+         settingsWindow.NavigateToSetting(LastSelectedProperty.Split('/'));
       return settingsWindow;
+   }
+
+   /// <summary>
+   /// Creates the tab structure without generating the expensive content.
+   /// Content is loaded on-demand when a tab is selected.
+   /// </summary>
+   private static void CreateTabsLazily(TabControl tc, object obj)
+   {
+      var settingsProperties = GetPublicProperties(obj);
+      settingsProperties.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+
+      foreach (var property in settingsProperties)
+      {
+         var subMenuName = GetSubMenuName(property);
+         var tabItem = new TabItem
+         {
+            Header = subMenuName ?? property.Name,
+            Content = LoadingPlaceholder,
+            Tag = (property, obj),
+         };
+         tc.Items.Add(tabItem);
+      }
+   }
+
+   /// <summary>
+   /// Event handler that triggers the generation of tab content when a tab is selected for the first time.
+   /// </summary>
+   private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+   {
+      if (e.AddedItems.Count == 0 || e.AddedItems[0] is not TabItem selectedTab)
+         return;
+
+      LoadTabContentIfNeeded(selectedTab);
+   }
+
+   /// <summary>
+   /// Checks if a TabItem's content needs to be loaded and generates it if necessary.
+   /// </summary>
+   private void LoadTabContentIfNeeded(TabItem tabItem)
+   {
+      if (tabItem.Tag is not (PropertyInfo property, { } parentObject))
+         return;
+
+      tabItem.Content = GenerateContentForProperty(property, parentObject);
+      tabItem.Tag = null;
+   }
+
+   /// <summary>
+   /// Contains the original logic to generate either a PropertyGrid or a nested TabControl for a given property.
+   /// </summary>
+   private UIElement GenerateContentForProperty(PropertyInfo property, object parentObject)
+   {
+      var subMenuName = GetSubMenuName(property);
+      var isSubItem = subMenuName != null;
+      var propertyValue = property.GetValue(parentObject)!;
+
+      if (isSubItem)
+         return GenerateSubMenu(propertyValue);
+
+      if (PropertyGrid.InformIfEditorAvailable(parentObject))
+         return new PropertyGrid
+         {
+            LabelWidth = subMenuName != null ? 100 : 250,
+            SelectedObject = propertyValue,
+            Name = property.Name,
+            Margin = new(0),
+            Padding = new(0),
+            ForceInlinePropertyGrid = property.GetCustomAttribute<SettingsForceInlinePropertyGrid>() != null,
+         };
+
+      return new TextBlock { Text = "No editor available for this property." };
+   }
+
+   private TabControl GenerateSubMenu(object subMenuObject)
+   {
+      TabControl tc = new()
+      {
+         Margin = new(0),
+         Padding = new(0),
+         TabStripPlacement = Dock.Left,
+      };
+
+      tc.SelectionChanged += TabControl_SelectionChanged;
+
+      CreateTabsLazily(tc, subMenuObject);
+      return tc;
    }
 
    private void InitTabs(TabControl tc, object obj)
@@ -35,7 +137,7 @@ public partial class SettingsWindow
       {
          var subMenuName = GetSubMenuName(property);
          var isSubItem = subMenuName != null;
-         var tabItem = new TabItem { Header = subMenuName ?? property.Name, };
+         var tabItem = new TabItem { Header = subMenuName ?? property.Name };
 
          if (isSubItem)
             tabItem.Content = GenerateSubMenu(property.GetValue(obj)!);
@@ -55,19 +157,6 @@ public partial class SettingsWindow
       }
    }
 
-   private TabControl GenerateSubMenu(object subMenuObject)
-   {
-      TabControl tc = new()
-      {
-         Margin = new(0),
-         Padding = new(0),
-         TabStripPlacement = Dock.Left,
-      };
-
-      InitTabs(tc, subMenuObject);
-      return tc;
-   }
-
    public void NavigateToSetting(string[] path)
    {
       var tabControl = SettingsTabControl;
@@ -82,6 +171,7 @@ public partial class SettingsWindow
             if (item.Header.ToString()?.Equals(step) ?? false)
             {
                tabControl.SelectedItem = item;
+               LoadTabContentIfNeeded(item);
 
                if (item.Content is TabControl nestedTabControl)
                   tabControl = nestedTabControl;
@@ -159,28 +249,18 @@ public partial class SettingsWindow
    private static PropertyGrid? FindActivePropertyGrid(TabControl rootTabControl)
    {
       while (true)
-      {
-         var selected = rootTabControl.SelectedContent;
-
-         if (selected is PropertyGrid pg)
+         switch (rootTabControl.SelectedContent)
          {
-            if (pg.HasInlinedPropertyGrid)
-               return pg.InlinedPropertyGrid;
-
-            return pg;
+            case PropertyGrid pg:
+               return pg.HasInlinedPropertyGrid ? pg.InlinedPropertyGrid : pg;
+            case TabControl nestedTab:
+               rootTabControl = nestedTab;
+               continue;
+            case TabItem tp:
+               return FindActivePropertyGridFromTabItem(tp.Content);
+            default:
+               return null;
          }
-
-         if (selected is TabControl nestedTab)
-         {
-            rootTabControl = nestedTab;
-            continue;
-         }
-
-         if (selected is TabItem tp)
-            return FindActivePropertyGridFromTabItem(tp.Content);
-
-         return null;
-      }
    }
 
    private static PropertyGrid? FindActivePropertyGridFromTabItem(object? content)
@@ -219,10 +299,15 @@ public partial class SettingsWindow
 
       var customResetMethod = selectedObject.GetType().GetCustomAttribute<CustomResetMethod>();
       if (customResetMethod == null)
-         propGrid.SelectedObject = Activator.CreateInstance(selectedObject.GetType(), true);
+      {
+         // We need to trigger a change event for all properties in the object to propagate the changes to other UI elements.
+         var propsToReset = selectedObject.GetType()
+                                          .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+         foreach (var property in propsToReset)
+            ResetPropertyToDefault(propGrid, property);
+      }
       else
       {
-         // Find the method in the selected object's type
          var methodInfo = selectedObject.GetType()
                                         .GetMethod(customResetMethod.MethodName,
                                                    BindingFlags.Public | BindingFlags.Instance);
@@ -248,5 +333,102 @@ public partial class SettingsWindow
          return;
 
       ResetPropertyToDefault(propGrid.GetActive(), selectedProperty);
+   }
+
+   private void Window_Closed(object sender, EventArgs e)
+   {
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.Settings);
+      LastSelectedProperty = GetCurrentSettingPath(SettingsTabControl);
+   }
+
+   private static string GetCurrentSettingPath(TabControl rootTabControl)
+   {
+      var tabPath = GetCurrentTabPath(rootTabControl);
+      var propertyPath = GetCurrentPropertyPath(rootTabControl);
+      return string.Join("/", tabPath.Concat(propertyPath));
+   }
+
+   private static List<string> GetCurrentTabPath(TabControl rootTabControl)
+   {
+      var path = new List<string>();
+      var currentTabControl = rootTabControl;
+
+      while (true)
+      {
+         if (currentTabControl.SelectedItem is not TabItem selectedTab)
+            break;
+
+         path.Add(selectedTab.Header.ToString() ?? string.Empty);
+
+         if (selectedTab.Content is TabControl nestedTabControl)
+         {
+            currentTabControl = nestedTabControl;
+            continue;
+         }
+
+         break;
+      }
+
+      return path;
+   }
+
+   private static List<string> GetCurrentPropertyPath(TabControl rootTabControl)
+   {
+      var path = new List<string>();
+
+      while (true)
+      {
+         var selected = rootTabControl.SelectedContent;
+
+         if (selected is PropertyGrid pg)
+         {
+            if (pg.HasInlinedPropertyGrid)
+               path.AddRange(GetCurrentPropertyPathFromPropertyGrid(pg.InlinedPropertyGrid));
+            else if (pg.SelectedPropertyItem != null)
+               path.Add(pg.SelectedPropertyItem.PropertyInfo.Name);
+
+            return path;
+         }
+
+         if (selected is TabControl nestedTab)
+         {
+            rootTabControl = nestedTab;
+            continue;
+         }
+
+         if (selected is TabItem tp)
+         {
+            path.Add(tp.Header.ToString() ?? string.Empty);
+            var nestedPath = GetCurrentPropertyPathFromTabItem(tp.Content);
+            path.AddRange(nestedPath);
+         }
+
+         return path;
+      }
+   }
+
+   private static List<string> GetCurrentPropertyPathFromTabItem(object? content)
+   {
+      return content switch
+      {
+         PropertyGrid pg => GetCurrentPropertyPathFromPropertyGrid(pg),
+         TabControl tc => GetCurrentPropertyPath(tc),
+         _ => [],
+      };
+   }
+
+   private static List<string> GetCurrentPropertyPathFromPropertyGrid(PropertyGrid? pg)
+   {
+      if (pg == null)
+         return [];
+
+      var path = new List<string>();
+      if (pg.SelectedPropertyItem != null)
+         path.Add(pg.SelectedPropertyItem.PropertyInfo.Name);
+
+      if (pg.HasInlinedPropertyGrid)
+         path.AddRange(GetCurrentPropertyPathFromPropertyGrid(pg.InlinedPropertyGrid));
+
+      return path;
    }
 }

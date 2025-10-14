@@ -9,7 +9,9 @@
                          Height = "700"
                          Width = "800"
                          Background = "{StaticResource DefaultBackColorBrush}"
-                         WindowStartupLocation = "CenterScreen">
+                         WindowStartupLocation = "CenterScreen"
+                         Closed = "Window_Closed"
+                         Topmost = "True">
 
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
