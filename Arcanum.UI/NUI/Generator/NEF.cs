@@ -632,10 +632,12 @@ public static class NEF
          {
             FontSize = fontSize, FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
          },
+         Height = height,
+         Margin = new(0),
       };
-      jomColView.ColorTextBlock.SetBinding(TextBlock.TextProperty, binding);
-      jomColView.Height = height;
-      jomColView.Margin = new(0);
+      binding.Mode = BindingMode.TwoWay;
+      jomColView.SetBinding(JominiColorView.ColorProperty, binding);
+
       return jomColView;
    }
 

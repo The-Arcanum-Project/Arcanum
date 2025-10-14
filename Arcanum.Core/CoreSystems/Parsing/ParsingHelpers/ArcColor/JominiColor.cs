@@ -36,6 +36,13 @@ public abstract record JominiColor : IEmpty<JominiColor>
    {
    }
 
+   public sealed record MediaColor(Color Color) : JominiColor
+   {
+      public override Color ToMediaColor() => Color;
+      public override JominiColorType Type => JominiColorType.Rgb;
+      public override string ToString() => $"rgb {{ {Color.R} {Color.G} {Color.B} }}";
+   }
+
    public sealed record ColorKey(string Key) : JominiColor
    {
       public override Color ToMediaColor() => ColorResolver.Instance.Resolve(Key).ToMediaColor();

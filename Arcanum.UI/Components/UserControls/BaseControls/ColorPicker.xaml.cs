@@ -3,12 +3,22 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
 public partial class ColorPicker
 {
-   private ColorPickerViewModel? ViewModel => DataContext as ColorPickerViewModel;
+   public ColorPickerViewModel? ViewModel => DataContext as ColorPickerViewModel;
+   public Color SelectedColor
+   {
+      get => ViewModel?.SelectedColor ?? Colors.Red;
+      set
+      {
+         if (ViewModel != null)
+            ViewModel.SelectedColor = value;
+      }
+   }
 
    public ColorPicker()
    {
