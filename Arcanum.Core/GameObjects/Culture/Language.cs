@@ -203,6 +203,24 @@ public partial class Language : IEu5Object<Language>
    [ParseAs("dialects", isEmbedded: true, itemNodeType: AstNodeType.BlockNode)]
    public ObservableRangeCollection<Language> Dialects { get; set; } = [];
 
+   [SaveAs]
+   [DefaultValue("")]
+   [Description("The language to fall back to if no other dialects are available.")]
+   [ParseAs("fallback")]
+   public string FallbackDialect { get; set; } = string.Empty; //TODO fix this to be embedded object
+
+   [SaveAs]
+   [DefaultValue("")]
+   [Description("A prefix dependant on the origin location of the character, used for ancient names")]
+   [ParseAs("location_prefix_ancient")]
+   public string LocationPrefixAncient { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue("")]
+   [Description("A prefix dependant on the origin location of the character, used for ancient names when the character name starts with a vowel")]
+   [ParseAs("location_prefix_ancient_vowel")]
+   public string LocationPrefixAncientVowel { get; set; } = string.Empty;
+
    #endregion
 
 #pragma warning disable AGS004

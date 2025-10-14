@@ -46,7 +46,10 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          ParsingMaster.ParsingMaster.Instance.Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
                                                                                i => polygons[i] =
-                                                                                     ParsingPolygons[i].Tesselate());
+                                                                                     ParsingPolygons[i].Tesselate(),
+                                                                               ParsingMaster.ParsingMaster.Instance
+                                                                                 .Scheduler.AvailableHeavyWorkers -
+                                                                               2);
 
          lock (this)
          {

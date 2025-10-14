@@ -5,7 +5,6 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
@@ -172,27 +171,36 @@ public class ParsingMaster
                                                                        ParsingStepsDone++;
                                                                        StepDurations.Add(wrapper.Duration);
                                                                        ParsingStepsChanged?.Invoke(this, step);
+                                                                       TotalProgressChanged?.Invoke(this,
+                                                                        ParsingStepsDone /
+                                                                        (double)ParsingSteps *
+                                                                        100.0);
                                                                     }
 
                                                                  return result;
                                                               },
                                                               cts.Token));
             else
-               currentBatchTasks.Add(Scheduler.QueueLightWork(() =>
-                                                              {
-                                                                 var wrapper = step.GetParsingStep();
-                                                                 var result = wrapper.Execute();
-                                                                 lock (lockObj)
-                                                                    if (result)
-                                                                    {
-                                                                       ParsingStepsDone++;
-                                                                       StepDurations.Add(wrapper.Duration);
-                                                                       ParsingStepsChanged?.Invoke(this, step);
-                                                                    }
+               currentBatchTasks.Add(Scheduler.QueueWorkAsHeavyIfAvailable(() =>
+                                                                           {
+                                                                              var wrapper = step.GetParsingStep();
+                                                                              var result = wrapper.Execute();
+                                                                              lock (lockObj)
+                                                                                 if (result)
+                                                                                 {
+                                                                                    ParsingStepsDone++;
+                                                                                    StepDurations.Add(wrapper.Duration);
+                                                                                    ParsingStepsChanged?.Invoke(this,
+                                                                                     step);
+                                                                                    TotalProgressChanged?.Invoke(this,
+                                                                                     ParsingStepsDone /
+                                                                                     (double)ParsingSteps *
+                                                                                     100.0);
+                                                                                 }
 
-                                                                 return result;
-                                                              },
-                                                              cts.Token));
+                                                                              return result;
+                                                                           },
+                                                                           cts.Token));
          }
 
          while (currentBatchTasks.Count > 0)
@@ -207,8 +215,6 @@ public class ParsingMaster
             await cts.CancelAsync();
             return false;
          }
-
-         TotalProgressChanged?.Invoke(this, ParsingStepsDone / (double)ParsingSteps * 100.0);
       }
 
       Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);

@@ -135,6 +135,11 @@ public sealed class Scheduler : IDisposable
       return Task.Run(() => Parallel.For(0, count, options, action));
    }
 
+   public Task<T> QueueWorkAsHeavyIfAvailable<T>(Func<T> work, CancellationToken ctsToken)
+   {
+      return AvailableHeavyWorkers > 0 ? QueueHeavyWork(work, ctsToken) : QueueLightWork(work, ctsToken);
+   }
+
    /// <summary>
    /// Queues a heavy, CPU-bound task with a return value.
    /// </summary>

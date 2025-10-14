@@ -28,6 +28,9 @@ public partial class Dynasty : IEu5Object<Dynasty>
 
       [EnumAgsData("patronym")]
       Patronym,
+
+      [EnumAgsData("location_ancient")]
+      LocationAncient,
    }
 
    #region Nexus Properties

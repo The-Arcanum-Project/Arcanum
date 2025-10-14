@@ -26,6 +26,12 @@ public partial class Age : IEu5Object<Age>
 
    [SaveAs]
    [DefaultValue(0)]
+   [ParseAs("victory_card")]
+   [Description("The factor for victory cards during this age.")]
+   public int VictoryCardFactor { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
    [ParseAs("year")]
    [Description("What year the age starts in.")]
    public int Year { get; set; }

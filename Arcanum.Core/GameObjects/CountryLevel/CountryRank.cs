@@ -19,6 +19,12 @@ public partial class CountryRank : IEu5Object<CountryRank>
    #region Nexus Properties
 
    [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("victory_card")]
+   [Description("The factor for victory cards during this age.")]
+   public bool VictoryCardFactor { get; set; }
+
+   [SaveAs]
    [ParseAs("color")]
    [DefaultValue(null)]
    [Description("The color associated with this CountryRank.")]
