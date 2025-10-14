@@ -30,7 +30,12 @@ public class ExampleRenderer : ID3DRenderer
     private ID3D11InputLayout? _inputLayout;
     private ID3D11Buffer? _vertexBuffer;
     private uint _vertexCount;
-    
+
+    public void Resize(int newWidth, int newHeight)
+    {
+        EndResize(newWidth, newHeight);
+    }
+
     public void Initialize(IntPtr hwnd, int width, int height)
     {
         if (width <= 0 || height <= 0)
@@ -164,7 +169,7 @@ public class ExampleRenderer : ID3DRenderer
     
     
     
-    public void Resize(int width, int height)
+    public void EndResize(int width, int height)
     {
         if (ignoreResize) return;
         
@@ -178,7 +183,7 @@ public class ExampleRenderer : ID3DRenderer
         _renderTargetView?.Dispose();
         _context.Flush(); // Ensure all commands are executed before resizing
 
-        // 2. Resize the swap chain buffers
+        // 2. EndResize the swap chain buffers
         _swapChain.ResizeBuffers(1, (uint)width, (uint)height, Format.R8G8B8A8_UNorm, SwapChainFlags.None);
 
         // 3. Recreate the render target view from the new back buffer

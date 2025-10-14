@@ -7,11 +7,12 @@ namespace Arcanum.UI.DirectX;
 
 public interface ID3DRenderer : IDisposable
 {
+    void EndResize(int newWidth, int newHeight);
+    
     void Resize(int newWidth, int newHeight);
+    
     void Initialize(IntPtr hwnd, int newWidth, int newHeight);
     void Render();
-
-    public void SetupEvents(Border parent);
     
     protected static ReadOnlyMemory<byte> CompileBytecode(string shaderName, string entryPoint, string profile)
     {

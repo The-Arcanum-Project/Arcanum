@@ -2,10 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
-using Arcanum.Core.GlobalStates;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -31,10 +28,10 @@ public struct Constants
    public Matrix4x4 WorldViewProjection;
 }
 
-public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRenderer
+public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors, float imageAspectRatio) : ID3DRenderer
 {
    private static readonly Color4 ClearColor;
-
+   
    private ID3D11Device? _device;
    private ID3D11DeviceContext? _context;
    private IDXGISwapChain? _swapChain;
@@ -51,18 +48,13 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
    private ID3D11Buffer? _colorLookupBuffer;
    private ID3D11ShaderResourceView? _colorLookupView;
 
-   private VertexPositionId2D[]? _vertices;
-   private Color4[] _polygonColors = new Color4[polygons.Length];
-
-   private Vector2 _pan = new(0.5f, 0.5f);
-   private float _zoom = 1.75f;
-   private Point _lastMousePosition;
-   private bool _isPanning;
-
-   private readonly float _imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
-
-   private Border? _parent;
+   private Color4[] _polygonColors = initColors;
+   
+   public Vector2 Pan = new(0.5f, 0.5f);
+   public float Zoom = 1.75f;
+   
    private uint _vertexCount;
+   private VertexPositionId2D[] _vertices = vertices;
 
    static LocationRenderer()
    {
@@ -75,29 +67,14 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
          ClearColor = new(1f, 0f, 1f);
       }
    }
-
-   public static async Task<LocationRenderer> CreateAsync(Polygon[] polygons, (int, int) imageSize)
+   
+   public static VertexPositionId2D[] CreateVertices(Polygon[] polygons, (int, int) imageSize)
    {
-      var renderer = new LocationRenderer(polygons, imageSize);
-
-      // Generate vertices asynchronously
-      renderer._vertices = await Task.Run(() => renderer.GetVertices().ToArray());
-
-      return renderer;
-   }
-
-   private List<VertexPositionId2D> GetVertices()
-   {
+      var imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
       var vertices = new List<VertexPositionId2D>(3 * polygons.Length);
-      var random = new Random(0);
       for (var i = 0; i < polygons.Length; i++)
       {
          var polygon = polygons[i];
-         // Generate a random color for the polygon
-         _polygonColors[i] = new(polygon.Color);
-         //_polygonColors[i] = new(255,255,255, 100);
-
-         // Triangulate the polygon using a simple fan method
          var indices = polygon.Indices;
          var triangleVertices = polygon.Vertices;
          for (var j = 0; j < indices.Length; j += 3)
@@ -105,24 +82,25 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
             var v0 = triangleVertices[indices[j]];
             var v1 = triangleVertices[indices[j + 1]];
             var v2 = triangleVertices[indices[j + 2]];
-            vertices.Add(new(new(v0.X / imageSize.Item1, _imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
-                             (uint)i));
-            vertices.Add(new(new(v1.X / imageSize.Item1, _imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
-                             (uint)i));
-            vertices.Add(new(new(v2.X / imageSize.Item1, _imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
-                             (uint)i));
+            vertices.Add(new(new(v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
+               (uint)i));
+            vertices.Add(new(new(v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
+               (uint)i));
+            vertices.Add(new(new(v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
+               (uint)i));
          }
       }
 
-      return vertices;
+      return vertices.ToArray();
+   }
+
+   public void Resize(int newWidth, int newHeight)
+   {
+      SetOrthographicProjection(newWidth, newHeight);
    }
 
    public void Initialize(IntPtr hwnd, int width, int height)
    {
-      if (_vertices == null)
-         throw new
-            InvalidOperationException("Vertices not initialized. Call CreateAsync to initialize vertices before calling Initialize.");
-
       if (width <= 0 || height <= 0)
       {
          return;
@@ -140,15 +118,15 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       };
 
       D3D11.D3D11CreateDeviceAndSwapChain(null,
-                                          DriverType.Hardware,
-                                          DeviceCreationFlags.None,
-                                          [FeatureLevel.Level_11_0],
-                                          swapChainDesc,
-                                          out _swapChain!,
-                                          out _device!,
-                                          out _,
-                                          out _context!)
-           .CheckError();
+            DriverType.Hardware,
+            DeviceCreationFlags.None,
+            [FeatureLevel.Level_11_0],
+            swapChainDesc,
+            out _swapChain!,
+            out _device!,
+            out _,
+            out _context!)
+         .CheckError();
 
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
       {
@@ -167,9 +145,9 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       _pixelShader = _device.CreatePixelShader(pixelShaderByteCode.Span);
       _inputLayout = _device.CreateInputLayout(inputElementDescs, vertexShaderByteCode.Span);
       _constantBuffer = _device.CreateBuffer(new((uint)Unsafe.SizeOf<Constants>(),
-                                                 BindFlags.ConstantBuffer,
-                                                 ResourceUsage.Dynamic,
-                                                 CpuAccessFlags.Write));
+         BindFlags.ConstantBuffer,
+         ResourceUsage.Dynamic,
+         CpuAccessFlags.Write));
       _vertexBuffer = _device.CreateBuffer(_vertices.ToArray(), BindFlags.VertexBuffer);
       var colorBufferDesc = new BufferDescription
       {
@@ -197,8 +175,8 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       UpdateColors(_polygonColors);
 
       _vertexCount = (uint)_vertices.Length;
-      _vertices = null!;
       _polygonColors = null!;
+      _vertices = null!;
 
       _context.RSSetViewport(new(width, height));
       _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
@@ -209,70 +187,35 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       _context.IASetInputLayout(_inputLayout);
       _context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionId2D.SizeInBytes);
       _context.OMSetBlendState(null);
+      
+      SetOrthographicProjection(width, height);
    }
 
    public void Render()
    {
-      unsafe
-      {
-         if (_renderTargetView == null || _context == null || _swapChain == null || _parent == null)
-            return;
+      if (_renderTargetView == null || _context == null || _swapChain == null)
+         return;
+      
+      _context.ClearRenderTargetView(_renderTargetView, ClearColor);
 
-         var aspectRatio = (float)(_parent.ActualWidth / _parent.ActualHeight);
+      _context!.OMSetRenderTargets(_renderTargetView);
+      _context.Draw(_vertexCount, 0);
+      _swapChain!.Present(1, PresentFlags.None);
+   }
 
-         var view = Matrix4x4.CreateTranslation(-1 * _pan.X, (_pan.Y - 1) * _imageAspectRatio, 0);
-         var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / _zoom, 2.0f / _zoom, -1.0f, 1.0f);
-         _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
-
+   public unsafe void SetOrthographicProjection(float width, float height)
+   {
+      var aspectRatio = width / height;
+      var view = Matrix4x4.CreateTranslation(-1 * Pan.X, (Pan.Y - 1) * imageAspectRatio, 0);
+      var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / Zoom, 2.0f / Zoom, -1.0f, 1.0f);
+      _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
+      if (_context == null) return;
          var mapped = _context.Map(_constantBuffer!, MapMode.WriteDiscard);
          Unsafe.Write(mapped.DataPointer.ToPointer(), _constants);
          _context.Unmap(_constantBuffer!);
-
-         _context.ClearRenderTargetView(_renderTargetView, ClearColor);
-
-         _context!.OMSetRenderTargets(_renderTargetView);
-         _context.Draw(_vertexCount, 0);
-         _swapChain!.Present(1, PresentFlags.None);
-      }
    }
-
-   public Vector2 ScreenToMap(Vector2 screenPoint)
-   {
-      var width = (float)_parent!.ActualWidth;
-      var height = (float)_parent.ActualHeight;
-      var aspectRatio = width / height;
-
-      var ndcX = screenPoint.X / width * 2.0f - 1.0f;
-      var ndcY = 1.0f - screenPoint.Y / height * 2.0f;
-
-      var worldX = ndcX * (aspectRatio / _zoom);
-      var worldY = ndcY * (1.0f / _zoom);
-
-      worldX += _pan.X;
-      worldY += (1f - _pan.Y) * _imageAspectRatio;
-
-      var mapX = worldX;
-      var mapY = 1.0f - worldY / _imageAspectRatio;
-
-      return new(mapX, mapY);
-   }
-
-   public Vector2 ScreenToMap(Point screenPoint)
-   {
-      return ScreenToMap(new Vector2((float)screenPoint.X, (float)screenPoint.Y));
-   }
-
-   public void SetupEvents(Border parent)
-   {
-      parent.MouseWheel += MouseWheel;
-      parent.MouseLeftButtonDown += MouseLeftButtonDown;
-      parent.MouseLeftButtonUp += MouseLeftButtonUp;
-      parent.MouseMove += MouseMove;
-      parent.MouseRightButtonDown += OnMouseRightButtonDown;
-      _parent = parent;
-   }
-
-   public void Resize(int width, int height)
+   
+   public void EndResize(int width, int height)
    {
       // Guard against invalid size or uninitialized state
       if (width <= 0 || height <= 0 || _context == null || _swapChain == null || _device == null)
@@ -284,7 +227,7 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       _renderTargetView?.Dispose();
       _context.Flush(); // Ensure all commands are executed before resizing
 
-      // 2. Resize the swap chain buffers
+      // 2. EndResize the swap chain buffers
       _swapChain.ResizeBuffers(1, (uint)width, (uint)height, Format.R8G8B8A8_UNorm, SwapChainFlags.None);
 
       // 3. Recreate the render target view from the new back buffer
@@ -295,98 +238,6 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
 
       // 4. Set the new viewport
       _context.RSSetViewport(new(width, height));
-   }
-
-   private void MouseWheel(object sender, MouseWheelEventArgs e)
-   {
-      var pos = ScreenToMap(e.GetPosition(_parent));
-
-      var zoomFactor = e.Delta > 0 ? 1.2f : 1 / 1.2f;
-
-      var newZoom = _zoom * zoomFactor;
-
-      if (newZoom < Config.Settings.MapSettings.MinZoomLevel || newZoom > Config.Settings.MapSettings.MaxZoomLevel)
-         if (_zoom < Config.Settings.MapSettings.MinZoomLevel || _zoom > Config.Settings.MapSettings.MaxZoomLevel)
-            newZoom = Math.Clamp(_zoom,
-                                 Config.Settings.MapSettings.MinZoomLevel,
-                                 Config.Settings.MapSettings.MaxZoomLevel);
-         else
-            return;
-
-      _zoom = newZoom;
-
-      var delta = new Vector2(pos.X - _pan.X, pos.Y - _pan.Y);
-
-      delta /= zoomFactor;
-
-      var newPan = pos - delta;
-      PanTo(newPan.X, newPan.Y);
-
-      Render();
-   }
-
-   
-   
-   private void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-   {
-      if (sender is not IInputElement surface)
-         return;
-      
-      _isPanning = true;
-      _lastMousePosition = e.GetPosition(surface);
-      surface.CaptureMouse();
-   }
-
-   private void MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-   {
-      if (sender is not IInputElement surface)
-         return;
-      if (_isPanning)
-      {
-         Mouse.OverrideCursor = null;
-         _isPanning = false;
-      }
-
-      surface.ReleaseMouseCapture();
-   }
-
-   private void PanTo(float x, float y)
-   {
-      _pan.X = Math.Clamp(x, -0.1f, 1.1f);
-      _pan.Y = Math.Clamp(y, -0.1f, 1.1f);
-   }
-
-   private void MouseMove(object sender, MouseEventArgs e)
-   {
-      if (!_isPanning || sender is not FrameworkElement surface)
-         return;
-      
-      Mouse.OverrideCursor = Cursors.ScrollAll;
-      
-      var currentMousePosition = e.GetPosition(surface);
-      var delta = currentMousePosition - _lastMousePosition;
-
-      var aspectRatio = (float)(_parent!.ActualWidth / _parent.ActualHeight);
-
-      var x = _pan.X - (float)(delta.X * 2 / (surface.ActualWidth * _zoom)) * aspectRatio;
-      var y = _pan.Y - (float)(delta.Y * 2 / (surface.ActualHeight * _zoom)) / _imageAspectRatio;
-
-      PanTo(x, y);
-
-      _lastMousePosition = currentMousePosition;
-      Render();
-   }
-
-   private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-   {
-      var list = new Color4[polygons.Length];
-      var rand = new Random();
-      for (var i = 0; i < polygons.Length; i++)
-      {
-         list[i] = new(rand.NextSingle(), rand.NextSingle(), rand.NextSingle());
-      }
-
-      UpdateColors(list);
    }
 
    private void UpdateColors(Color4[] newColors)

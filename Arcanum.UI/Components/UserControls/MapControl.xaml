@@ -22,9 +22,8 @@
         <Border x:Name="HwndHostContainer"
                 Background="{StaticResource DefaultBackColorBrush}"
                 BorderBrush="{StaticResource DefaultBorderColorBrush}"
-                BorderThickness="1"
-                Margin="5"
-                MouseRightButtonDown="HwndHostContainer_OnMouseRightButtonDown">
+                BorderThickness="0"
+                Margin="0">
             <!-- D3D11HwndHost will be added here from code-behind -->
             <Border.ContextMenu>
                 <ContextMenu>

@@ -424,7 +424,10 @@
         </GridSplitter>
 
         <uc:MapControl x:Name = "MainMap"
-                       Grid.Column = "2">
+                       Grid.Column = "2"
+                       Margin="5"
+                       BorderThickness="2"
+                       BorderBrush="{StaticResource DefaultBorderColorBrush}">
         </uc:MapControl>
 
         <GridSplitter Grid.Column = "3"

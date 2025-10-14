@@ -141,7 +141,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       lock (mapDataParser)
          if (mapDataParser.finishedTesselation)
-            MainMap.SetupRenderingAsync(mapDataParser.polygons, mapDataParser.mapSize);
+            _ = MainMap.SetupRenderer(mapDataParser.polygons, mapDataParser.mapSize);
 
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 

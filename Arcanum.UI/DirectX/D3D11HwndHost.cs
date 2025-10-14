@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Arcanum.UI.DirectX;
@@ -12,16 +10,15 @@ public partial class D3D11HwndHost : HwndHost
 {
     private readonly ID3DRenderer _renderer;
     private IntPtr _hwnd;
-    private readonly Border _parent;
+    private readonly Border _hwndHostContainer;
 
     private readonly DispatcherTimer _resizeTimer;
     private SizeChangedInfo _currentSizeInfo = null!;
 
     public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer)
     {
+        _hwndHostContainer = hwndHostContainer;
         _renderer = renderer;
-        _parent = hwndHostContainer;
-        _renderer.SetupEvents(hwndHostContainer);
         Unloaded += OnUnloaded;
         Loaded += OnLoaded;
         _resizeTimer = new()
@@ -33,7 +30,7 @@ public partial class D3D11HwndHost : HwndHost
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _renderer.Initialize(_hwnd, (int)_parent.ActualWidth, (int)_parent.ActualHeight);
+        _renderer.Initialize(_hwnd, (int)_hwndHostContainer.ActualWidth, (int)_hwndHostContainer.ActualHeight);
     }
 
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
@@ -45,20 +42,19 @@ public partial class D3D11HwndHost : HwndHost
             hwndParent.Handle,
             IntPtr.Zero, IntPtr.Zero, 0);
      
-        return new HandleRef(this, _hwnd);
+        return new(this, _hwnd);
     }
 
-    private void OnRendering(object? sender, EventArgs e)
+    public void Invalidate()
     {
-        // TODO @MelCo: Add modes for rendering on demand vs continuous
-        //_renderer.Render();
+        _renderer.Render();
     }
 
     private void ResizeRenderer(object? sender, EventArgs eventArgs)
     {
         if (_currentSizeInfo.NewSize is { Width: > 0, Height: > 0 })
         {
-            _renderer.Resize((int)_currentSizeInfo.NewSize.Width, (int)_currentSizeInfo.NewSize.Height);
+            _renderer.EndResize((int)_currentSizeInfo.NewSize.Width, (int)_currentSizeInfo.NewSize.Height);
             _renderer.Render();
         }
         _resizeTimer.Stop();
@@ -67,7 +63,6 @@ public partial class D3D11HwndHost : HwndHost
     protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
     {
         base.OnRenderSizeChanged(sizeInfo);
-
         _currentSizeInfo = sizeInfo;
 
         var newWidth = (int)sizeInfo.NewSize.Width;
@@ -77,7 +72,8 @@ public partial class D3D11HwndHost : HwndHost
         if (newWidth <= 0 || newHeight <= 0)
             return;
         
-        // Start debounce timer
+        _renderer.Resize(newWidth, newHeight);
+        // Start the debouncing timer
         _resizeTimer.Stop();
         _resizeTimer.Start();
     }
