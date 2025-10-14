@@ -411,8 +411,9 @@
                 BorderThickness = "2"
                 CornerRadius = "8"
                 Margin = "0, 0, 2, 0">
-            <ContentPresenter x:Name = "UiPresenter">
-            </ContentPresenter>
+            <ScrollViewer>
+                <ContentPresenter x:Name = "UiPresenter" />
+            </ScrollViewer>
 
         </Border>
 

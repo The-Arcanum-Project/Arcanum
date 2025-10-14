@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -292,7 +293,7 @@ public static class Eu5UiGen
                            rowIndex,
                            isMarked: isMarked,
                            embeddedPropertyTargets: parentProp,
-                           leftMargin: 6,
+                           leftMargin: 17,
                            allowReadOnlyEditing: allowReadOnlyEditing);
          return;
       }
@@ -320,7 +321,7 @@ public static class Eu5UiGen
          return;
       }
 
-      var margin = 8;
+      var margin = 19;
       var collectionGrid = ControlFactory.GetCollectionGrid();
       SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked, navH);
       GetCollectionPreview(navH,
@@ -833,7 +834,7 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static Ellipse GetPropertyMarker(IEu5Object primary, Enum nxProp)
+   private static Image GetPropertyMarker(IEu5Object primary, Enum nxProp)
    {
       var value = Nx.ForceGetAs<object>(primary, nxProp);
       var defaultValue = primary.GetDefaultValue(nxProp);
@@ -848,20 +849,27 @@ public static class Eu5UiGen
           value is IList { Count: 0 })
          isSaved = true;
 
-      var ellipse = new Ellipse
+      var image = new Image
       {
-         Width = 4,
-         Height = 4,
+         Width = 16,
+         Height = 16,
          VerticalAlignment = VerticalAlignment.Center,
          HorizontalAlignment = HorizontalAlignment.Left,
-         Margin = new(-2, 0, 0, 0),
-         Fill = isSaved ? Brushes.Green : Brushes.Transparent,
-         ToolTip = isSaved
-                      ? $"{nxProp} is set to a non-default value."
-                      : $"{nxProp} is set to its default value.",
+         Margin = new(0, 0, 0, 0),
+         SnapsToDevicePixels = true,
       };
 
-      return ellipse;
+      var uri = isSaved
+                   ? "/Arcanum_UI;component/Assets/Icons/16x16/DontSaveToFile16x16.png"
+                   : "/Arcanum_UI;component/Assets/Icons/16x16/SaveToFile16x16.png";
+
+      image.ToolTip = isSaved
+                         ? "This property is set to a NON-default value and will be saved to file."
+                         : "This property is set to its default value and will NOT be saved to file.";
+
+      image.Source = new BitmapImage(new(uri, UriKind.RelativeOrAbsolute));
+
+      return image;
    }
 
    private static void SetTooltipIsAny(IAgs iAgs, Enum nxProp, UIElement element)
