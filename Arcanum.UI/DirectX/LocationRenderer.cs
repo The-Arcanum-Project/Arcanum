@@ -148,7 +148,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
          BindFlags.ConstantBuffer,
          ResourceUsage.Dynamic,
          CpuAccessFlags.Write));
-      _vertexBuffer = _device.CreateBuffer(_vertices.ToArray(), BindFlags.VertexBuffer);
+      _vertexBuffer = _device.CreateBuffer(_vertices, BindFlags.VertexBuffer);
       var colorBufferDesc = new BufferDescription
       {
          // Total size of the buffer in bytes.
