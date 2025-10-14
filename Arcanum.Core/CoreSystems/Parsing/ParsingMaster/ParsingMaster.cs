@@ -1,13 +1,15 @@
-﻿//# define DEBUG_PARSING_STEP_TIMES
+﻿// # define DEBUG_PARSING_STEP_TIMES
 
 using System.Diagnostics;
+#if DEBUG_PARSING_STEP_TIMES
+using System.Globalization;
+#endif
 using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
@@ -21,8 +23,6 @@ public class ParsingMaster
    [UsedImplicitly]
    public EventHandler<FileLoadingService>? ParsingStepsChanged;
 
-   public EventHandler<(double percentage, int doneSteps)>? StepProcessChanged;
-   public EventHandler<TimeSpan>? StepDurationEstimationChanged;
    public EventHandler<double>? TotalProgressChanged;
 
    private static HashSet<FileLoadingService> _sortedLoadingSteps = [];
@@ -60,27 +60,6 @@ public class ParsingMaster
       }
 
       return true;
-   }
-
-   public static List<double> GetStepWeightsByFileSize(FileDescriptor descriptor)
-   {
-      ArgumentNullException.ThrowIfNull(descriptor);
-      if (_sortedLoadingSteps.Count == 0)
-         throw new InvalidOperationException("Check is only available after calling ExecuteAllParsingSteps() first.");
-
-      List<long> fileSizes = [];
-      fileSizes.AddRange(descriptor.Files.Select(fileObj => fileObj.Path.FullPath)
-                                   .Select(filePath => new FileInfo(filePath))
-                                   .Select(fileInfo => fileInfo.Exists ? fileInfo.Length : 0));
-
-      if (fileSizes.Count == 0)
-         return [];
-
-      var totalSize = fileSizes.Sum();
-      if (totalSize == 0)
-         return [];
-
-      return fileSizes.Select(size => size / (double)totalSize).ToList();
    }
 
    /// <summary>
@@ -174,9 +153,9 @@ public class ParsingMaster
                                                                        StepDurations.Add(wrapper.Duration);
                                                                        ParsingStepsChanged?.Invoke(this, step);
                                                                        TotalProgressChanged?.Invoke(this,
-                                                                        ParsingStepsDone /
-                                                                        (double)ParsingSteps *
-                                                                        100.0);
+                                                                           ParsingStepsDone /
+                                                                           (double)ParsingSteps *
+                                                                           100.0);
                                                                     }
 
                                                                  step.LastTotalLoadingDuration = sw.Elapsed;
@@ -196,11 +175,11 @@ public class ParsingMaster
                                                                                     ParsingStepsDone++;
                                                                                     StepDurations.Add(wrapper.Duration);
                                                                                     ParsingStepsChanged?.Invoke(this,
-                                                                                     step);
+                                                                                        step);
                                                                                     TotalProgressChanged?.Invoke(this,
-                                                                                     ParsingStepsDone /
-                                                                                     (double)ParsingSteps *
-                                                                                     100.0);
+                                                                                        ParsingStepsDone /
+                                                                                        (double)ParsingSteps *
+                                                                                        100.0);
                                                                                  }
 
                                                                               step.LastTotalLoadingDuration =

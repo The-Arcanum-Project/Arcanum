@@ -62,7 +62,6 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    private string _stepName = "Step: Initializing...";
    private TimeSpan _estimatedTime = TimeSpan.Zero;
-   private double _subProgressPercentage;
    private double _totalProgressPercentage;
 
    public async Task<bool> StartLoading()
@@ -73,21 +72,9 @@ public partial class LoadingScreen : INotifyPropertyChanged
          FormatLoadingText();
       };
 
-      ParsingMaster.Instance.StepProcessChanged += (_, args) =>
-      {
-         _subProgressPercentage = args.percentage;
-         FormatLoadingText();
-      };
-
       ParsingMaster.Instance.TotalProgressChanged += (_, percentage) =>
       {
          _totalProgressPercentage = percentage;
-         FormatLoadingText();
-      };
-
-      ParsingMaster.Instance.StepDurationEstimationChanged += (_, estimatedTime) =>
-      {
-         _estimatedTime = estimatedTime;
          FormatLoadingText();
       };
 
@@ -98,10 +85,7 @@ public partial class LoadingScreen : INotifyPropertyChanged
    {
       // First, construct the string. This can be done on any thread.
       var newText =
-         $"{_stepName} {_totalProgressPercentage:F0}% ({ParsingMaster.Instance.ParsingStepsDone}/{ParsingMaster.Instance.ParsingSteps})" +
-         (_estimatedTime != TimeSpan.Zero
-             ? $" Estimated time: {_estimatedTime.TotalSeconds:F2} s ({_subProgressPercentage:F0}% done)"
-             : "");
+         $"{_stepName} {_totalProgressPercentage:F0}% ({ParsingMaster.Instance.ParsingStepsDone}/{ParsingMaster.Instance.ParsingSteps})";
 
       // Now, use the Dispatcher to set the property on the UI thread.
       // This is the crucial part.

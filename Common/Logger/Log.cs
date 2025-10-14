@@ -11,6 +11,8 @@ public enum LogLevel
 
 public static class ArcLog
 {
+   static DateTime _startTime = DateTime.Now;
+
    // We want to log messages but in this format: [<Source>] [<Level>] <Message> 
    // The Source should be either a 3-letter or a word which will be converted to 3-letter
    // The Level should be one of the following: INF, WRN, ERR, DBG, CRT
@@ -36,7 +38,12 @@ public static class ArcLog
 
    private static void Log(string str)
    {
-      Console.WriteLine(str);
+      Console.WriteLine($"{GetTimestamp()} - {str}");
+   }
+
+   private static string GetTimestamp()
+   {
+      return (DateTime.Now - _startTime).ToString(@"mm\:ss\.ff");
    }
 
    private static string GetSourceString(string source)
