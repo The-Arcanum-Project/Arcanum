@@ -1,7 +1,6 @@
-﻿# define DEBUG_PARSING_STEP_TIMES
+﻿//# define DEBUG_PARSING_STEP_TIMES
 
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
@@ -33,8 +32,6 @@ public class ParsingMaster
    public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
-
-   public Scheduler Scheduler = new();
 
    public static List<(string, TimeSpan)> StepDurationsByName => _sortedLoadingSteps
                                                                 .Select(loading

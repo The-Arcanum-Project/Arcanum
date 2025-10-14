@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.Logger;
 using Common.UI;
@@ -37,31 +38,28 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          }
       }
 
-      Task.Run(() =>
-      {
-         // var maxThreads = Math.Max(1, (Environment.ProcessorCount / 2));
-         //
-         // var options = new ParallelOptions { MaxDegreeOfParallelism = maxThreads, };
-         //
-         // Parallel.For(0, ParsingPolygons.Count, options, i => { polygons[i] = ParsingPolygons[i].Tesselate();});
+      _ = Tessellate();
 
-         ParsingMaster.ParsingMaster.Instance.Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
-                                                                               i => polygons[i] =
-                                                                                     ParsingPolygons[i].Tesselate(),
-                                                                               ParsingMaster.ParsingMaster.Instance
-                                                                                 .Scheduler.AvailableHeavyWorkers -
-                                                                               2);
+      ArcLog.WriteLine("MPS", LogLevel.INF, "Finished loading and parsing map polygons.");
 
-         lock (this)
-         {
-            finishedTesselation = true;
-         }
-
-         UIHandle.Instance.MapHandle.NotifyMapLoaded();
-
-         ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
-      });
       return true;
+   }
+
+   private async Task Tessellate()
+   {
+      await Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
+                                             i => polygons[i] =
+                                                     ParsingPolygons[i].Tesselate(),
+                                             Scheduler.AvailableHeavyWorkers -
+                                             2);
+
+      lock (this)
+      {
+         finishedTesselation = true;
+         UIHandle.Instance.MapHandle.NotifyMapLoaded();
+      }
+
+      ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
