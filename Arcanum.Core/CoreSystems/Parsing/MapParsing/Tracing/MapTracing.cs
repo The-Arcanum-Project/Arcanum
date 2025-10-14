@@ -286,12 +286,14 @@ public unsafe class MapTracing : IDisposable
 
     private PolygonParsing TraceFromNode(Node startNode, Direction startDirection)
     {
-        var polygon = new PolygonParsing(0);
         var currentNode = startNode;
         var currentDirection = startDirection;
 
         var firstCache = startNode.GetSegment(currentDirection);
-
+        
+        var rightPixel = DirectionHelper.GetRightPixel(startNode.XPos, startNode.YPos, currentDirection);
+        
+        var polygon = new PolygonParsing(GetColor(rightPixel.Item1, rightPixel.Item2));
         firstCache.Visited = true;
 
         BorderSegmentDirectional currentSegment;

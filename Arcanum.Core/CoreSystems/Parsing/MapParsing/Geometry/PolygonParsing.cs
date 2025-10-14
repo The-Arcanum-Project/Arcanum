@@ -5,11 +5,11 @@ namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
 public class PolygonParsing(int color)
 {
-    public int Color { get; } = color;
+    public readonly int Color = color;
     public List<ICoordinateAdder> Segments { get; } = [];
     public List<PolygonParsing> Holes { get; } = [];
-    
-    public List<Vector2I> GetAllPoints()
+
+    private List<Vector2I> GetAllPoints()
     {
         var points = new List<Vector2I>();
         foreach (var segment in Segments)
@@ -18,7 +18,7 @@ public class PolygonParsing(int color)
         return points;
     }
     
-    public Polygon Tesselate()
+    public Polygon Tessellate()
     {
         var tess = new Tess();
         var points = GetAllPoints();
@@ -40,7 +40,7 @@ public class PolygonParsing(int color)
             vertices[i] = new (pos.X, pos.Y);
         }
 
-        return new(vertices, tess.Elements);
+        return new(vertices, tess.Elements, Color);
     }
     
     public Rectangle GetBoundingBox()

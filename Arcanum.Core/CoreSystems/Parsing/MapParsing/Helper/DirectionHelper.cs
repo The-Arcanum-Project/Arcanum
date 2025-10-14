@@ -1,8 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
-namespace Arcanum.Core.CoreSystems.Parsing.MapParsing;
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
 public static class DirectionHelper
 {
@@ -95,6 +94,18 @@ public static class DirectionHelper
             Direction.South => new (xGrid, yGrid, xGrid - 1, yGrid, xGrid, yGrid),
             Direction.West => new (xGrid - 1, yGrid, xGrid - 1, yGrid - 1, xGrid, yGrid),
             _ => throw new ArgumentOutOfRangeException(nameof(d), d, null)
+        };
+    }
+
+    public static (int, int) GetRightPixel(int startNodeXPos, int startNodeYPos, Direction currentDirection)
+    {
+        return currentDirection switch
+        {
+            Direction.North => (startNodeXPos, startNodeYPos - 1),
+            Direction.East => (startNodeXPos, startNodeYPos),
+            Direction.South => (startNodeXPos - 1, startNodeYPos),
+            Direction.West => (startNodeXPos - 1, startNodeYPos - 1),
+            _ => throw new ArgumentOutOfRangeException(nameof(currentDirection), currentDirection, null)
         };
     }
 }

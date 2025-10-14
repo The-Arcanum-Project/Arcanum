@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Numerics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -10,8 +11,10 @@ namespace Arcanum.UI.Components.UserControls;
 
 public partial class MapControl : UserControl
 {
-   private D3D11HwndHost _d3dHost;
-
+   private D3D11HwndHost _d3dHost = null!;
+   
+   
+   
    public MapControl()
    {
       InitializeComponent();

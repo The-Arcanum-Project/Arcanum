@@ -94,9 +94,7 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       {
          var polygon = polygons[i];
          // Generate a random color for the polygon
-         _polygonColors[i] = new(random.NextSingle(),
-                                 random.NextSingle(),
-                                 random.NextSingle()); // Full opacity
+         _polygonColors[i] = new(polygon.Color);
          //_polygonColors[i] = new(255,255,255, 100);
 
          // Triangulate the polygon using a simple fan method
@@ -327,11 +325,13 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
       Render();
    }
 
+   
+   
    private void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
    {
       if (sender is not IInputElement surface)
          return;
-
+      
       _isPanning = true;
       _lastMousePosition = e.GetPosition(surface);
       surface.CaptureMouse();
@@ -341,8 +341,12 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
    {
       if (sender is not IInputElement surface)
          return;
+      if (_isPanning)
+      {
+         Mouse.OverrideCursor = null;
+         _isPanning = false;
+      }
 
-      _isPanning = false;
       surface.ReleaseMouseCapture();
    }
 
@@ -356,7 +360,9 @@ public class LocationRenderer(Polygon[] polygons, (int, int) imageSize) : ID3DRe
    {
       if (!_isPanning || sender is not FrameworkElement surface)
          return;
-
+      
+      Mouse.OverrideCursor = Cursors.ScrollAll;
+      
       var currentMousePosition = e.GetPosition(surface);
       var delta = currentMousePosition - _lastMousePosition;
 

@@ -49,7 +49,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    {
       await Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
                                              i => polygons[i] =
-                                                     ParsingPolygons[i].Tesselate(),
+                                                     ParsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers -
                                              2);
 
