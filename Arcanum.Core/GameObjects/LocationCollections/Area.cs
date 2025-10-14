@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
@@ -46,10 +47,11 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
                                                                            .Distinct()
                                                                            .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable<Area> items)
+   public static List<Location> GetRelevantLocations(IEnumerable items)
    {
+      var typedItems = items.Cast<Area>();
       List<Location> locations = [];
-      foreach (var item in items)
+      foreach (var item in typedItems)
          locations.AddRange(item.GetLocations());
       return locations.Distinct().ToList();
    }

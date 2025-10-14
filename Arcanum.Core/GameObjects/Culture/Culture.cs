@@ -128,7 +128,7 @@ public partial class Culture : IEu5Object<Culture>
    public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => true;
+   public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;
    public INUINavigation[] Navigations => [new NUINavigation(Language == Language.Empty ? null : Language, "Language")];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureAgsSettings;

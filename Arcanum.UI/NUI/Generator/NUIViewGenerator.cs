@@ -412,7 +412,7 @@ public static class NUIViewGenerator
       {
          var temp = JominiColor.Empty;
          Nx.ForceGet(targets[0], nxProp, ref temp);
-         element = NEF.GetJominiColorUI(binding, temp);
+         element = NEF.GetJominiColorUI(binding, temp, targets[0].IsPropertyReadOnly(nxProp));
       }
       else if (type == typeof(object))
          element = NEF.GetStringUI(binding);

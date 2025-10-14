@@ -39,6 +39,10 @@ public class MapInferableSourceGen : IIncrementalGenerator
          RuntimeMethodName = "GetInferredList",
          CompileTimeValueFactory = symbol =>
             $"(sLocs) => {symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.GetInferredList(sLocs)",
+         Delegate2Definition = "private delegate List<Location> ObjToMapAccessor(IList items);",
+         DelegateName2 = "ObjToMapAccessor",
+         CompileTimeValueFactoryForSecondMethod = symbol =>
+            $"(items) => {symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.GetRelevantLocations(items)",
          PublicApiMethods = """
 
                                 /// <summary>
@@ -49,6 +53,16 @@ public class MapInferableSourceGen : IIncrementalGenerator
                                     if (_dispatchers.TryGetValue(type, out var accessor))
                                         return accessor(sLocs);
                                     return null;
+                                }
+                                
+                                /// <summary>
+                                /// Returns a list of locations relevant to the provided items of type T.
+                                /// </summary>
+                                public static List<Location> GetRelevantLocations(Type type, IList items)
+                                {
+                                    if (_dispatchers2.TryGetValue(type, out var accessor))
+                                        return accessor(items);
+                                    return [];
                                 }
                             """,
          DelegateName = "Accessor",

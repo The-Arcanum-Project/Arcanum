@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using System.Collections;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.NUI;
@@ -20,5 +21,5 @@ public interface IMapInferable<T> : IHasMapMode
    /// </summary>
    /// <param name="items"></param>
    /// <returns></returns>
-   public static abstract List<Location> GetRelevantLocations(IEnumerable<T> items);
+   public static abstract List<Location> GetRelevantLocations(IEnumerable items);
 }

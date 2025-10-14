@@ -1,6 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
@@ -38,19 +42,20 @@ public static class GridManager
          Grid.SetColumnSpan(element, columnSpan);
    }
 
-   private static void SetHeaderInternal(Grid mainGrid,
-                                         string headerText,
-                                         int row,
-                                         int column,
-                                         int columnSpan,
-                                         int defaultRowHeight,
-                                         Action<TextBlock>? configureHeader = null)
+   private static TextBlock SetHeaderInternal(Grid mainGrid,
+                                              string headerText,
+                                              int row,
+                                              int column,
+                                              int columnSpan,
+                                              int defaultRowHeight,
+                                              Action<TextBlock>? configureHeader = null)
    {
       var header = ControlFactory.GetHeaderTextBlock(18, false, headerText);
 
       configureHeader?.Invoke(header);
 
       AddToGrid(mainGrid, header, row, column, columnSpan, defaultRowHeight);
+      return header;
    }
 
    public static void SetPureHeader(Grid mainGrid,
@@ -61,7 +66,8 @@ public static class GridManager
                                     int columnSpan = 0)
    {
       var headerText = targetsCount > 1 ? $"{primary.GetType().Name} ({targetsCount})" : primary.UniqueId;
-      SetHeaderInternal(mainGrid, headerText, row, column, columnSpan, DEFAULT_HEADER_ROW_HEIGHT);
+      var header = SetHeaderInternal(mainGrid, headerText, row, column, columnSpan, DEFAULT_HEADER_ROW_HEIGHT);
+      SetUpHeaderHover(primary, header);
    }
 
    public static TextBlock GetNavigationHeader(IEu5Object primary,
@@ -84,9 +90,39 @@ public static class GridManager
       if (isNavigation)
       {
          EventHandlers.SetOnMouseUpHandler(header, navH, primary);
-         header.Cursor = System.Windows.Input.Cursors.Hand;
+         SetUpHeaderHover(primary, header);
       }
 
       return header;
+   }
+
+   public static void SetUpHeaderHover(IEu5Object primary, TextBlock header)
+   {
+      MouseEventHandler onMouseEnter = (_, _) =>
+      {
+         header.TextDecorations = TextDecorations.Underline;
+         header.Cursor = Cursors.Hand;
+         var locations =
+            MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
+         if (locations.Count > 0)
+            Selection.Modify(SelectionTarget.Highlight, locations, true, false);
+      };
+
+      MouseEventHandler onMouseLeave = (_, _) =>
+      {
+         header.TextDecorations = null;
+         var locations =
+            MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
+         if (locations.Count > 0)
+            Selection.Modify(SelectionTarget.Highlight, locations, false, false);
+      };
+
+      header.MouseEnter += onMouseEnter;
+      header.MouseLeave += onMouseLeave;
+      header.Unloaded += (_, _) =>
+      {
+         header.MouseEnter -= onMouseEnter;
+         header.MouseLeave -= onMouseLeave;
+      };
    }
 }

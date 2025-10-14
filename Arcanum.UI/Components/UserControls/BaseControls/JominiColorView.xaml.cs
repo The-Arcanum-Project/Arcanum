@@ -9,6 +9,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls;
 
 public partial class JominiColorView
 {
+   private bool _isReadOnly;
+
    public static readonly DependencyProperty ColorProperty =
       DependencyProperty.Register(nameof(Color),
                                   typeof(JominiColor),
@@ -29,9 +31,12 @@ public partial class JominiColorView
       InitializeComponent();
    }
 
-   public JominiColorView(JominiColor color) : this()
+   public JominiColorView(JominiColor color, bool isReadOnly) : this()
    {
       Color = color;
+      _isReadOnly = isReadOnly;
+      if (isReadOnly)
+         ColorButton.ToolTip = "This field is read-only.";
    }
 
    private static void OnColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -43,6 +48,9 @@ public partial class JominiColorView
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
+      if (_isReadOnly)
+         return;
+
       var buttonBottomRightCorner = ColorButton.PointToScreen(new(ColorButton.ActualWidth, ColorButton.ActualHeight));
       var result = PopupService.ShowColorPicker(Color.ToMediaColor(), buttonBottomRightCorner);
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -56,7 +57,7 @@ public partial class Location
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
    public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.ToList();
-   public static List<Location> GetRelevantLocations(IEnumerable<Location> items) => items.ToList();
+   public static List<Location> GetRelevantLocations(IEnumerable items) => items.Cast<Location>().ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
 

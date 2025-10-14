@@ -1,4 +1,5 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.Collections;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -43,10 +44,11 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
                                                                              .Distinct()
                                                                              .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable<Region> items)
+   public static List<Location> GetRelevantLocations(IEnumerable items)
    {
+      var typedItems = items.Cast<Region>();
       List<Location> locations = [];
-      foreach (var item in items)
+      foreach (var item in typedItems)
          locations.AddRange(item.GetLocations());
       return locations.Distinct().ToList();
    }

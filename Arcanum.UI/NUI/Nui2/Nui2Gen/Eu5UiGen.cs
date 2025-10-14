@@ -776,7 +776,8 @@ public static class Eu5UiGen
       {
          var temp = JominiColor.Empty;
          Nx.ForceGet(primary, nxProp, ref temp);
-         element = NEF.GetJominiColorUI(binding, temp);
+         var isReadonly = primary.IsPropertyReadOnly(nxProp);
+         element = NEF.GetJominiColorUI(binding, temp, isReadonly);
       }
       else if (type == typeof(JominiDate))
          element = NEF.GetJominiDateUI(binding);

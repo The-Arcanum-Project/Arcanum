@@ -32,6 +32,8 @@ public class DispatcherConfig
    /// </summary>
    public string DelegateName { get; set; } = "Accessor";
 
+   public string? DelegateName2 { get; set; } = null;
+
    /// <summary>
    /// A function that takes a Roslyn type symbol and returns the C# code
    /// for the value to be stored in the dictionary at compile time.
@@ -40,6 +42,10 @@ public class DispatcherConfig
    /// </summary>
    public Func<INamedTypeSymbol, string> CompileTimeValueFactory { get; set; } =
       symbol => $"MISSING_CompileTimeValueFactory_for_{symbol.Name}";
+
+   public string? Delegate2Definition { get; set; }
+
+   public Func<INamedTypeSymbol, string>? CompileTimeValueFactoryForSecondMethod { get; set; }
 
    /// <summary>
    /// The name of the static method or property to look for at runtime via reflection.

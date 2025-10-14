@@ -1,4 +1,5 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.Collections;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -27,10 +28,11 @@ public partial class Continent
      .Distinct()
      .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable<Continent> items)
+   public static List<Location> GetRelevantLocations(IEnumerable items)
    {
+      var typedItems = items.Cast<Continent>();
       List<Location> locations = [];
-      foreach (var item in items)
+      foreach (var item in typedItems)
          locations.AddRange(item.GetLocations());
       return locations.Distinct().ToList();
    }

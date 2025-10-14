@@ -44,6 +44,23 @@ public static class DispatcherGeneratorHelper
       sb.AppendLine("    };");
       sb.AppendLine();
 
+      if (config is { Delegate2Definition: not null, CompileTimeValueFactoryForSecondMethod: not null })
+      {
+         sb.AppendLine($"    {config.Delegate2Definition}");
+         sb.AppendLine();
+         sb.AppendLine($"    private static readonly ConcurrentDictionary<Type, {config.DelegateName2}> _dispatchers2 = new()");
+         sb.AppendLine("    {");
+         foreach (var typeSymbol in foundTypes)
+         {
+            var fullTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var valueExpression = config.CompileTimeValueFactoryForSecondMethod(typeSymbol);
+            sb.AppendLine($"        [typeof({fullTypeName})] = {valueExpression},");
+         }
+
+         sb.AppendLine("    };");
+         sb.AppendLine();
+      }
+
       // --- Generate the runtime Register method ---
       sb.AppendLine("    /// <summary>");
       sb.AppendLine("    /// Registers a type at runtime. Intended for use by plugins.");
