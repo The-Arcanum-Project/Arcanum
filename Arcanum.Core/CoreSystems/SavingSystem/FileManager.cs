@@ -44,7 +44,7 @@ public static class FileManager
       ];
    }
 
-   public static string SanitizePath(string path)
+   public static string SanitizePath(string path, char separationChar = '>')
    {
       if (string.IsNullOrEmpty(path))
          return string.Empty;
@@ -52,33 +52,36 @@ public static class FileManager
       // Remove the mod or vanilla path if it is the beginning of the path
       if (path.StartsWith(ModDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
          return ArrayToPointingPath(path[ModDataSpace.FullPath.Length..]
-                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar),
+                                    separationChar);
       if (path.StartsWith(VanillaDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
          return ArrayToPointingPath(path[VanillaDataSpace.FullPath.Length..]
-                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar),
+                                    separationChar);
       if (path.StartsWith(DocumentsEUV.FullPath, StringComparison.OrdinalIgnoreCase))
          return ArrayToPointingPath(path[(DocumentsEUV.FullPath.Length - 1)..]
-                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar));
+                                      .TrimStart(DefaultSeparationChar, AlternativeSeparationChar),
+                                    separationChar);
 
       // If the path does not start with any of the known paths, we return the path as is
       return path;
    }
 
-   public static string ArrayToPointingPath(string[] pathParts)
+   public static string ArrayToPointingPath(string[] pathParts, char separationChar)
    {
       if (pathParts.Length == 0)
          return string.Empty;
 
-      return string.Join(DEFAULT_PATH_POINTING_CHAR, pathParts);
+      return string.Join(separationChar, pathParts);
    }
 
-   public static string ArrayToPointingPath(string path)
+   public static string ArrayToPointingPath(string path, char separationChar)
    {
       if (string.IsNullOrEmpty(path))
          return string.Empty;
 
       var pathParts = path.Split(DefaultSeparationChar, AlternativeSeparationChar);
-      return ArrayToPointingPath(pathParts);
+      return ArrayToPointingPath(pathParts, separationChar);
    }
 
    public static string Normalize(string path) => path.Replace(AlternativeSeparationChar, DefaultSeparationChar);

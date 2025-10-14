@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿# define DEBUG_PARSING_STEP_TIMES
+
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
@@ -9,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
+using Common.Logger;
 using JetBrains.Annotations;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -163,6 +167,7 @@ public class ParsingMaster
             if (step.IsHeavyStep)
                currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
                                                               {
+                                                                 var sw = Stopwatch.StartNew();
                                                                  var wrapper = step.GetParsingStep();
                                                                  var result = wrapper.Execute();
                                                                  lock (lockObj)
@@ -177,12 +182,15 @@ public class ParsingMaster
                                                                         100.0);
                                                                     }
 
+                                                                 step.LastTotalLoadingDuration = sw.Elapsed;
+
                                                                  return result;
                                                               },
                                                               cts.Token));
             else
                currentBatchTasks.Add(Scheduler.QueueWorkAsHeavyIfAvailable(() =>
                                                                            {
+                                                                              var sw2 = Stopwatch.StartNew();
                                                                               var wrapper = step.GetParsingStep();
                                                                               var result = wrapper.Execute();
                                                                               lock (lockObj)
@@ -198,6 +206,8 @@ public class ParsingMaster
                                                                                      100.0);
                                                                                  }
 
+                                                                              step.LastTotalLoadingDuration =
+                                                                                 sw2.Elapsed;
                                                                               return result;
                                                                            },
                                                                            cts.Token));
@@ -221,7 +231,17 @@ public class ParsingMaster
       Queastor.Queastor.GlobalInstance.RebuildBkTree();
 
       sw.Stop();
-      Console.WriteLine($"Finished all parsing steps in {sw.Elapsed.TotalSeconds:F2} seconds.");
+
+      ArcLog.WriteLine("PMS", LogLevel.INF, $"All parsing steps completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+
+#if DEBUG_PARSING_STEP_TIMES
+      var sortedByDuration = StepDurationsByName.OrderByDescending(t => t.Item2).ToList();
+
+      foreach (var (name, duration) in sortedByDuration)
+         ArcLog.WriteLine("PMS",
+                          LogLevel.DBG,
+                          $"{duration.TotalSeconds.ToString("F2", CultureInfo.InvariantCulture)} s for '{name}'");
+#endif
 
       return await Task.FromResult(true);
    }

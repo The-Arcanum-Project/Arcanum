@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.UI;
 using Common.UI.Interfaces;
@@ -30,6 +32,7 @@ public class MainWindowHandleImpl : IMainWindowsHandle
                                         Enum view)
    {
       ParsingMaster.UnloadAll();
+      FileStateManager.Shutdown();
       var mw = new MainMenuScreen { MainMenuViewModel = { TargetedView = (MainMenuScreen.MainMenuScreenView)view } };
       Application.Current.MainWindow = mw;
       Application.Current.MainWindow.Show();

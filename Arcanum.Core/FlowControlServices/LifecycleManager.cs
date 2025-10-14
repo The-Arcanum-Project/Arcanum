@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
+using Common.UI;
 
 namespace Arcanum.Core.FlowControlServices;
 
@@ -38,8 +39,11 @@ public class LifecycleManager
    public void RunStartUpSequence(IPluginHost host)
    {
 #if DEBUG
+
       // Step 0: Initialize debug elements
       LoadDebugElements();
+      if (DebugConfig.Settings.EnableDebugLogging)
+         UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
 
       InitializeApplicationCore();

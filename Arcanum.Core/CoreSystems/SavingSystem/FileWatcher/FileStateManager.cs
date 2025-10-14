@@ -4,11 +4,13 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Common.Logger;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
 public static class FileStateManager
 {
+   private const string LOG_SOURCE = "FSM";
    public static event EventHandler<FileChangedEventArgs>? FileChanged;
 
    private static readonly object Lock = new();
@@ -69,9 +71,10 @@ public static class FileStateManager
 
          Watchers[directoryToWatch] = watcher;
          watcher.EnableRaisingEvents = true;
-#if IS_DEBUG
-         Console.WriteLine($"[Watcher] Started monitoring directory: {directoryToWatch}");
-#endif
+
+         ArcLog.WriteLine(LOG_SOURCE,
+                          LogLevel.INF,
+                          $"Started monitoring directory: {FileManager.SanitizePath(directoryToWatch, '/')}");
       }
    }
 
@@ -99,9 +102,10 @@ public static class FileStateManager
          watcher.EnableRaisingEvents = false;
          watcher.Dispose();
          Watchers.Remove(directoryToWatch);
-#if IS_DEBUG
-         Console.WriteLine($"[Watcher] Stopped monitoring directory: {directoryToWatch}");
-#endif
+
+         ArcLog.WriteLine(LOG_SOURCE,
+                          LogLevel.INF,
+                          $"Stopped monitoring directory: {FileManager.SanitizePath(directoryToWatch, '/')}");
       }
    }
 
@@ -121,9 +125,8 @@ public static class FileStateManager
 
          Watchers.Clear();
          RegisteredPaths.Clear();
-#if IS_DEBUG
-         Console.WriteLine("[Watcher] All file watchers have been shut down.");
-#endif
+
+         ArcLog.WriteLine(LOG_SOURCE, LogLevel.INF, "FileStateManager has been shut down and all watchers disposed.");
       }
    }
 

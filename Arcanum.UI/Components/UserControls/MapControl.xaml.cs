@@ -10,34 +10,32 @@ namespace Arcanum.UI.Components.UserControls;
 
 public partial class MapControl : UserControl
 {
-    private D3D11HwndHost _d3dHost;
-    
-    public MapControl()
-    {
-        InitializeComponent();
-    }
-    
-    private void HwndHostContainer_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        Console.WriteLine("Right click");
-    }
+   private D3D11HwndHost _d3dHost;
 
-    public async void SetupRenderingAsync(Polygon[] polygons, (int, int) imageSize)
-    {
-        if (!IsLoaded)
-        {
-            throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
-        }
-        
-        var renderer = await LocationRenderer.CreateAsync(polygons, imageSize);
-        
-        _d3dHost = new (renderer, HwndHostContainer);
-        HwndHostContainer.Child = _d3dHost;
+   public MapControl()
+   {
+      InitializeComponent();
+   }
 
-        //_overlay = new OverlayWindow { Owner = this };
+   private void HwndHostContainer_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+   {
+      Console.WriteLine("Right click");
+   }
 
-        // Use LayoutUpdated for initial positioning and then rely on location/size changed events
-        DataContext = _d3dHost;
-        LoadingPanel.Visibility = Visibility.Collapsed;
-    }
+   public async void SetupRenderingAsync(Polygon[] polygons, (int, int) imageSize)
+   {
+      if (!IsLoaded)
+         throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
+
+      var renderer = await LocationRenderer.CreateAsync(polygons, imageSize);
+
+      _d3dHost = new(renderer, HwndHostContainer);
+      HwndHostContainer.Child = _d3dHost;
+
+      //_overlay = new OverlayWindow { Owner = this };
+
+      // Use LayoutUpdated for initial positioning and then rely on location/size changed events
+      DataContext = _d3dHost;
+      LoadingPanel.Visibility = Visibility.Collapsed;
+   }
 }

@@ -21,6 +21,7 @@ public partial class DebugPanelGrid
 
    private void FindNullMarketsButton_Click(object sender, RoutedEventArgs e)
    {
+      new LogWindow().Show();
    }
 
    private void FindNullLocationInMarketButton_Click(object sender, RoutedEventArgs e)

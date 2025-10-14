@@ -21,7 +21,7 @@
                                      Padding = "4"
                                      Click = "BrowseProvincesButton_Click" />
 
-            <styleClasses:BaseButton Content = "FindNullMarkets"
+            <styleClasses:BaseButton Content = "Log"
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "FindNullMarketsButton_Click" />

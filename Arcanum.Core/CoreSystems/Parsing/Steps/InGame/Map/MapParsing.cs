@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
+using Common.Logger;
 using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
@@ -57,7 +58,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          }
 
          UIHandle.Instance.MapHandle.NotifyMapLoaded();
-         Console.WriteLine("Finished tesselation of map polygons.");
+
+         ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
       });
       return true;
    }
