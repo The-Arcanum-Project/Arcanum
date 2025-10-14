@@ -13,7 +13,7 @@ public class InterfaceGatherer : IIncrementalGenerator
    // Value: The name of the property list in the generated class.
    private static readonly Dictionary<string, (string name, bool generateEnum)> InterfacesToRegister = new()
    {
-      { "Arcanum.API.UtilServices.Search.ISearchable", ("AllSearchableTypes", false) },
+      { "Arcanum.SDK.UtilServices.Search.ISearchable", ("AllSearchableTypes", false) },
       { "Arcanum.Core.CoreSystems.NUI.IHasMapMode", ("MapModeProvider", false) },
       { "Arcanum.Core.CoreSystems.NUI.INUI", ("NUIType", false) },
       { "Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs", ("Ags", false) },
@@ -67,18 +67,17 @@ public class InterfaceGatherer : IIncrementalGenerator
       sb.AppendLine("    ];");
       sb.AppendLine();
 
-
       if (InterfacesToRegister[results.Key].generateEnum)
          GenerateEnumSource(context, results, sb);
       else
          sb.AppendLine("}");
-      
-      
+
       context.AddSource($"{InterfacesToRegister[results.Key].name}Registry.g.cs", sb.ToString());
    }
 
    private static void GenerateEnumSource(SourceProductionContext context,
-                                        KeyValuePair<string, List<INamedTypeSymbol>> results, StringBuilder sb)
+                                          KeyValuePair<string, List<INamedTypeSymbol>> results,
+                                          StringBuilder sb)
    {
       sb.AppendLine($"    public static Type ToType(this {InterfacesToRegister[results.Key].name}Enum enumValue)");
       sb.AppendLine("    {");
@@ -94,6 +93,7 @@ public class InterfaceGatherer : IIncrementalGenerator
 
          sb.AppendLine($"            {InterfacesToRegister[results.Key].name}Enum.{enumName} => typeof(global::{typeSymbol.ToDisplayString()}),");
       }
+
       sb.AppendLine("            _ => throw new ArgumentOutOfRangeException(nameof(enumValue), enumValue, null)");
       sb.AppendLine("        };");
       sb.AppendLine("    }");
@@ -113,12 +113,13 @@ public class InterfaceGatherer : IIncrementalGenerator
          sb.AppendLine($"                result = {InterfacesToRegister[results.Key].name}Enum.{enumName};");
          sb.AppendLine("                return true;");
       }
+
       sb.AppendLine("            default:");
       sb.AppendLine("                result = default;");
       sb.AppendLine("                return false;");
       sb.AppendLine("        }");
       sb.AppendLine("    }");
-      
+
       sb.AppendLine($"    public enum {InterfacesToRegister[results.Key].name}Enum");
       sb.AppendLine("    {");
 
@@ -132,10 +133,11 @@ public class InterfaceGatherer : IIncrementalGenerator
 
          sb.AppendLine($"        {enumName},");
       }
+
       sb.AppendLine("    }");
       sb.AppendLine("}");
    }
-   
+
    private static Dictionary<string, List<INamedTypeSymbol>> FoundTypesByInterface(
       Compilation compilation,
       ImmutableArray<ClassDeclarationSyntax> classes)

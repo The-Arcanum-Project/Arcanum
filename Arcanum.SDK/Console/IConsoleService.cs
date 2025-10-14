@@ -28,7 +28,7 @@ public interface IConsoleService : IService
    /// </summary>
    /// <returns>A read-only list of unique command definitions, sorted by their name.</returns>
    IReadOnlyList<ICommandDefinition> GetRegisteredCommandsWithoutAliases();
-   
+
    /// <summary>
    /// Registers a new command definition in the console service.
    /// </summary>
@@ -47,7 +47,7 @@ public interface IConsoleService : IService
    /// retrieving past commands using up and down arrow keys during console interaction.
    /// </summary>
    public int HistoryIndex { get; }
-   
+
    /// <summary>
    /// Processes the given command line input, executes the associated command logic,
    /// and returns the resulting output as an array of strings where each string represents a line of output.
@@ -104,7 +104,6 @@ public interface IConsoleService : IService
    /// <returns>True if the macro was executed successfully; otherwise, false if the macro was not found.</returns>
    void RunMacro(string macroString, out string[] resultOutput);
 
-   
    /// <summary>
    /// Clears all macros currently stored for the console service associated with the specified identifier.
    /// </summary>

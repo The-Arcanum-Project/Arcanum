@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Arcanum.API\Arcanum.API.csproj" />
+        <ProjectReference Include="..\Arcanum.SDK\Arcanum.SDK.csproj"/>
       <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj" />
     </ItemGroup>
 

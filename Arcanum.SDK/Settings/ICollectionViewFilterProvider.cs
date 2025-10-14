@@ -2,7 +2,7 @@
 
 public class ICollectionViewFilterProvider
 {
-/*
-   public Predicate<object> GenerateFilter { get; set; }
-*/
+   /*
+      public Predicate<object> GenerateFilter { get; set; }
+   */
 }

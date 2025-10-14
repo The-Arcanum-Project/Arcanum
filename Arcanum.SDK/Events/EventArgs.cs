@@ -8,6 +8,7 @@ public enum EventSource
    Plugin,
    User
 }
+
 // Base class for all plugin-related event arguments
 public class BasePluginEventArgs(Guid pluginGuid, EventSource source) : EventArgs
 {

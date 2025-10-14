@@ -20,7 +20,7 @@ public abstract class KeyBindProvider
 
       return keyBinds;
    }
-   
+
    /// <summary>
    /// Sets multiple key binds at once using a dictionary.
    /// </summary>
@@ -30,7 +30,7 @@ public abstract class KeyBindProvider
       foreach (var kvp in keyBinds)
          SetKeyBind(kvp.Key, kvp.Value);
    }
-   
+
    /// <summary>
    /// Resets all key binds to their initialization values.
    /// </summary>

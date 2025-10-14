@@ -134,6 +134,6 @@ namespace Arcanum.API.UtilServices
       /// The Default is to expect numbers or case-sensitive string names.
       /// </summary>
       public JsonStringEnumConverterOptions EnumDeserialization { get; set; } =
-         JsonStringEnumConverterOptions.SerializeAsNumber; 
+         JsonStringEnumConverterOptions.SerializeAsNumber;
    }
 }

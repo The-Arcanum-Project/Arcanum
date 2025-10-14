@@ -28,7 +28,6 @@ public interface IEventBus : IService
    /// execution. Higher values indicate higher priority. Defaults to 0.</param>
    public void RegisterUiEvent<T>(PluginEventId id, Action<T> handler, int priority = 0) where T : EventArgs;
 
-
    /// <summary>
    /// Unregisters an event handler for a specific plugin event ID.
    /// </summary>

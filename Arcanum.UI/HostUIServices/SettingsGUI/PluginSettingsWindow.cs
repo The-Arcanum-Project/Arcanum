@@ -1,7 +1,7 @@
 ﻿// using System.ComponentModel;
-// using Arcanum.API;
-// using Arcanum.API.Events;
-// using Arcanum.API.AgsSettings;
+// using Arcanum.SDK;
+// using Arcanum.SDK.Events;
+// using Arcanum.SDK.AgsSettings;
 // using Arcanum.UI.GeneralUiElements.DarkUiElements;
 //
 // namespace Arcanum.UI.HostUIServices.SettingsGUI;

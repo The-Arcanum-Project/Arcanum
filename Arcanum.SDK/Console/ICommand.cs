@@ -17,7 +17,11 @@ public abstract class CommandBase : ICommandDefinition
    public IReadOnlyList<string> Aliases { get; protected init; }
    public Func<string[], string[]> Execute { get; protected init; }
 
-   protected CommandBase(string name, string usage, ClearanceLevel clearance, IReadOnlyList<string> aliases, Func<string[], string[]> execute)
+   protected CommandBase(string name,
+                         string usage,
+                         ClearanceLevel clearance,
+                         IReadOnlyList<string> aliases,
+                         Func<string[], string[]> execute)
    {
       Name = name;
       Usage = usage;
@@ -33,7 +37,7 @@ public abstract class CommandBase : ICommandDefinition
 
       return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
    }
-   
+
    public override int GetHashCode()
    {
       return Name.GetHashCode(StringComparison.OrdinalIgnoreCase);

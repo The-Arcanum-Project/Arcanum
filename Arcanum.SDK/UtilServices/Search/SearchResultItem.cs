@@ -1,6 +1,4 @@
-﻿
-
-namespace Arcanum.API.UtilServices.Search;
+﻿namespace Arcanum.API.UtilServices.Search;
 
 public class SearchResultItem : ISearchResult
 {
@@ -10,6 +8,7 @@ public class SearchResultItem : ISearchResult
       MainText = mainText;
       Description = description;
    }
+
    public string? IconPath { get; set; } // e.g., "/Assets/csharp_icon.png"
    public string MainText { get; set; }
    public string Description { get; set; }

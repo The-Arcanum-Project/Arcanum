@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Arcanum.API\Arcanum.API.csproj" />
+      <ProjectReference Include="..\Arcanum.SDK\Arcanum.SDK.csproj"/>
   </ItemGroup>
 
 </Project>

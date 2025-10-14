@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:search = "clr-namespace:Arcanum.API.UtilServices.Search;assembly=Arcanum.API">
+                    xmlns:search = "clr-namespace:Arcanum.API.UtilServices.Search;assembly=Arcanum.SDK">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />

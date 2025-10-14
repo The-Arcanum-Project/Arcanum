@@ -1,7 +1,7 @@
 ﻿/*using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using Arcanum.API.Settings;
+using Arcanum.SDK.Settings;
 
 namespace Arcanum.PluginHost.Settings;
 
@@ -15,7 +15,7 @@ public abstract class PluginSettingConverter : JsonConverter<IPluginSetting>
     {
         return typeof(IPluginSetting).IsAssignableFrom(typeToConvert);
     }
-    
+
     public override IPluginSetting? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var jsonObject = JsonNode.Parse(ref reader);
@@ -61,3 +61,4 @@ public abstract class PluginSettingConverter : JsonConverter<IPluginSetting>
         jsonObject.WriteTo(writer, options);
     }
 }*/
+

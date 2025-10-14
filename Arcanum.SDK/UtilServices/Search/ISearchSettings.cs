@@ -1,5 +1,4 @@
-﻿
-namespace Arcanum.API.UtilServices.Search;
+﻿namespace Arcanum.API.UtilServices.Search;
 
 public interface ISearchSettings
 {

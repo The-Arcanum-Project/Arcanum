@@ -1,5 +1,4 @@
-﻿
-namespace Arcanum.API.Settings;
+﻿namespace Arcanum.API.Settings;
 
 /// <summary>
 /// Specifies a unique, stable string key for a class implementing IPluginSetting.

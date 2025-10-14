@@ -27,12 +27,12 @@ public interface IService
       /// The service is in a valid and operational state,
       /// </summary>
       Ok,
-      
+
       /// <summary>
       /// The service is in an error state, possibly due to exceptions or misconfiguration.
       /// </summary>
       Error,
-      
+
       /// <summary>
       /// The service is in an unknown state, possibly due to initialization issues or other problems.
       /// </summary>
