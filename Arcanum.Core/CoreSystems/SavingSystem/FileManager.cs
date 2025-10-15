@@ -192,42 +192,38 @@ public static class FileManager
       string[] subPath,
       string searchPattern)
    {
-      var vSubPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
+      var varFolderPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
       if (fileName != null)
-         return [new(vSubPath, fileName, GetDataSpace(vSubPath))];
+         return [new(varFolderPath, fileName, GetDataSpace(Path.Combine(subPath)))];
 
       IEnumerable<string> modFiles = [];
-      if (Directory.Exists(GetModPath(vSubPath)))
+      if (Directory.Exists(GetModPath(varFolderPath)))
       {
-         modFiles = Directory.GetFiles(GetModPath(vSubPath), searchPattern).Select(Path.GetFileName)!;
-         if (IsPathReplaced(vSubPath))
-            return modFiles.Select(file => new PathObj(vSubPath, file, ModDataSpace)).ToList();
+         modFiles = Directory.GetFiles(GetModPath(varFolderPath), searchPattern).Select(Path.GetFileName)!;
+         if (IsPathReplaced(varFolderPath))
+            return modFiles.Select(file => new PathObj(varFolderPath, file, ModDataSpace)).ToList();
       }
 
       var defined = new HashSet<string>(modFiles);
       List<PathObj> fileList = [];
-      fileList.AddRange(defined.Select(file => new PathObj(vSubPath, file, ModDataSpace)));
+      fileList.AddRange(defined.Select(file => new PathObj(varFolderPath, file, ModDataSpace)));
 
-      var vanillaFiles = Directory.GetFiles(GetVanillaPath(vSubPath), searchPattern);
+      var vanillaFiles = Directory.GetFiles(GetVanillaPath(varFolderPath), searchPattern);
       foreach (var file in vanillaFiles)
       {
          var fileNameOnly = Path.GetFileName(file);
          if (defined.Contains(fileNameOnly))
             continue; // We already have this file in the mod data space
 
-         fileList.Add(new(vSubPath, fileNameOnly, VanillaDataSpace));
+         fileList.Add(new(varFolderPath, fileNameOnly, VanillaDataSpace));
       }
 
       return fileList;
    }
 
-   private static DataSpace GetDataSpace(string[] subPath)
+   private static DataSpace GetDataSpace(string path)
    {
-      var vSubPath = Path.Combine(subPath);
-      if (ExistsInMod(vSubPath))
-         return ModDataSpace;
-
-      return VanillaDataSpace;
+      return ExistsInMod(path) ? ModDataSpace : VanillaDataSpace;
    }
 
    public static Eu5FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)

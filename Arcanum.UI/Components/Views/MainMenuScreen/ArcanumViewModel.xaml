@@ -69,7 +69,7 @@
 
             <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Box20x20.png"
                    Stretch = "None"
-                   ToolTip = "Vanilla Game Folder">
+                   ToolTip = "Vanilla Game Folder: ../Europa Universalis V/game">
 
                 <Image.Clip>
                     <RectangleGeometry RadiusX = "3"
@@ -157,7 +157,7 @@
                                          Click = "AddBaseModButton_Click"
                                          ToolTip = "Add a new base mod declaration">
                     <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/AddFolder20x20.png"
-                           Stretch = "None"/>
+                           Stretch = "None" />
                 </styleClasses:BaseButton>
 
                 <Rectangle Grid.Column = "0"
