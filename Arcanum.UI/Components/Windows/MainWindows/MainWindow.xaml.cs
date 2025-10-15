@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
@@ -14,6 +16,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
+using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -22,7 +25,9 @@ using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Common.UI;
+using CommunityToolkit.Mvvm.Input;
 using Application = System.Windows.Application;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -146,6 +151,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
       Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
+      GenerateMapModeButtons();
       GcWizard.ForceGc();
    }
 
@@ -371,6 +377,33 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       {
          NUINavigation.Instance.Forward();
          e.Handled = true;
+      }
+   }
+
+   public void GenerateMapModeButtons()
+   {
+      for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
+      {
+         MapModeButtonGrid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
+         var mapMode = MapModeManager.GetMapModeForButtonIndex(i);
+
+         var button = new MapModeButton
+         {
+            Margin = new(2),
+            Padding = new(0),
+            Command = new RelayCommand(() =>
+            {
+               if (mapMode != null)
+                  MapModeManager.Activate(mapMode.Type);
+            }),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Height = 30,
+            ToolTip = mapMode != null ? mapMode.Description : "No map mode assigned to this button.",
+            MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.None,
+         };
+         button.SetValue(Grid.ColumnProperty, i);
+         MapModeButtonGrid.Children.Add(button);
       }
    }
 

@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
+﻿using System.Windows;
+using System.Windows.Controls;
+using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
@@ -70,5 +72,19 @@ public static partial class MapModeManager
    public static void OnLocationDataChanged(Location changedLocation)
    {
       LruCache.MarkInvalid(changedLocation);
+   }
+
+   public static IMapMode? GetMapModeForButtonIndex(int i)
+   {
+      if (Config.Settings.MapModeConfig.QuickAccessMapModes.Count > i)
+      {
+         var modeType = Config.Settings.MapModeConfig.QuickAccessMapModes[i];
+         return modeType != MapModeType.None ? Get(modeType) : null;
+      }
+
+      if (!Config.Settings.MapModeConfig.DefaultAssignMapModes)
+         return null;
+
+      return i < Enum.GetNames<MapModeType>().Length ? Get((MapModeType)i) : null;
    }
 }

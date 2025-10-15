@@ -423,12 +423,19 @@
 
         </GridSplitter>
 
-        <uc:MapControl x:Name = "MainMap"
-                       Grid.Column = "2"
-                       Margin="5"
-                       BorderThickness="2"
-                       BorderBrush="{StaticResource DefaultBorderColorBrush}">
-        </uc:MapControl>
+        <DockPanel Grid.Column = "2"
+                   LastChildFill = "True">
+            <Grid x:Name = "MapModeButtonGrid"
+                  DockPanel.Dock = "Bottom" />
+
+            <uc:MapControl x:Name = "MainMap"
+                           Margin = "5"
+                           BorderThickness = "2"
+                           BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                           VerticalAlignment = "Stretch"
+                           HorizontalAlignment = "Stretch">
+            </uc:MapControl>
+        </DockPanel>
 
         <GridSplitter Grid.Column = "3"
                       Width = "4"
