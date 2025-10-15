@@ -31,7 +31,7 @@ public struct Constants
 public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors, float imageAspectRatio) : ID3DRenderer
 {
    private static readonly Color4 ClearColor;
-   
+
    private ID3D11Device? _device;
    private ID3D11DeviceContext? _context;
    private IDXGISwapChain? _swapChain;
@@ -49,10 +49,10 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    private ID3D11ShaderResourceView? _colorLookupView;
 
    private Color4[] _polygonColors = initColors;
-   
+
    public Vector2 Pan = new(0.5f, 0.5f);
    public float Zoom = 1.75f;
-   
+
    private uint _vertexCount;
    private VertexPositionId2D[] _vertices = vertices;
 
@@ -67,7 +67,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
          ClearColor = new(1f, 0f, 1f);
       }
    }
-   
+
    public static VertexPositionId2D[] CreateVertices(Polygon[] polygons, (int, int) imageSize)
    {
       var imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
@@ -75,7 +75,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       for (var i = 0; i < polygons.Length; i++)
       {
          var polygon = polygons[i];
-         var indices = polygon.Indices;
+         var indices = polygon.Indices; // TODO @Melco crashes with polygon = null
          var triangleVertices = polygon.Vertices;
          for (var j = 0; j < indices.Length; j += 3)
          {
@@ -83,11 +83,11 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
             var v1 = triangleVertices[indices[j + 1]];
             var v2 = triangleVertices[indices[j + 2]];
             vertices.Add(new(new(v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
-               (uint)i));
+                             (uint)i));
             vertices.Add(new(new(v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
-               (uint)i));
+                             (uint)i));
             vertices.Add(new(new(v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
-               (uint)i));
+                             (uint)i));
          }
       }
 
@@ -118,15 +118,15 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       };
 
       D3D11.D3D11CreateDeviceAndSwapChain(null,
-            DriverType.Hardware,
-            DeviceCreationFlags.None,
-            [FeatureLevel.Level_11_0],
-            swapChainDesc,
-            out _swapChain!,
-            out _device!,
-            out _,
-            out _context!)
-         .CheckError();
+                                          DriverType.Hardware,
+                                          DeviceCreationFlags.None,
+                                          [FeatureLevel.Level_11_0],
+                                          swapChainDesc,
+                                          out _swapChain!,
+                                          out _device!,
+                                          out _,
+                                          out _context!)
+           .CheckError();
 
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
       {
@@ -145,9 +145,9 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _pixelShader = _device.CreatePixelShader(pixelShaderByteCode.Span);
       _inputLayout = _device.CreateInputLayout(inputElementDescs, vertexShaderByteCode.Span);
       _constantBuffer = _device.CreateBuffer(new((uint)Unsafe.SizeOf<Constants>(),
-         BindFlags.ConstantBuffer,
-         ResourceUsage.Dynamic,
-         CpuAccessFlags.Write));
+                                                 BindFlags.ConstantBuffer,
+                                                 ResourceUsage.Dynamic,
+                                                 CpuAccessFlags.Write));
       _vertexBuffer = _device.CreateBuffer(_vertices, BindFlags.VertexBuffer);
       var colorBufferDesc = new BufferDescription
       {
@@ -187,7 +187,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _context.IASetInputLayout(_inputLayout);
       _context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionId2D.SizeInBytes);
       _context.OMSetBlendState(null);
-      
+
       SetOrthographicProjection(width, height);
    }
 
@@ -195,7 +195,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    {
       if (_renderTargetView == null || _context == null || _swapChain == null)
          return;
-      
+
       _context.ClearRenderTargetView(_renderTargetView, ClearColor);
 
       _context!.OMSetRenderTargets(_renderTargetView);
@@ -209,12 +209,14 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       var view = Matrix4x4.CreateTranslation(-1 * Pan.X, (Pan.Y - 1) * imageAspectRatio, 0);
       var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / Zoom, 2.0f / Zoom, -1.0f, 1.0f);
       _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
-      if (_context == null) return;
-         var mapped = _context.Map(_constantBuffer!, MapMode.WriteDiscard);
-         Unsafe.Write(mapped.DataPointer.ToPointer(), _constants);
-         _context.Unmap(_constantBuffer!);
+      if (_context == null)
+         return;
+
+      var mapped = _context.Map(_constantBuffer!, MapMode.WriteDiscard);
+      Unsafe.Write(mapped.DataPointer.ToPointer(), _constants);
+      _context.Unmap(_constantBuffer!);
    }
-   
+
    public void EndResize(int width, int height)
    {
       // Guard against invalid size or uninitialized state

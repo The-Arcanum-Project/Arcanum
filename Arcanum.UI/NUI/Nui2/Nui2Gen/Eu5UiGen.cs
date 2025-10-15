@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -15,7 +14,6 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem;
-using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
@@ -148,7 +146,7 @@ public static class Eu5UiGen
             }
             else
             {
-               GenerateShortInfo(navH, primary, mainGrid, isMarked);
+               GenerateShortInfo(navH, primary, nxProp, mainGrid, isMarked);
             }
          }
          else
@@ -283,7 +281,7 @@ public static class Eu5UiGen
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
-      var propertyViewModel = new MultiSelectPropertyViewModel(navH.Targets, nxProp, allowReadOnlyEditing);
+      var propertyViewModel = new MultiSelectPropertyViewModel([primary], nxProp, allowReadOnlyEditing);
 
       if (itemType == null)
       {
@@ -303,7 +301,7 @@ public static class Eu5UiGen
 
       if (navH.Targets.Count > 1)
       {
-         GetNotSupportedForMultiSelect(nxProp, mainGrid);
+         GetNotSupportedForMultiSelect(nxProp, mainGrid, rowIndex);
          return;
       }
 
@@ -379,8 +377,7 @@ public static class Eu5UiGen
    {
       var headerPanel = NEF.PropertyTitlePanel(leftMargin);
 
-      var tb = GetCollectionTitleTextBox(modifiableList.Count,
-                                         nxProp,
+      var tb = GetCollectionTitleTextBox(nxProp,
                                          headerPanel,
                                          primary,
                                          leftMargin,
@@ -727,8 +724,7 @@ public static class Eu5UiGen
       }
    }
 
-   private static TextBlock GetCollectionTitleTextBox(int count,
-                                                      Enum nxProp,
+   private static TextBlock GetCollectionTitleTextBox(Enum nxProp,
                                                       DockPanel panel,
                                                       IEu5Object primary,
                                                       int margin,
@@ -774,9 +770,17 @@ public static class Eu5UiGen
       tb.ToolTip = toolTip;
    }
 
-   private static void GetNotSupportedForMultiSelect(Enum nxProp, Grid mainGrid)
+   private static void GetNotSupportedForMultiSelect(Enum nxProp, Grid mainGrid, int rowIndex)
    {
       var text = $"{nxProp} (Not supported in multi-select views)";
+      var tb = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                 false,
+                                                 text,
+                                                 height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                 alignment: HorizontalAlignment.Left,
+                                                 leftMargin: 17);
+
+      GridManager.AddToGrid(mainGrid, tb, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
    private static void GetTypeSpecificUI(NavH navH,
@@ -856,8 +860,6 @@ public static class Eu5UiGen
          element.IsEnabled = false;
       element.VerticalAlignment = VerticalAlignment.Stretch;
       element.Height = ControlFactory.SHORT_INFO_ROW_HEIGHT;
-
-      SetTooltipIsAny(primary, nxProp, element);
 
       var desc = NEF.DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
@@ -973,12 +975,31 @@ public static class Eu5UiGen
       return image;
    }
 
-   private static void SetTooltipIsAny(IAgs iAgs, Enum nxProp, UIElement element)
+   private static void SetTooltipIsAny(IEu5Object primary, Enum nxProp, FrameworkElement element)
    {
+      var desc = primary.GetDescription(nxProp);
+      if (string.IsNullOrWhiteSpace(desc))
+         return;
+
+      element.ToolTip = new ToolTip
+      {
+         Content = desc, MaxWidth = 400,
+      };
    }
 
-   private static void GenerateShortInfo(NavH navH, IEu5Object primary, Grid mainGrid, bool isMarked)
+   private static void GenerateShortInfo(NavH navH, IEu5Object primary, Enum nxProp, Grid mainGrid, bool isMarked)
    {
+      var si = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root),
+                                                                      Nx.ForceGetAs<IEu5Object>(primary, nxProp),
+                                                                      nxProp,
+                                                                      ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                                      ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                      0,
+                                                                      2);
+      if (isMarked)
+         si.Background = ControlFactory.MarkedBrush;
+
+      GridManager.AddToGrid(mainGrid, si, mainGrid.RowDefinitions.Count, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
    public static void CreateGraphViewerButton(IEu5Object primary, NavH navh, DockPanel panel)

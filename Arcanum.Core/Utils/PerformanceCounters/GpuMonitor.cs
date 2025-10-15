@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
+using Common.Logger;
 
 namespace Arcanum.Core.Utils.PerformanceCounters;
 
-public class GpuMonitor : IDisposable
+public sealed class GpuMonitor : IDisposable
 {
    private const string CATEGORY_NAME = "GPU Engine";
    private const string COUNTER_NAME = "Utilization Percentage";
@@ -11,7 +12,8 @@ public class GpuMonitor : IDisposable
    private const string VRAM_COUNTER_NAME = "Dedicated Usage";
 
    private PerformanceCounter? _vramUsageCounter;
-   private readonly List<PerformanceCounter> _gpuCounters = new();
+   private readonly List<PerformanceCounter> _gpuCounters = [];
+   private bool _disposed;
 
    /// <summary>
    /// Initializes the monitor for the current process. This may take a moment.
@@ -19,6 +21,9 @@ public class GpuMonitor : IDisposable
    /// </summary>
    public bool Initialize()
    {
+      if (_disposed)
+         throw new ObjectDisposedException(nameof(GpuMonitor));
+
       try
       {
          var currentProcess = Process.GetCurrentProcess();
@@ -31,18 +36,12 @@ public class GpuMonitor : IDisposable
                                      .ToList();
 
          if (instanceNames.Count == 0)
-         {
-            // This can happen if the process has not yet used the GPU.
-            // We can try again later if we want.
-            Debug.WriteLine($"Could not find GPU performance counter instance for PID {processId}.");
-            return false;
-         }
+            ArcLog.WriteLine("PerfCounter",
+                             LogLevel.WRN,
+                             $"No GPU performance counter instances found for PID {processId}.");
 
-         foreach (var counter in instanceNames.Select(instanceName
-                                                         => new PerformanceCounter(CATEGORY_NAME,
-                                                             COUNTER_NAME,
-                                                             instanceName)))
-            _gpuCounters.Add(counter);
+         foreach (var instanceName in instanceNames)
+            _gpuCounters.Add(new(CATEGORY_NAME, COUNTER_NAME, instanceName));
 
          var gpuMemoryCat = new PerformanceCounterCategory(GPU_MEMORY_CATEGORY);
          var vramInstanceName = gpuMemoryCat.GetInstanceNames()
@@ -51,8 +50,11 @@ public class GpuMonitor : IDisposable
          if (!string.IsNullOrEmpty(vramInstanceName))
             _vramUsageCounter = new(GPU_MEMORY_CATEGORY, VRAM_COUNTER_NAME, vramInstanceName);
          else
-            Debug.WriteLine($"Could not find GPU Process Memory counter for PID {processId}.");
+            ArcLog.WriteLine("PerfCounter",
+                             LogLevel.WRN,
+                             $"Could not find GPU Process Memory counter for PID {processId}.");
 
+         // Prime the counters by reading the first value
          foreach (var counter in _gpuCounters)
             counter.NextValue();
          _vramUsageCounter?.NextValue();
@@ -61,7 +63,8 @@ public class GpuMonitor : IDisposable
       }
       catch (Exception ex)
       {
-         Debug.WriteLine($"Error initializing GPU counter: {ex.Message}");
+         ArcLog.WriteLine("PerfCounter", LogLevel.ERR, $"Error initializing GPU counter: {ex.Message}");
+         Dispose();
          return false;
       }
    }
@@ -71,33 +74,81 @@ public class GpuMonitor : IDisposable
    /// </summary>
    public GpuUsageMetrics GetMetrics()
    {
+      if (_disposed)
+         throw new ObjectDisposedException(nameof(GpuMonitor));
+
       var metrics = new GpuUsageMetrics();
 
       if (_gpuCounters.Count > 0)
-         metrics.GpuUsage = _gpuCounters.Select(c => c.NextValue()).Max();
+         try
+         {
+            metrics.GpuUsage = _gpuCounters.Select(c => c.NextValue()).Max();
+         }
+         catch (InvalidOperationException ex)
+         {
+            Debug.WriteLine($"Failed to read GPU usage counter: {ex.Message}");
+            metrics.GpuUsage = -1;
+         }
       else
          metrics.GpuUsage = -1;
 
       if (_vramUsageCounter != null)
-      {
-         var vramBytes = _vramUsageCounter.NextValue();
-         metrics.VramUsageMb = vramBytes / (1024 * 1024);
-      }
+         try
+         {
+            var vramBytes = _vramUsageCounter.NextValue();
+            metrics.VramUsageMb = vramBytes / (1024f * 1024f);
+         }
+         catch (InvalidOperationException ex)
+         {
+            Debug.WriteLine($"Failed to read VRAM usage counter: {ex.Message}");
+            metrics.VramUsageMb = -1;
+         }
       else
-      {
          metrics.VramUsageMb = -1;
-      }
 
       return metrics;
    }
 
    /// <summary>
-   /// Cleans up the PerformanceCounter resource.
+   /// Cleans up the PerformanceCounter resources.
    /// </summary>
    public void Dispose()
    {
-      foreach (var counter in _gpuCounters)
-         counter.Dispose();
-      _vramUsageCounter?.Dispose();
+      Dispose(true);
+      // GC.SuppressFinalize(this);
+   }
+
+   private void Dispose(bool disposing)
+   {
+      if (_disposed)
+         return;
+
+      if (disposing)
+      {
+         foreach (var counter in _gpuCounters)
+            try
+            {
+               counter.Dispose();
+            }
+            catch (Exception ex)
+            {
+               Debug.WriteLine($"Error disposing GPU counter: {ex.Message}");
+            }
+
+         _gpuCounters.Clear();
+
+         try
+         {
+            _vramUsageCounter?.Dispose();
+         }
+         catch (Exception ex)
+         {
+            Debug.WriteLine($"Error disposing VRAM counter: {ex.Message}");
+         }
+
+         _vramUsageCounter = null;
+      }
+
+      _disposed = true;
    }
 }
