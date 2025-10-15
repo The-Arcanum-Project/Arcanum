@@ -1,6 +1,7 @@
 ﻿// Filename: MultiSelectPropertyViewModel.cs
 
 using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.NUI;
@@ -21,7 +22,11 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    private readonly bool _allowReadonlyWrite;
    private readonly object? _defaultValue;
 
+   private INotifyCollectionChanged? _observableCollection;
+   public event EventHandler? CollectionContentChanged;
+
    public bool IsNonDefaultValue { get; private set; }
+   public int CollectionCount { get; private set; }
 
    public MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property, bool allowReadonlyWrite = false)
    {
@@ -45,7 +50,21 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
             inpc.PropertyChanged += listener.OnEvent;
          }
 
+      if (Value is INotifyCollectionChanged newCollection)
+      {
+         _observableCollection = newCollection;
+         _observableCollection.CollectionChanged += OnModelCollectionChanged;
+      }
+
       UpdateIsNonDefaultState();
+      UpdateCollectionCount();
+   }
+
+   private void OnModelCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+   {
+      UpdateIsNonDefaultState();
+      UpdateCollectionCount();
+      CollectionContentChanged?.Invoke(this, EventArgs.Empty);
    }
 
    /// <summary>
@@ -53,11 +72,40 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    /// </summary>
    private void OnModelPropertyChanged(PropertyChangedEventArgs e)
    {
-      if (e.PropertyName == _property.ToString())
+      if (e.PropertyName != _property.ToString())
+         return;
+
+      if (_observableCollection != null)
+         _observableCollection.CollectionChanged -= OnModelCollectionChanged;
+
+      if (Value is INotifyCollectionChanged newCollection)
       {
-         OnPropertyChanged(nameof(Value));
-         UpdateIsNonDefaultState();
+         _observableCollection = newCollection;
+         _observableCollection.CollectionChanged += OnModelCollectionChanged;
       }
+
+      Refresh();
+   }
+
+   public void Refresh()
+   {
+      OnPropertyChanged(nameof(Value));
+      UpdateIsNonDefaultState();
+      UpdateCollectionCount();
+      CollectionContentChanged?.Invoke(this, EventArgs.Empty);
+   }
+
+   private void UpdateCollectionCount()
+   {
+      var newCount = 0;
+      if (Value is ICollection collection)
+         newCount = collection.Count;
+
+      if (CollectionCount == newCount)
+         return;
+
+      CollectionCount = newCount;
+      OnPropertyChanged(nameof(CollectionCount));
    }
 
    private void UpdateIsNonDefaultState()

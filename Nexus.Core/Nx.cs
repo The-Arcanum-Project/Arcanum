@@ -112,6 +112,9 @@ public static class Nx
       target._removeFromCollection(e, value!);
    }
 
+   /// <summary>
+   /// TRIGGERS UI UPDATES AND COMMAND CREATION
+   /// </summary>
    public static void ClearCollection(INexus target,
                                       [LinkedPropertyEnum(nameof(target))] Enum e)
    {

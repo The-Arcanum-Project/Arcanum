@@ -283,6 +283,7 @@ public static class Eu5UiGen
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
+      var propertyViewModel = new MultiSelectPropertyViewModel(navH.Targets, nxProp, allowReadOnlyEditing);
 
       if (itemType == null)
       {
@@ -292,10 +293,11 @@ public static class Eu5UiGen
                            nxProp,
                            mainGrid,
                            rowIndex,
-                           isMarked: isMarked,
-                           embeddedPropertyTargets: parentProp,
-                           leftMargin: 17,
-                           allowReadOnlyEditing: allowReadOnlyEditing);
+                           isMarked,
+                           propertyViewModel,
+                           parentProp,
+                           17,
+                           allowReadOnlyEditing);
          return;
       }
 
@@ -316,6 +318,7 @@ public static class Eu5UiGen
                            nxProp,
                            mainGrid,
                            rowIndex,
+                           propertyViewModel: propertyViewModel,
                            isMarked: isMarked,
                            embeddedPropertyTargets: parentProp,
                            allowReadOnlyEditing: allowReadOnlyEditing);
@@ -324,18 +327,43 @@ public static class Eu5UiGen
 
       var margin = 19;
       var collectionGrid = ControlFactory.GetCollectionGrid();
-      SetCollectionHeaderPanel(nxProp, itemType, modifiableList, collectionGrid, primary, 0, margin, isMarked, navH);
-      GetCollectionPreview(navH,
-                           primary,
-                           collectionGrid,
-                           nxProp,
-                           modifiableList,
-                           1,
-                           margin);
+
+      SetCollectionHeaderPanel(nxProp,
+                               itemType,
+                               modifiableList,
+                               collectionGrid,
+                               primary,
+                               0,
+                               margin,
+                               isMarked,
+                               navH,
+                               propertyViewModel);
+
+      var rebuildPreview = () =>
+      {
+         ClearCollectionPreview(collectionGrid);
+         GetCollectionPreview(navH, primary, collectionGrid, nxProp, modifiableList, 1, margin);
+      };
+      rebuildPreview();
+
+      propertyViewModel.CollectionContentChanged += (_, _) =>
+      {
+         Application.Current.Dispatcher.Invoke(rebuildPreview);
+      };
 
       if (modifiableList.Count > 0)
          GetCollectionLiner(collectionGrid, margin);
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
+   private static void ClearCollectionPreview(Grid grid)
+   {
+      for (var i = grid.Children.Count - 1; i >= 0; i--)
+      {
+         var child = grid.Children[i];
+         if (Grid.GetRow(child) > 0)
+            grid.Children.RemoveAt(i);
+      }
    }
 
    private static void SetCollectionHeaderPanel(Enum nxProp,
@@ -346,22 +374,27 @@ public static class Eu5UiGen
                                                 int row,
                                                 int leftMargin,
                                                 bool isMarked,
-                                                NavH navh)
+                                                NavH navh,
+                                                MultiSelectPropertyViewModel propertyViewModel)
    {
       var headerPanel = NEF.PropertyTitlePanel(leftMargin);
 
-      GetCollectionTitleTextBox(modifiableList.Count,
-                                nxProp,
-                                headerPanel,
-                                primary,
-                                leftMargin,
-                                isMarked: isMarked,
-                                fontSize: 12,
-                                height: ControlFactory.SHORT_INFO_ROW_HEIGHT - 4);
+      var tb = GetCollectionTitleTextBox(modifiableList.Count,
+                                         nxProp,
+                                         headerPanel,
+                                         primary,
+                                         leftMargin,
+                                         isMarked,
+                                         propertyViewModel,
+                                         fontSize: 12,
+                                         height: ControlFactory.SHORT_INFO_ROW_HEIGHT - 4);
+
+      SetUpPropertyContextMenu(primary, nxProp, tb, propertyViewModel);
+
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
       GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
-      var marker = GetPropertyMarker(new([primary], nxProp));
+      var marker = GetPropertyMarker(propertyViewModel);
 
       GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid, marker, row, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
@@ -694,19 +727,19 @@ public static class Eu5UiGen
       }
    }
 
-   private static void GetCollectionTitleTextBox(int count,
-                                                 Enum nxProp,
-                                                 DockPanel panel,
-                                                 IEu5Object primary,
-                                                 int margin,
-                                                 bool isMarked,
-                                                 int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                 int height = ControlFactory.SHORT_INFO_ROW_HEIGHT)
+   private static TextBlock GetCollectionTitleTextBox(int count,
+                                                      Enum nxProp,
+                                                      DockPanel panel,
+                                                      IEu5Object primary,
+                                                      int margin,
+                                                      bool isMarked,
+                                                      MultiSelectPropertyViewModel propertyViewModel,
+                                                      int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                      int height = ControlFactory.SHORT_INFO_ROW_HEIGHT)
    {
-      var text = $"{nxProp.ToString()} ({count})";
       var tb = ControlFactory.GetHeaderTextBlock(fontSize,
                                                  false,
-                                                 text,
+                                                 string.Empty,
                                                  height: height,
                                                  alignment: HorizontalAlignment.Left,
                                                  leftMargin: margin);
@@ -714,8 +747,18 @@ public static class Eu5UiGen
       if (isMarked)
          tb.Background = ControlFactory.MarkedBrush;
 
+      var multiBinding = new MultiBinding { Converter = new PropertyNameAndCountConverter() };
+      multiBinding.Bindings.Add(new Binding { Source = nxProp });
+
+      multiBinding.Bindings.Add(new Binding(nameof(MultiSelectPropertyViewModel.CollectionCount))
+      {
+         Source = propertyViewModel,
+      });
+      tb.SetBinding(TextBlock.TextProperty, multiBinding);
+
       panel.Children.Add(tb);
       SetCollectionToolTip(primary, nxProp, tb);
+      return tb;
    }
 
    private static void SetCollectionToolTip(IEu5Object primary, Enum nxProp, TextBlock tb)
@@ -742,13 +785,12 @@ public static class Eu5UiGen
                                          Grid mainGrid,
                                          int rowIndex,
                                          bool isMarked,
+                                         MultiSelectPropertyViewModel propertyViewModel,
                                          Enum? embeddedPropertyTargets = null,
                                          int leftMargin = 0,
                                          bool allowReadOnlyEditing = false)
    {
       var type = primary.GetNxPropType(nxProp);
-
-      MultiSelectPropertyViewModel propertyViewModel;
 
       if (embeddedPropertyTargets != null)
       {
@@ -763,8 +805,6 @@ public static class Eu5UiGen
 
          propertyViewModel = new(targets, nxProp, allowReadOnlyEditing);
       }
-      else
-         propertyViewModel = new(navH.Targets, nxProp, allowReadOnlyEditing);
 
       var binding = new Binding(nameof(propertyViewModel.Value))
       {
@@ -822,7 +862,7 @@ public static class Eu5UiGen
       var desc = NEF.DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
 
-      SetUpPropertyContextMenu(primary, nxProp, desc);
+      SetUpPropertyContextMenu(primary, nxProp, desc, propertyViewModel);
 
       if (isMarked)
          desc.Background = ControlFactory.MarkedBrush;
@@ -851,7 +891,10 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static void SetUpPropertyContextMenu(IEu5Object primary, Enum nxProp, TextBlock desc)
+   private static void SetUpPropertyContextMenu(IEu5Object primary,
+                                                Enum nxProp,
+                                                TextBlock uiTarget,
+                                                MultiSelectPropertyViewModel propertyViewModel)
    {
       if (primary.IsPropertyReadOnly(nxProp))
          return;
@@ -859,29 +902,46 @@ public static class Eu5UiGen
       var defaultValue = primary.GetDefaultValue(nxProp);
       MouseButtonEventHandler mouseUpHandler = (_, _) =>
       {
-         if (desc.ContextMenu == null)
-            desc.ContextMenu = new();
+         if (uiTarget.ContextMenu == null)
+            uiTarget.ContextMenu = new();
          else
          {
-            foreach (var item in desc.ContextMenu.Items.OfType<MenuItem>())
+            foreach (var item in uiTarget.ContextMenu.Items.OfType<MenuItem>())
                if (item.Header.ToString() == "Reset to Default")
                   return;
 
-            desc.ContextMenu.Items.Add(new Separator());
+            uiTarget.ContextMenu.Items.Add(new Separator());
          }
-
-         var curVal = Nx.ForceGetAs<object>(primary, nxProp);
 
          var resetItem = new MenuItem
          {
-            Header = "Reset to Default", IsEnabled = !Equals(curVal, defaultValue),
+            Name = "ResetToDefaultMenuItem",
+            Header = "Reset to Default",
+            DataContext = propertyViewModel,
          };
-         resetItem.Click += (_, _) => { Nx.ForceSet(defaultValue, primary, nxProp); };
-         desc.ContextMenu.Items.Add(resetItem);
+
+         resetItem.SetBinding(UIElement.IsEnabledProperty,
+                              new Binding(nameof(MultiSelectPropertyViewModel.IsNonDefaultValue)));
+
+         resetItem.Click += (_, _) =>
+         {
+            if (primary.IsCollection(nxProp))
+            {
+               Nx.ClearCollection(primary, nxProp);
+               propertyViewModel.Refresh();
+            }
+            else
+               propertyViewModel.Value = defaultValue;
+         };
+
+         if (uiTarget.ContextMenu.Items.Count > 0 && uiTarget.ContextMenu.Items[^1] is not Separator)
+            uiTarget.ContextMenu.Items.Add(new Separator());
+
+         uiTarget.ContextMenu.Items.Add(resetItem);
       };
 
-      desc.MouseRightButtonUp += mouseUpHandler;
-      desc.Unloaded += (_, _) => desc.MouseRightButtonUp -= mouseUpHandler;
+      uiTarget.MouseRightButtonUp += mouseUpHandler;
+      uiTarget.Unloaded += (_, _) => uiTarget.MouseRightButtonUp -= mouseUpHandler;
    }
 
    private static Image GetPropertyMarker(MultiSelectPropertyViewModel vm)
