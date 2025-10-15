@@ -92,7 +92,6 @@ public static class NEF
          HorizontalAlignment = HorizontalAlignment.Stretch,
          VerticalAlignment = VerticalAlignment.Center,
          Margin = new(leftMargin, 0, 0, 0),
-         Height = double.NaN,
       };
    }
 

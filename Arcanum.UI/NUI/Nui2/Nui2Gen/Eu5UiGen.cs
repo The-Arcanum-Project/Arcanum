@@ -356,7 +356,8 @@ public static class Eu5UiGen
                                 primary,
                                 leftMargin,
                                 isMarked: isMarked,
-                                fontSize: 12);
+                                fontSize: 12,
+                                height: ControlFactory.SHORT_INFO_ROW_HEIGHT - 4);
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
       GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
@@ -674,7 +675,18 @@ public static class Eu5UiGen
             }
             else
             {
-               // TODO: @Minnator Fallback window
+               var text = ControlFactory.PureHeaderTextBlock(false);
+               text.Text = item?.ToString() ?? "null";
+               text.FontSize = ControlFactory.SHORT_INFO_FONT_SIZE;
+               text.Height = 14;
+               text.VerticalAlignment = VerticalAlignment.Top;
+               GridManager.AddToGrid(grid,
+                                     text,
+                                     rowIndex + i,
+                                     0,
+                                     0,
+                                     ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                     leftMargin: margin + 4);
             }
          }
 
@@ -688,13 +700,14 @@ public static class Eu5UiGen
                                                  IEu5Object primary,
                                                  int margin,
                                                  bool isMarked,
-                                                 int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE)
+                                                 int fontSize = ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                 int height = ControlFactory.SHORT_INFO_ROW_HEIGHT)
    {
       var text = $"{nxProp.ToString()} ({count})";
       var tb = ControlFactory.GetHeaderTextBlock(fontSize,
                                                  false,
                                                  text,
-                                                 height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                 height: height,
                                                  alignment: HorizontalAlignment.Left,
                                                  leftMargin: margin);
 
