@@ -19,12 +19,18 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    private readonly IReadOnlyList<INUI> _targets;
    private readonly Enum _property;
    private readonly bool _allowReadonlyWrite;
+   private readonly object? _defaultValue;
+
+   public bool IsNonDefaultValue { get; private set; }
 
    public MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property, bool allowReadonlyWrite = false)
    {
       _targets = targets;
       _property = property;
       _allowReadonlyWrite = allowReadonlyWrite;
+
+      if (_targets.Count > 0)
+         _defaultValue = _targets[0].GetDefaultValue(_property);
 
       // Subscribe to the PropertyChanged event of each target using a weak listener.
       foreach (var target in _targets)
@@ -38,6 +44,8 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
 
             inpc.PropertyChanged += listener.OnEvent;
          }
+
+      UpdateIsNonDefaultState();
    }
 
    /// <summary>
@@ -46,7 +54,40 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    private void OnModelPropertyChanged(PropertyChangedEventArgs e)
    {
       if (e.PropertyName == _property.ToString())
+      {
          OnPropertyChanged(nameof(Value));
+         UpdateIsNonDefaultState();
+      }
+   }
+
+   private void UpdateIsNonDefaultState()
+   {
+      if (_targets.Count == 0)
+      {
+         SetIsNonDefaultValue(false);
+         return;
+      }
+
+      // The logic: if ANY target's value is not the default, the marker is "on".
+      // This correctly handles the multi-select case where values might be mixed.
+      var anyNonDefault = false;
+      foreach (var target in _targets)
+         if (!AreValuesEqual(GetValue(target), _defaultValue))
+         {
+            anyNonDefault = true;
+            break; //
+         }
+
+      SetIsNonDefaultValue(anyNonDefault);
+   }
+
+   private void SetIsNonDefaultValue(bool newValue)
+   {
+      if (IsNonDefaultValue == newValue)
+         return;
+
+      IsNonDefaultValue = newValue;
+      OnPropertyChanged(nameof(IsNonDefaultValue));
    }
 
    /// <summary>

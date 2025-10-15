@@ -146,6 +146,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
       Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
+      GcWizard.ForceGc();
    }
 
    private void SelectionOnLocationSelectionChanged(List<Location> locations)

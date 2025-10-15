@@ -20,6 +20,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Registry;
+using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -359,7 +360,7 @@ public static class Eu5UiGen
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
       GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
-      var marker = GetPropertyMarker(primary, nxProp);
+      var marker = GetPropertyMarker(new([primary], nxProp));
 
       GridManager.AddToGrid(mainGrid, headerPanel, row, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid, marker, row, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
@@ -807,6 +808,9 @@ public static class Eu5UiGen
 
       var desc = NEF.DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
+
+      SetUpPropertyContextMenu(primary, nxProp, desc);
+
       if (isMarked)
          desc.Background = ControlFactory.MarkedBrush;
 
@@ -820,7 +824,7 @@ public static class Eu5UiGen
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
 
-      var propertyMarker = GetPropertyMarker(primary, nxProp);
+      var propertyMarker = GetPropertyMarker(propertyViewModel);
 
       GridManager.AddToGrid(mainGrid, dockPanel, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid,
@@ -834,21 +838,41 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static Image GetPropertyMarker(IEu5Object primary, Enum nxProp)
+   private static void SetUpPropertyContextMenu(IEu5Object primary, Enum nxProp, TextBlock desc)
    {
-      var value = Nx.ForceGetAs<object>(primary, nxProp);
+      if (primary.IsPropertyReadOnly(nxProp))
+         return;
+
       var defaultValue = primary.GetDefaultValue(nxProp);
+      MouseButtonEventHandler mouseUpHandler = (_, _) =>
+      {
+         if (desc.ContextMenu == null)
+            desc.ContextMenu = new();
+         else
+         {
+            foreach (var item in desc.ContextMenu.Items.OfType<MenuItem>())
+               if (item.Header.ToString() == "Reset to Default")
+                  return;
 
-      var isSaved = !Equals(value, defaultValue);
+            desc.ContextMenu.Items.Add(new Separator());
+         }
 
-      if (!primary.AgsSettings.SkipDefaultValues && isSaved)
-         isSaved = false;
+         var curVal = Nx.ForceGetAs<object>(primary, nxProp);
 
-      if (primary.AgsSettings.WriteEmptyCollectionHeader &&
-          primary.IsCollection(nxProp) &&
-          value is IList { Count: 0 })
-         isSaved = true;
+         var resetItem = new MenuItem
+         {
+            Header = "Reset to Default", IsEnabled = !Equals(curVal, defaultValue),
+         };
+         resetItem.Click += (_, _) => { Nx.ForceSet(defaultValue, primary, nxProp); };
+         desc.ContextMenu.Items.Add(resetItem);
+      };
 
+      desc.MouseRightButtonUp += mouseUpHandler;
+      desc.Unloaded += (_, _) => desc.MouseRightButtonUp -= mouseUpHandler;
+   }
+
+   private static Image GetPropertyMarker(MultiSelectPropertyViewModel vm)
+   {
       var image = new Image
       {
          Width = 16,
@@ -857,17 +881,21 @@ public static class Eu5UiGen
          HorizontalAlignment = HorizontalAlignment.Left,
          Margin = new(0, 0, 0, 0),
          SnapsToDevicePixels = true,
+         DataContext = vm,
       };
 
-      var uri = isSaved
-                   ? "/Arcanum_UI;component/Assets/Icons/16x16/DontSaveToFile16x16.png"
-                   : "/Arcanum_UI;component/Assets/Icons/16x16/SaveToFile16x16.png";
+      var sourceBinding = new Binding(nameof(vm.IsNonDefaultValue))
+      {
+         Converter = new IsNonDefaultToImageSourceConverter(),
+      };
 
-      image.ToolTip = isSaved
-                         ? "This property is set to a NON-default value and will be saved to file."
-                         : "This property is set to its default value and will NOT be saved to file.";
+      var tooltipBinding = new Binding(nameof(vm.IsNonDefaultValue))
+      {
+         Converter = new IsNonDefaultToTooltipConverter(),
+      };
 
-      image.Source = new BitmapImage(new(uri, UriKind.RelativeOrAbsolute));
+      image.SetBinding(Image.SourceProperty, sourceBinding);
+      image.SetBinding(FrameworkElement.ToolTipProperty, tooltipBinding);
 
       return image;
    }
