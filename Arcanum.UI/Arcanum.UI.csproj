@@ -311,6 +311,7 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11"/>
         <PackageReference Include="Vortice.D3DCompiler" Version="3.6.2" />
         <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
@@ -321,6 +322,10 @@
 
     <ItemGroup>
       <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\AverageColor.hlsl"/>
     </ItemGroup>
 
 </Project>

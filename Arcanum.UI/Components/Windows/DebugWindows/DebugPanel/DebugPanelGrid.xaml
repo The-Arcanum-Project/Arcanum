@@ -9,7 +9,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "1*"
                               MinWidth = "150" />
-            <ColumnDefinition Width = "4*" />
+            <ColumnDefinition Width = "2*" />
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row = "0"
@@ -74,6 +74,11 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "GraphViewerButton_Click" />
+
+            <styleClasses:BaseButton Content = "Average Compute Shader"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "AverageComputeShaderButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

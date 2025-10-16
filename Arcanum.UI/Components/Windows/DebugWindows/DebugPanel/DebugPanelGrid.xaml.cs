@@ -4,6 +4,7 @@ using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.DirectX.ComputeShaderClasses;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -78,5 +79,10 @@ public partial class DebugPanelGrid
    private void GraphViewerButton_Click(object sender, RoutedEventArgs e)
    {
       new GraphViewer().Show();
+   }
+
+   private void AverageComputeShaderButton_Click(object sender, RoutedEventArgs e)
+   {
+      AveragerTest.RunTest();
    }
 }
