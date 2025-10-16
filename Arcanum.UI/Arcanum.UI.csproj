@@ -332,4 +332,13 @@
         <EmbeddedResource Include="DirectX\Shaders\DrawRects.hlsl"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\ClearHistogram.hlsl"/>
+        <EmbeddedResource Include="DirectX\Shaders\DrawGradientRects.hlsl"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\BuildHistogram.hlsl"/>
+    </ItemGroup>
+
 </Project>

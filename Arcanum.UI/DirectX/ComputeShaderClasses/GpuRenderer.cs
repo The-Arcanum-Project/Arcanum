@@ -78,10 +78,11 @@ public class GpuRenderer : IDisposable
    }
 
    public void Render(
+      Blob vertexShaderByteCode,
       ID3D11RenderTargetView renderTarget,
       ID3D11VertexShader vertexShader,
       ID3D11PixelShader pixelShader,
-      ID3D11InputLayout inputLayout,
+      InputElementDescription[] inputElements,
       ID3D11Buffer[] vertexBuffers,
       uint[] strides,
       ID3D11Buffer indexBuffer,
@@ -94,6 +95,7 @@ public class GpuRenderer : IDisposable
       var viewport = new Viewport(0, 0, desc.Width, desc.Height, 0.0f, 1.0f);
 
       // --- Set Pipeline State ---
+      using var inputLayout = Device.CreateInputLayout(inputElements, vertexShaderByteCode);
       _context.IASetInputLayout(inputLayout);
 
       var offsets = new uint[vertexBuffers.Length];

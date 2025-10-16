@@ -23,6 +23,9 @@ public class GpuComputeRunner : IDisposable
            .CheckError();
    }
 
+   public ID3D11Device Device => _device;
+   public ID3D11DeviceContext Context => _context;
+
    /// <summary>
    /// Creates a Texture2D from an ImageSharp Image&lt;Rgba32&gt;.
    /// The texture will have a format of R8G8B8A8_UNorm.
@@ -68,6 +71,60 @@ public class GpuComputeRunner : IDisposable
          MiscFlags = ResourceOptionFlags.BufferStructured,
       };
       return _device.CreateBuffer(data, bufferDesc);
+   }
+
+   public void UpdateBuffer<T>(ID3D11Buffer buffer, in T data) where T : unmanaged
+   {
+      var mapped = _context.Map(buffer, 0, MapMode.WriteDiscard);
+      try
+      {
+         Marshal.StructureToPtr(data, mapped.DataPointer, false);
+      }
+      finally
+      {
+         _context.Unmap(buffer, 0);
+      }
+   }
+
+   public unsafe T[] ReadBackBuffer<T>(ID3D11Buffer buffer) where T : unmanaged
+   {
+      var stagingDesc = buffer.Description;
+      stagingDesc.Usage = ResourceUsage.Staging;
+      stagingDesc.BindFlags = BindFlags.None;
+      stagingDesc.CPUAccessFlags = CpuAccessFlags.Read;
+      stagingDesc.MiscFlags = ResourceOptionFlags.None;
+
+      using var stagingBuffer = _device.CreateBuffer(stagingDesc);
+      _context.CopyResource(stagingBuffer, buffer);
+
+      var mapped = _context.Map(stagingBuffer, 0, MapMode.Read);
+      try
+      {
+         var sizeInBytes = buffer.Description.ByteWidth;
+         var dataSpan = new ReadOnlySpan<byte>(mapped.DataPointer.ToPointer(), (int)sizeInBytes);
+         var result = new T[sizeInBytes / sizeof(uint)];
+         MemoryMarshal.Cast<byte, T>(dataSpan).CopyTo(result);
+         return result;
+      }
+      finally
+      {
+         _context.Unmap(stagingBuffer, 0);
+      }
+   }
+
+   public ID3D11Buffer CreateConstantBuffer(uint sizeInBytes)
+   {
+      if (sizeInBytes % 16 != 0)
+         throw new ArgumentException("Constant buffer size must be a multiple of 16.", nameof(sizeInBytes));
+
+      var desc = new BufferDescription
+      {
+         ByteWidth = sizeInBytes,
+         Usage = ResourceUsage.Dynamic,
+         BindFlags = BindFlags.ConstantBuffer,
+         CPUAccessFlags = CpuAccessFlags.Write,
+      };
+      return _device.CreateBuffer(desc);
    }
 
    /// <summary>
