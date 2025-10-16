@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Vortice.D3DCompiler;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;

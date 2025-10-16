@@ -1,13 +1,10 @@
 ﻿using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Vortice.D3DCompiler;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
-using Vortice.Mathematics;
 using MapFlags = Vortice.Direct3D11.MapFlags;
 
 namespace Arcanum.UI.DirectX.ComputeShaderClasses;
@@ -56,170 +53,167 @@ public class GpuRectangleRenderer : IDisposable
 
    public void RenderRectanglesToFile(string outputPath, int width, int height, GpuRect[] rects, Float4[] colors)
    {
-      unsafe
+      // --- 1. Compile Shaders ---
+      var vsByteCode = ID3DRenderer.CompileBytecode("DrawRects.hlsl", "VS", "vs_5_0");
+      using var vertexShader = _device.CreateVertexShader(vsByteCode.Span);
+
+      var psByteCode = ID3DRenderer.CompileBytecode("DrawRects.hlsl", "PS", "ps_5_0");
+      using var pixelShader = _device.CreatePixelShader(psByteCode.Span);
+
+      // --- 2. Create Render Target Resources ---
+      var textureDesc = new Texture2DDescription
       {
-         // --- 1. Compile Shaders ---
-         var vsByteCode = ID3DRenderer.CompileBytecode("DrawRects.hlsl", "VS", "vs_5_0");
-         using var vertexShader = _device.CreateVertexShader(vsByteCode.Span);
+         Width = (uint)width,
+         Height = (uint)height,
+         MipLevels = 1,
+         ArraySize = 1,
+         Format = Format.R8G8B8A8_UNorm,
+         SampleDescription = new(1, 0),
+         Usage = ResourceUsage.Default,
+         BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource
+      };
+      using var renderTargetTexture = _device.CreateTexture2D(textureDesc);
+      using var renderTargetView = _device.CreateRenderTargetView(renderTargetTexture);
 
-         var psByteCode = ID3DRenderer.CompileBytecode("DrawRects.hlsl", "PS", "ps_5_0");
-         using var pixelShader = _device.CreatePixelShader(psByteCode.Span);
+      // --- 3. Create Input Assembler Resources (Buffers and Layout) ---
 
-         // --- 2. Create Render Target Resources ---
-         var textureDesc = new Texture2DDescription
+      // A simple quad made of 4 vertices (will be drawn as 2 triangles)
+      var quadVertices = new Vertex[]
+      {
+         new() { Position = new(0, 0) }, // Top-left
+         new() { Position = new(1, 0) }, // Top-right
+         new() { Position = new(0, 1) }, // Bottom-left
+         new() { Position = new(1, 1) } // Bottom-right
+      };
+      // We also need an index buffer to tell the GPU how to form triangles from the vertices
+      var quadIndices = new ushort[] { 0, 1, 2, 2, 1, 3 };
+
+      using var vertexBuffer = _device.CreateBuffer(quadVertices, BindFlags.VertexBuffer);
+      using var indexBuffer = _device.CreateBuffer(quadIndices, BindFlags.IndexBuffer);
+
+      // Create the per-instance data
+      var instanceData = new InstanceData[rects.Length];
+      for (int i = 0; i < rects.Length; i++)
+      {
+         instanceData[i] = new()
          {
-            Width = (uint)width,
-            Height = (uint)height,
-            MipLevels = 1,
-            ArraySize = 1,
-            Format = Format.R8G8B8A8_UNorm,
-            SampleDescription = new(1, 0),
-            Usage = ResourceUsage.Default,
-            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource
+            Offset = new(rects[i].Left, rects[i].Top),
+            Size = new(rects[i].Right - rects[i].Left, rects[i].Bottom - rects[i].Top),
+            Color = colors[i]
          };
-         using var renderTargetTexture = _device.CreateTexture2D(textureDesc);
-         using var renderTargetView = _device.CreateRenderTargetView(renderTargetTexture);
+      }
 
-         // --- 3. Create Input Assembler Resources (Buffers and Layout) ---
+      using var instanceBuffer = _device.CreateBuffer(instanceData, BindFlags.VertexBuffer);
 
-         // A simple quad made of 4 vertices (will be drawn as 2 triangles)
-         var quadVertices = new Vertex[]
+      var constBufferDesc = new BufferDescription
+      {
+         // ByteWidth MUST be a multiple of 16.
+         ByteWidth = 16, // Marshal.SizeOf<Constants>() would also work and is safer.
+         Usage = ResourceUsage.Dynamic,
+         BindFlags = BindFlags.ConstantBuffer,
+         CPUAccessFlags = CpuAccessFlags.Write,
+      };
+      using var constantBuffer = _device.CreateBuffer(constBufferDesc);
+      var constants = new Constants { RenderTargetSize = new(width, height) };
+      var mappedResource = _context.Map(constantBuffer, 0, MapMode.WriteDiscard);
+      try
+      {
+         Marshal.StructureToPtr(constants, mappedResource.DataPointer, false);
+      }
+      finally
+      {
+         _context.Unmap(constantBuffer, 0);
+      }
+
+      // Create the Input Layout - This tells the GPU how our vertex and instance data is structured.
+      var inputElements = new[]
+      {
+         // Per-Vertex Data (from vertexBuffer in slot 0)
+         new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0, InputClassification.PerVertexData, 0),
+         // Per-Instance Data (from instanceBuffer in slot 1)
+         new InputElementDescription("INSTANCE_OFFSET",
+                                     0,
+                                     Format.R32G32_Float,
+                                     0,
+                                     1,
+                                     InputClassification.PerInstanceData,
+                                     1),
+         new InputElementDescription("INSTANCE_SIZE",
+                                     0,
+                                     Format.R32G32_Float,
+                                     8,
+                                     1,
+                                     InputClassification.PerInstanceData,
+                                     1),
+         new InputElementDescription("INSTANCE_COLOR",
+                                     0,
+                                     Format.R32G32B32A32_Float,
+                                     16,
+                                     1,
+                                     InputClassification.PerInstanceData,
+                                     1)
+      };
+      using var inputLayout = _device.CreateInputLayout(inputElements, vsByteCode.Span);
+
+      // --- 4. Set Pipeline State ---
+      _context.IASetInputLayout(inputLayout);
+      _context.IASetVertexBuffer(0, vertexBuffer, (uint)Marshal.SizeOf<Vertex>());
+      _context.IASetVertexBuffer(1, instanceBuffer, (uint)Marshal.SizeOf<InstanceData>());
+      _context.IASetIndexBuffer(indexBuffer, Format.R16_UInt, 0);
+      _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+      _context.VSSetShader(vertexShader);
+      _context.VSSetConstantBuffer(0, constantBuffer);
+      _context.RSSetViewport(0, 0, width, height);
+      _context.PSSetShader(pixelShader);
+      _context.OMSetRenderTargets(renderTargetView);
+
+      // --- 5. Clear and Draw ---
+      _context.ClearRenderTargetView(renderTargetView, new(0.0f, 0.0f, 0.0f)); // Clear to black
+      _context.DrawIndexedInstanced((uint)quadIndices.Length, (uint)rects.Length, 0, 0, 0);
+
+      // --- 6. Readback the Result to CPU ---
+      var stagingDesc = renderTargetTexture.Description;
+      stagingDesc.Usage = ResourceUsage.Staging;
+      stagingDesc.BindFlags = BindFlags.None;
+      stagingDesc.CPUAccessFlags = CpuAccessFlags.Read;
+      using var stagingTexture = _device.CreateTexture2D(stagingDesc);
+      _context.CopyResource(stagingTexture, renderTargetTexture);
+
+      var mapped = _context.Map(stagingTexture, 0, MapMode.Read, MapFlags.None);
+      try
+      {
+         int sourceRowPitch = (int)mapped.RowPitch;
+         int bytesPerPixel = 4; // For R8G8B8A8_UNorm
+         int destinationStride = width * bytesPerPixel; // The tightly-packed stride
+
+         // Create a new, tightly-packed buffer on the CPU.
+         var tightlyPackedPixels = new byte[width * height * bytesPerPixel];
+
+         // If the strides match, we can do a single fast copy.
+         if (sourceRowPitch == destinationStride)
          {
-            new() { Position = new(0, 0) }, // Top-left
-            new() { Position = new(1, 0) }, // Top-right
-            new() { Position = new(0, 1) }, // Bottom-left
-            new() { Position = new(1, 1) } // Bottom-right
-         };
-         // We also need an index buffer to tell the GPU how to form triangles from the vertices
-         var quadIndices = new ushort[] { 0, 1, 2, 2, 1, 3 };
-
-         using var vertexBuffer = _device.CreateBuffer(quadVertices, BindFlags.VertexBuffer);
-         using var indexBuffer = _device.CreateBuffer(quadIndices, BindFlags.IndexBuffer);
-
-         // Create the per-instance data
-         var instanceData = new InstanceData[rects.Length];
-         for (int i = 0; i < rects.Length; i++)
+            Marshal.Copy(mapped.DataPointer, tightlyPackedPixels, 0, tightlyPackedPixels.Length);
+         }
+         else // The strides do NOT match, we must copy row by row.
          {
-            instanceData[i] = new()
+            for (int y = 0; y < height; y++)
             {
-               Offset = new(rects[i].Left, rects[i].Top),
-               Size = new(rects[i].Right - rects[i].Left, rects[i].Bottom - rects[i].Top),
-               Color = colors[i]
-            };
-         }
+               // Calculate the starting position for this row in both buffers.
+               IntPtr sourcePtr = mapped.DataPointer + (y * sourceRowPitch);
+               int destinationOffset = y * destinationStride;
 
-         using var instanceBuffer = _device.CreateBuffer(instanceData, BindFlags.VertexBuffer);
-
-         var constBufferDesc = new BufferDescription
-         {
-            // ByteWidth MUST be a multiple of 16.
-            ByteWidth = 16, // Marshal.SizeOf<Constants>() would also work and is safer.
-            Usage = ResourceUsage.Dynamic,
-            BindFlags = BindFlags.ConstantBuffer,
-            CPUAccessFlags = CpuAccessFlags.Write,
-         };
-         using var constantBuffer = _device.CreateBuffer(constBufferDesc);
-         var constants = new Constants { RenderTargetSize = new(width, height) };
-         var mappedResource = _context.Map(constantBuffer, 0, MapMode.WriteDiscard);
-         try
-         {
-            Marshal.StructureToPtr(constants, mappedResource.DataPointer, false);
-         }
-         finally
-         {
-            _context.Unmap(constantBuffer, 0);
-         }
-
-         // Create the Input Layout - This tells the GPU how our vertex and instance data is structured.
-         var inputElements = new[]
-         {
-            // Per-Vertex Data (from vertexBuffer in slot 0)
-            new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0, InputClassification.PerVertexData, 0),
-            // Per-Instance Data (from instanceBuffer in slot 1)
-            new InputElementDescription("INSTANCE_OFFSET",
-                                        0,
-                                        Format.R32G32_Float,
-                                        0,
-                                        1,
-                                        InputClassification.PerInstanceData,
-                                        1),
-            new InputElementDescription("INSTANCE_SIZE",
-                                        0,
-                                        Format.R32G32_Float,
-                                        8,
-                                        1,
-                                        InputClassification.PerInstanceData,
-                                        1),
-            new InputElementDescription("INSTANCE_COLOR",
-                                        0,
-                                        Format.R32G32B32A32_Float,
-                                        16,
-                                        1,
-                                        InputClassification.PerInstanceData,
-                                        1)
-         };
-         using var inputLayout = _device.CreateInputLayout(inputElements, vsByteCode.Span);
-
-         // --- 4. Set Pipeline State ---
-         _context.IASetInputLayout(inputLayout);
-         _context.IASetVertexBuffer(0, vertexBuffer, (uint)Marshal.SizeOf<Vertex>());
-         _context.IASetVertexBuffer(1, instanceBuffer, (uint)Marshal.SizeOf<InstanceData>());
-         _context.IASetIndexBuffer(indexBuffer, Format.R16_UInt, 0);
-         _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-         _context.VSSetShader(vertexShader);
-         _context.VSSetConstantBuffer(0, constantBuffer);
-         _context.RSSetViewport(0, 0, width, height);
-         _context.PSSetShader(pixelShader);
-         _context.OMSetRenderTargets(renderTargetView);
-
-         // --- 5. Clear and Draw ---
-         _context.ClearRenderTargetView(renderTargetView, new(0.0f, 0.0f, 0.0f)); // Clear to black
-         _context.DrawIndexedInstanced((uint)quadIndices.Length, (uint)rects.Length, 0, 0, 0);
-
-         // --- 6. Readback the Result to CPU ---
-         var stagingDesc = renderTargetTexture.Description;
-         stagingDesc.Usage = ResourceUsage.Staging;
-         stagingDesc.BindFlags = BindFlags.None;
-         stagingDesc.CPUAccessFlags = CpuAccessFlags.Read;
-         using var stagingTexture = _device.CreateTexture2D(stagingDesc);
-         _context.CopyResource(stagingTexture, renderTargetTexture);
-
-         var mapped = _context.Map(stagingTexture, 0, MapMode.Read, MapFlags.None);
-         try
-         {
-            int sourceRowPitch = (int)mapped.RowPitch;
-            int bytesPerPixel = 4; // For R8G8B8A8_UNorm
-            int destinationStride = width * bytesPerPixel; // The tightly-packed stride
-
-            // Create a new, tightly-packed buffer on the CPU.
-            var tightlyPackedPixels = new byte[width * height * bytesPerPixel];
-
-            // If the strides match, we can do a single fast copy.
-            if (sourceRowPitch == destinationStride)
-            {
-               Marshal.Copy(mapped.DataPointer, tightlyPackedPixels, 0, tightlyPackedPixels.Length);
+               // Copy one row's worth of pixel data, skipping the padding.
+               Marshal.Copy(sourcePtr, tightlyPackedPixels, destinationOffset, destinationStride);
             }
-            else // The strides do NOT match, we must copy row by row.
-            {
-               for (int y = 0; y < height; y++)
-               {
-                  // Calculate the starting position for this row in both buffers.
-                  IntPtr sourcePtr = mapped.DataPointer + (y * sourceRowPitch);
-                  int destinationOffset = y * destinationStride;
-
-                  // Copy one row's worth of pixel data, skipping the padding.
-                  Marshal.Copy(sourcePtr, tightlyPackedPixels, destinationOffset, destinationStride);
-               }
-            }
-
-            // Now, load the perfectly packed data into ImageSharp.
-            var image = Image.LoadPixelData<Rgba32>(tightlyPackedPixels, width, height);
-            image.SaveAsPng(outputPath);
          }
-         finally
-         {
-            _context.Unmap(stagingTexture, 0);
-         }
+
+         // Now, load the perfectly packed data into ImageSharp.
+         var image = Image.LoadPixelData<Rgba32>(tightlyPackedPixels, width, height);
+         image.SaveAsPng(outputPath);
+      }
+      finally
+      {
+         _context.Unmap(stagingTexture, 0);
       }
    }
 
