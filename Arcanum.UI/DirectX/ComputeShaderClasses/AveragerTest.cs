@@ -7,27 +7,32 @@ public static class AveragerTest
 {
    public static void RunTest()
    {
-      const int rectCount = 100;
+      const int rectCount = 4096;
 
       Console.WriteLine("Generating sample locations...");
       var random = new Random();
       using var image =
          SixLabors.ImageSharp.Image
                   .Load<
-                      Rgba32>("C:\\Users\\david\\source\\repos\\Arcanum\\Arcanum.UI\\Assets\\Images\\ProvinceFileCreator1024x1024.png");
+                      Rgba32>("C:\\Users\\david\\source\\repos\\Arcanum\\Arcanum.UI\\Assets\\Logo\\ArcanumForeColor.png");
       var locations = new GpuRect[rectCount];
       var imageWidth = image.Width;
       var imageHeight = image.Height;
 
-      // split the image into rectCount triangles covering the whole image
+      var gridSize = (int)Math.Ceiling(Math.Sqrt(rectCount));
+
+      var cellWidth = imageWidth / gridSize;
+      var cellHeight = imageHeight / gridSize;
+
       for (var i = 0; i < rectCount; i++)
       {
-         var left = (i % 10) * (imageWidth / 10);
-         var top = (i / 10) * (imageHeight / 10);
-         var right = left + (imageWidth / 10);
-         var bottom = top + (imageHeight / 10);
+         // 3. Use the dynamic 'gridSize' instead of the hard-coded '10'.
+         var left = (i % gridSize) * cellWidth;
+         var top = (i / gridSize) * cellHeight;
+         var right = left + cellWidth;
+         var bottom = top + cellHeight;
 
-         // Add some random jitter to the rectangle position
+         // Your jitter logic is perfectly fine and can remain as is.
          var jitterX = random.Next(-5, 5);
          var jitterY = random.Next(-5, 5);
 
@@ -49,16 +54,13 @@ public static class AveragerTest
       stopwatch.Stop();
       Console.WriteLine($"Processing complete in {stopwatch.ElapsedMilliseconds} ms.");
 
-      var sb = new System.Text.StringBuilder();
-      // Print some results
-      for (var i = 0; i < rectCount; i++)
-      {
-         var str =
-            $"Location {i} ({locations[i]}) Avg Color: R={results[i].R:F2}, G={results[i].G:F2}, B={results[i].B:F2}";
-         Console.WriteLine(str);
-         sb.AppendLine(str);
-      }
+      using var renderer = new GpuRectangleRenderer();
+      Console.WriteLine("Rendering rectangles to output.png...");
+      stopwatch.Restart();
+      renderer.RenderRectanglesToFile("output.png", image.Width, image.Height, locations, results);
+      stopwatch.Stop();
+      Console.WriteLine($"Rendering complete in {stopwatch.ElapsedMilliseconds} ms.");
 
-      Clipboard.SetText(sb.ToString());
+      Console.WriteLine("Done. Check for output.png in your execution directory.");
    }
 }
