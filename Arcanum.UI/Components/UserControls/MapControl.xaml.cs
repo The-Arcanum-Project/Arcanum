@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.DirectX;
+using CommunityToolkit.Mvvm.Input;
 using Vortice.Mathematics;
 
 namespace Arcanum.UI.Components.UserControls;
@@ -25,8 +26,18 @@ public partial class MapControl
    {
       HwndHostContainer.MouseWheel += OnMouseWheel;
       HwndHostContainer.MouseLeftButtonDown += OnMouseLeftButtonDown;
-      HwndHostContainer.MouseLeftButtonUp += OnMouseLeftButtonUp;
+      HwndHostContainer.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
       HwndHostContainer.MouseMove += OnMouseMove;
+      HwndHostContainer.MouseLeave += OnMouseLeave;
+   }
+
+   private void OnMouseLeave(object sender, MouseEventArgs e)
+   {
+      // Stop panning if the mouse leaves the control
+      if (!_isPanning) return;
+      Mouse.OverrideCursor = null;
+      _isPanning = false;
+      _hasPanned = false;
    }
 
    private static Color4[] CreateColors(Polygon[] polygons)
@@ -68,6 +79,18 @@ public partial class MapControl
    {
       return ScreenToMap(new Vector2((float)screenPoint.X, (float)screenPoint.Y));
    }
+   
+   public ICommand ClickCommand => new RelayCommand<MouseButtonEventArgs>(args =>
+   {
+      if(args == null)
+         return;
+      var pos = ScreenToMap(args.GetPosition(this));
+   });
+   
+   // Command to load the project in the Arcanum view
+   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args =>
+   {
+   });
    
    public Vector2 ScreenToMap(Vector2 screenPoint)
    {
@@ -123,20 +146,31 @@ public partial class MapControl
       PanTo(newPan.X, newPan.Y);
    }
    
+   private bool _hasPanned = false;
+   
    private void OnMouseMove(object sender, MouseEventArgs e)
    {
       if (!_isPanning)
          return;
-      
+
+      if (!_hasPanned && (e.LeftButton != MouseButtonState.Pressed ||
+                          (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >
+                             SystemParameters.MinimumHorizontalDragDistance) &&
+                           !(Math.Abs(e.GetPosition(HwndHostContainer).Y - _lastMousePosition.Y) >
+                             SystemParameters.MinimumVerticalDragDistance)))) return;
+      _hasPanned = true;
+
       Mouse.OverrideCursor = Cursors.ScrollAll;
-      
+
       var currentMousePosition = e.GetPosition(HwndHostContainer);
       var delta = currentMousePosition - _lastMousePosition;
 
       var aspectRatio = (float)(HwndHostContainer.ActualWidth / HwndHostContainer.ActualHeight);
 
-      var x = _locationRenderer.Pan.X - (float)(delta.X * 2 / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) * aspectRatio;
-      var y = _locationRenderer.Pan.Y - (float)(delta.Y * 2 / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom)) / _imageAspectRatio;
+      var x = _locationRenderer.Pan.X -
+              (float)(delta.X * 2 / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) * aspectRatio;
+      var y = _locationRenderer.Pan.Y -
+              (float)(delta.Y * 2 / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom)) / _imageAspectRatio;
 
       PanTo(x, y);
 
@@ -150,19 +184,15 @@ public partial class MapControl
       
       _isPanning = true;
       _lastMousePosition = e.GetPosition(surface);
-      surface.CaptureMouse();
    }
 
-   private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+   private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
    {
-      if (sender is not IInputElement surface)
-         return;
-      if (_isPanning)
-      {
-         Mouse.OverrideCursor = null;
-         _isPanning = false;
-      }
-
-      surface.ReleaseMouseCapture();
+      if (!_isPanning) return;
+      Mouse.OverrideCursor = null;
+      _isPanning = false;
+      if (!_hasPanned) return;
+      e.Handled = true;
+      _hasPanned = false;
    }
 }
