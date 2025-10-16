@@ -90,29 +90,42 @@ public static class AveragerTest
       // stopwatch.Stop();
       // Console.WriteLine($"Processing complete in {stopwatch.ElapsedMilliseconds} ms.");
 
-      using var gpuTexture = runner.CreateTexture2D(image);
-      using var gpuTextureSrv = runner.CreateShaderResourceView(gpuTexture);
+      // --- FAST HISTOGRAM ANALYSIS TEST ---
 
-      using var gpuBoundsBuffer = runner.CreateStructuredBuffer<GpuRect>(locations);
-      using var gpuBoundsSrv = runner.CreateShaderResourceView(gpuBoundsBuffer);
+      // using var gpuTexture = runner.CreateTexture2D(image);
+      // using var gpuTextureSrv = runner.CreateShaderResourceView(gpuTexture);
+      //
+      // using var gpuBoundsBuffer = runner.CreateStructuredBuffer<GpuRect>(locations);
+      // using var gpuBoundsSrv = runner.CreateShaderResourceView(gpuBoundsBuffer);
+      //
+      // using var gpuOutputBuffer = runner.CreateReadWriteStructuredBuffer<TopTwoColors>(rectCount);
+      //
+      // // --- THIS IS THE NEW DISPATCH LOGIC ---
+      // // We dispatch ONE thread group PER RECTANGLE.
+      //
+      // Console.WriteLine("Finding top 2 colors using GPU (single dispatch)...");
+      // var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+      //
+      // // Now we call the generic Execute method just ONCE.
+      // var results = runner.Execute<TopTwoColors>("TopTwoColors.hlsl", // The new, correct shader
+      //                                            "main",
+      //                                            rectCount,
+      //                                            1,
+      //                                            1,
+      //                                            gpuOutputBuffer,
+      //                                            gpuTextureSrv,
+      //                                            gpuBoundsSrv);
+      //
+      // stopwatch.Stop();
+      // Console.WriteLine($"Processing complete in {stopwatch.ElapsedMilliseconds} ms.");
 
-      using var gpuOutputBuffer = runner.CreateReadWriteStructuredBuffer<TopTwoColors>(rectCount);
+      using var analyzer = new GpuMultiPassHistogram(runner);
 
-      // --- THIS IS THE NEW DISPATCH LOGIC ---
-      // We dispatch ONE thread group PER RECTANGLE.
-
-      Console.WriteLine("Finding top 2 colors using GPU (single dispatch)...");
+      Console.WriteLine("Finding top 2 colors using multi-pass GPU analysis...");
       var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-      // Now we call the generic Execute method just ONCE.
-      var results = runner.Execute<TopTwoColors>("TopTwoColors.hlsl", // The new, correct shader
-                                                 "main",
-                                                 rectCount,
-                                                 1,
-                                                 1,
-                                                 gpuOutputBuffer,
-                                                 gpuTextureSrv,
-                                                 gpuBoundsSrv);
+      // The single call that does all the work.
+      var results = analyzer.Analyze(image, locations);
 
       stopwatch.Stop();
       Console.WriteLine($"Processing complete in {stopwatch.ElapsedMilliseconds} ms.");

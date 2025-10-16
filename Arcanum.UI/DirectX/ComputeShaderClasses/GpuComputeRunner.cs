@@ -136,9 +136,15 @@ public class GpuComputeRunner : IDisposable
    /// <returns></returns>
    public ID3D11Buffer CreateReadWriteStructuredBuffer<T>(int elementCount) where T : unmanaged
    {
+      var sizeInBytes = (long)elementCount * Marshal.SizeOf<T>();
+
+      if (sizeInBytes > uint.MaxValue)
+         throw new ArgumentOutOfRangeException(nameof(elementCount),
+                                               "The calculated buffer size exceeds the 4GB limit.");
+
       var bufferDesc = new BufferDescription
       {
-         ByteWidth = (uint)(elementCount * Marshal.SizeOf<T>()),
+         ByteWidth = (uint)sizeInBytes,
          Usage = ResourceUsage.Default,
          BindFlags = BindFlags.UnorderedAccess | BindFlags.ShaderResource,
          StructureByteStride = (uint)Marshal.SizeOf<T>(),

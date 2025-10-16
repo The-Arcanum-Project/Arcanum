@@ -318,6 +318,10 @@
 
     <ItemGroup>
       <EmbeddedResource Include="DirectX\Shaders\ExampleTriangle.hlsl" />
+        <None Remove="DirectX\Shaders\Compute\Histogram\ClearHistogram.hlsl"/>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\Histogram\ClearHistogram.hlsl"/>
+        <None Remove="DirectX\Shaders\Compute\Histogram\VoteOnGlobalHistogram"/>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\Histogram\VoteOnGlobalHistogram.hlsl"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -343,6 +347,10 @@
 
     <ItemGroup>
         <EmbeddedResource Include="DirectX\Shaders\Compute\TopTwoColors.hlsl"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="DirectX\Shaders\Compute\Histogram\ReduceHistograms.hlsl"/>
     </ItemGroup>
 
 </Project>
