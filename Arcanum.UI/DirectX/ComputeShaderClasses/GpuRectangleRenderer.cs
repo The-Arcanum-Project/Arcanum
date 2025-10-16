@@ -184,19 +184,41 @@ public class GpuRectangleRenderer : IDisposable
          using var stagingTexture = _device.CreateTexture2D(stagingDesc);
          _context.CopyResource(stagingTexture, renderTargetTexture);
 
-         var mapped = _context.Map(stagingTexture, 0);
+         var mapped = _context.Map(stagingTexture, 0, MapMode.Read, MapFlags.None);
          try
          {
-            var image = Image.LoadPixelData<Rgba32>(new ReadOnlySpan<byte>(mapped.DataPointer.ToPointer(),
-                                                                           (int)(height * mapped.RowPitch)),
-                                                    (int)width,
-                                                    (int)height);
+            int sourceRowPitch = (int)mapped.RowPitch;
+            int bytesPerPixel = 4; // For R8G8B8A8_UNorm
+            int destinationStride = width * bytesPerPixel; // The tightly-packed stride
+
+            // Create a new, tightly-packed buffer on the CPU.
+            var tightlyPackedPixels = new byte[width * height * bytesPerPixel];
+
+            // If the strides match, we can do a single fast copy.
+            if (sourceRowPitch == destinationStride)
+            {
+               Marshal.Copy(mapped.DataPointer, tightlyPackedPixels, 0, tightlyPackedPixels.Length);
+            }
+            else // The strides do NOT match, we must copy row by row.
+            {
+               for (int y = 0; y < height; y++)
+               {
+                  // Calculate the starting position for this row in both buffers.
+                  IntPtr sourcePtr = mapped.DataPointer + (y * sourceRowPitch);
+                  int destinationOffset = y * destinationStride;
+
+                  // Copy one row's worth of pixel data, skipping the padding.
+                  Marshal.Copy(sourcePtr, tightlyPackedPixels, destinationOffset, destinationStride);
+               }
+            }
+
+            // Now, load the perfectly packed data into ImageSharp.
+            var image = Image.LoadPixelData<Rgba32>(tightlyPackedPixels, width, height);
             image.SaveAsPng(outputPath);
          }
          finally
          {
             _context.Unmap(stagingTexture, 0);
-            _context.Unmap(constantBuffer);
          }
       }
    }

@@ -7,14 +7,12 @@ public static class AveragerTest
 {
    public static void RunTest()
    {
-      const int rectCount = 4096;
+      const int rectCount = 4096 * 4;
 
       Console.WriteLine("Generating sample locations...");
       var random = new Random();
       using var image =
-         SixLabors.ImageSharp.Image
-                  .Load<
-                      Rgba32>("C:\\Users\\david\\source\\repos\\Arcanum\\Arcanum.UI\\Assets\\Logo\\ArcanumForeColor.png");
+         SixLabors.ImageSharp.Image.Load<Rgba32>("C:\\Users\\david\\Bilder\\MV.png");
       var locations = new GpuRect[rectCount];
       var imageWidth = image.Width;
       var imageHeight = image.Height;
@@ -23,18 +21,20 @@ public static class AveragerTest
 
       var cellWidth = imageWidth / gridSize;
       var cellHeight = imageHeight / gridSize;
+      var estimatedJitter = cellHeight * 0.2;
+      var maxJitter = (int)Math.Max(estimatedJitter, 1);
 
       for (var i = 0; i < rectCount; i++)
       {
          // 3. Use the dynamic 'gridSize' instead of the hard-coded '10'.
-         var left = (i % gridSize) * cellWidth;
-         var top = (i / gridSize) * cellHeight;
+         var left = i % gridSize * cellWidth;
+         var top = i / gridSize * cellHeight;
          var right = left + cellWidth;
          var bottom = top + cellHeight;
 
          // Your jitter logic is perfectly fine and can remain as is.
-         var jitterX = random.Next(-5, 5);
-         var jitterY = random.Next(-5, 5);
+         var jitterX = random.Next(-maxJitter, maxJitter);
+         var jitterY = random.Next(-maxJitter, maxJitter);
 
          locations[i] = new()
          {
