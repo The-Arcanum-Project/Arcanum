@@ -430,4 +430,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       var debugPanel = new Debug_Panel();
       debugPanel.Show();
    }
+
+   private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
+   {
+      UIHandle.Instance.LogWindowHandle.CloseWindow();
+   }
 }

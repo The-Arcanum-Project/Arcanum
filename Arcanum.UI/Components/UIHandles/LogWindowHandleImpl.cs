@@ -35,4 +35,14 @@ public class LogWindowHandleImpl : Common.UI.Interfaces.ILogWindowHandle
       _logWindow.Hide();
       _isVisible = false;
    }
+
+   public void CloseWindow()
+   {
+      if (_logWindow == null)
+         return;
+
+      _logWindow.Close();
+      _logWindow = null;
+      _isVisible = false;
+   }
 }

@@ -6,7 +6,7 @@
                          xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
-                         xmlns:converters="clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -14,6 +14,7 @@
                          HeaderHeight = "35"
                          Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown"
+                         Closing = "MainWindow_OnClosing"
                          WindowStartupLocation = "CenterScreen"
                          Background = "{DynamicResource DefaultBackColorBrush}"
                          HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}"
@@ -48,7 +49,7 @@
                     </Setter>
                 </Style.Setters>
             </Style>
-            <converters:Vector2ToStringConverter x:Key="Vector2ToStringConverter"/>
+            <converters:Vector2ToStringConverter x:Key = "Vector2ToStringConverter" />
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
