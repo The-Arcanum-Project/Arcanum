@@ -90,4 +90,9 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, ResultName, GetNamespace);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.AbstractObjects;
+
+   public void Reset()
+   {
+      _files = [];
+   }
 }

@@ -4,6 +4,8 @@ namespace Common.UI.Interfaces;
 
 public interface IMainWindowsHandle
 {
+   public event Action OnOpenMainMenuScreen;
+
    public void OpenMainMenuScreen();
 
    public void TransferToMainMenuScreen(Window sender, Enum view);

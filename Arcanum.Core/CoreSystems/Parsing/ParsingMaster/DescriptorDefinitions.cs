@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Common.UI;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
 using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
 
@@ -306,5 +307,11 @@ public static class DescriptorDefinitions
          var loadingSteps = descriptor.LoadingService;
          LoadingStepsList.AddRange(loadingSteps);
       }
+
+      UIHandle.Instance.MainWindowsHandle.OnOpenMainMenuScreen += () =>
+      {
+         foreach (var descriptor in FileDescriptors)
+            descriptor.Reset();
+      };
    }
 }

@@ -10,6 +10,8 @@ namespace Arcanum.UI.Components.UIHandles;
 
 public class MainWindowHandleImpl : IMainWindowsHandle
 {
+   public event Action? OnOpenMainMenuScreen;
+
    public void OpenMainMenuScreen()
    {
       if (Application.Current.MainWindow is MainMenuScreen mainMenuScreen)
@@ -33,6 +35,7 @@ public class MainWindowHandleImpl : IMainWindowsHandle
    {
       ParsingMaster.UnloadAll();
       FileStateManager.Shutdown();
+      OnOpenMainMenuScreen?.Invoke();
       var mw = new MainMenuScreen { MainMenuViewModel = { TargetedView = (MainMenuScreen.MainMenuScreenView)view } };
       Application.Current.MainWindow = mw;
       Application.Current.MainWindow.Show();
