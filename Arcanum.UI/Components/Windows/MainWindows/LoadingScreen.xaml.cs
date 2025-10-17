@@ -24,8 +24,8 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    private readonly string[] _loadingTips =
    [
-      "Press `F10` to view the error log", "Press `F1` to view the console",
-      "Press `Shift + Shift` to open the application wide search: \"Queastor\"",
+      "Press `F10` to view the error log", "Press `F1` to open the settings",
+      "Press `Ctrl + F` to open the application wide search: \"Queastor\"",
       "Are you missing a feature? Open an issue on GitHub or join the Discord server to see if a member of the community created a plugin for it!",
    ];
 
