@@ -3,8 +3,6 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.Culture;
-using Arcanum.Core.Utils.Sorting;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
 using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
 
@@ -19,14 +17,10 @@ public static class DescriptorDefinitions
    /// The input is a list of loading steps, each consequent step will automatically depend on the previous one.
    /// Therefore, each step only has to define its own dependencies, the dependency to the previous step is added automatically.
    /// </description>
-   /// <param name="steps"></param>
-   /// <returns></returns>
    private static FileLoadingService[] ConsequentialLoadingSteps(List<FileLoadingService> steps)
    {
       for (var index = 1; index < steps.Count; index++)
-      {
          steps[index].Dependencies = steps[index].Dependencies.Append(steps[index - 1]);
-      }
 
       return steps.ToArray();
    }

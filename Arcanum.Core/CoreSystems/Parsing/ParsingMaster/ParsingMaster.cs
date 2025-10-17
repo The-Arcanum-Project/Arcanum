@@ -4,7 +4,6 @@ using System.Diagnostics;
 #if DEBUG_PARSING_STEP_TIMES
 using System.Globalization;
 #endif
-using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;

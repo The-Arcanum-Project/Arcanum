@@ -14,8 +14,18 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public readonly FileTypeInformation FileType;
    public FileLoadingService[] LoadingService { get; }
    public readonly bool AllowMultipleInstances;
+   private List<Eu5FileObj> _files = [];
 
-   public List<Eu5FileObj> Files { get; private set; }
+   public List<Eu5FileObj> Files
+   {
+      get
+      {
+         if (_files.Count == 0)
+            CalculateFiles();
+         return _files;
+      }
+      private set => _files = value;
+   }
 
    public FileDescriptor(string[] localPath,
                          FileTypeInformation fileType,
@@ -24,15 +34,17 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
                          bool allowMultipleInstances = true)
    {
       foreach (var fileLoadingService in loadingService)
-      {
          fileLoadingService.Descriptor = this;
-      }
 
       LocalPath = localPath;
       FileType = fileType;
       LoadingService = loadingService;
       AllowMultipleInstances = allowMultipleInstances;
       IsMultithreadable = isMultithreadable;
+   }
+
+   public void CalculateFiles()
+   {
       Files = FileManager.GetAllFileInfosForDirectory(this);
    }
 
@@ -40,7 +52,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    {
       if (string.IsNullOrWhiteSpace(newFileName))
          throw new ArgumentException("File name cannot be null or empty.", nameof(newFileName));
-      
+
       LocalPath[^1] = newFileName;
       Files = FileManager.GetAllFileInfosForDirectory(this);
    }
