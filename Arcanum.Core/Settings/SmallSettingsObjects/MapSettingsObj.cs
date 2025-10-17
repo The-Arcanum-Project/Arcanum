@@ -27,13 +27,13 @@ public class MapSettingsObj
    [DefaultValue(60)]
    public int MaxMapFps { get; set; } = 60;
 
-   [Description("The maximum zoom level for the map. Higher values may cause performance issues.")]
-   [DefaultValue(500f)]
-   public float MaxZoomLevel { get; set; } = 500f;
+   [Description("The maximum zoom level for the map.")]
+   [DefaultValue(8f)]
+   public float MaxZoomLevel { get; set; } = 8f;
 
-   [Description("The minimum zoom level for the map. Lower values may cause performance issues.")]
-   [DefaultValue(1f)]
-   public float MinZoomLevel { get; set; } = 1f;
+   [Description("The minimum zoom level for the map.")]
+   [DefaultValue(-1.1f)]
+   public float MinZoomLevel { get; set; } = -1.1f;
 
    [Description("If map updates should be suspended when possible to improve performance.")]
    [DefaultValue(true)]

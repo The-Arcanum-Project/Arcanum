@@ -51,7 +51,8 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    private Color4[] _polygonColors = initColors;
 
    public Vector2 Pan = new(0.5f, 0.5f);
-   public float Zoom = 1.75f;
+
+   public float Zoom = 1f;
 
    private uint _vertexCount;
    private VertexPositionId2D[] _vertices = vertices;
@@ -206,8 +207,11 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    public unsafe void SetOrthographicProjection(float width, float height)
    {
       var aspectRatio = width / height;
+
+      var zoomRatio = imageAspectRatio / Zoom;
+      
       var view = Matrix4x4.CreateTranslation(-1 * Pan.X, (Pan.Y - 1) * imageAspectRatio, 0);
-      var projection = Matrix4x4.CreateOrthographic(2.0f * aspectRatio / Zoom, 2.0f / Zoom, -1.0f, 1.0f);
+      var projection = Matrix4x4.CreateOrthographic(zoomRatio * aspectRatio, zoomRatio, -1.0f, 1.0f);
       _constants.WorldViewProjection = Matrix4x4.Transpose(view * projection);
       if (_context == null)
          return;

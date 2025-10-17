@@ -6,6 +6,7 @@
                          xmlns:uc = "clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
+                         xmlns:converters="clr-namespace:Arcanum.UI.Components.Converters"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -47,6 +48,7 @@
                     </Setter>
                 </Style.Setters>
             </Style>
+            <converters:Vector2ToStringConverter x:Key="Vector2ToStringConverter"/>
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
@@ -383,6 +385,11 @@
                     VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                    Margin = "2, 0"
+                    FontFamily = "{StaticResource DefaultMonospacedFont}"
+                    VerticalAlignment = "Center" />
+                <TextBlock
+                    Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
                     Margin = "2, 0"
                     FontFamily = "{StaticResource DefaultMonospacedFont}"
                     VerticalAlignment = "Center" />

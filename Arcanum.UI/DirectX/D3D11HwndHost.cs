@@ -102,14 +102,13 @@ public partial class D3D11HwndHost : HwndHost
                 _renderer.Render();
                 return IntPtr.Zero;
         }
-            
+        
         handled = false;
         return IntPtr.Zero;
     }
     
     #region pInvoke
         private const int WM_PAINT = 0x000F;
-        
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial void ValidateRect(IntPtr hWnd, IntPtr lpRect);

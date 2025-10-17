@@ -14,9 +14,22 @@ public partial class MapControl
    private D3D11HwndHost _d3dHost = null!;
    private LocationRenderer _locationRenderer = null!;
    
+   private const float ZOOM_STEP = 1.2f;
+   
    private Point _lastMousePosition;
    private bool _isPanning;
    private float _imageAspectRatio;
+   private (int, int) _imageSize;
+
+   public static readonly DependencyProperty CurrentPosProperty = DependencyProperty.Register(
+      nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
+
+   public Vector2 CurrentPos
+   {
+      get => (Vector2)GetValue(CurrentPosProperty);
+      set => SetValue(CurrentPosProperty, value);
+   }
+   
    public MapControl()
    {
       InitializeComponent();
@@ -34,10 +47,13 @@ public partial class MapControl
    private void OnMouseLeave(object sender, MouseEventArgs e)
    {
       // Stop panning if the mouse leaves the control
-      if (!_isPanning) return;
-      Mouse.OverrideCursor = null;
-      _isPanning = false;
-      _hasPanned = false;
+      if (_isPanning)
+      {
+         Mouse.OverrideCursor = null;
+         _isPanning = false;
+         _hasPanned = false;
+      }
+      CurrentPos = Vector2.Zero;
    }
 
    private static Color4[] CreateColors(Polygon[] polygons)
@@ -55,6 +71,8 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
+      _imageSize = imageSize;
+      
       _imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
       
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
@@ -79,12 +97,24 @@ public partial class MapControl
    {
       return ScreenToMap(new Vector2((float)screenPoint.X, (float)screenPoint.Y));
    }
-   
+
+   public Vector2 ScreenToMapAbsolute(Vector2 screenPoint)
+   {
+      var mapPoint = ScreenToMap(screenPoint);
+      return new Vector2(mapPoint.X * _imageSize.Item1, mapPoint.Y * _imageSize.Item2);
+   }
+
+   public Vector2 ScreenToMapAbsolute(Point screenPoint)
+   {
+      return ScreenToMapAbsolute(new Vector2((float)screenPoint.X, (float)screenPoint.Y));
+   }
+
    public ICommand ClickCommand => new RelayCommand<MouseButtonEventArgs>(args =>
    {
       if(args == null)
          return;
       var pos = ScreenToMap(args.GetPosition(this));
+      Console.WriteLine(pos);
    });
    
    // Command to load the project in the Arcanum view
@@ -98,11 +128,12 @@ public partial class MapControl
       var height = (float)HwndHostContainer.ActualHeight;
       var aspectRatio = width / height;
 
+      // Get Coordinates from -1 to 1
       var ndcX = screenPoint.X / width * 2.0f - 1.0f;
       var ndcY = 1.0f - screenPoint.Y / height * 2.0f;
-
-      var worldX = ndcX * (aspectRatio / _locationRenderer.Zoom);
-      var worldY = ndcY * (1.0f / _locationRenderer.Zoom);
+      var zoomRatio = _imageAspectRatio / (_locationRenderer.Zoom * 2);
+      var worldX = ndcX * (aspectRatio * zoomRatio);
+      var worldY = ndcY * (zoomRatio);
 
       worldX += _locationRenderer.Pan.X;
       worldY += (1f - _locationRenderer.Pan.Y) * _imageAspectRatio;
@@ -119,23 +150,26 @@ public partial class MapControl
       _locationRenderer.Pan.Y = Math.Clamp(y, -0.1f, 1.1f);
       UpdateRenderer();
    }
+
+   private const float ZOOM_LOG_BASE = 2f;
+   private static readonly float LnZoomLogBase = MathF.Log(ZOOM_LOG_BASE);
    
    private void OnMouseWheel(object sender, MouseWheelEventArgs e)
    {
       var pos = ScreenToMap(e.GetPosition(this));
 
-      var zoomFactor = e.Delta > 0 ? 1.2f : 1 / 1.2f;
+      var zoomFactor = e.Delta > 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      
+      var maxZoom = MathF.Exp(Config.Settings.MapSettings.MaxZoomLevel * LnZoomLogBase);
+      var minZoom = MathF.Exp(Config.Settings.MapSettings.MinZoomLevel * LnZoomLogBase);
 
       var newZoom = _locationRenderer.Zoom * zoomFactor;
 
-      if (newZoom < Config.Settings.MapSettings.MinZoomLevel || newZoom > Config.Settings.MapSettings.MaxZoomLevel)
-         if (_locationRenderer.Zoom < Config.Settings.MapSettings.MinZoomLevel || _locationRenderer.Zoom > Config.Settings.MapSettings.MaxZoomLevel)
-            newZoom = Math.Clamp(_locationRenderer.Zoom,
-               Config.Settings.MapSettings.MinZoomLevel,
-               Config.Settings.MapSettings.MaxZoomLevel);
-         else
-            return;
-
+      if (newZoom < minZoom || maxZoom < newZoom)
+      {
+         return;
+      }
+      
       _locationRenderer.Zoom = newZoom;
 
       var delta = new Vector2(pos.X - _locationRenderer.Pan.X, pos.Y - _locationRenderer.Pan.Y);
@@ -146,12 +180,12 @@ public partial class MapControl
       PanTo(newPan.X, newPan.Y);
    }
    
-   private bool _hasPanned = false;
+   private bool _hasPanned;
    
    private void OnMouseMove(object sender, MouseEventArgs e)
    {
       if (!_isPanning)
-         return;
+         UpdateCursorLocation(e.GetPosition(HwndHostContainer));
 
       if (!_hasPanned && (e.LeftButton != MouseButtonState.Pressed ||
                           (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >
@@ -168,15 +202,20 @@ public partial class MapControl
       var aspectRatio = (float)(HwndHostContainer.ActualWidth / HwndHostContainer.ActualHeight);
 
       var x = _locationRenderer.Pan.X -
-              (float)(delta.X * 2 / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) * aspectRatio;
+              (float)(delta.X / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) * _imageAspectRatio * aspectRatio;
       var y = _locationRenderer.Pan.Y -
-              (float)(delta.Y * 2 / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom)) / _imageAspectRatio;
+              (float)(delta.Y / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom));
 
       PanTo(x, y);
 
       _lastMousePosition = currentMousePosition;
    }
-   
+
+   private void UpdateCursorLocation(Point position)
+   {
+      CurrentPos = ScreenToMapAbsolute(position);
+   }
+
    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
    {
       if (sender is not IInputElement surface)
