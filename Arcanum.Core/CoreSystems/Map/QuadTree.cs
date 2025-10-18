@@ -1,78 +1,111 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Geometry;
 
-// Make sure you have a using statement for your PointF and RectangleF,
-// e.g., using System.Drawing;
+// Assumes the existence of the PolygonReference struct defined above.
 
 namespace Arcanum.Core.CoreSystems.Map;
 
 public sealed class QuadTree
 {
-   private const int MAX_POLYGONS = 10;
+   private const int MAX_OBJECTS = 10;
    private const int MAX_DEPTH = 15;
 
    public RectangleF Bounds { get; }
-   public List<Polygon> Polygons { get; } = [];
 
+   private readonly Location[] _allLocations;
+   private List<PolygonReference>? _references;
    private QuadTree[]? _children;
    private readonly int _depth;
 
-   public QuadTree(RectangleF bounds, int depth = 0)
+   public QuadTree(RectangleF bounds, Location[] allLocations, int depth = 0)
    {
       Bounds = bounds;
+      _allLocations = allLocations;
       _depth = depth;
+      _children = null;
+      _references = null;
    }
 
    /// <summary>
-   /// Inserts a polygon into the quadtree. This method remains unchanged.
+   /// Inserts all polygons from a given Location into the quadtree.
    /// </summary>
-   public void Insert(Polygon poly)
+   public void Insert(Location location)
    {
-      if (!Bounds.IntersectsWith(poly.Bounds))
+      var locationId = location.ColorIndex;
+
+      if (locationId < 0 || locationId >= _allLocations.Length)
+         throw new ArgumentException("Location has an invalid ID for insertion.", nameof(location));
+
+      for (var i = 0; i < location.Polygons.Length; i++)
+      {
+         var polyBounds = location.Polygons[i].Bounds;
+         var polyRef = new PolygonReference(locationId, i);
+         InsertInternal(polyRef, polyBounds);
+      }
+   }
+
+   private void InsertInternal(PolygonReference polyRef, RectangleF polyBounds)
+   {
+      if (!Bounds.IntersectsWith(polyBounds))
          return;
 
       if (_children != null)
       {
          foreach (var child in _children)
-            child.Insert(poly);
+            child.InsertInternal(polyRef, polyBounds);
          return;
       }
 
-      Polygons.Add(poly);
+      _references ??= [];
+      _references.Add(polyRef);
 
-      if (Polygons.Count <= MAX_POLYGONS || _depth >= MAX_DEPTH)
+      if (_references.Count <= MAX_OBJECTS || _depth >= MAX_DEPTH)
          return;
 
       Subdivide();
-      foreach (var p in Polygons)
-      {
-         Debug.Assert(_children != null, nameof(_children) + " != null");
 
+      Debug.Assert(_children != null, "Subdivision failed to create child nodes.");
+
+      foreach (var pRef in _references)
          foreach (var child in _children)
-            child.Insert(p);
-      }
+            child.InsertInternal(pRef, _allLocations[pRef.LocationId].Polygons[pRef.PolygonIndex].Bounds);
 
-      Polygons.Clear();
+      _references = null;
    }
 
    /// <summary>
-   /// Queries the quadtree for the single polygon that contains the specified point.
-   /// Because polygons do not overlap, this method returns the first and only match found.
+   /// Queries the quadtree for the single Location that contains the specified point.
    /// </summary>
    /// <param name="point">The point to check.</param>
-   /// <returns>The Polygon containing the point, or null if no polygon is found.</returns>
-   public Polygon? Query(Vector2 point)
+   /// <returns>The Location containing the point, or null if no location is found.</returns>
+   public Location? Query(Vector2 point)
    {
       if (!Bounds.ContainsVec2(point))
          return null;
 
+      // If this is a branch node, find the correct child and query it.
       if (_children != null)
-         return (from child in _children
-                 where child.Bounds.ContainsVec2(point)
-                 select child.Query(point)).FirstOrDefault();
+      {
+         var index = GetChildIndexForPoint(point);
+         return _children[index].Query(point);
+      }
 
-      return Polygons.FirstOrDefault(p => p.Contains(point));
+      // If this is a leaf node, check the references it contains.
+      if (_references == null)
+         return null; // No match found in this leaf.
+
+      foreach (var polyRef in _references)
+      {
+         // Resolve the reference to the actual polygon for a precise check.
+         var location = _allLocations[polyRef.LocationId];
+         var polygon = location.Polygons[polyRef.PolygonIndex];
+         if (polygon.Contains(point))
+            return location;
+      }
+
+      return null;
    }
 
    private void Subdivide()
@@ -82,66 +115,55 @@ public sealed class QuadTree
       var x = Bounds.X;
       var y = Bounds.Y;
 
-      _children =
-      [
-         new(new(x, y, halfWidth, halfHeight), _depth + 1),
-         new(new(x + halfWidth, y, halfWidth, halfHeight), _depth + 1),
-         new(new(x, y + halfHeight, halfWidth, halfHeight), _depth + 1),
-         new(new(x + halfWidth, y + halfHeight, halfWidth, halfHeight), _depth + 1),
-      ];
+      _children = new QuadTree[4];
+      _children[0] = new(new(x, y, halfWidth, halfHeight), _allLocations, _depth + 1);
+      _children[1] = new(new(x + halfWidth, y, halfWidth, halfHeight), _allLocations, _depth + 1);
+      _children[2] = new(new(x, y + halfHeight, halfWidth, halfHeight), _allLocations, _depth + 1);
+      _children[3] = new(new(x + halfWidth, y + halfHeight, halfWidth, halfHeight), _allLocations, _depth + 1);
    }
 
-   public List<Polygon> GetAllPolygonsInRectangle(RectangleF area)
+   private int GetChildIndexForPoint(Vector2 point)
    {
-      var results = new List<Polygon>();
-      var candidatePolygons = QueryRange(area);
+      var index = 0;
+      var midX = Bounds.X + (Bounds.Width / 2);
+      var midY = Bounds.Y + (Bounds.Height / 2);
 
-      foreach (var candidate in candidatePolygons)
-         if (area.Contains(candidate.Bounds))
-            results.Add(candidate);
+      if (point.X > midX)
+         index |= 1;
+      if (point.Y > midY)
+         index |= 2;
 
-      return results;
+      // 0: Top-Left, 1: Top-Right, 2: Bottom-Left, 3: Bottom-Right
+      return index;
    }
 
-   public List<Polygon> FindPolygonsIn(Polygon containerPolygon)
+   public List<Location> QueryRange(RectangleF range)
    {
-      var results = new List<Polygon>();
-      var candidatePolygons = QueryRange(containerPolygon.Bounds);
-
-      foreach (var candidate in candidatePolygons)
-      {
-         if (!containerPolygon.Bounds.Contains(candidate.Bounds))
-            continue;
-
-         if (containerPolygon.Contains(candidate))
-            results.Add(candidate);
-      }
-
-      return results;
+      var foundLocations = new HashSet<Location>();
+      QueryRangeRecursive(range, foundLocations);
+      return [..foundLocations];
    }
 
-   public List<Polygon> QueryRange(RectangleF range)
-   {
-      var foundPolygons = new HashSet<Polygon>();
-      QueryRangeRecursive(range, foundPolygons);
-      return [..foundPolygons];
-   }
-
-   private void QueryRangeRecursive(RectangleF range, HashSet<Polygon> foundPolygons)
+   private void QueryRangeRecursive(RectangleF range, HashSet<Location> foundLocations)
    {
       if (!Bounds.IntersectsWith(range))
          return;
 
+      // If leaf node, check actual objects
+      if (_references != null)
+         foreach (var polyRef in _references)
+         {
+            var location = _allLocations[polyRef.LocationId];
+            // First check against the query range using the cheap bounding box.
+            if (location.Polygons[polyRef.PolygonIndex].Bounds.IntersectsWith(range))
+               foundLocations.Add(location);
+         }
+
+      // If it has children, recurse
       if (_children == null)
-      {
-         foreach (var poly in Polygons)
-            if (poly.Bounds.IntersectsWith(range))
-               foundPolygons.Add(poly);
-      }
-      else
-      {
-         foreach (var child in _children)
-            child.QueryRangeRecursive(range, foundPolygons);
-      }
+         return;
+
+      foreach (var child in _children)
+         child.QueryRangeRecursive(range, foundLocations);
    }
 }

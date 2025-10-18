@@ -394,6 +394,11 @@
                     Margin = "2, 0"
                     FontFamily = "{StaticResource DefaultMonospacedFont}"
                     VerticalAlignment = "Center" />
+                <TextBlock
+                    Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                    Margin = "2, 0"
+                    FontFamily = "{StaticResource DefaultMonospacedFont}"
+                    VerticalAlignment = "Center" />
             </StackPanel>
         </Border>
     </styleClasses:BaseWindow.FooterContent>

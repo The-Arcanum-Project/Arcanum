@@ -1,8 +1,10 @@
-﻿using System.Windows.Threading;
+﻿using System.Collections;
+using System.Windows.Threading;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.Logger;
@@ -48,10 +50,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    private async Task Tessellate()
    {
       await Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
-                                             i => polygons[i] =
-                                                     ParsingPolygons[i].Tessellate(),
-                                             Scheduler.AvailableHeavyWorkers -
-                                             2);
+                                             i => polygons[i] = ParsingPolygons[i].Tessellate(),
+                                             Scheduler.AvailableHeavyWorkers - 2);
 
       lock (this)
       {
@@ -60,6 +60,49 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       }
 
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
+
+      // TODO @MelCo: Make this right
+      Dictionary<int, Location> colorCache = [];
+      try
+      {
+         foreach (var loc in Globals.Locations.Values)
+         {
+            if (colorCache.TryGetValue(loc.Color.AsInt(), out var dup))
+               Console.WriteLine($"[MPS] Duplicate location color detected: {loc.Color} in location {loc.UniqueId} and {dup.UniqueId}");
+            colorCache[loc.Color.AsInt()] = loc;
+         }
+      }
+      catch (Exception e)
+      {
+         Console.WriteLine(e);
+         throw;
+      }
+
+      var tempDict = new Dictionary<int, List<Arcanum.Core.CoreSystems.Map.Polygon>>();
+      foreach (var p in polygons)
+      {
+         if (!colorCache.ContainsKey(p.Color))
+         {
+            Console.WriteLine($"[MPS] No location found for color {p.Color}");
+            continue;
+         }
+
+         try
+         {
+            if (!tempDict.ContainsKey(p.Color))
+               tempDict[p.Color] = [];
+            tempDict[p.Color].Add(new(p.Vertices, p.Indices));
+         }
+         catch (Exception e)
+         {
+            Console.WriteLine(e);
+            throw;
+         }
+      }
+
+      foreach (var loc in Globals.Locations.Values)
+         loc.Polygons = tempDict.TryGetValue(loc.Color.AsInt(), out var polygonList) ? polygonList.ToArray() : [];
+      // End todo
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)

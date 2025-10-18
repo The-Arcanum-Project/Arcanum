@@ -2,6 +2,8 @@
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.DirectX;
 using CommunityToolkit.Mvvm.Input;
@@ -13,23 +15,26 @@ public partial class MapControl
 {
    private D3D11HwndHost _d3dHost = null!;
    private LocationRenderer _locationRenderer = null!;
-   
+
    private const float ZOOM_STEP = 1.2f;
-   
+
    private Point _lastMousePosition;
    private bool _isPanning;
    private float _imageAspectRatio;
    private (int, int) _imageSize;
 
-   public static readonly DependencyProperty CurrentPosProperty = DependencyProperty.Register(
-      nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
+   public event Action<Vector2>? OnAbsolutePositionChanged;
+   public static event Action? OnMapLoaded;
+
+   public static readonly DependencyProperty CurrentPosProperty =
+      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
 
    public Vector2 CurrentPos
    {
       get => (Vector2)GetValue(CurrentPosProperty);
       set => SetValue(CurrentPosProperty, value);
    }
-   
+
    public MapControl()
    {
       InitializeComponent();
@@ -42,6 +47,15 @@ public partial class MapControl
       HwndHostContainer.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
       HwndHostContainer.MouseMove += OnMouseMove;
       HwndHostContainer.MouseLeave += OnMouseLeave;
+
+      OnAbsolutePositionChanged += pos =>
+      {
+         if (!Selection.MapManager.IsMapDataInitialized)
+            return;
+
+         var loc = Selection.MapManager.FindLocationAt(pos) ?? Location.Empty;
+         Selection.Modify(SelectionTarget.Hover, [loc], true);
+      };
    }
 
    private void OnMouseLeave(object sender, MouseEventArgs e)
@@ -53,13 +67,14 @@ public partial class MapControl
          _isPanning = false;
          _hasPanned = false;
       }
+
       CurrentPos = Vector2.Zero;
    }
 
    private static Color4[] CreateColors(Polygon[] polygons)
    {
       var colors = new Color4[polygons.Length];
-      
+
       for (var i = 0; i < polygons.Length; i++)
          colors[i] = new(polygons[i].Color);
 
@@ -72,12 +87,12 @@ public partial class MapControl
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
       _imageSize = imageSize;
-      
+
       _imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
-      
+
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors(polygons);
-      _locationRenderer = new (vertices, startColor, _imageAspectRatio);
+      _locationRenderer = new(vertices, startColor, _imageAspectRatio);
       _d3dHost = new(_locationRenderer, HwndHostContainer);
       HwndHostContainer.Child = _d3dHost;
 
@@ -85,11 +100,14 @@ public partial class MapControl
       LoadingPanel.Visibility = Visibility.Collapsed;
       UpdateRenderer();
       SetupEvents();
+
+      OnMapLoaded?.Invoke();
    }
 
    private void UpdateRenderer()
    {
-      _locationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth, (float)HwndHostContainer.ActualHeight);
+      _locationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
+                                                  (float)HwndHostContainer.ActualHeight);
       _d3dHost.Invalidate();
    }
 
@@ -111,17 +129,16 @@ public partial class MapControl
 
    public ICommand ClickCommand => new RelayCommand<MouseButtonEventArgs>(args =>
    {
-      if(args == null)
+      if (args == null)
          return;
+
       var pos = ScreenToMap(args.GetPosition(this));
       Console.WriteLine(pos);
    });
-   
+
    // Command to load the project in the Arcanum view
-   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args =>
-   {
-   });
-   
+   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args => { });
+
    public Vector2 ScreenToMap(Vector2 screenPoint)
    {
       var width = (float)HwndHostContainer.ActualWidth;
@@ -143,7 +160,7 @@ public partial class MapControl
 
       return new(mapX, mapY);
    }
-   
+
    private void PanTo(float x, float y)
    {
       _locationRenderer.Pan.X = Math.Clamp(x, -0.1f, 1.1f);
@@ -153,13 +170,13 @@ public partial class MapControl
 
    private const float ZOOM_LOG_BASE = 2f;
    private static readonly float LnZoomLogBase = MathF.Log(ZOOM_LOG_BASE);
-   
+
    private void OnMouseWheel(object sender, MouseWheelEventArgs e)
    {
       var pos = ScreenToMap(e.GetPosition(this));
 
       var zoomFactor = e.Delta > 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-      
+
       var maxZoom = MathF.Exp(Config.Settings.MapSettings.MaxZoomLevel * LnZoomLogBase);
       var minZoom = MathF.Exp(Config.Settings.MapSettings.MinZoomLevel * LnZoomLogBase);
 
@@ -169,7 +186,7 @@ public partial class MapControl
       {
          return;
       }
-      
+
       _locationRenderer.Zoom = newZoom;
 
       var delta = new Vector2(pos.X - _locationRenderer.Pan.X, pos.Y - _locationRenderer.Pan.Y);
@@ -179,19 +196,22 @@ public partial class MapControl
       var newPan = pos - delta;
       PanTo(newPan.X, newPan.Y);
    }
-   
+
    private bool _hasPanned;
-   
+
    private void OnMouseMove(object sender, MouseEventArgs e)
    {
       if (!_isPanning)
          UpdateCursorLocation(e.GetPosition(HwndHostContainer));
 
-      if (!_hasPanned && (e.LeftButton != MouseButtonState.Pressed ||
-                          (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >
-                             SystemParameters.MinimumHorizontalDragDistance) &&
-                           !(Math.Abs(e.GetPosition(HwndHostContainer).Y - _lastMousePosition.Y) >
-                             SystemParameters.MinimumVerticalDragDistance)))) return;
+      if (!_hasPanned &&
+          (e.LeftButton != MouseButtonState.Pressed ||
+           (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >
+              SystemParameters.MinimumHorizontalDragDistance) &&
+            !(Math.Abs(e.GetPosition(HwndHostContainer).Y - _lastMousePosition.Y) >
+              SystemParameters.MinimumVerticalDragDistance))))
+         return;
+
       _hasPanned = true;
 
       Mouse.OverrideCursor = Cursors.ScrollAll;
@@ -202,7 +222,9 @@ public partial class MapControl
       var aspectRatio = (float)(HwndHostContainer.ActualWidth / HwndHostContainer.ActualHeight);
 
       var x = _locationRenderer.Pan.X -
-              (float)(delta.X / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) * _imageAspectRatio * aspectRatio;
+              (float)(delta.X / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) *
+              _imageAspectRatio *
+              aspectRatio;
       var y = _locationRenderer.Pan.Y -
               (float)(delta.Y / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom));
 
@@ -214,23 +236,28 @@ public partial class MapControl
    private void UpdateCursorLocation(Point position)
    {
       CurrentPos = ScreenToMapAbsolute(position);
+      OnAbsolutePositionChanged?.Invoke(CurrentPos);
    }
 
    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
    {
       if (sender is not IInputElement surface)
          return;
-      
+
       _isPanning = true;
       _lastMousePosition = e.GetPosition(surface);
    }
 
    private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
    {
-      if (!_isPanning) return;
+      if (!_isPanning)
+         return;
+
       Mouse.OverrideCursor = null;
       _isPanning = false;
-      if (!_hasPanned) return;
+      if (!_hasPanned)
+         return;
+
       e.Handled = true;
       _hasPanned = false;
    }

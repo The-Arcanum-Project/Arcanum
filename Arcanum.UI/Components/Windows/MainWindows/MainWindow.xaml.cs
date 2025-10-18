@@ -11,18 +11,16 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.Components.UIHandles;
+using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
-using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Common.UI;
 using CommunityToolkit.Mvvm.Input;
@@ -41,6 +39,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private string _gpuUsage = "GPU: [0%]";
    private string _vramUsage = "VRAM: [0 MB]";
    private string _fps = "FPS: [0]";
+   private string _hoveredLocation;
 
    #region Properties
 
@@ -108,6 +107,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    }
 
+   public string HoveredLocation
+   {
+      get => _hoveredLocation;
+      private set
+      {
+         if (value == _hoveredLocation)
+            return;
+
+         _hoveredLocation = value.PadLeft(30);
+         OnPropertyChanged();
+      }
+   }
+
    #endregion
 
    public MainWindow()
@@ -152,7 +164,31 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
       GenerateMapModeButtons();
+
+      MapControl.OnMapLoaded += () =>
+      {
+         var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
+                                                              .LoadingService[0]).mapSize;
+         Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
+      };
+
       GcWizard.ForceGc();
+
+      Selection.LocationHovered += locations =>
+      {
+         switch (locations.Count)
+         {
+            case 0:
+               HoveredLocation = "No Location";
+               return;
+            case 1:
+               HoveredLocation = locations[0].UniqueId;
+               return;
+            default:
+               HoveredLocation = $"{locations.Count} Locations";
+               break;
+         }
+      };
    }
 
    private void SelectionOnLocationSelectionChanged(List<Location> locations)
@@ -367,7 +403,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
    {
-      // Check which button was pressed
       if (e.ChangedButton == MouseButton.XButton1)
       {
          NUINavigation.Instance.Back();

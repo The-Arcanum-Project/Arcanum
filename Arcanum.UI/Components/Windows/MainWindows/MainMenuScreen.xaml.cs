@@ -4,10 +4,8 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Views.MainMenuScreen;
 using Arcanum.UI.Components.Windows.PopUp;
-using Common.UI;
 using Common.UI.MBox;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
@@ -169,9 +167,9 @@ public partial class MainMenuScreen
       catch (Exception ex)
       {
          MBox.Show($"An error occurred while loading: {ex.Message}",
-                         "Error",
-                         MBoxButton.OK,
-                         MessageBoxImage.Error);
+                   "Error",
+                   MBoxButton.OK,
+                   MessageBoxImage.Error);
 
          // On error, close the loading screen and show this window again
          if (loadingScreen.IsLoaded)

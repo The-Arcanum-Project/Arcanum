@@ -51,8 +51,7 @@ public static class Selection
    public static List<Vector2> DragPath { get; set; } = [];
    private static RectangleF DragArea { get; set; } = RectangleF.Empty;
 
-   private static QuadTree QuadTree { get; set; } =
-      new(new(0, 0, 10000, 10000)); // Placeholder, will be set by Map system
+   public static MapManager MapManager = new();
 
    #region Events
 
@@ -166,6 +165,10 @@ public static class Selection
       // in each branch respectively we gather the toAdd and toRemove lists
       if (additive)
          foreach (var loc in locations)
+         {
+            if (loc == Location.Empty)
+               continue;
+
             if (targetSet.Contains(loc))
             {
                if (invert)
@@ -173,8 +176,13 @@ public static class Selection
             }
             else
                AddCache.Add(loc);
+         }
       else
          foreach (var loc in locations)
+         {
+            if (loc == Location.Empty)
+               continue;
+
             if (targetSet.Contains(loc))
                RemoveCache.Add(loc);
             else
@@ -182,7 +190,9 @@ public static class Selection
                if (invert)
                   AddCache.Add(loc);
             }
+         }
 
+      TriggerEvents(target, AddCache, RemoveCache);
       AddTo(target, AddCache);
       RemoveFrom(target, RemoveCache);
    }
@@ -191,6 +201,7 @@ public static class Selection
    {
       var targetSet = GetTarget(target);
 
+      TriggerEvents(target, locations.Except(targetSet).ToList(), targetSet.Except(locations).ToList());
       AddTo(target, locations.Except(targetSet));
       RemoveFrom(target, targetSet.Except(locations));
    }
@@ -321,14 +332,14 @@ public static class Selection
       if (GeoRect.IsRectangleContained(rect, DragArea))
       {
          // Add all locations in the verticalRect to the SelectionPreview
-         var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
-         Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), invert: false);
+         // var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
+         // Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), invert: false);
       }
       else
       {
          // Add all locations in the horizontalRect to the SelectionPreview
-         var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
-         Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), true, false);
+         // var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
+         // Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), true, false);
       }
    }
 
@@ -463,4 +474,9 @@ public static class Selection
    }
 
    #endregion
+
+   public static Location GetLocation(Vector2 vec2)
+   {
+      return MapManager.FindLocationAt(vec2) ?? Location.Empty;
+   }
 }
