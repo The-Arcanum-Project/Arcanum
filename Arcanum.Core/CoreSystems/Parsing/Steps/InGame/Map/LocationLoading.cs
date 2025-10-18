@@ -50,9 +50,9 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
          var key = cn.KeyNode.GetLexeme(source);
          var loc = IEu5Object<Location>.CreateInstance(key, fileObj);
          loc.Color = new JominiColor.Int(hex);
-         loc.ColorIndex = cIndex++;
 
-         LUtil.TryAddToGlobals(ctx, cn.KeyNode, key, actionStack, ref validation, loc);
+         if (LUtil.TryAddToGlobals(ctx, cn.KeyNode, key, actionStack, ref validation, loc))
+            loc.ColorIndex = cIndex++;
       }
    }
 }
