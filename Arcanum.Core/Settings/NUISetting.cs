@@ -24,6 +24,8 @@ using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Religion = Arcanum.Core.GameObjects.Religion.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.Settings;
@@ -437,4 +439,53 @@ public class NUISettings
           Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray(),
           Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray(),
           Enum.GetValues<EstateSatisfactionDefinition.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ReligionSettings { get; set; } = new(Religion.Field.UniqueId,
+                                                          Enum.GetValues<Religion.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Religion.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Religion.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ReligionGroupSettings { get; set; } = new(ReligionGroup.Field.UniqueId,
+                                                               Enum.GetValues<ReligionGroup.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<ReligionGroup.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<ReligionGroup.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray());
+
+   public NUISetting Eu5ObjOpinionValueSettings { get; set; } = new(ReligionOpinionValue.Field.UniqueId,
+                                                                    Enum.GetValues<ReligionOpinionValue.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<ReligionOpinionValue.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<ReligionOpinionValue.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray());
+
+   public NUISetting ReligiousFactionSettings { get; set; } = new(ReligiousFaction.Field.UniqueId,
+                                                                  Enum.GetValues<ReligiousFaction.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<ReligiousFaction.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<ReligiousFaction.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray());
+
+   public NUISetting ReligiousFocusSettings { get; set; } = new(ReligiousFocus.Field.UniqueId,
+                                                                Enum.GetValues<ReligiousFocus.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ReligiousFocus.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ReligiousFocus.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray());
 }

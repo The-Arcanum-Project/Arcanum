@@ -26,6 +26,11 @@ public class AGSSettings
    public AgsSettings JominiDateSettings { get; set; } = new();
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
    public AgsSettings RulerTermAgsSettings { get; set; } = new();
+   public AgsSettings ReligionAgsSettings { get; set; } = new();
+   public AgsSettings ReligionGroupAgsSettings { get; set; } = new();
+   public AgsSettings Eu5ObjOpinionValueAgsSettings { get; set; } = new();
+   public AgsSettings ReligiousFactionAgsSettings { get; set; } = new();
+   public AgsSettings ReligiousFocusAgsSettings { get; set; } = new();
    public AgsSettings DynastyAgsSettings { get; set; } = new();
    public AgsSettings EstateAgsSettings { get; set; } = new();
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();

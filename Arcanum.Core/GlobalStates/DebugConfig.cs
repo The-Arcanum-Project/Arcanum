@@ -21,5 +21,7 @@ public class DebugConfigSettings() : InternalSearchableSetting(Config.Settings)
    public bool EnableDebugLogging { get; set; } = true;
    public bool SkipMainMenu { get; set; } = false;
    public bool SuppressAllErrors { get; set; } = false;
+   public bool OnlyHandleSpecifiedErrors { get; set; } = false;
+   public List<string> ErrorsToHandle { get; set; } = [];
 }
 #endif

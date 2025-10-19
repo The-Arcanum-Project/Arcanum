@@ -8,12 +8,15 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
+using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Arcanum.Core.GlobalStates.BackingClasses;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Religion = Arcanum.Core.GameObjects.Religion.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.GlobalStates;
@@ -42,9 +45,22 @@ public static class Globals
 
    public static Dictionary<string, Country> Countries { get; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
+
+   #region Religion
+
+   public static Dictionary<string, ReligiousFocus> ReligiousFocuses { get; set; } = [];
+   public static Dictionary<string, Religion> Religions { get; } = [];
+   public static Dictionary<string, ReligionGroup> ReligionGroups { get; } = [];
    public static Dictionary<string, ReligiousSchool> ReligiousSchools { get; set; } = [];
+   public static Dictionary<string, ReligiousFaction> ReligiousFactions { get; set; } = [];
+
+   #endregion
+
+   #region Culture
 
    public static Dictionary<string, Culture> Cultures { get; } = [];
+
+   #endregion
 
    #region Map
 

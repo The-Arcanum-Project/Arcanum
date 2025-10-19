@@ -91,6 +91,9 @@ public sealed class DiagnosticException : Exception
 #if DEBUG
       if (!DebugConfig.Settings.SuppressAllErrors)
       {
+         if (DebugConfig.Settings.OnlyHandleSpecifiedErrors)
+            if (!DebugConfig.Settings.ErrorsToHandle.Any(action.Contains))
+               return;
 #endif
          switch (ReportSeverity)
          {

@@ -24,6 +24,8 @@ using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Religion = Arcanum.Core.GameObjects.Religion.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -538,6 +540,16 @@ public static class ParsingToolBox
       return node.TryParseAudioTagInstance(ctx, actionName, source, ref validation, out value);
    }
 
+   public static bool ArcTryParse_ReligiousFaction(KeyOnlyNode node,
+                                                   LocationContext ctx,
+                                                   string actionName,
+                                                   string source,
+                                                   [MaybeNullWhen(false)] out ReligiousFaction value,
+                                                   ref bool validation)
+   {
+      return node.TryGetReligiousFaction(ctx, source, actionName, ref validation, out value);
+   }
+
    public static bool ArcTryParse_CurrencyData(ContentNode node,
                                                LocationContext ctx,
                                                string actionName,
@@ -900,6 +912,62 @@ public static class ParsingToolBox
       return true;
    }
 
+   public static bool ArcTryParse_ReligionOpinionValue(ContentNode node,
+                                                       LocationContext ctx,
+                                                       string actionName,
+                                                       string source,
+                                                       [MaybeNullWhen(false)] out ReligionOpinionValue value,
+                                                       ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_ReligionOpinionValue)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!Globals.Religions.TryGetValue(node.KeyNode.GetLexeme(source), out var religion))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        actionName,
+                                        node.KeyNode.GetLexeme(source),
+                                        nameof(Religion));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidEnumValue,
+                                        actionName,
+                                        lexeme,
+                                        nameof(Opinion),
+                                        Enum.GetNames(typeof(Opinion)));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new() { Key = religion, Value = opinion };
+      return true;
+   }
+
    public static bool ArcTryParse_ReligiousSchoolOpinionValue(ContentNode node,
                                                               LocationContext ctx,
                                                               string actionName,
@@ -1143,6 +1211,50 @@ public static class ParsingToolBox
       return lvn.TryParseCulture(ctx, actionName, source, ref validation, out value);
    }
 
+   public static bool ArcTryParse_ReligionGroup(ContentNode node,
+                                                LocationContext ctx,
+                                                string actionName,
+                                                string source,
+                                                [MaybeNullWhen(false)] out ReligionGroup value,
+                                                ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_ReligionGroup)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseReligionGroup(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Religion(ContentNode node,
+                                           LocationContext ctx,
+                                           string actionName,
+                                           string source,
+                                           [MaybeNullWhen(false)] out Religion value,
+                                           ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Religion)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseReligion(ctx, actionName, source, ref validation, out value);
+   }
+
    public static bool ArcTryParse_SoundToll(ContentNode node,
                                             LocationContext ctx,
                                             string actionName,
@@ -1169,5 +1281,15 @@ public static class ParsingToolBox
 
       value = new() { StraitLocationOne = from, StraitLocationTwo = loc };
       return true;
+   }
+
+   public static bool ArcTryParse_ReligiousFocus(KeyOnlyNode node,
+                                                 LocationContext ctx,
+                                                 string actionName,
+                                                 string source,
+                                                 [MaybeNullWhen(false)] out ReligiousFocus value,
+                                                 ref bool validation)
+   {
+      return node.TryGetReligiousFocus(ctx, source, actionName, ref validation, out value);
    }
 }

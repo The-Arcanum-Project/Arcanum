@@ -11,6 +11,8 @@ using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Nexus.Core;
+using Religion = Arcanum.Core.GameObjects.Religion.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
@@ -291,6 +293,38 @@ public static class LvnHelpers
                                            actionName,
                                            ref validationResult,
                                            Globals.Cultures,
+                                           out value);
+   }
+
+   public static bool TryParseReligion(this LiteralValueNode lvn,
+                                       LocationContext ctx,
+                                       string actionName,
+                                       string source,
+                                       ref bool validationResult,
+                                       [MaybeNullWhen(false)] out Religion value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Religions,
+                                           out value);
+   }
+
+   public static bool TryParseReligionGroup(this LiteralValueNode lvn,
+                                            LocationContext ctx,
+                                            string actionName,
+                                            string source,
+                                            ref bool validationResult,
+                                            [MaybeNullWhen(false)] out ReligionGroup value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.ReligionGroups,
                                            out value);
    }
 }

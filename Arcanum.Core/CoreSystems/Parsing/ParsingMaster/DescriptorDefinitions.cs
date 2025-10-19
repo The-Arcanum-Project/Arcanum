@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
@@ -287,6 +288,44 @@ public static class DescriptorDefinitions
           false,
           false);
 
+   public static readonly FileDescriptor ReligiousFactionParsing = new(["in_game", "common", "religious_factions"],
+                                                                       new("religious_factions", "txt", "#"),
+                                                                       [new ReligiousFactionParsing([]),],
+                                                                       false);
+
+   public static readonly FileDescriptor ReligiousGroupDescriptor = new(["in_game", "common", "religion_groups"],
+                                                                        new("religion_groups", "txt", "#"),
+                                                                        [
+                                                                           new ReligionGroupParsing([
+                                                                              ColorParser.LoadingService[0],
+                                                                              ModifierDefinitionDescriptor
+                                                                                .LoadingService[0],
+                                                                           ]),
+                                                                        ],
+                                                                        false);
+
+   public static readonly FileDescriptor ReligiousFocusParsing = new(["in_game", "common", "religious_focuses"],
+                                                                     new("religious_focuses", "txt", "#"),
+                                                                     [new ReligiousFocusParsing([]),],
+                                                                     false);
+
+   public static readonly FileDescriptor ReligionDescriptor = new(["in_game", "common", "religions"],
+                                                                  new("religions", "txt", "#"),
+                                                                  [
+                                                                     new ReligionDiscovererParsing([]),
+                                                                     new ReligionParsing([
+                                                                        ReligiousGroupDescriptor.LoadingService[0],
+                                                                        ModifierDefinitionDescriptor
+                                                                          .LoadingService[0],
+                                                                        ColorParser.LoadingService[0],
+                                                                        LanguageDescriptor.LoadingService[0],
+                                                                        ReligiousFactionParsing.LoadingService[0],
+                                                                        CountriesDescriptor.LoadingService[0],
+                                                                        ReligiousFocusParsing.LoadingService[0],
+                                                                     ]),
+                                                                  ],
+                                                                  false);
+
    //TODO Autogenerate this list
    static DescriptorDefinitions()
    {
@@ -298,6 +337,7 @@ public static class DescriptorDefinitions
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser, LanguageDescriptor,
          AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor,
          RegenciesDescriptor, CharactersDiscoveryDescriptor, DynastyManagerDescriptor, EstateDescriptor,
+         ReligiousGroupDescriptor, ReligionDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

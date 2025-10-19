@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Common.UI;
 using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.Common;
@@ -158,9 +159,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 
-   public void OnSearchSelected()
-   {
-   }
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.AbstractObjects;

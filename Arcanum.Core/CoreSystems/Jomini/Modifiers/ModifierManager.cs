@@ -47,7 +47,7 @@ public static class ModifierManager
          return false;
       }
 
-      if (!InferModifierType(definition, out var inferredType) && inferredType is not null)
+      if (!InferModifierType(definition, out var inferredType) && inferredType is null)
       {
          ctx.SetPosition(nodeKeyNode);
          DiagnosticException.LogWarning(ctx,
@@ -277,10 +277,10 @@ public static class ModifierManager
 
    private static bool IsPercentageModifier(ModifierDefinition definition)
    {
-      if (!definition.IsPercentage)
+      if (definition is { IsPercentage: false, IsAlreadyPercent: false })
          return false;
 
-      if (definition is { IsBoolean: false })
+      if (definition.IsAlreadyPercent || definition.IsPercentage)
          return true;
 
       DiagnosticException.LogWarning(LocationContext.Empty,

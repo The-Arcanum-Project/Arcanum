@@ -1,0 +1,75 @@
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Common.UI;
+
+namespace Arcanum.Core.GameObjects.Religion;
+
+[ObjectSaveAs]
+public partial class ReligionGroup : IEu5Object<ReligionGroup>
+{
+   #region Nexus Properties
+
+   [ParseAs("color")]
+   [DefaultValue(null)]
+   [SaveAs]
+   [Description("Color associated with this ReligionGroup.")]
+   public JominiColor Color { get; set; } = JominiColor.Empty;
+
+   [ParseAs("convert_slaves_at_start")]
+   [DefaultValue(false)]
+   [SaveAs]
+   [Description("Indicates whether slaves should be converted at the start for this ReligionGroup.")]
+   public bool ConvertSlavesAtStart { get; set; }
+
+   [ParseAs("allow_slaves_of_same_group")]
+   [DefaultValue(false)]
+   [SaveAs]
+   [Description("Indicates whether slaves of the same ReligionGroup are allowed.")]
+   public bool AllowSlavesOfSameGroup { get; set; }
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to members of this ReligionGroup.")]
+   public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
+
+   #endregion
+
+#pragma warning disable AGS004
+   [ReadonlyNexus]
+   [Description("Unique key of this ReligionGroup. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public Eu5FileObj Source { get; set; } = null!;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string GetNamespace => $"Religion.{nameof(ReligionGroup)}";
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public bool IsReadonly => false;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligionGroupSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligionGroupAgsSettings;
+   public static Dictionary<string, ReligionGroup> GetGlobalItems() => Globals.ReligionGroups;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+
+   public static ReligionGroup Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligionGroup" };
+
+   public override string ToString() => UniqueId;
+
+   #endregion
+}

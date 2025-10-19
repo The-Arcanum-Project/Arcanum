@@ -9,4 +9,6 @@ public interface IMainWindowsHandle
    public void OpenMainMenuScreen();
 
    public void TransferToMainMenuScreen(Window sender, Enum view);
+
+   public void SetToNui(object obj);
 }
