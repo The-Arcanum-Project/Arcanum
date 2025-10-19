@@ -49,7 +49,7 @@ public static class Selection
    // State Variables for drag selection
    public static bool IsDragging { get; set; }
    public static List<Vector2> DragPath { get; set; } = [];
-   private static RectangleF DragArea { get; set; } = RectangleF.Empty;
+   public static RectangleF DragArea { get; private set; } = RectangleF.Empty;
 
    public static MapManager MapManager = new();
 
@@ -62,6 +62,8 @@ public static class Selection
    public static event Action<List<Location>>? LocationHighlighted;
    public static event Action<List<Location>>? LocationUnhighlighted;
    public static event Action<List<Location>>? LocationSelectionChanged;
+   public static event Action<(List<Location> add, List<Location> remove)>? RectangleSelectionUpdated;
+   public static event Action<(List<Location> add, List<Location> remove)>? LassoSelectionUpdated;
 
    private static void OnLocationSelected(List<Location> locations)
    {
@@ -95,7 +97,20 @@ public static class Selection
       LocationUnhighlighted?.Invoke(locations);
    }
 
-   private static void TriggerEvents(SelectionTarget target, List<Location> added, List<Location> removed)
+   private static void OnRectangleSelectionUpdated(List<Location> added, List<Location> removed)
+   {
+      RectangleSelectionUpdated?.Invoke((added, removed));
+   }
+
+   private static void OnLassoSelectionUpdated(List<Location> added, List<Location> removed)
+   {
+      LassoSelectionUpdated?.Invoke((added, removed));
+   }
+
+   private static void TriggerEvents(SelectionTarget target,
+                                     SelectionMethod method,
+                                     List<Location> added,
+                                     List<Location> removed)
    {
       if (added.Count > 0)
          switch (target)
@@ -134,6 +149,20 @@ public static class Selection
             default:
                throw new ArgumentOutOfRangeException(nameof(target), target, null);
          }
+
+      switch (method)
+      {
+         case SelectionMethod.Simple:
+         case SelectionMethod.Undefined:
+         case SelectionMethod.Expand:
+         case SelectionMethod.Rectangle:
+            break;
+         case SelectionMethod.Lasso:
+            OnLassoSelectionUpdated(added, removed);
+            break;
+         default:
+            throw new ArgumentOutOfRangeException(nameof(method), method, null);
+      }
    }
 
    #endregion
@@ -143,6 +172,12 @@ public static class Selection
    public static List<Location> GetSelectedLocations => SelectedLocations.ToList();
    public static List<Location> GetHoveredLocations => HoveredLocations.ToList();
    public static List<Location> GetHighlightedLocations => HighlightedLocations.ToList();
+   public static List<Location> GetSelectionPreviewLocations => SelectionPreview.ToList();
+
+   public static int SelectedLocationCount => SelectedLocations.Count;
+   public static int HoveredLocationCount => HoveredLocations.Count;
+   public static int HighlightedLocationCount => HighlightedLocations.Count;
+   public static int SelectionPreviewCount => SelectionPreview.Count;
 
    #endregion
 
@@ -156,11 +191,16 @@ public static class Selection
    /// and locations that are not present will be added instead of removed. <br/>
    /// </summary>
    public static void Modify(SelectionTarget target,
+                             SelectionMethod method,
                              IEnumerable<Location> locations,
                              bool additive = false,
-                             bool invert = true)
+                             bool invert = true,
+                             bool clearAllFirst = false)
    {
       var targetSet = GetTarget(target);
+
+      if (clearAllFirst)
+         RemoveCache.AddRange(targetSet);
 
       // in each branch respectively we gather the toAdd and toRemove lists
       if (additive)
@@ -192,36 +232,40 @@ public static class Selection
             }
          }
 
-      TriggerEvents(target, AddCache, RemoveCache);
-      AddTo(target, AddCache);
-      RemoveFrom(target, RemoveCache);
+      AddTo(target, AddCache, false);
+      RemoveFrom(target, RemoveCache, false);
+      TriggerEvents(target, method, AddCache, RemoveCache);
+      AddCache.Clear();
+      RemoveCache.Clear();
    }
 
-   public static void Set(SelectionTarget target, List<Location> locations)
+   public static void Set(SelectionTarget target, SelectionMethod method, List<Location> locations)
    {
       var targetSet = GetTarget(target);
 
-      TriggerEvents(target, locations.Except(targetSet).ToList(), targetSet.Except(locations).ToList());
       AddTo(target, locations.Except(targetSet));
       RemoveFrom(target, targetSet.Except(locations));
+      TriggerEvents(target, method, locations.Except(targetSet).ToList(), targetSet.Except(locations).ToList());
    }
 
-   private static void AddTo(SelectionTarget target, IEnumerable<Location> locations)
+   private static void AddTo(SelectionTarget target, IEnumerable<Location> locations, bool autoClear = true)
    {
       var targetSet = GetTarget(target);
       targetSet.UnionWith(locations);
       // TODO The internal handling of the addition
 
-      AddCache.Clear();
+      if (autoClear)
+         AddCache.Clear();
    }
 
-   private static void RemoveFrom(SelectionTarget target, IEnumerable<Location> locations)
+   private static void RemoveFrom(SelectionTarget target, IEnumerable<Location> locations, bool autoClear = true)
    {
       var targetSet = GetTarget(target);
       targetSet.ExceptWith(locations);
       // TODO The internal handling of the removal
 
-      RemoveCache.Clear();
+      if (autoClear)
+         RemoveCache.Clear();
    }
 
    private static HashSet<Location> GetTarget(SelectionTarget target)
@@ -231,6 +275,7 @@ public static class Selection
          SelectionTarget.Selection => SelectedLocations,
          SelectionTarget.Hover => HoveredLocations,
          SelectionTarget.Highlight => HighlightedLocations,
+         SelectionTarget.SelectionPreview => SelectionPreview,
          _ => throw new ArgumentOutOfRangeException(nameof(target), target, null),
       };
    }
@@ -244,13 +289,22 @@ public static class Selection
       switch (target)
       {
          case SelectionTarget.Selection:
+            var selection = SelectedLocations.ToList();
             SelectedLocations.Clear();
+            OnLocationDeselected(selection);
             break;
          case SelectionTarget.Hover:
+            var hover = HoveredLocations.ToList();
             HoveredLocations.Clear();
+            OnLocationUnhovered(hover);
             break;
          case SelectionTarget.Highlight:
+            var highlight = HighlightedLocations.ToList();
             HighlightedLocations.Clear();
+            OnLocationUnhighlighted(highlight);
+            break;
+         case SelectionTarget.SelectionPreview:
+            SelectionPreview.Clear();
             break;
          default:
             throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -280,12 +334,20 @@ public static class Selection
       else if (!isDragging && IsDragging)
       {
          // Perform the final selection
-         Modify(SelectionTarget.Selection, SelectionPreview, true, false);
+         Modify(SelectionTarget.Selection,
+                isLasso ? SelectionMethod.Lasso : SelectionMethod.Rectangle,
+                SelectionPreview,
+                true,
+                false);
+         Clear(SelectionTarget.SelectionPreview);
       }
 
       IsDragging = isDragging;
       if (!isDragging)
          return;
+
+      var sType = isLasso ? "Lasso" : "Rectangle";
+      Console.WriteLine($"Selection: {sType,10} | Mouse Position: {mousePos} | Drag Path Count: {DragPath.Count} | Drag Area: {DragArea}");
 
       DragPath.Add(mousePos);
 
@@ -322,24 +384,24 @@ public static class Selection
 
          var (horizontalRect, verticalRect) = GeoRect.RectDiff(DragArea, newArea);
 
-         AddLocationsFromRectangle(horizontalRect);
-         AddLocationsFromRectangle(verticalRect);
-      }
-   }
+         List<Location> added;
+         List<Location> removed;
 
-   private static void AddLocationsFromRectangle(RectangleF rect)
-   {
-      if (GeoRect.IsRectangleContained(rect, DragArea))
-      {
-         // Add all locations in the verticalRect to the SelectionPreview
-         // var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
-         // Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), invert: false);
-      }
-      else
-      {
-         // Add all locations in the horizontalRect to the SelectionPreview
-         // var addLocs = QuadTree.GetAllPolygonsInRectangle(rect);
-         // Modify(SelectionTarget.SelectionPreview, SelectionHelpers.PolygonsToLocations(addLocs), true, false);
+         if (GeoRect.IsRectangleContained(horizontalRect, DragArea))
+         {
+            added = MapManager.Lqt.FindLocations(horizontalRect);
+            removed = MapManager.Lqt.FindLocations(verticalRect);
+         }
+         else
+         {
+            added = MapManager.Lqt.FindLocations(verticalRect);
+            removed = MapManager.Lqt.FindLocations(horizontalRect);
+         }
+
+         Modify(SelectionTarget.SelectionPreview, SelectionMethod.Rectangle, added, invert: false);
+         Modify(SelectionTarget.SelectionPreview, SelectionMethod.Rectangle, removed, true, false);
+
+         OnRectangleSelectionUpdated(added, removed);
       }
    }
 
@@ -367,28 +429,24 @@ public static class Selection
       // The line connecting the first two points
       locsOnLine = GeoRect.GetLocationsOnLine(vector2S[^2], vector2S[0], locList);
       foreach (var prov in locsOnLine)
-      {
          if (polygon.Contains(prov.Polygons[0].Vertices[0])) //TODO: Crash potential if a location has no vertices
             addToPreview.Add(prov);
          else
             rmvfrPreview.Add(prov);
-      }
 
       locsOnLine = GeoRect.GetLocationsInPolygon(polygon, locList);
 
       foreach (var prov in locsOnLine)
-      {
          if (SelectionPreview.Contains(prov))
             addToPreview.Add(prov);
          else
             rmvfrPreview.Add(prov);
-      }
 
       sw.Stop();
       Debug.WriteLine($"Checks: {sw.ElapsedTicks} nano seconds");
 
-      Modify(SelectionTarget.SelectionPreview, addToPreview, true, false);
-      Modify(SelectionTarget.SelectionPreview, rmvfrPreview, false, false);
+      Modify(SelectionTarget.SelectionPreview, SelectionMethod.Lasso, addToPreview, true, false);
+      Modify(SelectionTarget.SelectionPreview, SelectionMethod.Lasso, rmvfrPreview, false, false);
    }
 
    /// <summary>
@@ -397,7 +455,7 @@ public static class Selection
    /// </summary>
    public static void LmbSelect(Location location, bool invert = false)
    {
-      Modify(SelectionTarget.Selection, [location], true, invert);
+      Modify(SelectionTarget.Selection, SelectionMethod.Simple, [location], true, invert);
    }
 
    /// <summary>
@@ -414,7 +472,7 @@ public static class Selection
       if (bp == null)
          return;
 
-      Set(SelectionTarget.Selection, bp.GetLocations());
+      Set(SelectionTarget.Selection, SelectionMethod.Expand, bp.GetLocations());
    }
 
    public static void ShrinkSelection(Location location)
@@ -423,7 +481,36 @@ public static class Selection
       if (ptst == null)
          return;
 
-      Set(SelectionTarget.Selection, ptst.GetLocations());
+      Set(SelectionTarget.Selection, SelectionMethod.Expand, ptst.GetLocations());
+   }
+
+   #endregion
+
+   #region SelectionStartAndEndHelpers
+
+   // For Rectangle Selection we can just call UpdateDragSelection with isLasso = false
+   public static void StartRectangleSelection(Vector2 startPos)
+   {
+      Console.WriteLine($"Rectangle selection started at {startPos} with initial area {DragArea}");
+      UpdateDragSelection(startPos, true, false);
+   }
+
+   public static void EndRectangleSelection(Vector2 endPos)
+   {
+      Console.WriteLine($"Rectangle selection ended at {endPos} with final area {DragArea}");
+      UpdateDragSelection(endPos, false, false);
+      DragArea = RectangleF.Empty;
+   }
+
+   // For Lasso Selection we can just call UpdateDragSelection with isLasso = true
+   public static void StartLassoSelection(Vector2 startPos)
+   {
+      UpdateDragSelection(startPos, true, true);
+   }
+
+   public static void EndLassoSelection(Vector2 endPos)
+   {
+      UpdateDragSelection(endPos, false, true);
    }
 
    #endregion
@@ -458,7 +545,7 @@ public static class Selection
 
       foreach (var ts in TimedSelections)
          if (now >= ts.EndTime)
-            Modify(ts.Target, ts.Locations);
+            Modify(ts.Target, SelectionMethod.Undefined, ts.Locations);
 
       TimedSelections.RemoveAll(ts => now >= ts.EndTime);
       if (TimedSelections.Count > 0)
@@ -478,5 +565,15 @@ public static class Selection
    public static Location GetLocation(Vector2 vec2)
    {
       return MapManager.FindLocationAt(vec2) ?? Location.Empty;
+   }
+
+   public static List<Location> GetLocations(RectangleF rect)
+   {
+      return MapManager.Lqt.FindLocations(rect);
+   }
+
+   public static List<Location> GetLocations(Polygon polygon)
+   {
+      return MapManager.Lqt.FindLocations(polygon);
    }
 }

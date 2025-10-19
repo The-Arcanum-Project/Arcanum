@@ -105,7 +105,7 @@ public static class GridManager
          var locations =
             MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
          if (locations.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, locations, true, false);
+            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, true, false);
       };
 
       MouseEventHandler onMouseLeave = (_, _) =>
@@ -114,7 +114,7 @@ public static class GridManager
          var locations =
             MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
          if (locations.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, locations, false, false);
+            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, false, false);
       };
 
       header.MouseEnter += onMouseEnter;

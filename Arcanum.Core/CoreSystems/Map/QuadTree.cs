@@ -137,7 +137,12 @@ public sealed class QuadTree
       return index;
    }
 
-   public List<Location> QueryRange(RectangleF range)
+   #region Query Methods
+
+   /// <summary>
+   /// Retrieves all unique Locations whose polygons intersect with the given range.
+   /// </summary>
+   private List<Location> QueryRange(RectangleF range)
    {
       var foundLocations = new HashSet<Location>();
       QueryRangeRecursive(range, foundLocations);
@@ -149,21 +154,56 @@ public sealed class QuadTree
       if (!Bounds.IntersectsWith(range))
          return;
 
-      // If leaf node, check actual objects
-      if (_references != null)
+      if (_children != null)
+         foreach (var child in _children)
+            child.QueryRangeRecursive(range, foundLocations);
+
+      else if (_references != null)
          foreach (var polyRef in _references)
          {
             var location = _allLocations[polyRef.LocationId];
-            // First check against the query range using the cheap bounding box.
             if (location.Polygons[polyRef.PolygonIndex].Bounds.IntersectsWith(range))
                foundLocations.Add(location);
          }
-
-      // If it has children, recurse
-      if (_children == null)
-         return;
-
-      foreach (var child in _children)
-         child.QueryRangeRecursive(range, foundLocations);
    }
+
+   /// <summary>
+   /// Finds all unique locations whose bounds either intersect with or are contained by a given rectangle.
+   /// </summary>
+   /// <param name="area">The rectangular search area.</param>
+   public List<Location> FindLocations(RectangleF area)
+   {
+      return QueryRange(area);
+   }
+
+   /// <summary>
+   /// Finds all unique locations that intersect with a given polygon.
+   /// </summary>
+   /// <param name="containerPolygon">The polygon to check against.</param>
+   public List<Location> FindLocations(Polygon containerPolygon)
+   {
+      var results = new List<Location>();
+      var containerBounds = containerPolygon.Bounds;
+
+      var candidateLocations = QueryRange(containerBounds);
+      foreach (var candidate in candidateLocations)
+      {
+         // Fast reject using bounding boxes.
+         if (!containerBounds.IntersectsWith(candidate.Bounds))
+            continue;
+
+         foreach (var polygon in candidate.Polygons)
+         {
+            if (!containerPolygon.Intersects(polygon))
+               continue;
+
+            results.Add(candidate);
+            break;
+         }
+      }
+
+      return results;
+   }
+
+   #endregion
 }

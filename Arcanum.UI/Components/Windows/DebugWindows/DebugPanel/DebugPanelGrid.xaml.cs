@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GlobalStates;
@@ -78,5 +79,10 @@ public partial class DebugPanelGrid
    private void GraphViewerButton_Click(object sender, RoutedEventArgs e)
    {
       new GraphViewer().Show();
+   }
+
+   private void ClearSelectionButton_Click(object sender, RoutedEventArgs e)
+   {
+      Selection.ClearAll();
    }
 }

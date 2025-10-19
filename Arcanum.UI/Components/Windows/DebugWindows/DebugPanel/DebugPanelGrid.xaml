@@ -74,6 +74,10 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "GraphViewerButton_Click" />
+            <styleClasses:BaseButton Content = "Clear Selection"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "ClearSelectionButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

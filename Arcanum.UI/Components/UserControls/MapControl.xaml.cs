@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
@@ -8,6 +9,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.UI.DirectX;
 using CommunityToolkit.Mvvm.Input;
 using Vortice.Mathematics;
+using Point = System.Windows.Point;
 
 namespace Arcanum.UI.Components.UserControls;
 
@@ -23,6 +25,8 @@ public partial class MapControl
    private float _imageAspectRatio;
    private (int, int) _imageSize;
 
+   private bool _hasPanned;
+
    public event Action<Vector2>? OnAbsolutePositionChanged;
    public static event Action? OnMapLoaded;
 
@@ -34,6 +38,11 @@ public partial class MapControl
       get => (Vector2)GetValue(CurrentPosProperty);
       set => SetValue(CurrentPosProperty, value);
    }
+
+   // Command to load the project in the Arcanum view
+   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args => { });
+   private const float ZOOM_LOG_BASE = 2f;
+   private static readonly float LnZoomLogBase = MathF.Log(ZOOM_LOG_BASE);
 
    public MapControl()
    {
@@ -54,21 +63,9 @@ public partial class MapControl
             return;
 
          var loc = Selection.MapManager.FindLocationAt(pos) ?? Location.Empty;
-         Selection.Modify(SelectionTarget.Hover, [loc], true);
+         Selection.Clear(SelectionTarget.Hover);
+         Selection.Modify(SelectionTarget.Hover, SelectionMethod.Simple, [loc], true);
       };
-   }
-
-   private void OnMouseLeave(object sender, MouseEventArgs e)
-   {
-      // Stop panning if the mouse leaves the control
-      if (_isPanning)
-      {
-         Mouse.OverrideCursor = null;
-         _isPanning = false;
-         _hasPanned = false;
-      }
-
-      CurrentPos = Vector2.Zero;
    }
 
    private static Color4[] CreateColors(Polygon[] polygons)
@@ -119,7 +116,7 @@ public partial class MapControl
    public Vector2 ScreenToMapAbsolute(Vector2 screenPoint)
    {
       var mapPoint = ScreenToMap(screenPoint);
-      return new Vector2(mapPoint.X * _imageSize.Item1, mapPoint.Y * _imageSize.Item2);
+      return new(mapPoint.X * _imageSize.Item1, mapPoint.Y * _imageSize.Item2);
    }
 
    public Vector2 ScreenToMapAbsolute(Point screenPoint)
@@ -133,11 +130,8 @@ public partial class MapControl
          return;
 
       var pos = ScreenToMap(args.GetPosition(this));
-      Console.WriteLine(pos);
+      // TODO: MelCo draw selections: Console.WriteLine(pos);
    });
-
-   // Command to load the project in the Arcanum view
-   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args => { });
 
    public Vector2 ScreenToMap(Vector2 screenPoint)
    {
@@ -161,45 +155,244 @@ public partial class MapControl
       return new(mapX, mapY);
    }
 
-   private void PanTo(float x, float y)
+   public void PanTo(float x, float y)
    {
       _locationRenderer.Pan.X = Math.Clamp(x, -0.1f, 1.1f);
       _locationRenderer.Pan.Y = Math.Clamp(y, -0.1f, 1.1f);
       UpdateRenderer();
    }
 
-   private const float ZOOM_LOG_BASE = 2f;
-   private static readonly float LnZoomLogBase = MathF.Log(ZOOM_LOG_BASE);
+   public void PanTo(Vector2 position)
+   {
+      PanTo(position.X, position.Y);
+   }
+
+   public void EnsureVisible(RectangleF area)
+   {
+      var areaAspectRatio = area.Width / area.Height;
+      var controlAspectRatio = (float)HwndHostContainer.ActualWidth / (float)HwndHostContainer.ActualHeight;
+
+      float requiredZoom;
+
+      if (areaAspectRatio > controlAspectRatio)
+         requiredZoom = controlAspectRatio / areaAspectRatio;
+      else
+         requiredZoom = area.Height / area.Width * controlAspectRatio;
+
+      requiredZoom /= _imageAspectRatio;
+      requiredZoom *= 2f; // Because orthographic projection is from -1 to 1
+
+      _locationRenderer.Zoom = requiredZoom;
+
+      var panX = area.X + area.Width / 2f;
+      var panY = 1f - (area.Y + area.Height / 2f);
+
+      PanTo(panX, panY);
+   }
+
+   public void EnsureVisibleWithMargin(RectangleF area, float marginFraction)
+   {
+      var marginX = area.Width * marginFraction;
+      var marginY = area.Height * marginFraction;
+
+      var expandedArea = new RectangleF(area.X - marginX,
+                                        area.Y - marginY,
+                                        area.Width + 2 * marginX,
+                                        area.Height + 2 * marginY);
+
+      EnsureVisible(expandedArea);
+   }
+
+   #region Events
+
+   private void OnMouseLeave(object sender, MouseEventArgs e)
+   {
+      // Stop panning if the mouse leaves the control
+      if (_isPanning)
+      {
+         Mouse.OverrideCursor = null;
+         _isPanning = false;
+         _hasPanned = false;
+      }
+
+      CurrentPos = Vector2.Zero;
+   }
 
    private void OnMouseWheel(object sender, MouseWheelEventArgs e)
    {
       var pos = ScreenToMap(e.GetPosition(this));
 
-      var zoomFactor = e.Delta > 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-
-      var maxZoom = MathF.Exp(Config.Settings.MapSettings.MaxZoomLevel * LnZoomLogBase);
-      var minZoom = MathF.Exp(Config.Settings.MapSettings.MinZoomLevel * LnZoomLogBase);
-
-      var newZoom = _locationRenderer.Zoom * zoomFactor;
-
-      if (newZoom < minZoom || maxZoom < newZoom)
-      {
+      if (UpdateZoomLevel(e, pos, out var delta))
          return;
-      }
-
-      _locationRenderer.Zoom = newZoom;
-
-      var delta = new Vector2(pos.X - _locationRenderer.Pan.X, pos.Y - _locationRenderer.Pan.Y);
-
-      delta /= zoomFactor;
 
       var newPan = pos - delta;
       PanTo(newPan.X, newPan.Y);
    }
 
-   private bool _hasPanned;
-
    private void OnMouseMove(object sender, MouseEventArgs e)
+   {
+      HandleMousePanning(e);
+
+      if (_isPanning)
+         return;
+
+      HandleMouseSelection(e);
+   }
+
+   private void UpdateCursorLocation(Point position)
+   {
+      CurrentPos = ScreenToMapAbsolute(position);
+      OnAbsolutePositionChanged?.Invoke(CurrentPos);
+   }
+
+   private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+   {
+      if (sender is not IInputElement surface)
+         return;
+
+      InitializePanning(surface, e);
+      SelectionModeStarting(e);
+   }
+
+   private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+   {
+      ResetPanningState(e);
+
+      // If we were panning, do not process selection
+      if (_hasPanned)
+         return;
+
+      SelectionModeTermination(e);
+   }
+
+   #endregion
+
+   #region Selection Logic
+
+   private void SelectionModeStarting(MouseButtonEventArgs e)
+   {
+      switch (e.ChangedButton)
+      {
+         case MouseButton.Left:
+            switch (Keyboard.Modifiers)
+            {
+               // Unused
+               case ModifierKeys.None:
+                  break;
+               // Unused
+               case ModifierKeys.Control:
+                  break;
+               // Enter Rectangle Selection Mode
+               case ModifierKeys.Shift:
+                  Selection.StartRectangleSelection(CurrentPos);
+                  break;
+               // Enter Lasso Selection Mode
+               case ModifierKeys.Alt:
+                  Selection.StartLassoSelection(CurrentPos);
+                  break;
+            }
+
+            break;
+         case MouseButton.Right:
+            switch (Keyboard.Modifiers)
+            {
+               // WILL_BE: Default smart context menu
+               case ModifierKeys.None:
+                  break;
+               // WILL_BE: Smart Selection Menu
+               case ModifierKeys.Control:
+                  break;
+               // WILL_BE: Invert collection for scope x (e.g. Continent)
+               case ModifierKeys.Shift:
+                  break;
+               // Unused
+               case ModifierKeys.Alt:
+                  break;
+            }
+
+            break;
+      }
+   }
+
+   private void HandleMouseSelection(MouseEventArgs e)
+   {
+      if (e.LeftButton == MouseButtonState.Pressed)
+         switch (Keyboard.Modifiers)
+         {
+            case ModifierKeys.Shift:
+               Selection.UpdateDragSelection(CurrentPos, true, false);
+               break;
+            case ModifierKeys.Alt:
+               Selection.UpdateDragSelection(CurrentPos, true, true);
+               break;
+         }
+   }
+
+   private void SelectionModeTermination(MouseButtonEventArgs e)
+   {
+      switch (e.ChangedButton)
+      {
+         case MouseButton.Left:
+            switch (Keyboard.Modifiers)
+            {
+               // Simple LMB Click selection
+               case ModifierKeys.None:
+                  Selection.Modify(SelectionTarget.Selection,
+                                   SelectionMethod.Simple,
+                                   [Selection.GetLocation(CurrentPos)],
+                                   true,
+                                   false,
+                                   true);
+                  break;
+               // Simple LMB Click selection with inversion
+               case ModifierKeys.Control:
+                  Selection.Modify(SelectionTarget.Selection,
+                                   SelectionMethod.Simple,
+                                   [Selection.GetLocation(CurrentPos)],
+                                   true);
+                  break;
+               case ModifierKeys.Shift:
+                  Selection.EndRectangleSelection(CurrentPos);
+                  break;
+               case ModifierKeys.Alt:
+                  Selection.EndLassoSelection(CurrentPos);
+                  break;
+            }
+
+            break;
+         // Unused
+         case MouseButton.Right:
+            switch (Keyboard.Modifiers)
+            {
+               // Unused
+               case ModifierKeys.None:
+                  break;
+               // Unused
+               case ModifierKeys.Control:
+                  break;
+               // Unused
+               case ModifierKeys.Shift:
+                  break;
+               // Unused
+               case ModifierKeys.Alt:
+                  break;
+            }
+
+            break;
+      }
+   }
+
+   #endregion
+
+   #region Internal Panning
+
+   private void InitializePanning(IInputElement surface, MouseButtonEventArgs e)
+   {
+      _isPanning = true;
+      _lastMousePosition = e.GetPosition(surface);
+   }
+
+   private void HandleMousePanning(MouseEventArgs e)
    {
       if (!_isPanning)
          UpdateCursorLocation(e.GetPosition(HwndHostContainer));
@@ -233,22 +426,7 @@ public partial class MapControl
       _lastMousePosition = currentMousePosition;
    }
 
-   private void UpdateCursorLocation(Point position)
-   {
-      CurrentPos = ScreenToMapAbsolute(position);
-      OnAbsolutePositionChanged?.Invoke(CurrentPos);
-   }
-
-   private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-   {
-      if (sender is not IInputElement surface)
-         return;
-
-      _isPanning = true;
-      _lastMousePosition = e.GetPosition(surface);
-   }
-
-   private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+   private void ResetPanningState(MouseButtonEventArgs e)
    {
       if (!_isPanning)
          return;
@@ -260,5 +438,30 @@ public partial class MapControl
 
       e.Handled = true;
       _hasPanned = false;
+   }
+
+   #endregion
+
+   private bool UpdateZoomLevel(MouseWheelEventArgs e, Vector2 pos, out Vector2 delta)
+   {
+      var zoomFactor = e.Delta > 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+
+      var maxZoom = MathF.Exp(Config.Settings.MapSettings.MaxZoomLevel * LnZoomLogBase);
+      var minZoom = MathF.Exp(Config.Settings.MapSettings.MinZoomLevel * LnZoomLogBase);
+
+      var newZoom = _locationRenderer.Zoom * zoomFactor;
+
+      if (newZoom < minZoom || maxZoom < newZoom)
+      {
+         delta = Vector2.Zero;
+         return true;
+      }
+
+      _locationRenderer.Zoom = newZoom;
+
+      delta = new(pos.X - _locationRenderer.Pan.X, pos.Y - _locationRenderer.Pan.Y);
+
+      delta /= zoomFactor;
+      return false;
    }
 }

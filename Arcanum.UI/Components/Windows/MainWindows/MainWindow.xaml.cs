@@ -40,6 +40,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private string _vramUsage = "VRAM: [0 MB]";
    private string _fps = "FPS: [0]";
    private string _hoveredLocation;
+   private string _rectangleBounds;
 
    #region Properties
 
@@ -120,6 +121,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    }
 
+   public string RectangleBounds
+   {
+      get => _rectangleBounds;
+      set
+      {
+         if (value == _rectangleBounds)
+            return;
+
+         _rectangleBounds = value;
+         OnPropertyChanged();
+      }
+   }
+
    #endregion
 
    public MainWindow()
@@ -172,6 +186,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
       };
 
+      Selection.RectangleSelectionUpdated += _ =>
+      {
+         var rect = Selection.DragArea;
+         RectangleBounds = $"Rect: [X:{rect.X}, Y:{rect.Y}, W:{rect.Width}, H:{rect.Height}]";
+      };
+
       GcWizard.ForceGc();
 
       Selection.LocationHovered += locations =>
@@ -193,6 +213,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void SelectionOnLocationSelectionChanged(List<Location> locations)
    {
+      if (locations.Count == 0)
+      {
+         UiPresenter.Content = null;
+         return;
+      }
+
       Eu5UiGen.GenerateAndSetView(new([..locations], true, UiPresenter));
    }
 
