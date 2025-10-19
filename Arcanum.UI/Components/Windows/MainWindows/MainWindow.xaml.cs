@@ -171,8 +171,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          throw new ApplicationException("Could not load location map tracing descriptor.");
 
       lock (mapDataParser)
-         if (mapDataParser.finishedTesselation)
-            _ = MainMap.SetupRenderer(mapDataParser.polygons, mapDataParser.mapSize);
+         if (mapDataParser.FinishedTesselation)
+            _ = MainMap.SetupRenderer(mapDataParser.Polygons, mapDataParser.MapSize);
 
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
@@ -182,7 +182,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       MapControl.OnMapLoaded += () =>
       {
          var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
-                                                              .LoadingService[0]).mapSize;
+                                                              .LoadingService[0]).MapSize;
          Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
       };
 

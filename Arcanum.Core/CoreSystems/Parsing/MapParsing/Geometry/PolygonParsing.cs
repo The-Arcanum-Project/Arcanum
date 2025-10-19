@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Arcanum.Core.CoreSystems.Map;
 using LibTessDotNet;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
@@ -40,7 +41,7 @@ public class PolygonParsing(int color)
             vertices[i] = new (pos.X, pos.Y);
         }
 
-        return new(vertices, tess.Elements, Color);
+        return new(vertices, tess.Elements);
     }
     
     public Rectangle GetBoundingBox()

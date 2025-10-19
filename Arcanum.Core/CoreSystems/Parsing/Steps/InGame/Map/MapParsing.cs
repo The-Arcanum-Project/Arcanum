@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Windows.Threading;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -14,17 +15,18 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects { get; }
-   public List<PolygonParsing> ParsingPolygons = [];
-   public Polygon[] polygons;
-   public bool finishedTesselation = false;
-   public (int, int) mapSize;
+   public override List<Type> ParsedObjects { get; } = [];
+   private List<PolygonParsing> _parsingPolygons = [];
+   public Polygon[]? Polygons;
+   public int TotalPolygonsCount;
+   public bool FinishedTesselation;
+   public (int, int) MapSize;
    public override bool IsHeavyStep => true;
    public override bool HasPriority { get; set; } = true;
 
    public override string GetFileDataDebugInfo()
    {
-      return $"Number of polygons: {ParsingPolygons.Count}";
+      return $"Number of polygons: {_parsingPolygons.Count}";
    }
 
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
@@ -34,11 +36,12 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       {
          using (MapTracing tracing = new(bitmap))
          {
-            ParsingPolygons = tracing.Trace();
-            polygons = new Polygon[ParsingPolygons.Count];
-            mapSize = (bitmap.Width, bitmap.Height);
+            _parsingPolygons = tracing.Trace();
+            Polygons = new Polygon[_parsingPolygons.Count];
+            MapSize = (bitmap.Width, bitmap.Height);
          }
       }
+      TotalPolygonsCount = _parsingPolygons.Count;
 
       _ = Tessellate();
 
@@ -49,49 +52,24 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
    private async Task Tessellate()
    {
-      await Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
-                                             i => polygons[i] = ParsingPolygons[i].Tessellate(),
+      await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
+                                             i => Polygons![i] = _parsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
-
-      lock (this)
-      {
-         finishedTesselation = true;
-         UIHandle.Instance.MapHandle.NotifyMapLoaded();
-      }
 
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
 
       // TODO @MelCo: Make this right
-      Dictionary<int, Location> colorCache = [];
-      try
-      {
-         foreach (var loc in Globals.Locations.Values)
-         {
-            if (colorCache.TryGetValue(loc.Color.AsInt(), out var dup))
-               Console.WriteLine($"[MPS] Duplicate location color detected: {loc.Color} in location {loc.UniqueId} and {dup.UniqueId}");
-            colorCache[loc.Color.AsInt()] = loc;
-         }
-      }
-      catch (Exception e)
-      {
-         Console.WriteLine(e);
-         throw;
-      }
 
-      var tempDict = new Dictionary<int, List<Arcanum.Core.CoreSystems.Map.Polygon>>();
-      foreach (var p in polygons)
+      var tempDict = new Dictionary<int, List<Polygon>>();
+      for (var index = 0; index < Polygons!.Length; index++)
       {
-         if (!colorCache.ContainsKey(p.Color))
-         {
-            Console.WriteLine($"[MPS] No location found for color {p.Color}");
-            continue;
-         }
-
+         var p = Polygons![index];
+         var color = _parsingPolygons[index].Color;
          try
          {
-            if (!tempDict.ContainsKey(p.Color))
-               tempDict[p.Color] = [];
-            tempDict[p.Color].Add(new(p.Vertices, p.Indices));
+            if (!tempDict.TryGetValue(color, out var list))
+               tempDict[color] = list = [];
+            list.Add(p);
          }
          catch (Exception e)
          {
@@ -101,7 +79,21 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       }
 
       foreach (var loc in Globals.Locations.Values)
+      {
          loc.Polygons = tempDict.TryGetValue(loc.Color.AsInt(), out var polygonList) ? polygonList.ToArray() : [];
+         if (polygonList == null) continue;
+         foreach (var polygon in polygonList)
+         {
+            polygon.ColorIndex = loc.ColorIndex;
+         }
+      }
+      
+      lock (this)
+      {
+         FinishedTesselation = true;
+         UIHandle.Instance.MapHandle.NotifyMapLoaded();
+      }
+      
       // End todo
    }
 

@@ -11,10 +11,13 @@ public sealed class Polygon
    public int[] TriangleIndices { get; } // [0,1,2, 0,2,3,...]
    public RectangleF Bounds { get; }
 
+   public int ColorIndex;
+
    public Polygon(Vector2[] vertices, int[] triangleIndices)
    {
       Vertices = vertices ?? throw new ArgumentNullException(nameof(vertices));
       TriangleIndices = triangleIndices ?? throw new ArgumentNullException(nameof(triangleIndices));
+      this.ColorIndex = ColorIndex;
 
 #if DEBUG
       if (Vertices.Length < 3)

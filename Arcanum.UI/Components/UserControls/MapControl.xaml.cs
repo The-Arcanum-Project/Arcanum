@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -10,7 +10,6 @@ using Arcanum.UI.DirectX;
 using CommunityToolkit.Mvvm.Input;
 using Vortice.Mathematics;
 using Point = System.Windows.Point;
-
 namespace Arcanum.UI.Components.UserControls;
 
 public partial class MapControl
@@ -24,9 +23,12 @@ public partial class MapControl
    private bool _isPanning;
    private float _imageAspectRatio;
    private (int, int) _imageSize;
-
+   
+   private Color4[] _currentBackgroundColor;
+   private Color4[] _selectionColor;
+   
    private bool _hasPanned;
-
+   
    public event Action<Vector2>? OnAbsolutePositionChanged;
    public static event Action? OnMapLoaded;
 
@@ -70,11 +72,14 @@ public partial class MapControl
 
    private static Color4[] CreateColors(Polygon[] polygons)
    {
-      var colors = new Color4[polygons.Length];
+      var locations = Globals.Locations.Values;
+      var colors = new Color4[locations.Count];
 
-      for (var i = 0; i < polygons.Length; i++)
-         colors[i] = new(polygons[i].Color);
-
+      foreach (var location in locations)
+      {
+         var color = new Color4(location.Color.AsInt());
+         colors[location.ColorIndex] = color;
+      }
       return colors;
    }
 
@@ -84,12 +89,14 @@ public partial class MapControl
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
       _imageSize = imageSize;
-
+      
       _imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
-
+      
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors(polygons);
       _locationRenderer = new(vertices, startColor, _imageAspectRatio);
+      _currentBackgroundColor = startColor;
+      _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       _d3dHost = new(_locationRenderer, HwndHostContainer);
       HwndHostContainer.Child = _d3dHost;
 
@@ -99,8 +106,29 @@ public partial class MapControl
       SetupEvents();
 
       OnMapLoaded?.Invoke();
+      Selection.LocationSelected += LocationSelectedAddHandler;
+      Selection.LocationDeselected += LocationDeselectedAddHandler;
    }
 
+   private void LocationSelectedAddHandler(List<Location> locations)
+   {
+      foreach (var loc in locations)
+      {
+         _selectionColor[loc.ColorIndex] = new(1, 0, 0, 1);
+      }
+      _locationRenderer.UpdateColors(_selectionColor);
+      _d3dHost.Invalidate();
+   }
+   
+   private void LocationDeselectedAddHandler(List<Location> locations)
+   {
+      foreach (var loc in locations)
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex];
+      
+      _locationRenderer.UpdateColors(_selectionColor);
+      _d3dHost.Invalidate();
+   }
+   
    private void UpdateRenderer()
    {
       _locationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
@@ -130,7 +158,8 @@ public partial class MapControl
          return;
 
       var pos = ScreenToMap(args.GetPosition(this));
-      // TODO: MelCo draw selections: Console.WriteLine(pos);
+      // TODO: MelCo draw selections:
+      Console.WriteLine(pos);
    });
 
    public Vector2 ScreenToMap(Vector2 screenPoint)
@@ -231,11 +260,13 @@ public partial class MapControl
 
    private void OnMouseMove(object sender, MouseEventArgs e)
    {
-      HandleMousePanning(e);
 
       if (_isPanning)
+      {
+         HandleMousePanning(e);
          return;
-
+      }
+      UpdateCursorLocation(e.GetPosition(HwndHostContainer));
       HandleMouseSelection(e);
    }
 
@@ -247,29 +278,24 @@ public partial class MapControl
 
    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
    {
-      if (sender is not IInputElement surface)
-         return;
-
-      InitializePanning(surface, e);
-      SelectionModeStarting(e);
+      SelectionModeStarting(e, sender);
    }
 
    private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
    {
-      ResetPanningState(e);
 
       // If we were panning, do not process selection
-      if (_hasPanned)
-         return;
-
-      SelectionModeTermination(e);
+      if (!_hasPanned)
+         SelectionModeTermination(e);
+      
+      ResetPanningState(e);
    }
 
    #endregion
 
    #region Selection Logic
 
-   private void SelectionModeStarting(MouseButtonEventArgs e)
+   private void SelectionModeStarting(MouseButtonEventArgs e, object sender)
    {
       switch (e.ChangedButton)
       {
@@ -278,8 +304,11 @@ public partial class MapControl
             {
                // Unused
                case ModifierKeys.None:
+                  if (sender is not IInputElement surface)
+                     return;
+      
+                  InitializePanning(surface, e);
                   break;
-               // Unused
                case ModifierKeys.Control:
                   break;
                // Enter Rectangle Selection Mode
@@ -394,9 +423,6 @@ public partial class MapControl
 
    private void HandleMousePanning(MouseEventArgs e)
    {
-      if (!_isPanning)
-         UpdateCursorLocation(e.GetPosition(HwndHostContainer));
-
       if (!_hasPanned &&
           (e.LeftButton != MouseButtonState.Pressed ||
            (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >

@@ -407,6 +407,7 @@ public static class Selection
 
    private static void SetLassoLocations(Vector2[] vector2S)
    {
+      // TODO: @Minnator why do you use the tessellated polygon here?
       var polygon = new Polygon(vector2S.Select(v => new Vector2(v.X, v.Y)).ToArray(), []);
 
       var sw = new Stopwatch();

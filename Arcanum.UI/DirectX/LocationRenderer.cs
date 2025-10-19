@@ -2,12 +2,12 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using Color = System.Windows.Media.Color;
+using Arcanum.Core.CoreSystems.Map;
 
 namespace Arcanum.UI.DirectX;
 
@@ -76,7 +76,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       for (var i = 0; i < polygons.Length; i++)
       {
          var polygon = polygons[i];
-         var indices = polygon.Indices; // TODO @Melco crashes with polygon = null
+         var indices = polygon.TriangleIndices; // TODO @Melco crashes with polygon = null
          var triangleVertices = polygon.Vertices;
          for (var j = 0; j < indices.Length; j += 3)
          {
@@ -84,11 +84,11 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
             var v1 = triangleVertices[indices[j + 1]];
             var v2 = triangleVertices[indices[j + 2]];
             vertices.Add(new(new(v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
-                             (uint)i));
+                             (uint)polygon.ColorIndex));
             vertices.Add(new(new(v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
-                             (uint)i));
+                             (uint)polygon.ColorIndex));
             vertices.Add(new(new(v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
-                             (uint)i));
+                             (uint)polygon.ColorIndex));
          }
       }
 
@@ -246,7 +246,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _context.RSSetViewport(new(width, height));
    }
 
-   private void UpdateColors(Color4[] newColors)
+   public void UpdateColors(Color4[] newColors)
    {
       // Ensure the context and buffer have been created and the color count matches.
       if (_context == null || _colorLookupBuffer == null)
