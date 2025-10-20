@@ -72,6 +72,12 @@ public partial class Estate : IEu5Object<Estate>
    [Description("When calculating a new dynasty head, the dynasty will check characters of this estate first before falling back to the other estates")]
    public bool PriorityForDynastyHead { get; set; }
 
+   [ParseAs("can_spawn_random_characters")]
+   [SaveAs]
+   [DefaultValue(true)]
+   [Description("If false, characters of this estate will not spawn randomly.")]
+   public bool CanSpawnRandomCharacters { get; set; } = true;
+
    [SaveAs]
    [ParseAs("can_have_characters")]
    [DefaultValue(false)]
