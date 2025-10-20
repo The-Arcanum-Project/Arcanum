@@ -380,5 +380,13 @@ public static class DescriptorDefinitions
          foreach (var descriptor in FileDescriptors)
             descriptor.Reset();
       };
+
+      foreach (var t in from descriptor in FileDescriptors
+                        from t in descriptor.LoadingService.SelectMany(fs => fs.ParsedObjects).Distinct()
+                        where !TypeToDescriptor.TryAdd(t, descriptor)
+                        select t)
+         throw new InvalidOperationException($"Type {t.FullName} is already registered to a FileDescriptor.");
    }
+
+   public static readonly Dictionary<Type, FileDescriptor> TypeToDescriptor = new();
 }
