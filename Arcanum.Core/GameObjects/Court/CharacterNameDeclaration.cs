@@ -72,7 +72,7 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
 
    public string GetNamespace => $"Characters.{nameof(CharacterNameDeclaration)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Name, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

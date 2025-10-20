@@ -15,6 +15,7 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -23,6 +24,7 @@ using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religion;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Religion = Arcanum.Core.GameObjects.Religion.Religion;
 using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
@@ -1291,5 +1293,123 @@ public static class ParsingToolBox
                                                  ref bool validation)
    {
       return node.TryGetReligiousFocus(ctx, source, actionName, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_DesignateHeirReason(ContentNode node,
+                                                      LocationContext ctx,
+                                                      string actionName,
+                                                      string source,
+                                                      [MaybeNullWhen(false)] out DesignateHeirReason value,
+                                                      ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_DesignateHeirReason)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseDesignateHeirReason(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Estate(ContentNode node,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         [MaybeNullWhen(false)] out Estate value,
+                                         ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Estate)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseEstate(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Trait(KeyOnlyNode node,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        string source,
+                                        [MaybeNullWhen(false)] out Trait value,
+                                        ref bool validation)
+   {
+      return node.TryParseTrait(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_Trait(ContentNode node,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        string source,
+                                        [MaybeNullWhen(false)] out Trait value,
+                                        ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Trait)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseTrait(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_ParliamentType(ContentNode node,
+                                                 LocationContext ctx,
+                                                 string actionName,
+                                                 string source,
+                                                 [MaybeNullWhen(false)] out ParliamentType value,
+                                                 ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_ParliamentType)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return lvn.TryParseParliamentType(ctx, actionName, source, ref validation, out value);
    }
 }

@@ -35,7 +35,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
    public static EnactedLaw Empty { get; } = new() { Key = string.Empty, Value = string.Empty };
    public string GetNamespace => $"Court.GovernmentState.{nameof(EnactedLaw)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Key, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

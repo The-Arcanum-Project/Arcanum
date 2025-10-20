@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
@@ -71,11 +72,11 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("heir")]
    public string Heir { get; set; } = string.Empty;
 
-   [SaveAs]
-   [DefaultValue("")]
-   [Description("TODO???")]
+   [SaveAs(SavingValueType.Identifier)]
+   [DefaultValue(null)]
+   [Description(Globals.REPLACE_DESCRIPTION)]
    [ParseAs("designated_heir_reason")]
-   public string DesignateHeirReason { get; set; } = string.Empty;
+   public DesignateHeirReason DesignateHeirReason { get; set; } = DesignateHeirReason.Empty;
 
    [SaveAs]
    [DefaultValue("")]
@@ -128,7 +129,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    #region IEu5Object Implementation
 
    public string GetNamespace => $"Court.{nameof(GovernmentState)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, SavingKey, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

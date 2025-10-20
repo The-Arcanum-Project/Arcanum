@@ -39,7 +39,7 @@ public partial class Road : IEu5Object<Road>
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));

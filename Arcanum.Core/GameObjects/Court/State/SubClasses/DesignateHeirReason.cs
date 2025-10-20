@@ -2,54 +2,47 @@
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Culture;
+namespace Arcanum.Core.GameObjects.Court.State.SubClasses;
 
 [ObjectSaveAs]
-public partial class Institution : IEu5Object<Institution>
+public partial class DesignateHeirReason : IEu5Object<DesignateHeirReason>
 {
    #region Nexus Properties
 
-   [SaveAs]
-   [ParseAs("age")]
-   [Description("The age in which this institution first appears.")]
-   [DefaultValue(null)]
-   public Age Age { get; set; } = Age.Empty;
+   // There is literally nothing in the files lol
 
    #endregion
 
 #pragma warning disable AGS004
    [ReadonlyNexus]
-   [Description("Unique key of this Institution. Must be unique among all objects of this type.")]
+   [Description("Unique key of this DesignateHeirReason. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;
-   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
    #region IEu5Object
 
-   public string GetNamespace => $"Court.{nameof(Institution)}";
+   public string GetNamespace => $"Court.Government.{nameof(DesignateHeirReason)}";
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => true;
-   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionSettings;
+   public bool IsReadonly => false;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DesignateHeirReasonSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionAgsSettings;
-   public static Dictionary<string, Institution> GetGlobalItems() => Globals.Institutions;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DesignateHeirReasonAgsSettings;
+   public static Dictionary<string, DesignateHeirReason> GetGlobalItems() => Globals.DesignateHeirReasons;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
-   public static Institution Empty { get; } = new() { UniqueId = "Arcanum_Empty_Institution" };
+   public static DesignateHeirReason Empty { get; } = new() { UniqueId = "Arcanum_Empty_DesignateHeirReason" };
 
    public override string ToString() => UniqueId;
 

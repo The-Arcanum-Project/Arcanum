@@ -7,10 +7,12 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Nexus.Core;
+using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Religion = Arcanum.Core.GameObjects.Religion.Religion;
 using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 
@@ -325,6 +327,70 @@ public static class LvnHelpers
                                            actionName,
                                            ref validationResult,
                                            Globals.ReligionGroups,
+                                           out value);
+   }
+
+   public static bool TryParseDesignateHeirReason(this LiteralValueNode lvn,
+                                                  LocationContext ctx,
+                                                  string actionName,
+                                                  string source,
+                                                  ref bool validationResult,
+                                                  [MaybeNullWhen(false)] out DesignateHeirReason value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.DesignateHeirReasons,
+                                           out value);
+   }
+
+   public static bool TryParseEstate(this LiteralValueNode lvn,
+                                     LocationContext ctx,
+                                     string actionName,
+                                     string source,
+                                     ref bool validationResult,
+                                     [MaybeNullWhen(false)] out Estate value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Estates,
+                                           out value);
+   }
+
+   public static bool TryParseTrait(this LiteralValueNode lvn,
+                                    LocationContext ctx,
+                                    string actionName,
+                                    string source,
+                                    ref bool validationResult,
+                                    [MaybeNullWhen(false)] out Trait value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.Traits,
+                                           out value);
+   }
+
+   public static bool TryParseParliamentType(this LiteralValueNode lvn,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             ref bool validationResult,
+                                             [MaybeNullWhen(false)] out ParliamentType value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.ParliamentTypes,
                                            out value);
    }
 }

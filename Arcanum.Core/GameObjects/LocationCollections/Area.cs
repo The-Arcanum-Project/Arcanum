@@ -59,7 +59,7 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
    public string GetNamespace => $"Map.{nameof(Area)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |

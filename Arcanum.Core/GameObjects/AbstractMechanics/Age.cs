@@ -99,7 +99,7 @@ public partial class Age : IEu5Object<Age>
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));

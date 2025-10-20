@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 
@@ -119,37 +120,37 @@ public partial class Character : IEu5Object<Character>
    [DefaultValue(null)]
    [ParseAs("ruler_trait", isShatteredList: true)]
    [Description("The traits of this character.")]
-   public ObservableRangeCollection<string> RulerTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> RulerTraits { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("artist_trait", isShatteredList: true)]
    [Description("The artistic traits of this character.")]
-   public ObservableRangeCollection<string> ArtistTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> ArtistTraits { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("child_trait", isShatteredList: true)]
    [Description("The traits of this child character.")]
-   public ObservableRangeCollection<string> ChildTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> ChildTraits { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("religious_figure_trait", isShatteredList: true)]
    [Description("The religous traits of this character.")]
-   public ObservableRangeCollection<string> ReligiousFigureTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> ReligiousFigureTraits { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("admiral_trait", isShatteredList: true)]
    [Description("The admiral traits of this character.")]
-   public ObservableRangeCollection<string> AdmiralTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> AdmiralTraits { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("general_trait", isShatteredList: true)]
    [Description("The general traits of this character.")]
-   public ObservableRangeCollection<string> GeneralTraits { get; set; } = [];
+   public ObservableRangeCollection<Trait> GeneralTraits { get; set; } = [];
 
    [SaveAs]
    [ParseAs("timed_modifier",
@@ -161,11 +162,11 @@ public partial class Character : IEu5Object<Character>
    [Description("A modifier starting and ending at a given date.")]
    public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(0)]
    [ParseAs("estate")]
    [Description("The estate this character belongs to.")]
-   public string Estate { get; set; } = string.Empty;
+   public Estate Estate { get; set; } = Estate.Empty;
 
    [SaveAs]
    [DefaultValue("")]
@@ -225,7 +226,7 @@ public partial class Character : IEu5Object<Character>
    #region IEu5Object
 
    public string GetNamespace => $"Court.{nameof(Character)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;

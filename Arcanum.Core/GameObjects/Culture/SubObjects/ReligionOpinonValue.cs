@@ -40,7 +40,7 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
    #region IEu5Object
 
    public string GetNamespace => $"Opinions.{nameof(ReligionOpinionValue)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;

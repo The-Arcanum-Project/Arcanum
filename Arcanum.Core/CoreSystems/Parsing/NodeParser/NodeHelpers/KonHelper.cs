@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
@@ -132,6 +133,27 @@ public static class KonHelper
                                      $"Parsing {className}",
                                      key,
                                      nameof(ReligiousFocus));
+      validationResult = false;
+      return false;
+   }
+
+   public static bool TryParseTrait(this KeyOnlyNode node,
+                                    LocationContext ctx,
+                                    string actionName,
+                                    string source,
+                                    ref bool validationResult,
+                                    [MaybeNullWhen(false)] out Trait value)
+   {
+      var key = node.KeyNode.GetLexeme(source);
+      if (Globals.Traits.TryGetValue(key, out value))
+         return true;
+
+      ctx.SetPosition(node.KeyNode);
+      DiagnosticException.LogWarning(ctx,
+                                     ParsingError.Instance.InvalidObjectKey,
+                                     actionName,
+                                     key,
+                                     nameof(Trait));
       validationResult = false;
       return false;
    }

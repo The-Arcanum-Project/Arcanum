@@ -51,7 +51,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public string GetNamespace => $"Jomini.Modifiers.{nameof(TimedModifier)}";
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

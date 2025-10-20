@@ -147,7 +147,7 @@ public partial class Topography : IEu5Object<Topography>
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));

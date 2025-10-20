@@ -76,7 +76,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
 #pragma warning restore CS0618 // Type or member is obsolete
    public string GetNamespace => $"Jomini.{nameof(ModValInstance)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Definition.UniqueId, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

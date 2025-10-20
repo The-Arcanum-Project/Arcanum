@@ -41,6 +41,30 @@ public static class DescriptorDefinitions
           [new ModifierParsing([ColorParser.LoadingService[0]])],
           false);
 
+   public static readonly FileDescriptor DesignateHeirReasonDescriptor =
+      new(["in_game", "common", "designated_heir_reason"],
+          new("designated_heir_reason", "txt", "#"),
+          [new DesignateHeirReasonParsing([])],
+          false,
+          false);
+
+   public static readonly FileDescriptor TraitDescriptor = new(["in_game", "common", "traits"],
+                                                               new("traits", "txt", "#"),
+                                                               [
+                                                                  new TraitParsing([
+                                                                     ModifierDefinitionDescriptor.LoadingService[0],
+                                                                  ]),
+                                                               ],
+                                                               false,
+                                                               false);
+
+   public static readonly FileDescriptor ParliamentTypeParsingDescriptor =
+      new(["in_game", "common", "parliament_types"],
+          new("parliament_types", "txt", "#"),
+          [new ParliamentTypeParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
+          false,
+          false);
+
    private static readonly DefaultMapPreParsingStep DefaultMapPreParsing = new([]);
 
    public static readonly FileDescriptor LocationDescriptor = new(["in_game", "map_data", "named_locations"],
@@ -201,6 +225,7 @@ public static class DescriptorDefinitions
                 LocationDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
                 ReligiousSchoolsDescriptor.LoadingService[0], ColorParser.LoadingService[0], CharacterDiscovery,
                 LanguageDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
+                DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
              ]),
           ],
           false,
@@ -213,14 +238,15 @@ public static class DescriptorDefinitions
           false,
           false);
 
-   public static readonly FileDescriptor CharactersDiscoveryDescriptor =
+   public static readonly FileDescriptor CharactersDescriptor =
       new(["main_menu", "setup", "start", "05_characters.txt"],
           new("characters", "txt", "#"),
           ConsequentialLoadingSteps([
              CharacterDiscovery,
              new CharacterPropertiesParsing([
                 ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
-                CountriesDescriptor.LoadingService[0],
+                CountriesDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
+                TraitDescriptor.LoadingService[0],
              ]),
           ]),
           false);
@@ -336,8 +362,9 @@ public static class DescriptorDefinitions
          RoadsDescriptor, CountriesDescriptor, CountryRankDescriptor, InstitutionsAndReligiousSchools,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser, LanguageDescriptor,
          AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor,
-         RegenciesDescriptor, CharactersDiscoveryDescriptor, DynastyManagerDescriptor, EstateDescriptor,
+         RegenciesDescriptor, CharactersDescriptor, DynastyManagerDescriptor, EstateDescriptor,
          ReligiousGroupDescriptor, ReligionDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
+         DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

@@ -57,7 +57,7 @@ public partial class Province : IMapInferable<Province>, IEu5Object<Province>, I
    public static Province Empty { get; } = new() { UniqueId = "Empty Province" };
    public string GetNamespace => "Map.Province";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |

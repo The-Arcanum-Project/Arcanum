@@ -31,7 +31,7 @@ public partial class ReligiousSchool : IEu5Object<ReligiousSchool>
    #region IEu5Object
 
    public string GetNamespace => $"Religion.{nameof(ReligiousSchool)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;

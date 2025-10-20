@@ -2,6 +2,7 @@
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -13,6 +14,7 @@ using Arcanum.Core.GlobalStates.BackingClasses;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
+using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Religion = Arcanum.Core.GameObjects.Religion.Religion;
@@ -79,6 +81,9 @@ public static class Globals
 
    #region Court
 
+   public static Dictionary<string, ParliamentType> ParliamentTypes { get; set; } = [];
+   public static Dictionary<string, Trait> Traits { get; } = [];
+   public static Dictionary<string, DesignateHeirReason> DesignateHeirReasons { get; set; } = [];
    public static Dictionary<string, Language> Languages { get; set; } = [];
    public static Dictionary<string, Language> Dialects { get; set; } = [];
    public static Dictionary<string, Regency> Regencies { get; set; } = [];

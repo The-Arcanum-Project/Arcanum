@@ -89,7 +89,7 @@ public partial class Vegetation : IEu5Object<Vegetation>
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Vegetation", string.Empty);

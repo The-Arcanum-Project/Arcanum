@@ -32,7 +32,7 @@ public partial class ReligiousFaction : IEu5Object<ReligiousFaction>
    #region IEu5Object
 
    public string GetNamespace => $"Religion.{nameof(ReligiousFaction)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;

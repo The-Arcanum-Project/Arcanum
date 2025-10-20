@@ -10,6 +10,7 @@ using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.Economy;
@@ -22,6 +23,7 @@ using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 using Religion = Arcanum.Core.GameObjects.Religion.Religion;
@@ -486,6 +488,33 @@ public class NUISettings
                                                                     .Cast<Enum>()
                                                                     .ToArray(),
                                                                 Enum.GetValues<ReligiousFocus.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray());
+
+   public NUISetting DesignateHeirReasonSettings { get; set; } = new(DesignateHeirReason.Field.UniqueId,
+                                                                     Enum.GetValues<DesignateHeirReason.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray(),
+                                                                     Enum.GetValues<DesignateHeirReason.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray(),
+                                                                     Enum.GetValues<DesignateHeirReason.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray());
+
+   public NUISetting TraitSettings { get; set; } = new(Trait.Field.UniqueId,
+                                                       Enum.GetValues<Trait.Field>().Cast<Enum>().ToArray(),
+                                                       Enum.GetValues<Trait.Field>().Cast<Enum>().ToArray(),
+                                                       Enum.GetValues<Trait.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ParliamentTypeSettings { get; set; } = new(ParliamentType.Field.UniqueId,
+                                                                Enum.GetValues<ParliamentType.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ParliamentType.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<ParliamentType.Field>()
                                                                     .Cast<Enum>()
                                                                     .ToArray());
 }

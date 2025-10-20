@@ -31,6 +31,9 @@ public class AGSSettings
    public AgsSettings Eu5ObjOpinionValueAgsSettings { get; set; } = new();
    public AgsSettings ReligiousFactionAgsSettings { get; set; } = new();
    public AgsSettings ReligiousFocusAgsSettings { get; set; } = new();
+   public AgsSettings DesignateHeirReasonAgsSettings { get; set; } = new();
+   public AgsSettings TraitAgsSettings { get; set; } = new();
+   public AgsSettings ParliamentTypeAgsSettings { get; set; } = new();
    public AgsSettings DynastyAgsSettings { get; set; } = new();
    public AgsSettings EstateAgsSettings { get; set; } = new();
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();

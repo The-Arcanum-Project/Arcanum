@@ -15,11 +15,11 @@ namespace Arcanum.Core.GameObjects.Court.State;
 public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
 #pragma warning restore ARC002
 {
-   [SaveAs]
-   [DefaultValue("")]
+   [SaveAs(SavingValueType.Identifier)]
+   [DefaultValue(null)]
    [Description("The type of this parliament definition.")]
    [ParseAs("parliament_type")]
-   public string Type { get; set; } = string.Empty;
+   public ParliamentType Type { get; set; } = ParliamentType.Empty;
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ParliamentDefinitionSettings;
@@ -27,17 +27,17 @@ public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentDefinitionAgsSettings;
    public string UniqueId
    {
-      get => Type;
+      get => Type.UniqueId;
       set { }
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => string.Empty;
-   public static ParliamentDefinition Empty { get; } = new() { Type = "Arcanum_empty_parliament_definition" };
+   public static ParliamentDefinition Empty { get; } = new() { Type = ParliamentType.Empty };
    public string GetNamespace => "Court.parliament_definition";
 
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, Type, string.Empty);
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, Type.UniqueId, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    public static Dictionary<string, ParliamentDefinition> GetGlobalItems() => [];
