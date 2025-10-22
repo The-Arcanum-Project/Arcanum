@@ -68,5 +68,5 @@ public class LinearHistoryManager : IHistoryManager
       _currentIndex = -1;
    }
 
-   public ICommand Current => _entries[_currentIndex];
+   public ICommand CurrentCommand => _entries[_currentIndex];
 }

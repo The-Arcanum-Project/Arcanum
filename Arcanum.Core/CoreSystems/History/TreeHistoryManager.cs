@@ -67,6 +67,8 @@ public class TreeHistoryManager : IHistoryManager
    /// It is updated whenever a new command is added, undone, or redone.
    /// </summary>
    public HistoryNode Current { get; private set; }
+   
+   public ICommand CurrentCommand => Current.Command;
 
    [Obsolete("Use <Undo(bool)> instead. This has missing functionality in a tree History")]
    public ICommand? Undo() => Undo(false);

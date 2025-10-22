@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Common.Logger;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -37,8 +38,9 @@ public static class SaveMaster
                throw new InvalidOperationException("ModificationCache does not contain type " + type);
          }
 
-         list.Add(command);
+         list.Remove(command);
       }
+      ChangesSinceLastSave.Remove(command);
    }
 
    private static void AddChange(ICommand command)
@@ -55,9 +57,9 @@ public static class SaveMaster
             else
                ModificationCache[type] = 1;
          }
-      
-         list.Remove(command);
+         list.Add(command);
       }
+      ChangesSinceLastSave.Add(command);
    }
 
    public static void CommandExecuted(ICommand command)

@@ -8,10 +8,16 @@ namespace Arcanum.Core.CoreSystems.History;
 public interface ICommand
 {
    /// <summary>
+   /// Finalizes the setup of the command after its initial creation.
+   /// Cleans up any temporary data used during construction.
+   /// </summary>
+   public void FinalizeSetup();
+   
+   /// <summary>
    /// Normal command execution.
    /// </summary>
    public void Execute();
-
+   
    /// <summary>
    /// Undo the command.
    /// </summary>
@@ -21,7 +27,7 @@ public interface ICommand
    /// Redo the command often can directly call Execute, but can also be used to restore state after an undo.
    /// </summary>
    public void Redo();
-
+   
    /// <summary>
    /// The hash is needed to determine commands which target the same objects in history compaction
    /// </summary>
@@ -34,7 +40,7 @@ public interface ICommand
    public IEu5Object[] GetTargets();
    
    public string GetDescription { get; }
-
+   
    /// <summary>
    /// Provides detailed information about the command for debugging purposes.
    /// This will be written to the log if a crash or issue occurs.
@@ -49,6 +55,10 @@ public interface ICommand
 /// and does not perform any execution or state changes.
 public class CInitial : ICommand
 {
+   public void FinalizeSetup()
+   {
+   }
+
    public void Execute()
    {
    }
@@ -65,5 +75,6 @@ public class CInitial : ICommand
    public IEu5Object[] GetTargets() => [];
 
    public string GetDescription => "Initial Command";
+
    public string GetDebugInformation(int indent) => "Initial Command Debug Information";
 }

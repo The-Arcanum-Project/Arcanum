@@ -54,4 +54,9 @@ public interface IHistoryManager
    /// Clears the command history, resetting it to its initial state.
    /// </summary>
    public void Clear();
+
+   /// <summary>
+   /// Gets the current command in the history manager.
+   /// </summary>
+   public ICommand CurrentCommand { get; }
 }

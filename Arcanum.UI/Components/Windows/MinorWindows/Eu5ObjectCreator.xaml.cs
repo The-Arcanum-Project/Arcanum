@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
