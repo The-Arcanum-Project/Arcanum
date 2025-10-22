@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -9,30 +11,72 @@ namespace Arcanum.Core.CoreSystems.SavingSystem;
 
 public static class SaveMaster
 {
-   private static List<Eu5FileObj> NeedsToBeSaved { get; } = [];
-   private static Dictionary<SaveableType, List<ISaveable>> NewSaveables { get; } = [];
-   private static readonly Dictionary<SaveableType, int> ModificationCache;
-
+   private static Dictionary<IEu5Object, List<ICommand>> NeedsToBeSaved { get; } = [];
+   private static Dictionary<Type, List<IEu5Object>> NewSaveables { get; } = [];
+   private static readonly Dictionary<Type, int> ModificationCache = [];
+   private static readonly List<ICommand> ChangesSinceLastSave = [];
+   
    static SaveMaster()
    {
-      var saveableTypes = Enum.GetValues<SaveableType>();
-      ModificationCache = new(saveableTypes.Length);
-      foreach (var t in saveableTypes)
-         ModificationCache.Add(t, 0);
    }
 
    public static int GetModifiedCount => ModificationCache.Values.Sum();
 
-   public static List<(SaveableType type, int amount)> GetModifiedCounts()
+   private static void RemoveChange(ICommand command)
    {
-      return ModificationCache
-            .Where(kvp => kvp.Value > 0)
-            .Select(kvp => (kvp.Key, kvp.Value))
-            .ToList();
+      var targets = command.GetTargets();
+      foreach (var target in targets)
+      {
+         if(!NeedsToBeSaved.TryGetValue(target, out var list))
+         {
+            NeedsToBeSaved[target] = list = [];
+            var type = target.GetType();
+            if(ModificationCache.TryGetValue(type, out var value))
+               ModificationCache[type] = --value;
+            else
+               throw new InvalidOperationException("ModificationCache does not contain type " + type);
+         }
+
+         list.Add(command);
+      }
    }
 
-   public static void HandleNewSaveables()
+   private static void AddChange(ICommand command)
    {
+      var targets = command.GetTargets();
+      foreach (var target in targets)
+      {
+         if(!NeedsToBeSaved.TryGetValue(target, out var list))
+         {
+            NeedsToBeSaved[target] = list = [];
+            var type = target.GetType();
+            if (ModificationCache.TryGetValue(type, out var value))
+               ModificationCache[type] = ++value;
+            else
+               ModificationCache[type] = 1;
+         }
+      
+         list.Remove(command);
+      }
+   }
+
+   public static void CommandExecuted(ICommand command)
+   {
+      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+         RemoveChange(command);
+      AddChange(command);
+   }
+   
+   public static void CommandUndone(ICommand command)
+   {
+      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+         AddChange(command);
+      RemoveChange(command);
+   }
+   
+   public static void HandleNewSaveables(IEu5Object obj)
+   {
+      
    }
 
    public static void SaveAll(bool onlyModified = true)
@@ -63,10 +107,6 @@ public static class SaveMaster
          -> Then we need some sort of static method, which can be inherited and generate a FileObj?
          -> Does that make sense if we have like 50 different file types, or does it not really change since we would need 50 different IFileInformationProvider implementations anyway?
       */
-   }
-
-   public static void RegisterFile(Eu5FileObj fileObj)
-   {
    }
 
    /// <summary>

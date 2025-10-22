@@ -1,4 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.History;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
+
+namespace Arcanum.Core.CoreSystems.History;
 
 /// Represents the base interface for commands in the command history system.
 /// Commands implementing this interface are used to modify the state, and they
@@ -26,6 +28,11 @@ public interface ICommand
    /// <returns></returns>
    public List<int> GetTargetHash();
 
+   /// <summary>
+   /// Returns the target objects affected by this command.
+   /// </summary>
+   public IEu5Object[] GetTargets();
+   
    public string GetDescription { get; }
 
    /// <summary>
@@ -55,6 +62,8 @@ public class CInitial : ICommand
    }
 
    public List<int> GetTargetHash() => [-1];
+   public IEu5Object[] GetTargets() => [];
+
    public string GetDescription => "Initial Command";
    public string GetDebugInformation(int indent) => "Initial Command Debug Information";
 }

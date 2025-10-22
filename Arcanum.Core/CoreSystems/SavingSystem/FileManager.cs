@@ -18,8 +18,6 @@ public static class FileManager
    public static DataSpace[] DependentDataSpaces;
    public static DataSpace VanillaDataSpace => DependentDataSpaces[0];
 
-   public static readonly List<ISaveable> NewSaveables = [];
-
    public static readonly DataSpace DocumentsEUV;
 
    private static readonly char DefaultSeparationChar = Path.DirectorySeparatorChar;
