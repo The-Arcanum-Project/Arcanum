@@ -66,6 +66,15 @@ public class AgsSettings
    [DefaultValue(SavingFormat.Default)]
    public SavingFormat Format { get; set; } = SavingFormat.Default;
 
+   [Description("A custom default name to use when saving objects of this type. If empty, the object's ToString() method will be used.")]
+   [DefaultValue("")]
+   public string CustomDefaultName { get; set; } = string.Empty;
+
+   public string GetDefaultOrCustomFileName(IEu5Object obj)
+   {
+      return string.IsNullOrWhiteSpace(CustomDefaultName) ? obj.GetType().Name : CustomDefaultName;
+   }
+
    #region Reset Methods
 
    public object ResetSaveOrder(PropertyInfo propInfo)

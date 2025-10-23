@@ -4,17 +4,20 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.ErrorSystem;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common;
+using Common.Logger;
 using Path = System.IO.Path;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -75,16 +78,16 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
-   private string _errorResolution = string.Empty;
-   public string ErrorResolution
+   private string _fileProbe = string.Empty;
+   public string FileProbe
    {
-      get => _errorResolution;
+      get => _fileProbe;
       set
       {
-         if (_errorResolution == value)
+         if (_fileProbe == value)
             return;
 
-         _errorResolution = value;
+         _fileProbe = value;
          OnPropertyChanged();
       }
    }
@@ -117,6 +120,20 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
+   private bool _dontProbeFiles;
+   public bool DontProbeForFiles
+   {
+      get => _dontProbeFiles;
+      set
+      {
+         if (_dontProbeFiles == value)
+            return;
+
+         _dontProbeFiles = value;
+         OnPropertyChanged();
+      }
+   }
+
    private SimpleSearchSettings SearchSettings { get; set; } = new();
    private bool _isFullyLoaded;
 
@@ -137,32 +154,6 @@ public partial class ErrorLog : INotifyPropertyChanged
    public ErrorLog()
    {
       InitializeComponent();
-
-      ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError1,
-                                       new(0, 0, "TestFile.txt"),
-                                       DiagnosticSeverity.Error,
-                                       "Test Action",
-                                       "Test Message",
-                                       "Test Description"));
-
-      ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError1,
-                                       new(0, 0, "TestFile.txt"),
-                                       DiagnosticSeverity.Warning,
-                                       "Test Action",
-                                       "Test Message",
-                                       "Test Description"));
-      ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.DebugError2,
-                                       new(0, 0, "TestFile.txt"),
-                                       DiagnosticSeverity.Information,
-                                       "Test Action",
-                                       "Test Message",
-                                       "Test Description"));
-      ErrorManager.Diagnostics.Add(new(MiscellaneousError.Instance.UnknownError,
-                                       new(0, 0, "TestFile.txt"),
-                                       DiagnosticSeverity.Error,
-                                       "Test Action",
-                                       "Test Message",
-                                       "Test Description"));
 
       Loaded += OnLoaded;
    }
@@ -202,6 +193,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          QuerySearch(SearchTextBox.SearchInputTextBox.Text);
       };
 
+      DontProbeForFiles = !Config.Settings.ErrorLogOptions.ProbeFiles;
       _isFullyLoaded = true;
    }
 
@@ -236,15 +228,16 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorName = diagnostic.Descriptor.Name;
          ErrorMessage = diagnostic.Message;
          ErrorDescription = diagnostic.Description;
-         ErrorResolution = diagnostic.Descriptor.Resolution;
+         FileProbe = diagnostic.Descriptor.Resolution;
          SelectedPath = FileManager.SanitizePath(diagnostic.Context.FilePath);
+         UpdateProbe(diagnostic);
       }
       else
       {
          ErrorName = "Error Name";
          ErrorMessage = "Error Message";
          ErrorDescription = "Error Description";
-         ErrorResolution = string.Empty;
+         FileProbe = string.Empty;
          SelectedPath = string.Empty;
       }
 
@@ -252,6 +245,61 @@ public partial class ErrorLog : INotifyPropertyChanged
          return;
 
       SelectedSeverity = selectedDiagnostic.Severity;
+   }
+
+   public static Task<string[]> ReadLineRange(Diagnostic diagnostic)
+   {
+      return IO.ReadLineRange(diagnostic.Context.FilePath,
+                              diagnostic.Context.LineNumber - 2,
+                              diagnostic.Context.LineNumber + 2);
+   }
+
+   private async void UpdateProbe(Diagnostic diagnostic)
+   {
+      if (DontProbeForFiles)
+         return;
+
+      try
+      {
+         var lines = await ReadLineRange(diagnostic);
+
+         for (var i = 0; i < lines.Length; i++)
+            lines[i] = lines[i].Trim() + '\n';
+
+         ProbeTextBlock.Inlines.Clear();
+
+         var line1Run = new Run(lines[0]);
+         var line2Run = new Run(lines[1]);
+         var line3Run = new Run(lines[2]);
+         line3Run.TextDecorations.Add(GetRedUnderlineDecoration());
+         var line4Run = new Run(lines[3]);
+         var line5Run = new Run(lines[4]);
+
+         ProbeTextBlock.Inlines.Add(line1Run);
+         ProbeTextBlock.Inlines.Add(line2Run);
+         ProbeTextBlock.Inlines.Add(line3Run);
+         ProbeTextBlock.Inlines.Add(line4Run);
+         ProbeTextBlock.Inlines.Add(line5Run);
+      }
+      catch (Exception e)
+      {
+         ArcLog.Write("ERL", LogLevel.CRT, "Exception during probing of error file: {0}", e);
+      }
+   }
+
+   private static TextDecorationCollection GetRedUnderlineDecoration()
+   {
+      var redPen = new Pen(Brushes.Red, 1);
+      redPen.Freeze();
+      var customUnderline = new TextDecoration
+      {
+         Location = TextDecorationLocation.Underline, Pen = redPen,
+      };
+      customUnderline.Freeze();
+
+      var customDecorations = new TextDecorationCollection { customUnderline };
+      customDecorations.Freeze();
+      return customDecorations;
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
@@ -354,7 +402,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
       var csvContent = new StringBuilder();
 
-      var cols = Config.Settings.ErrorLogExportOptions.ColumnsToExport.Split(',')
+      var cols = Config.Settings.ErrorLogOptions.ColumnsToExport.Split(',')
                        .Select(x => x.Equals("*"))
                        .ToArray();
 
@@ -382,14 +430,91 @@ public partial class ErrorLog : INotifyPropertyChanged
          csvContent.AppendLine();
       }
 
-      var folder = string.IsNullOrWhiteSpace(Config.Settings.ErrorLogExportOptions.ExportFilePath)
+      var folder = string.IsNullOrWhiteSpace(Config.Settings.ErrorLogOptions.ExportFilePath)
                       ? IO.GetArcanumDataPath
-                      : Config.Settings.ErrorLogExportOptions.ExportFilePath;
-      var filePath = Path.Combine(folder, Config.Settings.ErrorLogExportOptions.ExportFileName);
+                      : Config.Settings.ErrorLogOptions.ExportFilePath;
+      var filePath = Path.Combine(folder, Config.Settings.ErrorLogOptions.ExportFileName);
 
       IO.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8);
 
       if (e.ChangedButton == MouseButton.Right)
+         ProcessHelper.OpenFile(filePath);
+   }
+
+   private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
+   {
+      if (e.ChangedButton != MouseButton.Right)
+         return;
+
+      ExportToPdx();
+   }
+
+   private void ExportToPdx()
+   {
+      Dictionary<string, int> diagnosticsPerFile = [];
+      foreach (var diag in ErrorManager.Diagnostics)
+      {
+         var sanitizedPath = FileManager.SanitizePath(diag.Context.FilePath, '\\');
+         foreach (var fileDescriptor in DescriptorDefinitions.FileDescriptors)
+         {
+            if (!sanitizedPath.StartsWith(fileDescriptor.FilePath))
+               continue;
+
+            if (!diagnosticsPerFile.TryAdd(fileDescriptor.FilePath, 1))
+               diagnosticsPerFile[fileDescriptor.FilePath]++;
+         }
+      }
+
+      var sb = new StringBuilder();
+      sb.AppendLine("# Arcanum Exported Diagnostics");
+      sb.AppendLine();
+      sb.AppendLine($"# Exported on: {DateTime.Now}");
+      sb.AppendLine($"# Total Diagnostics: {ErrorManager.Diagnostics.Count}");
+      sb.AppendLine();
+      // Parsed files and folders
+      sb.AppendLine("# Parsed Files and Folders:");
+      var fileDescriptors = DescriptorDefinitions.FileDescriptors.OrderBy(x => x.FilePath).ToList();
+      var maxErrorsInFileIntLength = diagnosticsPerFile.Values.Count == 0
+                                        ? 1
+                                        : diagnosticsPerFile.Values.Max().ToString().Length;
+      foreach (var descriptor in fileDescriptors)
+      {
+         var sanitizedPath = FileManager.SanitizePath(descriptor.FilePath);
+         diagnosticsPerFile.TryGetValue(sanitizedPath, out var errorCount);
+         sb.AppendLine($"- ({errorCount.ToString().PadLeft(maxErrorsInFileIntLength)}) | {sanitizedPath}");
+      }
+
+      sb.AppendLine();
+      sb.AppendLine("Format:");
+      sb.AppendLine("# Error Type: Error Name, ID: Error ID, Occurrences: Count, Severity: Severity");
+      sb.AppendLine("--> Description: Error Description (replace the {x} with the 0 indexed argument from the line below to get the full error message)");
+      sb.AppendLine("- FilePath (Line Number, Column Number) || Argument1 -|- Argument2 -|- ...");
+      sb.AppendLine();
+      sb.AppendLine();
+      sb.AppendLine();
+
+      var diagnosticsByType = ErrorManager.Diagnostics
+                                          .GroupBy(d => d.Descriptor.Name)
+                                          .ToDictionary(g => g.Key, g => g.ToList());
+
+      foreach (var kvp in diagnosticsByType)
+      {
+         sb.AppendLine($"# Error Type: {kvp.Key}, ID: {kvp.Value.First().Descriptor.Id}, Occurrences: {kvp.Value.Count}, Severity: {kvp.Value.First().Severity}");
+         sb.AppendLine($"--> Description: {kvp.Value.First().Descriptor.Description.Replace("\n", "\n    ")}");
+         sb.AppendLine();
+         foreach (var diagnostic in kvp.Value)
+            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FilePath, '.')} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
+         sb.AppendLine();
+      }
+
+      var folder = string.IsNullOrWhiteSpace(Config.Settings.ErrorLogOptions.ExportFilePath)
+                      ? IO.GetArcanumDataPath
+                      : Config.Settings.ErrorLogOptions.ExportFilePath;
+      var filePath = Path.Combine(folder, "ExportedDiagnosticsPdx.txt");
+
+      IO.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+
+      if (Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl))
          ProcessHelper.OpenFile(filePath);
    }
 }

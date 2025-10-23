@@ -1,6 +1,7 @@
 ﻿using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.IO;
 
@@ -369,6 +370,45 @@ public static class IO
          /* TODO: Log cancellation */
          return false;
       }
+   }
+
+   public static Task<string[]> ReadLineRange(string path,
+                                              int lineStart,
+                                              int lineEnd,
+                                              CancellationToken cancellationToken = default)
+   {
+      ArgumentNullException.ThrowIfNull(path);
+      if (lineStart <= 0)
+         throw new ArgumentOutOfRangeException(nameof(lineStart), "Starting line number must be positive.");
+      if (lineEnd < lineStart)
+         throw new ArgumentOutOfRangeException(nameof(lineEnd),
+                                               "Ending line number must be greater than or equal to the starting line number.");
+      if (!File.Exists(path))
+         throw new FileNotFoundException("File not found.", path);
+
+      return Task.Run(() =>
+                      {
+                         var result = new string[lineEnd - lineStart + 1];
+                         var currentLineNumber = 1;
+                         var numAdded = 0;
+
+                         using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                         using var sr = new StreamReader(fs);
+                         while (sr.ReadLine() is { } line)
+                         {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            if (currentLineNumber >= lineStart)
+                               result[numAdded++] = line;
+
+                            if (currentLineNumber >= lineEnd)
+                               break;
+
+                            currentLineNumber++;
+                         }
+
+                         return result;
+                      },
+                      cancellationToken);
    }
 
    public static Task<bool> WriteAllTextAnsiAsync(string path,

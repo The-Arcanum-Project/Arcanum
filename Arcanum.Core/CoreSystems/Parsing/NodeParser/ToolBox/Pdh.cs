@@ -394,70 +394,8 @@ public static class Pdh
                DiagnosticException.LogWarning(ctx.GetInstance(),
                                               ParsingError.Instance.DuplicateItemInCollection,
                                               actionStack,
-                                              kon.KeyNode.GetLexeme(source));
-            }
-      }
-
-      return results;
-   }
-
-   public static ObservableHashSet<T> ParseContentObservableHashSet<T>(BlockNode node,
-                                                                       LocationContext ctx,
-                                                                       string source,
-                                                                       string actionStack,
-                                                                       ref bool validation,
-                                                                       ContentItemParser<T> itemParser)
-   {
-      var results = new ObservableHashSet<T>();
-      if (node.Children.Count == 0)
-         return results;
-
-      foreach (var sn in node.Children)
-      {
-         if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
-            continue;
-
-         if (itemParser(cn, ctx, actionStack, source, out var item, ref validation))
-            if (!results.Add(item))
-            {
-               ctx.SetPosition(cn.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
-                                              ParsingError.Instance.DuplicateItemInCollection,
-                                              actionStack,
-                                              cn.KeyNode.GetLexeme(source));
-            }
-      }
-
-      return results;
-   }
-
-   public static ObservableHashSet<T> ParseBlockObservableHashSet<T>(BlockNode node,
-                                                                     LocationContext ctx,
-                                                                     string source,
-                                                                     string actionStack,
-                                                                     ref bool validation,
-                                                                     BlockItemParser<T> itemParser) where T : INexus
-   {
-      var results = new ObservableHashSet<T>();
-      if (node.Children.Count == 0)
-         return results;
-
-      foreach (var sn in node.Children)
-      {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
-            continue;
-
-         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
-         Debug.Assert(newInstance != null, "newInstance != null");
-
-         if (itemParser(bn, newInstance, ctx, source, ref validation))
-            if (!results.Add(newInstance))
-            {
-               ctx.SetPosition(bn.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
-                                              ParsingError.Instance.DuplicateItemInCollection,
-                                              actionStack,
-                                              bn.KeyNode.GetLexeme(source));
+                                              kon.KeyNode.GetLexeme(source),
+                                              node.KeyNode.GetLexeme(source));
             }
       }
 
@@ -492,7 +430,8 @@ public static class Pdh
             DiagnosticException.LogWarning(ctx.GetInstance(),
                                            ParsingError.Instance.DuplicateItemInCollection,
                                            actionStack,
-                                           bn.KeyNode.GetLexeme(source));
+                                           bn.KeyNode.GetLexeme(source),
+                                           node.KeyNode.GetLexeme(source));
          }
       }
 

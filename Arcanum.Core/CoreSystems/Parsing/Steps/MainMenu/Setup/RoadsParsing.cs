@@ -15,7 +15,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : FileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects { get; } = [typeof(Road), typeof(Country)];
+   public override List<Type> ParsedObjects { get; } = [typeof(Road)];
 
    public override string GetFileDataDebugInfo()
    {

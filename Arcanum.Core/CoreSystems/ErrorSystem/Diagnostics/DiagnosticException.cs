@@ -24,6 +24,7 @@ public sealed class DiagnosticException : Exception
       => new(ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
 
    public readonly DiagnosticDescriptor Descriptor;
+   public readonly object[] Arguments;
 
    public DiagnosticReportSeverity ReportSeverity;
    public DiagnosticSeverity Severity;
@@ -78,6 +79,7 @@ public sealed class DiagnosticException : Exception
       Description = FormatMessage(descriptor.Description, args);
       Code = Descriptor
         .ToString(); // For now take the Descriptor ToString since it is equal / $"{Descriptor.Category.GetPrefix()}-{Descriptor.Id:D4}";
+      Arguments = args;
    }
 
    public void HandleDiagnostic(LocationContext context,
@@ -132,7 +134,7 @@ public sealed class DiagnosticException : Exception
       }
 #endif
 
-      var diagnostic = new Diagnostic(this, context, action);
+      var diagnostic = new Diagnostic(this, context, action, Arguments);
       ErrorManager.AddToLog(diagnostic);
 
       if (ohNoWhatShouldWeDoNow == DiagnosticHandle.Retry)

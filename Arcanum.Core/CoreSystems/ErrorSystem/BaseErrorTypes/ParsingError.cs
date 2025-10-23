@@ -48,7 +48,7 @@ public class ParsingError : ILazySingleton
                                                                       "Hex to Int Conversion Error",
                                                                       DiagnosticSeverity.Error,
                                                                       "Failed to convert hex value '{0}' to an integer.",
-                                                                      "The given hex value could not be converted to an integer. Please ensure it is a valid hexadecimal number.",
+                                                                      "The given hex value could not be converted to an integer. The values must be in a range of `80000000` to `7FFFFFFF`.",
                                                                       DiagnosticReportSeverity.PopupNotify);
 
    public DiagnosticDescriptor DuplicateLocationDefinition { get; } = new(DiagnosticCategory.Parsing,
@@ -92,7 +92,7 @@ public class ParsingError : ILazySingleton
                                                                  "Invalid Location Name",
                                                                  DiagnosticSeverity.Error,
                                                                  "The location name '{0}' is invalid.",
-                                                                 "This error indicates that the location name provided is not valid or does not conform to the expected format.",
+                                                                 "The location with the name '{0}' is not know at this point. Is it correctly defined? Does it have a valid hex color?\nThis error always shows up for a reference of a location that is not defined correctly. The source thus is quite likely not the reference itself but rather the location definition.",
                                                                  DiagnosticReportSeverity.Silent);
 
    public DiagnosticDescriptor DuplicateProvinceDefinition { get; } = new(DiagnosticCategory.Parsing,
@@ -313,7 +313,7 @@ public class ParsingError : ILazySingleton
                                                          "Unknown Key",
                                                          DiagnosticSeverity.Error,
                                                          "The key '{0}' is unknown in the current context.",
-                                                         "The key '{0}' with the value '{1}' is not recognized in the current parsing context.",
+                                                         "The key '{0}' with the expected type of '{1}' is not recognized in the current parsing context.\nIs it misspelled, misplaced or is it being used before being defined? (Jomini syntax is case sensitive)",
                                                          DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The object value that is duplicated</param>
@@ -396,7 +396,7 @@ public class ParsingError : ILazySingleton
                                                               "Invalid Node Type",
                                                               DiagnosticSeverity.Error,
                                                               "The node type '{0}' ({2}) is invalid in the current context.",
-                                                              "The node ({2}) of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.",
+                                                              "The node ({2}) of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.\nBlock Node: `name = {{ 'some content' }}`\nContent Node: `key = value`\nKey Only Node: `name`",
                                                               DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The node type that is invalid</param>
@@ -597,7 +597,7 @@ public class ParsingError : ILazySingleton
                                                                        "Duplicate Color Definition",
                                                                        DiagnosticSeverity.Error,
                                                                        "Duplicate color definition found for '{0}'.",
-                                                                       "{1} are uniquely identified by their name.\n'{0}' Is defined multiple times which is not allowed.",
+                                                                       "{1} are uniquely identified by their name.\n'{0}' Is defined multiple times. The first occurrence will be used.",
                                                                        DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The double value that is invalid</param>
@@ -721,7 +721,7 @@ public class ParsingError : ILazySingleton
                                                                "Partial Date Value",
                                                                DiagnosticSeverity.Warning,
                                                                "The date value {0} is partial and missing components.",
-                                                               "The provided date value is incomplete. Please ensure it includes all necessary components (e.g., day, month, year).",
+                                                               "The provided date value is incomplete. A date has to be in the format 'YYYY.MM.DD'. Missing months and days will be set to '1' by default if missing.",
                                                                DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The grouping key that is invalid</param>
@@ -734,11 +734,12 @@ public class ParsingError : ILazySingleton
                                                                   DiagnosticReportSeverity.PopupNotify);
 
    /// <param name="0">The item that is duplicated in the collection</param>
+   /// <param name="1">The collection in which the item is duplicated</param>
    public DiagnosticDescriptor DuplicateItemInCollection { get; } = new(DiagnosticCategory.Parsing,
                                                                         76,
                                                                         "Duplicate Item in Collection",
                                                                         DiagnosticSeverity.Error,
-                                                                        "The item '{0}' is duplicated in the collection.",
-                                                                        "Items in a collection must be unique. The item '{0}' appears multiple times, which is not allowed.",
+                                                                        "The item '{0}' is duplicated in the collection {1}.",
+                                                                        "Items in '{1}' must be unique. The item '{0}' appears multiple times. This error will be resolved when saving the affected object.",
                                                                         DiagnosticReportSeverity.PopupNotify);
 }

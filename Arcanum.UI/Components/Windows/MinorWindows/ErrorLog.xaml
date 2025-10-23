@@ -6,6 +6,7 @@
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
                          xmlns:dig = "clr-namespace:Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;assembly=Arcanum.Core"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          mc:Ignorable = "d"
                          Title = "ErrorLog"
                          Height = "600"
@@ -19,6 +20,7 @@
                 <ResourceDictionary
                     Source = "/Arcanum_UI;component/Components/Styles/Specific/DataTemplate/DiagnosticTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
@@ -304,7 +306,7 @@
                                               IsReadOnly = "True" />
 
                 <styleClasses:CorneredTextBox Grid.Row = "3"
-                                              Text = "{Binding ErrorResolution, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                                              Text = "{Binding FileProbe, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
                                               VerticalAlignment = "Stretch"
                                               VerticalContentAlignment = "Top"
                                               FontSize = "14"
@@ -312,6 +314,24 @@
                                               TextWrapping = "Wrap"
                                               CornerRadiusValue = "4"
                                               IsReadOnly = "True" />
+
+                <TextBlock Grid.Row = "3"
+                           x:Name = "ProbeTextBlock"
+                           Margin = "15, 0, 0, 0"
+                           TextWrapping = "Wrap"
+                           TextAlignment = "Left"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Left">
+                </TextBlock>
+
+                <TextBlock Grid.Row = "3"
+                           Visibility = "{Binding DontProbeForFiles, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}, Converter={StaticResource BoolToVisibilityConverter}}"
+                           TextAlignment = "Center"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Center"
+                           Opacity = "0.7">
+                    Probing files disabled in settings. &#10;No Error preview available.
+                </TextBlock>
 
                 <Grid Grid.Row = "4"
                       Margin = "4, 2">
@@ -360,7 +380,8 @@
                                              Margin = "2, 0"
                                              Click = "OpenFileAtPos_OnClick"
                                              ToolTip = "Open file at error position"
-                                             BorderBrush = "{StaticResource DefaultBackColorBrush}">
+                                             BorderBrush = "{StaticResource DefaultBackColorBrush}"
+                                             MouseDown = "UIElement_OnMouseDown">
                         <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/File20x20.png"
                                Width = "20"
                                Height = "20">

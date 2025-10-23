@@ -16,29 +16,34 @@ public sealed class Diagnostic(DiagnosticDescriptor descriptor,
                                DiagnosticSeverity severity,
                                string action,
                                string message,
-                               string description)
+                               string description,
+                               object[]? args = null)
 {
    public string Action { get; } = action;
-   public DiagnosticDescriptor Descriptor { get; }= descriptor;
+   public DiagnosticDescriptor Descriptor { get; } = descriptor;
    public LocationContext Context { get; } = context;
-   public string Code { get; }= descriptor.ToString();
+   public string Code { get; } = descriptor.ToString();
    public string Description { get; } = description;
    public string Message { get; } = message;
-   public DiagnosticSeverity Severity { get; }= severity;
+   public DiagnosticSeverity Severity { get; } = severity;
+   public object[] Arguments { get; } = args ?? [];
 
-   public Diagnostic(DiagnosticException diagnosticException, LocationContext context, string action)
+   public Diagnostic(DiagnosticException diagnosticException,
+                     LocationContext context,
+                     string action,
+                     object[]? arguments = null)
       : this(diagnosticException.Descriptor,
              context,
              diagnosticException.Severity,
              action,
              diagnosticException.Message,
-             diagnosticException.Description)
+             diagnosticException.Description,
+             arguments)
    {
    }
 
    // Example:  PA-002 Duplicate Province: Validating Province ID failed in File \"./wrong.txt\" at Line 10:4: The Province ID '10' is duplicate and was previously defined
-   
-   
+
    public override string ToString()
    {
       var actionString = string.IsNullOrWhiteSpace(Action) ? string.Empty : $" {Action} failed";

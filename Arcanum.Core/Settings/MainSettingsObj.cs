@@ -27,7 +27,7 @@ public class MainSettingsObj
    [IsSubMenu("Error Handling")]
    public ErrorDescriptors ErrorDescriptors { get; set; } = ErrorDescriptors.Instance;
 
-   public ErrorLogExportOptions ErrorLogExportOptions { get; set; } = new();
+   public ErrorLogOptions ErrorLogOptions { get; set; } = new();
 
    [IsSubMenu("Keymap")]
    public UserKeyBinds UserKeyBinds { get; set; } = new();

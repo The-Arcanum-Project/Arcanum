@@ -44,7 +44,7 @@ public static class FileManager
       ];
    }
 
-   public static string SanitizePath(string path, char separationChar = '>')
+   public static string SanitizePath(string path, char separationChar = '.')
    {
       if (string.IsNullOrEmpty(path))
          return string.Empty;
