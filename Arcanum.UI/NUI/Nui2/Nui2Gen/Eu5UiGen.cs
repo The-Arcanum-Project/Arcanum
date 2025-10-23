@@ -136,14 +136,7 @@ public static class Eu5UiGen
          {
             if (navH.GenerateSubViews)
             {
-               if (navH.Targets.Count > 1)
-               {
-                  // TODO: @Minnator not supported Yet.
-               }
-               else
-               {
-                  GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + startRow, isMarked);
-               }
+               GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + startRow, isMarked);
             }
             else
             {
@@ -186,7 +179,8 @@ public static class Eu5UiGen
                                             bool isMarked)
    {
       var pevm = new PropertyEditorViewModel(nxProp, navH, primary);
-      var ebv = new EmbeddedView(pevm)
+      var mspvm = new MultiSelectPropertyViewModel(navH.Targets, nxProp);
+      var ebv = new EmbeddedView(pevm, mspvm)
       {
          MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
       };
@@ -194,8 +188,13 @@ public static class Eu5UiGen
       if (IsExpandedCache.TryGetValue(nxProp, out var isExpanded) && isExpanded)
          ebv.ViewModel.IsExpanded = true;
 
-      object em = null!;
-      Nx.ForceGet(primary, nxProp, ref em);
+      var em = mspvm.Value;
+      if (em == null)
+      {
+         // TODO Minnator show smth like not editable bc not identical
+         return;
+      }
+
       var embedded = em as IEu5Object ??
                      throw new InvalidOperationException($"Property {nxProp} is not an embedded IEu5Object.");
 
@@ -830,9 +829,9 @@ public static class Eu5UiGen
       else if (type.IsEnum)
          element = NEF.GetEnumUI(type, binding);
       else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
-         element = NEF.GetIntUI(binding);
+         element = NEF.GetIntUI(binding, (int)val);
       else if (type == typeof(double) || type == typeof(decimal))
-         element = NEF.GetDoubleUI(binding);
+         element = NEF.GetDoubleUI(binding, (decimal)val);
       else if (type == typeof(JominiColor))
       {
          var temp = JominiColor.Empty;

@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
@@ -17,12 +18,18 @@ public partial class EmbeddedView
    public PropertyEditorViewModel ViewModel { get; set; }
    private AutoCompleteComboBox Selector { get; set; }
 
-   public EmbeddedView(PropertyEditorViewModel vm)
+   public EmbeddedView(PropertyEditorViewModel vm, MultiSelectPropertyViewModel mspvm)
    {
+      var binding = new Binding(nameof(mspvm.Value))
+      {
+         Source = mspvm,
+         Mode = BindingMode.TwoWay,
+         UpdateSourceTrigger = UpdateSourceTrigger.Explicit,
+      };
       ViewModel = vm;
       DataContext = ViewModel;
       InitializeComponent();
-      Selector = NEF.ObjectSelector(vm.Target, vm.Embedded.GetGlobalItemsNonGeneric().Values, 1, vm.NxProp);
+      Selector = NEF.ObjectSelector(vm.Target, vm.Embedded.GetGlobalItemsNonGeneric().Values, binding, 1);
       Selector.Height = 20;
       SelectorDockPanel.Children.Add(Selector);
 

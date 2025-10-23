@@ -23,7 +23,7 @@ namespace Arcanum.UI.NUI.Generator;
 // ReSharper disable once InconsistentNaming
 public static class NEF
 {
-   public static AutoCompleteComboBox ObjectSelector<T>(T target, IEnumerable allItems, int index, Enum nxProp)
+   public static AutoCompleteComboBox ObjectSelector<T>(T target, IEnumerable allItems, Binding binding, int index)
       where T : INUI
    {
       var objectSelector = new AutoCompleteComboBox
@@ -35,14 +35,7 @@ public static class NEF
          FontSize = 11,
          Name = $"AutoComplete_{target.GetType().Name}_{index}",
       };
-      var selectedItemBinding = new Binding(nxProp.ToString())
-      {
-         Source = target,
-         Mode = BindingMode.TwoWay,
-         UpdateSourceTrigger = UpdateSourceTrigger.Explicit,
-      };
-
-      objectSelector.SetBinding(Selector.SelectedItemProperty, selectedItemBinding);
+      objectSelector.SetBinding(Selector.SelectedItemProperty, binding);
       return objectSelector;
    }
 
@@ -586,12 +579,13 @@ public static class NEF
       return comboBox;
    }
 
-   public static BaseNumericUpDown GetIntUI(Binding binding, int height = 23, int fontSize = 12)
+   public static BaseNumericUpDown GetIntUI(Binding binding, int value, int height = 23, int fontSize = 12)
    {
       BaseNumericUpDown numericUpDown = new()
       {
          Height = height,
          FontSize = fontSize,
+         Value = value,
          Margin = new(0),
          InnerBorderThickness = new(1, 1, 1, 1),
          InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
@@ -603,13 +597,17 @@ public static class NEF
       return numericUpDown;
    }
 
-   public static DecimalBaseNumericUpDown GetDoubleUI(Binding binding, int height = 23, int fontSize = 12)
+   public static DecimalBaseNumericUpDown GetDoubleUI(Binding binding,
+                                                      decimal value,
+                                                      int height = 23,
+                                                      int fontSize = 12)
    {
       binding.Converter = DoubleToDecimalConverter;
       DecimalBaseNumericUpDown numericUpDown = new()
       {
          Height = height,
          FontSize = fontSize,
+         Value = value,
          Margin = new(0),
          InnerBorderThickness = new(1, 1, 1, 1),
          InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,

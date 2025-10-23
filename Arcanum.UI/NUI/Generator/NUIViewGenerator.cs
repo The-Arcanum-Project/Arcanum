@@ -190,7 +190,7 @@ public static class NUIViewGenerator
 
       if (!isReadonlyProp)
       {
-         var objectSelector = NEF.ObjectSelector(target, allItems, _index, property);
+         var objectSelector = NEF.ObjectSelector(target, allItems, new(), _index);
          _index++;
 
          var binding = new Binding(property.ToString())
@@ -406,9 +406,9 @@ public static class NUIViewGenerator
       else if (type.IsEnum)
          element = NEF.GetEnumUI(type, binding);
       else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
-         element = NEF.GetIntUI(binding);
+         element = NEF.GetIntUI(binding, 0);
       else if (type == typeof(double) || type == typeof(decimal))
-         element = NEF.GetDoubleUI(binding);
+         element = NEF.GetDoubleUI(binding, 0);
       else if (type == typeof(JominiColor))
       {
          var temp = JominiColor.Empty;
