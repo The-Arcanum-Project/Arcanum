@@ -479,7 +479,7 @@ public static class NEF
       Margin = new(leftMargin, 0, 5, 3),
    };
 
-   public static FloatNumericUpDown GetFloatUI(Binding binding, int height = 23, int fontSize = 12)
+   public static FloatNumericUpDown GetFloatUI(Binding binding, float value, int height = 23, int fontSize = 12)
    {
       FloatNumericUpDown numericUpDown = new()
       {
@@ -490,6 +490,7 @@ public static class NEF
          InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
          MinValue = float.MinValue,
          MaxValue = float.MaxValue,
+         Value = value,
          StepSize = 0.1f,
          FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
       };

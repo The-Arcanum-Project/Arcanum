@@ -222,8 +222,12 @@ public partial class FloatNumericUpDown
       var control = (FloatNumericUpDown)d;
       var value = (float)baseValue;
 
-      value = Math.Clamp(value, control.MinValue, control.MaxValue);
-      value = (float)Math.Round((decimal)value, 7);
-      return value;
+      var roundedValue = (float)Math.Round((decimal)value, 7);
+
+      if (value >= control.MinValue && value <= control.MaxValue && Math.Abs(value - roundedValue) < 0.0001)
+         return baseValue;
+
+      var clampedValue = Math.Clamp(value, control.MinValue, control.MaxValue);
+      return (float)Math.Round((decimal)clampedValue, 7);
    }
 }

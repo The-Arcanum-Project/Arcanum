@@ -819,9 +819,10 @@ public static class Eu5UiGen
       };
 
       Control element;
+      var val = Nx.ForceGetAs<object>(primary, nxProp);
 
       if (type == typeof(float))
-         element = NEF.GetFloatUI(binding);
+         element = NEF.GetFloatUI(binding, (float)val);
       else if (type == typeof(string))
          element = NEF.GetStringUI(binding);
       else if (type == typeof(bool))

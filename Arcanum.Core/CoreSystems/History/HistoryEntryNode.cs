@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Arcanum.Core.CoreSystems.History.Commands;
 
@@ -62,7 +63,7 @@ public class HistoryNode(int id, ICommand command, HistoryEntryType entryType, H
    /// manage the tree structure by adding or removing child nodes. Each child node
    /// will have its <see cref="Parent"/> property set to this node.
    /// </remarks>
-   public List<HistoryNode> Children { get; init; } = [];
+   public ObservableCollection<HistoryNode> Children { get; init; } = [];
    /// <summary>
    /// Indicates whether the history node has been compacted.
    /// </summary>
@@ -141,7 +142,7 @@ public class CompactHistoryNode : HistoryNode
       CompactedNodes = compactedNodes;
       _current = CompactedNodes.Count - 1;
    }
-   
+
    public new ICommand Command => new CompactingCommandDummy(this);
 
    /// <summary>

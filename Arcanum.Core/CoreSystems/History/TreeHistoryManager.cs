@@ -36,6 +36,7 @@ public class TreeHistoryManager : IHistoryManager
    // Events for when the undo/redo depth changes
    public EventHandler<ICommand?> UndoEvent { get; } = delegate { };
    public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
+   public event Action<ICommand>? CommandAdded;
 
    private int _lastCompactionDepth;
    private Timer? _autoCompactingTimer;
@@ -54,6 +55,7 @@ public class TreeHistoryManager : IHistoryManager
       var newNode = new HistoryNode(_nodeId++, newCommand, type, Current);
       Current.Children.Add(newNode);
       Current = newNode;
+      CommandAdded?.Invoke(newCommand);
    }
 
    // Check if there are any commands to undo or redo
@@ -67,7 +69,7 @@ public class TreeHistoryManager : IHistoryManager
    /// It is updated whenever a new command is added, undone, or redone.
    /// </summary>
    public HistoryNode Current { get; private set; }
-   
+
    public ICommand CurrentCommand => Current.Command;
 
    [Obsolete("Use <Undo(bool)> instead. This has missing functionality in a tree History")]
@@ -292,7 +294,7 @@ public class TreeHistoryManager : IHistoryManager
       return (p1, p2);
    }
 
-   private bool GetPath(HistoryNode subRoot, List<HistoryNode> path, int id)
+   private static bool GetPath(HistoryNode subRoot, List<HistoryNode> path, int id)
    {
       if (subRoot == null!)
          return false;
@@ -345,7 +347,7 @@ public class TreeHistoryManager : IHistoryManager
    /// <param name="node">The starting node from which to determine the node above.</param>
    /// <param name="n">The number of levels to navigate upwards in the hierarchy.</param>
    /// <returns>The node located n levels above the given node. If the root is reached before completing the levels, the root is returned.</returns>
-   public HistoryNode GetNodeAbove(HistoryNode node, int n)
+   public static HistoryNode GetNodeAbove(HistoryNode node, int n)
    {
       var current = node;
       for (var i = 0; i < n; i++)
@@ -369,7 +371,7 @@ public class TreeHistoryManager : IHistoryManager
       return GetNodeWithId(_root, id);
    }
 
-   private HistoryNode GetNodeWithId(HistoryNode node, int id)
+   private static HistoryNode GetNodeWithId(HistoryNode node, int id)
    {
       if (node.Id == id)
          return node;
@@ -391,7 +393,7 @@ public class TreeHistoryManager : IHistoryManager
    /// Expands the compacted nodes in the history tree starting from the given node.
    /// </summary>
    /// <param name="node">The root node from which the un-compaction process will begin.</param>
-   public void Uncompact(HistoryNode node)
+   public static void Uncompact(HistoryNode node)
    {
       for (var i = node.Children.Count - 1; i >= 0; i--)
       {
@@ -432,7 +434,7 @@ public class TreeHistoryManager : IHistoryManager
       _compacting = false;
    }
 
-   private List<List<HistoryNode>> FindCompactableGroups(Dictionary<List<int>, List<HistoryNode>> groups)
+   private static List<List<HistoryNode>> FindCompactableGroups(Dictionary<List<int>, List<HistoryNode>> groups)
    {
       var compGroups = new List<List<HistoryNode>>();
 
@@ -494,7 +496,7 @@ public class TreeHistoryManager : IHistoryManager
       return groups;
    }
 
-   private void TraverseTree(HistoryNode node, Action<HistoryNode> action)
+   private static void TraverseTree(HistoryNode node, Action<HistoryNode> action)
    {
       if (node == null!)
          return;

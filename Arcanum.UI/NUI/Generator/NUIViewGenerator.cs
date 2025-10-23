@@ -398,7 +398,7 @@ public static class NUIViewGenerator
       Control element;
 
       if (type == typeof(float))
-         element = NEF.GetFloatUI(binding);
+         element = NEF.GetFloatUI(binding, 0f); // THIS BREAKS THE UI AS UI IS DEPRECATED
       else if (type == typeof(string))
          element = NEF.GetStringUI(binding);
       else if (type == typeof(bool))

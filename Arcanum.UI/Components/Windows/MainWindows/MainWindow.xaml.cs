@@ -352,7 +352,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var historyWindow = new HistoryTreeView();
-      historyWindow.ShowDialog();
+      historyWindow.Show();
    }
 
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
