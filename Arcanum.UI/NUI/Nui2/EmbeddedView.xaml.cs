@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;

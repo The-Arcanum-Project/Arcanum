@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.UserControls.BaseControls;

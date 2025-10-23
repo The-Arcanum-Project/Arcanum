@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Nexus.Core;
 
