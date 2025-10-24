@@ -8,12 +8,6 @@ namespace Arcanum.Core.CoreSystems.History;
 public interface ICommand
 {
    /// <summary>
-   /// Finalizes the setup of the command after its initial creation.
-   /// Cleans up any temporary data used during construction.
-   /// </summary>
-   public void FinalizeSetup();
-   
-   /// <summary>
    /// Normal command execution.
    /// </summary>
    public void Execute();
@@ -55,10 +49,6 @@ public interface ICommand
 /// and does not perform any execution or state changes.
 public class CInitial : ICommand
 {
-   public void FinalizeSetup()
-   {
-   }
-
    public void Execute()
    {
    }
