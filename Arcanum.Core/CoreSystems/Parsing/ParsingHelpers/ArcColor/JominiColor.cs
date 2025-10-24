@@ -17,7 +17,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
          return _cachedIntValue.Value;
 
       var mediaColor = ToMediaColor();
-      return (_cachedIntValue = (mediaColor.A << 24) | (mediaColor.R << 16) | (mediaColor.G << 8) | mediaColor.B).Value;
+      return (_cachedIntValue = (mediaColor.A << 24) | (mediaColor.B << 16) | (mediaColor.G << 8) | mediaColor.R).Value;
    }
 
    public abstract Color ToMediaColor();

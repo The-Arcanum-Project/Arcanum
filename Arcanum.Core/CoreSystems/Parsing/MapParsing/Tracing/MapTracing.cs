@@ -34,9 +34,9 @@ public sealed unsafe class MapTracing : IDisposable
       var row = (byte*)_scan0 + y * _stride;
       var xTimesThree = x * 3;
       return ALPHA |
-             (row[xTimesThree + 2] << 16) |
+             (row[xTimesThree + 2]) |
              (row[xTimesThree + 1] << 8) |
-             row[xTimesThree];
+             row[xTimesThree] << 16;
    }
 
    private int GetColor(Vector2I pos)
