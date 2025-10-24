@@ -274,6 +274,37 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
    
 #endregion
 }</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/@KeyIndexDefined">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Field/=Type/@KeyIndexDefined">True</s:Boolean>
+    <s:Int64
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Field/=Type/Order/@EntryValue">0</s:Int64>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Reformat/@EntryValue">True</s:Boolean>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Shortcut/@EntryValue">embeddedEU5Obj</s:String>
+    <s:Boolean
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+    <s:String
+            x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=8098A127FBD2054FA89D088351CA89DF/Text/@EntryValue">
+[ObjectSaveAs]
+public partial class $Type$ : IEmbeddedEu5Object&lt;$Type$&gt;
+{
+   public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$Type$Settings;
+   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$Type$AgsSettings;
+   public string UniqueId { get; set; } = string.Empty;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+}</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Description/@EntryValue">Diagnostic Descriptor Template</s:String>
