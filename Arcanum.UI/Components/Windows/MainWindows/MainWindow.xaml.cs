@@ -172,7 +172,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       lock (mapDataParser)
          if (mapDataParser.FinishedTesselation)
-            _ = MainMap.SetupRenderer(mapDataParser.Polygons, mapDataParser.MapSize);
+            _ = MainMap.SetupRenderer(mapDataParser.ParsingPolygons, mapDataParser.Polygons!, mapDataParser.MapSize);
 
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 

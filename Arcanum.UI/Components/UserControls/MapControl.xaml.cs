@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -83,7 +84,7 @@ public partial class MapControl
       return colors;
    }
 
-   public async Task SetupRenderer(Polygon[] polygons, (int, int) imageSize)
+   public async Task SetupRenderer(List<PolygonParsing> parsingPolygons ,Polygon[] polygons, (int, int) imageSize)
    {
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
@@ -94,7 +95,8 @@ public partial class MapControl
       
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors(polygons);
-      _locationRenderer = new(vertices, startColor, _imageAspectRatio);
+      var data = LocationRenderer.GenerateBorderVertices(parsingPolygons, imageSize);
+      _locationRenderer = new(vertices, startColor, data.Vertices, data.Indices, data.BorderProperties, _imageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       _d3dHost = new(_locationRenderer, HwndHostContainer);

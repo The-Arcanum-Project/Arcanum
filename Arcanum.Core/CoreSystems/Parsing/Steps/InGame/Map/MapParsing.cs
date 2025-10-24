@@ -16,7 +16,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [];
-   private List<PolygonParsing> _parsingPolygons = [];
+   public List<PolygonParsing> ParsingPolygons = [];
    public Polygon[]? Polygons;
    public int TotalPolygonsCount;
    public bool FinishedTesselation;
@@ -26,7 +26,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
    public override string GetFileDataDebugInfo()
    {
-      return $"Number of polygons: {_parsingPolygons.Count}";
+      return $"Number of polygons: {ParsingPolygons.Count}";
    }
 
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
@@ -36,12 +36,12 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       {
          using (MapTracing tracing = new(bitmap))
          {
-            _parsingPolygons = tracing.Trace();
-            Polygons = new Polygon[_parsingPolygons.Count];
+            ParsingPolygons = tracing.Trace();
+            Polygons = new Polygon[ParsingPolygons.Count];
             MapSize = (bitmap.Width, bitmap.Height);
          }
       }
-      TotalPolygonsCount = _parsingPolygons.Count;
+      TotalPolygonsCount = ParsingPolygons.Count;
 
       _ = Tessellate();
 
@@ -52,8 +52,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
    private async Task Tessellate()
    {
-      await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
-                                             i => Polygons![i] = _parsingPolygons[i].Tessellate(),
+      await Scheduler.QueueWorkInForParallel(ParsingPolygons.Count,
+                                             i => Polygons![i] = ParsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
 
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
@@ -64,7 +64,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       for (var index = 0; index < Polygons!.Length; index++)
       {
          var p = Polygons![index];
-         var color = _parsingPolygons[index].Color;
+         var color = ParsingPolygons[index].Color;
          try
          {
             if (!tempDict.TryGetValue(color, out var list))
