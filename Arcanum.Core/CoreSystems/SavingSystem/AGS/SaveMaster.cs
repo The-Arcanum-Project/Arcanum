@@ -1,16 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Common.Logger;
 
-namespace Arcanum.Core.CoreSystems.SavingSystem;
+namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SaveMaster
 {
@@ -18,13 +14,13 @@ public static class SaveMaster
    private static Dictionary<Type, List<IEu5Object>> NewSaveables { get; } = [];
    private static readonly Dictionary<Type, int> ModificationCache = [];
    private static readonly List<ICommand> ChangesSinceLastSave = [];
-   
+
    static SaveMaster()
    {
    }
 
    public static int GetModifiedCount => ModificationCache.Values.Sum();
-   
+
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
    public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewSaveables;
 
@@ -33,11 +29,11 @@ public static class SaveMaster
       var targets = command.GetTargets();
       foreach (var target in targets)
       {
-         if(!NeedsToBeSaved.TryGetValue(target, out var list))
+         if (!NeedsToBeSaved.TryGetValue(target, out var list))
          {
             NeedsToBeSaved[target] = list = [];
             var type = target.GetType();
-            if(ModificationCache.TryGetValue(type, out var value))
+            if (ModificationCache.TryGetValue(type, out var value))
                ModificationCache[type] = --value;
             else
                throw new InvalidOperationException("ModificationCache does not contain type " + type);
@@ -45,12 +41,13 @@ public static class SaveMaster
 
          list.Remove(command);
       }
+
       ChangesSinceLastSave.Remove(command);
    }
 
    private static void AddSingleCommand(ICommand command, IEu5Object target)
    {
-      if(!NeedsToBeSaved.TryGetValue(target, out var list))
+      if (!NeedsToBeSaved.TryGetValue(target, out var list))
       {
          NeedsToBeSaved[target] = list = [];
          var type = target.GetType();
@@ -59,6 +56,7 @@ public static class SaveMaster
          else
             ModificationCache[type] = 1;
       }
+
       list.Add(command);
    }
 
@@ -68,12 +66,13 @@ public static class SaveMaster
       {
          AddSingleCommand(command, target);
       }
+
       ChangesSinceLastSave.Add(command);
    }
 
    public static void CommandExecuted(ICommand command)
    {
-      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+      if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          RemoveChange(command);
       AddChange(command);
    }
@@ -83,7 +82,7 @@ public static class SaveMaster
       AddSingleCommand(command, target);
       ChangesSinceLastSave.Add(command);
    }
-   
+
    public static void AddToCommand(ICommand command, IEu5Object target)
    {
       Debug.Assert(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command,
@@ -93,14 +92,13 @@ public static class SaveMaster
 
    public static void CommandUndone(ICommand command)
    {
-      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+      if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          AddChange(command);
       RemoveChange(command);
    }
-   
+
    public static void HandleNewSaveables(IEu5Object obj)
    {
-      
    }
 
    public static void SaveAll(bool onlyModified = true)
@@ -142,7 +140,7 @@ public static class SaveMaster
    public static bool SaveFile(List<IEu5Object> modifiedObjects, Eu5FileObj fileObj)
    {
       var topLevelModObjs = FilterOutNestedObjects(modifiedObjects);
-      var sb = FormatFileForGivenObjects(fileObj, topLevelModObjs);
+      var sb = FormatFileAndUpdateLocationForGivenObjects(fileObj, topLevelModObjs);
 
       if (sb == null)
          return false;
@@ -176,10 +174,11 @@ public static class SaveMaster
       IndentedStringBuilder? sb;
 
       if (onlyModifiedObjects)
-         sb = FormatFileForGivenObjects(fileObj,
-                                        fileObj.ObjectsInFile.Where(obj => GetState(obj) != ObjState.Unchanged)
-                                               .OrderBy(obj => obj.FileLocation.CharPos)
-                                               .ToList());
+         sb = FormatFileAndUpdateLocationForGivenObjects(fileObj,
+                                                         fileObj.ObjectsInFile
+                                                                .Where(obj => GetState(obj) != ObjState.Unchanged)
+                                                                .OrderBy(obj => obj.FileLocation.CharPos)
+                                                                .ToList());
       else
          sb = SavingUtil.FormatFilesMultithreadedIf(fileObj.ObjectsInFile.ToList());
 
@@ -194,12 +193,12 @@ public static class SaveMaster
 
    /// <summary>
    /// Takes a file and a list of modifiedObjects
-   /// and returns a formatted version of the file with the modified objects replaced.
+   /// and returns a formatted version of the file with the modified objects replaced. <br/>
+   /// Also updates the FileLocation of the modified objects to reflect their new position in the file.
    /// </summary>
-   /// <param name="fileObj"></param>
-   /// <param name="modifiedObjects"></param>
-   /// <returns></returns>
-   private static IndentedStringBuilder? FormatFileForGivenObjects(Eu5FileObj fileObj, List<IEu5Object> modifiedObjects)
+   private static IndentedStringBuilder? FormatFileAndUpdateLocationForGivenObjects(
+      Eu5FileObj fileObj,
+      List<IEu5Object> modifiedObjects)
    {
       if (modifiedObjects.Count == 0)
          return null;
@@ -218,28 +217,71 @@ public static class SaveMaster
       var currentPos = 0;
       var spaces = Config.Settings.AgsConfig.SpacesPerIndent;
       var isb = new IndentedStringBuilder();
+      var sortedMods = modifiedObjects.OrderBy(o => o.FileLocation.CharPos).ToList();
 
-      foreach (var obj in modifiedObjects)
+      foreach (var obj in sortedMods)
       {
+         isb.Clear();
          sb.InnerBuilder.Append(original, currentPos, obj.FileLocation.CharPos - currentPos);
+         currentPos = obj.FileLocation.CharPos + obj.FileLocation.Length;
 
          var indentLevel = Math.DivRem(obj.FileLocation.Column, spaces, out var remainder);
 
          // We have an object defined in one line, disgusting we can not really deal with it,
          // so we just append a new line and dump our formatted obj there :P
          if (remainder != 0)
-            sb.InnerBuilder.AppendLine();
+            isb.InnerBuilder.AppendLine();
 
-         isb.Clear();
          isb.SetIndentLevel(indentLevel);
          obj.ToAgsContext().BuildContext(isb);
-         sb.Merge(isb.InnerBuilder);
+         obj.FileLocation.Update(isb.InnerBuilder.Length,
+                                 CountNewLinesInStringBuilder(isb.InnerBuilder),
+                                 indentLevel * spaces,
+                                 sb.InnerBuilder.Length);
 
-         currentPos = obj.FileLocation.CharPos + obj.FileLocation.Length;
+         sb.Merge(isb.InnerBuilder);
       }
 
       sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
       return sb;
+   }
+
+   public static int CountNewLinesInStringBuilder(StringBuilder sb)
+   {
+      ArgumentNullException.ThrowIfNull(sb);
+
+      var newlineCount = 0;
+
+      for (var i = 0; i < sb.Length; i++)
+         if (sb[i] == '\n')
+            newlineCount++;
+
+      return newlineCount;
+   }
+
+   /// <summary>
+   /// Counts the number of newline characters ('\n') in a specific region of a StringBuilder.
+   /// </summary>
+   public static int CountNewlinesInRegion(StringBuilder sb, int startIndex, int count)
+   {
+      ArgumentNullException.ThrowIfNull(sb);
+
+      if (startIndex < 0 || count < 0 || startIndex > sb.Length - count)
+         throw new ArgumentOutOfRangeException(nameof(startIndex),
+                                               "The specified region is out of the bounds of the StringBuilder.");
+
+      var newlineCount = 0;
+      var endIndex = startIndex + count;
+
+      for (var i = startIndex; i < endIndex; i++)
+         if (sb[i] == '\n')
+            newlineCount++;
+
+      return newlineCount;
+   }
+
+   private static void UpdateFileLocations(IEu5Object obj, int delta, int deltaLines)
+   {
    }
 
    private static List<IEu5Object> FilterOutNestedObjects(List<IEu5Object> allMods)

@@ -31,4 +31,14 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
    }
 
    public static Eu5ObjectLocation Empty => new(-1, -1, -1, -1);
+
+   public void Update(int length, int line, int column, int charPos)
+   {
+      // The delta we get contains additional whitespaces from formatting so we need to subtract the column to get the actual length of the object.
+      // And we need to add the column to the char pos to get the correct overall position where the object starts.
+      Length = length - column;
+      Line = line;
+      Column = column;
+      CharPos += charPos + column;
+   }
 }
