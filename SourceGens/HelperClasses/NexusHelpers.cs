@@ -42,24 +42,25 @@ public static class NexusHelpers
    }
 
    public static void RunPropertyModifierGenerator(INamedTypeSymbol classSymbol,
-                                                   SourceProductionContext context,
-                                                   INamedTypeSymbol enumerableSymbol,
-                                                   INamedTypeSymbol ieu5ObjectSymbol)
+      SourceProductionContext context,
+      INamedTypeSymbol enumerableSymbol,
+      INamedTypeSymbol ieu5ObjectSymbol, INamedTypeSymbol iListSymbol)
    {
       var sourceCode = GeneratePropertyModifierPart(classSymbol,
                                                     Helpers.FindModifiableMembers(classSymbol, context),
                                                     enumerableSymbol,
-                                                    ieu5ObjectSymbol,
+                                                    ieu5ObjectSymbol, iListSymbol,
                                                     context);
       var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
       context.AddSource(hintName, sourceCode);
    }
 
    private static string GeneratePropertyModifierPart(INamedTypeSymbol classSymbol,
-                                                      List<ISymbol> members,
-                                                      INamedTypeSymbol enumerableSymbol,
-                                                      INamedTypeSymbol ieu5ObjectSymbol,
-                                                      SourceProductionContext context)
+      List<ISymbol> members,
+      INamedTypeSymbol enumerableSymbol,
+      INamedTypeSymbol ieu5ObjectSymbol,
+      INamedTypeSymbol iListSymbol,
+      SourceProductionContext context)
    {
       var readonlyStatuses = new List<bool>();
       var allowsEmpty = new List<bool>();
@@ -67,7 +68,7 @@ public static class NexusHelpers
 
       // List of all members that are a collection
       var collectionMembers = new List<ISymbol>();
-
+      var listMembers = new List<ISymbol>();
       var propertyTypes = new List<ITypeSymbol>();
       var collectionItemTypes = new List<ITypeSymbol?>();
 
@@ -132,7 +133,12 @@ public static class NexusHelpers
          collectionItemTypes.Add(itemType);
 
          if (itemType != null)
+         {
             collectionMembers.Add(member);
+            // Check if it's a List
+            if (memberType.AllInterfaces.Contains(iListSymbol, SymbolEqualityComparer.Default))
+               listMembers.Add(member);
+         }
 
          // 2. Get a fully qualified name for the type
          var memberTypeName = memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -441,7 +447,80 @@ public static class NexusHelpers
 
       builder.AppendLine("#endregion");
       builder.AppendLine();
+      
+      // --- InsertIntoCollection ---
+      builder.AppendLine("    public void _insertIntoCollection(Enum property, int index, object item)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in listMembers)
+      {
+          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
+          builder.AppendLine($"            case Field.{member.Name}:");
+          builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item must be of type {itemTypeName}\");");
+          builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support InsertAt.\");");
+          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list && item is {itemTypeName} {member.Name}_typedItem)");
+          builder.AppendLine($"                    {member.Name}_list.Insert(index, {member.Name}_typedItem);");
+          builder.AppendLine("                break;");
+      }
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed insertion.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // --- RemoveFromCollectionAt ---
+      builder.AppendLine("    public void _removeFromCollectionAt(Enum property, int index)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in listMembers)
+      {
+          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+          builder.AppendLine($"            case Field.{member.Name}:");
+          builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support RemoveAt.\");");
+          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list)");
+          builder.AppendLine($"                    {member.Name}_list.RemoveAt(index);");
+          builder.AppendLine("                break;");
+      }
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed removal.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+      
+      // --- AddRangeToCollection (for Clear undo) ---
+      builder.AppendLine("    public void _addRangeToCollection(Enum property, System.Collections.IEnumerable items)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        switch (property)");
+      builder.AppendLine("        {");
+      foreach (var member in collectionMembers)
+      {
+          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+          builder.AppendLine($"            case Field.{member.Name}:");
+          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll)");
+          builder.AppendLine("                {");
+          builder.AppendLine("                    foreach (var item in items.Cast<object>().ToList())");
+          builder.AppendLine($"                        {member.Name}_coll.Add(({itemTypeName})item);");
+          builder.AppendLine("                }");
+          builder.AppendLine("                break;");
+      }
+      builder.AppendLine("            default:");
+      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("        }");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      
       #endregion
 
       #region Indexer

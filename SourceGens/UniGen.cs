@@ -41,8 +41,9 @@ public class UniGen : IIncrementalGenerator
          return;
 
       var enumerableSymbol = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
+      var iListSymbol = compilation.GetTypeByMetadataName("System.Collections.IList");
       var ieu5ObjectSymbol = compilation.GetTypeByMetadataName("Arcanum.Core.GameObjects.BaseTypes.IEu5Object");
-      if (enumerableSymbol is null || ieu5ObjectSymbol is null)
+      if (enumerableSymbol is null || ieu5ObjectSymbol is null || iListSymbol is null)
          return;
 
       AgsHelper.EnumAnalysisCache = [];
@@ -50,7 +51,7 @@ public class UniGen : IIncrementalGenerator
       foreach (var nexusClassSymbol in nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
          try
          {
-            NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol, context, enumerableSymbol, ieu5ObjectSymbol);
+            NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol, context, enumerableSymbol, ieu5ObjectSymbol, iListSymbol);
             if (nexusClassSymbol.AllInterfaces.Any(i => i.ToDisplayString() == IAGS_INTERFACE))
                AgsHelper.RunSavingGenerator(nexusClassSymbol, context);
          }

@@ -17,7 +17,7 @@ public static class Nx
       [LinkedPropertyEnum(nameof(target))] Enum e,
       [PropertyValue] T value)
    {
-      CommandManager.AddNexusDummyCommand((IEu5Object)target, e, value!);
+      CommandManager.SetValueCommand((IEu5Object)target, e, value!);
       target._setValue(e, value!);
    }
 
@@ -32,7 +32,7 @@ public static class Nx
                                   INexus target,
                                   Enum e)
    {
-      CommandManager.AddNexusDummyCommand((IEu5Object)target, e, value!);
+      CommandManager.SetValueCommand((IEu5Object)target, e, value!);
       target._setValue(e, value!);
    }
 
@@ -105,7 +105,7 @@ public static class Nx
       T value)
    {
       Debug.Assert(value != null, nameof(value) + " != null");
-      // TODO @Melco add command creation
+      CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
       target._addToCollection(e, value!);
    }
 
@@ -115,7 +115,7 @@ public static class Nx
       T value)
    {
       Debug.Assert(value != null, nameof(value) + " != null");
-      // TODO @Melco add command creation
+      CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
       target._removeFromCollection(e, value!);
    }
 
@@ -125,7 +125,7 @@ public static class Nx
    public static void ClearCollection(INexus target,
                                       [LinkedPropertyEnum(nameof(target))] Enum e)
    {
-      // TODO @Melco add command creation
+      CommandManager.ClearCollectionCommand((IEu5Object)target, e);
       target._clearCollection(e);
    }
 

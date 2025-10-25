@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 
 namespace Nexus.Core;
 
@@ -22,31 +23,48 @@ public interface INexus : INotifyPropertyChanged
    /// <param name="value"></param>
    void _setValue(Enum property, object value);
 
+   #region Collection Manipulation
+
    /// <summary>
    /// Adds a value to a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
    /// Use <see cref="Nx.AddToCollection{T}(INexus, Enum, T)"/> to add values from outside!
    /// </summary>
-   /// <param name="property"></param>
-   /// <param name="item"></param>
    void _addToCollection(Enum property, object item);
+    
+   /// <summary>
+   /// Adds a range of values to a collection property by its enum key. <br/>
+   /// Only to be used internally by Nexus only!
+   /// </summary>
+   void _addRangeToCollection(Enum property, IEnumerable items);
 
    /// <summary>
    /// Removes a value from a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
    /// Use <see cref="Nx.RemoveFromCollection{T}(INexus, Enum, T)"/> to remove values from outside!
    /// </summary>
-   /// <param name="property"></param>
-   /// <param name="item"></param>
    void _removeFromCollection(Enum property, object item);
+    
+   /// <summary>
+   /// Inserts an item into a collection property at a specific index. <br/>
+   /// Only to be used internally by Nexus only!
+   /// </summary>
+   void _insertIntoCollection(Enum property, int index, object item);
+
+   /// <summary>
+   /// Removes an item from a collection property at a specific index. <br/>
+   /// Only to be used internally by Nexus only!
+   /// </summary>
+   void _removeFromCollectionAt(Enum property, int index);
 
    /// <summary>
    /// Clears all values from a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
    /// Use <see cref="Nx.ClearCollection(INexus, Enum)"/> to clear collections from outside!
    /// </summary>
-   /// <param name="property"></param>
    void _clearCollection(Enum property);
+   
+   #endregion
 
    /// <summary>
    /// Returns whether the given property is read-only and cannot be modified.
