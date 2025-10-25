@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
@@ -114,12 +115,16 @@ public partial class SaveWindow
 
     #endregion
 
-    public SaveWindow(List<IEu5Object> newObjects, HashSet<IEu5Object> changedObjects, bool newMode = false)
+    public SaveWindow()
     {
+        var newObjectsList = SaveMaster.GetNewSaveables();
+        
+        var newObjects = newObjectsList.SelectMany(kv => kv.Value).ToList();
+        
         _newObjects = newObjects;
-        _changedObjects = changedObjects;
+        _changedObjects = SaveMaster.GetAllModifiedObjects().ToHashSet();
 
-        foreach (var file in changedObjects.Select(changedObject => changedObject.Source))
+        foreach (var file in _changedObjects.Select(changedObject => changedObject.Source))
         {
             _relevantFiles.Add(file);
             _descriptorsWithChangedFiles.Add(file.Descriptor);
@@ -135,7 +140,7 @@ public partial class SaveWindow
         _newFileQuaestor.RebuildBkTree();
         InitializeComponent();
         SetupUi();
-        if (newMode)
+        if (newObjects.Count > 0)
         {
             NewObjectModeToggle.IsChecked = true;
             SetUpNewObjectMode();

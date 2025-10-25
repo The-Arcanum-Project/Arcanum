@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
@@ -23,6 +24,9 @@ public static class SaveMaster
    }
 
    public static int GetModifiedCount => ModificationCache.Values.Sum();
+   
+   public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
+   public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewSaveables;
 
    private static void RemoveChange(ICommand command)
    {
