@@ -12,7 +12,8 @@ using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 [ParserFor(typeof(Continent))]
-public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Continent>(dependencies)
+public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<Continent>(dependencies)
 {
    public override List<Type> ParsedObjects
       => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province)];
@@ -50,8 +51,11 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
          var continentKey = contBn.KeyNode.GetLexeme(source);
          var continent = IEu5Object<Continent>.CreateInstance(continentKey, fileObj);
+         if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var skn))
+            continue;
+
          LUtil.TryAddToGlobals(ctx,
-                               contBn.KeyNode,
+                               skn.KeyToken,
                                continentKey,
                                actionStack,
                                ref validation,
@@ -66,8 +70,11 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
             var superRegionKey = srBn.KeyNode.GetLexeme(source);
             var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
+            if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var srkn))
+               continue;
+
             LUtil.TryAddToGlobals(ctx,
-                                  srBn.KeyNode,
+                                  srkn.KeyToken,
                                   superRegionKey,
                                   actionStack,
                                   ref validation,
@@ -84,7 +91,10 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                var regionKey = rBn.KeyNode.GetLexeme(source);
                var region = IEu5Object<Region>.CreateInstance(regionKey, fileObj);
-               LUtil.TryAddToGlobals(ctx, rBn.KeyNode, regionKey, actionStack, ref validation, region, regionGlobals);
+               if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+                  continue;
+
+               LUtil.TryAddToGlobals(ctx, skn.KeyToken, regionKey, actionStack, ref validation, region, regionGlobals);
                superRegion.LocationChildren.Add(region);
                region.Parents.Add(superRegion);
 
@@ -96,7 +106,10 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                   var areaKey = aBn.KeyNode.GetLexeme(source);
                   var area = IEu5Object<Area>.CreateInstance(areaKey, fileObj);
-                  LUtil.TryAddToGlobals(ctx, aBn.KeyNode, areaKey, actionStack, ref validation, area, areaGlobals);
+                  if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+                     continue;
+
+                  LUtil.TryAddToGlobals(ctx, skn.KeyToken, areaKey, actionStack, ref validation, area, areaGlobals);
                   region.LocationChildren.Add(area);
                   area.Parents.Add(region);
 
@@ -108,8 +121,11 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                      var provinceKey = pBn.KeyNode.GetLexeme(source);
                      var province = IEu5Object<Province>.CreateInstance(provinceKey, fileObj);
+                     if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+                        continue;
+
                      LUtil.TryAddToGlobals(ctx,
-                                           pBn.KeyNode,
+                                           skn.KeyToken,
                                            provinceKey,
                                            actionStack,
                                            ref validation,

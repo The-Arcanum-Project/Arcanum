@@ -6,3 +6,11 @@
 				multiply = 0.01
 			}
 		}
+
+visible = {
+		religion:shinto = {
+			any_country_in_religion = {
+				has_reform = government_reform:japanese_imperial_family
+			}
+		}
+	}

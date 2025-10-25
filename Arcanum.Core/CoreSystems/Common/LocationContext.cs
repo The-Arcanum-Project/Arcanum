@@ -33,6 +33,13 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
       ColumnNumber = token.Column;
    }
 
+   public void SetPosition(KeyNodeBase vn)
+   {
+      var (line, column) = vn.GetLocation();
+      LineNumber = line;
+      ColumnNumber = column;
+   }
+
    public void SetPosition(ValueNode vn)
    {
       var (line, column) = vn.GetLocation();
