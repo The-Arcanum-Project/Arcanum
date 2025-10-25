@@ -3,8 +3,9 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.Map;
-using Nexus.Core;
+using Arcanum.Core.GameObjects.Map.SubObjects;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -61,5 +62,29 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveIAgsEnumKvp can only be used with IIagsEnumKvp<IAgs> instances.");
 
       sb.AppendLine($"{kvp.Key.SavingKey} = {EnumAgsRegistry.GetKey(kvp.Value)}");
+   }
+
+   public static void SaveDemandData(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   {
+      if (target is not DemandData dd)
+         throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
+
+      if (dd.TargetAll > 0f)
+         sb.AppendLine($"all = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}");
+      else if (dd.TargetUpper > 0f)
+         sb.AppendLine($"upper = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+      else
+         sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+   }
+
+   public static void MapMovementAssistSaving(IAgs target,
+                                              HashSet<PropertySavingMetadata> metadata,
+                                              IndentedStringBuilder sb)
+   {
+      if (target is not MapMovementAssist mma)
+         throw new
+            InvalidOperationException("MapMovementAssistSaving can only be used with MapMovementAssist instances.");
+
+      sb.AppendLine($"movement_assistance = {{ {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
    }
 }

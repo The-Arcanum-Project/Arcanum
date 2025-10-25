@@ -15,6 +15,7 @@ public class Eu5FileObj
    public PathObj Path { get; }
    public HashSet<IEu5Object> ObjectsInFile { get; } = [];
    public static Eu5FileObj Empty { get; } = new(PathObj.Empty, FileDescriptor.Empty);
+   public static Eu5FileObj Embedded { get; } = new(PathObj.Empty, FileDescriptor.Empty);
    public byte[] Checksum { get; private set; } = [];
 
    public void GenerateChecksum()

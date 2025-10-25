@@ -134,6 +134,48 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
+   private int _modErrorCount;
+   public int ModErrorCount
+   {
+      get => _modErrorCount;
+      set
+      {
+         if (_modErrorCount == value)
+            return;
+
+         _modErrorCount = value;
+         OnPropertyChanged();
+      }
+   }
+
+   private int _vanillaErrorCount;
+   public int VanillaErrorCount
+   {
+      get => _vanillaErrorCount;
+      set
+      {
+         if (_vanillaErrorCount == value)
+            return;
+
+         _vanillaErrorCount = value;
+         OnPropertyChanged();
+      }
+   }
+
+   private int _baseModErrorCount;
+   public int BaseModErrorCount
+   {
+      get => _baseModErrorCount;
+      set
+      {
+         if (_baseModErrorCount == value)
+            return;
+
+         _baseModErrorCount = value;
+         OnPropertyChanged();
+      }
+   }
+
    private SimpleSearchSettings SearchSettings { get; set; } = new();
    private bool _isFullyLoaded;
 
@@ -195,6 +237,22 @@ public partial class ErrorLog : INotifyPropertyChanged
 
       DontProbeForFiles = !Config.Settings.ErrorLogOptions.ProbeFiles;
       _isFullyLoaded = true;
+
+      var modErrors = 0;
+      var vanillaErrors = 0;
+      var baseModErrors = 0;
+
+      foreach (var diagnostic in ErrorManager.Diagnostics)
+         if (diagnostic.Context.FilePath.StartsWith(FileManager.GetVanillaPath()))
+            vanillaErrors++;
+         else if (diagnostic.Context.FilePath.StartsWith(FileManager.GetModPath()))
+            modErrors++;
+         else
+            baseModErrors++;
+
+      ModErrorCount = modErrors;
+      VanillaErrorCount = vanillaErrors;
+      BaseModErrorCount = baseModErrors;
    }
 
    private void QuerySearch(string query)

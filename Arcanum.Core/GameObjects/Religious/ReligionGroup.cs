@@ -11,7 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Religion;
+namespace Arcanum.Core.GameObjects.Religious;
 
 [ObjectSaveAs]
 public partial class ReligionGroup : IEu5Object<ReligionGroup>

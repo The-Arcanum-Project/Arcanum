@@ -11,23 +11,33 @@ using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Culture;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Arcanum.Core.GameObjects.Map;
+using Arcanum.Core.GameObjects.Map.SubObjects;
 using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religion;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
+using Culture = Arcanum.Core.GameObjects.Cultural.Culture;
+using CultureOpinionValue = Arcanum.Core.GameObjects.Cultural.SubObjects.CultureOpinionValue;
+using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
+using Institution = Arcanum.Core.GameObjects.Cultural.Institution;
+using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
+using Language = Arcanum.Core.GameObjects.Cultural.Language;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
-using Religion = Arcanum.Core.GameObjects.Religion.Religion;
-using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
+using Religion = Arcanum.Core.GameObjects.Religious.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religious.ReligionGroup;
+using ReligionOpinionValue = Arcanum.Core.GameObjects.Cultural.SubObjects.ReligionOpinionValue;
+using ReligiousFaction = Arcanum.Core.GameObjects.Religious.ReligiousFaction;
+using ReligiousFocus = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousFocus;
+using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
+using ReligiousSchoolOpinionValue = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousSchoolOpinionValue;
+using ReligiousSchoolRelations = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousSchoolRelations;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.Settings;
@@ -515,6 +525,51 @@ public class NUISettings
                                                                     .Cast<Enum>()
                                                                     .ToArray(),
                                                                 Enum.GetValues<ParliamentType.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray());
+
+   public NUISetting LocationTemplateDataSettings { get; set; } = new(LocationTemplateData.Field.UniqueId,
+                                                                      Enum.GetValues<LocationTemplateData.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<LocationTemplateData.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<LocationTemplateData.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray());
+
+   public NUISetting RawMaterialSettings { get; set; } = new(RawMaterial.Field.UniqueId,
+                                                             Enum.GetValues<RawMaterial.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<RawMaterial.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<RawMaterial.Field>()
+                                                                 .Cast<Enum>()
+                                                                 .ToArray());
+
+   public NUISetting DemandDataSettings { get; set; } = new(DemandData.Field.UniqueId,
+                                                            Enum.GetValues<DemandData.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<DemandData.Field>().Cast<Enum>().ToArray(),
+                                                            Enum.GetValues<DemandData.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting MapMovementAssistSettings { get; set; } = new(MapMovementAssist.Field.UniqueId,
+                                                                   Enum.GetValues<MapMovementAssist.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray(),
+                                                                   Enum.GetValues<MapMovementAssist.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray(),
+                                                                   Enum.GetValues<MapMovementAssist.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray());
+
+   public NUISetting StaticModifierSettings { get; set; } = new(StaticModifier.Field.UniqueId,
+                                                                Enum.GetValues<StaticModifier.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<StaticModifier.Field>()
+                                                                    .Cast<Enum>()
+                                                                    .ToArray(),
+                                                                Enum.GetValues<StaticModifier.Field>()
                                                                     .Cast<Enum>()
                                                                     .ToArray());
 }

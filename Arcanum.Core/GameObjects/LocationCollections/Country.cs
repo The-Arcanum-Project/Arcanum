@@ -13,8 +13,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court.State;
-using Arcanum.Core.GameObjects.Religion;
 using Common.UI;
+using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 

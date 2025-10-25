@@ -3,9 +3,9 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Culture;
+using Arcanum.Core.GameObjects.Cultural;
 
-namespace Arcanum.Core.GameObjects.Religion.SubObjects;
+namespace Arcanum.Core.GameObjects.Religious.SubObjects;
 
 [ObjectSaveAs(savingMethod: "SaveIAgsEnumKvp")]
 #pragma warning disable ARC002

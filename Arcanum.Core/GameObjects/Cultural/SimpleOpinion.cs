@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.GameObjects.Culture;
+﻿namespace Arcanum.Core.GameObjects.Cultural;
 
 public enum SimpleOpinion
 {

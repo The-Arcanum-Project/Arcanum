@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Windows.Threading;
-using Arcanum.Core.CoreSystems.Map;
+﻿using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.Logger;
@@ -41,6 +38,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             MapSize = (bitmap.Width, bitmap.Height);
          }
       }
+
       TotalPolygonsCount = _parsingPolygons.Count;
 
       _ = Tessellate();
@@ -81,19 +79,21 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       foreach (var loc in Globals.Locations.Values)
       {
          loc.Polygons = tempDict.TryGetValue(loc.Color.AsInt(), out var polygonList) ? polygonList.ToArray() : [];
-         if (polygonList == null) continue;
+         if (polygonList == null)
+            continue;
+
          foreach (var polygon in polygonList)
          {
             polygon.ColorIndex = loc.ColorIndex;
          }
       }
-      
+
       lock (this)
       {
          FinishedTesselation = true;
          UIHandle.Instance.MapHandle.NotifyMapLoaded();
       }
-      
+
       // End todo
    }
 

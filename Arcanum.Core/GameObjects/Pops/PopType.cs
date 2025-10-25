@@ -1,8 +1,5 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
-using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -12,8 +9,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Culture;
 using Common.UI;
+using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
 namespace Arcanum.Core.GameObjects.Pops;
 

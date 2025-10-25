@@ -8,10 +8,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Religion.SubObjects;
+namespace Arcanum.Core.GameObjects.Religious;
 
 [ObjectSaveAs]
-public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
+public partial class ReligiousSchool : IEu5Object<ReligiousSchool>
 {
    #region Nexus Properties
 
@@ -19,28 +19,28 @@ public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
 
 #pragma warning disable AGS004
    [ReadonlyNexus]
-   [Description("Unique key of this ReligiousFocus. Must be unique among all objects of this type.")]
+   [Description("Unique key of this ReligiousSchool. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
    #region IEu5Object
 
-   public string GetNamespace => $"Religion.{nameof(ReligiousFocus)}";
+   public string GetNamespace => $"Religion.{nameof(ReligiousSchool)}";
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => false;
-   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousFocusSettings;
+   public bool IsReadonly => true;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousSchoolSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousFocusAgsSettings;
-   public static Dictionary<string, ReligiousFocus> GetGlobalItems() => Globals.ReligiousFocuses;
-   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolAgsSettings;
+   public static Dictionary<string, ReligiousSchool> GetGlobalItems() => Globals.ReligiousSchools;
 
-   public static ReligiousFocus Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousFocus" };
+   public static ReligiousSchool Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousSchool" };
 
    public override string ToString() => UniqueId;
 

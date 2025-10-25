@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
@@ -352,6 +353,35 @@ public static class DescriptorDefinitions
                                                                   ],
                                                                   false);
 
+   public static readonly FileDescriptor RawMaterialDescriptor = new(["in_game", "common", "goods"],
+                                                                     new("raw_materials", "txt", "#"),
+                                                                     [
+                                                                        new RawMaterialParsing([
+                                                                           PopTypeDescriptor.LoadingService[0],
+                                                                        ]),
+                                                                     ],
+                                                                     false);
+
+   public static readonly FileDescriptor StaticModifiersDescriptor =
+      new(["main_menu", "common", "static_modifiers"],
+          new("static_modifiers", "txt", "#"),
+          [new StaticModifierParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
+          false);
+
+   public static readonly FileDescriptor LocationTemplateDescriptor =
+      new(["in_game", "map_data", "location_templates.txt"],
+          new("location_templates", "txt", "#"),
+          [
+             new LocationTemplateParsing([
+                LocationDescriptor.LoadingService[0], ClimateDescriptor.LoadingService[0],
+                VegetationDescriptor.LoadingService[0], TopographyDescriptor.LoadingService[0],
+                ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0],
+                RawMaterialDescriptor.LoadingService[0], StaticModifiersDescriptor.LoadingService[0],
+             ]),
+          ],
+          false,
+          false);
+
    //TODO Autogenerate this list
    static DescriptorDefinitions()
    {
@@ -364,7 +394,8 @@ public static class DescriptorDefinitions
          AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor,
          RegenciesDescriptor, CharactersDescriptor, DynastyManagerDescriptor, EstateDescriptor,
          ReligiousGroupDescriptor, ReligionDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
-         DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor,
+         DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor,
+         LocationTemplateDescriptor, StaticModifiersDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

@@ -25,6 +25,12 @@ public class AGSSettings
    public AgsSettings TimedModifierAgsSettings { get; set; } = new();
    public AgsSettings JominiDateSettings { get; set; } = new();
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
+   public AgsSettings LocationTemplateDataAgsSettings { get; set; } = new();
+   public AgsSettings RawMaterialAgsSettings { get; set; } = new();
+   public AgsSettings DemandDataAgsSettings { get; set; } = new();
+   public AgsSettings PopsDemandDataAgsSettings { get; set; } = new();
+   public AgsSettings MapMovementAssistAgsSettings { get; set; } = new();
+   public AgsSettings StaticModifierAgsSettings { get; set; } = new();
    public AgsSettings RulerTermAgsSettings { get; set; } = new();
    public AgsSettings ReligionAgsSettings { get; set; } = new();
    public AgsSettings ReligionGroupAgsSettings { get; set; } = new();

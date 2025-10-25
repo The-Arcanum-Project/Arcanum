@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Arcanum.Core.Utils.Sorting;
+using ReligiousFocus = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousFocus;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

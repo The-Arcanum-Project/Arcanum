@@ -3,6 +3,11 @@ using Arcanum.Core.CoreSystems.NUI;
 
 namespace Arcanum.Core.GameObjects.BaseTypes;
 
+/// <summary>
+/// Simplified interface for embedded EU5 objects that do not require full search or NUI support.
+/// NO Search, NO global items, NO navigation.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public interface IEmbeddedEu5Object<T> : IEu5Object<T> where T : IEu5Object<T>, new()
 {
    string ISearchable.GetNamespace => $"Embedded.{GetType().Name}";
@@ -15,6 +20,5 @@ public interface IEmbeddedEu5Object<T> : IEu5Object<T> where T : IEu5Object<T>, 
    Enum ISearchable.SearchCategory => throw new NotSupportedException();
    bool INUI.IsReadonly => false;
    static Dictionary<string, T> IEu5ObjectProvider<T>.GetGlobalItems() => [];
-   static T IEmpty<T>.Empty => new() { UniqueId = $"Arcanum_Empty_{typeof(T).Name}" };
    INUINavigation?[] INUI.Navigations => [];
 }

@@ -1,7 +1,6 @@
 ﻿using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 
 namespace Arcanum.Core.CoreSystems.IO;
 

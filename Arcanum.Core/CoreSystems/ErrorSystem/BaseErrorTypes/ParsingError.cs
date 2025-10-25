@@ -742,4 +742,14 @@ public class ParsingError : ILazySingleton
                                                                         "The item '{0}' is duplicated in the collection {1}.",
                                                                         "Items in '{1}' must be unique. The item '{0}' appears multiple times. This error will be resolved when saving the affected object.",
                                                                         DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The expected token count</param>
+   /// <param name="1">The actual token count</param>
+   public DiagnosticDescriptor UnexpectedTokenCount { get; } = new(DiagnosticCategory.Parsing,
+                                                                   77,
+                                                                   "Unexpected Token Count",
+                                                                   DiagnosticSeverity.Error,
+                                                                   "The token count is unexpected. Expected {0}, but found {1}.",
+                                                                   "The number of tokens encountered does not match the expected count. Please ensure the correct number of tokens are provided.",
+                                                                   DiagnosticReportSeverity.PopupNotify);
 }

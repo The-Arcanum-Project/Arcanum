@@ -63,8 +63,15 @@ public interface IEu5Object : ISearchable, INUI, IAgs
 
    string ISearchable.ResultName => UniqueId;
    List<string> ISearchable.SearchTerms => [UniqueId];
-
    string IAgs.SavingKey => UniqueId;
+   /// <summary>
+   /// If true this object can not be saved individually and has to have a reference to it's parent
+   /// </summary>
+   public bool IsEmbeddedObject => false;
+   /// <summary>
+   /// Only exists if this object is an embedded object.
+   /// </summary>
+   public IEu5Object? Parent => null;
 
    /// <summary>
    /// Provides the default implementation for the non-generic gateway method from IEu5Object.

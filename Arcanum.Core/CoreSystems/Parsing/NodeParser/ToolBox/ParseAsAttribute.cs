@@ -25,7 +25,8 @@ public class ParseAsAttribute(string? key,
                               bool isShatteredList = false,
                               AstNodeType itemNodeType = AstNodeType.KeyOnlyNode,
                               bool isEmbedded = false,
-                              Type? iEu5KeyType = null) : Attribute
+                              Type? iEu5KeyType = null,
+                              Type? customGlobalsSource = null) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -57,4 +58,6 @@ public class ParseAsAttribute(string? key,
    /// If true, the property is an embedded object which has it's own parser and is wrapped by the key.
    /// </summary>
    public bool IsEmbedded { get; set; } = isEmbedded;
+
+   public Type? CustomGlobalsSource { get; set; } = customGlobalsSource;
 }

@@ -3,17 +3,17 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Arcanum.Core.GameObjects.MainMenu.States;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Arcanum.Core.Utils.Sorting;
+using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
+using ReligiousSchoolRelations = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousSchoolRelations;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependencyNode<string>> dependencies) : PureParseLoadingService(dependencies)
+public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : PureParseLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects => [typeof(InstitutionManager), typeof(ReligiousSchoolRelations)];
    public override string GetFileDataDebugInfo() => "Parsed InstitutionState and ReligiousSchoolState";
@@ -51,7 +51,8 @@ public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependency
 }
 
 [ParserFor(typeof(InstitutionManager))]
-public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<InstitutionManager>(dependencies)
+public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<InstitutionManager>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,
@@ -88,8 +89,8 @@ public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNod
 public abstract partial class InstitutionStateParsing;
 
 [ParserFor(typeof(ReligiousSchoolRelations))]
-public partial class ReligiousSchoolRelationsParsing
-  (IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<ReligiousSchoolRelations>(dependencies)
+public partial class ReligiousSchoolRelationsParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<ReligiousSchoolRelations>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
                                         LocationContext ctx,

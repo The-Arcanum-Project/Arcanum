@@ -5,7 +5,8 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
+using Arcanum.Core.GameObjects.Religious;
+using Arcanum.Core.GameObjects.Religious.SubObjects;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -29,6 +30,27 @@ public static class KonHelper
                                      $"Parsing {className}",
                                      key);
       validationResult = false;
+      return false;
+   }
+
+   public static bool TryParseFloatValue(this KeyOnlyNode node,
+                                         LocationContext ctx,
+                                         string source,
+                                         string actionName,
+                                         ref bool validationResult,
+                                         out float value)
+   {
+      var lexeme = node.KeyNode.GetLexeme(source);
+      if (float.TryParse(lexeme, out value))
+         return true;
+
+      ctx.SetPosition(node.KeyNode);
+      DiagnosticException.LogWarning(ctx,
+                                     ParsingError.Instance.FloatParsingError,
+                                     actionName,
+                                     lexeme);
+      validationResult = false;
+      value = 0f;
       return false;
    }
 
@@ -100,7 +122,7 @@ public static class KonHelper
                                              string source,
                                              string className,
                                              ref bool validationResult,
-                                             [MaybeNullWhen(false)] out GameObjects.Religion.ReligiousFaction value)
+                                             [MaybeNullWhen(false)] out ReligiousFaction value)
    {
       var key = node.KeyNode.GetLexeme(source);
       if (Globals.ReligiousFactions.TryGetValue(key, out value))
@@ -111,7 +133,7 @@ public static class KonHelper
                                      ParsingError.Instance.InvalidObjectKey,
                                      $"Parsing {className}",
                                      key,
-                                     nameof(GameObjects.Religion.ReligiousFaction));
+                                     nameof(ReligiousFaction));
       validationResult = false;
       return false;
    }

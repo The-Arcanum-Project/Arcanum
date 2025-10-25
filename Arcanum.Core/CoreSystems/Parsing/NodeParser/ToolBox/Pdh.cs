@@ -2,13 +2,10 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.Registry;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -192,6 +189,7 @@ public static class Pdh
    /// <param name="blockParsers">The dictionary of parsers for BlockNodes.</param>
    /// <param name="statementParsers"></param>
    /// <param name="dynamicBlockParsers"></param>
+   /// <param name="dynamicContentParsers"></param>
    /// <param name="ignoredBlockKeys"></param>
    /// <param name="ignoredContentKeys"></param>
    /// <param name="allowUnknownNodes"></param>
@@ -208,6 +206,7 @@ public static class Pdh
                                                IReadOnlyDictionary<string, StatementParser<TTarget>>
                                                   statementParsers,
                                                List<BlockParser<TTarget>> dynamicBlockParsers,
+                                               List<ContentParser<TTarget>> dynamicContentParsers,
                                                HashSet<string> ignoredBlockKeys,
                                                HashSet<string> ignoredContentKeys,
                                                bool allowUnknownNodes = false) where TTarget : INexus
@@ -222,6 +221,17 @@ public static class Pdh
             {
                parser(cn, target, ctx, source, ref validation);
                wasHandled = true;
+            }
+            else
+            {
+               foreach (var dcParser in dynamicContentParsers)
+               {
+                  if (!dcParser(cn, target, ctx, source, ref validation))
+                     continue;
+
+                  wasHandled = true;
+                  break;
+               }
             }
          }
          else if (sn is BlockNode bn)

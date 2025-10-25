@@ -3,22 +3,26 @@ using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religion;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
 using Arcanum.Core.GlobalStates.BackingClasses;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
+using Culture = Arcanum.Core.GameObjects.Cultural.Culture;
+using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
+using Institution = Arcanum.Core.GameObjects.Cultural.Institution;
+using Language = Arcanum.Core.GameObjects.Cultural.Language;
 using LocationRank = Arcanum.Core.GameObjects.LocationCollections.LocationRank;
 using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Regency = Arcanum.Core.GameObjects.Court.Regency;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
-using Religion = Arcanum.Core.GameObjects.Religion.Religion;
-using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
+using Religion = Arcanum.Core.GameObjects.Religious.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religious.ReligionGroup;
+using ReligiousFaction = Arcanum.Core.GameObjects.Religious.ReligiousFaction;
+using ReligiousFocus = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousFocus;
+using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 
 namespace Arcanum.Core.GlobalStates;
@@ -66,6 +70,7 @@ public static class Globals
 
    #region Map
 
+   public static Dictionary<string, LocationTemplateData> LocationTemplateDatas { get; } = [];
    public static Dictionary<string, Climate> Climates { get; set; } = [];
    public static Dictionary<string, Vegetation> Vegetation { get; set; } = [];
    public static Dictionary<string, Topography> Topography { get; set; } = [];
@@ -101,7 +106,14 @@ public static class Globals
 
    #region Economy
 
+   public static Dictionary<string, RawMaterial> RawMaterials { get; } = [];
    public static Dictionary<string, Market> Markets { get; } = [];
+
+   #endregion
+
+   #region Modifiers
+
+   public static Dictionary<string, StaticModifier> StaticModifiers { get; } = [];
 
    #endregion
 

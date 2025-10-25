@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.GameObjects.Religion;
+﻿namespace Arcanum.Core.GameObjects.Religious;
 
 /// <summary>
 /// Defines how two religious schools relate to each other.

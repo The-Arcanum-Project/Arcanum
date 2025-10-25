@@ -9,7 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Religion.SubObjects;
+namespace Arcanum.Core.GameObjects.Religious.SubObjects;
 
 [ObjectSaveAs]
 public partial class ReligiousSchoolRelations : IEu5Object<ReligiousSchoolRelations>

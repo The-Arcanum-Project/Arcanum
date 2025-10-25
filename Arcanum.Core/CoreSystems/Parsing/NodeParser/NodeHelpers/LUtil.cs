@@ -85,7 +85,8 @@ public static class LUtil
       Dictionary<string, T> globals,
       [MaybeNullWhen(false)] out T value) where T : IEu5Object
    {
-      if (!globals.TryGetValue(token.GetLexeme(source), out value))
+      var lexeme = token.GetLexeme(source);
+      if (!globals.TryGetValue(lexeme, out value))
       {
          ctx.SetPosition(token);
          DiagnosticException.LogWarning(ctx.GetInstance(),

@@ -7,27 +7,29 @@ using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.AbstractMechanics;
+using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Culture;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
+using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religion;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
-using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+using Arcanum.Core.GameObjects.Religious;
+using Arcanum.Core.GameObjects.Religious.SubObjects;
 using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
-using Religion = Arcanum.Core.GameObjects.Religion.Religion;
-using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -1411,5 +1413,213 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseParliamentType(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_DemandData(ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out DemandData value,
+                                             ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_DemandData)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var key = node.KeyNode.GetLexeme(source);
+      value = Eu5Activator.CreateEmbeddedInstance<DemandData>(null, node);
+
+      switch (key)
+      {
+         case "all":
+            if (!lvn.TryParseFloat(ctx, actionName, source, ref validation, out var all))
+            {
+               value = null;
+               return false;
+            }
+
+            value.TargetAll = all;
+            break;
+         case "upper":
+            if (!lvn.TryParseFloat(ctx, actionName, source, ref validation, out var upper))
+            {
+               value = null;
+               return false;
+            }
+
+            value.TargetUpper = upper;
+            break;
+         default:
+            if (!Globals.PopTypes.TryGetValue(key, out var popType))
+            {
+               ctx.SetPosition(node.KeyNode);
+               DiagnosticException.LogWarning(ctx.GetInstance(),
+                                              ParsingError.Instance.UnknownObjectKey,
+                                              actionName,
+                                              key,
+                                              nameof(PopType));
+               value = null;
+               validation = false;
+               return false;
+            }
+
+            value.PopType = popType;
+            break;
+      }
+
+      return true;
+   }
+
+   public static bool ArcTryParse_Topography(ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out Topography value,
+                                             ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Topography)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Topography,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_Vegetation(ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out Vegetation value,
+                                             ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Vegetation)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Vegetation,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_Climate(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          [MaybeNullWhen(false)] out Climate value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Climate)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Climates,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_RawMaterial(ContentNode node,
+                                              LocationContext ctx,
+                                              string actionName,
+                                              string source,
+                                              [MaybeNullWhen(false)] out RawMaterial value,
+                                              ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_RawMaterial)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.RawMaterials,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_StaticModifier(ContentNode node,
+                                                 LocationContext ctx,
+                                                 string actionName,
+                                                 string source,
+                                                 [MaybeNullWhen(false)] out StaticModifier value,
+                                                 ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_StaticModifier)}"))
+         validation = false;
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.StaticModifiers,
+                                           out value);
    }
 }

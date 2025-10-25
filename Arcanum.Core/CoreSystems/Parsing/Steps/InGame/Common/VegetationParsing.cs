@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
@@ -10,7 +9,8 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(Vegetation))]
-public partial class VegetationParsing(IEnumerable<IDependencyNode<string>> dependencies) : ParserValidationLoadingService<Vegetation>(dependencies)
+public partial class VegetationParsing(IEnumerable<IDependencyNode<string>> dependencies)
+   : ParserValidationLoadingService<Vegetation>(dependencies)
 {
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,

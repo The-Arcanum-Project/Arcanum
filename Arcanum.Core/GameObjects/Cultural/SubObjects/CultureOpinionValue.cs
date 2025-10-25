@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
 
-namespace Arcanum.Core.GameObjects.Culture.SubObjects;
+namespace Arcanum.Core.GameObjects.Cultural.SubObjects;
 
 [ObjectSaveAs(savingMethod: "SaveIAgsEnumKvp")]
 #pragma warning disable ARC002

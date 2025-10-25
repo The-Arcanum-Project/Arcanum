@@ -10,13 +10,13 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Culture;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
+using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
+using Arcanum.Core.GameObjects.Religious.SubObjects;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Religion;
+namespace Arcanum.Core.GameObjects.Religious;
 
 [ObjectSaveAs]
 public partial class Religion : IEu5Object<Religion>

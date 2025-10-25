@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.Settings;
-using Arcanum.Core.Settings.BaseClasses;
+﻿using Arcanum.Core.Settings.BaseClasses;
 
 #if DEBUG
 namespace Arcanum.Core.GlobalStates;

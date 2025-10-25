@@ -3,18 +3,17 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Date;
-using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
-using Nexus.Core;
+using Culture = Arcanum.Core.GameObjects.Cultural.Culture;
+using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
-using Religion = Arcanum.Core.GameObjects.Religion.Religion;
-using ReligionGroup = Arcanum.Core.GameObjects.Religion.ReligionGroup;
+using Religion = Arcanum.Core.GameObjects.Religious.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.Religious.ReligionGroup;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
@@ -121,6 +120,28 @@ public static class LvnHelpers
       }
 
       return true;
+   }
+
+   public static bool TryParseBool(this LiteralValueNode lvn,
+                                   LocationContext ctx,
+                                   string actionName,
+                                   string source,
+                                   ref bool validationResult,
+                                   out bool value,
+                                   bool complainOnError = true)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (bool.TryParse(lexeme, out value) || !complainOnError)
+         return true;
+
+      ctx.SetPosition(lvn.Value);
+      DiagnosticException.LogWarning(ctx.GetInstance(),
+                                     ParsingError.Instance.BoolParsingError,
+                                     actionName,
+                                     lexeme);
+      value = false;
+      validationResult = false;
+      return false;
    }
 
    public static bool TryParseFloat(this LiteralValueNode lvn,

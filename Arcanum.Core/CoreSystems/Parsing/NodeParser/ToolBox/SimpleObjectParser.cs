@@ -2,13 +2,10 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.Registry;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -120,14 +117,14 @@ public static class SimpleObjectParser
       return true;
    }
 
-   private static bool ValidateAndCreateInstance<TTarget>(Eu5FileObj fileObj,
-                                                          LocationContext ctx,
-                                                          string actionStack,
-                                                          string source,
-                                                          ref bool validation,
-                                                          StatementNode sn,
-                                                          out BlockNode? bn,
-                                                          out TTarget? eu5Obj)
+   internal static bool ValidateAndCreateInstance<TTarget>(Eu5FileObj fileObj,
+                                                           LocationContext ctx,
+                                                           string actionStack,
+                                                           string source,
+                                                           ref bool validation,
+                                                           StatementNode sn,
+                                                           out BlockNode? bn,
+                                                           out TTarget? eu5Obj)
       where TTarget : IEu5Object<TTarget>, new()
    {
       if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out bn))
@@ -136,8 +133,7 @@ public static class SimpleObjectParser
          return false;
       }
 
-      eu5Obj = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
-      eu5Obj.FileLocation = bn.GetFileLocation();
+      eu5Obj = Eu5Activator.CreateInstance<TTarget>(bn.KeyNode.GetLexeme(source), fileObj, bn);
       return true;
    }
 
@@ -159,8 +155,7 @@ public static class SimpleObjectParser
          if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
-         var instance = IEu5Object<TTarget>.CreateInstance(bn.KeyNode.GetLexeme(source), fileObj);
-         instance.FileLocation = bn.GetFileLocation();
+         var instance = Eu5Activator.CreateInstance<TTarget>(bn.KeyNode.GetLexeme(source), fileObj, bn);
          Debug.Assert(instance.Source != null, "instance.Source != null");
 
          if (lockObject != null)

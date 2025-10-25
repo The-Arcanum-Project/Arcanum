@@ -7,7 +7,6 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils;
-using Nexus.Core;
 
 // ReSharper disable PossibleMultipleEnumeration
 

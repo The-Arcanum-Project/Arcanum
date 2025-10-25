@@ -3,7 +3,6 @@ using System.Diagnostics;
 using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
-using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.PathAccessorEngine;
 

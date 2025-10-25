@@ -4,13 +4,14 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.GameObjects.Common;
 
 [ObjectSaveAs]
 public partial class ModifierGameData
-   : IEu5EmbeddedObject<ModifierGameData>, IEmpty<ModifierGameData>
+   : IEmbeddedEu5Object<ModifierGameData>
 {
    #region Nexus Properties
 
@@ -51,6 +52,11 @@ public partial class ModifierGameData
    [SaveAs]
    [DefaultValue(false)]
    public bool ScaleWithPop { get; set; }
+   [SaveAs]
+   [ParseAs("decaying")]
+   [Description("Whether this modifier decays over time.")]
+   [DefaultValue(false)]
+   public bool Decaying { get; set; }
    [ParseAs("cap_zero_to_one")]
    [Description("Whether this modifier is capped between 0 and 1.")]
    [SaveAs]
@@ -118,5 +124,12 @@ public partial class ModifierGameData
    }
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierDataSettings;
+   public string UniqueId
+   {
+      get => "";
+      set { }
+   }
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Embedded;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => "game_data";
 }

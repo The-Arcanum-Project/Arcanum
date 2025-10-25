@@ -8,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Culture.SubObjects;
+namespace Arcanum.Core.GameObjects.Cultural.SubObjects;
 
 [ObjectSaveAs(savingMethod: "SaveIAgsEnumKvp")]
 public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
@@ -18,7 +18,7 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
    [SuppressAgs]
    [DefaultValue(null)]
    [Description("The culture this opinion is about.")]
-   public GameObjects.Religion.Religion Key { get; set; } = GameObjects.Religion.Religion.Empty;
+   public Religious.Religion Key { get; set; } = Religious.Religion.Empty;
 
    [SuppressAgs]
    [DefaultValue(Opinion.Neutral)]

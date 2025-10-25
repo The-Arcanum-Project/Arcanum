@@ -6,34 +6,28 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Culture.SubObjects;
+namespace Arcanum.Core.GameObjects.Cultural;
 
 [ObjectSaveAs]
-public partial class InstitutionState : IEu5Object<InstitutionState>
+public partial class Institution : IEu5Object<Institution>
 {
    #region Nexus Properties
 
    [SaveAs]
-   [DefaultValue(false)]
-   [ParseAs("active")]
-   [Description("Whether this InstitutionState is currently active.")]
-   public bool IsActive { get; set; }
-
-   [SaveAs]
+   [ParseAs("age")]
+   [Description("The age in which this institution first appears.")]
    [DefaultValue(null)]
-   [ParseAs("birth_place")]
-   [Description("The location where this InstitutionState was founded.")]
-   public Location BirthPlace { get; set; } = Location.Empty;
+   public Age Age { get; set; } = Age.Empty;
 
    #endregion
 
 #pragma warning disable AGS004
    [ReadonlyNexus]
-   [Description("Unique key of this InstitutionState. Must be unique among all objects of this type.")]
+   [Description("Unique key of this Institution. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
 
@@ -44,19 +38,17 @@ public partial class InstitutionState : IEu5Object<InstitutionState>
 
    #region IEu5Object
 
-   public string GetNamespace => $"MainMenu.State.{nameof(InstitutionState)}";
+   public string GetNamespace => $"Court.{nameof(Institution)}";
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
-   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionStateSettings;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionStateAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionAgsSettings;
+   public static Dictionary<string, Institution> GetGlobalItems() => Globals.Institutions;
 
-   public static Dictionary<string, InstitutionState> GetGlobalItems()
-      => Globals.State.InstitutionManager.InstitutionStates.ToDictionary(i => i.UniqueId, i => i);
-
-   public static InstitutionState Empty { get; } = new() { UniqueId = "Arcanum_Empty_InstitutionState" };
+   public static Institution Empty { get; } = new() { UniqueId = "Arcanum_Empty_Institution" };
 
    public override string ToString() => UniqueId;
 

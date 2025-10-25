@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.MainMenu.States;
-using Arcanum.Core.GameObjects.Religion.SubObjects;
+using ReligiousSchoolRelations = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousSchoolRelations;
 
 namespace Arcanum.Core.GlobalStates;
 

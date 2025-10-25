@@ -3,7 +3,6 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 

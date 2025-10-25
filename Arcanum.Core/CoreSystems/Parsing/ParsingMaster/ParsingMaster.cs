@@ -1,6 +1,9 @@
 ﻿// # define DEBUG_PARSING_STEP_TIMES
 
+#define PRINT_PARSING_ORDER
+
 using System.Diagnostics;
+using System.Windows;
 #if DEBUG_PARSING_STEP_TIMES
 using System.Globalization;
 #endif
@@ -13,6 +16,8 @@ using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.Logger;
+using Common.UI;
+using Common.UI.MBox;
 using JetBrains.Annotations;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -79,6 +84,16 @@ public class ParsingMaster
 
       var finalList = sortedPrioritySteps.Concat(sortedRemainingSteps);
       _sortedLoadingSteps = new(finalList);
+
+#if PRINT_PARSING_ORDER
+      ArcLog.WriteLine("PMS", LogLevel.INF, "Parsing order of loading steps:");
+      var index = 1;
+      foreach (var step in _sortedLoadingSteps)
+      {
+         ArcLog.WriteLine("PMS", LogLevel.INF, $"{index}. {step.Name} (Priority: {step.HasPriority})");
+         index++;
+      }
+#endif
    }
 
    /// <summary>
@@ -142,48 +157,83 @@ public class ParsingMaster
             if (step.IsHeavyStep)
                currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
                                                               {
-                                                                 var sw = Stopwatch.StartNew();
-                                                                 var wrapper = step.GetParsingStep();
-                                                                 var result = wrapper.Execute();
-                                                                 lock (lockObj)
-                                                                    if (result)
-                                                                    {
-                                                                       ParsingStepsDone++;
-                                                                       StepDurations.Add(wrapper.Duration);
-                                                                       ParsingStepsChanged?.Invoke(this, step);
-                                                                       TotalProgressChanged?.Invoke(this,
-                                                                           ParsingStepsDone /
-                                                                           (double)ParsingSteps *
-                                                                           100.0);
-                                                                    }
+                                                                 try
+                                                                 {
+                                                                    var sw = Stopwatch.StartNew();
+                                                                    var wrapper = step.GetParsingStep();
+                                                                    var result = wrapper.Execute();
+                                                                    lock (lockObj)
+                                                                       if (result)
+                                                                       {
+                                                                          ParsingStepsDone++;
+                                                                          StepDurations.Add(wrapper.Duration);
+                                                                          ParsingStepsChanged?.Invoke(this, step);
+                                                                          TotalProgressChanged?.Invoke(this,
+                                                                              ParsingStepsDone /
+                                                                              (double)ParsingSteps *
+                                                                              100.0);
+                                                                       }
 
-                                                                 step.LastTotalLoadingDuration = sw.Elapsed;
-
-                                                                 return result;
+                                                                    step.LastTotalLoadingDuration = sw.Elapsed;
+                                                                    return result;
+                                                                 }
+                                                                 catch (Exception e)
+                                                                 {
+                                                                    UIHandle.Instance.PopUpHandle
+                                                                            .ShowMBox("An Exception occured during heavy parsing step: " +
+                                                                                    $"{step.Name}\n\n" +
+                                                                                    $"Exception Message: {e.Message}\n\n" +
+                                                                                    "Please check the log for more details.",
+                                                                                 "Parsing Error",
+                                                                                 MBoxButton.OK,
+                                                                                 MessageBoxImage.Error);
+                                                                    throw
+                                                                       new($"Exception occurred while executing heavy parsing step '{step.Name}': {e.Message}",
+                                                                           e);
+                                                                 }
                                                               },
                                                               cts.Token));
             else
                currentBatchTasks.Add(Scheduler.QueueWorkAsHeavyIfAvailable(() =>
                                                                            {
-                                                                              var sw2 = Stopwatch.StartNew();
-                                                                              var wrapper = step.GetParsingStep();
-                                                                              var result = wrapper.Execute();
-                                                                              lock (lockObj)
-                                                                                 if (result)
-                                                                                 {
-                                                                                    ParsingStepsDone++;
-                                                                                    StepDurations.Add(wrapper.Duration);
-                                                                                    ParsingStepsChanged?.Invoke(this,
-                                                                                        step);
-                                                                                    TotalProgressChanged?.Invoke(this,
-                                                                                        ParsingStepsDone /
-                                                                                        (double)ParsingSteps *
-                                                                                        100.0);
-                                                                                 }
+                                                                              try
+                                                                              {
+                                                                                 var sw2 = Stopwatch.StartNew();
+                                                                                 var wrapper = step.GetParsingStep();
+                                                                                 var result = wrapper.Execute();
+                                                                                 lock (lockObj)
+                                                                                    if (result)
+                                                                                    {
+                                                                                       ParsingStepsDone++;
+                                                                                       StepDurations
+                                                                                         .Add(wrapper.Duration);
+                                                                                       ParsingStepsChanged?.Invoke(this,
+                                                                                           step);
+                                                                                       TotalProgressChanged
+                                                                                        ?.Invoke(this,
+                                                                                              ParsingStepsDone /
+                                                                                              (double)ParsingSteps *
+                                                                                              100.0);
+                                                                                    }
 
-                                                                              step.LastTotalLoadingDuration =
-                                                                                 sw2.Elapsed;
-                                                                              return result;
+                                                                                 step.LastTotalLoadingDuration =
+                                                                                    sw2.Elapsed;
+                                                                                 return result;
+                                                                              }
+                                                                              catch (Exception e)
+                                                                              {
+                                                                                 UIHandle.Instance.PopUpHandle
+                                                                                   .ShowMBox("An Exception occured during parsing step: " +
+                                                                                           $"{step.Name}\n\n" +
+                                                                                           $"Exception Message: {e.Message}\n\n" +
+                                                                                           "Please check the log for more details.",
+                                                                                        "Parsing Error",
+                                                                                        MBoxButton.OK,
+                                                                                        MessageBoxImage.Error);
+                                                                                 throw
+                                                                                    new($"Exception occurred while executing parsing step '{step.Name}': {e.Message}",
+                                                                                        e);
+                                                                              }
                                                                            },
                                                                            cts.Token));
          }

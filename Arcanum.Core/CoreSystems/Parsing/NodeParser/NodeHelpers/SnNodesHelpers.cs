@@ -42,6 +42,31 @@ public static class SnNodesHelpers
       return true;
    }
 
+   public static bool IsUnaryStatementNode(this StatementNode node,
+                                           LocationContext ctx,
+                                           string source,
+                                           string actionName,
+                                           ref bool validation,
+                                           [MaybeNullWhen(false)] out UnaryStatementNode value)
+   {
+      if (node is not UnaryStatementNode usn)
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidNodeType,
+                                        actionName,
+                                        $"{node.GetType().Name}({node.KeyNode.GetLexeme(source)})",
+                                        $"{nameof(UnaryStatementNode)}",
+                                        node.KeyNode.GetLexeme(source));
+         value = null!;
+         validation = false;
+         return false;
+      }
+
+      value = usn;
+      return true;
+   }
+
    /// <summary>
    /// Logs a warning if the StatementNode is not a BlockNode. <br/>
    /// Updates the <paramref name="validationResult"/> with the result of the check.

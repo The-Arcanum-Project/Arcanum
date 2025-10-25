@@ -7,8 +7,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
 using Common.UI;
+using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 

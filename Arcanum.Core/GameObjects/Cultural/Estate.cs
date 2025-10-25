@@ -11,7 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Culture;
+namespace Arcanum.Core.GameObjects.Cultural;
 
 [ObjectSaveAs]
 public partial class Estate : IEu5Object<Estate>

@@ -26,7 +26,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    [ParseAs("culture")]
    [DefaultValue(null)]
    [Description("The culture associated with this PopDefinition.")]
-   public Culture.Culture Culture { get; set; } = GameObjects.Culture.Culture.Empty;
+   public Cultural.Culture Culture { get; set; } = Cultural.Culture.Empty;
 
    [SaveAs]
    [ParseAs("religion")]

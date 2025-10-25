@@ -1,6 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
+﻿using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;

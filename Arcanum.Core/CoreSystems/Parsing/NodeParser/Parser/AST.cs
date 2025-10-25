@@ -218,3 +218,21 @@ public class UnaryNode(Token op, ValueNode value) : ValueNode
    public override (int, int) GetLocation() => (Operator.Line, Operator.Column);
    public override (int line, int charPos) GetEndLocation() => Value.GetEndLocation();
 }
+
+/// <summary>
+/// Represents a statement that is just a unary expression, like a negative number in a list.
+/// e.g., the "-10" in `movement_assistance = { -10 20 }`
+/// </summary>
+public class UnaryStatementNode : StatementNode
+{
+   public UnaryNode Value { get; }
+
+   public UnaryStatementNode(UnaryNode value)
+   {
+      Value = value;
+      KeyNode = value.Operator;
+   }
+
+   public override (int, int) GetLocation() => Value.GetLocation();
+   public override (int line, int charPos) GetEndLocation() => Value.GetEndLocation();
+}

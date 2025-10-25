@@ -8,10 +8,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Culture;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Nexus.Core;
+using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 

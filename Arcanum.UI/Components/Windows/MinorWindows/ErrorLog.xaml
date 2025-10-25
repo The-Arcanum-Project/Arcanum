@@ -41,6 +41,8 @@
         <Grid Grid.Row = "0"
               Grid.ColumnSpan = "3">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "*"
+                                  MinWidth = "300" />
                 <ColumnDefinition Width = "*" />
                 <ColumnDefinition Width = "*" />
                 <ColumnDefinition Width = "*" />
@@ -48,21 +50,52 @@
                 <ColumnDefinition Width = "200" />
             </Grid.ColumnDefinitions>
 
-            <CheckBox Grid.Column = "0"
+            <DockPanel Grid.Column = "0"
+                       Margin = "3, 0, 0, 0">
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center">
+                    Mod Errors:
+                </TextBlock>
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center"
+                           Margin = "3, 0, 0, 0"
+                           Text = "{Binding ModErrorCount, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                           MinWidth = "30" />
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center">
+                    Vanilla Errors:
+                </TextBlock>
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center"
+                           Margin = "3, 0, 0, 0"
+                           MinWidth = "30"
+                           Text = "{Binding VanillaErrorCount, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}" />
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center">
+                    Base Mod Errors:
+                </TextBlock>
+                <TextBlock DockPanel.Dock = "Left"
+                           VerticalAlignment = "Center"
+                           Margin = "3, 0, 0, 0"
+                           MinWidth = "30"
+                           Text = "{Binding BaseModErrorCount, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}" />
+            </DockPanel>
+
+            <CheckBox Grid.Column = "1"
                       x:Name = "ErrorCheckBox"
                       HorizontalAlignment = "Center"
                       Checked = "CheckBox_OnClick"
                       Unchecked = "CheckBoxUnCheck_OnClick">
                 Error
             </CheckBox>
-            <CheckBox Grid.Column = "1"
+            <CheckBox Grid.Column = "2"
                       x:Name = "WarningCheckBox"
                       HorizontalAlignment = "Center"
                       Checked = "CheckBox_OnClick"
                       Unchecked = "CheckBoxUnCheck_OnClick">
                 Warning
             </CheckBox>
-            <CheckBox Grid.Column = "2"
+            <CheckBox Grid.Column = "3"
                       x:Name = "InformationCheckBox"
                       HorizontalAlignment = "Center"
                       Checked = "CheckBox_OnClick"
@@ -70,13 +103,13 @@
                 Information
             </CheckBox>
 
-            <userControls:SearchTextBox Grid.Column = "3"
+            <userControls:SearchTextBox Grid.Column = "4"
                                         x:Name = "SearchTextBox"
                                         ShowTextUnderline = "True">
 
             </userControls:SearchTextBox>
 
-            <ComboBox Grid.Column = "4"
+            <ComboBox Grid.Column = "5"
                       x:Name = "FilterComboBox"
                       Margin = "4">
             </ComboBox>

@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Map;
-using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 

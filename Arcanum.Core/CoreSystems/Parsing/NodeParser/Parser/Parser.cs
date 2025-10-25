@@ -59,9 +59,16 @@ public class Parser(LexerResult lexerResult)
    {
       const string scriptedTrigger = "scripted_trigger";
       const string scriptedEffect = "scripted_effect";
-      // Case: Array block `{ ... }`
+
       if (Check(TokenType.LeftBrace))
          return ParseAnonymousBlock();
+
+      if (Check(TokenType.Minus))
+      {
+         var value = ParseValue();
+         if (value is UnaryNode unaryNode)
+            return new UnaryStatementNode(unaryNode);
+      }
 
       // Allow statements to begin with an Identifier, Date, Number or Quoted String
       if (Check(TokenType.Identifier) ||

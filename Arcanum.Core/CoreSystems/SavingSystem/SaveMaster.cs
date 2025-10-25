@@ -1,12 +1,10 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Common.Logger;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -16,7 +14,7 @@ public static class SaveMaster
    private static Dictionary<Type, List<IEu5Object>> NewSaveables { get; } = [];
    private static readonly Dictionary<Type, int> ModificationCache = [];
    private static readonly List<ICommand> ChangesSinceLastSave = [];
-   
+
    static SaveMaster()
    {
    }
@@ -28,11 +26,11 @@ public static class SaveMaster
       var targets = command.GetTargets();
       foreach (var target in targets)
       {
-         if(!NeedsToBeSaved.TryGetValue(target, out var list))
+         if (!NeedsToBeSaved.TryGetValue(target, out var list))
          {
             NeedsToBeSaved[target] = list = [];
             var type = target.GetType();
-            if(ModificationCache.TryGetValue(type, out var value))
+            if (ModificationCache.TryGetValue(type, out var value))
                ModificationCache[type] = --value;
             else
                throw new InvalidOperationException("ModificationCache does not contain type " + type);
@@ -40,6 +38,7 @@ public static class SaveMaster
 
          list.Remove(command);
       }
+
       ChangesSinceLastSave.Remove(command);
    }
 
@@ -48,7 +47,7 @@ public static class SaveMaster
       var targets = command.GetTargets();
       foreach (var target in targets)
       {
-         if(!NeedsToBeSaved.TryGetValue(target, out var list))
+         if (!NeedsToBeSaved.TryGetValue(target, out var list))
          {
             NeedsToBeSaved[target] = list = [];
             var type = target.GetType();
@@ -57,28 +56,29 @@ public static class SaveMaster
             else
                ModificationCache[type] = 1;
          }
+
          list.Add(command);
       }
+
       ChangesSinceLastSave.Add(command);
    }
 
    public static void CommandExecuted(ICommand command)
    {
-      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+      if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          RemoveChange(command);
       AddChange(command);
    }
-   
+
    public static void CommandUndone(ICommand command)
    {
-      if(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+      if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          AddChange(command);
       RemoveChange(command);
    }
-   
+
    public static void HandleNewSaveables(IEu5Object obj)
    {
-      
    }
 
    public static void SaveAll(bool onlyModified = true)

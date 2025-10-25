@@ -1,10 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
 public enum Direction
 {
-    North,
-    East,
-    South,
-    West,
+   North,
+   East,
+   South,
+   West,
 }

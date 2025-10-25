@@ -9,10 +9,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Culture.SubObjects;
+using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Common.UI;
 
-namespace Arcanum.Core.GameObjects.Culture;
+namespace Arcanum.Core.GameObjects.Cultural;
 
 public enum Opinion
 {

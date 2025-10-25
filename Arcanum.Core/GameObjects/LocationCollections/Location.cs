@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Common.UI;
 using Nexus.Core;
@@ -45,6 +46,15 @@ public partial class Location
    [Description("The pops residing in this location.")]
    [DefaultValue(null)]
    public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];
+
+   #endregion
+
+   #region game/map_data/location_templates.txt
+
+   [SuppressAgs]
+   [Description("The template data associated with this location.")]
+   [DefaultValue(null)]
+   public LocationTemplateData TemplateData { get; set; } = LocationTemplateData.Empty;
 
    #endregion
 
