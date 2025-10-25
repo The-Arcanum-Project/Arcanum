@@ -39,6 +39,7 @@ public class Lexer
       CharToTokenMap['/'] = TokenType.Divide;
       CharToTokenMap['!'] = TokenType.NotEquals; // Special case with '='
       CharToTokenMap['?'] = TokenType.QuestionEquals; // Special case with '='
+      CharToTokenMap[':'] = TokenType.ScopeSeparator;
 
       // Whitespace
       CharToTokenMap[' '] = TokenType.Whitespace;
@@ -113,6 +114,7 @@ public class Lexer
             case TokenType.Multiply:
             case TokenType.Divide:
             case TokenType.Equals:
+            case TokenType.ScopeSeparator:
                AddToken(tokenType);
                break;
 
@@ -323,7 +325,7 @@ public class Lexer
    {
       // This is a great candidate for another small lookup table if you want to push it further,
       // but a series of ORs is usually compiled efficiently.
-      return IsAlphaNumeric(c) || c == ':' || c == '.' || c == '|' || c == '-';
+      return IsAlphaNumeric(c) || c == '.' || c == '|' || c == '-';
    }
 
    #endregion

@@ -28,6 +28,7 @@ public enum TokenType
 
    // Literals
    Identifier, // my_variable, width, rgb
+   ScopeSeparator, // :
    AtIdentifier, // @my_variable
    String, // "Hello, World!"
    Number, // 123, 45.67

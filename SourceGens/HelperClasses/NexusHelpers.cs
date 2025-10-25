@@ -446,7 +446,7 @@ public static class NexusHelpers
 
       #region Indexer
 
-      // 4. Generate the indexer
+      // Indexer has to call those methods and not use faster _setValue or _getValue to ensure PropertyChanged is called
       builder.AppendLine();
       builder.AppendLine("    public object this[Enum key]");
       builder.AppendLine("    {");
