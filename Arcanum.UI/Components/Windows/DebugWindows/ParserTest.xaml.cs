@@ -155,45 +155,37 @@ public partial class ParserTest : INotifyPropertyChanged
 
    private void RunParser()
    {
-      try
+      var filePath = ParserTesting.GetFilePath(SelectedFile);
+      if (!System.IO.File.Exists(filePath))
+         return;
+
+      var source = System.IO.File.ReadAllText(filePath);
+      if (source.Length < MAX_OUTPUT_LENGTH)
+         InputText = source;
+      else
+         InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
+      var lexer = new Lexer(source);
+      var watch = System.Diagnostics.Stopwatch.StartNew();
+      var result = lexer.ScanTokens();
+      watch.Stop();
+      Time = $"Lexing {watch.ElapsedMilliseconds} ms";
+      var lexTime = watch.ElapsedMilliseconds;
+      watch.Restart();
+      var parser = new Parser(result);
+      var ast = parser.Parse();
+      watch.Stop();
+
+      var sb = new System.Text.StringBuilder();
+      if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
+         sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
+      else
       {
-         Time = string.Empty;
-         var filePath = ParserTesting.GetFilePath(SelectedFile);
-         if (!System.IO.File.Exists(filePath))
-            return;
-
-         var source = System.IO.File.ReadAllText(filePath);
-         if (source.Length < MAX_OUTPUT_LENGTH)
-            InputText = source;
-         else
-            InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
-         var lexer = new Lexer(source);
-         var watch = System.Diagnostics.Stopwatch.StartNew();
-         var result = lexer.ScanTokens();
-         watch.Stop();
-         Time = $"Lexing {watch.ElapsedMilliseconds} ms";
-         var lexTime = watch.ElapsedMilliseconds;
-         watch.Restart();
-         var parser = new Parser(result);
-         var ast = parser.Parse();
-         watch.Stop();
-
-         var sb = new System.Text.StringBuilder();
-         if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
-            sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
-         else
-         {
-            Parser.PrintAst(ast, sb, "", source);
-            OutputText = sb.ToString();
-         }
-
-         Time +=
-            $", Parsing {watch.ElapsedMilliseconds} ms, Total {lexTime + watch.ElapsedMilliseconds} ms";
-         Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
+         Parser.PrintAst(ast, sb, "", source);
+         OutputText = sb.ToString();
       }
-      catch (Exception e)
-      {
-         MBox.Show($"An error occurred during parsing:\n{e.Message}", "Error", MBoxButton.OK, MessageBoxImage.Error);
-      }
+
+      Time +=
+         $", Parsing {watch.ElapsedMilliseconds} ms, Total {lexTime + watch.ElapsedMilliseconds} ms";
+      Time += $", lines: {result.Tokens[^1].Line}|{source.Length} chars";
    }
 }

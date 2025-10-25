@@ -174,7 +174,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          if (mapDataParser.FinishedTesselation)
             _ = MainMap.SetupRenderer(mapDataParser.Polygons, mapDataParser.MapSize);
 
-      Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
+      // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
       Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
       GenerateMapModeButtons();

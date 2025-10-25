@@ -12,7 +12,7 @@ public class Parser(LexerResult lexerResult)
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private readonly int _tokensCount = lexerResult.Tokens.Count;
    private int _current;
-   private static Eu5FileObj _fileObj = null!;
+   private static Eu5FileObj _fileObj = Eu5FileObj.Empty;
 
    public static RootNode Parse(Eu5FileObj fileObj, out string source, out LocationContext ctx)
    {
@@ -37,7 +37,7 @@ public class Parser(LexerResult lexerResult)
                                              fileObj.Path.FullPath);
 
          source = string.Empty;
-         return new();
+         return new(0, 0);
       }
 
       var lexer = new Lexer(source);
@@ -48,11 +48,22 @@ public class Parser(LexerResult lexerResult)
 
    public RootNode Parse()
    {
-      var root = new RootNode();
+      var root = new RootNode(0, _tokens[^1].End);
       while (!IsAtEnd())
          root.Statements.Add(ParseStatement());
 
       return root;
+   }
+
+   private KeyNodeBase ParseKey()
+   {
+      if (!Check(TokenType.Identifier) || !CheckNext(TokenType.ScopeSeparator))
+         return new SimpleKeyNode(Advance());
+
+      var scope = Advance(); // Consume scope identifier
+      Advance(); // Consume ':'
+      var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+      return new ScopedKeyNode(scope, name);
    }
 
    private StatementNode ParseStatement()
@@ -84,26 +95,25 @@ public class Parser(LexerResult lexerResult)
                return ParseScriptedStatement();
          }
 
-         // Identifiers, Dates, and Numbers as keys
-         switch (PeekNext().Type)
-         {
-            case TokenType.LeftBrace:
-               return ParseBlockStatement();
-            case TokenType.Equals
-              or TokenType.NotEquals
-              or TokenType.Less
-              or TokenType.Greater
-              or TokenType.LessOrEqual
-              or TokenType.GreaterOrEqual
-              or TokenType.QuestionEquals:
-               return ParseContentOrBlockStatement();
-         }
+         var key = ParseKey();
 
-         return new KeyOnlyNode(Advance());
+         return Peek().Type switch
+         {
+            TokenType.Equals when PeekNext().Type == TokenType.LeftBrace => ParseBlockStatement(key),
+            TokenType.LeftBrace => ParseBlockStatement(key),
+            TokenType.Equals
+            or TokenType.NotEquals
+            or TokenType.Less
+            or TokenType.Greater
+            or TokenType.LessOrEqual
+            or TokenType.GreaterOrEqual
+            or TokenType.QuestionEquals => ParseContentStatement(key),
+            _ => new KeyOnlyNode(key),
+         };
       }
 
       if (Check(TokenType.AtIdentifier))
-         return ParseContentOrBlockStatement();
+         return ParseContentStatement(ParseKey());
 
       DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
@@ -131,33 +141,19 @@ public class Parser(LexerResult lexerResult)
       return block;
    }
 
-   private StatementNode ParseContentOrBlockStatement()
+   private StatementNode ParseContentStatement(KeyNodeBase key)
    {
-      var key = Advance();
       var separator = Advance();
-
-      // If the value is a block `{...}`, we treat the whole thing as a BlockNode.
-      if (Check(TokenType.LeftBrace))
-      {
-         var block = ParseBlockStatement(key);
-         return block;
-      }
-
-      // Otherwise, it's a standard ContentNode like `width = 1280`.
       var value = ParseValue();
       return new ContentNode(key, separator, value);
    }
 
-   private BlockNode ParseBlockStatement(Token? knownIdentifier = null)
+   private BlockNode ParseBlockStatement(KeyNodeBase key)
    {
-      var name = knownIdentifier ?? Advance(); // Use the passed identifier or consume a new one
+      Match(TokenType.Equals);
 
-      // Handle optional `=` before the brace
-      if (knownIdentifier == null)
-         Match(TokenType.Equals);
-
-      Expect(TokenType.LeftBrace, $"'{{' after block name '{name.GetValue(_source)}'.");
-      var block = new BlockNode(name);
+      Expect(TokenType.LeftBrace, $"'{{' after block name '{key.GetKeyText(_source)}'.");
+      var block = new BlockNode(key);
 
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
          block.Children.Add(ParseStatement());
@@ -172,20 +168,28 @@ public class Parser(LexerResult lexerResult)
       if (Match(TokenType.Minus))
       {
          var op = Previous();
-         // After the '-', we recursively call ParseValue to get the operand.
-         // This is powerful because it could handle `-(2+3)` if you extend the grammar later.
          var right = ParseValue();
          return new UnaryNode(op, right);
       }
 
+      // Check for scoped identifier first
+      if (Check(TokenType.Identifier) && CheckNext(TokenType.ScopeSeparator))
+      {
+         var scope = Advance();
+         Advance(); // Consume ':'
+         var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+         return new ScopedIdentifierNode(scope, name);
+      }
+
       // An Identifier followed by a LeftBrace is a function call.
-      if (Check(TokenType.Identifier) && PeekNext().Type == TokenType.LeftBrace)
+      if (Check(TokenType.Identifier) && CheckNext(TokenType.LeftBrace))
          return ParseFunctionCallNode();
 
       // A block used as a value, e.g., OR = { ... }
       if (Match(TokenType.LeftBrace))
       {
-         var blockValue = new BlockValueNode(Current());
+         var brace = Previous(); // Get the opening brace token
+         var blockValue = new BlockValueNode(brace);
          while (!Check(TokenType.RightBrace) && !IsAtEnd())
             blockValue.Children.Add(ParseStatement());
 
@@ -206,7 +210,6 @@ public class Parser(LexerResult lexerResult)
       }
 
       // FALLBACK: If it's not a special case, it must be a simple literal.
-      // correctly handles `quality = high` without consuming `rgb` prematurely.
       if (Match(TokenType.Number, TokenType.String, TokenType.Yes, TokenType.No, TokenType.Identifier, TokenType.Date))
          return new LiteralValueNode(Previous());
 
@@ -231,9 +234,7 @@ public class Parser(LexerResult lexerResult)
 
       Expect(TokenType.LeftBrace, $"'{{' after function name '{name.GetValue(_source)}'.");
 
-      // Loop until we find the closing brace.
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
-         // Parse each argument as a value. This allows for nested function calls
          funcCall.Arguments.Add(ParseValue());
 
       Expect(TokenType.RightBrace, "'}' to close function call.");
@@ -310,12 +311,11 @@ public class Parser(LexerResult lexerResult)
       var keyword = Advance(); // Consume 'scripted_trigger'
       var name = Advance(); // Consume the name
 
-      var node = new ScriptedStatementNode(keyword, name);
+      var node = new ScriptedStatementNode(keyword, name, keyword.Start, name.End - keyword.Start);
 
       Expect(TokenType.Equals, $"Expected '=' after name in '{keyword.GetValue(_source)}' statement.");
       Expect(TokenType.LeftBrace, "Expected '{' to open scripted statement block.");
 
-      // The content inside is just a list of normal statements. We can reuse ParseStatement!
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
          node.Children.Add(ParseStatement());
 
@@ -350,9 +350,12 @@ public class Parser(LexerResult lexerResult)
             break;
 
          case BlockNode block:
-            var name = block.KeyNode.Type == TokenType.LeftBrace
-                          ? "Array Block"
-                          : block.KeyNode.GetValue(source);
+            var name = block.KeyNode.GetKeyText(source);
+            if (block.KeyNode is SimpleKeyNode skn && skn.KeyToken.Type == TokenType.LeftBrace)
+            {
+               name = "Array Block";
+            }
+
             sb.AppendLine($"{indent}Block: '{name}'");
             block.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
             break;
@@ -363,18 +366,18 @@ public class Parser(LexerResult lexerResult)
             break;
 
          case KeyOnlyNode keyOnly:
-            sb.AppendLine($"{indent}Key: '{keyOnly.KeyNode.GetValue(source)}'");
+            sb.AppendLine($"{indent}Key: '{keyOnly.KeyNode.GetKeyText(source)}'");
             break;
 
          case ScriptedStatementNode scripted:
-            var keyword = scripted.KeyNode.GetValue(source);
+            var keyword = scripted.KeyNode.GetKeyText(source);
             var name2 = scripted.Name.GetValue(source);
             sb.AppendLine($"{indent}ScriptedStatement: '{keyword}' on '{name2}'");
             scripted.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
             break;
 
          case ContentNode content:
-            var key = content.KeyNode.GetValue(source);
+            var key = content.KeyNode.GetKeyText(source);
             var sep = content.Separator.GetValue(source);
             sb.Append($"{indent}Content: '{key}' {sep} ");
             PrintValue(content.Value, source, sb);
@@ -388,6 +391,9 @@ public class Parser(LexerResult lexerResult)
       {
          case LiteralValueNode literal:
             sb.AppendLine($"Literal: '{literal.Value.GetValue(source)}'");
+            break;
+         case ScopedIdentifierNode scoped:
+            sb.AppendLine($"ScopedIdentifier: '{scoped.GetKeyText(source)}'");
             break;
          case MathExpressionNode math:
             var expr = string.Join(" ", math.Tokens.Select(t => t.GetValue(source)));
@@ -531,18 +537,18 @@ public class Parser(LexerResult lexerResult)
       {
          key = string.Empty;
          value = string.Empty;
-
-         ctx.LineNumber = cn.KeyNode.Line;
-         ctx.ColumnNumber = cn.KeyNode.Column;
+         var (line, column) = cn.Value.GetLocation();
+         ctx.LineNumber = line;
+         ctx.ColumnNumber = column;
          DiagnosticException.LogWarning(ctx.GetInstance(),
                                         ParsingError.Instance.InvalidContentKeyOrType,
                                         actionName,
-                                        cn.KeyNode.GetLexeme(source),
+                                        cn.KeyNode.GetKeyText(source),
                                         "a string value and key");
          return false;
       }
 
-      key = cn.KeyNode.GetLexeme(source);
+      key = cn.KeyNode.GetKeyText(source);
       value = lvn.Value.GetLexeme(source);
       return true;
    }

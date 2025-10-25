@@ -48,47 +48,6 @@ public static class CnHelpers
       return true;
    }
 
-   /// <summary>
-   /// Tries to get an enum value from a ContentNode. <br/>
-   /// The ContentNode must have an Equals separator and a LiteralValueNode as value. <br/>
-   /// The string content of the LiteralValueNode is parsed to the specified enum type. <br/>
-   /// <c>Logs warnings</c> if any of the checks fail or if the parsing fails. 
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="enumType"></param>
-   /// <param name="enumValue"></param>
-   /// <returns></returns>
-   public static bool TryGetEnumValue(this ContentNode node,
-                                      LocationContext ctx,
-                                      string actionName,
-                                      string source,
-                                      Type enumType,
-                                      out Enum enumValue)
-   {
-      enumValue = (Enum)Enum.GetValues(enumType).GetValue(0)!;
-
-      if (!node.TryGetStringContentNode(ctx, actionName, source, out var strValue))
-         return false;
-
-      if (!Enum.TryParse(enumType, strValue, true, out var parsedEnum))
-      {
-         ctx.SetPosition(node.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
-                                        strValue,
-                                        enumType.Name,
-                                        Enum.GetNames(enumType));
-         return false;
-      }
-
-      enumValue = (Enum)parsedEnum;
-      return true;
-   }
-
    public static bool TryGetIdentifierNode(this ContentNode node,
                                            LocationContext ctx,
                                            string actionName,
@@ -299,8 +258,11 @@ public static class CnHelpers
                                                      out var value))
          return false;
 
+      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, actionName, out var skn))
+         return false;
+
       return ModifierManager.TryCreateModifierInstance(ctx,
-                                                       node.KeyNode,
+                                                       skn.KeyToken,
                                                        source,
                                                        value,
                                                        ref validationResult,
@@ -324,8 +286,11 @@ public static class CnHelpers
                                                      out var value))
          return false;
 
+      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, actionName, out var skn))
+         return false;
+
       return AudioTagsManager.TryCreateModifierInstance(ctx,
-                                                        node.KeyNode,
+                                                        skn.KeyToken,
                                                         source,
                                                         value,
                                                         ref validationResult,
@@ -349,8 +314,11 @@ public static class CnHelpers
                                                      out var value))
          return false;
 
+      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, actionName, out var skn))
+         return false;
+
       return AiTagManager.TryCreateAiTagInstance(ctx,
-                                                 node.KeyNode,
+                                                 skn.KeyToken,
                                                  source,
                                                  value,
                                                  ref validationResult,

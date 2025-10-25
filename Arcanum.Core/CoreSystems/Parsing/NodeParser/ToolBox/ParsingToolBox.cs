@@ -1280,7 +1280,10 @@ public static class ParsingToolBox
       if (!lvn.TryParseLocationFromLvn(ctx, actionName, source, ref validation, out var loc))
          return false;
 
-      if (!node.KeyNode.TryGetLocationFromToken(ctx, source, actionName, ref validation, out var from))
+      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, actionName, out var skn))
+         return false;
+
+      if (!skn.KeyToken.TryGetLocationFromToken(ctx, source, actionName, ref validation, out var from))
          return false;
 
       value = new() { StraitLocationOne = from, StraitLocationTwo = loc };

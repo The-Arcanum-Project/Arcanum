@@ -245,7 +245,7 @@ public partial class Country : IEu5Object<Country>
 
    #endregion
 
-   public bool IsReadonly => false;
+   public bool IsReadonly => true;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CountrySettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Country> GetGlobalItems() => Globals.Countries;

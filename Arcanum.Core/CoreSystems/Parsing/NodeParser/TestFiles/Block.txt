@@ -1,2 +1,16 @@
-﻿default_block = {
-}
+﻿if = {
+			limit = { societal_value:centralization_vs_decentralization > 0 }
+			add = {
+				desc = "centralization_vs_decentralization"
+				value = societal_value:centralization_vs_decentralization
+				multiply = 0.01
+			}
+		}
+
+visible = {
+		religion:shinto = {
+			any_country_in_religion = {
+				has_reform = government_reform:japanese_imperial_family
+			}
+		}
+	}
