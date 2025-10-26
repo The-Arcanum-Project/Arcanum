@@ -6,7 +6,7 @@ namespace Arcanum.Core.GameObjects.BaseTypes;
 
 public abstract class OldNameKeyDefined(string name) : ISearchable
 {
-   [ReadonlyNexus]
+   [NuiConfig]
    [AddModifiable]
    public string Name { get; set; } = name;
 

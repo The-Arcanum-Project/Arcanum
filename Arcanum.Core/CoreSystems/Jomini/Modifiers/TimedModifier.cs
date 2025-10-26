@@ -16,7 +16,6 @@ namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 public partial class TimedModifier : IEu5Object<TimedModifier>
 {
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

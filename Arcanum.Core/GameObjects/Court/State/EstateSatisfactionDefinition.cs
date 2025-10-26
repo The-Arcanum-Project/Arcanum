@@ -25,9 +25,8 @@ public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactio
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this EstateSatisfactionDefinition. Must be unique among all objects of this type.")]
-   [DefaultValue("null")]
+   [DefaultValue(null)]
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]

@@ -26,7 +26,6 @@ public partial class InstitutionManager : IEu5Object<InstitutionManager>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this InstitutionState. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

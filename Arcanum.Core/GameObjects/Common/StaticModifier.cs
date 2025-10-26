@@ -39,7 +39,6 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this StaticModifier. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

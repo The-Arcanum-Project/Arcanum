@@ -16,7 +16,6 @@ namespace Arcanum.Core.GameObjects.AbstractMechanics;
 public partial class Age : IEu5Object<Age>
 {
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key for ages. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

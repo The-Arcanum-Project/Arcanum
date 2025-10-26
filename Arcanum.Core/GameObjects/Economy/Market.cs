@@ -30,7 +30,6 @@ public partial class Market : IEu5Object<Market>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this Market. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId

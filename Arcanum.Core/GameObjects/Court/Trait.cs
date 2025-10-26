@@ -39,7 +39,6 @@ public partial class Trait : IEu5Object<Trait>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this Trait. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

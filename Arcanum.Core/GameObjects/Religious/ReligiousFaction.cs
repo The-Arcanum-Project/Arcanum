@@ -20,7 +20,6 @@ public partial class ReligiousFaction : IEu5Object<ReligiousFaction>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this ReligiousFaction. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

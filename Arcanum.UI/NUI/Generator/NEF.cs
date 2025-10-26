@@ -218,42 +218,6 @@ public static class NEF
       };
    }
 
-   public static BaseButton GetSetEmptyButton(Type itemType,
-                                              Enum property,
-                                              INUI parent,
-                                              NUINavHistory navHistory,
-                                              object emptyInstance,
-                                              bool enabled)
-   {
-      var setEmptyButton = new BaseButton
-      {
-         Width = 20,
-         Height = 20,
-         ToolTip =
-            enabled
-               ? $"Clear {property}:\n\tSet '{property}' to '{itemType.Name}.Empty'"
-               : $"{property} cannot be set to empty",
-         Content = new Image
-         {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Close20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
-         },
-         BorderThickness = new(1),
-         Margin = new(1, 1, -1, 1),
-         Background = enabled ? Brushes.Transparent : (Brush)Application.Current.FindResource("DimErrorRedColorBrush")!,
-      };
-
-      if (enabled)
-         setEmptyButton.Click += (_, _) =>
-         {
-            Nx.ForceSet(emptyInstance, parent, property);
-            NUIViewGenerator.GenerateAndSetView(navHistory);
-         };
-
-      return setEmptyButton;
-   }
-
    public static BaseButton CreateRemoveButton()
    {
       var removeButton = new BaseButton

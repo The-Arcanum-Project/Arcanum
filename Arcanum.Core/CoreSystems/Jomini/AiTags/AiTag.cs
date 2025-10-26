@@ -10,7 +10,6 @@ namespace Arcanum.Core.CoreSystems.Jomini.AiTags;
 [ObjectSaveAs]
 public partial class AiTag : INUI, IEmpty<AiTag>, IModifierPattern
 {
-   [ReadonlyNexus]
    [DefaultValue("null")]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    public string UniqueId { get; set; } = null!;

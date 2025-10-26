@@ -32,7 +32,6 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterNameDeclarationAgsSettings;
 
-   [ReadonlyNexus]
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
    public string UniqueId

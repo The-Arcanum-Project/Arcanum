@@ -79,7 +79,6 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this LocationTemplateData. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

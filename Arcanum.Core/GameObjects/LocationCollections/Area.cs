@@ -66,7 +66,6 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.AreaAgsSettings;
 
-   [ReadonlyNexus]
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
    public string UniqueId { get; set; } = string.Empty;

@@ -68,7 +68,6 @@ public partial class Dynasty : IEu5Object<Dynasty>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this Dynasty. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

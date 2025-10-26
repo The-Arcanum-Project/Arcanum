@@ -1,4 +1,5 @@
-﻿using Nexus.Core;
+﻿using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
@@ -11,6 +12,7 @@ public interface IModifierPattern
    /// The unique identifier for the modifier pattern.
    /// </summary>
    [AddModifiable]
+   [NuiConfig(isReadonly: true)]
    public string UniqueId { get; set; }
 
    /// <summary>

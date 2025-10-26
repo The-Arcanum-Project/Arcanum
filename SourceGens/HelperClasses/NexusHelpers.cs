@@ -10,11 +10,8 @@ public static class NexusHelpers
 {
    private const string INEXUS_INTERFACE = "Nexus.Core.INexus";
 
-   private const string READONLY_NEXUS_ATTRIBUTE_NAME =
-      "Arcanum.Core.CoreSystems.NUI.Attributes.ReadonlyNexusAttribute";
-
-   private const string NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE =
-      "Arcanum.Core.CoreSystems.NUI.Attributes.BlockEmptyAttribute";
+   private const string NUI_CONFIG_ATTRIBUTE_NAME =
+      "Arcanum.Core.CoreSystems.NUI.Attributes.NuiConfigAttribute";
 
    private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
 
@@ -42,28 +39,29 @@ public static class NexusHelpers
    }
 
    public static void RunPropertyModifierGenerator(INamedTypeSymbol classSymbol,
-      SourceProductionContext context,
-      INamedTypeSymbol enumerableSymbol,
-      INamedTypeSymbol ieu5ObjectSymbol, INamedTypeSymbol iListSymbol)
+                                                   SourceProductionContext context,
+                                                   INamedTypeSymbol enumerableSymbol,
+                                                   INamedTypeSymbol ieu5ObjectSymbol,
+                                                   INamedTypeSymbol iListSymbol)
    {
       var sourceCode = GeneratePropertyModifierPart(classSymbol,
                                                     Helpers.FindModifiableMembers(classSymbol, context),
                                                     enumerableSymbol,
-                                                    ieu5ObjectSymbol, iListSymbol,
+                                                    ieu5ObjectSymbol,
+                                                    iListSymbol,
                                                     context);
       var hintName = $"{classSymbol.ContainingNamespace}.{classSymbol.Name}.PropertyModifier.g.cs";
       context.AddSource(hintName, sourceCode);
    }
 
    private static string GeneratePropertyModifierPart(INamedTypeSymbol classSymbol,
-      List<ISymbol> members,
-      INamedTypeSymbol enumerableSymbol,
-      INamedTypeSymbol ieu5ObjectSymbol,
-      INamedTypeSymbol iListSymbol,
-      SourceProductionContext context)
+                                                      List<ISymbol> members,
+                                                      INamedTypeSymbol enumerableSymbol,
+                                                      INamedTypeSymbol ieu5ObjectSymbol,
+                                                      INamedTypeSymbol iListSymbol,
+                                                      SourceProductionContext context)
    {
-      var readonlyStatuses = new List<bool>();
-      var allowsEmpty = new List<bool>();
+      var nuiConfig = new List<NuiConfigData?>();
       var descriptions = new List<string?>();
 
       // List of all members that are a collection
@@ -104,16 +102,7 @@ public static class NexusHelpers
 
          propertyTypes.Add(memberType);
 
-         // Gather the readonly status
-         readonlyStatuses.Add(member.GetAttributes()
-                                    .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                             READONLY_NEXUS_ATTRIBUTE_NAME,
-                                                             StringComparison.Ordinal)));
-         // Gather the AllowsEmpty status
-         allowsEmpty.Add(!member.GetAttributes()
-                                .Any(ad => string.Equals(ad.AttributeClass?.ToDisplayString(),
-                                                         NEXUS_CORE_CORESYSTEMS_NUI_ATTRIBUTES_BLOCK_EMPTY_ATTRIBUTE,
-                                                         StringComparison.Ordinal)));
+         nuiConfig.Add(GetNuiConfigData(member));
 
          // Gather the description (if any)
          var descriptionAttribute = member.GetAttributes()
@@ -156,27 +145,6 @@ public static class NexusHelpers
       #region Property Modifiers and acessors
 
       builder.AppendLine("#region Property Modifier Backing Fields");
-      builder.AppendLine();
-
-      // ------- Readonly Array -------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array indicating whether a property is read-only.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      // Convert the list of booleans to a C# array literal string
-      var arrayInitializer = string.Join(", ", readonlyStatuses.Select(s => s.ToString().ToLower()));
-      builder.AppendLine($"    private static readonly bool[] _isReadOnly = {{ {arrayInitializer} }};");
-      builder.AppendLine();
-
-      // -------- Allows Empty Value Array --------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array indicating whether a property allows empty values.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      var allowsEmptyInitializer = string.Join(", ", allowsEmpty.Select(s => s.ToString().ToLower()));
-      builder.AppendLine($"    private static readonly bool[] _allowsEmpty = {{ {allowsEmptyInitializer} }};");
       builder.AppendLine();
 
       // -------- Description Array --------
@@ -229,29 +197,15 @@ public static class NexusHelpers
       builder.AppendLine("    };");
       builder.AppendLine();
 
+      // ########## NUI CONFIG ##########
+      builder.AppendLine();
+      builder.AppendLine("#region NUI Config Accessors");
+
+      AppendIntBitsAsBools(builder, nuiConfig);
+
+      builder.AppendLine("#endregion");
+
       builder.AppendLine("#region Property Modifier Methods");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the readonly status ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Checks if a property is marked as read-only.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public bool IsPropertyReadOnly(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _isReadOnly[(int)((Field)property)];");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the AllowsEmpty status ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Checks if a property allows empty values.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public bool AllowsEmptyValue(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _allowsEmpty[(int)((Field)property)];");
-      builder.AppendLine("    }");
       builder.AppendLine();
 
       // --- Generate a public accessor method for the Description ---
@@ -447,7 +401,7 @@ public static class NexusHelpers
 
       builder.AppendLine("#endregion");
       builder.AppendLine();
-      
+
       // --- InsertIntoCollection ---
       builder.AppendLine("    public void _insertIntoCollection(Enum property, int index, object item)");
       builder.AppendLine("    {");
@@ -455,17 +409,18 @@ public static class NexusHelpers
       builder.AppendLine("        {");
       foreach (var member in listMembers)
       {
-          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
-          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-          builder.AppendLine($"            case Field.{member.Name}:");
-          builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item must be of type {itemTypeName}\");");
-          builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support InsertAt.\");");
-          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list && item is {itemTypeName} {member.Name}_typedItem)");
-          builder.AppendLine($"                    {member.Name}_list.Insert(index, {member.Name}_typedItem);");
-          builder.AppendLine("                break;");
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                Debug.Assert(item is {itemTypeName}, \"Item must be of type {itemTypeName}\");");
+         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support InsertAt.\");");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list && item is {itemTypeName} {member.Name}_typedItem)");
+         builder.AppendLine($"                    {member.Name}_list.Insert(index, {member.Name}_typedItem);");
+         builder.AppendLine("                break;");
       }
+
       builder.AppendLine("            default:");
       builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed insertion.\");");
       builder.AppendLine("        }");
@@ -479,22 +434,23 @@ public static class NexusHelpers
       builder.AppendLine("        {");
       foreach (var member in listMembers)
       {
-          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
-          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-          builder.AppendLine($"            case Field.{member.Name}:");
-          builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support RemoveAt.\");");
-          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list)");
-          builder.AppendLine($"                    {member.Name}_list.RemoveAt(index);");
-          builder.AppendLine("                break;");
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                Debug.Assert(this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}>, \"Property '{member.Name}' must be an IList to support RemoveAt.\");");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.IList<{itemTypeName}> {member.Name}_list)");
+         builder.AppendLine($"                    {member.Name}_list.RemoveAt(index);");
+         builder.AppendLine("                break;");
       }
+
       builder.AppendLine("            default:");
       builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed removal.\");");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
-      
+
       // --- AddRangeToCollection (for Clear undo) ---
       builder.AppendLine("    public void _addRangeToCollection(Enum property, System.Collections.IEnumerable items)");
       builder.AppendLine("    {");
@@ -502,25 +458,25 @@ public static class NexusHelpers
       builder.AppendLine("        {");
       foreach (var member in collectionMembers)
       {
-          var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
-          var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-          var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+         var memberType = (member is IPropertySymbol p) ? p.Type : ((IFieldSymbol)member).Type;
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemTypeName = itemType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-          builder.AppendLine($"            case Field.{member.Name}:");
-          builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll)");
-          builder.AppendLine("                {");
-          builder.AppendLine("                    foreach (var item in items.Cast<object>().ToList())");
-          builder.AppendLine($"                        {member.Name}_coll.Add(({itemTypeName})item);");
-          builder.AppendLine("                }");
-          builder.AppendLine("                break;");
+         builder.AppendLine($"            case Field.{member.Name}:");
+         builder.AppendLine($"                if (this.{member.Name} is System.Collections.Generic.ICollection<{itemTypeName}> {member.Name}_coll)");
+         builder.AppendLine("                {");
+         builder.AppendLine("                    foreach (var item in items.Cast<object>().ToList())");
+         builder.AppendLine($"                        {member.Name}_coll.Add(({itemTypeName})item);");
+         builder.AppendLine("                }");
+         builder.AppendLine("                break;");
       }
+
       builder.AppendLine("            default:");
       builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
 
-      
       #endregion
 
       #region Indexer
@@ -579,6 +535,98 @@ public static class NexusHelpers
       builder.AppendLine("}"); // Close class
 
       return builder.ToString();
+   }
+
+   private static void AppendIntBitsAsBools(StringBuilder sb, List<NuiConfigData?> nuiConfig)
+   {
+      var bitArrays = new int[nuiConfig.Count];
+      for (var i = 0; i < nuiConfig.Count; i++)
+      {
+         var dataNull = nuiConfig[i];
+         bitArrays[i] = 0;
+
+         if (!dataNull.HasValue)
+            continue;
+
+         var data = dataNull.Value;
+         bitArrays[i] |= data.IsInlined ? 1 << 0 : 0;
+         bitArrays[i] |= data.IsReadOnly ? 1 << 1 : 0;
+         bitArrays[i] |= data.AllowEmpty ? 1 << 2 : 0;
+         bitArrays[i] |= data.DisableMapInferButtons ? 1 << 3 : 0;
+      }
+
+      sb.AppendLine($"    /// <summary>");
+      sb.AppendLine($"    /// Encoded NuiConfig data as an integer for efficient access. <br/>");
+      sb.AppendLine($"    /// Bit 0: IsInlined <br/>");
+      sb.AppendLine($"    /// Bit 1: IsReadOnly <br/>");
+      sb.AppendLine($"    /// Bit 2: AllowEmpty <br/>");
+      sb.AppendLine($"    /// Bit 3: DisableMapInferButtons <br/>");
+      sb.AppendLine($"    /// </summary>");
+      // the int[] in binary format for easier debugging
+      var arrayInitializer = string.Join(", ",
+                                         bitArrays.Select(b => "0b" + Convert.ToString(b, 2).PadLeft(8, '0')));
+      sb.AppendLine($"    private static readonly int[] _nuiConfigBits = {{ {arrayInitializer} }};");
+      sb.AppendLine();
+
+      // Write consts for access to the sb
+      sb.AppendLine("    private const int IS_INLINED = 1 << 0;");
+      sb.AppendLine("    private const int IS_READONLY = 1 << 1;");
+      sb.AppendLine("    private const int ALLOW_EMPTY = 1 << 2;");
+      sb.AppendLine("    private const int DISABLE_MAP_INFER_BUTTONS = 1 << 3;");
+
+      sb.AppendLine();
+
+      // Generate methods to access the bits
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property is marked as inlined.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool IsPropertyInlined(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IS_INLINED) != 0;");
+      sb.AppendLine();
+
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property is marked as read-only.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool IsPropertyReadOnly(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IS_READONLY) != 0;");
+      sb.AppendLine();
+
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property allows empty values.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool AllowsEmptyValue(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & ALLOW_EMPTY) != 0;");
+      sb.AppendLine();
+
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property has map infer buttons disabled.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool IsMapInferButtonsDisabled(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & DISABLE_MAP_INFER_BUTTONS) != 0;");
+      sb.AppendLine();
+   }
+
+   private static NuiConfigData? GetNuiConfigData(ISymbol member)
+   {
+      var attributes = member.GetAttributes();
+      var nuiConfigAttribute = attributes
+        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() ==
+                              NUI_CONFIG_ATTRIBUTE_NAME);
+
+      if (nuiConfigAttribute == null)
+         return null;
+
+      var nuiConfigData = new NuiConfigData
+      {
+         IsReadOnly = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 0, "isReadOnly"),
+         IsInlined = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 1, "isInlined"),
+         AllowEmpty = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 2, "allowEmpty"),
+         DisableMapInferButtons = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute,
+          3,
+          "disableMapInferButtons"),
+      };
+
+      return nuiConfigData;
    }
 
    private static void AppendRequiredFilter(StringBuilder builder, INamedTypeSymbol classSymbol, List<ISymbol> members)
@@ -767,5 +815,13 @@ public static class NexusHelpers
       builder.AppendLine("        return (T)GetDefaultValue(property);");
       builder.AppendLine("    }");
       builder.AppendLine();
+   }
+
+   public struct NuiConfigData(bool isReadOnly, bool isInlined, bool allowEmpty, bool disableMapInferButtons)
+   {
+      public bool IsReadOnly = isReadOnly;
+      public bool IsInlined = isInlined;
+      public bool AllowEmpty = allowEmpty;
+      public bool DisableMapInferButtons = disableMapInferButtons;
    }
 }

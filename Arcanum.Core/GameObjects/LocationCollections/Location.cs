@@ -25,7 +25,6 @@ public partial class Location
 {
    #region game/in_game/map_data/named_locations.txt
 
-   [ReadonlyNexus]
    [SuppressAgs]
    [ToStringArguments("X")]
    [Description("The color of the location in the map data.")]

@@ -24,7 +24,6 @@ public partial class Country : IEu5Object<Country>
    #region Nexus
 
    [SuppressAgs]
-   [ReadonlyNexus]
    [Description("The unique tag for this country.")]
    public string UniqueId { get; set; } = null!;
 

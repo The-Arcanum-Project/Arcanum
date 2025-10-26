@@ -32,7 +32,6 @@ public partial class ParliamentType : IEu5Object<ParliamentType>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this ParliamentType. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

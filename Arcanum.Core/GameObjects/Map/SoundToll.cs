@@ -33,7 +33,6 @@ public partial class SoundToll : IEu5Object<SoundToll>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [IgnoreModifiable]
    [Description("Unique key of this SoundToll. Must be unique among all objects of this type.")]
    [DefaultValue("null")]

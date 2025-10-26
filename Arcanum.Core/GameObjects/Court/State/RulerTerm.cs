@@ -57,7 +57,6 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public INUINavigation[] Navigations { get; } = [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.RulerTermAgsSettings;
 
-   [ReadonlyNexus]
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
    public string UniqueId

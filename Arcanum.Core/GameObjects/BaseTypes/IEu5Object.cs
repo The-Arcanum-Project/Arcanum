@@ -52,7 +52,7 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    [Required]
    [SuppressAgs]
    [AddModifiable]
-   [ReadonlyNexus]
+   [NuiConfig(isReadonly: true)]
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
    public string UniqueId { get; set; }

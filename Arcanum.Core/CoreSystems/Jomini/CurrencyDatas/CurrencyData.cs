@@ -10,7 +10,6 @@ namespace Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 [ObjectSaveAs]
 public partial class CurrencyData : INUI, IEmpty<CurrencyData>, IModifierPattern
 {
-   [ReadonlyNexus]
    [DefaultValue("null")]
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    public string UniqueId { get; set; } = null!;

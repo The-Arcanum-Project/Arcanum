@@ -75,7 +75,6 @@ public partial class LocationRank : IEu5Object<LocationRank>
    # endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this LocationRank. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

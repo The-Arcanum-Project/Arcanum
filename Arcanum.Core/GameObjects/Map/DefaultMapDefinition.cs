@@ -116,7 +116,6 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
    #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this DefaultMapDefinition. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
