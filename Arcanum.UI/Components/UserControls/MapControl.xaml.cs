@@ -124,6 +124,9 @@ public partial class MapControl
    {
       foreach (var loc in locations)
       {
+         if (loc == Location.Empty)
+            continue;
+
          _selectionColor[loc.ColorIndex] = new(1, 0, 0, 1);
       }
 

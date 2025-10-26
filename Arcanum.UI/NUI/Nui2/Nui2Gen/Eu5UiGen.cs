@@ -188,7 +188,9 @@ public static class Eu5UiGen
 
       var inlineTargets = navH.Targets.Select(target => (IEu5Object)target._getValue(nxProp)).ToList();
 
-      GenerateViewElements(navH, inlineTargets, inlineGrid, inlineObj, [], false);
+      // TODO @Minnator: https://github.com/users/Minnator/projects/2/views/2?pane=issue&itemId=135643593&issue=Minnator%7CArcanum%7C61
+      var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root);
+      GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false);
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
       bottomBorderMarker.Margin = new(0, 0, 0, 6);
@@ -217,9 +219,6 @@ public static class Eu5UiGen
       var em = mspvm.Value;
       var embeddedObjectBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value)) { Source = mspvm };
 
-      var embedded = em as IEu5Object ??
-                     throw new InvalidOperationException($"Property {nxProp} is not an embedded IEu5Object.");
-
       var header = GridManager.GetNavigationHeader(navH,
                                                    nxProp.ToString(),
                                                    ControlFactory.SHORT_INFO_FONT_SIZE + 2,
@@ -240,11 +239,18 @@ public static class Eu5UiGen
       DockPanel.SetDock(setButton, Dock.Right);
       setButton.ToolTip = $"Set the '{nxProp}' property for all selected objects to the value inferred from the map.";
 
-      var targetType = embedded.GetType();
+      if (em is not IEu5Object embedded)
+      {
+         // We don't have a valid embedded object, so we can't add buttons that operate on it.
+      }
+      else
+      {
+         var targetType = embedded.GetType();
 
-      AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, targetType, Dock.Right);
-      if (AddCustomButtonToPanel(nxProp, ebv.TitleDockPanel, targetType, Dock.Right) is { } customButton)
-         customButton.SetBinding(FrameworkElement.TagProperty, embeddedObjectBinding);
+         AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, targetType, Dock.Right);
+         if (AddCustomButtonToPanel(nxProp, ebv.TitleDockPanel, targetType, Dock.Right) is { } customButton)
+            customButton.SetBinding(FrameworkElement.TagProperty, embeddedObjectBinding);
+      }
 
       var visibilityBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value))
       {

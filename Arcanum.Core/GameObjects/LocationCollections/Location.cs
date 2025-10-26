@@ -100,7 +100,7 @@ public partial class Location
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" };
+   public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" + Guid.NewGuid() };
 
    #region Map Management
 
