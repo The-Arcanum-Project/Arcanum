@@ -78,6 +78,10 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "ClearSelectionButton_Click" />
+            <styleClasses:BaseButton Content = "Clear Selection"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "FileWatcherTest_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

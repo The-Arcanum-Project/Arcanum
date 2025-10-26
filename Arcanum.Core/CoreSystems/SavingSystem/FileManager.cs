@@ -218,8 +218,22 @@ public static class FileManager
       return fileList;
    }
 
+   public static DataSpace GetDataSpaceFromFullPath(string fullPath)
+   {
+      if (fullPath.StartsWith(ModDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
+         return ModDataSpace;
+
+      foreach (var dependentDataSpace in DependentDataSpaces)
+      {
+         if (fullPath.StartsWith(dependentDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
+            return dependentDataSpace;
+      }
+      return DataSpace.Empty;
+   }
+   
    private static DataSpace GetDataSpace(string path)
    {
+      //TODO: @Minnator make this also take base mods into account
       return ExistsInMod(path) ? ModDataSpace : VanillaDataSpace;
    }
 

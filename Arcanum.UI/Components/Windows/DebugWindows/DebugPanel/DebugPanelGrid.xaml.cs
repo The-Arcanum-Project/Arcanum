@@ -5,6 +5,7 @@ using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.PopUp;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -82,5 +83,10 @@ public partial class DebugPanelGrid
    private void ClearSelectionButton_Click(object sender, RoutedEventArgs e)
    {
       Selection.ClearAll();
+   }
+
+   private void FileWatcherTest_Click(object sender, RoutedEventArgs e)
+   {
+      new FileChange().Show();
    }
 }

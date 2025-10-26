@@ -19,7 +19,7 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
     public static readonly PathObj Empty = new([], string.Empty, DataSpace.Empty);
 
     public readonly string[] LocalPath = localPath;
-    public string Filename { get; } = filename;
+    public string Filename { get; set; } = filename;
     public readonly DataSpace DataSpace = dataSpace;
     
     public void AddSearchTerms(ICollection<string> terms)
@@ -37,4 +37,6 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
     /// The full path as a string, combining the root position, local path, and filename.
     /// </summary>
     public string FullPath => Path.Combine(Path.Combine(DataSpace.Path), Path.Combine(LocalPath), Filename);
+    
+    public string FullPathWithoutFilename => Path.Combine(Path.Combine(DataSpace.Path), Path.Combine(LocalPath));
 }

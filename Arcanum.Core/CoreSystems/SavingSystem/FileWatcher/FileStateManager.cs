@@ -10,7 +10,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
 public static class FileStateManager
 {
-   private const string LOG_SOURCE = "FSM";
+   public const string LOG_SOURCE = "FSM";
    public static event EventHandler<FileChangedEventArgs>? FileChanged;
 
    private static readonly object Lock = new();
@@ -19,36 +19,28 @@ public static class FileStateManager
    private static readonly Dictionary<string, FileSystemWatcher> Watchers = new();
 
    // Stores the full paths of all files and folders the user has explicitly registered.
-   private static readonly HashSet<string> RegisteredPaths = [];
-
-   // debouncing to avoid duplicate events for a single file save.
-   private static readonly ConcurrentDictionary<string, DateTime> DebounceCache = new();
-   private static readonly TimeSpan DebounceTime = TimeSpan.FromMilliseconds(250);
-
-   public static void RegisterPath(PathObj po)
-   {
-      ArgumentNullException.ThrowIfNull(po);
-      RegisterPath(po.FullPath);
-   }
+   private static readonly HashSet<PathObj> RegisteredPaths = [];
 
    /// <summary>
    /// Registers a file or a directory to be watched. This method is thread-safe.
    /// </summary>
-   /// <param name="path">The full path to the file or directory.</param>
+   /// <param name="pathObj">The Path Object to the file</param>
    /// <exception cref="ArgumentException">Thrown if the path is null, empty, or does not exist.</exception>
-   public static void RegisterPath(string path)
+   public static void RegisterPath(PathObj pathObj)
    {
+      ArgumentNullException.ThrowIfNull(pathObj);
+      var path = pathObj.FullPath;
       if (string.IsNullOrEmpty(path))
-         throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+         throw new ArgumentException("Path cannot be null or empty.", nameof(pathObj));
 
       var fullPath = Path.GetFullPath(path);
 
       if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
-         throw new ArgumentException($"The path '{fullPath}' does not exist.", nameof(path));
+         throw new ArgumentException($"The path '{fullPath}' does not exist.", nameof(pathObj));
 
       lock (Lock)
       {
-         if (!RegisteredPaths.Add(fullPath))
+         if (!RegisteredPaths.Add(pathObj))
             return;
 
          // Determine the directory to watch. For a file, it's its parent directory.
@@ -60,7 +52,7 @@ public static class FileStateManager
          var watcher = new FileSystemWatcher(directoryToWatch)
          {
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-            IncludeSubdirectories = true,
+            IncludeSubdirectories = false,
          };
 
          watcher.Changed += OnAnyEvent;
@@ -82,19 +74,20 @@ public static class FileStateManager
    /// Unregisters a file or directory from being watched. This method is thread-safe.
    /// </summary>
    /// <param name="path">The full path to the file or directory.</param>
-   public static void UnregisterPath(string path)
+   public static void UnregisterPath(PathObj pathObj)
    {
+      var path = pathObj.FullPath;
       var fullPath = Path.GetFullPath(path);
 
       lock (Lock)
       {
-         if (!RegisteredPaths.Remove(fullPath))
+         if (!RegisteredPaths.Remove(pathObj))
             return; // Was not registered.
 
          var directoryToWatch = Directory.Exists(fullPath) ? fullPath : Path.GetDirectoryName(fullPath)!;
 
          var isWatcherStillNeeded =
-            RegisteredPaths.Any(p => p.StartsWith(directoryToWatch, StringComparison.OrdinalIgnoreCase));
+            RegisteredPaths.Any(p => p.FullPath.StartsWith(directoryToWatch, StringComparison.OrdinalIgnoreCase));
 
          if (isWatcherStillNeeded || !Watchers.TryGetValue(directoryToWatch, out var watcher))
             return;
@@ -138,30 +131,30 @@ public static class FileStateManager
    private static void OnRenamedEvent(object sender, RenamedEventArgs e)
    {
       HandleEvent(e.ChangeType, e.FullPath, e.OldFullPath);
+      // TODO: @Minnator actually change the data structures to reflect the rename.
    }
 
    private static void HandleEvent(WatcherChangeTypes changeType, string fullPath, string? oldFullPath = null)
    {
-      if (DebounceCache.TryGetValue(fullPath, out var lastEventTime))
-         if (DateTime.UtcNow - lastEventTime < DebounceTime)
-            return;
-
-      DebounceCache[fullPath] = DateTime.UtcNow;
-
       // No lock needed here because we are only reading from _registeredPaths.
       // Even if the collection changes on another thread, a stale read is acceptable
       // and won't cause a crash. A lock is primarily for protecting writes.
-      var isPathRegistered = RegisteredPaths.Any(p => fullPath.StartsWith(p, StringComparison.OrdinalIgnoreCase) ||
+      var isPathRegistered = RegisteredPaths.Any(p => fullPath.StartsWith(p.FullPath, StringComparison.OrdinalIgnoreCase) ||
                                                       (oldFullPath != null &&
-                                                       oldFullPath.StartsWith(p, StringComparison.OrdinalIgnoreCase)));
-
-      if (!isPathRegistered)
-         return;
+                                                       oldFullPath.StartsWith(p.FullPath, StringComparison.OrdinalIgnoreCase)));
 
       var args = new FileChangedEventArgs(changeType, fullPath, oldFullPath);
+      if (!isPathRegistered)
+      {
+         FileChangeHandler.HandleUnknownFileChange(args);
+         return;
+      }
+
+      FileChangeHandler.HandleFileChange(args);
       FileChanged?.Invoke(null, args);
    }
-
+   
+   
    private static void OnError(object sender, ErrorEventArgs e)
    {
 #if IS_DEBUG
