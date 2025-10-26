@@ -1,4 +1,7 @@
-﻿namespace Arcanum.Core.GameObjects.BaseTypes;
+﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+
+namespace Arcanum.Core.GameObjects.BaseTypes;
 
 /// <summary>
 /// Holds the char pos, line, length, and overall pos of this object in the file it was loaded from.
@@ -40,5 +43,10 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
       Line = line;
       Column = column;
       CharPos += charPos + column;
+   }
+
+   public LocationContext ToLocationContext(Eu5FileObj source)
+   {
+      return new(Line, Column, source.Path.FullPath);
    }
 }

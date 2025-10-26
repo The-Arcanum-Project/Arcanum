@@ -15,7 +15,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.Map;
 
 [ParserFor(typeof(MapMovementAssist))]
-public partial class MapMovementAssistParsingWhy;
+public static partial class MapMovementAssistParsingWhy;
 
 [ObjectSaveAs]
 public partial class LocationTemplateData : IEu5Object<LocationTemplateData>
@@ -97,7 +97,7 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationTemplateDataSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationTemplateDataAgsSettings;
-   public static Dictionary<string, LocationTemplateData> GetGlobalItems() => Globals.LocationTemplateDatas;
+   public static Dictionary<string, LocationTemplateData> GetGlobalItems() => Globals.LocationTemplateData;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static LocationTemplateData Empty { get; } = new() { UniqueId = "Arcanum_Empty_LocationTemplateData" };

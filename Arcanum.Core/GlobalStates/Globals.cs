@@ -70,7 +70,7 @@ public static class Globals
 
    #region Map
 
-   public static Dictionary<string, LocationTemplateData> LocationTemplateDatas { get; } = [];
+   public static Dictionary<string, LocationTemplateData> LocationTemplateData { get; } = [];
    public static Dictionary<string, Climate> Climates { get; set; } = [];
    public static Dictionary<string, Vegetation> Vegetation { get; set; } = [];
    public static Dictionary<string, Topography> Topography { get; set; } = [];

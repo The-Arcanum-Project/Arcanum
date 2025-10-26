@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Map.SubObjects;
 using Arcanum.Core.Utils.Sorting;
@@ -33,6 +34,21 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
+   }
+
+   public override bool AfterLoadingStep(FileDescriptor descriptor)
+   {
+      var locations = Globals.Locations;
+      foreach (var ltd in Globals.LocationTemplateData.Values)
+         if (locations.TryGetValue(ltd.UniqueId, out var loc))
+            loc.TemplateData = ltd;
+         else
+            De.Warning(ltd.FileLocation.ToLocationContext(ltd.Source),
+                       ParsingError.Instance.UnknownObjectKey,
+                       $"{nameof(LocationTemplateParsing)}.AssignTemplates",
+                       ltd.UniqueId,
+                       nameof(Location));
+      return true;
    }
 
    private static bool MapMovementAssistParsing(BlockNode node,
