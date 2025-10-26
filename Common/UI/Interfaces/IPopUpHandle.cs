@@ -21,5 +21,7 @@ public interface IPopUpHandle
       int height = -1,
       int width = -1);
 
+   public void ShowFileChangeWindow(FileChangedEventArgs args);
+
    public Window GetPropertyGridOrCollectionView(object? obj);
 }

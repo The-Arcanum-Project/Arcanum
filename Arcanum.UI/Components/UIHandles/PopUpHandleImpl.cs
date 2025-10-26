@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Common;
 using Common.UI;
 using Common.UI.Interfaces;
 using Common.UI.MBox;
@@ -29,6 +32,11 @@ public class PopUpHandleImpl : IPopUpHandle
                               int width = -1)
    {
       return MBox.Show(message, title, buttons, icon, height, width);
+   }
+
+   public void ShowFileChangeWindow(FileChangedEventArgs args)
+   {
+      FileChange.Show(args);
    }
 
    public Window GetPropertyGridOrCollectionView(object? obj)
