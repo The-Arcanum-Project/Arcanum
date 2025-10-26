@@ -1,8 +1,10 @@
 ﻿using System.IO;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Common.UI;
@@ -35,6 +37,7 @@ public class MainWindowHandleImpl : IMainWindowsHandle
    public void TransferToMainMenuScreen(Window sender,
                                         Enum view)
    {
+      MainMenuScreenDescriptor.SaveData();
       ParsingMaster.UnloadAll();
       FileStateManager.Shutdown();
       OnOpenMainMenuScreen?.Invoke();

@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
+using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -494,6 +495,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
+      MainMenuScreenDescriptor.SaveData();
       UIHandle.Instance.LogWindowHandle.CloseWindow();
    }
 }

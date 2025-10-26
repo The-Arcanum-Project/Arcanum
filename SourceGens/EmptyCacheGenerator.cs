@@ -54,6 +54,23 @@ public class EmptyCacheGenerator : IIncrementalGenerator
       sb.AppendLine("    };");
       sb.AppendLine();
 
+      // Type string to object dictionary
+      sb.AppendLine("    public static readonly Dictionary<string, object> EmptiesByTypeName = new()");
+      sb.AppendLine("    {");
+      foreach (var typeSymbol in results)
+         sb.AppendLine($"        [\"{typeSymbol.Name}\"] = global::{typeSymbol.ToDisplayString()}.Empty,");
+      sb.AppendLine("    };");
+
+      // Type name to object TryGetAccessor
+      sb.AppendLine();
+      sb.AppendLine("    public static bool TryGetEmpty(string typeName, out object empty)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        if (EmptiesByTypeName.TryGetValue(typeName, out empty))");
+      sb.AppendLine("            return true;");
+      sb.AppendLine();
+      sb.AppendLine("        return false;");
+      sb.AppendLine("    }");
+
       // TryGetAccessor
       sb.AppendLine();
       sb.AppendLine("    public static bool TryGetEmpty<T>(out T empty) where T : class");

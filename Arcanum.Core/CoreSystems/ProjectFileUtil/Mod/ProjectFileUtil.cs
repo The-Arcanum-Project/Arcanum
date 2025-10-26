@@ -96,26 +96,4 @@ public static class ProjectFileUtil
    {
       return File.Exists(projectFile) && Path.GetExtension(projectFile) == ARCANUM_PROJECT_FILE_EXTENSION;
    }
-
-   /// <summary>
-   /// Gathers all files for a project file descriptor. Any settings or metadata required for the project file
-   /// List of files which will be gathered:
-   /// - ProjectFileDescriptor
-   /// 
-   /// </summary>
-   /// <param name="descriptor"></param>
-   public static void GatherFilesForProjectFile(ProjectFileDescriptor? descriptor)
-   {
-      descriptor ??= ProjectFileDescriptor.GatherFromState();
-      var zipPath = Path.Combine(IO.IO.GetArcanumDataPath,
-                                 ARCANUM_PROJECT_FILES_DIRECTORY,
-                                 $"{descriptor.ModName}{ARCANUM_PROJECT_FILE_EXTENSION}");
-
-      IO.IO.EnsureDirectoryExists(Path.GetDirectoryName(zipPath) ?? string.Empty);
-      // The file may already exist, so we delete it to ensure we create a new one
-      if (File.Exists(zipPath))
-         File.Delete(zipPath);
-      using var zipFile = CreateZipArchive(zipPath);
-      AddFileFromStringToArchive(zipFile, "ProjDescriptor.json", JsonProcessor.Serialize(descriptor));
-   }
 }

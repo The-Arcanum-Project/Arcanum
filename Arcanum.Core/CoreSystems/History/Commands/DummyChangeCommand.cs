@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem;
-using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands;
@@ -64,5 +63,11 @@ public class DummyChangeCommand : ICommand
    {
       var indentStr = new string(' ', indent);
       return $"{indentStr}DummyChangeCommand targeting {_targets.Length} objects.";
+   }
+
+   public object SerializeToDto() => new();
+
+   public void DeserializeFromDto(object dto)
+   {
    }
 }

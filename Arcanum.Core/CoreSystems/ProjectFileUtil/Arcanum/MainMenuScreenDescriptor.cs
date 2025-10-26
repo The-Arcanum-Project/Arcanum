@@ -12,6 +12,7 @@ public class MainMenuScreenDescriptor
    public List<ProjectFileDescriptor> ProjectFiles { get; set; } = [];
    public string? LastProjectFile { get; set; } = null;
    public DataSpace? LastVanillaPath { get; set; } = null;
+   public ProjectFileDescriptor? Current => ProjectFiles.FirstOrDefault(x => x.ModName == LastProjectFile);
 
    /// <summary>
    /// Only meant for serialization purposes.
@@ -20,10 +21,12 @@ public class MainMenuScreenDescriptor
    {
    }
 
-   // We do not need an instance here as we can use the instance of th AppData class
    public static void SaveData()
    {
       var path = Path.Combine(IO.IO.GetArcanumDataPath, INTERNAL_PATH_MAIN_MENU_SCREEN);
+      AppData.MainMenuScreenDescriptor.ProjectFiles
+             .FirstOrDefault(x => x.ModName == AppData.MainMenuScreenDescriptor.LastProjectFile)
+            ?.UpdateForClose();
       var json = JsonProcessor.Serialize(AppData.MainMenuScreenDescriptor);
       IO.IO.WriteAllTextAnsi(path, json);
    }

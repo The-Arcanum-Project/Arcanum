@@ -2,29 +2,30 @@
 using System.Text.Json.Serialization;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.History.HistoryDto;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 
 public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
 {
-   public string ModName { get; set; }
-   public DataSpace ModPath { get; set; }
-
-   public DataSpace VanillaPath { get; set; }
+   public string ModName { get; set; } = null!;
+   public DataSpace ModPath { get; set; } = null!;
+   public DataSpace VanillaPath { get; set; } = null!;
    public bool IsSubMod { get; set; }
    public List<DataSpace> RequiredMods { get; set; } = [];
    public DateTime LastModified { get; set; }
+   public HistoryNodeDto? History { get; set; }
 
    /// <summary>
    /// Only meant for serialization purposes.
    /// </summary>
    [JsonConstructor]
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
    public ProjectFileDescriptor()
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
    {
    }
 
@@ -46,7 +47,11 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       LastModified = DateTime.Now;
    }
 
-   public void UpdateLastModified() => LastModified = DateTime.Now;
+   public void UpdateForClose()
+   {
+      LastModified = DateTime.Now;
+      History = HistoryDtoManager.GetHistoryAsDto();
+   }
 
    public override string ToString()
    {
@@ -83,21 +88,6 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       return hash.ToHashCode();
    }
 
-   public static ProjectFileDescriptor GatherFromState()
-   {
-      // TODO: Implement the logic to gather the current state of the application
-      // This method should gather the necessary data from the current state of the application
-      // and return a new ProjectFileDescriptor instance.
-      // For now, we will return a placeholder instance.
-      return new("DefaultMod",
-                 new("example", [], DataSpace.AccessType.ReadOnly),
-                 [
-                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
-                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
-                 ],
-                 new("example", [], DataSpace.AccessType.ReadOnly));
-   }
-
    public static bool operator <(ProjectFileDescriptor left, ProjectFileDescriptor right)
       => left.LastModified < right.LastModified;
 
@@ -116,9 +106,9 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
    {
       var metadata = ExistingModsLoader.ParseModMetadata(ModPath.FullPath);
       var thumbnailPath = Path.Combine(ModPath.FullPath, ".metadata", metadata?.ThumbnailPath ?? string.Empty);
-      if (!File.Exists(thumbnailPath))
-         return new BitmapImage(new("/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png", UriKind.RelativeOrAbsolute));
-
-      return new BitmapImage(new(thumbnailPath, UriKind.Absolute));
+      return !File.Exists(thumbnailPath)
+                ? new(new("/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png",
+                          UriKind.RelativeOrAbsolute))
+                : new BitmapImage(new(thumbnailPath, UriKind.Absolute));
    }
 }

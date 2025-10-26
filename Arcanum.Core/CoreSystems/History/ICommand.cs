@@ -11,7 +11,7 @@ public interface ICommand
    /// Normal command execution.
    /// </summary>
    public void Execute();
-   
+
    /// <summary>
    /// Undo the command.
    /// </summary>
@@ -21,7 +21,7 @@ public interface ICommand
    /// Redo the command often can directly call Execute, but can also be used to restore state after an undo.
    /// </summary>
    public void Redo();
-   
+
    /// <summary>
    /// The hash is needed to determine commands which target the same objects in history compaction
    /// </summary>
@@ -32,9 +32,9 @@ public interface ICommand
    /// Returns the target objects affected by this command.
    /// </summary>
    public IEu5Object[] GetTargets();
-   
+
    public string GetDescription { get; }
-   
+
    /// <summary>
    /// Provides detailed information about the command for debugging purposes.
    /// This will be written to the log if a crash or issue occurs.
@@ -42,6 +42,9 @@ public interface ICommand
    /// <param name="indent"></param>
    /// <returns></returns>
    public string GetDebugInformation(int indent);
+
+   public object SerializeToDto();
+   public void DeserializeFromDto(object dto);
 }
 
 /// Represents the initial command in the command history system.
@@ -67,4 +70,13 @@ public class CInitial : ICommand
    public string GetDescription => "Initial Command";
 
    public string GetDebugInformation(int indent) => "Initial Command Debug Information";
+
+   public object SerializeToDto()
+   {
+      return new();
+   }
+
+   public void DeserializeFromDto(object dto)
+   {
+   }
 }

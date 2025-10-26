@@ -43,6 +43,13 @@ public class TreeHistoryManager : IHistoryManager
    private Timer? _updateToolStripTimer;
    private DateTime _nextCompactionTime = DateTime.Now;
 
+   public void SetRoot(HistoryNode root, int index)
+   {
+      _root = root;
+      Current = root;
+      _nodeId = index;
+   }
+
    public void Add(ICommand command) => AddCommand(command);
 
    /// <summary>
@@ -196,6 +203,11 @@ public class TreeHistoryManager : IHistoryManager
       Current = redo[^1];
    }
 
+   public void UncompactTree()
+   {
+      Uncompact(_root);
+   }
+
    /// <summary>
    /// Calculates the undo depth and the total number of undoable commands in the history tree.
    /// </summary>
@@ -312,7 +324,11 @@ public class TreeHistoryManager : IHistoryManager
       return false;
    }
 
-   public HistoryNode Root => _root;
+   public HistoryNode Root
+   {
+      get => _root;
+      set => _root = value;
+   }
    public bool CanStepRedo
    {
       get

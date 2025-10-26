@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.History.HistoryDto;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
@@ -133,36 +134,35 @@ public partial class MainMenuScreen
       MainMenuViewModel.SetCurrentView(MainMenuViewModel.TargetedView);
    }
 
-   // Create a new method that returns a Task for proper async/await
    public async Task LoadAndTransferAsync()
    {
       var loadingScreen = new LoadingScreen();
 
       try
       {
-         // 1. Hide this window and show the loading screen.
-         //    Both Show() and Hide() are non-blocking.
          Hide();
          loadingScreen.Show();
 
-         // 2. Await the loading logic directly.
-         //    Because we are awaiting, the UI thread is NOW FREE. It can process
-         //    the Dispatcher messages from the loading task and update the text.
          var value = await loadingScreen.StartLoading();
-         if (value == false)
+         if (!value)
          {
             loadingScreen.Close();
             return;
          }
 
-         // 3. Once loading is done, create and show the new MainWindow.
+         var history = AppData.MainMenuScreenDescriptor.ProjectFiles
+                              .FirstOrDefault(x => x.ModName == AppData.MainMenuScreenDescriptor.LastProjectFile)
+                             ?.History;
+
+         if (history is not null)
+            HistoryDtoManager.LoadHistoryFromDto(history);
+
          var mw = new MainWindow();
          Application.Current.MainWindow = mw; // Set the new main window
          mw.Show();
 
-         // 4. Close the loading screen and this initial window.
          loadingScreen.Close();
-         Close(); // 'this' refers to the now-hidden LoginWindow
+         Close();
       }
       catch (Exception ex)
       {

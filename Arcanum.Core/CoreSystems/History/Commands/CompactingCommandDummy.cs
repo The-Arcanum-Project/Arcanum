@@ -13,17 +13,14 @@ public class CompactingCommandDummy(CompactHistoryNode node) : ICommand
 
    public void Execute()
    {
-      
    }
 
    public void Undo()
    {
-      
    }
 
    public void Redo()
    {
-      
    }
 
    public List<int> GetTargetHash() => [-1];
@@ -32,4 +29,9 @@ public class CompactingCommandDummy(CompactHistoryNode node) : ICommand
    public string GetDescription => $"Compacting {Node.CompactedNodes.Count} nodes";
 
    public string GetDebugInformation(int indent) => throw new NotImplementedException();
+   public object SerializeToDto() => new();
+
+   public void DeserializeFromDto(object dto)
+   {
+   }
 }
