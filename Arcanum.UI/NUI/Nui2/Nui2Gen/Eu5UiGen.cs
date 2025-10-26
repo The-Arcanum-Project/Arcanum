@@ -46,7 +46,7 @@ public static class Eu5UiGen
 
    public readonly static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
 
-   public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomTypeButtons = new();
+   public readonly static Dictionary<Type, Func<Enum, FrameworkElement>> CustomTypeButtons = new();
 
    public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new();
 
@@ -134,18 +134,11 @@ public static class Eu5UiGen
          var isMarked = markedProps.Contains(nxProp);
 
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
-         {
             if (navH.GenerateSubViews)
-            {
                GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + startRow, isMarked);
-            }
             else
-            {
                GenerateShortInfo(navH, primary, nxProp, mainGrid, isMarked);
-            }
-         }
          else
-         {
             BuildCollectionViewOrDefault(navH,
                                          primary,
                                          mainGrid,
@@ -153,7 +146,6 @@ public static class Eu5UiGen
                                          i + startRow,
                                          isMarked: isMarked,
                                          allowReadOnlyEditing: allowReadOnlyEditing);
-         }
       }
    }
 
@@ -190,21 +182,19 @@ public static class Eu5UiGen
          ebv.ViewModel.IsExpanded = true;
 
       var em = mspvm.Value;
-      if (em == null)
-      {
-         // TODO Minnator show smth like not editable bc not identical
-         return;
-      }
+      var embeddedObjectBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value)) { Source = mspvm };
 
       var embedded = em as IEu5Object ??
                      throw new InvalidOperationException($"Property {nxProp} is not an embedded IEu5Object.");
 
-      var header = GridManager.GetNavigationHeader(embedded,
-                                                   navH,
+      var header = GridManager.GetNavigationHeader(navH,
                                                    nxProp.ToString(),
                                                    ControlFactory.SHORT_INFO_FONT_SIZE + 2,
                                                    ControlFactory.SHORT_INFO_ROW_HEIGHT,
                                                    true);
+
+      // Make the header update if the value changes in multi-select
+      header.SetBinding(FrameworkElement.TagProperty, embeddedObjectBinding);
 
       if (isMarked)
          header.Background = ControlFactory.MarkedBrush;
@@ -217,9 +207,22 @@ public static class Eu5UiGen
       DockPanel.SetDock(setButton, Dock.Right);
       setButton.ToolTip = $"Set the '{nxProp}' property for all selected objects to the value inferred from the map.";
 
-      AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
-      AddCustomButtonToPanel(embedded, nxProp, ebv.TitleDockPanel, embedded.GetType(), Dock.Right);
-      CreateGraphViewerButton(embedded, navH, ebv.TitleDockPanel);
+      var targetType = embedded.GetType();
+
+      AddMapModeButtonToPanel(embedded, ebv.TitleDockPanel, targetType, Dock.Right);
+      if (AddCustomButtonToPanel(nxProp, ebv.TitleDockPanel, targetType, Dock.Right) is { } customButton)
+         customButton.SetBinding(FrameworkElement.TagProperty, embeddedObjectBinding);
+
+      var visibilityBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value))
+      {
+         Source = mspvm, Converter = new ObjectToGraphButtonVisibilityConverter(),
+      };
+      if (CreateGraphViewerButton(navH, ebv.TitleDockPanel) is { } graphButton)
+      {
+         graphButton.SetBinding(FrameworkElement.TagProperty, embeddedObjectBinding);
+         graphButton.SetBinding(UIElement.VisibilityProperty, visibilityBinding);
+      }
+
       AddCreateNewEu5ObjectButton(primary, nxProp, ebv.TitleDockPanel, Dock.Right);
 
       RoutedEventHandler setClick = (_, _) =>
@@ -390,7 +393,7 @@ public static class Eu5UiGen
       SetUpPropertyContextMenu(primary, nxProp, tb, propertyViewModel);
 
       GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
-      GetInferActionButtons(primary, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
+      GetInferActionButtons(propertyViewModel, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
       var marker = GetPropertyMarker(propertyViewModel);
 
@@ -398,7 +401,7 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, marker, row, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static void GetInferActionButtons(IEu5Object primary,
+   private static void GetInferActionButtons(MultiSelectPropertyViewModel mspvm,
                                              Enum nxProp,
                                              Type nxPropType,
                                              Type? nxItemType,
@@ -426,16 +429,22 @@ public static class Eu5UiGen
          {
             var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
+            if (mspvm.Value == null)
+               return;
+
             foreach (var obj in enumerable)
-               Nx.AddToCollection(primary, nxProp, obj);
+               Nx.AddToCollection((IEu5Object)mspvm.Value, nxProp, obj);
          };
 
          RoutedEventHandler removeClick = (_, _) =>
          {
             var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
+            if (mspvm.Value == null)
+               return;
+
             foreach (var obj in enumerable)
-               Nx.RemoveFromCollection(primary, nxProp, obj);
+               Nx.RemoveFromCollection((IEu5Object)mspvm.Value, nxProp, obj);
          };
 
          panel.Children.Add(addButton);
@@ -450,7 +459,7 @@ public static class Eu5UiGen
 
          if (CustomItemTypeButtons.TryGetValue(nxItemType, out var customButtonFunc))
          {
-            var customButton = customButtonFunc(primary, nxProp);
+            var customButton = customButtonFunc(mspvm, nxProp);
             panel.Children.Add(customButton);
             DockPanel.SetDock(customButton, Dock.Right);
          }
@@ -459,24 +468,36 @@ public static class Eu5UiGen
       if (!EmptyRegistry.TryGet(targetType, out var item) && !typeof(IEu5Object).IsAssignableFrom(targetType))
          return;
 
+      var valueBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value)) { Source = mspvm };
+      var visibilityBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value))
+      {
+         Source = mspvm, Converter = new ObjectToGraphButtonVisibilityConverter(),
+      };
+
       // Infer actions for a single embedded object or property
       AddMapModeButtonToPanel((IEu5Object)item, panel, targetType, Dock.Right);
-      CreateGraphViewerButton((IEu5Object)item, navh, panel);
-      AddCustomButtonToPanel((IEu5Object)item, nxProp, panel, targetType, Dock.Right);
+      if (CreateGraphViewerButton(navh, panel) is { } graphButton)
+      {
+         graphButton.SetBinding(FrameworkElement.TagProperty, valueBinding);
+         graphButton.SetBinding(UIElement.VisibilityProperty, visibilityBinding);
+      }
+
+      if (AddCustomButtonToPanel(nxProp, panel, targetType, Dock.Right) is { } fe)
+         fe.SetBinding(FrameworkElement.TagProperty, valueBinding);
    }
 
-   private static void AddCustomButtonToPanel(IEu5Object primary,
-                                              Enum nxProp,
-                                              DockPanel panel,
-                                              Type targetType,
-                                              Dock dock)
+   private static FrameworkElement? AddCustomButtonToPanel(Enum nxProp, DockPanel panel, Type targetType, Dock dock)
    {
-      if (CustomTypeButtons.TryGetValue(targetType, out var customTypeButtonFunc))
-      {
-         var customButton = customTypeButtonFunc(primary, nxProp);
-         panel.Children.Add(customButton);
-         DockPanel.SetDock(customButton, dock);
-      }
+      if (!CustomTypeButtons.TryGetValue(targetType, out var customTypeButtonFunc))
+         return null;
+
+      // The implementer MUST write event handlers that get the current IEu5Object
+      // from the sender's Tag.
+      var customButton = customTypeButtonFunc(nxProp);
+
+      panel.Children.Add(customButton);
+      DockPanel.SetDock(customButton, dock);
+      return customButton;
    }
 
    private static void AddCreateNewEu5ObjectButton(IEu5Object primary, Enum nxProp, DockPanel panel, Dock dock)
@@ -873,7 +894,7 @@ public static class Eu5UiGen
 
       SetTooltipIsAny(primary, nxProp, desc);
 
-      GetInferActionButtons(primary, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
+      GetInferActionButtons(propertyViewModel, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
 
       var line = NEF.GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
@@ -1004,19 +1025,20 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, si, mainGrid.RowDefinitions.Count, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   public static void CreateGraphViewerButton(IEu5Object primary, NavH navh, DockPanel panel)
+   public static FrameworkElement CreateGraphViewerButton(NavH navh, DockPanel panel)
    {
-      if (Nx.GetGraphableProperties(primary).Length == 0)
-         return;
-
       var graphButton = NEF.GetGraphButton();
       graphButton.ToolTip = "Open Graph Viewer for this object and its relations.";
-      RoutedEventHandler graphClick = (_, _) =>
-      {
-         var graph = primary.CreateGraph();
-         foreach (var node in graph.Nodes)
-            node.NavigationHandler = EventHandlers.GetSimpleNavigationHandler(navh, primary);
 
+      // Dynamic click handler
+      RoutedEventHandler graphClick = (sender, _) =>
+      {
+         if (sender is not FrameworkElement { Tag: IEu5Object currentTarget })
+            return;
+
+         var graph = currentTarget.CreateGraph();
+         foreach (var node in graph.Nodes)
+            node.NavigationHandler = EventHandlers.GetSimpleNavigationHandler(navh, node.LinkedObject);
          GraphWindow.ShowWindow(graph);
       };
 
@@ -1025,5 +1047,6 @@ public static class Eu5UiGen
 
       panel.Children.Add(graphButton);
       DockPanel.SetDock(graphButton, Dock.Right);
+      return graphButton;
    }
 }

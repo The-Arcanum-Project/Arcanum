@@ -67,11 +67,10 @@ public static class GridManager
    {
       var headerText = targetsCount > 1 ? $"{primary.GetType().Name} ({targetsCount})" : primary.UniqueId;
       var header = SetHeaderInternal(mainGrid, headerText, row, column, columnSpan, DEFAULT_HEADER_ROW_HEIGHT);
-      SetUpHeaderHover(primary, header);
+      SetUpHeaderHover(header);
    }
 
-   public static TextBlock GetNavigationHeader(IEu5Object primary,
-                                               NavH navH,
+   public static TextBlock GetNavigationHeader(NavH navH,
                                                string headerText,
                                                int fontSize,
                                                int height,
@@ -89,30 +88,39 @@ public static class GridManager
                                                           alignment: alignment);
       if (isNavigation)
       {
-         EventHandlers.SetOnMouseUpHandler(header, navH, primary);
-         SetUpHeaderHover(primary, header);
+         EventHandlers.SetOnMouseUpHandler(header, navH);
+         SetUpHeaderHover(header);
       }
 
       return header;
    }
 
-   public static void SetUpHeaderHover(IEu5Object primary, TextBlock header)
+   public static void SetUpHeaderHover(TextBlock header)
    {
-      MouseEventHandler onMouseEnter = (_, _) =>
+      MouseEventHandler onMouseEnter = (sender, _) =>
       {
+         if (sender is not FrameworkElement { Tag: IEu5Object currentPrimary })
+            return;
+
          header.TextDecorations = TextDecorations.Underline;
          header.Cursor = Cursors.Hand;
+
          var locations =
-            MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
+            MapInferrableRegistry.GetRelevantLocations(currentPrimary.GetType(),
+                                                       new List<IEu5Object> { currentPrimary });
          if (locations.Count > 0)
             Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, true, false);
       };
 
-      MouseEventHandler onMouseLeave = (_, _) =>
+      MouseEventHandler onMouseLeave = (sender, _) =>
       {
+         if (sender is not FrameworkElement { Tag: IEu5Object currentPrimary })
+            return;
+
          header.TextDecorations = null;
          var locations =
-            MapInferrableRegistry.GetRelevantLocations(primary.GetType(), new List<IEu5Object> { primary });
+            MapInferrableRegistry.GetRelevantLocations(currentPrimary.GetType(),
+                                                       new List<IEu5Object> { currentPrimary });
          if (locations.Count > 0)
             Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, false, false);
       };

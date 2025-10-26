@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
@@ -12,13 +13,16 @@ public static class EventHandlers
    /// when clicked. If the right mouse button is clicked, a context menu with navigation options
    /// is displayed instead.
    /// </summary>
-   public static void SetOnMouseUpHandler(TextBlock tb, NavH navh, IEu5Object target)
+   public static void SetOnMouseUpHandler(TextBlock tb, NavH navh)
    {
-      MouseButtonEventHandler handler = (_, args) =>
+      MouseButtonEventHandler handler = (sender, args) =>
       {
+         if (sender is not FrameworkElement { Tag: IEu5Object currentTarget })
+            return;
+
          if (args.ChangedButton == MouseButton.Left)
          {
-            navh.NavigateTo(target);
+            navh.NavigateTo(currentTarget);
          }
          else
          {

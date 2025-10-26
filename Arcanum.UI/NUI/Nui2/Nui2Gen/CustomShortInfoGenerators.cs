@@ -73,8 +73,7 @@ public static class CustomShortInfoGenerators
       }
 
       var headerBlock =
-         GridManager.GetNavigationHeader(primary,
-                                         navH,
+         GridManager.GetNavigationHeader(navH,
                                          $"({sNxProp.ToString()}) {primary.UniqueId}",
                                          fontSize,
                                          height,
