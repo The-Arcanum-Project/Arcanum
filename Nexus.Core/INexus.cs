@@ -31,7 +31,7 @@ public interface INexus : INotifyPropertyChanged
    /// Use <see cref="Nx.AddToCollection{T}(INexus, Enum, T)"/> to add values from outside!
    /// </summary>
    void _addToCollection(Enum property, object item);
-    
+
    /// <summary>
    /// Adds a range of values to a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only!
@@ -44,7 +44,7 @@ public interface INexus : INotifyPropertyChanged
    /// Use <see cref="Nx.RemoveFromCollection{T}(INexus, Enum, T)"/> to remove values from outside!
    /// </summary>
    void _removeFromCollection(Enum property, object item);
-    
+
    /// <summary>
    /// Inserts an item into a collection property at a specific index. <br/>
    /// Only to be used internally by Nexus only!
@@ -63,22 +63,8 @@ public interface INexus : INotifyPropertyChanged
    /// Use <see cref="Nx.ClearCollection(INexus, Enum)"/> to clear collections from outside!
    /// </summary>
    void _clearCollection(Enum property);
-   
+
    #endregion
-
-   /// <summary>
-   /// Returns whether the given property is read-only and cannot be modified.
-   /// </summary>
-   /// <param name="property"></param>
-   /// <returns></returns>
-   bool IsPropertyReadOnly(Enum property);
-
-   /// <summary>
-   /// Returns whether the given property allows an empty value (e.g., null or default) in it's embedded view.
-   /// </summary>
-   /// <param name="property"></param>
-   /// <returns></returns>
-   bool AllowsEmptyValue(Enum property);
 
    /// <summary>
    /// Returns a description of the given property, if any.
@@ -105,6 +91,8 @@ public interface INexus : INotifyPropertyChanged
    /// </summary>
    Type? GetNxItemType(Enum property);
 
+   #region Bool Accessors
+
    /// <summary>
    /// Returns whether the given property is a collection.
    /// </summary>
@@ -116,6 +104,30 @@ public interface INexus : INotifyPropertyChanged
    /// <param name="property"></param>
    /// <returns></returns>
    bool IsRequired(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property is inlined (i.e., shown directly instead of in a sub-view).
+   /// </summary>
+   bool IsPropertyInlined(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property is read-only and cannot be modified.
+   /// </summary>
+   /// <param name="property"></param>
+   /// <returns></returns>
+   bool IsPropertyReadOnly(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property allows an empty value (e.g., null or default) in it's embedded view.
+   /// </summary>
+   bool AllowsEmptyValue(Enum property);
+
+   /// <summary>
+   /// Returns whether the "Map Infer" buttons for the given property are disabled.
+   /// </summary>
+   bool IsMapInferButtonsDisabled(Enum property);
+
+   #endregion
 
    /// <summary>
    /// Gets the default value for the given property.

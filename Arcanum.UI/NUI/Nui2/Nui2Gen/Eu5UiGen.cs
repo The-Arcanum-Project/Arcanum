@@ -79,7 +79,7 @@ public static class Eu5UiGen
          GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
       }
 
-      GenerateViewElements(navh, mainGrid, primary, markedProps, allowReadOnlyEditing, hasHeader ? 1 : 0);
+      GenerateViewElements(navh, navh.Targets, mainGrid, primary, markedProps, allowReadOnlyEditing, hasHeader ? 1 : 0);
 
       return view;
    }
@@ -118,6 +118,7 @@ public static class Eu5UiGen
    }
 
    private static void GenerateViewElements(NavH navH,
+                                            List<IEu5Object> targets,
                                             Grid mainGrid,
                                             IEu5Object primary,
                                             List<Enum> markedProps,
@@ -135,11 +136,15 @@ public static class Eu5UiGen
 
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
             if (navH.GenerateSubViews)
-               GenerateEmbeddedView(navH, primary, mainGrid, nxProp, i + startRow, isMarked);
+               if (primary.IsPropertyInlined(nxProp))
+                  GenerateInlinedView(navH, primary, mainGrid, nxProp, i + startRow);
+               else
+                  GenerateEmbeddedView(navH, targets, primary, mainGrid, nxProp, i + startRow, isMarked);
             else
                GenerateShortInfo(navH, primary, nxProp, mainGrid, isMarked);
          else
             BuildCollectionViewOrDefault(navH,
+                                         targets,
                                          primary,
                                          mainGrid,
                                          nxProp,
@@ -164,7 +169,35 @@ public static class Eu5UiGen
       return viewFields.ToArray();
    }
 
+   private static void GenerateInlinedView(NavH navH,
+                                           IEu5Object primary,
+                                           Grid mainGrid,
+                                           Enum nxProp,
+                                           int startRow)
+   {
+      // Instead of standard embedded view we generate a nice header, then just add type specific grid elements
+      // and at the end we add another border to mark that it ends there.
+      var inlineGrid = ControlFactory.GetMainGrid();
+      var inlineProp = primary._getValue(nxProp);
+      Debug.Assert(inlineProp != null, "inlineProp != null");
+      Debug.Assert(inlineProp is IEu5Object, "inlineProp is IEu5Object");
+      var inlineObj = (IEu5Object)inlineProp;
+
+      GridManager.AddToGrid(inlineGrid, NEF.InlineBorderMarker(6, 2), 0, 0);
+      GridManager.AddToGrid(inlineGrid, NEF.InlineHeaderPanel(nxProp, inlineObj.GetType().Name, 2), 0, 0);
+
+      var inlineTargets = navH.Targets.Select(target => (IEu5Object)target._getValue(nxProp)).ToList();
+
+      GenerateViewElements(navH, inlineTargets, inlineGrid, inlineObj, [], false);
+
+      var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
+      bottomBorderMarker.Margin = new(0, 0, 0, 6);
+      GridManager.AddToGrid(inlineGrid, bottomBorderMarker, inlineGrid.RowDefinitions.Count, 0);
+      GridManager.AddToGrid(mainGrid, inlineGrid, startRow, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+   }
+
    private static void GenerateEmbeddedView(NavH navH,
+                                            List<IEu5Object> targets,
                                             IEu5Object primary,
                                             Grid mainGrid,
                                             Enum nxProp,
@@ -172,7 +205,7 @@ public static class Eu5UiGen
                                             bool isMarked)
    {
       var pevm = new PropertyEditorViewModel(nxProp, navH, primary);
-      var mspvm = new MultiSelectPropertyViewModel(navH.Targets, nxProp);
+      var mspvm = new MultiSelectPropertyViewModel(targets, nxProp);
       var ebv = new EmbeddedView(pevm, mspvm)
       {
          MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
@@ -235,9 +268,6 @@ public static class Eu5UiGen
             return;
 
          Nx.ForceSet(inferred[0], primary, nxProp);
-         // We don't? need this as the PropertyEditorViewModel handles updating all targets.
-         // foreach (var obj in navH.Targets)
-         //    Nx.Set(obj, nxProp, inferred[0]);
          if (inferred.Count > 1)
             UIHandle.Instance.PopUpHandle
                     .ShowMBox($"Multiple inferred values found for {nxProp}. Using the first one ({inferred[0]}).",
@@ -248,7 +278,11 @@ public static class Eu5UiGen
       setButton.Unloaded += (_, _) => setButton.Click -= setClick;
    }
 
-   public static void PopulateEmbeddedGrid(Grid grid, NavH navH, IEu5Object embedded, Enum parentProp)
+   public static void PopulateEmbeddedGrid(Grid grid,
+                                           NavH navH,
+                                           List<IEu5Object> targets,
+                                           IEu5Object embedded,
+                                           Enum parentProp)
    {
       for (var index = 0; index < embedded.NUISettings.EmbeddedFields.Length; index++)
       {
@@ -271,11 +305,19 @@ public static class Eu5UiGen
             continue;
          }
 
-         BuildCollectionViewOrDefault(navH, embedded, grid, nxProp, index + 1, parentProp: parentProp, isMarked: false);
+         BuildCollectionViewOrDefault(navH,
+                                      targets,
+                                      embedded,
+                                      grid,
+                                      nxProp,
+                                      index + 1,
+                                      parentProp: parentProp,
+                                      isMarked: false);
       }
    }
 
    private static void BuildCollectionViewOrDefault(NavH navH,
+                                                    List<IEu5Object> targets,
                                                     IEu5Object primary,
                                                     Grid mainGrid,
                                                     Enum nxProp,
@@ -303,7 +345,7 @@ public static class Eu5UiGen
          return;
       }
 
-      if (navH.Targets.Count > 1)
+      if (targets.Count > 1)
       {
          GetNotSupportedForMultiSelect(nxProp, mainGrid, rowIndex);
          return;

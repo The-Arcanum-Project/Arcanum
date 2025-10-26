@@ -16,9 +16,10 @@ public static class ControlFactory
    public const int EMBEDDED_VIEW_HEIGHT = 25;
 
    public static readonly Brush BlueBrush = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!;
-   private static readonly Brush ForegroundBrush = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!;
+   public static readonly Brush ForegroundBrush = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!;
    public static readonly Brush AccentBrush = (Brush)Application.Current.FindResource("LightAccentBackColorBrush")!;
    public static readonly Brush MarkedBrush = (Brush)Application.Current.FindResource("MarkedColorBrush")!;
+   public static readonly Brush BackColorBrush = (Brush)Application.Current.FindResource("DefaultBackColorBrush")!;
 
    public static BaseView GetBaseView()
    {

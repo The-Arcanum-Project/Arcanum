@@ -16,6 +16,7 @@ using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
+using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
@@ -23,6 +24,42 @@ namespace Arcanum.UI.NUI.Generator;
 // ReSharper disable once InconsistentNaming
 public static class NEF
 {
+   public static TextBlock InlineHeaderPanel(Enum nxProp, string type, int columnSpan)
+   {
+      var tb = new TextBlock
+      {
+         Text = $"{nxProp} ({type})",
+         FontSize = 11,
+         FontWeight = FontWeights.Bold,
+         FontStyle = FontStyles.Italic,
+         Foreground = ControlFactory.ForegroundBrush,
+         Background = ControlFactory.BackColorBrush,
+         VerticalAlignment = VerticalAlignment.Center,
+         HorizontalAlignment = HorizontalAlignment.Center,
+         Margin = new(8, 0, 8, 0),
+         Padding = new(5, 0, 5, 0),
+      };
+      tb.SetValue(Grid.ColumnSpanProperty, columnSpan);
+      return tb;
+   }
+
+   public static Border InlineBorderMarker(int leftMargin, int columnSpan)
+   {
+      var rect = new Border
+      {
+         Height = 1,
+         Background = ControlFactory.ForegroundBrush,
+         BorderBrush = ControlFactory.ForegroundBrush,
+         CornerRadius = new(1),
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+         SnapsToDevicePixels = true,
+         Margin = new(leftMargin, 2, 4, 0),
+      };
+      rect.SetValue(Grid.ColumnSpanProperty, columnSpan);
+      return rect;
+   }
+
    public static AutoCompleteComboBox ObjectSelector<T>(T target, IEnumerable allItems, Binding binding, int index)
       where T : INUI
    {

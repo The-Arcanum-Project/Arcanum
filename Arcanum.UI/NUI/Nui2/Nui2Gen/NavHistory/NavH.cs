@@ -35,7 +35,7 @@ public class NavH
    {
    }
 
-   public IReadOnlyList<IEu5Object> Targets { get; }
+   public List<IEu5Object> Targets { get; }
    public bool GenerateSubViews { get; }
    public ContentPresenter Root { get; }
 

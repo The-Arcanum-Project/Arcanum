@@ -50,6 +50,7 @@ public partial class Location
 
    #region game/map_data/location_templates.txt
 
+   [NuiConfig(isInlined: true)]
    [SuppressAgs]
    [Description("The template data associated with this location.")]
    [DefaultValue(null)]

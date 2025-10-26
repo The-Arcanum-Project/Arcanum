@@ -32,9 +32,6 @@ public class PropertyEditorViewModel
 
       var type = target.GetNxPropType(nxProp);
       Debug.Assert(type != null, "type != null");
-
-      var itemObj = (IEu5Object)EmptyRegistry.Empties[type];
-
       IsExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
    }
 
@@ -87,7 +84,7 @@ public class PropertyEditorViewModel
       Nx.ForceGet(Target, NxProp, ref value);
       Debug.Assert(value is IEu5Object, "EmbeddedView can only display IEu5Object values.");
 
-      Eu5UiGen.PopulateEmbeddedGrid(newGrid, NavH, (IEu5Object)value, NxProp);
+      Eu5UiGen.PopulateEmbeddedGrid(newGrid, NavH, NavH.Targets, (IEu5Object)value, NxProp);
 
       ExpandableContentGrid = newGrid;
       _hasRefreshedContent = true;

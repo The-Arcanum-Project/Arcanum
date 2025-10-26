@@ -12,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// Following this we can display any kind of object in the NUI system,
 /// as long as it implements <see cref="INUI"/> and <see cref="INexus"/>.<br/>
 /// </summary>
-public interface INUI : INexus, INotifyPropertyChanged
+public interface INUI : INexus
 {
    /// <summary>
    /// Whether any property of this object can be modified in the NUI.
