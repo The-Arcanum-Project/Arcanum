@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.Views.MainMenuScreen;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
@@ -23,10 +24,10 @@ public partial class MainMenuScreen
    {
       Home = 0,
       Arcanum = 1,
-      Feature = 0, // Assuming Feature is the same as Home for now as we have disabled that button
-      Modforge = 2,
-      AboutUs = 3,
-      Attributions = 4,
+      Feature = 2, // Assuming Feature is the same as Home for now as we have disabled that button
+      Modforge = 3,
+      AboutUs = 4,
+      Attributions = 5,
    }
 
    public readonly MainMenuViewModel MainMenuViewModel;
@@ -57,6 +58,7 @@ public partial class MainMenuScreen
          }
       };
 #endif
+      ScreenManager.GetScreenFrom(this);
    }
 
    private void OnClosed(object? sender, EventArgs? e)

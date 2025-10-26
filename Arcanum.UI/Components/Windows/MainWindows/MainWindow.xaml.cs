@@ -15,6 +15,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
+using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.Windows.DebugWindows;
@@ -157,14 +158,15 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
-      var interop = new WindowInteropHelper(this);
-      var screen = Screen.FromHandle(interop.Handle);
+      var screen = ScreenManager.MainScreen;
       if (screen.Bounds.Height <= DEFAULT_HEIGHT || screen.Bounds.Width <= DEFAULT_WIDTH)
       {
          Height = screen.WorkingArea.Height * 0.8;
          Width = screen.WorkingArea.Width * 0.8;
          WindowState = WindowState.Maximized;
       }
+
+      this.SetScreen(screen);
 
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
