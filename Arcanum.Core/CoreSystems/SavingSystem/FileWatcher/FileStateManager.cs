@@ -4,7 +4,9 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Common;
 using Common.Logger;
+using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
@@ -146,11 +148,13 @@ public static class FileStateManager
       var args = new FileChangedEventArgs(changeType, fullPath, oldFullPath);
       if (!isPathRegistered)
       {
-         FileChangeHandler.HandleUnknownFileChange(args);
+         //FileChangeHandler.HandleUnknownFileChange(args);
+         UIHandle.Instance.PopUpHandle.ShowFileChangeWindow(args);
          return;
       }
 
-      FileChangeHandler.HandleFileChange(args);
+      //FileChangeHandler.HandleFileChange(args);
+      UIHandle.Instance.PopUpHandle.ShowFileChangeWindow(args);
       FileChanged?.Invoke(null, args);
    }
    

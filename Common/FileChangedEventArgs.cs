@@ -1,6 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+﻿using System.IO;
 
-using System.IO;
+namespace Common;
 
 public class FileChangedEventArgs(WatcherChangeTypes changeType, string fullPath, string? oldFullPath = null)
    : EventArgs
