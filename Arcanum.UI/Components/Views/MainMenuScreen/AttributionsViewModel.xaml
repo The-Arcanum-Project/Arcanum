@@ -21,41 +21,63 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height = "40" />
-            <RowDefinition Height = "4" />
+            <RowDefinition Height = "Auto" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
-
+        <Grid.Resources>
+            <Style TargetType="Rectangle">
+                <Setter Property="Fill"
+                        Value="{StaticResource DefaultBorderColorBrush}" />
+                <Setter Property="Height"
+                        Value="4" />
+                <Setter Property="Margin"
+                        Value="10, 18" />
+                <Setter Property="RadiusX"
+                        Value="4" />
+                <Setter Property="RadiusY"
+                        Value="4" />
+            </Style>
+        </Grid.Resources>
         <TextBlock Grid.Row = "0"
                    Text = "Attributions"
                    FontSize = "24"
                    FontWeight = "Bold"
                    Margin = "10,0,0,0"
-                   VerticalAlignment = "Bottom"
+                   VerticalAlignment = "Center"
                    HorizontalAlignment = "Left" />
 
-        <Rectangle Grid.Row = "1"
-                   Fill = "{StaticResource DefaultBorderColorBrush}"
-                   Height = "4"
-                   Margin = "10,0,10,0"
-                   RadiusX = "4"
-                   RadiusY = "4">
-        </Rectangle>
+        <Rectangle Grid.Row = "1"/>
 
-        <TextBlock Grid.Row = "2"
-                   Margin = "10,10,10,10"
-                   IsEnabled = "True"
-                   Focusable = "True">
-            <Run TextDecorations = "Underline"
-                 Text = "Icons: "
-                 FontSize = "16" />
+        <TextBlock 
+            Grid.Row="2" 
+            Margin="10,3" 
+            IsEnabled="True" 
+            Focusable="True"
+            TextWrapping="Wrap"
+            FontSize="14">
+
+            <Run Text="Solar-Icon-Set:" 
+                 FontWeight="Bold" 
+                 FontSize="16" 
+                 TextDecorations="Underline" />
             <LineBreak />
-            <Run Text = "- " />
-            <Hyperlink x:Name = "Bby40LicenseLink"
-                       NavigateUri = "https://creativecommons.org/licenses/by/4.0"
-                       RequestNavigate = "Hyperlink_OnRequestNavigate"
-                       MouseUp = "BBY40LicenseLink_OnMouseUp">
+
+            <Run Text="• " />
+            <Hyperlink 
+                NavigateUri="https://creativecommons.org/licenses/by/4.0"
+                RequestNavigate="Hyperlink_OnRequestNavigate">
                 Creative Commons License
             </Hyperlink>
+            <LineBreak />
+            <Run Text="• " />
+            <Hyperlink 
+                NavigateUri="https://github.com/480-Design/Solar-Icon-Set/tree/main"
+                RequestNavigate="Hyperlink_OnRequestNavigate">
+                Solar-Icon-Set GitHub Repository
+            </Hyperlink>
+            <LineBreak />
+            <Run Text="•  Icons were adapted and expanded upon" />
+            
         </TextBlock>
 
     </Grid>

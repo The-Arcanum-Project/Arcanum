@@ -50,4 +50,13 @@ public partial class ModforgeViewModel
       }
    }
 */
+private void OpenGithub(object sender, MouseButtonEventArgs e)
+{
+   ProcessHelper.OpenLink(GitDataService.MODFORGE_REPOSITORY_URL);
+}
+
+private void OpenDiscord(object sender, MouseButtonEventArgs e)
+{
+   ProcessHelper.OpenDiscordLinkIfDiscordRunning(GitDataService.MODFORGE_DISCORD_URL);
+}
 }

@@ -10,16 +10,10 @@ public partial class AttributionsViewModel
    {
       InitializeComponent();
       
-      Bby40LicenseLink.RequestNavigate += Hyperlink_OnRequestNavigate;
    }
 
    private void Hyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
    {
       ProcessHelper.OpenLink(e.Uri.ToString());
-   }
-
-   private void BBY40LicenseLink_OnMouseUp(object sender, MouseButtonEventArgs e)
-   {
-      ProcessHelper.OpenLink(Bby40LicenseLink.NavigateUri.AbsolutePath);
    }
 }

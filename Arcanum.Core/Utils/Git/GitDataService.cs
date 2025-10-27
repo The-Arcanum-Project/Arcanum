@@ -9,6 +9,11 @@ public static class GitDataService
    private const string GIT_OWNER = "Minnator";
    private const string MOD_FORGE_GIT_REPOSITORY = "Minnators-Modforge";
    public const string ARCANUM_REPOSITORY_URL = "https://github.com/Minnator/Arcanum";
+   public const string ARCANUM_RELEASES_URL = ARCANUM_REPOSITORY_URL + "/releases";
+   //TODO: @MelCo Update documentation URL when docs are available
+   public const string ARCANUM_DOCUMENTATION_URL = "https://github.com/Minnator/Arcanum";
+   public const string ARCANUM_USER_GUIDE_URL = ARCANUM_DOCUMENTATION_URL + "";
+   public const string ARCANUM_DEV_DOCUMENTATION_URL = ARCANUM_DOCUMENTATION_URL + "";
    public const string MODFORGE_REPOSITORY_URL = "https://github.com/Minnator/Minnators-Modforge";
 
    public const string MODFORGE_DISCORD_URL = "https://discord.gg/22AhD5qkme";
