@@ -239,7 +239,7 @@ public partial class Language : IEu5Object<Language>
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => true;
+   public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LanguageNuiSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LanguageAgsSettings;

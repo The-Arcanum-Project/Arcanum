@@ -21,6 +21,7 @@ public partial class HistoryTreeView
          Nodes.Add(AppData.HistoryManager.Root);
          ExpandAll(NodesTreeView);
       };
+      Nodes.CollectionChanged += (_, _) => ExpandAll(NodesTreeView);
    }
 
    public static void ExpandAll(TreeView treeView)

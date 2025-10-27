@@ -515,8 +515,17 @@ public static class NEF
          FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
          VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
          TextWrapping = TextWrapping.NoWrap,
+         UseDebouncing = true,
       };
+      binding.UpdateSourceTrigger = UpdateSourceTrigger.Explicit;
       textBox.SetBinding(TextBox.TextProperty, binding);
+
+      textBox.DebouncedTextChanged += (_, _) =>
+      {
+         var expr = textBox.GetBindingExpression(TextBox.TextProperty);
+         expr?.UpdateSource();
+      };
+
       return textBox;
    }
 
