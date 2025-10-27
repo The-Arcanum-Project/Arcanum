@@ -103,9 +103,9 @@ public class MainMenuViewModel : ObservableObject
          case MainMenuScreenView.Modforge:
             CurrentView = ModforgeVm;
             break;
-         // case MainMenuScreenView.Feature:
-         //    CurrentView = FeatureFm;
-         //    break;
+         case MainMenuScreenView.Feature:
+             CurrentView = FeatureFm;
+             break;
          case MainMenuScreenView.Arcanum:
             CurrentView = ArcanumVm;
             break;

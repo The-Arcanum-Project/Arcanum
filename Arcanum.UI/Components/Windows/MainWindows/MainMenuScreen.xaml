@@ -66,18 +66,18 @@
                              Style = "{StaticResource MenuButtonTheme}" />
                 <RadioButton x:Name = "ArcanumTabButton"
                              Margin = "40,0,40,10"
-                             Content = "Arcanum"
+                             Content = "Configure"
                              Height = "30"
                              FontSize = "14"
                              Command = "{Binding ArcanumVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
-                <!-- <RadioButton Margin = "40,0,40,10" -->
-                <!--              Content = "Features" -->
-                <!--              Height = "30" -->
-                <!--              Foreground = "{StaticResource DefaultForeColorBrush}" -->
-                <!--              FontSize = "14" -->
-                <!--              Command = "{Binding FeatureVc}" -->
-                <!--              Style = "{StaticResource MenuButtonTheme}" /> -->
+                <RadioButton Margin = "40,0,40,10"
+                             Content = "Resources"
+                             Height = "30"
+                             Foreground = "{StaticResource DefaultForeColorBrush}"
+                             FontSize = "14"
+                             Command = "{Binding FeatureVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
                 <RadioButton IsChecked = "False"
                              Margin = "40,0,40,10"
                              Content = "Modforge"
@@ -98,6 +98,8 @@
                              Command = "{Binding AttributionsVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
                 <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
+                       Stretch="Uniform" 
+                       RenderOptions.BitmapScalingMode="HighQuality"
                        Margin = "40, 73, 40, 40" />
             </StackPanel>
 
