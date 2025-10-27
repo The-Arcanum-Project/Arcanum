@@ -17,6 +17,15 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<LocationTemplateData>(dependencies)
 {
+   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   {
+      var result = base.UnloadSingleFileContent(fileObj, lockObject);
+      foreach (var obj in fileObj.ObjectsInFile)
+         if (Globals.Locations.TryGetValue(obj.UniqueId, out var loc))
+            loc.TemplateData = LocationTemplateData.Empty;
+      return result;
+   }
+
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,

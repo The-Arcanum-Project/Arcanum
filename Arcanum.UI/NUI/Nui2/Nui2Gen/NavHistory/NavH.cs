@@ -72,4 +72,6 @@ public class NavH
       var nav = new NavH(navTarget, subViews, Root);
       Eu5UiGen.GenerateAndSetView(nav);
    }
+
+   public override string ToString() => $"NavH: {string.Join(", ", Targets.Select(t => t.ToString()))}";
 }

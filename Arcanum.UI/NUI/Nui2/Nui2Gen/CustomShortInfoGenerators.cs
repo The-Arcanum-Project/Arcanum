@@ -78,6 +78,7 @@ public static class CustomShortInfoGenerators
                                          fontSize,
                                          height,
                                          true);
+      headerBlock.SetBinding(FrameworkElement.TagProperty, new System.Windows.Data.Binding { Source = primary, });
       headerBlock.Margin = new(6, 0, 0, 0);
 
       var dashBlock = ControlFactory.GetDashBlock(fontSize);
