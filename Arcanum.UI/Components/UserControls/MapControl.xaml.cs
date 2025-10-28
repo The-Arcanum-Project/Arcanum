@@ -18,7 +18,7 @@ namespace Arcanum.UI.Components.UserControls;
 public partial class MapControl
 {
    private D3D11HwndHost _d3dHost = null!;
-   private LocationRenderer _locationRenderer = null!;
+   public LocationRenderer LocationRenderer { get; private set; } = null!;
 
    private const float ZOOM_STEP = 1.2f;
 
@@ -79,6 +79,14 @@ public partial class MapControl
       });
    }
 
+   public void SetColors(Color4[] colors)
+   {
+      _currentBackgroundColor = colors;
+      _selectionColor = (Color4[])_currentBackgroundColor.Clone();
+      LocationRenderer.UpdateColors(_currentBackgroundColor);
+      _d3dHost.Invalidate();
+   }
+
    private static Color4[] CreateColors(Polygon[] polygons)
    {
       var locations = Globals.Locations.Values;
@@ -104,10 +112,10 @@ public partial class MapControl
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors(polygons);
-      _locationRenderer = new(vertices, startColor, _imageAspectRatio);
+      LocationRenderer = new(vertices, startColor, _imageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      _d3dHost = new(_locationRenderer, HwndHostContainer);
+      _d3dHost = new(LocationRenderer, HwndHostContainer);
       HwndHostContainer.Child = _d3dHost;
 
       DataContext = _d3dHost;
@@ -130,7 +138,7 @@ public partial class MapControl
          _selectionColor[loc.ColorIndex] = new(1, 0, 0, 1);
       }
 
-      _locationRenderer.UpdateColors(_selectionColor);
+      LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }
 
@@ -139,13 +147,13 @@ public partial class MapControl
       foreach (var loc in locations)
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex];
 
-      _locationRenderer.UpdateColors(_selectionColor);
+      LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }
 
    private void UpdateRenderer()
    {
-      _locationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
+      LocationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
                                                   (float)HwndHostContainer.ActualHeight);
       _d3dHost.Invalidate();
    }
@@ -185,12 +193,12 @@ public partial class MapControl
       // Get Coordinates from -1 to 1
       var ndcX = screenPoint.X / width * 2.0f - 1.0f;
       var ndcY = 1.0f - screenPoint.Y / height * 2.0f;
-      var zoomRatio = _imageAspectRatio / (_locationRenderer.Zoom * 2);
+      var zoomRatio = _imageAspectRatio / (LocationRenderer.Zoom * 2);
       var worldX = ndcX * (aspectRatio * zoomRatio);
       var worldY = ndcY * (zoomRatio);
 
-      worldX += _locationRenderer.Pan.X;
-      worldY += (1f - _locationRenderer.Pan.Y) * _imageAspectRatio;
+      worldX += LocationRenderer.Pan.X;
+      worldY += (1f - LocationRenderer.Pan.Y) * _imageAspectRatio;
 
       var mapX = worldX;
       var mapY = 1.0f - worldY / _imageAspectRatio;
@@ -200,8 +208,8 @@ public partial class MapControl
 
    public void PanTo(float x, float y)
    {
-      _locationRenderer.Pan.X = Math.Clamp(x, -0.1f, 1.1f);
-      _locationRenderer.Pan.Y = Math.Clamp(y, -0.1f, 1.1f);
+      LocationRenderer.Pan.X = Math.Clamp(x, -0.1f, 1.1f);
+      LocationRenderer.Pan.Y = Math.Clamp(y, -0.1f, 1.1f);
       UpdateRenderer();
    }
 
@@ -225,7 +233,7 @@ public partial class MapControl
       requiredZoom /= _imageAspectRatio;
       requiredZoom *= 2f; // Because orthographic projection is from -1 to 1
 
-      _locationRenderer.Zoom = requiredZoom;
+      LocationRenderer.Zoom = requiredZoom;
 
       var panX = area.X + area.Width / 2f;
       var panY = 1f - (area.Y + area.Height / 2f);
@@ -453,12 +461,12 @@ public partial class MapControl
 
       var aspectRatio = (float)(HwndHostContainer.ActualWidth / HwndHostContainer.ActualHeight);
 
-      var x = _locationRenderer.Pan.X -
-              (float)(delta.X / (HwndHostContainer.ActualWidth * _locationRenderer.Zoom)) *
+      var x = LocationRenderer.Pan.X -
+              (float)(delta.X / (HwndHostContainer.ActualWidth * LocationRenderer.Zoom)) *
               _imageAspectRatio *
               aspectRatio;
-      var y = _locationRenderer.Pan.Y -
-              (float)(delta.Y / (HwndHostContainer.ActualHeight * _locationRenderer.Zoom));
+      var y = LocationRenderer.Pan.Y -
+              (float)(delta.Y / (HwndHostContainer.ActualHeight * LocationRenderer.Zoom));
 
       PanTo(x, y);
 
@@ -488,7 +496,7 @@ public partial class MapControl
       var maxZoom = MathF.Exp(Config.Settings.MapSettings.MaxZoomLevel * LnZoomLogBase);
       var minZoom = MathF.Exp(Config.Settings.MapSettings.MinZoomLevel * LnZoomLogBase);
 
-      var newZoom = _locationRenderer.Zoom * zoomFactor;
+      var newZoom = LocationRenderer.Zoom * zoomFactor;
 
       if (newZoom < minZoom || maxZoom < newZoom)
       {
@@ -496,9 +504,9 @@ public partial class MapControl
          return true;
       }
 
-      _locationRenderer.Zoom = newZoom;
+      LocationRenderer.Zoom = newZoom;
 
-      delta = new(pos.X - _locationRenderer.Pan.X, pos.Y - _locationRenderer.Pan.Y);
+      delta = new(pos.X - LocationRenderer.Pan.X, pos.Y - LocationRenderer.Pan.Y);
 
       delta /= zoomFactor;
       return false;

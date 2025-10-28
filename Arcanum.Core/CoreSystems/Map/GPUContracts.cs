@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Common.UI;
+using Common.UI.Interfaces;
 
 namespace Arcanum.Core.CoreSystems.Map;
 
@@ -11,6 +13,7 @@ public static class GPUContracts
    /// <param name="colors">A <see cref="List{T}"/> of colors represented as ARGB integers.</param>
    public static void SetColors(int[] colors)
    {
+      UIHandle.Instance.MapHandle.SetColor(colors);
    }
 
    /// <summary>
