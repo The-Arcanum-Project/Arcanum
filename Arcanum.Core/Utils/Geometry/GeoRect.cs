@@ -6,46 +6,73 @@ namespace Arcanum.Core.Utils.Geometry;
 
 public static class GeoRect
 {
+   private const float EPSILON = 1e-6f;
+
+   /// <summary>
+   /// Helper method for floating-point comparison.
+   /// </summary>
+   private static bool IsClose(float a, float b) => Math.Abs(a - b) < EPSILON;
+
+   /// <summary>
+   /// Calculates the geometric difference between two rectangles that share exactly one corner.
+   /// The difference is the "L" shape area of the larger rectangle not occupied by the smaller one.
+   /// </summary>
+   /// <param name="rectA">The first rectangle.</param>
+   /// <param name="rectB">The second rectangle.</param>
+   /// <returns>A tuple containing two rectangles that represent the "L" shape difference. 
+   /// One or both can be RectangleF.Empty if there is no difference in that dimension.</returns>
+   /// <exception cref="ArgumentException">Thrown if the rectangles do not share exactly one corner.</exception>
    public static (RectangleF rect1, RectangleF rect2) RectDiff(RectangleF rectA, RectangleF rectB)
    {
-      // Ensure they are aligned.
-      const float epsilon = 1e-6f;
-      if (Math.Abs(rectA.X - rectB.X) > epsilon || Math.Abs(rectA.Y - rectB.Y) > epsilon)
-         throw new ArgumentException("Rectangles must share the same top-left corner.");
-
-      if (Math.Abs(rectA.Width - rectB.Width) < epsilon && Math.Abs(rectA.Height - rectB.Height) < epsilon)
+      if (rectA.Equals(rectB))
          return (RectangleF.Empty, RectangleF.Empty);
 
-      // Find the dimensions of the intersection (the smaller of the two)
-      var minWidth = Math.Min(rectA.Width, rectB.Width);
-      var minHeight = Math.Min(rectA.Height, rectB.Height);
+      // Check if they share at least one corner. 
+      var sharesTopLeft = IsClose(rectA.Left, rectB.Left) && IsClose(rectA.Top, rectB.Top);
+      var sharesTopRight = IsClose(rectA.Right, rectB.Right) && IsClose(rectA.Top, rectB.Top);
+      var sharesBottomLeft = IsClose(rectA.Left, rectB.Left) && IsClose(rectA.Bottom, rectB.Bottom);
+      var sharesBottomRight = IsClose(rectA.Right, rectB.Right) && IsClose(rectA.Bottom, rectB.Bottom);
 
-      // Find the dimensions of the union (the larger of the two)
-      var maxWidth = Math.Max(rectA.Width, rectB.Width);
-      var maxHeight = Math.Max(rectA.Height, rectB.Height);
+      if (!sharesTopLeft && !sharesTopRight && !sharesBottomLeft && !sharesBottomRight)
+         throw new ArgumentException("Rectangles must share at least one corner to calculate a difference.");
 
-      // The non-intersecting area is the "L" shape formed by (Union - Intersection).
+      var unionRect = RectangleF.Union(rectA, rectB);
+      var intersectRect = RectangleF.Intersect(rectA, rectB);
+
+      // If one rectangle is fully contained within the other but they don't share a corner,
+      // Intersect will equal the smaller rect.
+      if (intersectRect.IsEmpty)
+         // This case shouldn't be hit if the corner check passes.
+         return (rectA, rectB);
 
       var rect1 = RectangleF.Empty;
       var rect2 = RectangleF.Empty;
 
-      // The horizontal bar of the "L" shape.
-      // This is the area at the bottom of the union rectangle.
-      var horizontalBarHeight = maxHeight - minHeight;
-      if (horizontalBarHeight > epsilon)
-         rect1 = new(rectA.X,
-                     rectA.Y + minHeight,
-                     maxWidth,
-                     horizontalBarHeight);
+      // The horizontal bar of the "L".
+      // Its width is the full union width, and its height is the difference.
+      var horizontalBarHeight = unionRect.Height - intersectRect.Height;
+      if (horizontalBarHeight > EPSILON)
+      {
+         // If the intersection is at the top of the union, the bar is at the bottom.
+         var y = IsClose(unionRect.Top, intersectRect.Top)
+                    ? intersectRect.Bottom
+                    : unionRect.Top;
 
-      // The vertical bar of the "L" shape.
-      // This is the area at the right side of the union, but only as tall as the intersection.
-      var verticalBarWidth = maxWidth - minWidth;
-      if (verticalBarWidth > epsilon)
-         rect2 = new(rectA.X + minWidth,
-                     rectA.Y,
-                     verticalBarWidth,
-                     minHeight);
+         rect1 = unionRect with { Y = y, Height = horizontalBarHeight };
+      }
+
+      // The vertical bar of the "L".
+      // Its height is the height of the *intersection*, and its width is the difference.
+      var verticalBarWidth = unionRect.Width - intersectRect.Width;
+      if (!(verticalBarWidth > EPSILON))
+         return (rect1, rect2);
+
+      // If the intersection is on the left of the union, the bar is on the right.
+      var x = IsClose(unionRect.Left, intersectRect.Left)
+                 ? intersectRect.Right
+                 : unionRect.Left;
+
+      rect2 = intersectRect with { X = x, Width = verticalBarWidth };
 
       return (rect1, rect2);
    }
