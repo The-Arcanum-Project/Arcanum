@@ -60,7 +60,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
    // Standard HSV where H is [0, 360], S and V are [0, 1]
    public sealed record Hsv(double H, double S, double V) : JominiColor
    {
-      public override Color ToMediaColor() => HsvConverter.ToRgb(H, S, V);
+      public override Color ToMediaColor() => HsvConverter.ToRgb(H * 360, S, V);
       public override JominiColorType Type => JominiColorType.Hsv;
       public override string ToString() => $"hsv {{ {H:F2} {S:F2} {V:F2} }}";
    }
@@ -93,5 +93,5 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override string ToString() => $"{Value:X6}";
    }
 
-   public static JominiColor Empty { get; } = new Hsv(1, 0, 1);
+   public static JominiColor Empty { get; } = new Rgb(49, 49, 49);
 }
