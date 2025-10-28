@@ -2,7 +2,7 @@
 
 public static class HsvConverter
 {
-   public static System.Windows.Media.Color ToRgb(double h, double s, double v)
+   public static System.Windows.Media.Color Hsv360ToRgb(double h, double s, double v)
    {
       // Clamp values to ensure they are in the expected range.
       h = Math.Max(0, Math.Min(360, h));
