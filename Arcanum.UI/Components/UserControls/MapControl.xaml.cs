@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
@@ -81,6 +82,9 @@ public partial class MapControl
 
    public void SetColors(Color4[] colors)
    {
+      Debug.Assert(colors.Length == _currentBackgroundColor.Length,
+                   "Color array length does not match the number of locations.");
+
       _currentBackgroundColor = colors;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       LocationRenderer.UpdateColors(_currentBackgroundColor);
@@ -154,7 +158,7 @@ public partial class MapControl
    private void UpdateRenderer()
    {
       LocationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
-                                                  (float)HwndHostContainer.ActualHeight);
+                                                 (float)HwndHostContainer.ActualHeight);
       _d3dHost.Invalidate();
    }
 
@@ -387,18 +391,24 @@ public partial class MapControl
             {
                // Simple LMB Click selection
                case ModifierKeys.None:
+                  if (!Selection.GetLocation(CurrentPos, out var location1))
+                     return;
+
                   Selection.Modify(SelectionTarget.Selection,
                                    SelectionMethod.Simple,
-                                   [Selection.GetLocation(CurrentPos)],
+                                   [location1],
                                    true,
                                    false,
                                    true);
                   break;
                // Simple LMB Click selection with inversion
                case ModifierKeys.Control:
+                  if (!Selection.GetLocation(CurrentPos, out var location2))
+                     return;
+
                   Selection.Modify(SelectionTarget.Selection,
                                    SelectionMethod.Simple,
-                                   [Selection.GetLocation(CurrentPos)],
+                                   [location2],
                                    true);
                   break;
                case ModifierKeys.Shift:

@@ -140,7 +140,7 @@ public static class FcnHelpers
          case hsvFcn:
             var hsv = new float[3];
             for (var i = 0; i < args.Count; i++)
-               if (NumberParsing.TryParseFloat(args[i].Value.GetLexeme(source), ctx, out hsv[i]))
+               if (!NumberParsing.TryParseFloat(args[i].Value.GetLexeme(source), ctx, out hsv[i]))
                {
                   color = null;
                   return false;

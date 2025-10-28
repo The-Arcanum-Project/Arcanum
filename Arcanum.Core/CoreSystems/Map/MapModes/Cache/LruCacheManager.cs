@@ -68,7 +68,9 @@ public class LruCacheManager(int maxSize = 5)
          throw;
       }
 
-      return colors;
+      var returnVal = colors[..count];
+      ArrayPool<int>.Shared.Return(colors);
+      return returnVal;
    }
 
    public void MarkInvalid(Location loc)

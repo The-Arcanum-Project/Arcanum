@@ -463,7 +463,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
             VerticalAlignment = VerticalAlignment.Bottom,
             Height = 30,
             ToolTip = mapMode != null ? mapMode.Description : "No map mode assigned to this button.",
-            MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.None,
+            MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Base,
          };
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);

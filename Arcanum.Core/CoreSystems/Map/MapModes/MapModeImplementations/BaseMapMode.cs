@@ -4,9 +4,13 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class BaseMapMode : IMapMode
 {
-   public string Name { get; } = "Base Map Mode";
-   public MapModeManager.MapModeType Type { get; } = MapModeManager.MapModeType.BaseMapMode;
+   public string Name { get; } = "Base";
+   public MapModeManager.MapModeType Type { get; } = MapModeManager.MapModeType.Base;
    public string Description { get; } = "The default map mode.";
    public string? IconSource { get; } = null;
-   public int GetColorForLocation(Location location) => unchecked((int)0xFFFFFFFF); // White
+
+   public int GetColorForLocation(Location location)
+   {
+      return location.Color.AsInt();
+   }
 }

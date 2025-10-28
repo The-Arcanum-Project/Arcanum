@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Common.Logger;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -49,13 +50,16 @@ public static partial class MapModeManager
    #endregion
 
    private static readonly LruCacheManager LruCache = new();
-   public static MapModeType CurrentMode { get; private set; } = MapModeType.BaseMapMode;
+   public static MapModeType CurrentMode { get; private set; } = MapModeType.Base;
    public static List<MapModeType> RecentModes { get; } = new(25);
    private static int _maxRecentModes = 25;
 
    public static void Activate(MapModeType type)
    {
+      var sw = System.Diagnostics.Stopwatch.StartNew();
       GPUContracts.SetColors(LruCache.GetOrCreateColors(type));
+      sw.Stop();
+      ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {type} in {sw.ElapsedMilliseconds} ms");
       CurrentMode = type;
       AddToRecentHistory(type);
    }
@@ -77,7 +81,7 @@ public static partial class MapModeManager
       if (Config.Settings.MapModeConfig.QuickAccessMapModes.Count > i)
       {
          var modeType = Config.Settings.MapModeConfig.QuickAccessMapModes[i];
-         return modeType != MapModeType.None ? Get(modeType) : null;
+         return modeType != MapModeType.Base ? Get(modeType) : null;
       }
 
       if (!Config.Settings.MapModeConfig.DefaultAssignMapModes)
