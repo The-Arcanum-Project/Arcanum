@@ -13,4 +13,19 @@ public class ReligionGroupMapMode : IMapMode
    {
       return location.TemplateData.Religion.Group.Color.AsInt();
    }
+
+   public string[] GetTooltip(Location location)
+      => [$"Religion Group: {location.TemplateData.Religion.Group.UniqueId}"];
+
+   public string? GetLocationText(Location location) => null;
+
+   public object?[]? GetVisualObject(Location location) => null;
+
+   public void OnActivateMode()
+   {
+   }
+
+   public void OnDeactivateMode()
+   {
+   }
 }

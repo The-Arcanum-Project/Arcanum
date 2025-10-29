@@ -13,4 +13,18 @@ public class LanguageMapMode : IMapMode
    {
       return location.TemplateData.Culture.Language.Color.AsInt();
    }
+
+   public string[] GetTooltip(Location location) => [$"Language: {location.TemplateData.Culture.Language.UniqueId}"];
+
+   public string? GetLocationText(Location location) => null;
+
+   public object?[]? GetVisualObject(Location location) => null;
+
+   public void OnActivateMode()
+   {
+   }
+
+   public void OnDeactivateMode()
+   {
+   }
 }

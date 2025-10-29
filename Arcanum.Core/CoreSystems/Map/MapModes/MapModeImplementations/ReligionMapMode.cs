@@ -10,8 +10,19 @@ public class ReligionMapMode : IMapMode
    public string Description => "Displays the dominant religion of each location on the map.";
    public string? IconSource => null;
 
-   public int GetColorForLocation(Location location)
+   public int GetColorForLocation(Location location) => location.TemplateData.Religion.Color.AsInt();
+
+   public string[] GetTooltip(Location location) => [$"Religion: {location.TemplateData.Religion.UniqueId}"];
+
+   public string? GetLocationText(Location location) => null;
+
+   public object?[]? GetVisualObject(Location location) => null;
+
+   public void OnActivateMode()
    {
-      return location.TemplateData.Religion.Color.AsInt();
+   }
+
+   public void OnDeactivateMode()
+   {
    }
 }

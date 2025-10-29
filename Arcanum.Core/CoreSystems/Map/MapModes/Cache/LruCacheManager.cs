@@ -1,17 +1,36 @@
 ﻿using System.Buffers;
+using System.Windows.Media;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Settings.BaseClasses;
+using Arcanum.Core.Settings.SmallSettingsObjects;
+using Arcanum.Core.Utils.Colors;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 
 using System.Collections.Generic;
 
-public class LruCacheManager(int maxSize = 5)
+public class LruCacheManager
 {
+   private readonly int _maxSize;
+
    private readonly Location[] _locationsArray = Globals.Locations.Values.ToArray();
    private readonly LinkedList<KeyValuePair<MapModeManager.MapModeType, LruCacheValue>> _lruList = [];
 
    private readonly Dictionary<MapModeManager.MapModeType,
       LinkedListNode<KeyValuePair<MapModeManager.MapModeType, LruCacheValue>>> _cache = new();
+
+   public LruCacheManager(int maxSize = 5)
+   {
+      _maxSize = maxSize;
+
+      SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.UseShadeOfColorOnWater),
+                                                   (_, args) =>
+                                                   {
+                                                      if (args.SettingName ==
+                                                          nameof(MapSettingsObj.UseShadeOfColorOnWater))
+                                                         _cache.Clear();
+                                                   });
+   }
 
    public void InvalidateLocation(Location changedLocation)
    {
@@ -35,12 +54,12 @@ public class LruCacheManager(int maxSize = 5)
 
       var newColorData = GenerateFullColorArray(type);
       var newNode = new LinkedListNode<KeyValuePair<MapModeManager.MapModeType, LruCacheValue>>(new(type,
-              new(newColorData)));
+       new(newColorData)));
 
       _cache.Add(type, newNode);
       _lruList.AddFirst(newNode);
 
-      if (_cache.Count <= maxSize)
+      if (_cache.Count <= _maxSize)
          return newColorData;
 
       if (_lruList.Last != null)
@@ -58,9 +77,34 @@ public class LruCacheManager(int maxSize = 5)
 
       try
       {
-         Parallel.For(0,
-                      count,
-                      i => { colors[i] = mode.GetColorForLocation(_locationsArray[i]); });
+         if (mode.IsLandOnly)
+         {
+            var waterProvinces = new HashSet<Location>(Globals.DefaultMapDefinition.SeaZones);
+            waterProvinces.UnionWith(Globals.DefaultMapDefinition.Lakes);
+            var blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
+            var useLocWater = Config.Settings.MapSettings.UseShadeOfColorOnWater;
+            Parallel.For(0,
+                         count,
+                         i =>
+                         {
+                            if (waterProvinces.Contains(_locationsArray[i]))
+                            {
+                               if (useLocWater)
+                                  colors[i] = blueColors[Random.Shared.Next(blueColors.Count)].AsAbgrInt();
+                               else
+                                  colors[i] = _locationsArray[i].Color.AsInt();
+                            }
+                            else
+                               colors[i] = mode.GetColorForLocation(_locationsArray[i]);
+                         });
+            waterProvinces.Clear();
+         }
+         else
+         {
+            Parallel.For(0,
+                         count,
+                         i => { colors[i] = mode.GetColorForLocation(_locationsArray[i]); });
+         }
       }
       catch
       {

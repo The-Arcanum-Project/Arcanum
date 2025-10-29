@@ -12,11 +12,6 @@ public interface IMapMode
    public string Name { get; }
 
    /// <summary>
-   /// The enum type of this map mode.
-   /// </summary>
-   public MapModeManager.MapModeType Type { get; }
-
-   /// <summary>
    /// A brief description of what this map mode does.
    /// </summary>
    public string Description { get; }
@@ -26,7 +21,22 @@ public interface IMapMode
    /// This should be a path that the UI can use to load the icon. <br/>
    /// The optimal size for the icon is 20x20 pixels.
    /// </summary>
-   public string? IconSource { get; }
+   public string? IconSource => null;
+
+   /// <summary>
+   /// If data is only being shown for land locations.
+   /// </summary>
+   public bool IsLandOnly => true;
+
+   /// <summary>
+   /// Whether this map mode has a legend to display.
+   /// </summary>
+   public bool HasLegend => true;
+
+   /// <summary>
+   /// The enum type of this map mode.
+   /// </summary>
+   public MapModeManager.MapModeType Type { get; }
 
    /// <summary>
    /// Returns a color for the given location on the map.
@@ -34,4 +44,42 @@ public interface IMapMode
    /// <param name="location"></param>
    /// <returns></returns>
    public int GetColorForLocation(Location location);
+
+   /// <summary>
+   /// Returns a tooltip string for the given location on the map. <br/>
+   /// Tooltips follow the following format: 
+   /// <code>Location Name (Localisation)
+   /// Additional Info[0]
+   /// Additional Info[1]
+   /// ...</code>
+   /// </summary>
+   /// <returns>An Array of lines for the tooltip</returns>
+   public string[] GetTooltip(Location location);
+
+   /// <summary>
+   /// Returns a text string for the given location on the map. 
+   /// <code>E.g. "(Population: )1000"</code>
+   /// </summary>
+   public string? GetLocationText(Location location);
+
+   /// <summary>
+   /// Returns an array of visual objects for the given location on the map. <br/>
+   /// These objects will be rendered on top of the location. <br/>
+   /// The array can contain different types of objects, e.g. strings, icons, etc
+   /// </summary>
+   /// <param name="location"></param>
+   /// <returns></returns>
+   public object?[]? GetVisualObject(Location location);
+
+   // ################# Methods ##################
+
+   /// <summary>
+   /// Is called when this map mode is activated.
+   /// </summary>
+   public void OnActivateMode();
+
+   /// <summary>
+   /// Is called when this map mode is deactivated.
+   /// </summary>
+   public void OnDeactivateMode();
 }

@@ -169,4 +169,12 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get => _animatedHighlightBorder;
       set => SetNotifyProperty(ref _animatedHighlightBorder, value);
    }
+
+   [Description("If water locations should use a shade of the WaterShadeBaseColor as color or the color from the location definition.")]
+   [DefaultValue(true)]
+   public bool UseShadeOfColorOnWater { get; set; } = true;
+
+   [Description("The base color used to shade water locations when 'Use Shade Of Color On Water' is enabled.")]
+   [DefaultValue(typeof(Color), "0, 105, 148")]
+   public Color WaterShadeBaseColor { get; set; } = Color.FromRgb(0, 105, 148);
 }

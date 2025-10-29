@@ -13,4 +13,18 @@ public class CultureMapMode : IMapMode
    {
       return location.TemplateData.Culture.Color.AsInt();
    }
+
+   public string[] GetTooltip(Location location) => [$"Culture: {location.TemplateData.Culture.UniqueId}"];
+
+   public string? GetLocationText(Location location) => null;
+
+   public object?[]? GetVisualObject(Location location) => null;
+
+   public void OnActivateMode()
+   {
+   }
+
+   public void OnDeactivateMode()
+   {
+   }
 }
