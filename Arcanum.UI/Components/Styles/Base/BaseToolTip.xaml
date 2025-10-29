@@ -33,7 +33,7 @@
                     <Border Background = "{TemplateBinding Background}"
                             BorderBrush = "{TemplateBinding BorderBrush}"
                             BorderThickness = "{TemplateBinding BorderThickness}"
-                            CornerRadius = "6"
+                            CornerRadius = "3"
                             SnapsToDevicePixels = "True"
                             Effect = "{DynamicResource TooltipDropShadow}">
                         <ContentPresenter Margin = "{TemplateBinding Padding}"

@@ -89,4 +89,6 @@ public static partial class MapModeManager
 
       return i < Enum.GetNames<MapModeType>().Length ? Get((MapModeType)i) : null;
    }
+
+   public static IMapMode GetCurrent() => Get(CurrentMode);
 }

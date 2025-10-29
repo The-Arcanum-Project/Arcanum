@@ -23,10 +23,12 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
+using Arcanum.UI.Util;
 using Common.UI;
 using CommunityToolkit.Mvvm.Input;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using ToolTip = System.Windows.Controls.ToolTip;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -42,6 +44,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private string _fps = "FPS: [0]";
    private string _hoveredLocation;
    private string _rectangleBounds;
+
+   private readonly ToolTipManager _toolTipManager = new();
 
    #region Properties
 
@@ -211,6 +215,14 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
                break;
          }
       };
+
+      lock (mapDataParser)
+         SetUpToolTip(MainMap);
+   }
+
+   private void SetUpToolTip(MapControl mainMap)
+   {
+      _toolTipManager.SetUpToolTip(mainMap);
    }
 
    private void SelectionOnLocationSelectionChanged(List<Location> locations)

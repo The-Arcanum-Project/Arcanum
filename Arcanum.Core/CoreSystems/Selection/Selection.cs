@@ -54,6 +54,8 @@ public static class Selection
 
    public static MapManager MapManager = new();
 
+   public static Location CurrentLocationBelowMouse { get; set; } = Location.Empty;
+
    #region Events
 
    public static event Action<List<Location>>? LocationSelected;

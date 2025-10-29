@@ -24,8 +24,11 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
    private BorderType _hoverBorderType = BorderType.Wide;
    private BorderType _highlightBorderType = BorderType.Dotted;
    private bool _animatedSelectionBorder = true;
-   private bool _animatedHoverBorder = false;
+   private bool _animatedHoverBorder;
    private bool _animatedHighlightBorder = true;
+   private bool _showTooltips = true;
+   private bool _useShadeOfColorOnWater = true;
+   private Color _waterShadeBaseColor = Color.FromRgb(0, 105, 148);
    [Description("If animations are used on map borders.")]
    [DefaultValue(true)]
    public bool AllowAnimatedBorders
@@ -172,9 +175,25 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
 
    [Description("If water locations should use a shade of the WaterShadeBaseColor as color or the color from the location definition.")]
    [DefaultValue(true)]
-   public bool UseShadeOfColorOnWater { get; set; } = true;
+   public bool UseShadeOfColorOnWater
+   {
+      get => _useShadeOfColorOnWater;
+      set => SetNotifyProperty(ref _useShadeOfColorOnWater, value);
+   }
 
    [Description("The base color used to shade water locations when 'Use Shade Of Color On Water' is enabled.")]
    [DefaultValue(typeof(Color), "0, 105, 148")]
-   public Color WaterShadeBaseColor { get; set; } = Color.FromRgb(0, 105, 148);
+   public Color WaterShadeBaseColor
+   {
+      get => _waterShadeBaseColor;
+      set => SetNotifyProperty(ref _waterShadeBaseColor, value);
+   }
+
+   [Description("Wheter any tooltip is shown when hovering over map locations.")]
+   [DefaultValue(true)]
+   public bool ShowTooltips
+   {
+      get => _showTooltips;
+      set => SetNotifyProperty(ref _showTooltips, value);
+   }
 }

@@ -69,6 +69,7 @@ public partial class MapControl
             return;
 
          var loc = Selection.MapManager.FindLocationAt(pos) ?? Location.Empty;
+         Selection.CurrentLocationBelowMouse = loc;
          Selection.Clear(SelectionTarget.Hover);
          Selection.Modify(SelectionTarget.Hover, SelectionMethod.Simple, [loc], true);
       };
@@ -446,10 +447,15 @@ public partial class MapControl
 
    #region Internal Panning
 
+   public event Action? OnPanningStarted;
+   public event Action? OnPanningEnded;
+
    private void InitializePanning(IInputElement surface, MouseButtonEventArgs e)
    {
       _isPanning = true;
       _lastMousePosition = e.GetPosition(surface);
+
+      OnPanningStarted?.Invoke();
    }
 
    private void HandleMousePanning(MouseEventArgs e)
@@ -495,6 +501,8 @@ public partial class MapControl
 
       e.Handled = true;
       _hasPanned = false;
+
+      OnPanningEnded?.Invoke();
    }
 
    #endregion
