@@ -16,7 +16,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class SuperRegion
-   : IMapInferable<SuperRegion>, IEu5Object<SuperRegion>, ILocation, ILocationCollection<Region>
+   : IMapInferable, IEu5Object<SuperRegion>, ILocation, ILocationCollection<Region>
 {
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
@@ -40,14 +40,14 @@ public partial class SuperRegion
    }
    public static Dictionary<string, SuperRegion> GetGlobalItems() => Globals.SuperRegions;
 
-   public static List<SuperRegion> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-     .Select(loc => (SuperRegion)loc
-               .GetFirstParentOfType(LocationCollectionType
-                                       .Area)!)
-     .Distinct()
-     .ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                        .Area)!)
+                                                                          .Distinct()
+                                                                          .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEnumerable items)
    {
       var typedItems = items.Cast<SuperRegion>();
       List<Location> locations = [];

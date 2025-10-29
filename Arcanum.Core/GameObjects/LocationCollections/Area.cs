@@ -15,7 +15,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, ILocationCollection<Province>
+public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocationCollection<Province>
 {
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
@@ -39,15 +39,14 @@ public partial class Area : IMapInferable<Area>, IEu5Object<Area>, ILocation, IL
    }
    public static Dictionary<string, Area> GetGlobalItems() => Globals.Areas;
 
-   public static List<Area> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                           .Select(loc => (Area)
-                                                                                   loc
-                                                                                     .GetFirstParentOfType(LocationCollectionType
-                                                                                            .Area)!)
-                                                                           .Distinct()
-                                                                           .ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                        .Area)!)
+                                                                          .Distinct()
+                                                                          .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEnumerable items)
    {
       var typedItems = items.Cast<Area>();
       List<Location> locations = [];

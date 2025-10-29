@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -10,6 +12,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Cultural;
@@ -33,7 +37,7 @@ public enum Opinion
 }
 
 [ObjectSaveAs]
-public partial class Culture : IEu5Object<Culture>
+public partial class Culture : IEu5Object<Culture>, IMapInferable
 {
    #region Nexus Properties
 
@@ -138,4 +142,36 @@ public partial class Culture : IEu5Object<Culture>
    #endregion
 
    public override string ToString() => UniqueId;
+
+   #region IMapInferable
+
+   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Culture);
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> items = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Culture != Empty)
+            continue;
+
+         items.Add(loc.TemplateData.Culture);
+      }
+
+      return items.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEnumerable items)
+   {
+      List<Location> locations = [];
+      foreach (var obj in items)
+         if (obj is Location loc &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Culture != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
+
+   #endregion
 }

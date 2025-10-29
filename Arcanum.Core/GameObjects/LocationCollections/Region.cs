@@ -13,7 +13,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocation, ILocationCollection<Area>
+public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
@@ -37,14 +37,14 @@ public partial class Region : IMapInferable<Region>, IEu5Object<Region>, ILocati
    }
    public static Dictionary<string, Region> GetGlobalItems() => Globals.Regions;
 
-   public static List<Region> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                             .Select(loc => (Region)loc
-                                                                                    .GetFirstParentOfType(LocationCollectionType
-                                                                                           .Area)!)
-                                                                             .Distinct()
-                                                                             .ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                        .Area)!)
+                                                                          .Distinct()
+                                                                          .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEnumerable items)
    {
       var typedItems = items.Cast<Region>();
       List<Location> locations = [];

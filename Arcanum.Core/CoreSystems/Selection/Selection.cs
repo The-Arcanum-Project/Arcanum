@@ -67,35 +67,36 @@ public static class Selection
    public static event Action<List<Location>>? LocationSelectionChanged;
    public static event Action<(List<Location> add, List<Location> remove)>? RectangleSelectionUpdated;
    public static event Action<(List<Location> add, List<Location> remove)>? LassoSelectionUpdated;
+   public static event Action? SelectionModified;
 
-   private static void OnLocationSelected(List<Location> locations)
+   private static void OnLocationsSelected(List<Location> locations)
    {
       LocationSelected?.Invoke(locations);
       LocationSelectionChanged?.Invoke(GetSelectedLocations);
    }
 
-   private static void OnLocationDeselected(List<Location> locations)
+   private static void OnLocationsDeselected(List<Location> locations)
    {
       LocationDeselected?.Invoke(locations);
       LocationSelectionChanged?.Invoke(GetSelectedLocations);
    }
 
-   private static void OnLocationHovered(List<Location> locations)
+   private static void OnLocationsHovered(List<Location> locations)
    {
       LocationHovered?.Invoke(locations);
    }
 
-   private static void OnLocationUnhovered(List<Location> locations)
+   private static void OnLocationsUnhovered(List<Location> locations)
    {
       LocationUnhovered?.Invoke(locations);
    }
 
-   private static void OnLocationHighlighted(List<Location> locations)
+   private static void OnLocationsHighlighted(List<Location> locations)
    {
       LocationHighlighted?.Invoke(locations);
    }
 
-   private static void OnLocationUnhighlighted(List<Location> locations)
+   private static void OnLocationsUnhighlighted(List<Location> locations)
    {
       LocationUnhighlighted?.Invoke(locations);
    }
@@ -119,13 +120,13 @@ public static class Selection
          switch (target)
          {
             case SelectionTarget.Selection:
-               OnLocationSelected(added);
+               OnLocationsSelected(added);
                break;
             case SelectionTarget.Hover:
-               OnLocationHovered(added);
+               OnLocationsHovered(added);
                break;
             case SelectionTarget.Highlight:
-               OnLocationHighlighted(added);
+               OnLocationsHighlighted(added);
                break;
             case SelectionTarget.SelectionPreview:
                // No event for preview changes
@@ -138,13 +139,13 @@ public static class Selection
          switch (target)
          {
             case SelectionTarget.Selection:
-               OnLocationDeselected(removed);
+               OnLocationsDeselected(removed);
                break;
             case SelectionTarget.Hover:
-               OnLocationUnhovered(removed);
+               OnLocationsUnhovered(removed);
                break;
             case SelectionTarget.Highlight:
-               OnLocationUnhighlighted(removed);
+               OnLocationsUnhighlighted(removed);
                break;
             case SelectionTarget.SelectionPreview:
                // No event for preview changes
@@ -166,6 +167,9 @@ public static class Selection
          default:
             throw new ArgumentOutOfRangeException(nameof(method), method, null);
       }
+
+      if ((added.Count > 0 || removed.Count > 0) && target == SelectionTarget.Selection)
+         SelectionModified?.Invoke();
    }
 
    #endregion
@@ -294,17 +298,17 @@ public static class Selection
          case SelectionTarget.Selection:
             var selection = SelectedLocations.ToList();
             SelectedLocations.Clear();
-            OnLocationDeselected(selection);
+            OnLocationsDeselected(selection);
             break;
          case SelectionTarget.Hover:
             var hover = HoveredLocations.ToList();
             HoveredLocations.Clear();
-            OnLocationUnhovered(hover);
+            OnLocationsUnhovered(hover);
             break;
          case SelectionTarget.Highlight:
             var highlight = HighlightedLocations.ToList();
             HighlightedLocations.Clear();
-            OnLocationUnhighlighted(highlight);
+            OnLocationsUnhighlighted(highlight);
             break;
          case SelectionTarget.SelectionPreview:
             SelectionPreview.Clear();

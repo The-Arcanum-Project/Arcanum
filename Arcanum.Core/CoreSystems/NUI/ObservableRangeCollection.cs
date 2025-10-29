@@ -10,13 +10,20 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// <typeparam name="T"></typeparam>
 public class ObservableRangeCollection<T> : ObservableCollection<T>
 {
+   public bool IsDistinct { get; set; } = false;
+
    /// <summary>
    /// Adds a collection of items and raises a single notification.
    /// </summary>
    public void AddRange(IEnumerable<T> range)
    {
       foreach (var item in range)
+      {
+         if (IsDistinct && Items.Contains(item))
+            continue;
+
          Items.Add(item); // Add to the internal list without raising events
+      }
 
       // Raise a single "Reset" event to tell the UI to refresh itself completely.
       OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));

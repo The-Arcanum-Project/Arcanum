@@ -1,9 +1,11 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class ClimateMapMode : IMapMode
 {
+   public Type DisplayType => typeof(Climate);
    public bool IsLandOnly => false;
    public string Name => "Climate";
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Climate;

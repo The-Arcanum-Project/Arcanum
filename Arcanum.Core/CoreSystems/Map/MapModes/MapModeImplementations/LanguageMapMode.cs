@@ -1,10 +1,12 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class LanguageMapMode : IMapMode
 {
    public string Name => "Language";
+   public Type DisplayType => typeof(Language);
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Language;
    public string Description => "Displays the primary language of each location on the map.";
    public string? IconSource => null;

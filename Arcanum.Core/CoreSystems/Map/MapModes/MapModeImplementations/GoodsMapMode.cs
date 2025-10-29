@@ -1,10 +1,12 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class GoodsMapMode : IMapMode
 {
    public string Name => "Goods";
+   public Type DisplayType => typeof(RawMaterial);
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Goods;
    public string Description => "Displays the predominant goods produced in each location on the map.";
    public string? IconSource => null;

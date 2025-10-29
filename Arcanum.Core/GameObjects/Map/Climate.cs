@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -9,13 +11,14 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
 [ObjectSaveAs]
-public partial class Climate : IEu5Object<Climate>
+public partial class Climate : IEu5Object<Climate>, IMapInferable
 {
    #region Enums
 
@@ -127,4 +130,31 @@ public partial class Climate : IEu5Object<Climate>
    public string SavingKey => UniqueId;
 
    public override string ToString() => UniqueId;
+   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Climate);
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> climates = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Climate != Empty)
+            continue;
+
+         climates.Add(loc.TemplateData.Climate);
+      }
+
+      return climates.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEnumerable items)
+   {
+      List<Location> locations = [];
+      foreach (var obj in items)
+         if (obj is Location loc &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Climate != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
 }

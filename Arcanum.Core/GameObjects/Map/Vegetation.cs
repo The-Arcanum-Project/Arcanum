@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -9,13 +11,14 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
 [ObjectSaveAs]
-public partial class Vegetation : IEu5Object<Vegetation>
+public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 {
 #pragma warning disable AGS004
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
@@ -102,4 +105,36 @@ public partial class Vegetation : IEu5Object<Vegetation>
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;
+
+   #region IMapInferable
+
+   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Vegetation);
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> items = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Vegetation != Empty)
+            continue;
+
+         items.Add(loc.TemplateData.Vegetation);
+      }
+
+      return items.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEnumerable items)
+   {
+      List<Location> locations = [];
+      foreach (var obj in items)
+         if (obj is Location loc &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Vegetation != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
+
+   #endregion
 }

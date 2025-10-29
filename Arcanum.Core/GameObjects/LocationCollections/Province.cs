@@ -13,7 +13,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Province : IMapInferable<Province>, IEu5Object<Province>, ILocation, ILocationCollection<Location>
+public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
@@ -37,14 +37,14 @@ public partial class Province : IMapInferable<Province>, IEu5Object<Province>, I
    }
    public static Dictionary<string, Province> GetGlobalItems() => Globals.Provinces;
 
-   public static List<Province> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-     .Select(loc => (Province)loc
-               .GetFirstParentOfType(LocationCollectionType
-                                       .Province)!)
-     .Distinct()
-     .ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                        .Province)!)
+                                                                          .Distinct()
+                                                                          .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEnumerable items)
    {
       var typedItems = items.Cast<Province>();
       List<Location> locations = [];

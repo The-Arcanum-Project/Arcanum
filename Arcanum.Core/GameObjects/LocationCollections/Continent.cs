@@ -14,21 +14,21 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class Continent
-   : IMapInferable<Continent>, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>
+   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Continent> GetGlobalItems() => Globals.Continents;
 
-   public static List<Continent> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-     .Select(loc => (Continent)loc
-               .GetFirstParentOfType(LocationCollectionType
-                                       .Area)!)
-     .Distinct()
-     .ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                 .GetFirstParentOfType(LocationCollectionType
+                                                                                        .Area)!)
+                                                                          .Distinct()
+                                                                          .ToList();
 
-   public static List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEnumerable items)
    {
       var typedItems = items.Cast<Continent>();
       List<Location> locations = [];

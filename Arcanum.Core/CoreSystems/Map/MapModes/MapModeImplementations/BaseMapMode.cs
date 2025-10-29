@@ -6,6 +6,7 @@ public class BaseMapMode : IMapMode
 {
    public string Name => "Base";
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Base;
+   public Type DisplayType => typeof(Location);
    public string Description => "The default map mode.";
    public string? IconSource => null;
 

@@ -1,10 +1,12 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class TopographyMapMode : IMapMode
 {
    public bool IsLandOnly => false;
+   public Type DisplayType => typeof(Topography);
    public string Name => "Topography";
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Topography;
    public string Description => "Displays the topography of each location on the map.";

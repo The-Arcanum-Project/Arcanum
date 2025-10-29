@@ -21,7 +21,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class Location
-   : IMapInferable<Location>, IEu5Object<Location>, ILocation
+   : IMapInferable, IEu5Object<Location>, ILocation
 {
    #region game/in_game/map_data/named_locations.txt
 
@@ -66,8 +66,8 @@ public partial class Location
 
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
-   public static List<Location> GetInferredList(IEnumerable<Location> sLocs) => sLocs.ToList();
-   public static List<Location> GetRelevantLocations(IEnumerable items) => items.Cast<Location>().ToList();
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Cast<IEu5Object>().ToList();
+   public List<Location> GetRelevantLocations(IEnumerable items) => items.Cast<Location>().ToList();
 
    public static IMapMode GetMapMode { get; } = new BaseMapMode();
 

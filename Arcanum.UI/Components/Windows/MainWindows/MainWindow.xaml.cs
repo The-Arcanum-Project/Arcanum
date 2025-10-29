@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -182,7 +183,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
-      Selection.LocationSelectionChanged += SelectionOnLocationSelectionChanged;
+      SelectionManager.EditableObjects.CollectionChanged += EditableObjectsOnCollectionChanged;
       GenerateMapModeButtons();
 
       MapControl.OnMapLoaded += () =>
@@ -220,20 +221,21 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          SetUpToolTip(MainMap);
    }
 
-   private void SetUpToolTip(MapControl mainMap)
+   private void EditableObjectsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
    {
-      _toolTipManager.SetUpToolTip(mainMap);
-   }
-
-   private void SelectionOnLocationSelectionChanged(List<Location> locations)
-   {
-      if (locations.Count == 0)
+      var items = SelectionManager.EditableObjects;
+      if (items.Count == 0)
       {
          UiPresenter.Content = null;
          return;
       }
 
-      Eu5UiGen.GenerateAndSetView(new([..locations], true, UiPresenter));
+      Eu5UiGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter));
+   }
+
+   private void SetUpToolTip(MapControl mainMap)
+   {
+      _toolTipManager.SetUpToolTip(mainMap);
    }
 
    private void OpenPluginSettingsWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -509,5 +511,15 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
       UIHandle.Instance.LogWindowHandle.CloseWindow();
+   }
+
+   private void SelectionModeToggle_OnUnchecked(object sender, RoutedEventArgs e)
+   {
+      SelectionManager.ObjectSelectionMode = ObjectSelectionMode.LocationSelection;
+   }
+
+   private void SelectionModeToggle_OnChecked(object sender, RoutedEventArgs e)
+   {
+      SelectionManager.ObjectSelectionMode = ObjectSelectionMode.InferSelection;
    }
 }

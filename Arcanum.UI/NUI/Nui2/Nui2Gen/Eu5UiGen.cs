@@ -29,6 +29,7 @@ using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
+using Common.Logger;
 using Common.UI;
 using Common.UI.MBox;
 using Nexus.Core;
@@ -267,11 +268,9 @@ public static class Eu5UiGen
 
       RoutedEventHandler setClick = (_, _) =>
       {
-         var inferred = MapInferrableRegistry.GetInferredList(primary.GetType(), Selection.GetSelectedLocations);
-         if (inferred == null)
-            return;
+         var inferred = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
 
-         if (inferred.Count < 1)
+         if (inferred == null || inferred.Count < 1)
             return;
 
          Nx.ForceSet(inferred[0], primary, nxProp);
@@ -454,8 +453,7 @@ public static class Eu5UiGen
       var targetType = nxItemType ?? nxPropType;
       Debug.Assert(targetType != null, "targetType != null");
 
-      var inferableInterface = typeof(IMapInferable<>).MakeGenericType(targetType);
-      if (!inferableInterface.IsAssignableFrom(targetType))
+      if (!typeof(IMapInferable).IsAssignableFrom(targetType))
          return;
 
       // Infer actions for a collection
@@ -466,7 +464,7 @@ public static class Eu5UiGen
 
          RoutedEventHandler addClick = (_, _) =>
          {
-            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
             if (mspvm.Value == null)
                return;
@@ -477,7 +475,7 @@ public static class Eu5UiGen
 
          RoutedEventHandler removeClick = (_, _) =>
          {
-            var enumerable = MapInferrableRegistry.GetInferredList(nxItemType, Selection.GetSelectedLocations);
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
             Debug.Assert(enumerable != null, "enumerable != null");
             if (mspvm.Value == null)
                return;
@@ -624,7 +622,17 @@ public static class Eu5UiGen
 
       ICollection allItems = null!;
       if (EmptyRegistry.Empties.TryGetValue(nxItemType, out var value))
-         allItems = ((IEu5Object)value).GetGlobalItemsNonGeneric().Values;
+      {
+         if (value is not IEu5Object eu5Object)
+         {
+            ArcLog.WriteLine("UIG",
+                             LogLevel.CRT,
+                             $"Tried to get global items for type {nxItemType.Name} but the empty is not an IEu5Object.");
+            return;
+         }
+
+         allItems = eu5Object.GetGlobalItemsNonGeneric().Values;
+      }
 
       RoutedEventHandler clickHandler = (_, _) =>
       {

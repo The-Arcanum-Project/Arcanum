@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -9,12 +11,15 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Religious;
 
 [ObjectSaveAs]
-public partial class ReligionGroup : IEu5Object<ReligionGroup>
+public partial class ReligionGroup : IEu5Object<ReligionGroup>, IMapInferable
 {
    #region Nexus Properties
 
@@ -69,6 +74,38 @@ public partial class ReligionGroup : IEu5Object<ReligionGroup>
    public static ReligionGroup Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligionGroup" };
 
    public override string ToString() => UniqueId;
+
+   #endregion
+
+   #region IMapInferable
+
+   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.ReligionGroup);
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> items = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Religion.Group != Empty)
+            continue;
+
+         items.Add(loc.TemplateData.Religion.Group);
+      }
+
+      return items.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEnumerable items)
+   {
+      List<Location> locations = [];
+      foreach (var obj in items)
+         if (obj is Location loc &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Religion.Group != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
 
    #endregion
 }

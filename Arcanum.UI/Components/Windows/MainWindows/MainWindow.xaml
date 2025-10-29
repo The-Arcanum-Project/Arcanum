@@ -27,6 +27,7 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key = "HeaderButtonStyle"
                    TargetType = "styleClasses:BaseButton"
@@ -445,6 +446,51 @@
                    LastChildFill = "True">
             <Grid x:Name = "MapModeButtonGrid"
                   DockPanel.Dock = "Bottom" />
+
+            <Grid x:Name = "SelectionTopBar"
+                  DockPanel.Dock = "Top"
+                  Height = "30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "Auto" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column = "0"
+                            Orientation = "Horizontal">
+                    <ToggleButton x:Name = "SelectionModeToggle"
+                                  Style = "{StaticResource ToggleSwitch}"
+                                  Width = "40"
+                                  Height = "20"
+                                  Margin = "5"
+                                  VerticalAlignment = "Center"
+                                  Checked = "SelectionModeToggle_OnChecked"
+                                  Unchecked = "SelectionModeToggle_OnUnchecked" />
+                    <TextBlock Text = "Toggle Infer Selection Mode"
+                               FontSize = "12"
+                               VerticalAlignment = "Center"
+                               Margin = "0,0,0,0">
+                        <TextBlock.ToolTip>
+                            <ToolTip>
+                                <TextBlock>
+                                    <Run Text = "Infer Selection Mode"
+                                         FontWeight = "Bold" />
+                                    <LineBreak />
+                                    <Run Text = "Selects an object base on the map mode currently active." />
+                                    <LineBreak />
+                                    <Run Text = "   -> Culture map mode -> Cultures are selected"
+                                         FontStyle = "Italic" />
+                                    <LineBreak />
+                                    <LineBreak />
+                                    <Run Text = "Normal Selection Mode"
+                                         FontWeight = "Bold" />
+                                    <LineBreak />
+                                    <Run Text = "Selects clicked locations, regardless of map mode." />
+                                </TextBlock>
+                            </ToolTip>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
 
             <uc:MapControl x:Name = "MainMap"
                            Margin = "5"

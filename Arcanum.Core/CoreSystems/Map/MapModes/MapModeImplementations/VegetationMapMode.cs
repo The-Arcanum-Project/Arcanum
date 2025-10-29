@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -6,6 +7,7 @@ public class VegetationMapMode : IMapMode
 {
    public bool IsLandOnly => false;
    public string Name => "Vegetation";
+   public Type DisplayType => typeof(Vegetation);
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Vegetation;
    public string Description => "Displays the vegetation type of each location on the map.";
    public string? IconSource => null;

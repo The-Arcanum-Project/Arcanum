@@ -105,10 +105,8 @@ public static class GridManager
          header.TextDecorations = TextDecorations.Underline;
          header.Cursor = Cursors.Hand;
 
-         var locations =
-            MapInferrableRegistry.GetRelevantLocations(currentPrimary.GetType(),
-                                                       new List<IEu5Object> { currentPrimary });
-         if (locations.Count > 0)
+         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
+         if (locations?.Count > 0)
             Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, true, false);
       };
 
@@ -118,10 +116,8 @@ public static class GridManager
             return;
 
          header.TextDecorations = null;
-         var locations =
-            MapInferrableRegistry.GetRelevantLocations(currentPrimary.GetType(),
-                                                       new List<IEu5Object> { currentPrimary });
-         if (locations.Count > 0)
+         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
+         if (locations?.Count > 0)
             Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, false, false);
       };
 

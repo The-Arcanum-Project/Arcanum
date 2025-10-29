@@ -1,10 +1,12 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class ReligionGroupMapMode : IMapMode
 {
    public string Name => "Religion Group";
+   public Type DisplayType => typeof(ReligionGroup);
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.ReligionGroup;
    public string Description => "Displays the religion group of each location on the map.";
    public string? IconSource => null;
