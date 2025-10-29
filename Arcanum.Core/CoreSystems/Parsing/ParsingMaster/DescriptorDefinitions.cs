@@ -268,6 +268,7 @@ public static class DescriptorDefinitions
                                                              [
                                                                 new AgeParsing([
                                                                    ModifierDefinitionDescriptor.LoadingService[0],
+                                                                   EstateDescriptor.LoadingService[0],
                                                                 ]),
                                                              ],
                                                              false);

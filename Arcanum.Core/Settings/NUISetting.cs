@@ -572,4 +572,15 @@ public class NUISettings
                                                                 Enum.GetValues<StaticModifier.Field>()
                                                                     .Cast<Enum>()
                                                                     .ToArray());
+
+   public NUISetting EstateCountDefinitonSettings { get; set; } = new(EstateCountDefinition.Field.UniqueId,
+                                                                      Enum.GetValues<EstateCountDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<EstateCountDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray(),
+                                                                      Enum.GetValues<EstateCountDefinition.Field>()
+                                                                          .Cast<Enum>()
+                                                                          .ToArray());
 }

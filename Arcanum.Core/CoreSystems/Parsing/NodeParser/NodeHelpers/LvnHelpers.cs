@@ -168,6 +168,30 @@ public static class LvnHelpers
       return true;
    }
 
+   public static bool TryParseInt(this LiteralValueNode lvn,
+                                  LocationContext ctx,
+                                  string actionName,
+                                  string source,
+                                  ref bool validationResult,
+                                  out int value,
+                                  bool complainOnError = true)
+   {
+      var lexeme = lvn.Value.GetLexeme(source);
+      if (!int.TryParse(lexeme, out value) && complainOnError)
+      {
+         ctx.SetPosition(lvn.Value);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.InvalidIntegerValue,
+                                        actionName,
+                                        lexeme);
+         value = 0;
+         validationResult = false;
+         return false;
+      }
+
+      return true;
+   }
+
    public static bool TryParseJominiDate(this LiteralValueNode lvn,
                                          LocationContext ctx,
                                          string actionName,

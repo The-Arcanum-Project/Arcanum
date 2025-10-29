@@ -1486,6 +1486,54 @@ public static class ParsingToolBox
       return true;
    }
 
+   public static bool ArcTryParse_EstateCountDefinition(ContentNode node,
+                                                        LocationContext ctx,
+                                                        string actionName,
+                                                        string source,
+                                                        [MaybeNullWhen(false)] out EstateCountDefinition value,
+                                                        ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_EstateCountDefinition)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var key = node.KeyNode.GetLexeme(source);
+      if (!Globals.Estates.TryGetValue(key, out var estate))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        actionName,
+                                        key,
+                                        nameof(Estate));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = Eu5Activator.CreateEmbeddedInstance<EstateCountDefinition>(null, node);
+      value.Estate = estate;
+
+      if (!lvn.TryParseInt(ctx, actionName, source, ref validation, out var count))
+         return false;
+
+      value.Count = count;
+      return true;
+   }
+
    public static bool ArcTryParse_Topography(ContentNode node,
                                              LocationContext ctx,
                                              string actionName,

@@ -77,6 +77,18 @@ public partial class Age : IEu5Object<Age>
    [Description("Modifiers applied during this age.")]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
 
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("max_ai_privilege_per_estate", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("The maximum privileges the AI can grant to estates during this age.")]
+   public ObservableRangeCollection<EstateCountDefinition> MaxAiPrivilegesPerEstate { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("min_ai_privilege_per_estate", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("The minimum privileges the AI can grant to estates during this age.")]
+   public ObservableRangeCollection<EstateCountDefinition> MinAiPrivilegesPerEstate { get; set; } = [];
+
    # endregion
 
    #region Interface Properties
