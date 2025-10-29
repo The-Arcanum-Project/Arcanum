@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -563,9 +564,10 @@ public static class Selection
 
    #endregion
 
-   public static Location GetLocation(Vector2 vec2)
+   public static bool GetLocation(Vector2 vec2, [MaybeNullWhen(false)] out Location location)
    {
-      return MapManager.FindLocationAt(vec2) ?? Location.Empty;
+      location = MapManager.FindLocationAt(vec2);
+      return location != null;
    }
 
    public static List<Location> GetLocations(RectangleF rect)

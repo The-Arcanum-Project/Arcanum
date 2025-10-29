@@ -18,6 +18,8 @@
     <Color x:Key = "GreenColor"> #528d57 </Color>
     <Color x:Key = "EmbeddedBorderColor"> #800080 </Color>
     <Color x:Key = "MarkedColor"> #663b0a </Color>
+    <Color x:Key = "DarkGreenColor"> #004503 </Color>
+    <Color x:Key = "DarkYellowColor"> #8B8C00 </Color>
 
     <SolidColorBrush x:Key = "GreenColorBrush"
                      Color = "{StaticResource GreenColor}" />
@@ -55,6 +57,10 @@
                      Color = "{StaticResource EmbeddedBorderColor}" />
     <SolidColorBrush x:Key = "MarkedColorBrush"
                      Color = "{StaticResource MarkedColor}" />
+    <SolidColorBrush x:Key = "DarkGreenColorBrush"
+                     Color = "{StaticResource DarkGreenColor}" />
+    <SolidColorBrush x:Key = "DarkYellowColorBrush"
+                     Color = "{StaticResource DarkYellowColor}" />
 
     <LinearGradientBrush x:Key = "AccentGradientBrush"
                          StartPoint = "-0.2,-0.2"

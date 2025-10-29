@@ -1,11 +1,15 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
+using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using MultiCollectionEditor = Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors.MultiCollectionEditor;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -88,5 +92,18 @@ public partial class DebugPanelGrid
    private void FileWatcherTest_Click(object sender, RoutedEventArgs e)
    {
       new FileChange().Show();
+   }
+
+   private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+   {
+      var targets = Globals.Provinces.Values.Take(2);
+      var ownerWindow = Window.GetWindow(this);
+
+      var result = MultiCollectionEditor.ShowDialogN(ownerWindow!,
+                                                     "TestEditing",
+                                                     typeof(Location),
+                                                     targets.Select(x => x.LocationChildren),
+                                                     Globals.Locations.Values);
+      Debug.WriteLine($"Result: {result}");
    }
 }

@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>Library</OutputType>
         <UseWPF>true</UseWPF>
-        <LangVersion>12</LangVersion>
+        <LangVersion>latestmajor</LangVersion>
         <AssemblyName>Arcanum_UI</AssemblyName>
     </PropertyGroup>
 
@@ -298,6 +298,11 @@
           <SubType>Designer</SubType>
         </Page>
         <Page Update="Components\UserControls\BaseControls\AutoCompleteComboBox\AutoCompleteComboBox.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Windows\MinorWindows\CollectionEditor\MultiCollectionEditor.xaml">
           <Generator>MSBuild:Compile</Generator>
           <XamlRuntime>Wpf</XamlRuntime>
           <SubType>Designer</SubType>

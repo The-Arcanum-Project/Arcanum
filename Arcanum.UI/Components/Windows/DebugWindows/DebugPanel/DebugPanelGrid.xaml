@@ -82,6 +82,11 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "FileWatcherTest_Click" />
+
+            <styleClasses:BaseButton Content = "Open Multi-Collection Editor"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "ButtonBase_OnClick" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"

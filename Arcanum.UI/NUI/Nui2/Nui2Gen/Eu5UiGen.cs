@@ -24,6 +24,7 @@ using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
@@ -351,18 +352,10 @@ public static class Eu5UiGen
          return;
       }
 
-      if (targets.Count > 1)
-      {
-         GetNotSupportedForMultiSelect(nxProp, mainGrid, rowIndex);
-         return;
-      }
-
-      object collection = null!;
-      Nx.ForceGet(primary, nxProp, ref collection);
-
-      if (collection is not IList modifiableList)
+      if (propertyViewModel.Value is not ICollection modifiableList)
       {
          // We have a collection property, but it's not a list we can iterate with our current implementation.
+         // List and HashSet are supported.
          GetTypeSpecificUI(navH,
                            primary,
                            nxProp,
@@ -375,12 +368,11 @@ public static class Eu5UiGen
          return;
       }
 
-      var margin = 19;
+      const int margin = 19;
       var collectionGrid = ControlFactory.GetCollectionGrid();
 
       SetCollectionHeaderPanel(nxProp,
                                itemType,
-                               modifiableList,
                                collectionGrid,
                                primary,
                                0,
@@ -418,7 +410,6 @@ public static class Eu5UiGen
 
    private static void SetCollectionHeaderPanel(Enum nxProp,
                                                 Type itemType,
-                                                IList modifiableList,
                                                 Grid mainGrid,
                                                 IEu5Object primary,
                                                 int row,
@@ -440,7 +431,7 @@ public static class Eu5UiGen
 
       SetUpPropertyContextMenu(primary, nxProp, tb, propertyViewModel);
 
-      GetCollectionEditorButton(primary, nxProp, itemType, modifiableList, headerPanel);
+      GetCollectionEditorButton(navh, primary, nxProp, itemType, headerPanel);
       GetInferActionButtons(propertyViewModel, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
       var marker = GetPropertyMarker(propertyViewModel);
@@ -622,34 +613,50 @@ public static class Eu5UiGen
       return mapModeButton;
    }
 
-   private static void GetCollectionEditorButton(IEu5Object parent,
+   private static void GetCollectionEditorButton(NavH navh,
+                                                 IEu5Object parent,
                                                  Enum property,
                                                  Type nxItemType,
-                                                 IList collection,
                                                  DockPanel panel)
    {
       var eyeButton = NEF.GetEyeButton();
       eyeButton.Margin = new(4, 0, 0, 0);
-      RoutedEventHandler clickHandler;
 
-      if (nxItemType.IsAssignableFrom(typeof(IEu5Object)))
+      ICollection allItems = null!;
+      if (EmptyRegistry.Empties.TryGetValue(nxItemType, out var value))
+         allItems = ((IEu5Object)value).GetGlobalItemsNonGeneric().Values;
+
+      RoutedEventHandler clickHandler = (_, _) =>
       {
-         clickHandler = (_, _) =>
+         var owner = Window.GetWindow(navh.Root)!;
+         var lists = navh.Targets.Select(x => (IList)x._getValue(property));
+         var result =
+            MultiCollectionEditor.ShowDialogN(owner,
+                                              $"Edit {property} - {parent.UniqueId}",
+                                              nxItemType,
+                                              lists,
+                                              allItems);
+
+         dynamic dynamicResult = result;
+
+         if (dynamicResult.Canceled)
+            return;
+
+         Array toAddPerCollection = dynamicResult.ToAddPerCollection;
+         Array toRemovePerCollection = dynamicResult.ToRemovePerCollection;
+
+         for (var i = 0; i < navh.Targets.Count; i++)
          {
-            var allItems = ((IEu5Object)EmptyRegistry.Empties[nxItemType]).GetGlobalItemsNonGeneric().Values;
-            DualListSelector.CreateWindow(allItems, collection, $"Edit {property} - {parent.UniqueId}").ShowDialog();
-         };
-      }
-      else
-      {
-         if (CustomCollectionEditors.TryGetValue(nxItemType, out var customHandler))
-            clickHandler = customHandler;
-         else
-            clickHandler = (_, _) =>
-            {
-               PrimitiveTypeListView.ShowDialog(collection, collection, $"Edit {property} - {parent.UniqueId}");
-            };
-      }
+            var itemsToAdd = (Array)toAddPerCollection.GetValue(i)!;
+            var itemsToRemove = (Array)toRemovePerCollection.GetValue(i)!;
+
+            foreach (var item in itemsToAdd)
+               Nx.AddToCollection(navh.Targets[i], property, item);
+
+            foreach (var item in itemsToRemove)
+               Nx.RemoveFromCollection(navh.Targets[i], property, item);
+         }
+      };
 
       eyeButton.Click += clickHandler;
       eyeButton.Unloaded += (_, _) => eyeButton.Click -= clickHandler;
@@ -680,7 +687,7 @@ public static class Eu5UiGen
                                             IEu5Object primary,
                                             Grid grid,
                                             Enum nxProp,
-                                            IList modifiableList,
+                                            ICollection modifiableList,
                                             int rowIndex,
                                             int margin)
    {
