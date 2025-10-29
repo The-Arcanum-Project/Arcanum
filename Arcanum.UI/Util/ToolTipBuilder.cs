@@ -13,7 +13,8 @@ namespace Arcanum.UI.Util;
 public static class ToolTipBuilder
 {
    private static ToolTipLineSegment GetDefaultLineSegment(Location location)
-      => new($"Location: {location.UniqueId} (<MISSING_LOC>)", ToolTipObjectType.Text) { IsBold = true, };
+      => new($"Location: {location.UniqueId}",
+             ToolTipObjectType.Text) { IsBold = true }; // TODO: Add loc once we support it:  (<MISSING_LOC>)
 
    private static ToolTipLineSegment GetDefaultMapModeLineSegment(string text) => new(text, ToolTipObjectType.Text);
 

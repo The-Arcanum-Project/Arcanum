@@ -454,8 +454,6 @@ public partial class MapControl
    {
       _isPanning = true;
       _lastMousePosition = e.GetPosition(surface);
-
-      OnPanningStarted?.Invoke();
    }
 
    private void HandleMousePanning(MouseEventArgs e)
@@ -469,6 +467,8 @@ public partial class MapControl
          return;
 
       _hasPanned = true;
+
+      OnPanningStarted?.Invoke();
 
       Mouse.OverrideCursor = Cursors.ScrollAll;
 

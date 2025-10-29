@@ -71,6 +71,9 @@ public class ToolTipManager
 
    public void SuppressUntilNotice()
    {
+      if (!_mapToolTip.IsOpen)
+         return;
+
       _mapToolTip.IsOpen = false;
       _lastShownTooltipLocation = Location.Empty;
       _suppressUntilNotice = true;
