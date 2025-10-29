@@ -17,13 +17,12 @@ public enum LastActiveList
    Source,
 }
 
-public partial class DualListEditorViewModel<T> : ViewModelBase, ICollectionEditorViewModel where T : notnull
+public class DualListEditorViewModel<T> : ViewModelBase, ICollectionEditorViewModel where T : notnull
 {
-   private LastActiveList _lastActiveList = LastActiveList.Source; // Default to source
+   private LastActiveList _lastActiveList = LastActiveList.Source;
    private IList? _lastSelectedAppliedItems;
    private IList? _lastSelectedSourceItems;
 
-   // ... other properties are unchanged ...
    private readonly ObservableCollection<ListItemViewModel<T>> _appliedItemsInternal;
    private readonly ObservableCollection<ListItemViewModel<T>> _availableItemsInternal;
    public ICollectionView AppliedItems { get; }
@@ -68,7 +67,6 @@ public partial class DualListEditorViewModel<T> : ViewModelBase, ICollectionEdit
 
    public DualListEditorViewModel(IEnumerable<ICollection<T>> sourceCollections, IEnumerable<T>? globalItemPool = null)
    {
-      // --- Constructor populating lists is unchanged ---
       Collections = sourceCollections.ToList();
       var sourceObjectCount = Collections.Count;
       var itemCounts = new Dictionary<T, int>();
@@ -87,7 +85,6 @@ public partial class DualListEditorViewModel<T> : ViewModelBase, ICollectionEdit
       var typeOfT = typeof(T);
       CanCreatePrimitives = typeOfT == typeof(string) || typeOfT.IsPrimitive;
 
-      // --- COMMAND INITIALIZATION ---
       LeftArrowCommand = new RelayCommand<IList>(items => RemoveItems(items?.Cast<ListItemViewModel<T>>()));
       RightArrowCommand = new RelayCommand(ExecuteRightArrowAction);
 
@@ -108,15 +105,9 @@ public partial class DualListEditorViewModel<T> : ViewModelBase, ICollectionEdit
    private void ExecuteRightArrowAction()
    {
       if (_lastActiveList == LastActiveList.Source)
-      {
-         // Context 1: Last interaction was with the source list. Add items.
          AddItems(_lastSelectedSourceItems?.Cast<ListItemViewModel<T>>());
-      }
-      else // _lastActiveList == LastActiveList.Selection
-      {
-         // Context 2: Last interaction was with the selection list. Promote items.
+      else
          PromoteToAll(_lastSelectedAppliedItems?.Cast<ListItemViewModel<T>>());
-      }
    }
 
    private void AddItems(IEnumerable<ListItemViewModel<T>>? items)
@@ -197,15 +188,15 @@ public partial class DualListEditorViewModel<T> : ViewModelBase, ICollectionEdit
 
    private void CreatePrimitive()
    {
-      if (TypeDescriptor.GetConverter(typeof(T)) is { } converter && converter.IsValid(NewPrimitiveValue))
-      {
-         var newItem = (T)converter.ConvertFromString(NewPrimitiveValue)!;
-         if (!_appliedItemsInternal.Any(i => i.Value.Equals(newItem)) &&
-             !_availableItemsInternal.Any(i => i.Value.Equals(newItem)))
-         {
-            _availableItemsInternal.Add(new(newItem, EditState.NotPresent));
-            NewPrimitiveValue = string.Empty;
-         }
-      }
+      if (TypeDescriptor.GetConverter(typeof(T)) is not { } converter || !converter.IsValid(NewPrimitiveValue))
+         return;
+
+      var newItem = (T)converter.ConvertFromString(NewPrimitiveValue)!;
+      if (_appliedItemsInternal.Any(i => i.Value.Equals(newItem)) ||
+          _availableItemsInternal.Any(i => i.Value.Equals(newItem)))
+         return;
+
+      _availableItemsInternal.Add(new(newItem, EditState.NotPresent));
+      NewPrimitiveValue = string.Empty;
    }
 }
