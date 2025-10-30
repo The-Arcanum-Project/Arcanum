@@ -170,22 +170,21 @@ public partial class FloatNumericUpDown
 
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      if (NudTextBox.Text == INTERMEDIATE_TEXT || string.IsNullOrEmpty(NudTextBox.Text))
+      if (string.IsNullOrEmpty(NudTextBox.Text))
       {
-         SetCurrentValue(ValueProperty, null);
+         if (Value != null)
+            SetCurrentValue(ValueProperty, null);
          return;
       }
 
       if (float.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number))
       {
-         if (number >= MinValue && number <= MaxValue)
-            SetCurrentValue(ValueProperty, number);
-         else
-            RevertText();
-      }
-      else
-      {
-         RevertText();
+         var clampedNumber = Math.Clamp(number, MinValue, MaxValue);
+
+         // CRITICAL CHECK: Only update the source if the value is ACTUALLY different.
+         // This prevents the "1.2" vs "1.20" problem.
+         if (Value == null || !Value.Value.Equals(clampedNumber))
+            SetCurrentValue(ValueProperty, clampedNumber);
       }
    }
 
@@ -222,12 +221,12 @@ public partial class FloatNumericUpDown
       var control = (FloatNumericUpDown)d;
       var value = (float)baseValue;
 
-      var roundedValue = (float)Math.Round((decimal)value, 7);
+      if (value < control.MinValue)
+         return control.MinValue;
 
-      if (value >= control.MinValue && value <= control.MaxValue && Math.Abs(value - roundedValue) < 0.0001)
-         return baseValue;
+      if (value > control.MaxValue)
+         return control.MaxValue;
 
-      var clampedValue = Math.Clamp(value, control.MinValue, control.MaxValue);
-      return (float)Math.Round((decimal)clampedValue, 7);
+      return baseValue;
    }
 }

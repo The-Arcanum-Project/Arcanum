@@ -79,11 +79,7 @@ public static class SelectionManager
             if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
                return;
 
-            HashSet<IEu5Object> inferredObjects = new(inferable.GetInferredList(cLocs));
-
-            var curObjs = EditableObjects.ToHashSet();
-            inferredObjects.ExceptWith(curObjs);
-            EditableObjects.ReplaceRange(inferredObjects);
+            EditableObjects.ReplaceRange(inferable.GetInferredList(cLocs));
             break;
          }
          default:

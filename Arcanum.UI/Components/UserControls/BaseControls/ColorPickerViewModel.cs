@@ -7,7 +7,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls;
 public sealed class ColorPickerViewModel : INotifyPropertyChanged
 {
    private bool _isUpdating;
-   private Color _selectedColor;
+   private Color? _selectedColor;
    private double _hue;
    private double _saturation;
    private double _value;
@@ -19,10 +19,10 @@ public sealed class ColorPickerViewModel : INotifyPropertyChanged
 
    public ColorPickerViewModel()
    {
-      SelectedColor = Colors.Red;
+      SelectedColor = Colors.Transparent;
    }
 
-   public Color SelectedColor
+   public Color? SelectedColor
    {
       get => _selectedColor;
       set
@@ -192,13 +192,21 @@ public sealed class ColorPickerViewModel : INotifyPropertyChanged
       _isUpdating = false;
    }
 
-   private void UpdateAllPropertiesFromColor(Color color)
+   private void UpdateAllPropertiesFromColor(Color? col)
    {
       if (_isUpdating)
          return;
 
+      if (col == null)
+      {
+         _selectedColor = null;
+         OnPropertyChanged(nameof(SelectedColor));
+         return;
+      }
+
       _isUpdating = true;
 
+      var color = col.Value;
       _selectedColor = color;
       var (h, s, v) = ColorConversion.RgbToHsv(color.R, color.G, color.B);
 

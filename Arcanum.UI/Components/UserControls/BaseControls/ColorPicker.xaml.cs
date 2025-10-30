@@ -12,7 +12,7 @@ public partial class ColorPicker
    public ColorPickerViewModel? ViewModel => DataContext as ColorPickerViewModel;
    public Color SelectedColor
    {
-      get => ViewModel?.SelectedColor ?? Colors.Red;
+      get => ViewModel?.SelectedColor ?? Colors.Transparent;
       set
       {
          if (ViewModel != null)

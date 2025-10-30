@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -22,6 +23,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.Religious;
 
 [ObjectSaveAs]
+[DebuggerDisplay("{UniqueId,nq}")]
 public partial class Religion : IEu5Object<Religion>, IMapInferable
 {
    #region Nexus Properties

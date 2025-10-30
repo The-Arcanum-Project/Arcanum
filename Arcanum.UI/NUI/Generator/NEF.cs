@@ -631,12 +631,11 @@ public static class NEF
    }
 
    public static JominiColorView GetJominiColorUI(Binding binding,
-                                                  JominiColor color,
                                                   bool isReadOnly,
                                                   int fontSize = 12,
                                                   int height = 23)
    {
-      var jomColView = new JominiColorView(color, isReadOnly)
+      var jomColView = new JominiColorView(JominiColor.Empty, isReadOnly)
       {
          ColorTextBlock =
          {

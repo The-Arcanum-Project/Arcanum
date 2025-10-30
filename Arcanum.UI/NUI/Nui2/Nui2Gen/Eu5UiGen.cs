@@ -333,7 +333,7 @@ public static class Eu5UiGen
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
-      var propertyViewModel = new MultiSelectPropertyViewModel([primary], nxProp, allowReadOnlyEditing);
+      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp, allowReadOnlyEditing);
 
       if (itemType == null)
       {
@@ -351,7 +351,8 @@ public static class Eu5UiGen
          return;
       }
 
-      if (propertyViewModel.Value is not ICollection modifiableList)
+      // We have collections from multiple objects which are not identical.
+      if (primary._getValue(nxProp) is not ICollection)
       {
          // We have a collection property, but it's not a list we can iterate with our current implementation.
          // List and HashSet are supported.
@@ -380,11 +381,23 @@ public static class Eu5UiGen
                                navH,
                                propertyViewModel);
 
-      var rebuildPreview = () =>
+      Action rebuildPreview;
+      if (propertyViewModel.Value is ICollection modifiableList)
       {
-         ClearCollectionPreview(collectionGrid);
-         GetCollectionPreview(navH, primary, collectionGrid, nxProp, modifiableList, 1, margin);
-      };
+         rebuildPreview = () =>
+         {
+            ClearCollectionPreview(collectionGrid);
+            GetCollectionPreview(navH, primary, collectionGrid, nxProp, modifiableList, 1, margin);
+         };
+
+         if (modifiableList.Count > 0)
+            GetCollectionLiner(collectionGrid, margin);
+      }
+      else
+      {
+         rebuildPreview = () => { GetDifferingCollectionsNotPrevieable(collectionGrid, 1, margin); };
+      }
+
       rebuildPreview();
 
       propertyViewModel.CollectionContentChanged += (_, _) =>
@@ -392,8 +405,6 @@ public static class Eu5UiGen
          Application.Current.Dispatcher.Invoke(rebuildPreview);
       };
 
-      if (modifiableList.Count > 0)
-         GetCollectionLiner(collectionGrid, margin);
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
@@ -691,6 +702,24 @@ public static class Eu5UiGen
       Grid.SetRowSpan(border, int.MaxValue);
    }
 
+   private static void GetDifferingCollectionsNotPrevieable(Grid grid,
+                                                            int rowIndex,
+                                                            int margin)
+   {
+      var infoText = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                       false,
+                                                       "  (Collections differ between selected objects - no preview)",
+                                                       height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                       alignment: HorizontalAlignment.Left);
+      GridManager.AddToGrid(grid,
+                            infoText,
+                            rowIndex,
+                            0,
+                            0,
+                            ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                            leftMargin: margin + 4);
+   }
+
    private static void GetCollectionPreview(NavH navH,
                                             IEu5Object primary,
                                             Grid grid,
@@ -919,10 +948,8 @@ public static class Eu5UiGen
          element = NEF.GetDoubleUI(binding, (decimal)val);
       else if (type == typeof(JominiColor))
       {
-         var temp = JominiColor.Empty;
-         Nx.ForceGet(primary, nxProp, ref temp);
          var isReadonly = primary.IsPropertyReadOnly(nxProp);
-         element = NEF.GetJominiColorUI(binding, temp, isReadonly);
+         element = NEF.GetJominiColorUI(binding, isReadonly);
       }
       else if (type == typeof(JominiDate))
          element = NEF.GetJominiDateUI(binding);
