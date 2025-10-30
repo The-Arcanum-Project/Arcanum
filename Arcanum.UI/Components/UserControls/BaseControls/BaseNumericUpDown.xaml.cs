@@ -13,6 +13,8 @@ public partial class BaseNumericUpDown
    public BaseNumericUpDown()
    {
       InitializeComponent();
+
+      NudTextBox.LostFocus += NudTextBox_LostFocus;
    }
 
    public static readonly DependencyProperty InnerBorderThicknessProperty =
@@ -75,94 +77,79 @@ public partial class BaseNumericUpDown
                                   typeof(BaseNumericUpDown),
                                   new FrameworkPropertyMetadata(null,
                                                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                                                                OnValueChanged));
+                                                                OnValueChanged,
+                                                                CoerceValue));
 
    private static void OnMinMaxChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       var control = (BaseNumericUpDown)d;
 
-      if (control.MinValue > control.MaxValue)
-         control.MinValue = control.MaxValue;
+      control.CoerceValue(ValueProperty);
+   }
 
-      if (control.Value.HasValue)
-      {
-         if (control.Value < control.MinValue)
-            control.Value = control.MinValue;
-         else if (control.Value > control.MaxValue)
-            control.Value = control.MaxValue;
-      }
+   private static object? CoerceValue(DependencyObject d, object? baseValue)
+   {
+      if (baseValue == null)
+         return null;
+
+      var control = (BaseNumericUpDown)d;
+      var value = (int)baseValue;
+
+      return Math.Clamp(value, control.MinValue, control.MaxValue);
    }
 
    private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       var control = (BaseNumericUpDown)d;
       var newValue = (int?)e.NewValue;
-      string newText;
 
-      if (newValue.HasValue)
-      {
-         var clampedValue = newValue.Value;
-         if (clampedValue < control.MinValue)
-            clampedValue = control.MinValue;
-         else if (clampedValue > control.MaxValue)
-            clampedValue = control.MaxValue;
+      var newText = newValue.HasValue
+                       ? newValue.Value.ToString(CultureInfo.InvariantCulture)
+                       : INTERMEDIATE_TEXT;
 
-         newText = clampedValue.ToString(CultureInfo.InvariantCulture);
-      }
-      else
-      {
-         // This is the "indeterminate" state. Display a dash.
-         newText = INTERMEDIATE_TEXT;
-      }
-
-      // Update the TextBox text only if it's different to prevent cursor jumps
       if (control.NudTextBox.Text != newText)
          control.NudTextBox.Text = newText;
    }
 
    private void NUDButtonUP_Click(object sender, RoutedEventArgs e)
    {
-      int currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      var currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
 
-      if (currentValue < MaxValue)
-         SetCurrentValue(ValueProperty, currentValue + 1);
+      SetCurrentValue(ValueProperty, currentValue + 1);
    }
 
    private void NUDButtonDown_Click(object sender, RoutedEventArgs e)
    {
-      int currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
+      var currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
 
-      if (currentValue > MinValue)
-         SetCurrentValue(ValueProperty, currentValue - 1);
+      SetCurrentValue(ValueProperty, currentValue + 1);
    }
 
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      if (NudTextBox.Text == INTERMEDIATE_TEXT)
+      if (string.IsNullOrEmpty(NudTextBox.Text) || NudTextBox.Text == INTERMEDIATE_TEXT)
       {
-         SetCurrentValue(ValueProperty, null);
+         if (Value != null)
+            SetCurrentValue(ValueProperty, null);
          return;
       }
 
-      if (string.IsNullOrEmpty(NudTextBox.Text))
-      {
-         // An empty textbox can also represent a null state.
-         SetCurrentValue(ValueProperty, null);
+      // Allow user to type a negative sign without immediate reversion
+      if (NudTextBox.Text == "-")
          return;
-      }
 
-      if (int.TryParse(NudTextBox.Text, out var number))
-      {
-         // If the parsed number is within range, update the source value.
-         if (number >= MinValue && number <= MaxValue)
-            SetCurrentValue(ValueProperty, number);
-         else // Number is out of range, revert to the last valid value.
-            RevertText();
-      }
-      else // Text is not a valid number (and not a INTERMEDIATE_TEXT), revert.
-      {
-         RevertText();
-      }
+      if (!int.TryParse(NudTextBox.Text, CultureInfo.InvariantCulture, out var number))
+         return;
+
+      // CRITICAL GUARD: Only set the value if it's actually different.
+      // This prevents the update "bounce" from happening.
+      if (Value == null || Value.Value != number)
+         SetCurrentValue(ValueProperty, number);
+   }
+
+   private void NudTextBox_LostFocus(object sender, RoutedEventArgs e)
+   {
+      RevertText();
    }
 
    private void RevertText()
@@ -174,10 +161,17 @@ public partial class BaseNumericUpDown
    private void NudTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
    {
       var textBox = (TextBox)sender;
-      var proposedText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
-                                .Insert(textBox.SelectionStart, e.Text);
+      var currentText = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+      var proposedText = currentText.Insert(textBox.SelectionStart, e.Text);
 
-      e.Handled = !(int.TryParse(proposedText, out _) || (proposedText == INTERMEDIATE_TEXT && MinValue < 0));
+      // Allow typing a '-' only at the beginning
+      if (proposedText == "-")
+      {
+         e.Handled = false;
+         return;
+      }
+
+      e.Handled = !int.TryParse(proposedText, out _);
    }
 
    private void NudTextBox_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -187,7 +181,7 @@ public partial class BaseNumericUpDown
       else
          NUDButtonDown_Click(sender, e);
    }
-   
+
    private void NudTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
    {
       NudTextBox.SelectAll();
