@@ -1,4 +1,7 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
@@ -14,7 +17,12 @@ public sealed unsafe class MapTracing : IDisposable
    private IntPtr _scan0;
    private Bitmap _bitmap;
    private BitmapData _bitmapData;
-
+   private Bitmap _visitedBitmap;
+   private BitmapData _visitedBitmapData;
+   private IntPtr _visitedBitmapDataPtr;
+   private int _visitedStride;
+   
+   
    private Dictionary<Vector2I, Node> NodeCache { get; } = new();
 
    public MapTracing(Bitmap bmp)
@@ -27,6 +35,11 @@ public sealed unsafe class MapTracing : IDisposable
       Height = _bitmapData.Height;
       _stride = _bitmapData.Stride;
       _scan0 = _bitmapData.Scan0;
+      _visitedBitmap = new (_bitmap.Width, _bitmap.Height, PixelFormat.Format1bppIndexed);
+      _visitedBitmapData = _visitedBitmap.LockBits(new(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite,
+         PixelFormat.Format1bppIndexed);
+      _visitedBitmapDataPtr = _visitedBitmapData.Scan0;
+      _visitedStride = _visitedBitmapData.Stride;
    }
 
    private int GetColor(int x, int y)
@@ -43,7 +56,20 @@ public sealed unsafe class MapTracing : IDisposable
    {
       return GetColor(pos.X, pos.Y);
    }
-
+   
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private void ClearPixel(int i, int i1)
+   {
+      var row = (byte*)_visitedBitmapDataPtr + i1 * _visitedStride;
+      // Set the bit to 1
+      row[i/8] |= (byte)(0x80 >> (i % 8));
+   }
+   private bool IsPixelCleared(int i, int i1)
+   {
+      var row = (byte*)_visitedBitmapDataPtr + i1 * _visitedStride;
+      return (row[i/8] & (byte)(0x80 >> (i % 8))) != 0;
+   }
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColorWithOutsideCheck(int x, int y)
    {
       if (x < 0 || x >= Width || y < 0 || y >= Height)
@@ -54,6 +80,17 @@ public sealed unsafe class MapTracing : IDisposable
       return GetColor(x, y);
    }
 
+   private int GetColorAndSetCleared(int x, int y)
+   {
+      if (x < 0 || x >= Width || y < 0 || y >= Height)
+      {
+         return OUTSIDE_COLOR;
+      }
+      ClearPixel(x,y);
+      return GetColor(x, y);
+
+   }
+   
    private int GetColorWithOutsideCheck(Vector2I pos)
    {
       return GetColorWithOutsideCheck(pos.X, pos.Y);
@@ -82,7 +119,8 @@ public sealed unsafe class MapTracing : IDisposable
       Node? lastNode = null;
 
       var currentSegment = firstSegment;
-
+      
+      ClearPixel(0,0);
       // Left Edge (top to bottom)
       for (var y = 1; y <= Height - 1; y++)
       {
@@ -91,11 +129,13 @@ public sealed unsafe class MapTracing : IDisposable
          {
             FinalizeSegment(0, y, color, Direction.East);
          }
+         
+         ClearPixel(0,y);
       }
 
       // Bottom Left Corner
       currentSegment.Points.Add(new(0, Height));
-
+      ClearPixel(0,Height - 1);
       // Bottom Edge (left to right)
       for (var x = 1; x <= Width - 1; x++)
       {
@@ -104,11 +144,12 @@ public sealed unsafe class MapTracing : IDisposable
          {
             FinalizeSegment(x, Height, color, Direction.North);
          }
+         ClearPixel(x,Height - 1);
       }
 
       // Bottom Right Corner
       currentSegment.Points.Add(new(Width, Height));
-
+      ClearPixel(Width-1, Height - 1);
       // Right Edge (bottom to top)
       for (var y = Height - 1; y > 0; y--)
       {
@@ -117,11 +158,12 @@ public sealed unsafe class MapTracing : IDisposable
          {
             FinalizeSegment(Width, y, color, Direction.West);
          }
+         ClearPixel(Width - 1, y - 1);
       }
 
       // Top Right Corner
       currentSegment.Points.Add(new(Width, 0));
-
+      ClearPixel(Width-1, 0);
       // Top Edge (right to left)
       for (var x = Width - 1; x > 0; x--)
       {
@@ -130,8 +172,8 @@ public sealed unsafe class MapTracing : IDisposable
          {
             FinalizeSegment(x, 0, color, Direction.South);
          }
+         ClearPixel(x - 1, 0);
       }
-
       currentSegment.Points.AddRange(firstSegment.Points);
 
       //TODO: @MelCo: This currently does not handle the case where there are no nodes on the border.
@@ -177,19 +219,47 @@ public sealed unsafe class MapTracing : IDisposable
    private Node TraceEdgeStartNodeWithOutsideCheck(Node startNode,
                                                    Direction startDirection)
    {
+      var (node, cache) = TraceEdge(startNode.Position, startDirection);
+
+      cache.Node = startNode;
+      
+      var startCache = startNode.GetSegment(startDirection);
+      startCache.Node = node;
+      startCache.Segment = cache.Segment?.Invert();
+      
+      return node;
+   }
+
+   private (Node, CacheNodeInfo) TraceEdge(Vector2I startPos, Direction startDirection, bool loopCheck = false)
+   {
       // Get pixel positions to the left and right of the start node in the given direction
-      var points = DirectionHelper.GetStartPos(startNode.XPos, startNode.YPos, startDirection);
-      var lColor = GetColorWithOutsideCheck(points.Xl, points.Yl);
-      var rColor = GetColorWithOutsideCheck(points.Xr, points.Yr);
+      var points = DirectionHelper.GetStartPos(startPos.X, startPos.Y, startDirection);
+      var lColor = GetColorAndSetCleared(points.Xl, points.Yl);
+      var rColor = GetColorAndSetCleared(points.Xr, points.Yr);
 
       var currentDirection = startDirection;
       var currentSegment = new BorderSegment();
 
+      var startPointX = points.Xpos;
+      var startPointY = points.Ypos;
+      
       while (true)
       {
          currentDirection.Move(ref points, out var cachePos, out var xaxis);
-         var lTest = GetColorWithOutsideCheck(points.Xl, points.Yl);
-         var rTest = GetColorWithOutsideCheck(points.Xr, points.Yr);
+         if(loopCheck && points.Xpos == startPointX && points.Ypos == startPointY)
+         {
+            // We have looped back to the start position without finding a node.
+            // This can happen in case of small enclosed areas.
+            // To prevent infinite loops, we create a node here.
+            currentSegment.Points.Add(points.GetPosition());
+            var loopNode = Node.GetOneWayNode(points.Xpos, points.Ypos, startDirection);
+            var segment = loopNode.Segments[0];
+            segment.Segment = new(currentSegment, false);
+            return (loopNode, segment);
+         }
+         var lTest = GetColorAndSetCleared(points.Xl, points.Yl);
+         var rTest = GetColorAndSetCleared(points.Xr, points.Yr);
+         
          if (lTest == lColor && rTest == rColor)
             continue;
 
@@ -246,22 +316,18 @@ public sealed unsafe class MapTracing : IDisposable
                       : Node.GetFourWayNode(points.Xpos, points.Ypos, currentDirection);
 
             var segment = node.GetSegment(arriveDirection);
-            segment.Node = startNode;
+            //segment.Node = startNode;
             segment.Segment = new(currentSegment, false);
-
             NodeCache.Add(points.GetPosition(), node);
-         }
-         else
-         {
-            var cache = node.GetSegment(arriveDirection);
-            cache.Node = startNode;
-            cache.Segment = new(currentSegment, false);
+            
+            return (node, segment);
          }
 
-         var startCache = startNode.GetSegment(startDirection);
-         startCache.Node = node;
-         startCache.Segment = new(currentSegment, true);
-         return node;
+         var cache = node.GetSegment(arriveDirection);
+         //cache.Node = startNode;
+         cache.Segment = new(currentSegment, false);
+         return (node, cache);
+
       }
    }
 
@@ -367,7 +433,34 @@ public sealed unsafe class MapTracing : IDisposable
    polygons.AddRange(from direction in node.Segments.Select(s => s.Dir)
        where !node.TestDirection(direction)
        select TraceFromNode(node, direction));
-*/
+   */
+
+   /// <summary>
+   /// 
+   /// </summary>
+   /// <param name="position">Position of the new color on the right of the previous color</param>
+   private void HandleIsland(Vector2I position, List<PolygonParsing> polygons)
+   {
+      // Instead of parsing from a node, we parse from a segment by finding the start node and tracing from there.
+      // The edge case that no node exists will have to be taken into account.
+      // First, find the nodes at the start and end of the segment.
+      
+      // We have a border on the left of the position
+      if(position.Y is > 2986 and < 3006 && position.X is > 6900 and < 6937)
+         Debugger.Break();
+      var (startNode, startcache) = TraceEdge(new(position.X, position.Y + 1), Direction.North, true);
+      if (startNode.Segments.Length == 1)
+      {
+         // Loop so directly create a polygon
+         var polygon = new PolygonParsing(GetColorWithOutsideCheck(position.X, position.Y));
+         polygon.Segments.Add(startcache.Segment!.Value.Invert());
+         polygons.Add(polygon);
+      }
+      
+      //var endNode = TraceEdge(position, Direction.South);
+      
+   }
+
    public List<PolygonParsing> Trace()
    {
       TraceImageEdges();
@@ -380,7 +473,58 @@ public sealed unsafe class MapTracing : IDisposable
          VisitNode(node.Value, polygons);
          NodeCache.Remove(node.Key);
       }
+      // go through the entire visited bitmap and find borders which have not been visited yet
+      var sw = new Stopwatch();
+      sw.Start();
+      var lastcolor = OUTSIDE_COLOR;
+      
+      /*
+      for(var x = 0; x < Width; x++)
+      for (var y = 0; y < Height; y++)
+      {
+         
+         var color = GetColor(x, y);
+         if (color == lastcolor && !IsPixelCleared(x,y))
+         {
+            ClearPixel(x,y);
+            continue;
+         }
+         lastcolor = color;
+      }
+      */
+      var counter = 0;
+      
+      for (var y = 0; y < Height; y++)
+      {
+         var row = (byte*)_scan0 + y * _stride;
+         var visitedRow = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
 
+         var lastColor = OUTSIDE_COLOR;
+
+         for (var x = 0; x < Width; x++)
+         {
+            var idx = x * 3;
+            var color = ALPHA | row[idx + 2] | (row[idx + 1] << 8) | (row[idx] << 16);
+
+            var mask = (byte)(0x80 >> (x % 8));
+            if (color != lastColor)
+            {
+               if(( visitedRow[x / 8] & mask) == 0)
+               {
+                  HandleIsland(new(x, y), polygons);
+                  counter++;
+               }
+               lastColor = color;
+            }
+            else
+               visitedRow[x / 8] |= mask;
+         }
+      }
+  
+      sw.Stop();
+      Console.WriteLine($"Found {counter} new borders in: {sw.ElapsedMilliseconds} ms");
+  
+      _visitedBitmap.Save("testedged.png");
       return polygons;
    }
 
