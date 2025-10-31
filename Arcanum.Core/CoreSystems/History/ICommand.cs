@@ -11,7 +11,7 @@ public interface ICommand
    /// Normal command execution.
    /// </summary>
    public void Execute();
-   
+
    /// <summary>
    /// Undo the command.
    /// </summary>
@@ -21,7 +21,7 @@ public interface ICommand
    /// Redo the command often can directly call Execute, but can also be used to restore state after an undo.
    /// </summary>
    public void Redo();
-   
+
    /// <summary>
    /// The hash is needed to determine commands which target the same objects in history compaction
    /// </summary>
@@ -32,9 +32,9 @@ public interface ICommand
    /// Returns the target objects affected by this command.
    /// </summary>
    public IEu5Object[] GetTargets();
-   
+
    public string GetDescription { get; }
-   
+
    /// <summary>
    /// Provides detailed information about the command for debugging purposes.
    /// This will be written to the log if a crash or issue occurs.
@@ -42,29 +42,17 @@ public interface ICommand
    /// <param name="indent"></param>
    /// <returns></returns>
    public string GetDebugInformation(int indent);
-}
 
-/// Represents the initial command in the command history system.
-/// This command acts as the starting point for the history tree
-/// and does not perform any execution or state changes.
-public class CInitial : ICommand
-{
-   public void Execute()
-   {
-   }
+   /// <summary>
+   /// Returns the list of properties affected by this command.
+   /// if No properties are affected, return null.
+   /// </summary>
+   /// <returns></returns>
+   public Type? GetTargetPropertyType();
 
-   public void Undo()
-   {
-   }
-
-   public void Redo()
-   {
-   }
-
-   public List<int> GetTargetHash() => [-1];
-   public IEu5Object[] GetTargets() => [];
-
-   public string GetDescription => "Initial Command";
-
-   public string GetDebugInformation(int indent) => "Initial Command Debug Information";
+   /// <summary>
+   /// Returns an array of target properties affected by this command.
+   /// If no properties are affected, return null. Or if the properties are not of type IEu5Object, return null.
+   /// </summary>
+   public IEu5Object[]? GetTargetProperties();
 }

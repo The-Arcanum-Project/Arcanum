@@ -54,7 +54,7 @@ public class LruCacheManager
 
       var newColorData = GenerateFullColorArray(type);
       var newNode = new LinkedListNode<KeyValuePair<MapModeManager.MapModeType, LruCacheValue>>(new(type,
-       new(newColorData)));
+              new(newColorData)));
 
       _cache.Add(type, newNode);
       _lruList.AddFirst(newNode);
@@ -121,5 +121,11 @@ public class LruCacheManager
    {
       foreach (var node in _lruList)
          node.Value.InvalidLocations.Add(loc);
+   }
+
+   public void MarkInvalid(IEnumerable<Location> locs)
+   {
+      foreach (var loc in locs)
+         MarkInvalid(loc);
    }
 }

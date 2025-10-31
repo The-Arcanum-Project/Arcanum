@@ -1,4 +1,7 @@
-﻿using Timer = System.Threading.Timer;
+﻿using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Timer = System.Threading.Timer;
 
 namespace Arcanum.Core.CoreSystems.History;
 
@@ -38,6 +41,8 @@ public class TreeHistoryManager : IHistoryManager
    public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
    public event Action<ICommand>? CommandAdded;
 
+   public event Action<Type, IEu5Object[]>? ModifiedType;
+
    private int _lastCompactionDepth;
    private Timer? _autoCompactingTimer;
    private Timer? _updateToolStripTimer;
@@ -56,6 +61,14 @@ public class TreeHistoryManager : IHistoryManager
       Current.Children.Add(newNode);
       Current = newNode;
       CommandAdded?.Invoke(newCommand);
+      InvokeTypeUpdate(newCommand);
+   }
+
+   private void InvokeTypeUpdate(ICommand command)
+   {
+      var changedType = command.GetTargetPropertyType();
+      if (changedType != null)
+         ModifiedType?.Invoke(changedType, command.GetTargetProperties() ?? []);
    }
 
    // Check if there are any commands to undo or redo
@@ -115,6 +128,7 @@ public class TreeHistoryManager : IHistoryManager
       }
 
       UndoEvent.Invoke(null, undoCommand);
+      InvokeTypeUpdate(undoCommand!);
       return undoCommand;
    }
 
@@ -163,6 +177,7 @@ public class TreeHistoryManager : IHistoryManager
       end:
       RedoEvent.Invoke(null, redoCommand);
       redoCommand?.Redo();
+      InvokeTypeUpdate(redoCommand!);
       return redoCommand;
    }
 

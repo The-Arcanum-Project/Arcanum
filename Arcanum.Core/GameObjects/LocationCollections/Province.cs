@@ -44,7 +44,7 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
                                                                           .Distinct()
                                                                           .ToList();
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
       var typedItems = items.Cast<Province>();
       List<Location> locations = [];
@@ -53,7 +53,7 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
       return locations.Distinct().ToList();
    }
 
-   public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
    public static Province Empty { get; } = new() { UniqueId = "Empty Province" };
    public string GetNamespace => "Map.Province";
 

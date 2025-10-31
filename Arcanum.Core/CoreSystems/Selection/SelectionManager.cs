@@ -99,11 +99,17 @@ public static class SelectionManager
 
    public static List<Location>? GetRelevantLocationsForObjects(IEnumerable items)
    {
-      var mapMode = MapModeManager.GetCurrent();
-
-      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
+      var obj = items.Cast<IEu5Object>().ToArray();
+      if (obj.Length == 0)
          return null;
 
-      return inferable.GetRelevantLocations(items);
+      var mapMode = MapModeManager.GetCurrent();
+
+      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) ||
+          empty is not IMapInferable inferable ||
+          obj.GetType() != mapMode.DisplayType)
+         return null;
+
+      return inferable.GetRelevantLocations(obj);
    }
 }

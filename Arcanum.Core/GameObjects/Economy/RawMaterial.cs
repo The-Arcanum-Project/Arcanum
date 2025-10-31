@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
@@ -144,7 +145,7 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
 
    #region IMapInferable
 
-   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Goods);
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Goods;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
    {
@@ -160,11 +161,15 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
       return items.ToList();
    }
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
+      Debug.Assert(items.All(x => x is RawMaterial));
+      var objs = items.Cast<RawMaterial>().ToArray();
+
       List<Location> locations = [];
-      foreach (var obj in items)
-         if (obj is Location loc &&
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData.RawMaterial) &&
              loc.TemplateData != LocationTemplateData.Empty &&
              loc.TemplateData.RawMaterial != Empty)
             locations.Add(loc);

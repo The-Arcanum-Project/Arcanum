@@ -3,22 +3,27 @@ using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands.Collections;
 
-public class RemoveFromCollectionCommand(IEu5Object target, Enum attribute, object value)
-    : ModifyCollectionCommand(target, attribute, value)
+public class RemoveFromCollectionCommand
+   : ModifyCollectionCommand
 {
-    protected override string ActionDescription => "Remove";
+   public RemoveFromCollectionCommand(IEu5Object target, Enum attribute, object value) : base(target, attribute, value)
+   {
+      target._removeFromCollection(attribute, value);
+   }
 
-    public override void Undo()
-    {
-        base.Undo();
-        foreach(var target in Targets)
-            target._addToCollection(Attribute, Value);
-    }
+   protected override string ActionDescription => "Remove";
 
-    public override void Redo()
-    {
-        base.Redo();
-        foreach(var target in Targets)
-            target._removeFromCollection(Attribute, Value);
-    }
+   public override void Undo()
+   {
+      base.Undo();
+      foreach (var target in Targets)
+         target._addToCollection(Attribute, Value);
+   }
+
+   public override void Redo()
+   {
+      base.Redo();
+      foreach (var target in Targets)
+         target._removeFromCollection(Attribute, Value);
+   }
 }

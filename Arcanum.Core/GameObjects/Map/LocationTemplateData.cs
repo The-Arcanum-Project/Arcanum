@@ -1,5 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -9,7 +12,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map.SubObjects;
+using Arcanum.Core.GameObjects.Religious;
+using Common.Logger;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Map;
@@ -18,7 +24,7 @@ namespace Arcanum.Core.GameObjects.Map;
 public static partial class MapMovementAssistParsingWhy;
 
 [ObjectSaveAs]
-public partial class LocationTemplateData : IEu5Object<LocationTemplateData>
+public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IMapInferable
 {
    #region Nexus Properties
 
@@ -105,4 +111,24 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>
    public override string ToString() => UniqueId;
 
    #endregion
+
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base;
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+      => sLocs.Where(loc => loc.TemplateData == this).Cast<IEu5Object>().ToList();
+
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
+   {
+      Debug.Assert(items.All(x => x is LocationTemplateData));
+      var objs = items.Cast<LocationTemplateData>().ToArray();
+
+      List<Location> locations = [];
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData) &&
+             loc.TemplateData != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
 }

@@ -44,7 +44,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
                                                                           .Distinct()
                                                                           .ToList();
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
       var typedItems = items.Cast<Region>();
       List<Location> locations = [];
@@ -54,7 +54,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    }
 
    public List<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
-   public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
    public string GetNamespace => "Map.Region";
 
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);

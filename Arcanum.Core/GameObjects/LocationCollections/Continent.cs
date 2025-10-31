@@ -28,7 +28,7 @@ public partial class Continent
                                                                           .Distinct()
                                                                           .ToList();
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
       var typedItems = items.Cast<Continent>();
       List<Location> locations = [];
@@ -37,7 +37,7 @@ public partial class Continent
       return locations.Distinct().ToList();
    }
 
-   public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
    public string GetNamespace => $"Map.{nameof(Continent)}";
 
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);

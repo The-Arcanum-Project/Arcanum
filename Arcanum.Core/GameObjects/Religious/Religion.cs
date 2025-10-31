@@ -264,7 +264,7 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
 
    #region IMapInferable
 
-   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Religion);
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Religion;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
    {
@@ -280,11 +280,15 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
       return items.ToList();
    }
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
+      Debug.Assert(items.All(x => x is Religion));
+      var religions = items.Cast<Religion>().ToArray();
+
       List<Location> locations = [];
-      foreach (var obj in items)
-         if (obj is Location loc &&
+
+      foreach (var loc in Globals.Locations.Values)
+         if (religions.Contains(loc.TemplateData.Religion) &&
              loc.TemplateData != LocationTemplateData.Empty &&
              loc.TemplateData.Religion != Empty)
             locations.Add(loc);

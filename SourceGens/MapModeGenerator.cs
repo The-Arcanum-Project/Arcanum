@@ -115,6 +115,8 @@ public class MapModeGenerator : IIncrementalGenerator
       builder.AppendLine("        {");
       foreach (var mode in mapModes)
          builder.AppendLine($"            _mapModes.Add(MapModeType.{mode.EnumMemberName}, new {mode.ClassName}());");
+      builder.AppendLine();
+      builder.AppendLine("            InitializeMapModeManager();");
 
       builder.AppendLine("        }");
       builder.AppendLine();

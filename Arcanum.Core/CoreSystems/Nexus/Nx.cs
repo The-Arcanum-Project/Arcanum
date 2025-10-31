@@ -33,7 +33,6 @@ public static class Nx
                                   Enum e)
    {
       CommandManager.SetValueCommand((IEu5Object)target, e, value!);
-      target._setValue(e, value!);
    }
 
    [PropertyGetter]
@@ -116,7 +115,7 @@ public static class Nx
    {
       Debug.Assert(value != null, nameof(value) + " != null");
       CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
-      target._removeFromCollection(e, value!);
+      target._removeFromCollection(e, value);
    }
 
    /// <summary>

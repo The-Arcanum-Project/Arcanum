@@ -81,7 +81,14 @@ public static class Eu5UiGen
          GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
       }
 
-      GenerateViewElements(navh, navh.Targets, mainGrid, primary, markedProps, allowReadOnlyEditing, hasHeader ? 1 : 0);
+      GenerateViewElements(navh,
+                           navh.Targets,
+                           mainGrid,
+                           primary,
+                           markedProps,
+                           allowReadOnlyEditing,
+                           false,
+                           hasHeader ? 1 : 0);
 
       return view;
    }
@@ -125,6 +132,7 @@ public static class Eu5UiGen
                                             IEu5Object primary,
                                             List<Enum> markedProps,
                                             bool allowReadOnlyEditing,
+                                            bool isInlineCall,
                                             int startRow = 1)
    {
       var viewFields = SortViewFieldsByConfig(primary, markedProps);
@@ -141,7 +149,7 @@ public static class Eu5UiGen
                if (primary.IsPropertyInlined(nxProp))
                   GenerateInlinedView(navH, primary, mainGrid, nxProp, i + startRow);
                else
-                  GenerateEmbeddedView(navH, targets, primary, mainGrid, nxProp, i + startRow, isMarked);
+                  GenerateEmbeddedView(navH, targets, primary, mainGrid, nxProp, i + startRow, isMarked, isInlineCall);
             else
                GenerateShortInfo(navH, primary, nxProp, mainGrid, isMarked);
          else
@@ -192,7 +200,7 @@ public static class Eu5UiGen
 
       // TODO @Minnator: https://github.com/users/Minnator/projects/2/views/2?pane=issue&itemId=135643593&issue=Minnator%7CArcanum%7C61
       var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root);
-      GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false);
+      GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
       bottomBorderMarker.Margin = new(0, 0, 0, 6);
@@ -206,9 +214,10 @@ public static class Eu5UiGen
                                             Grid mainGrid,
                                             Enum nxProp,
                                             int rowIndex,
-                                            bool isMarked)
+                                            bool isMarked,
+                                            bool isInline)
    {
-      var pevm = new PropertyEditorViewModel(nxProp, navH, primary);
+      var pevm = new PropertyEditorViewModel(nxProp, navH, primary, isInline);
       var mspvm = new MultiSelectPropertyViewModel(targets, nxProp);
       var ebv = new EmbeddedView(pevm, mspvm)
       {

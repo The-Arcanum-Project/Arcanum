@@ -1,4 +1,7 @@
-﻿using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.Logger;
 
@@ -54,14 +57,25 @@ public static partial class MapModeManager
    public static List<MapModeType> RecentModes { get; } = new(25);
    private static int _maxRecentModes = 25;
 
+   private static void InitializeMapModeManager()
+   {
+      AppData.HistoryManager.ModifiedType += DataChanged;
+   }
+
    public static void Activate(MapModeType type)
    {
-      var sw = System.Diagnostics.Stopwatch.StartNew();
-      GPUContracts.SetColors(LruCache.GetOrCreateColors(type));
-      sw.Stop();
+      var sw = RenderMapMode(type);
       ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {type} in {sw.ElapsedMilliseconds} ms");
       CurrentMode = type;
       AddToRecentHistory(type);
+   }
+
+   private static Stopwatch RenderMapMode(MapModeType type)
+   {
+      var sw = Stopwatch.StartNew();
+      GPUContracts.SetColors(LruCache.GetOrCreateColors(type));
+      sw.Stop();
+      return sw;
    }
 
    private static void AddToRecentHistory(MapModeType type)
@@ -71,9 +85,18 @@ public static partial class MapModeManager
       RecentModes.Insert(0, type);
    }
 
-   public static void OnLocationDataChanged(Location changedLocation)
+   public static void DataChanged(Type _, IEu5Object[] objects)
    {
-      LruCache.MarkInvalid(changedLocation);
+      if (objects.Length == 0)
+         return;
+
+      if (objects[0] is not IMapInferable mapInferable)
+         return;
+
+      LruCache.MarkInvalid(mapInferable.GetRelevantLocations(objects));
+
+      if (CurrentMode == mapInferable.GetMapMode)
+         RenderMapMode(CurrentMode);
    }
 
    public static IMapMode? GetMapModeForButtonIndex(int i)

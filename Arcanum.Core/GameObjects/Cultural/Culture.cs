@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -145,7 +146,7 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
 
    #region IMapInferable
 
-   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Culture);
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Culture;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
    {
@@ -161,11 +162,15 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
       return items.ToList();
    }
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
+      Debug.Assert(items.All(x => x is Culture));
+      var objs = items.Cast<Culture>().ToArray();
+
       List<Location> locations = [];
-      foreach (var obj in items)
-         if (obj is Location loc &&
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData.Culture) &&
              loc.TemplateData != LocationTemplateData.Empty &&
              loc.TemplateData.Culture != Empty)
             locations.Add(loc);

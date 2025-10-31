@@ -9,7 +9,7 @@ namespace Arcanum.Core.CoreSystems.NUI;
 /// Defines a contract for classes that can infer a list of items of type T based on a selection of locations.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IMapInferable : IHasMapMode
+public interface IMapInferable
 {
    /// <summary>
    /// This retrieves a list of items of type T based on the selection.
@@ -22,5 +22,10 @@ public interface IMapInferable : IHasMapMode
    /// </summary>
    /// <param name="items"></param>
    /// <returns></returns>
-   public List<Location> GetRelevantLocations(IEnumerable items);
+   public List<Location> GetRelevantLocations(IEu5Object[] items);
+
+   /// <summary>
+   /// Returns the map mode type associated with this inferable.
+   /// </summary>
+   public MapModeManager.MapModeType GetMapMode { get; }
 }

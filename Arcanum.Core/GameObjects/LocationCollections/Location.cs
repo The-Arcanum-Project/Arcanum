@@ -67,9 +67,9 @@ public partial class Location
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Cast<IEu5Object>().ToList();
-   public List<Location> GetRelevantLocations(IEnumerable items) => items.Cast<Location>().ToList();
+   public List<Location> GetRelevantLocations(IEu5Object[] items) => items.Cast<Location>().ToList();
 
-   public static IMapMode GetMapMode { get; } = new BaseMapMode();
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base;
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationSettings;

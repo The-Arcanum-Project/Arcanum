@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -130,7 +131,7 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    public string SavingKey => UniqueId;
 
    public override string ToString() => UniqueId;
-   public static IMapMode GetMapMode => MapModeManager.Get(MapModeManager.MapModeType.Climate);
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Climate;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
    {
@@ -146,11 +147,15 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
       return climates.ToList();
    }
 
-   public List<Location> GetRelevantLocations(IEnumerable items)
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
+      Debug.Assert(items.All(x => x is Climate));
+      var objs = items.Cast<Climate>().ToArray();
+
       List<Location> locations = [];
-      foreach (var obj in items)
-         if (obj is Location loc &&
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData.Climate) &&
              loc.TemplateData != LocationTemplateData.Empty &&
              loc.TemplateData.Climate != Empty)
             locations.Add(loc);

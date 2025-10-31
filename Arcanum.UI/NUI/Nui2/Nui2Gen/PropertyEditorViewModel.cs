@@ -18,10 +18,12 @@ public class PropertyEditorViewModel
    : INotifyPropertyChanged
 {
    private bool _isExpanded;
+   private bool _isInline;
    private Grid? _expandableContentGrid;
 
-   public PropertyEditorViewModel(Enum nxProp, NavH navH, IEu5Object target)
+   public PropertyEditorViewModel(Enum nxProp, NavH navH, IEu5Object target, bool isInline)
    {
+      _isInline = isInline;
       NxProp = nxProp;
       NavH = navH;
       Target = target;
@@ -33,6 +35,10 @@ public class PropertyEditorViewModel
       var type = target.GetNxPropType(nxProp);
       Debug.Assert(type != null, "type != null");
       IsExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
+
+      if (_isInline)
+      {
+      }
    }
 
    public Enum NxProp { get; }
@@ -80,11 +86,16 @@ public class PropertyEditorViewModel
          },
       };
 
-      object value = null!;
-      Nx.ForceGet(Target, NxProp, ref value);
-      Debug.Assert(value is IEu5Object, "EmbeddedView can only display IEu5Object values.");
+      var targets = NavH.Targets;
 
-      Eu5UiGen.PopulateEmbeddedGrid(newGrid, NavH, NavH.Targets, (IEu5Object)value, NxProp);
+      if (_isInline)
+      {
+         targets = [];
+         foreach (var t in NavH.Targets)
+            targets.Add(t._getValue(NxProp) as IEu5Object ?? throw new InvalidOperationException());
+      }
+
+      Eu5UiGen.PopulateEmbeddedGrid(newGrid, NavH, targets, (IEu5Object)Target._getValue(NxProp), NxProp);
 
       ExpandableContentGrid = newGrid;
       _hasRefreshedContent = true;
