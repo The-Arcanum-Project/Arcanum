@@ -1,5 +1,0 @@
-﻿audio
-{
-    volume = 75
-    mute = no
-}

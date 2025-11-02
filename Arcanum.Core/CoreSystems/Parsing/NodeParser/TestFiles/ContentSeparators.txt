@@ -1,5 +1,0 @@
-﻿settings = {
-    min_width <= 640
-    max_width >= 1920
-    use_cache ?= yes
-}

@@ -1,4 +1,0 @@
-﻿colors = {
-    primary = rgb { 255, 0, 0 }
-    secondary = hsv { 0.5 0.7 0.9 }
-}

@@ -1,6 +1,0 @@
-﻿{
-    default_block = {
-        value1 = 10
-        value2 = 20
-    }
-}

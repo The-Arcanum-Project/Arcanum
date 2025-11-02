@@ -1,2 +1,0 @@
-﻿@example_height = @[ 1 / 13 * 7 ]
-@example_width = @[ (16 * 9) / 4 ]

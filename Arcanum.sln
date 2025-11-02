@@ -3,49 +3,49 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcanum.Core", "Arcanum.Core\Arcanum.Core.csproj", "{E02FC032-DC20-46EE-9160-01B5C67B1562}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcanum.Core", "src\Arcanum.Core\Arcanum.Core.csproj", "{E02FC032-DC20-46EE-9160-01B5C67B1562}"
 	ProjectSection(ProjectDependencies) = postProject
 		{734A6CB3-D436-497D-861C-78EEFE3D5EFC} = {734A6CB3-D436-497D-861C-78EEFE3D5EFC}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.SDK", "Arcanum.SDK\Arcanum.SDK.csproj", "{585EB8BF-CEC6-472A-9A38-7E92D2568FC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.SDK", "src\Arcanum.SDK\Arcanum.SDK.csproj", "{585EB8BF-CEC6-472A-9A38-7E92D2568FC6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{734A6CB3-D436-497D-861C-78EEFE3D5EFC} = {734A6CB3-D436-497D-861C-78EEFE3D5EFC}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.PluginHost", "Arcanum.PluginHost\Arcanum.PluginHost.csproj", "{892481F9-13C4-4945-BC00-E60554B58BDE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.PluginHost", "src\Arcanum.PluginHost\Arcanum.PluginHost.csproj", "{892481F9-13C4-4945-BC00-E60554B58BDE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{734A6CB3-D436-497D-861C-78EEFE3D5EFC} = {734A6CB3-D436-497D-861C-78EEFE3D5EFC}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.UI", "Arcanum.UI\Arcanum.UI.csproj", "{5CFFBBFF-7DE0-4C12-8AE9-0815CC93850A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.UI", "src\Arcanum.UI\Arcanum.UI.csproj", "{5CFFBBFF-7DE0-4C12-8AE9-0815CC93850A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{734A6CB3-D436-497D-861C-78EEFE3D5EFC} = {734A6CB3-D436-497D-861C-78EEFE3D5EFC}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{96A23B35-1014-45C2-B2AF-5F3B67C70A1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "src\dev\UnitTests\UnitTests.csproj", "{96A23B35-1014-45C2-B2AF-5F3B67C70A1B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nexus", "Nexus", "{D5103C34-923F-46A1-93FD-2DB002574E83}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nexus", "src\src_gen\Nexus", "{D5103C34-923F-46A1-93FD-2DB002574E83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Analyzer", "Nexus.Analyzer\Nexus.Analyzer.csproj", "{99950E67-1CFE-46D6-89DE-78072F9BA4C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Analyzer", "src\src_gen\Nexus.Analyzer\Nexus.Analyzer.csproj", "{99950E67-1CFE-46D6-89DE-78072F9BA4C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Core", "Nexus.Core\Nexus.Core.csproj", "{A2A29780-CF0F-46F4-A6AE-960990A043C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Core", "src\src_gen\Nexus.Core\Nexus.Core.csproj", "{A2A29780-CF0F-46F4-A6AE-960990A043C6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{057D7474-771C-4998-B633-5E3EB09B0E2A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "src\src_gen\Analyzers", "{057D7474-771C-4998-B633-5E3EB09B0E2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnosticArgsAnalyzer", "DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj", "{96A1FBC0-86B3-4452-BA5B-0D3E5E736196}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnosticArgsAnalyzer", "src\src_gen\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj", "{96A1FBC0-86B3-4452-BA5B-0D3E5E736196}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{734A6CB3-D436-497D-861C-78EEFE3D5EFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\Common\Common.csproj", "{734A6CB3-D436-497D-861C-78EEFE3D5EFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFixers", "CodeFixers\CodeFixers.csproj", "{625B13F9-CB34-451D-9336-630B1F26E7FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFixers", "src\src_gen\CodeFixers\CodeFixers.csproj", "{625B13F9-CB34-451D-9336-630B1F26E7FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGens", "SourceGens\SourceGens.csproj", "{C2946F5C-39A5-4620-8225-AFF9C5911645}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGens", "src\src_gen\SourceGens\SourceGens.csproj", "{C2946F5C-39A5-4620-8225-AFF9C5911645}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.App", "Arcanum.App\Arcanum.App.csproj", "{AAAABB66-8409-459A-85E6-B8DADD221C6E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.App", "src\Arcanum.App\Arcanum.App.csproj", "{AAAABB66-8409-459A-85E6-B8DADD221C6E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTimeProjects", "BuildTimeProjects", "{DB349F44-7A87-4E15-B784-34894EE5F091}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTimeProjects", "src\src_gen\BuildTimeProjects", "{DB349F44-7A87-4E15-B784-34894EE5F091}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTimeCodeGeneration", "BuildTimeCodeGeneration\BuildTimeCodeGeneration.csproj", "{76F848C7-9BFC-4270-BD8B-4BDABCBE02CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTimeCodeGeneration", "src\src_gen\BuildTimeCodeGeneration\BuildTimeCodeGeneration.csproj", "{76F848C7-9BFC-4270-BD8B-4BDABCBE02CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
