@@ -1,4 +1,10 @@
-﻿INJECT:arid = {
+﻿INJECT|TRY_INJECT|INJECT_OR_CREATE:arid = {
+	location_modifier = {
+		free_capacity_attracts_pops = yes
+	}
+}
+
+REPLACE|TRY_REPLACE|REPLACE_OR_CREATE:arid = {
 	location_modifier = {
 		free_capacity_attracts_pops = yes
 	}
