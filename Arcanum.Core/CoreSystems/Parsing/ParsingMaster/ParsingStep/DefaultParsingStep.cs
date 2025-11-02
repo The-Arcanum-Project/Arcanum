@@ -2,6 +2,7 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Scheduling;
 
@@ -12,7 +13,6 @@ public class DefaultParsingStep
    private readonly Stopwatch _stopwatch = new();
    private readonly List<double> _durations = []; // Stores the durations of each step in milliseconds
    private readonly object _lock = new();
-
 
    private bool _isSuccessful;
    public bool IsMultithreadable { get; }
@@ -91,6 +91,7 @@ public class DefaultParsingStep
          var swInner = Stopwatch.StartNew();
          foreach (var file in Descriptor.Files)
          {
+            FileStateManager.RegisterPath(file.Path);
             if (LoadingService.LoadWithErrorHandling(file, Descriptor, null) is { IsCritical: true })
                return false;
          }
@@ -117,6 +118,7 @@ public class DefaultParsingStep
                                         CancellationToken cancellationToken)
    {
       var file = files[i];
+      FileStateManager.RegisterPath(file.Path);
       if (cancellationToken.IsCancellationRequested)
       {
          Volatile.Write(ref _isSuccessful, false);

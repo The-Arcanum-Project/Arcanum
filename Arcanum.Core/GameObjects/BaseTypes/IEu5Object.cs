@@ -43,8 +43,6 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
          UniqueId = uniqueId, Source = source,
       };
       source.ObjectsInFile.Add(instance);
-      FileStateManager
-        .RegisterPath(source.Path); //TODO: This is a performance killer, only do this once per file loaded
       return instance;
    }
 }
