@@ -46,7 +46,6 @@ public static class DescriptorDefinitions
       new(["in_game", "common", "designated_heir_reason"],
           new("designated_heir_reason", "txt", "#"),
           [new DesignateHeirReasonParsing([])],
-          false,
           false);
 
    public static readonly FileDescriptor TraitDescriptor = new(["in_game", "common", "traits"],
@@ -56,14 +55,12 @@ public static class DescriptorDefinitions
                                                                      ModifierDefinitionDescriptor.LoadingService[0],
                                                                   ]),
                                                                ],
-                                                               false,
                                                                false);
 
    public static readonly FileDescriptor ParliamentTypeParsingDescriptor =
       new(["in_game", "common", "parliament_types"],
           new("parliament_types", "txt", "#"),
           [new ParliamentTypeParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
-          false,
           false);
 
    private static readonly DefaultMapPreParsingStep DefaultMapPreParsing = new([]);
@@ -106,20 +103,17 @@ public static class DescriptorDefinitions
                                                                            DefaultMapPreDescriptor.LoadingService[0],
                                                                         ]),
                                                                      ],
-                                                                     false,
                                                                      false);
 
    public static readonly FileDescriptor AdjacenciesDescriptor = new(["in_game", "map_data", "adjacencies.csv"],
                                                                      new("Adjacencies", "csv", string.Empty),
                                                                      [new AdjacencyFileLoading([])],
-                                                                     false,
                                                                      false);
 
    public static readonly FileDescriptor MarketDescriptor =
       new(["main_menu", "setup", "start", "03_markets.txt"],
           new("03_markets", "txt", "#"),
           [new MarketManagerParsing([LocationDescriptor.LoadingService[0]])],
-          false,
           false);
 
    public static readonly FileDescriptor EstateDescriptor = new(["in_game", "common", "estates"],
@@ -165,7 +159,6 @@ public static class DescriptorDefinitions
                                                                    ColorParser.LoadingService[0],
                                                                 ]),
                                                              ],
-                                                             false,
                                                              false);
 
    public static readonly FileDescriptor LocationRankDescriptor = new(["in_game", "common", "location_ranks"],
@@ -177,7 +170,6 @@ public static class DescriptorDefinitions
                                                                               .LoadingService[0],
                                                                          ]),
                                                                       ],
-                                                                      false,
                                                                       false);
 
    public static readonly FileDescriptor CountryRankDescriptor = new(["in_game", "common", "country_ranks"],
@@ -195,13 +187,11 @@ public static class DescriptorDefinitions
       new(["in_game", "common", "religious_schools"],
           new("religious_schools", "txt", "#"),
           [new ReligiousSchoolsParsing([ColorParser.LoadingService[0]])],
-          false,
           false);
 
    public static readonly FileDescriptor InstitutionsDescriptor = new(["in_game", "common", "institution"],
                                                                       new("age_x_institutions", "txt", "#"),
                                                                       [new InstitutionParsing([])],
-                                                                      false,
                                                                       false);
 
    public static readonly FileDescriptor InstitutionsAndReligiousSchools =
@@ -213,7 +203,6 @@ public static class DescriptorDefinitions
                 InstitutionsDescriptor.LoadingService[0],
              ]),
           ],
-          false,
           false);
 
    private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
@@ -229,14 +218,12 @@ public static class DescriptorDefinitions
                 DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
              ]),
           ],
-          false,
           false);
 
    public static readonly FileDescriptor RoadsDescriptor =
       new(["main_menu", "setup", "start", "09_roads.txt"],
           new("09_roads", "txt", "#"),
           [new RoadsParsing([LocationDescriptor.LoadingService[0],]),],
-          false,
           false);
 
    public static readonly FileDescriptor CharactersDescriptor =
@@ -313,7 +300,6 @@ public static class DescriptorDefinitions
       new(["main_menu", "setup", "start", "04_dynasties.txt"],
           new("04_dynasties", "txt", "#"),
           [new DynastyManagerParsing([LocationDescriptor.LoadingService[0],]),],
-          false,
           false);
 
    public static readonly FileDescriptor ReligiousFactionParsing = new(["in_game", "common", "religious_factions"],
@@ -380,7 +366,6 @@ public static class DescriptorDefinitions
                 RawMaterialDescriptor.LoadingService[0], StaticModifiersDescriptor.LoadingService[0],
              ]),
           ],
-          false,
           false);
 
    //TODO Autogenerate this list

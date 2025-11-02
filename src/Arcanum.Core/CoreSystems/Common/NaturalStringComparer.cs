@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Common;
 
@@ -11,12 +12,29 @@ public static class NaturalStringComparer
       {
          null when y is null => 0,
          null => -1,
-         _ => y is null ? 1 : StrCmpLogicalW(x, y)
+         _ => y is null ? 1 : StrCmpLogicalW(x, y),
       };
    }
 
    [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
    private static extern int StrCmpLogicalW(string psz1, string psz2);
+}
+
+public class PathObjComparer : IComparer<PathObj>
+{
+   public static readonly NaturalStringComparerManual Comparer = new();
+
+   public int Compare(PathObj? x, PathObj? y)
+   {
+      if (ReferenceEquals(x, y))
+         return 0;
+      if (y is null)
+         return 1;
+      if (x is null)
+         return -1;
+
+      return Comparer.Compare(x.Filename, y.Filename);
+   }
 }
 
 public partial class NaturalStringComparerManual : Comparer<string>, IDisposable

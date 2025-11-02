@@ -12,7 +12,6 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public string[] LocalPath { get; }
    public readonly FileTypeInformation FileType;
    public FileLoadingService[] LoadingService { get; }
-   public readonly bool AllowMultipleInstances;
    private List<Eu5FileObj> _files = [];
 
    public List<Eu5FileObj> Files
@@ -29,8 +28,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public FileDescriptor(string[] localPath,
                          FileTypeInformation fileType,
                          FileLoadingService[] loadingService,
-                         bool isMultithreadable,
-                         bool allowMultipleInstances = true)
+                         bool isMultithreadable)
    {
       foreach (var fileLoadingService in loadingService)
          fileLoadingService.Descriptor = this;
@@ -38,7 +36,6 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
       LocalPath = localPath;
       FileType = fileType;
       LoadingService = loadingService;
-      AllowMultipleInstances = allowMultipleInstances;
       IsMultithreadable = isMultithreadable;
    }
 

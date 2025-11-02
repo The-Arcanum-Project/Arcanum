@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -181,40 +182,51 @@ public static class FileManager
    /// Returns all files in the given subdirectory path from either the mod or vanilla data space.
    /// Handles <c>replaced paths</c> and also invalid paths.
    /// </summary>
-   /// <param name="subPath"></param>
-   /// <param name="searchPattern"></param>
-   /// <returns><see cref="ICollection{T}"/> of (<c>string</c>, <c>bool</c>) representing the path and if it is a mod file</returns>
-   /// <exception cref="ArgumentException"></exception>
-   public static ICollection<PathObj> GetAllFilesInDirectory(
+   public static ICollection<PathObj> GetAllFilesForDirectory(
       string[] subPath,
       string searchPattern)
    {
-      var varFolderPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
-      if (fileName != null)
-         return [new(varFolderPath, fileName, GetDataSpace(Path.Combine(subPath)))];
+      // Loading Order:
+      // --> Vanilla Files
+      // --> Mod Files
+      //
+      // Files are alpha numerically sorted for Vanilla and mod each.
+      //    objects in the mod folder can replace objects in the vanilla folder.
+      //    Vanilla is only not loaded if the path is replaced (does not affect sub folders)
 
-      IEnumerable<string> modFiles = [];
-      if (Directory.Exists(GetModPath(varFolderPath)))
+      var internalPath = RemoveFileNameEntryFromPath(subPath, out var fileName);
+      if (fileName != null)
+         return [new(internalPath, fileName, GetDataSpace(Path.Combine(subPath)))];
+
+      List<string> modFiles = [];
+      List<PathObj> modPathObjs = [];
+      if (Directory.Exists(GetModPath(internalPath)))
       {
-         modFiles = Directory.GetFiles(GetModPath(varFolderPath), searchPattern).Select(Path.GetFileName)!;
-         if (IsPathReplaced(varFolderPath))
-            return modFiles.Select(file => new PathObj(varFolderPath, file, ModDataSpace)).ToList();
+         modFiles = Directory.GetFiles(GetModPath(internalPath), searchPattern).Select(Path.GetFileName).ToList()!;
+         modPathObjs = modFiles.Select(file => new PathObj(internalPath, file, ModDataSpace)).ToList();
+         if (IsPathReplaced(internalPath))
+         {
+            modPathObjs.Sort(new PathObjComparer());
+            return modPathObjs;
+         }
       }
 
       var defined = new HashSet<string>(modFiles);
       List<PathObj> fileList = [];
-      fileList.AddRange(defined.Select(file => new PathObj(varFolderPath, file, ModDataSpace)));
 
-      var vanillaFiles = Directory.GetFiles(GetVanillaPath(varFolderPath), searchPattern);
+      var vanillaFiles = Directory.GetFiles(GetVanillaPath(internalPath), searchPattern);
       foreach (var file in vanillaFiles)
       {
          var fileNameOnly = Path.GetFileName(file);
          if (defined.Contains(fileNameOnly))
             continue; // We already have this file in the mod data space
 
-         fileList.Add(new(varFolderPath, fileNameOnly, VanillaDataSpace));
+         fileList.Add(new(internalPath, fileNameOnly, VanillaDataSpace));
       }
 
+      fileList.Sort(new PathObjComparer());
+
+      fileList.AddRange(modPathObjs);
       return fileList;
    }
 
@@ -272,7 +284,7 @@ public static class FileManager
    public static List<Eu5FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
    {
       List<Eu5FileObj> fileInfos = [];
-      foreach (var po in GetAllFilesInDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
+      foreach (var po in GetAllFilesForDirectory(descriptor.LocalPath, $"*.{descriptor.FileType.FileEnding}"))
          fileInfos.Add(new(po, descriptor));
 
       return fileInfos;
