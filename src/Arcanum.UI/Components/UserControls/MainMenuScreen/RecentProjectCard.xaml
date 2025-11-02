@@ -1,0 +1,91 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.MainMenuScreen.RecentProjectCard"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
+             mc:Ignorable = "d"
+             Width = "178"
+             Height = "166">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key = "HoverBorderStyle"
+                   TargetType = "Border">
+                <Setter Property = "BorderBrush"
+                        Value = "{StaticResource DefaultBorderColorBrush}" />
+                <Setter Property = "Background"
+                        Value = "Transparent" />
+                <Style.Triggers>
+                    <Trigger Property = "IsMouseOver"
+                             Value = "True">
+                        <Setter Property = "BorderBrush"
+                                Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                        <Setter Property = "Cursor"
+                                Value = "Hand">
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header = "Remove From List"
+                      Click = "MenuItem_OnClick" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
+    <Border x:Name = "CardBorder"
+            Style = "{StaticResource HoverBorderStyle}"
+            BorderThickness = "2"
+            CornerRadius = "5"
+            Margin = "0, 0, 35, 0"
+            Padding = "0">
+        <b:Interaction.Behaviors>
+            <behaviors:ClickAndDoubleClickBehavior
+                ClickCommand = "{Binding LoadProjectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                DoubleClickCommand = "{Binding LaunchArcanumCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                FireSingleClickOnDoubleClick = "True" />
+        </b:Interaction.Behaviors>
+        <Grid Background = "Transparent"
+              Margin = "0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "*" />
+                <RowDefinition Height = "3" />
+                <RowDefinition Height = "23" />
+            </Grid.RowDefinitions>
+
+            <Image Grid.Row = "0"
+                   x:Name = "ModThumbnailImage"
+                   Stretch = "Uniform"
+                   Margin = "0"
+                   RenderOptions.BitmapScalingMode = "Fant">
+                <Image.Clip>
+                    <RectangleGeometry RadiusX = "5"
+                                       RadiusY = "5"
+                                       Rect = "0,0,136,136" />
+                </Image.Clip>
+            </Image>
+
+            <Rectangle Grid.Row = "1"
+                       Height = "1"
+                       Margin = "5, 2, 5, 0"
+                       Fill = "{StaticResource DefaultForeColorBrush}"
+                       HorizontalAlignment = "Stretch">
+            </Rectangle>
+
+            <TextBlock Grid.Row = "2"
+                       x:Name = "ModNameTextBlock"
+                       VerticalAlignment = "Center"
+                       HorizontalAlignment = "Center">
+            </TextBlock>
+        </Grid>
+    </Border>
+</UserControl>

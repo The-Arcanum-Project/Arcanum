@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico">
+            <Link>ArcanumSimplified.ico</Link>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj"/>
+        <ProjectReference Include="..\Arcanum.UI\Arcanum.UI.csproj"/>
+    </ItemGroup>
+
+    <!--    <Target Name="GenerateEventTargets" BeforeTargets="BeforeBuild">-->
+    <!--        <PropertyGroup>-->
+    <!--            <InputScopes>$(MSBuildProjectDirectory)/Data/event_targets.log</InputScopes>-->
+    <!--            <OutputScopes>$(SolutionDir)/Arcanum.Core/CoreSystems/Jomini/Scopes/ScopeRegistry.cs</OutputScopes>-->
+    <!--            <InputTrigger>$(MSBuildProjectDirectory)/Data/triggers.log</InputTrigger>-->
+    <!--            <OutputTrigger>$(SolutionDir)/Arcanum.Core/CoreSystems/Jomini/Triggers/TriggerRegistry.cs</OutputTrigger>-->
+    <!--            <InputEffects>$(MSBuildProjectDirectory)/Data/effects.log</InputEffects>-->
+    <!--            <OutputEffects>$(SolutionDir)/Arcanum.Core/CoreSystems/Jomini/Effects/EffectRegistry.cs</OutputEffects>-->
+
+    <!--            <CodeGeneratorExe>$(SolutionDir)/BuildTimeCodeGeneration/bin/Debug/net8.0-windows/BuildTimeCodeGeneration.exe</CodeGeneratorExe>-->
+    <!--        </PropertyGroup>-->
+
+    <!--        <Message Text="-&#45;&#45; Generating event target C# code from documentation -&#45;&#45;" Importance="high"/>-->
+    <!--        <Exec Command="&quot;$(CodeGeneratorExe)&quot; &quot;$(InputScopes)&quot; &quot;$(OutputScopes)&quot; &quot;$(InputTrigger)&quot; &quot;$(OutputTrigger)&quot; &quot;$(InputEffects)&quot; &quot;$(OutputEffects)&quot;"/>-->
+
+    <!--        <ItemGroup>-->
+    <!--            <Compile Include="$(OutputScopes)"/>-->
+    <!--            <Compile Include="$(OutputTrigger)"/>-->
+    <!--            <Compile Include="$(OutputEffects)"/>-->
+    <!--        </ItemGroup>-->
+    <!--    </Target>-->
+
+</Project>

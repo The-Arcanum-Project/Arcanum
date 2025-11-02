@@ -1,0 +1,118 @@
+﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <DataTemplate x:Key = "BaseModDataTemplate"
+                  DataType = "{x:Type styleClasses:BaseModItem}">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <!-- <ColumnDefinition Width = "30" /> -->
+                <ColumnDefinition Width = "*" />
+                <ColumnDefinition Width = "30" />
+            </Grid.ColumnDefinitions>
+            <!-- -->
+            <!-- <sc:BaseButton Grid.Column = "0" -->
+            <!--                x:Name = "OpenFolderDialog" -->
+            <!--                Style = "{StaticResource BaseDarkButtonStyle}" -->
+            <!--                HoverBackground = "{StaticResource BlueSelectionBackColorBrush}" -->
+            <!--                Margin = "3" -->
+            <!--                Command = "{Binding SelectFolderCommand}"> -->
+            <!--     <Image Source = "../../../Assets/Icons/20x20/Folder20x20.png" -->
+            <!--            Stretch = "None" /> -->
+            <!-- </sc:BaseButton> -->
+
+            <TextBlock Grid.Column = "0"
+                       x:Name = "BaseModTextBlock"
+                       VerticalAlignment = "Center"
+                       HorizontalAlignment = "Stretch"
+                       FontSize = "12"
+                       Margin = "5, 0, 0, 0"
+                       Text = "{Binding DataSpace}">
+            </TextBlock>
+
+            <styleClasses:BaseButton Grid.Column = "1"
+                                     Grid.Row = "0"
+                                     Background = "{StaticResource AggressiveRedBackColorBrush}"
+                                     HoverBackground = "{StaticResource BlueSelectionBackColorBrush}"
+                                     Margin = "3"
+                                     Command = "{Binding RemoveCommand}"
+                                     CornerRadius = "3">
+
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Close20x20.png"
+                       Stretch = "Uniform"
+                       ToolTip = "Remove this base mod declaration">
+                    <Image.Clip>
+                        <RectangleGeometry RadiusX = "3"
+                                           RadiusY = "3"
+                                           Rect = "0,0,20,20" />
+                    </Image.Clip>
+                </Image>
+
+            </styleClasses:BaseButton>
+
+        </Grid>
+    </DataTemplate>
+
+    <Style x:Key = "BaseModListBoxStyle"
+           TargetType = "ListBox">
+        <Setter Property = "Background"
+                Value = "Transparent" />
+        <Setter Property = "BorderThickness"
+                Value = "1" />
+        <Setter Property = "BorderBrush"
+                Value = "{StaticResource DefaultBorderColorBrush}" />
+    </Style>
+
+    <Style x:Key = "BaseModItemStyle"
+           TargetType = "ListBoxItem">
+        <Setter Property = "HorizontalContentAlignment"
+                Value = "Stretch" />
+        <Setter Property = "Padding"
+                Value = "2" />
+        <Setter Property = "Margin"
+                Value = "0, 0" />
+        <Setter Property = "Background"
+                Value = "{StaticResource LightBackColorBrush}" />
+        <Setter Property = "BorderThickness"
+                Value = "2" />
+        <Setter Property = "Template">
+            <Setter.Value>
+                <ControlTemplate TargetType = "ListBoxItem">
+                    <Border x:Name = "Bd"
+                            Background = "{TemplateBinding Background}"
+                            BorderBrush = "{TemplateBinding BorderBrush}"
+                            BorderThickness = "{TemplateBinding BorderThickness}"
+                            Padding = "{TemplateBinding Padding}"
+                            SnapsToDevicePixels = "true"
+                            CornerRadius = "5">
+                        <ContentPresenter HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment = "{TemplateBinding VerticalContentAlignment}"
+                                          SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property = "IsMouseOver"
+                                 Value = "true">
+                            <Setter TargetName = "Bd"
+                                    Property = "BorderBrush"
+                                    Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                        </Trigger>
+                        <!-- <Trigger Property = "IsSelected" -->
+                        <!--          Value = "true"> -->
+                        <!--     <Setter TargetName = "Bd" -->
+                        <!--             Property = "Background" -->
+                        <!--             Value = "{StaticResource BlueSelectionBackColorBrush}" /> -->
+                        <!--     <Setter Property = "Foreground" -->
+                        <!--             Value = "{StaticResource DefaultForeColorBrush}" /> -->
+                        <!-- </Trigger> -->
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

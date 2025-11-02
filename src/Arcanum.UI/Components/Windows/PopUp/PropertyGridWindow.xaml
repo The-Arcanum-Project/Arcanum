@@ -1,0 +1,33 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.PopUp.PropertyGridWindow"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         mc:Ignorable = "d"
+                         Title = "PropertyGridWindow"
+                         Height = "450"
+                         Width = "500"
+                         Background = "{StaticResource DefaultBackColorBrush}"
+                         BorderThickness = "0"
+                         FooterHeight = "4"
+                         WindowStartupLocation = "CenterScreen">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
+    <baseControls:PropertyGrid Margin = "2"
+                               Background = "{StaticResource DefaultBackColorBrush}"
+                               BorderThickness = "0"
+                               BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                               SelectedObject = "{Binding SelectedObject, RelativeSource={RelativeSource AncestorType=Window}}">
+    </baseControls:PropertyGrid>
+</styleClasses:BaseWindow>

@@ -1,0 +1,28 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MinorWindows.LogWindow"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:helpers = "clr-namespace:Arcanum.UI.Components.Helpers"
+                         mc:Ignorable = "d"
+                         Title = "LogWindow"
+                         Height = "300"
+                         Width = "1200"
+                         WindowStartupLocation = "Manual"
+                         Top = "0"
+                         Left = "0">
+
+    <Window.DataContext>
+        <helpers:LogViewModel />
+    </Window.DataContext>
+
+    <ScrollViewer Margin = "10"
+                  VerticalScrollBarVisibility = "Auto"
+                  ScrollChanged = "OnScrollChanged">
+        <TextBlock Text = "{Binding LogText}"
+                   TextWrapping = "Wrap"
+                   FontFamily = "Consolas" />
+    </ScrollViewer>
+
+</styleClasses:BaseWindow>

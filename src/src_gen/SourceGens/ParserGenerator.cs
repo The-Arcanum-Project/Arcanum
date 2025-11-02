@@ -1,0 +1,1201 @@
+﻿using System.Collections.Immutable;
+using System.Text;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ParserGenerator.HelperClasses;
+using ParserGenerator.SubClasses;
+
+namespace ParserGenerator;
+
+[Generator]
+public class ParserSourceGenerator : IIncrementalGenerator
+{
+   private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParserForAttribute";
+   private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+   private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParsingToolBox";
+
+   public void Initialize(IncrementalGeneratorInitializationContext context)
+   {
+      var provider = context.SyntaxProvider
+                            .CreateSyntaxProvider(predicate: (node, _)
+                                                     => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 },
+                                                  transform: GetParserClassSymbol)
+                            .Where(s => s is not null); // Filter out classes that don't match our criteria
+
+      context.RegisterSourceOutput(context.CompilationProvider.Combine(provider.Collect()),
+                                   (spc, source) => { Generate(source.Left, source.Right, spc); });
+   }
+
+   /// <summary>
+   /// This "transform" step is a semantic filter. It takes the candidate classes
+   /// from the predicate and checks if they *actually* have our [ParserFor] attribute.
+   /// </summary>
+   private static INamedTypeSymbol GetParserClassSymbol(GeneratorSyntaxContext context, CancellationToken token)
+   {
+      var classDeclaration = (ClassDeclarationSyntax)context.Node;
+      var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration, token);
+
+      if (classSymbol == null)
+         return null!;
+
+      if (Enumerable.Any(classSymbol.GetAttributes(),
+                         attribute => string.Equals(attribute.AttributeClass?.ToDisplayString(),
+                                                    PARSER_FOR_ATTRIBUTE,
+                                                    StringComparison.Ordinal)))
+         return (INamedTypeSymbol)classSymbol;
+
+      return null!;
+   }
+
+   /// <summary>
+   /// This is the main method where we will eventually generate all our code.
+   /// For now, it will just prove that we've found the right classes.
+   /// </summary>
+   private static void Generate(Compilation compilation,
+                                ImmutableArray<INamedTypeSymbol> parsers,
+                                SourceProductionContext context)
+   {
+      if (parsers.IsDefaultOrEmpty)
+         return;
+
+      var toolboxSymbol = compilation.GetTypeByMetadataName(PARSING_TOOLBOX_CLASS);
+      if (toolboxSymbol == null)
+      {
+         ReportMissingDependency(context);
+         return;
+      }
+
+      foreach (var parserSymbol in parsers.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
+      {
+         try
+         {
+            var attr = parserSymbol.GetAttributes()
+                                   .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSER_FOR_ATTRIBUTE);
+
+            if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol targetTypeSymbol)
+               continue;
+
+            var cMetadata = new ParserClassMetadata(attr);
+
+            // --- Collect Metadata from Target Type's Properties ---
+            var propertiesToParse = new List<PropertyMetadata>();
+            ExtractMetadata(targetTypeSymbol, propertiesToParse, context);
+
+            // Generate the Parser class
+            var (parserHintName, parserSource) = GenerateParserClass(parserSymbol,
+                                                                     targetTypeSymbol,
+                                                                     propertiesToParse,
+                                                                     toolboxSymbol,
+                                                                     parsers,
+                                                                     context,
+                                                                     cMetadata);
+            context.AddSource(parserHintName, parserSource);
+         }
+         catch (Exception ex)
+         {
+            // ADD THIS to see the real error
+            context.ReportDiagnostic(Diagnostic.Create(new("GEN001",
+                                                           "Generator Crash",
+                                                           "Generator failed for parser '{0}'. Error: {1}",
+                                                           "Generator",
+                                                           DiagnosticSeverity.Error,
+                                                           true),
+                                                       parserSymbol.Locations.FirstOrDefault(),
+                                                       parserSymbol.Name,
+                                                       ex.ToString()));
+         }
+      }
+   }
+
+   private static (string HintName, string Source) GenerateParserClass(INamedTypeSymbol parserSymbol,
+                                                                       INamedTypeSymbol targetTypeSymbol,
+                                                                       List<PropertyMetadata> properties,
+                                                                       INamedTypeSymbol toolboxSymbol,
+                                                                       ImmutableArray<INamedTypeSymbol> parsers,
+                                                                       SourceProductionContext context,
+                                                                       ParserClassMetadata? classMetadata)
+   {
+      var hintName = $"{parserSymbol.ContainingNamespace}.{parserSymbol.Name}.g.cs";
+      var targetTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+      var handwrittenMethods = parserSymbol.GetMembers()
+                                           .OfType<IMethodSymbol>()
+                                           .Select(m => m.Name)
+                                           .ToImmutableHashSet();
+
+      // Group properties by the AST node they parse from
+      var contentNodeProps = properties.Where(p => p.AstNodeType == NodeType.ContentNode).ToList();
+      var embeddedBlockProps = properties.Where(p => p.IsEmbedded).ToList();
+      var standardBlockProps = properties
+                              .Where(p => !p.IsEmbedded &&
+                                          p is { AstNodeType: NodeType.BlockNode, IEu5KeyType: null })
+                              .ToList();
+      var statementNodeProps = properties.Where(p => p.AstNodeType == NodeType.StatementNode).ToList();
+      var dynamicBlockNodeProps =
+         properties.Where(p => p.IEu5KeyType != null && p.AstNodeType == NodeType.BlockNode).ToList();
+      var dynamicContentNodeProps =
+         properties.Where(p => p.IEu5KeyType != null && p.AstNodeType == NodeType.ContentNode).ToList();
+
+      var sb = new StringBuilder();
+      sb.AppendLine("// <auto-generated/>");
+      sb.AppendLine($"namespace {parserSymbol.ContainingNamespace};");
+      sb.AppendLine();
+      // --- Usings ---
+      GenerateUsings(targetTypeSymbol, sb, toolboxSymbol);
+
+      sb.AppendLine($"public partial class {parserSymbol.Name}");
+      sb.AppendLine("{");
+
+      // --- Dictionaries ---
+      try
+      {
+         GenerateParserDictionaries(sb,
+                                    targetTypeName,
+                                    contentNodeProps,
+                                    standardBlockProps,
+                                    embeddedBlockProps,
+                                    statementNodeProps,
+                                    dynamicBlockNodeProps,
+                                    dynamicContentNodeProps);
+
+         // --- ParseProperties Method ---
+         GenerateParsePropertiesMethod(targetTypeSymbol,
+                                       sb,
+                                       targetTypeName,
+                                       classMetadata,
+                                       properties.FirstOrDefault(),
+                                       parsers);
+
+         // --- Wrapper Methods (partial signatures) ---
+         GenerateParserMethodSignatures(properties, sb, targetTypeName);
+
+         if (classMetadata != null)
+            // --- Generated Wrapper Methods ---
+            GenerateAutoImplementedParsers(parserSymbol,
+                                           properties,
+                                           toolboxSymbol,
+                                           sb,
+                                           handwrittenMethods,
+                                           targetTypeName,
+                                           parsers,
+                                           context,
+                                           classMetadata);
+      }
+      catch (Exception e)
+      {
+         context.ReportDiagnostic(Diagnostic.Create(new(id: "GEN002",
+                                                        title: "Generator Crash",
+                                                        messageFormat:
+                                                        $"Generator failed while processing parser '{parserSymbol.Name}' for target type '{targetTypeSymbol.Name}'. Error: {e}",
+                                                        category: "Generator",
+                                                        DiagnosticSeverity.Error,
+                                                        isEnabledByDefault: true),
+                                                    parserSymbol.Locations.FirstOrDefault()));
+         throw;
+      }
+
+      return (hintName, sb.ToString());
+   }
+
+   #region Generator Helpers
+
+   private static void GenerateParserDictionaries(StringBuilder sb,
+                                                  string targetTypeName,
+                                                  List<PropertyMetadata> contentNodeProps,
+                                                  List<PropertyMetadata> blockNodeProps,
+                                                  List<PropertyMetadata> embeddedBlockNodeProps,
+                                                  List<PropertyMetadata> statementNodeProps,
+                                                  List<PropertyMetadata> dynamicBlockNodeProps,
+                                                  List<PropertyMetadata> dynamicContentParsers)
+   {
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
+      sb.AppendLine("    {");
+
+      foreach (var prop in contentNodeProps)
+         AppendParserMethodMapping(sb, prop);
+
+      sb.AppendLine("    };");
+      sb.AppendLine();
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
+      sb.AppendLine("    {");
+
+      foreach (var prop in blockNodeProps)
+         AppendParserMethodMapping(sb, prop);
+      foreach (var prop in embeddedBlockNodeProps)
+         sb.AppendLine($"        {{ \"{prop.Keyword}\", {PropCustomParserMethodName(prop)} }},");
+
+      sb.AppendLine("    };");
+
+      sb.AppendLine();
+      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.StatementParser<{targetTypeName}>> _statementParsers = new()");
+      sb.AppendLine("    {");
+
+      foreach (var prop in statementNodeProps)
+         AppendParserMethodMapping(sb, prop);
+
+      sb.AppendLine("    };");
+      sb.AppendLine();
+
+      sb.AppendLine($"    internal static readonly List<Pdh.BlockParser<{targetTypeName}>> _dynamicBlockParsers = ");
+      sb.AppendLine("    [");
+      foreach (var prop in dynamicBlockNodeProps)
+         sb.AppendLine($"        {PropCustomParserMethodName(prop)},");
+      sb.AppendLine("    ];");
+      sb.AppendLine();
+
+      sb.AppendLine($"    internal static readonly List<Pdh.ContentParser<{targetTypeName}>> _dynamicContentParsers = ");
+      sb.AppendLine("    [");
+      foreach (var prop in dynamicContentParsers)
+         sb.AppendLine($"        {PropCustomParserMethodName(prop)},");
+      sb.AppendLine("    ];");
+      sb.AppendLine();
+   }
+
+   private static void AppendParserMethodMapping(StringBuilder sb,
+                                                 PropertyMetadata prop)
+   {
+      sb.AppendLine($"        {{ \"{prop.Keyword}\", {PropCustomParserMethodName(prop)} }},");
+   }
+
+   private static string PropCustomParserMethodName(PropertyMetadata prop)
+   {
+      if (prop.CustomParserMethodName != null)
+         return prop.CustomParserMethodName;
+
+      return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}{IsContentNodeListSuffix(prop)}";
+   }
+
+   private static string IsContentNodeListSuffix(PropertyMetadata prop)
+      => prop.IsShatteredList ? "_PartList" : string.Empty;
+
+   private static string FlagsPrefix(PropertyMetadata prop) => IsFlagsEnum(prop) ? "Flags" : string.Empty;
+
+   private static bool IsFlagsEnum(PropertyMetadata prop)
+   {
+      var isFlagsEnum = prop.PropertyType.GetAttributes()
+                            .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+      return isFlagsEnum;
+   }
+
+   private static void GenerateUsings(INamedTypeSymbol targetTypeSymbol,
+                                      StringBuilder sb,
+                                      INamedTypeSymbol toolboxSymbol)
+   {
+      sb.AppendLine("using System.Collections.Generic;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Common;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;");
+      sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;");
+      sb.AppendLine("using System.Collections.ObjectModel;");
+      sb.AppendLine("using Arcanum.Core.Registry;");
+      sb.AppendLine("using Arcanum.Core.GameObjects.BaseTypes;");
+      sb.AppendLine($"using {targetTypeSymbol.ContainingNamespace.ToDisplayString()};");
+      sb.AppendLine($"using static {toolboxSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)};");
+      sb.AppendLine();
+   }
+
+   private static void GenerateAutoImplementedParsers(INamedTypeSymbol parserSymbol,
+                                                      List<PropertyMetadata> properties,
+                                                      INamedTypeSymbol toolboxSymbol,
+                                                      StringBuilder sb,
+                                                      ImmutableHashSet<string> handwrittenMethods,
+                                                      string targetTypeName,
+                                                      ImmutableArray<INamedTypeSymbol> parsers,
+                                                      SourceProductionContext context,
+                                                      ParserClassMetadata classMetadata)
+   {
+      sb.AppendLine("    #region Auto-Implemented Parsers");
+
+      foreach (var prop in properties)
+      {
+         if (GatherMethodCreationData(parserSymbol,
+                                      toolboxSymbol,
+                                      sb,
+                                      handwrittenMethods,
+                                      parsers,
+                                      context,
+                                      prop,
+                                      out var wrapperMethodName,
+                                      out var propTypeName,
+                                      out var actionName,
+                                      out var toolMethodCall,
+                                      out var genericType,
+                                      out var hasEmbeddedParser,
+                                      out var customParserName))
+            continue;
+
+         if (AddDynamicBlockParser(prop, sb, targetTypeName, customParserName, toolMethodCall))
+            continue;
+
+         if (hasEmbeddedParser)
+         {
+            if (!prop.IsCollection)
+            {
+               GenerateEmbeddedPropertyParserMethod(sb, targetTypeName, prop, customParserName!, classMetadata);
+               continue;
+            }
+
+            if (!prop.IsShatteredList)
+            {
+               GenerateEmbeddedCollectionPropertyParserMethod(sb,
+                                                              targetTypeName,
+                                                              actionName,
+                                                              prop,
+                                                              wrapperMethodName,
+                                                              genericType,
+                                                              customParserName!,
+                                                              classMetadata);
+               continue;
+            }
+
+            GenerateShatteredEmbeddedCollectionPropertyParserMethod(sb,
+                                                                    targetTypeName,
+                                                                    prop,
+                                                                    wrapperMethodName,
+                                                                    genericType,
+                                                                    customParserName!,
+                                                                    classMetadata);
+            continue;
+         }
+
+         if ((prop.IsHashSet || prop.IsCollection) && !prop.IsShatteredList)
+         {
+            GenerateCollectionMethodCall(sb,
+                                         prop,
+                                         wrapperMethodName,
+                                         toolMethodCall,
+                                         genericType,
+                                         targetTypeName,
+                                         actionName,
+                                         classMetadata);
+            continue;
+         }
+
+         GeneratePropertyParserMethod(sb,
+                                      targetTypeName,
+                                      prop,
+                                      genericType,
+                                      propTypeName,
+                                      wrapperMethodName,
+                                      toolMethodCall,
+                                      actionName,
+                                      classMetadata);
+      }
+
+      sb.AppendLine("    #endregion");
+      sb.AppendLine("}");
+   }
+
+   private static bool AddDynamicBlockParser(PropertyMetadata prop,
+                                             StringBuilder sb,
+                                             string targetTypeName,
+                                             string? customParserName,
+                                             string? toolBoxClass)
+   {
+      if (prop.IEu5KeyType == null)
+         return false;
+
+      var objTypSymbol = prop.IsCollection ? prop.ItemType : prop.PropertyType;
+      var globalsType = prop.CustomGlobalsSource == null
+                           ? prop.IEu5KeyType!.ToDisplayString()
+                           : prop.CustomGlobalsSource.ToDisplayString();
+
+      var objStr = objTypSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+      sb.AppendLine($"// ### Dynamic {prop.AstNodeType} Parser ###");
+
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+      sb.AppendLine($"        var globals = ((IEu5Object)EmptyRegistry.Empties[typeof({globalsType})]).GetGlobalItemsNonGeneric();");
+      sb.AppendLine($"        var key = node.KeyNode.GetLexeme(source);");
+      sb.AppendLine($"        if (!globals.Contains(key))");
+      sb.AppendLine("            return false;");
+      sb.AppendLine(prop.AstNodeType == NodeType.ContentNode
+                       ? $"        {toolBoxClass}(node, ctx, \"{PropCustomParserMethodName(prop)}\", source, out var value, ref validation);"
+                       : $"        var value = Pdh.ParseDynamicObject<{objStr}>(key, node, source, ctx, {customParserName}.ParseProperties, ref validation);");
+      sb.AppendLine($"        if (value == null)");
+      sb.AppendLine("            return false;");
+
+      if (prop.IsCollection)
+      {
+         sb.AppendLine($"        if (target.{prop.PropertyName} == null)");
+         sb.AppendLine($"            target.{prop.PropertyName} = new {prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}();");
+         sb.AppendLine();
+         sb.AppendLine($"        target.{prop.PropertyName}.Add(({objStr})value);");
+      }
+      else
+      {
+         sb.AppendLine($"        target.{prop.PropertyName} = ({objStr})value;");
+      }
+
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+      return true;
+   }
+
+   private static bool GatherMethodCreationData(INamedTypeSymbol parserSymbol,
+                                                INamedTypeSymbol toolboxSymbol,
+                                                StringBuilder sb,
+                                                ImmutableHashSet<string> handwrittenMethods,
+                                                ImmutableArray<INamedTypeSymbol> parsers,
+                                                SourceProductionContext context,
+                                                PropertyMetadata prop,
+                                                out string wrapperMethodName,
+                                                out string propTypeName,
+                                                out string actionName,
+                                                out string toolMethodCall,
+                                                out ITypeSymbol? genericType,
+                                                out bool hasEmbeddedParser,
+                                                out string? customParserName)
+   {
+      if (prop.AstNodeType == NodeType.ContentNode && prop.IEu5KeyType != null)
+      {
+         sb.AppendLine($"// Property '{prop.PropertyName}' is a dynamic content node and will be handled by a special parser.");
+         propTypeName = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+         actionName = $"\"{parserSymbol.Name}.\"";
+         toolMethodCall =
+            FormatToolMethodCall(FindMatchingTool(toolboxSymbol,
+                                                  prop,
+                                                  out toolMethodCall,
+                                                  out var message,
+                                                  out genericType),
+                                 prop,
+                                 message);
+         genericType = null;
+         hasEmbeddedParser = false;
+         wrapperMethodName = null!;
+         customParserName = null;
+         return false; //??? what does this return
+      }
+
+      // If a custom parser is specified, we DO NOT generate an implementation.
+      if (GenerateToolMethodCall(parserSymbol,
+                                 toolboxSymbol,
+                                 prop,
+                                 handwrittenMethods,
+                                 out wrapperMethodName,
+                                 out propTypeName,
+                                 out actionName,
+                                 out toolMethodCall,
+                                 out genericType))
+      {
+         sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{toolMethodCall}'.");
+         hasEmbeddedParser = false;
+         customParserName = null;
+         return true;
+      }
+
+      // We have a pure embedded property, not in combination with a list.
+      hasEmbeddedParser = TryGetEmbeddedParserName(parserSymbol,
+                                                   sb,
+                                                   parsers,
+                                                   context,
+                                                   prop,
+                                                   out customParserName);
+      return false;
+   }
+
+   private static void GeneratePropertyParserMethod(StringBuilder sb,
+                                                    string targetTypeName,
+                                                    PropertyMetadata prop,
+                                                    ITypeSymbol? genericType,
+                                                    string propTypeName,
+                                                    string wrapperMethodName,
+                                                    string toolMethodCall,
+                                                    string actionName,
+                                                    ParserClassMetadata pmc)
+   {
+      var outvalue = prop.IsCollection ? genericType?.ToDisplayString() ?? "object" : propTypeName;
+
+      sb.AppendLine($"// ### Property Parser ###");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+
+      if (!pmc.ContainsOnlyChildObjects)
+      {
+         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
+         sb.AppendLine("        {");
+         if (IsFlagsEnum(prop))
+            sb.AppendLine($"            target.{prop.PropertyName} |= value;");
+         else if (prop.IsShatteredList)
+         {
+            sb.AppendLine($"            if (target.{prop.PropertyName} == null)");
+            sb.AppendLine($"                target.{prop.PropertyName} = new {propTypeName}();");
+            sb.AppendLine();
+            sb.AppendLine($"            target.{prop.PropertyName}.Add(value);");
+         }
+         else
+            sb.AppendLine($"            target.{prop.PropertyName} = value;");
+
+         sb.AppendLine("            return true;");
+         sb.AppendLine("        }");
+         sb.AppendLine("        return false;");
+      }
+      else
+      {
+         sb.AppendLine("        // Skipped: Class is marked with [ParserFor(containsOnlyChildObjects:true)]");
+         sb.AppendLine("        return true;");
+      }
+
+      sb.AppendLine("    }");
+   }
+
+   private static void GenerateShatteredEmbeddedCollectionPropertyParserMethod(StringBuilder sb,
+                                                                               string targetTypeName,
+                                                                               PropertyMetadata prop,
+                                                                               string wrapperMethodName,
+                                                                               ITypeSymbol? genericType,
+                                                                               string customParserName,
+                                                                               ParserClassMetadata pmc)
+   {
+      sb.AppendLine("// ### Embedded Shattered Collection Property Parser ###");
+      var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+
+      if (!pmc.ContainsOnlyChildObjects)
+      {
+         sb.AppendLine($"        var newInstance = ({itemTypeName})Activator.CreateInstance(typeof({itemTypeName}))!;");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
+      }
+
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+   }
+
+   private static void GenerateEmbeddedCollectionPropertyParserMethod(StringBuilder sb,
+                                                                      string targetTypeName,
+                                                                      string actionName,
+                                                                      PropertyMetadata prop,
+                                                                      string wrapperMethodName,
+                                                                      ITypeSymbol? genericType,
+                                                                      string customParserName,
+                                                                      ParserClassMetadata pmc)
+   {
+      sb.AppendLine("// ### Embedded Collection Property Parser ###");
+      if (prop.AstNodeType != NodeType.BlockNode)
+      {
+         sb.AppendLine($"    // ERROR: Embedded collection property '{prop.PropertyName}' must be parsed from a BlockNode.");
+         return;
+      }
+
+      var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+      var collectionKeyName = prop.IsHashSet ? "ObservableHashSet" : "Collection";
+
+      var pdhMethodName = prop.IsEmbedded
+                             ? $"ParseEmbedded{collectionKeyName}"
+                             : prop.ItemNodeType switch
+                             {
+                                NodeType.ContentNode => $"ParseContent{collectionKeyName}",
+                                NodeType.KeyOnlyNode => $"ParseKeyOnly{collectionKeyName}",
+                                NodeType.BlockNode => $"ParseBlock{collectionKeyName}",
+                                NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
+                                _ => throw new ArgumentOutOfRangeException(),
+                             };
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+      if (!pmc.ContainsOnlyChildObjects)
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {customParserName}.ParseProperties, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+   }
+
+   private static void GenerateCollectionMethodCall(StringBuilder sb,
+                                                    PropertyMetadata prop,
+                                                    string wrapperMethodName,
+                                                    string toolMethodCall,
+                                                    ITypeSymbol? genericType,
+                                                    string targetTypeName,
+                                                    string actionName,
+                                                    ParserClassMetadata pmc)
+   {
+      sb.AppendLine("// ### Collection Property Parser ###");
+      if (prop.AstNodeType != NodeType.BlockNode)
+      {
+         sb.AppendLine($"    // ERROR: Collection property '{prop.PropertyName}' must be parsed from a BlockNode.");
+         return;
+      }
+
+      var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+      var collectionKeyName = prop.IsHashSet ? "ObservableHashSet" : "Collection";
+
+      var pdhMethodName = prop.ItemNodeType switch
+      {
+         NodeType.ContentNode => $"ParseContent{collectionKeyName}",
+         NodeType.KeyOnlyNode => $"ParseKeyOnly{collectionKeyName}",
+         NodeType.BlockNode => $"ParseBlock{collectionKeyName}",
+         NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
+         _ => throw new ArgumentOutOfRangeException(),
+      };
+
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+
+      if (!pmc.ContainsOnlyChildObjects)
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {toolMethodCall});");
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+   }
+
+   private static void WriteIgnoreList(StringBuilder sb, string ignoredblocktypes, string[] ignoredBlockKeys)
+   {
+      sb.AppendLine($"    private static readonly HashSet<string> {ignoredblocktypes} = new(StringComparer.OrdinalIgnoreCase)");
+      sb.AppendLine("    {");
+      foreach (var key in ignoredBlockKeys)
+         sb.AppendLine($"        \"{key}\",");
+      sb.AppendLine("    };");
+   }
+
+   private static bool TryGetEmbeddedParserName(INamedTypeSymbol parserSymbol,
+                                                StringBuilder sb,
+                                                ImmutableArray<INamedTypeSymbol> parsers,
+                                                SourceProductionContext context,
+                                                PropertyMetadata prop,
+                                                out string? customParserName)
+   {
+      customParserName = null;
+
+      if (prop is { IsEmbedded: false, IEu5KeyType: null })
+         return false;
+
+      var nestedParserSymbol = FindParserForType(prop.IsCollection ? prop.ItemType : prop.PropertyType,
+                                                 parsers);
+
+      if (nestedParserSymbol == null)
+      {
+         var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+         context.ReportDiagnostic(Diagnostic.Create(new(id: "PG002",
+                                                        title: "Missing Parser for Embedded Type",
+                                                        messageFormat:
+                                                        $"No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}' in parser '{parserSymbol.Name}'.",
+                                                        category: "SourceGens",
+                                                        DiagnosticSeverity.Error,
+                                                        isEnabledByDefault: true),
+                                                    Location.None));
+
+         sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}'.");
+         return true;
+      }
+
+      customParserName = nestedParserSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+      return true;
+   }
+
+   private static void GenerateEmbeddedPropertyParserMethod(StringBuilder sb,
+                                                            string targetTypeName,
+                                                            PropertyMetadata prop,
+                                                            string customParserName,
+                                                            ParserClassMetadata pmc)
+   {
+      sb.AppendLine("// ### Embedded Property Parser ###");
+      var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine("    {");
+      if (!pmc.ContainsOnlyChildObjects)
+      {
+         sb.AppendLine($"        target.{prop.PropertyName} = new {propTypeName2}();");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+      }
+
+      sb.AppendLine("        return true;");
+      sb.AppendLine("    }");
+   }
+
+   /// <summary>
+   /// For Collections the tool method will be for the item type, e.g., <c>ArcTryParse_String</c> for <c>List&lt;string&gt;</c> <br/>
+   /// For Enums the tool method will be <c>ArcTryParse_Enum&lt;T&gt;</c> <br/>
+   /// For Flags Enums the tool method will be <c>ArcTryParse_FlagsEnum&lt;T&gt;</c> <br/>
+   /// For all other types the tool method will be <c>ArcTryParse_Typename</c> <br/>
+   /// </summary>
+   private static bool GenerateToolMethodCall(INamedTypeSymbol parserSymbol,
+                                              INamedTypeSymbol toolboxSymbol,
+                                              PropertyMetadata prop,
+                                              ImmutableHashSet<string> handwrittenMethods,
+                                              out string wrapperMethodName,
+                                              out string propTypeName,
+                                              out string actionName,
+                                              out string toolMethodCall,
+                                              out ITypeSymbol? genericType)
+   {
+      if (prop.IEu5KeyType != null && prop.AstNodeType == NodeType.BlockNode)
+      {
+         wrapperMethodName = null!;
+         propTypeName = null!;
+         actionName = null!;
+         toolMethodCall = null!;
+         genericType = null;
+         return false;
+      }
+
+      if (prop.CustomParserMethodName != null)
+      {
+         wrapperMethodName = null!;
+         propTypeName = null!;
+         actionName = null!;
+         toolMethodCall = prop.CustomParserMethodName;
+         genericType = null;
+         return true;
+      }
+
+      wrapperMethodName = PropCustomParserMethodName(prop);
+
+      // If the user has provided their own implementation, skip generation.
+      if (handwrittenMethods.Contains(wrapperMethodName))
+      {
+         propTypeName = null!;
+         actionName = null!;
+         toolMethodCall = wrapperMethodName;
+         genericType = null;
+         return true;
+      }
+
+      actionName = $"\"{parserSymbol.Name}.{wrapperMethodName}\"";
+      propTypeName = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+      var toolMethod = FindMatchingTool(toolboxSymbol, prop, out toolMethodCall, out var message, out genericType);
+
+      if (prop.IsEmbedded)
+         return false;
+
+      // For a generic tool, we need to specify the type argument, e.g., "ArcTryParse_Enum<MyEnum>"
+      toolMethodCall = FormatToolMethodCall(toolMethod, prop, message);
+      return false;
+   }
+
+   private static string FormatToolMethodCall(IMethodSymbol? toolMethod,
+                                              PropertyMetadata prop,
+                                              string message = "MISSING_TOOL_METHOD")
+   {
+      if (toolMethod == null)
+         return message;
+
+      return toolMethod.IsGenericMethod
+                ? $"{toolMethod.Name}<{prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>"
+                : toolMethod.Name;
+   }
+
+   private static INamedTypeSymbol? FindParserForType(
+      ITypeSymbol targetType,
+      ImmutableArray<INamedTypeSymbol> allKnownParsers)
+   {
+      foreach (var potentialParser in allKnownParsers)
+      {
+         var attr = potentialParser.GetAttributes()
+                                   .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSER_FOR_ATTRIBUTE);
+
+         if (attr?.ConstructorArguments.FirstOrDefault().Value is not INamedTypeSymbol attrTargetType)
+            continue;
+
+         if (SymbolEqualityComparer.Default.Equals(attrTargetType, targetType))
+            return potentialParser;
+      }
+
+      return null;
+   }
+
+   private static void GenerateParserMethodSignatures(List<PropertyMetadata> properties,
+                                                      StringBuilder sb,
+                                                      string targetTypeName)
+   {
+      sb.AppendLine("    #region Parser Method Signatures");
+      foreach (var prop in properties)
+      {
+         // If a custom parser is specified, we DO NOT generate a signature for it.
+         if (!string.IsNullOrWhiteSpace(prop.CustomParserMethodName))
+         {
+            sb.AppendLine($"    // Property '{prop.PropertyName}' is handled by custom parser '{prop.CustomParserMethodName}'.");
+            continue;
+         }
+
+         sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
+      }
+
+      sb.AppendLine("    #endregion");
+      sb.AppendLine();
+   }
+
+   private static void GenerateParsePropertiesMethod(INamedTypeSymbol targetTypeSymbol,
+                                                     StringBuilder sb,
+                                                     string targetTypeName,
+                                                     ParserClassMetadata classMetadata,
+                                                     PropertyMetadata? prop,
+                                                     ImmutableArray<INamedTypeSymbol> allKnownParsers)
+   {
+      // Write the ignored keys lists
+      WriteIgnoreList(sb, "_ignoredBlockTypes", classMetadata.IgnoredBlockKeys);
+      sb.AppendLine();
+      WriteIgnoreList(sb, "_ignoredContentTypes", classMetadata.IgnoredContentKeys);
+
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Parses all properties of a " +
+                    targetTypeSymbol.Name +
+                    " object marked with [ParseAs] from a BlockNode.");
+      sb.AppendLine("    /// This is a facade that calls the centralized logic in the Pdh helper class.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
+      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
+      sb.AppendLine("    {");
+      if (!classMetadata.ContainsOnlyChildObjects)
+      {
+         sb.AppendLine($"        Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _statementParsers, _dynamicBlockParsers, _dynamicContentParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
+      }
+      // The entire objects only consists of a list of subobjects, instead of looking into our dictionaries we have to directly parse all child blocks as subobjects.
+      else
+      {
+         if (prop == null)
+         {
+            sb.AppendLine("        // ERROR: No properties found for parser marked with [ContainsOnlyChildObjects].");
+            sb.AppendLine("        validation = false;");
+            sb.AppendLine("        return;");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+            return;
+         }
+
+         if (prop.PropertyType is not INamedTypeSymbol { IsGenericType: true } namedType)
+         {
+            sb.AppendLine($"     // ERROR: Property '{prop.PropertyName}' must be a generic collection type when parser is marked with [ContainsOnlyChildObjects].");
+            return;
+         }
+
+         var itemType = namedType.TypeArguments.FirstOrDefault();
+         if (itemType == null)
+         {
+            sb.AppendLine($"     // ERROR: Property '{prop.PropertyName}' must be a generic collection type when parser is marked with [ContainsOnlyChildObjects].");
+            return;
+         }
+
+         var propTypeName = prop.ItemType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+         var parserName = FindParserForType(itemType, allKnownParsers);
+         if (parserName == null)
+         {
+            sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName}))] was found for embedded property '{prop.PropertyName}'.");
+            return;
+         }
+
+         var customParserName = parserName.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+         if (!prop.IsCollection)
+            sb.AppendLine($"     // ERROR: Property '{prop.PropertyName}' must be a collection when parser is marked with [ContainsOnlyChildObjects].");
+
+         sb.AppendLine($"       target.{prop.PropertyName} = Pdh.ParseEmbeddedCollection<{propTypeName}>(block, ctx, source, \"{targetTypeSymbol.Name}.ParseProperties\", ref validation,{customParserName}.ParseProperties, allowUnknownNodes);");
+      }
+
+      sb.AppendLine("    }");
+      sb.AppendLine();
+   }
+
+   #endregion
+
+   public const string ARC_PARSE_PREFIX = "ArcParse_";
+   private const string TOOL_METHOD_PREFIX = "ArcTryParse";
+
+   private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
+                                                  PropertyMetadata prop,
+                                                  out string expectedToolName,
+                                                  out string message,
+                                                  out ITypeSymbol? genericType)
+   {
+      message = string.Empty;
+      var propertyType = prop.PropertyType;
+      if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
+      {
+         var isFlagsEnum = propertyType.GetAttributes()
+                                       .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+
+         var genericToolName = isFlagsEnum
+                                  ? $"{TOOL_METHOD_PREFIX}_FlagsEnum"
+                                  : $"{TOOL_METHOD_PREFIX}_Enum";
+
+         expectedToolName = genericToolName;
+
+         var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
+
+         foreach (var member in methods)
+         {
+            // A valid tool must be static, generic, and have the right number of parameters.
+            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length < 5)
+               continue;
+
+            if (member.Parameters[0].Type.Name != prop.AstNodeType.ToString())
+               continue;
+
+            var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
+            if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
+               continue;
+
+            genericType = member.TypeArguments.FirstOrDefault();
+            return member;
+         }
+
+         genericType = null;
+         return null;
+      }
+
+      // We have a block which represents a list of content or keyOnly nodes, e.g.
+      if (prop.IsCollection)
+      {
+      }
+
+      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX, prop, out genericType);
+      return FindToolByName(toolboxSymbol,
+                            expectedToolName,
+                            prop.IsCollection ? prop.ItemNodeType : prop.AstNodeType,
+                            prop.IsCollection ? genericType! : propertyType,
+                            prop,
+                            out message);
+   }
+
+   // Extracted the search logic to a reusable method
+   private static IMethodSymbol? FindToolByName(INamedTypeSymbol toolboxSymbol,
+                                                string toolName,
+                                                NodeType astNodeType,
+                                                ITypeSymbol propertyType,
+                                                PropertyMetadata prop,
+                                                out string message)
+   {
+      message = string.Empty;
+
+      message +=
+         $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
+      message +=
+         $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
+
+      foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
+      {
+         if (!member.IsStatic || member.Parameters.Length < 4)
+            continue;
+
+         if (member.Parameters[0].Type.Name == astNodeType.ToString())
+         {
+            var outParam = member.Parameters.LastOrDefault(p => p.RefKind == RefKind.Out);
+            if (outParam != null && SymbolEqualityComparer.Default.Equals(outParam.Type, propertyType))
+            {
+               message = string.Empty;
+               return member;
+            }
+
+            if (prop.IsShatteredList)
+            {
+               var genericType = propertyType is INamedTypeSymbol { IsGenericType: true } namedType
+                                    ? namedType.TypeArguments.FirstOrDefault()
+                                    : null;
+               if (genericType != null &&
+                   outParam != null &&
+                   SymbolEqualityComparer.Default.Equals(outParam.Type, genericType))
+               {
+                  message = string.Empty;
+                  return member;
+               }
+            }
+
+            message =
+               $"Found method '{toolName}' but its 'out' parameter type '{outParam?.Type.Name}' does not match the property type '{propertyType.Name}'.";
+            return null;
+         }
+      }
+
+      message +=
+         $"\n\n//No matching method '{toolName}' found." +
+         $"\n//Found methods:" +
+         $"\n//-  {string.Join("\n//- ", toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>().Select(m => m.ToDisplayString()))}";
+      return null;
+   }
+
+   /// <summary>
+   /// For a collection returns the expected tool name for the item type. <br/>
+   /// For non-collections returns the expected tool name for the property type.
+   /// </summary>
+   private static string GetExpectedToolName(ITypeSymbol type,
+                                             string prefix,
+                                             PropertyMetadata prop,
+                                             out ITypeSymbol? genericType)
+   {
+      genericType = null;
+      if (!prop.IsCollection)
+         return $"{prefix}_{type.Name}";
+
+      if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
+         return $"{prefix}_Object";
+
+      var itemType = namedType.TypeArguments.FirstOrDefault();
+      if (itemType == null)
+         return $"{prefix}_Object";
+
+      // If we have a collection we only need the method for the item type
+      genericType = itemType;
+      return $"{prefix}_{itemType.Name}";
+   }
+
+   public enum NodeType
+   {
+      ContentNode,
+      BlockNode,
+      KeyOnlyNode,
+      StatementNode,
+   }
+
+   private static (string HintName, string Source) GenerateKeywordsClass(
+      INamedTypeSymbol parserSymbol,
+      INamedTypeSymbol targetTypeSymbol,
+      List<PropertyMetadata> properties)
+   {
+      var className = $"{targetTypeSymbol.Name}Keywords";
+      var hintName = $"{parserSymbol.ContainingNamespace}.{className}.g.cs";
+
+      var sb = new StringBuilder();
+      sb.AppendLine("// <auto-generated/>");
+      sb.AppendLine($"namespace {parserSymbol.ContainingNamespace};");
+      sb.AppendLine();
+      sb.AppendLine($"public static class {className}");
+      sb.AppendLine("{");
+
+      // Use a HashSet to ensure we only generate one const per unique keyword string
+      var uniqueKeywords = new HashSet<string>();
+      foreach (var prop in properties)
+         if (uniqueKeywords.Add(prop.Keyword))
+            sb.AppendLine($"    public const string {prop.KeywordConstantName} = \"{prop.Keyword}\";");
+
+      sb.AppendLine("}");
+
+      return (hintName, sb.ToString());
+   }
+
+   private record PropertyMetadata
+   {
+      public IPropertySymbol Symbol { get; }
+      public string PropertyName => Symbol.Name;
+      public ITypeSymbol PropertyType => Symbol.Type;
+      public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
+                                        ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
+                                        : Symbol.Type;
+      public string Keyword { get; }
+      public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
+      public NodeType AstNodeType { get; }
+      public string? CustomParserMethodName { get; }
+      public INamedTypeSymbol? IEu5KeyType { get; }
+      public bool IsEmbedded { get; }
+      public bool IsShatteredList { get; }
+      public bool IsCollection { get; }
+      public bool IsHashSet { get; }
+      public INamedTypeSymbol? CustomGlobalsSource { get; }
+
+      public NodeType ItemNodeType { get; }
+
+      public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
+      {
+         Symbol = symbol;
+
+         IsShatteredList = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 3, "isShatteredList");
+         CustomParserMethodName =
+            AttributeHelper.SimpleGetAttributeArgumentValue<string?>(attribute, 2, "customParser");
+         ItemNodeType =
+            AttributeHelper.SimpleGetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
+         IsEmbedded = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
+         IEu5KeyType =
+            AttributeHelper.SimpleGetAttributeArgumentValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
+         CustomGlobalsSource =
+            AttributeHelper.SimpleGetAttributeArgumentValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
+         IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
+         IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
+                     "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";
+         if (IsHashSet)
+            IsCollection = true;
+
+         if (IsEmbedded || ((IsHashSet || IsCollection) && !IsShatteredList))
+         {
+            AstNodeType = NodeType.BlockNode;
+         }
+         else
+         {
+            // For non-embedded types, we need to parse the enum from the attribute.
+            var constructor = attribute.AttributeConstructor;
+            var nodeTypeParameter = constructor?.Parameters.FirstOrDefault(p => p.Name == "nodeType");
+
+            var astNodeTypeEnumValue = attribute.ConstructorArguments.Length > 1
+                                          ? attribute.ConstructorArguments[1].Value
+                                          : nodeTypeParameter?.ExplicitDefaultValue;
+
+            if (astNodeTypeEnumValue != null)
+            {
+               var enumTypeSymbol = nodeTypeParameter?.Type;
+               var enumMemberSymbol = enumTypeSymbol?.GetMembers()
+                                                     .OfType<IFieldSymbol>()
+                                                     .FirstOrDefault(f => f.ConstantValue != null &&
+                                                                          f.ConstantValue.Equals(astNodeTypeEnumValue));
+
+               AstNodeType = Enum.TryParse(enumMemberSymbol?.Name, out NodeType nt) ? nt : NodeType.ContentNode;
+            }
+         }
+
+         Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
+      }
+
+      private static string ToSnakeCase(string text)
+      {
+         if (string.IsNullOrEmpty(text))
+            return string.Empty;
+
+         return string.Concat(text.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x : x.ToString()))
+                      .ToLower();
+      }
+
+      // Simple sanitizer to create a valid C# identifier from a keyword string.
+      // For example, "my-key" -> "MY_KEY"
+      private static string SanitizeToIdentifier(string text)
+      {
+         if (string.IsNullOrEmpty(text))
+            return "_";
+
+         var sanitized = Regex.Replace(text, "[^a-zA-Z0-9_]", "_");
+
+         if (char.IsDigit(sanitized[0]))
+            sanitized = "_" + sanitized;
+
+         return sanitized;
+      }
+   }
+
+   private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
+                                       List<PropertyMetadata> propertiesToParse,
+                                       SourceProductionContext context)
+   {
+      foreach (var member in targetTypeSymbol.GetMembers().OfType<IPropertySymbol>())
+      {
+         // Check for [ParseAs] first
+         var parseAsAttr = member.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
+         if (parseAsAttr != null)
+            propertiesToParse.Add(new(member, parseAsAttr));
+         else
+         {
+            // Report warning
+            context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
+                                                           title: "Missing [ParseAs] Attribute",
+                                                           messageFormat:
+                                                           $"Property '{member.Name}' in class '{targetTypeSymbol.Name}' is missing the required [ParseAs] attribute and will be ignored by the parser generator.",
+                                                           category: "SourceGens",
+                                                           DiagnosticSeverity.Warning,
+                                                           isEnabledByDefault: true),
+                                                       Location.None));
+         }
+      }
+   }
+
+   private static void ReportMissingDependency(SourceProductionContext context)
+   {
+      // Report a diagnostic that the ParsingToolBox class is missing
+      context.ReportDiagnostic(Diagnostic.Create(new(id: "PARSERGEN001",
+                                                     title: "Missing Dependency",
+                                                     messageFormat:
+                                                     $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
+                                                     category: "SourceGens",
+                                                     DiagnosticSeverity.Warning,
+                                                     isEnabledByDefault: true),
+                                                 Location.None));
+   }
+}

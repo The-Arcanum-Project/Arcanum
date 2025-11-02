@@ -1,0 +1,185 @@
+﻿using System.Drawing;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Common.UI.MBox;
+using static System.Double;
+
+namespace Arcanum.UI.Components.Windows.PopUp;
+
+public partial class MBox
+{
+   public MBoxResult Result { get; private set; }
+
+   public MBox(string message, string title, MBoxButton buttons, MessageBoxImage icon)
+   {
+      InitializeComponent();
+
+      Title = title;
+      MessageText.Text = message;
+      SetupButtons(buttons);
+      SetupIcon(icon);
+
+      Loaded += (_, _) =>
+      {
+         if (OkButton.Visibility == Visibility.Visible)
+         {
+            Keyboard.Focus(OkButton);
+            OkButton.Focus();
+         }
+         else if (CancelButton.Visibility == Visibility.Visible)
+         {
+            Keyboard.Focus(CancelButton);
+            CancelButton.Focus();
+         }
+      };
+   }
+
+   private void SetupButtons(MBoxButton buttons)
+   {
+      OkButton.Visibility = Visibility.Collapsed;
+      CancelButton.Visibility = Visibility.Collapsed;
+      RetryButton.Visibility = Visibility.Collapsed;
+
+      switch (buttons)
+      {
+         case MBoxButton.OK:
+            OkButton.Visibility = Visibility.Visible;
+            break;
+         case MBoxButton.OKCancel:
+            OkButton.Visibility = Visibility.Visible;
+            CancelButton.Visibility = Visibility.Visible;
+            break;
+         case MBoxButton.OKRetryCancel:
+            OkButton.Visibility = Visibility.Visible;
+            RetryButton.Visibility = Visibility.Visible;
+            CancelButton.Visibility = Visibility.Visible;
+            break;
+         case MBoxButton.OKRetry:
+            OkButton.Visibility = Visibility.Visible;
+            RetryButton.Visibility = Visibility.Visible;
+            break;
+         case MBoxButton.RetryCancel:
+            RetryButton.Visibility = Visibility.Visible;
+            CancelButton.Visibility = Visibility.Visible;
+            break;
+         default:
+            throw new ArgumentOutOfRangeException(nameof(buttons), buttons, null);
+      }
+   }
+
+   private void SetupIcon(MessageBoxImage icon)
+   {
+      var iconKey = icon switch
+      {
+         MessageBoxImage.Information => "Info",
+         MessageBoxImage.Warning => "Warning",
+         MessageBoxImage.Error => "Error",
+         MessageBoxImage.Question => "Help",
+         _ => null,
+      };
+
+      if (iconKey != null)
+      {
+         var drawing = SystemIconsHelper.GetIcon(iconKey);
+         if (drawing != null)
+            IconImage.Source = drawing;
+      }
+      else
+      {
+         IconImage.Visibility = Visibility.Collapsed;
+      }
+   }
+
+   private void OkButton_Click(object sender, RoutedEventArgs e)
+   {
+      Result = MBoxResult.OK;
+      DialogResult = true;
+   }
+
+   private void RetryButton_Click(object sender, RoutedEventArgs e)
+   {
+      Result = MBoxResult.Retry;
+      DialogResult = true;
+   }
+
+   private void CancelButton_Click(object sender, RoutedEventArgs e)
+   {
+      Result = MBoxResult.Cancel;
+      DialogResult = true;
+   }
+
+   public static MBoxResult Show(
+      string message,
+      string title = "Message",
+      MBoxButton buttons = MBoxButton.OK,
+      MessageBoxImage icon = MessageBoxImage.None,
+      int height = -1,
+      int width = -1,
+      Window? owner = null)
+   {
+      if (Application.Current?.Dispatcher == null)
+         throw new InvalidOperationException("No UI dispatcher found.");
+
+      if (Application.Current.Dispatcher.CheckAccess())
+         // Already on UI thread
+         return ShowOnCurrentThread(message, title, buttons, icon, height, width, owner);
+      else
+         // Marshal to UI thread and wait for result
+         return Application.Current.Dispatcher.Invoke(() =>
+                                                         ShowOnCurrentThread(message,
+                                                                             title,
+                                                                             buttons,
+                                                                             icon,
+                                                                             height,
+                                                                             width,
+                                                                             owner));
+   }
+
+   private static MBoxResult ShowOnCurrentThread(
+      string message,
+      string title,
+      MBoxButton buttons,
+      MessageBoxImage icon,
+      int height,
+      int width,
+      Window? owner)
+   {
+      var box = new MBox(message, title, buttons, icon)
+      {
+         Height = height < 0 ? NaN : height,
+         Width = width < 0 ? NaN : width,
+         WindowStartupLocation =
+            owner is null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner,
+         ResizeMode = ResizeMode.NoResize,
+         ShowInTaskbar = false,
+         Topmost = true,
+         Owner = owner
+      };
+
+      box.ShowDialog();
+      return box.Result;
+   }
+}
+
+public static class SystemIconsHelper
+{
+   public static ImageSource? GetIcon(string name) => name switch
+   {
+      "Info" => Imaging.CreateBitmapSourceFromHIcon(SystemIcons.Information.Handle,
+                                                    Int32Rect.Empty,
+                                                    BitmapSizeOptions.FromEmptyOptions()),
+      "Warning" => Imaging.CreateBitmapSourceFromHIcon(SystemIcons.Warning.Handle,
+                                                       Int32Rect.Empty,
+                                                       BitmapSizeOptions.FromEmptyOptions()),
+      "Error" => Imaging.CreateBitmapSourceFromHIcon(SystemIcons.Error.Handle,
+                                                     Int32Rect.Empty,
+                                                     BitmapSizeOptions.FromEmptyOptions()),
+      "Help" => Imaging.CreateBitmapSourceFromHIcon(SystemIcons.Question.Handle,
+                                                    Int32Rect.Empty,
+                                                    BitmapSizeOptions.FromEmptyOptions()),
+      _ => null,
+   };
+}

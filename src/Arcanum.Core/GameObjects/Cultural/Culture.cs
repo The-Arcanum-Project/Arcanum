@@ -1,0 +1,184 @@
+﻿using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Map;
+using Common.UI;
+
+namespace Arcanum.Core.GameObjects.Cultural;
+
+public enum Opinion
+{
+   [EnumAgsData("enemy")]
+   Enemy,
+
+   [EnumAgsData("negative")]
+   Negative,
+
+   [EnumAgsData("neutral")]
+   Neutral,
+
+   [EnumAgsData("positive")]
+   Positive,
+
+   [EnumAgsData("kindred")]
+   Kindred,
+}
+
+[ObjectSaveAs]
+public partial class Culture : IEu5Object<Culture>, IMapInferable
+{
+   #region Nexus Properties
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("language")]
+   [Description("The language or dialect of this culture.")]
+   public Language Language { get; set; } = Language.Empty;
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("color")]
+   [Description("The color of this culture.")]
+   public JominiColor Color { get; set; } = JominiColor.Empty;
+
+   [SaveAs]
+   [DefaultValue("")]
+   [ParseAs("dynasty_name_type")]
+   [Description("The type of family names this culture uses.")]
+   public string DynastyNameType { get; set; } = string.Empty;
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("use_patronym")]
+   [Description("If this culture uses patronyms instead of family names.")]
+   public bool UsePatronym { get; set; }
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("opinions", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Opinions towards other cultures.")]
+   public ObservableRangeCollection<CultureOpinionValue> Opinions { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("culture_groups")]
+   [Description("The groups this culture belongs to.")]
+   public ObservableRangeCollection<string> CultureGroups { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("tags")]
+   [Description("The tags this culture belongs to.\nConvention is to put the more unique ones first and less unique ones last.")]
+   public ObservableRangeCollection<string> GfxTags { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("noun_keys")]
+   [Description("The noun keys this culture uses.")]
+   public ObservableRangeCollection<string> NounKeys { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("adjective_keys")]
+   [Description("The adjective keys this culture uses.")]
+   public ObservableRangeCollection<string> AdjectiveKeys { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("country_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to countries of this culture.")]
+   public ObservableRangeCollection<ModValInstance> CountryModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("location_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to locations of this culture.")]
+   public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("character_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to characters of this culture.")]
+   public ObservableRangeCollection<ModValInstance> CharacterModifiers { get; set; } = [];
+
+   #endregion
+
+#pragma warning disable AGS004
+   [Description("Unique key of this Culture. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string GetNamespace => $"{nameof(Culture)}";
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
+   public bool IsReadonly => false;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;
+   public INUINavigation[] Navigations => [new NUINavigation(Language == Language.Empty ? null : Language, "Language")];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureAgsSettings;
+   public static Dictionary<string, Culture> GetGlobalItems() => Globals.Cultures;
+
+   public static Culture Empty { get; } = new() { UniqueId = "Arcanum_Empty_Culture" };
+
+   #endregion
+
+   public override string ToString() => UniqueId;
+
+   #region IMapInferable
+
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Culture;
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> items = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Culture != Empty)
+            continue;
+
+         items.Add(loc.TemplateData.Culture);
+      }
+
+      return items.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
+   {
+      Debug.Assert(items.All(x => x is Culture));
+      var objs = items.Cast<Culture>().ToArray();
+
+      List<Location> locations = [];
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData.Culture) &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Culture != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
+
+   #endregion
+}

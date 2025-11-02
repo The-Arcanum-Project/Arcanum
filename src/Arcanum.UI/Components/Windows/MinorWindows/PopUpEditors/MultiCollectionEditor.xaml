@@ -1,0 +1,167 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors.MultiCollectionEditor"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:i = "http://schemas.microsoft.com/xaml/behaviors"
+                         mc:Ignorable = "d"
+                         Title = "Multi Collection Editor"
+                         Height = "500"
+                         Width = "800"
+                         WindowStartupLocation = "CenterOwner">
+    <Window.Resources>
+        <!-- Ensure you have these converters in your project -->
+        <converters:StateToBackgroundConverter x:Key = "StateToBackgroundConverter" />
+        <BooleanToVisibilityConverter x:Key = "BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "30" />
+            <ColumnDefinition Width = "*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "40" />
+            <RowDefinition Height = "30" />
+            <RowDefinition Height = "*" />
+            <RowDefinition Height = "Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Headers -->
+        <TextBlock Grid.Row = "0"
+                   Grid.Column = "0"
+                   Text = "Selection"
+                   VerticalAlignment = "Center"
+                   HorizontalAlignment = "Center"
+                   FontWeight = "Bold"
+                   FontSize = "16" />
+        <TextBlock Grid.Row = "0"
+                   Grid.Column = "2"
+                   Text = "Source"
+                   VerticalAlignment = "Center"
+                   HorizontalAlignment = "Center"
+                   FontWeight = "Bold"
+                   FontSize = "16" />
+
+        <!-- Filters -->
+        <styleClasses:CorneredTextBox Grid.Row = "1"
+                                      Grid.Column = "0"
+                                      Margin = "5,0,5,5"
+                                      Text = "{Binding AppliedFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                      ToolTip = "Filter the selection list" />
+        <styleClasses:CorneredTextBox Grid.Row = "1"
+                                      Grid.Column = "2"
+                                      Margin = "5,0,5,5"
+                                      Text = "{Binding AvailableFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                      ToolTip = "Filter the source list" />
+
+        <!-- ListViews and Buttons -->
+        <ListView x:Name = "SelectionListView"
+                  Grid.Row = "2"
+                  Grid.Column = "0"
+                  Margin = "5,0"
+                  ItemsSource = "{Binding AppliedItems}"
+                  SelectionMode = "Extended"
+                  HorizontalContentAlignment = "Stretch"
+                  ToolTip = "Items currently in the selection&#x0a;Yellow: Is in some but not all lists&#x0a;Green: Is in all lists">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName = "SelectionChanged">
+                    <i:InvokeCommandAction Command = "{Binding SelectionListActivatedCommand}"
+                                           CommandParameter = "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}, Path=SelectedItems}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation = "Horizontal"
+                                Height = "23">
+                        <Border Width = "10"
+                                Height = "10"
+                                CornerRadius = "3"
+                                HorizontalAlignment = "Left"
+                                VerticalAlignment = "Center"
+                                Background = "{Binding State, Converter={StaticResource StateToBackgroundConverter}}" />
+                        <TextBlock Text = "{Binding DisplayText}"
+                                   VerticalAlignment = "Center"
+                                   Margin = "5,3" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <StackPanel Grid.Row = "2"
+                    Grid.Column = "1"
+                    VerticalAlignment = "Center"
+                    HorizontalAlignment = "Center">
+            <styleClasses:BaseButton x:Name = "MoveLeftButton"
+                                     Width = "30"
+                                     Height = "30"
+                                     Margin = "0,5"
+                                     Command = "{Binding RightArrowCommand}"
+                                     ToolTip = "Add selected item(s) to all lists&#x0a;If already in selection add it to the remaining lists">
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/ArrowLeft30x30.png" />
+            </styleClasses:BaseButton>
+
+            <styleClasses:BaseButton x:Name = "MoveRightButton"
+                                     ToolTip = "Remove selected item(s) from Selection"
+                                     Width = "30"
+                                     Height = "30"
+                                     Margin = "0,5"
+                                     Command = "{Binding LeftArrowCommand}"
+                                     CommandParameter = "{Binding ElementName=SelectionListView, Path=SelectedItems}">
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/ArrowRight30x30.png" />
+            </styleClasses:BaseButton>
+        </StackPanel>
+
+        <ListView x:Name = "SourceListView"
+                  Grid.Row = "2"
+                  Grid.Column = "2"
+                  Margin = "5,0"
+                  ItemsSource = "{Binding AvailableItems}"
+                  SelectionMode = "Extended">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName = "SelectionChanged">
+                    <i:InvokeCommandAction Command = "{Binding SourceListActivatedCommand}"
+                                           CommandParameter = "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}, Path=SelectedItems}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text = "{Binding DisplayText}"
+                               Padding = "5,3" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- OK and Cancel Buttons -->
+        <StackPanel Grid.Row = "3"
+                    Grid.Column = "0"
+                    Grid.ColumnSpan = "3"
+                    Orientation = "Horizontal"
+                    HorizontalAlignment = "Right"
+                    Margin = "5">
+            <styleClasses:BaseButton x:Name = "OkButton"
+                                     Width = "80"
+                                     Height = "23"
+                                     IsDefault = "True"
+                                     Click = "OkButton_Click">
+                <TextBlock Text = "OK"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Center" />
+            </styleClasses:BaseButton>
+            <styleClasses:BaseButton x:Name = "CancelButton"
+                                     Width = "80"
+                                     Height = "23"
+                                     IsCancel = "True"
+                                     Margin = "5,0,0,0">
+                <TextBlock Text = "Cancel"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Center" />
+            </styleClasses:BaseButton>
+        </StackPanel>
+    </Grid>
+</styleClasses:BaseWindow>

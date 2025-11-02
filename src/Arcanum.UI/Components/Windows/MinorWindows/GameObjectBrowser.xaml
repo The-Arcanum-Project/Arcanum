@@ -1,0 +1,69 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.MinorWindows.GameObjectBrowser"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:local = "clr-namespace:Arcanum.UI.Components.Windows.MinorWindows"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         mc:Ignorable = "d"
+                         Title = "GameObjectBrowser"
+                         Height = "450"
+                         Width = "800"
+                         WindowStartupLocation = "CenterScreen"
+                         FooterHeight = "0"
+                         Background = "{StaticResource DarkerSelectedBackColorBrush}">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
+    <Grid Margin = "4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "40" />
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row = "0"
+                   Margin = "5, 0, 0, 0"
+                   FontWeight = "Bold"
+                   FontSize = "25"
+                   FontFamily = "{StaticResource DefaultMonospacedFont}"
+                   VerticalAlignment = "Center">
+            Properties:
+        </TextBlock>
+
+
+        <ListView Grid.Row = "1"
+                  ItemsSource = "{Binding PropertyInfos, RelativeSource={RelativeSource AncestorType=local:GameObjectBrowser}}"
+                  VerticalAlignment = "Stretch">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "*" />
+                            <ColumnDefinition Width = "40" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column = "0"
+                                    Orientation = "Horizontal"
+                                    VerticalAlignment = "Center">
+                            <TextBlock Text = "{Binding Name}"
+                                       Margin = "0,0,10,0" />
+                            <TextBlock Text = "{Binding PropertyType.Name}"
+                                       Margin = "0,0,10,0" />
+                        </StackPanel>
+                        <styleClasses:BaseButton Grid.Column = "1"
+                                                 Content = "Open"
+                                                 Click = "OnPropertyOpenClick"
+                                                 Tag = "{Binding}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</styleClasses:BaseWindow>

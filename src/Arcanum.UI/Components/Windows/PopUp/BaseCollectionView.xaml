@@ -1,0 +1,104 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.PopUp.BaseCollectionView"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         mc:Ignorable = "d"
+                         Title = "BaseCollectionView"
+                         Height = "500"
+                         Width = "600">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:ComplexTypeVisibilityConverter x:Key = "ComplexTypeVisibilityConverter" />
+            <converters:IsListTypeVisibilityConverter x:Key = "IsListTypeVisibilityConverter" />
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+
+    <Grid Background = "{StaticResource DefaultBackColorBrush}"
+          Margin = "0"
+          VerticalAlignment = "Stretch"
+          HorizontalAlignment = "Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "1*" />
+            <ColumnDefinition Width = "1*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Column = "0"
+                Grid.Row = "0"
+                BorderThickness = "2"
+                BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                CornerRadius = "2"
+                Margin = "2">
+            <ListBox x:Name = "ListItems"
+                     SelectionChanged = "ListItems_SelectionChanged"
+                     Background = "Transparent"
+                     VirtualizingStackPanel.IsVirtualizing = "True"
+                     VirtualizingStackPanel.VirtualizationMode = "Recycling"
+                     ScrollViewer.IsDeferredScrollingEnabled = "True">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background = "Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "*" />
+                                <ColumnDefinition Width = "*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height = "20" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column = "0"
+                                       Text = "{Binding}"
+                                       Margin = "5, 2, 2,2"
+                                       VerticalAlignment = "Center"
+                                       HorizontalAlignment = "Stretch" />
+                            <styleClasses:BaseButton Grid.Column = "1"
+                                                     Margin = "2"
+                                                     Padding = "0"
+                                                     VerticalAlignment = "Stretch"
+                                                     Click = "ViewCollection_Button_Click"
+                                                     HorizontalAlignment = "Right"
+                                                     Visibility = "{Binding Converter={StaticResource IsListTypeVisibilityConverter}}">
+                                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Eye20x20.png"
+                                       VerticalAlignment = "Center"
+                                       HorizontalAlignment = "Center"
+                                       Stretch = "UniformToFill"
+                                       Margin = "0" />
+                            </styleClasses:BaseButton>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+
+        <baseControls:PropertyGrid Grid.Column = "1"
+                                   Grid.Row = "0"
+                                   BorderThickness = "2"
+                                   x:Name = "PropertyGrid"
+                                   Visibility = "{Binding Converter={StaticResource ComplexTypeVisibilityConverter}}"
+                                   HorizontalAlignment = "Stretch"
+                                   VerticalAlignment = "Stretch"
+                                   Margin = "0"
+                                   LabelWidth = "80">
+
+        </baseControls:PropertyGrid>
+    </Grid>
+</styleClasses:BaseWindow>

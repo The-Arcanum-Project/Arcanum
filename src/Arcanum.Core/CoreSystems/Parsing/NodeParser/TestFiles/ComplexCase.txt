@@ -1,0 +1,77 @@
+﻿default_block = {
+
+    scripted_trigger artist_events_15_character_trigger = {
+        artist_type = sculptor
+        OR = {
+            has_trait = prominent 
+            artist_skill >= 0.5
+        }
+    }
+
+
+    {
+        block = {
+            key = value
+        }
+        block2 = {
+            key2 = value2
+        }
+    }
+
+    date = 1444.10.1
+
+    title = "MainConfig"
+    width = 1280
+    height = 720
+    min_width <= 640
+    max_width >= 1920
+    fullscreen ?= no
+    scale = @[ 2 * 3 + 1 ]
+
+    graphics = {
+        vsync = yes
+        quality = high
+    } graphics = {
+        vsync = yes
+        quality = high
+    }
+
+    # {
+    # lexme comment
+    # }
+
+    colors = {
+        background = rgb { 0 0 0 }
+        highlight = hsv { 0.8 0.6 0.9 }
+        highlight = hsv360 { 0.8 0.6 0.9 }
+    }
+
+    10 = value
+
+    
+    20 = {
+        nested_key = nested_value
+    }
+
+    30 {
+        another_key = another_value
+    }
+
+    audio
+    {
+        volume = 80
+        mute = no
+    }
+    
+    map_color = {
+        lerp = {
+            min_color = define:NMapColors|MAP_COLOR_LOW
+            max_color = define:NMapColors|MAP_COLOR_HIGH
+            factor = "province.culture_percentage(scope:actor.dominant_culture)"
+        }
+    }
+
+    examp = {
+        hello hello2 helloKitty
+    }
+}

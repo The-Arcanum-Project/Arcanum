@@ -1,0 +1,191 @@
+﻿<Window x:Class = "Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen"
+        xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
+        xmlns:mainMenuScreen = "clr-namespace:Arcanum.UI.Components.Views.MainMenuScreen"
+        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+        mc:Ignorable = "d"
+        Height = "550"
+        Width = "900"
+        WindowStyle = "None"
+        ResizeMode = "NoResize"
+        WindowStartupLocation = "CenterScreen"
+        Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
+        Activated = "MainMenuScreen_OnActivated">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseMenuButtonTheme.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <mainMenuScreen:MainMenuViewModel />
+    </Window.DataContext>
+    <!-- #272537 -->
+    <Border Background = "{StaticResource AccentGradientBrush}"
+            CornerRadius = "0">
+        <b:Interaction.Behaviors>
+            <behaviors:WindowDrag EnableDoubleClickMaximize = "False" />
+        </b:Interaction.Behaviors>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "200" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "75" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text = "Arcanum"
+                       VerticalAlignment = "Center"
+                       HorizontalAlignment = "Center"
+                       Foreground = "{StaticResource DefaultForeColorBrush}"
+                       FontSize = "30"
+                       FontWeight = "Bold">
+            </TextBlock>
+
+            <StackPanel x:Name = "MenuBarStackPanel"
+                        Grid.Row = "1"
+                        Grid.Column = "0">
+                <RadioButton IsChecked = "True"
+                             Margin = "40,0,40,10"
+                             Content = "Home"
+                             Height = "30"
+                             FontSize = "14"
+                             Command = "{Binding HomeVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton x:Name = "ArcanumTabButton"
+                             Margin = "40,0,40,10"
+                             Content = "Configure"
+                             Height = "30"
+                             FontSize = "14"
+                             Command = "{Binding ArcanumVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton Margin = "40,0,40,10"
+                             Content = "Resources"
+                             Height = "30"
+                             Foreground = "{StaticResource DefaultForeColorBrush}"
+                             FontSize = "14"
+                             Command = "{Binding FeatureVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton IsChecked = "False"
+                             Margin = "40,0,40,10"
+                             Content = "Modforge"
+                             Height = "30"
+                             FontSize = "14"
+                             Command = "{Binding ModforgeVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton Margin = "40,0,40,10"
+                             Content = "About Us"
+                             Height = "30"
+                             FontSize = "14"
+                             Command = "{Binding AboutUsVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton Margin = "40,0,40,10"
+                             Content = "Attributions"
+                             Height = "30"
+                             FontSize = "14"
+                             Command = "{Binding AttributionsVc}"
+                             Style = "{StaticResource MenuButtonTheme}" />
+                <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
+                       Stretch = "Uniform"
+                       RenderOptions.BitmapScalingMode = "HighQuality"
+                       Margin = "40, 73, 40, 40" />
+            </StackPanel>
+
+            <Grid Row = "0"
+                  Column = "1">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "100" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column = "0"
+                        Grid.Row = "0"
+                        CornerRadius = "10"
+                        BorderThickness = "2"
+                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                        VerticalAlignment = "Center"
+                        HorizontalAlignment = "Center"
+                        Padding = "5"
+                        Margin = "0, 5, 0, 0">
+                    <StackPanel Orientation = "Horizontal"
+                                VerticalAlignment = "Center"
+                                HorizontalAlignment = "Center">
+
+                        <TextBlock VerticalAlignment = "Center"
+                                   Margin = "4"
+                                   FontSize = "14">
+                            New Project:
+                        </TextBlock>
+
+                        <styleClasses:BaseButton x:Name = "CreatNewProjectButton"
+                                                 VerticalAlignment = "Center"
+                                                 Margin = "0"
+                                                 CornerRadius = "7"
+                                                 Height = "25"
+                                                 Width = "25"
+                                                 Click = "CreateNewProjectButton_Click"
+                                                 Background = "{StaticResource GreenColorBrush}"
+                                                 ToolTip = "Create a new Arcanum configuration for a mod">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png" />
+
+                        </styleClasses:BaseButton>
+                        <TextBlock Text = "{Binding LaunchButtonText}"
+                                   VerticalAlignment = "Center"
+                                   Margin = "10, 4, 4,4"
+                                   FontSize = "14">
+                        </TextBlock>
+
+                        <styleClasses:BaseButton x:Name = "LoadLastConfigButton"
+                                                 VerticalAlignment = "Center"
+                                                 Margin = "0"
+                                                 CornerRadius = "7"
+                                                 Height = "25"
+                                                 Width = "25"
+                                                 Click = "LoadLastConfigButton_Click"
+                                                 MouseEnter = "LoadLastConfigButton_MouseEnter"
+                                                 Background = "{StaticResource GreenColorBrush}">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/Play30x30.png" />
+                        </styleClasses:BaseButton>
+                    </StackPanel>
+                </Border>
+
+                <styleClasses:BaseButton Grid.Column = "1"
+                                         x:Name = "CloseButton"
+                                         VerticalAlignment = "Top"
+                                         HorizontalAlignment = "Right"
+                                         Margin = "0"
+                                         Padding = "23"
+                                         Background = "Transparent"
+                                         Click = "CloseButton_Click"
+                                         BorderThickness = "0">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Close40x40.png"
+                           Stretch = "None"
+                           Margin = "0"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Center">
+                    </Image>
+                </styleClasses:BaseButton>
+            </Grid>
+
+            <ContentControl Grid.Row = "1"
+                            Grid.Column = "1"
+                            Margin = "10"
+                            Content = "{Binding CurrentView}" />
+
+        </Grid>
+
+    </Border>
+</Window>

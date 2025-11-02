@@ -1,0 +1,106 @@
+﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key = "{x:Type CheckBox}"
+           TargetType = "CheckBox">
+        <Setter Property = "BorderThickness"
+                Value = "1" />
+        <Setter Property = "Background"
+                Value = "{StaticResource DefaultBackColorBrush}" />
+        <Setter Property = "BorderBrush"
+                Value = "{StaticResource DefaultBorderColorBrush}" />
+        <Setter Property = "Foreground"
+                Value = "{StaticResource DefaultForeColorBrush}" />
+        <Setter Property = "Margin"
+                Value = "1" />
+        <Setter Property = "Padding"
+                Value = "0" />
+        <Setter Property = "HorizontalAlignment"
+                Value = "Left" />
+        <Setter Property = "VerticalAlignment"
+                Value = "Center" />
+        <Setter Property = "MinWidth"
+                Value = "22" />
+        <Setter Property = "MinHeight"
+                Value = "22" />
+
+        <Setter Property = "Template">
+            <Setter.Value>
+                <ControlTemplate TargetType = "CheckBox">
+                    <StackPanel Orientation = "Horizontal"
+                                VerticalAlignment = "Center">
+                        <Image x:Name = "UncheckedImage"
+                               Source = "/Arcanum_UI;component/Assets/Icons/20x20/CloseSquare20x20.png"
+                               Width = "20"
+                               Height = "20"
+                               Margin = "{TemplateBinding Margin}" />
+                        <Image x:Name = "CheckedImage"
+                               Source = "/Arcanum_UI;component/Assets/Icons/20x20/CheckSquare20x20.png"
+                               Width = "20"
+                               Height = "20"
+                               Margin = "{TemplateBinding Margin}"
+                               Visibility = "Collapsed" />
+                        <Image x:Name = "IndeterminateImage"
+                               Source = "/Arcanum_UI;component/Assets/Icons/20x20/IndeterminateSquare20x20.png"
+                               Width = "20"
+                               Height = "20"
+                               Margin = "{TemplateBinding Margin}"
+                               Visibility = "Collapsed" />
+                        <ContentPresenter VerticalAlignment = "Center" />
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property = "IsChecked"
+                                 Value = "True">
+                            <Setter TargetName = "CheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Visible" />
+                            <Setter TargetName = "UncheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                        </Trigger>
+                        <Trigger Property = "IsChecked"
+                                 Value = "False">
+                            <Setter TargetName = "CheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "UncheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Visible" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                        </Trigger>
+                        <Trigger Property = "IsChecked"
+                                 Value = "{x:Null}">
+                            <Setter TargetName = "CheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "UncheckedImage"
+                                    Property = "Visibility"
+                                    Value = "Collapsed" />
+                            <Setter TargetName = "IndeterminateImage"
+                                    Property = "Visibility"
+                                    Value = "Visible" />
+                        </Trigger>
+
+                        <Trigger Property = "IsEnabled"
+                                 Value = "False">
+                            <Setter Property = "Opacity"
+                                    Value = "0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+</ResourceDictionary>

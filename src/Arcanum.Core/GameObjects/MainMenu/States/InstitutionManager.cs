@@ -1,0 +1,60 @@
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Common.UI;
+using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
+
+namespace Arcanum.Core.GameObjects.MainMenu.States;
+
+[ObjectSaveAs]
+public partial class InstitutionManager : IEu5Object<InstitutionManager>
+{
+   #region Nexus Properties
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("institutions", isEmbedded: true)]
+   [Description("List of all defined InstitutionStates in the game.")]
+   public ObservableRangeCollection<InstitutionState> InstitutionStates { get; set; } = [];
+
+   #endregion
+
+#pragma warning disable AGS004
+   [Description("Unique key of this InstitutionState. Must be unique among all objects of this type.")]
+   [DefaultValue("null")]
+   public string UniqueId { get; set; } = null!;
+
+   [SuppressAgs]
+   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+#pragma warning restore AGS004
+
+   #region IEu5Object
+
+   public string SavingKey => "institution_manager";
+   public string GetNamespace => $"MainMenu.State.{nameof(InstitutionManager)}";
+   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public bool IsReadonly => true;
+   public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionManagerSettings;
+   public INUINavigation[] Navigations => [];
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionStateAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
+
+   public static Dictionary<string, InstitutionManager> GetGlobalItems()
+      => new() { { "State", Globals.State.InstitutionManager } };
+
+   public static InstitutionManager Empty { get; } = new() { UniqueId = "Arcanum_Empty_InstitutionState" };
+
+   public override string ToString() => UniqueId;
+
+   #endregion
+}

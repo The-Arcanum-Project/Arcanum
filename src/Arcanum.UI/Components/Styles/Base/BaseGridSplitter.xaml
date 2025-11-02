@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    <converters:HalfRadiusConverter x:Key = "HalfRadiusConverter" />
+    <Style TargetType = "GridSplitter">
+        <Setter Property = "Background"
+                Value = "{StaticResource DefaultBorderColorBrush}" />
+        <Setter Property = "HorizontalAlignment"
+                Value = "Center" />
+        <Setter Property = "VerticalAlignment"
+                Value = "Stretch" />
+        <Setter Property = "SnapsToDevicePixels"
+                Value = "True" />
+        <Setter Property = "Margin"
+                Value = "0,5" />
+
+        <Setter Property = "Template">
+            <Setter.Value>
+                <ControlTemplate TargetType = "GridSplitter">
+                    <Border Background = "{TemplateBinding Background}"
+                            CornerRadius = "{TemplateBinding ActualWidth, Converter={StaticResource HalfRadiusConverter}}"
+                            Width = "{TemplateBinding Width}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property = "IsKeyboardFocused"
+                                 Value = "True">
+                            <Setter Property = "Background"
+                                    Value = "{StaticResource SelectedControlBorderColorBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+
+</ResourceDictionary>

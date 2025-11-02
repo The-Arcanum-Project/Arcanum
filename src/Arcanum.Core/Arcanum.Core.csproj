@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latestmajor</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Arcanum.PluginHost\Arcanum.PluginHost.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="CoreSystems\Jomini\Scopes\"/>
+        <Folder Include="CoreSystems\Jomini\Triggers\"/>
+        <Folder Include="CoreSystems\Parsing\MapParsing\Smoothing\"/>
+        <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
+        <Folder Include="Utils\SearchingAlgorithms\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\src_gen\Nexus.Analyzer\Nexus.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\src_gen\Nexus.Core\Nexus.Core.csproj"/>
+        <ProjectReference Include="..\src_gen\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\src_gen\CodeFixers\CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\src_gen\SourceGens\SourceGens.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0"/>
+        <PackageReference Include="LibTessDotNet" Version="1.1.15"/>
+        <PackageReference Include="Octokit" Version="14.0.0"/>
+        <PackageReference Include="Pfim" Version="0.11.3"/>
+        <PackageReference Include="System.Management" Version="9.0.9"/>
+    </ItemGroup>
+
+</Project>
