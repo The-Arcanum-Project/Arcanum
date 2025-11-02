@@ -644,7 +644,6 @@ public static class NEF
          Height = height,
          Margin = new(0),
       };
-      binding.Mode = BindingMode.TwoWay;
       jomColView.SetBinding(JominiColorView.ColorProperty, binding);
 
       return jomColView;

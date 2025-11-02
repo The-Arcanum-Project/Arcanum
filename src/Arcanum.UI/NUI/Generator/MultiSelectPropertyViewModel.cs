@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
@@ -28,6 +29,19 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
 
    public bool IsNonDefaultValue { get; private set; }
    public int CollectionCount { get; private set; }
+   public IEu5Object[] Targets => _targets.OfType<IEu5Object>().ToArray();
+   public IEu5Object[] TargetPropObjects
+   {
+      get
+      {
+         if (_targets.Count == 0)
+            return [];
+
+         return _targets[0].GetNxPropType(_property).IsAssignableTo(typeof(IEu5Object))
+                   ? _targets.Select(t => (IEu5Object)t._getValue(_property)).ToArray()
+                   : _targets.OfType<IEu5Object>().ToArray();
+      }
+   }
 
    public MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property, bool allowReadonlyWrite = false)
    {

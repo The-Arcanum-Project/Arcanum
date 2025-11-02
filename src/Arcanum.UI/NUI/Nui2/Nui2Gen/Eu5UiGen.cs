@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.CommandSystem;
+using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -273,7 +274,7 @@ public static class Eu5UiGen
          graphButton.SetBinding(UIElement.VisibilityProperty, visibilityBinding);
       }
 
-      AddCreateNewEu5ObjectButton(primary, nxProp, ebv.TitleDockPanel, Dock.Right);
+      AddCreateNewEu5ObjectButton(mspvm, primary, nxProp, ebv.TitleDockPanel, Dock.Right);
 
       RoutedEventHandler setClick = (_, _) =>
       {
@@ -282,7 +283,7 @@ public static class Eu5UiGen
          if (inferred == null || inferred.Count < 1)
             return;
 
-         Nx.ForceSet(inferred[0], primary, nxProp);
+         mspvm.Value = inferred[0];
          if (inferred.Count > 1)
             UIHandle.Instance.PopUpHandle
                     .ShowMBox($"Multiple inferred values found for {nxProp}. Using the first one ({inferred[0]}).",
@@ -370,7 +371,7 @@ public static class Eu5UiGen
                            nxProp,
                            mainGrid,
                            rowIndex,
-                           propertyViewModel: propertyViewModel,
+                           mspvm: propertyViewModel,
                            isMarked: isMarked,
                            embeddedPropertyTargets: parentProp,
                            allowReadOnlyEditing: allowReadOnlyEditing);
@@ -557,7 +558,11 @@ public static class Eu5UiGen
       return customButton;
    }
 
-   private static void AddCreateNewEu5ObjectButton(IEu5Object primary, Enum nxProp, DockPanel panel, Dock dock)
+   private static void AddCreateNewEu5ObjectButton(MultiSelectPropertyViewModel mspvm,
+                                                   IEu5Object primary,
+                                                   Enum nxProp,
+                                                   DockPanel panel,
+                                                   Dock dock)
    {
       var createNewButton = NEF.GetCreateNewButton();
 
@@ -565,24 +570,19 @@ public static class Eu5UiGen
       {
          Type type;
          if (primary.IsCollection(nxProp))
-         {
             type = primary.GetNxItemType(nxProp) ??
                    throw new
                       InvalidOperationException($"Property {nxProp} does not have an item type but is a collection.");
-         }
          else
-         {
             type = primary.GetNxPropType(nxProp) ??
                    throw new InvalidOperationException($"Property {nxProp} does not have a type.");
-         }
 
          Eu5ObjectCreator.ShowPopUp(type,
                                     newObj =>
                                     {
-                                       if (primary.IsCollection(nxProp))
-                                          Nx.AddToCollection(primary, nxProp, newObj);
-                                       else
-                                          Nx.ForceSet(newObj, primary, nxProp);
+                                       mspvm.Value = newObj;
+                                       AppData.HistoryManager.InvokeTypeUpdate(newObj.GetType(),
+                                                                               mspvm.TargetPropObjects);
 
                                        // Find the first parent of type EmbeddedView of the createNewButton and refresh its selector
                                        var parent = VisualTreeHelper.GetParent(createNewButton);
@@ -912,7 +912,7 @@ public static class Eu5UiGen
                                          Grid mainGrid,
                                          int rowIndex,
                                          bool isMarked,
-                                         MultiSelectPropertyViewModel propertyViewModel,
+                                         MultiSelectPropertyViewModel mspvm,
                                          Enum? embeddedPropertyTargets = null,
                                          int leftMargin = 0,
                                          bool allowReadOnlyEditing = false)
@@ -930,12 +930,12 @@ public static class Eu5UiGen
             targets.Add((IEu5Object)value);
          }
 
-         propertyViewModel = new(targets, nxProp, allowReadOnlyEditing);
+         mspvm = new(targets, nxProp, allowReadOnlyEditing);
       }
 
-      var binding = new Binding(nameof(propertyViewModel.Value))
+      var binding = new Binding(nameof(mspvm.Value))
       {
-         Source = propertyViewModel,
+         Source = mspvm,
          Mode = BindingMode.TwoWay,
          UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
       };
@@ -956,10 +956,7 @@ public static class Eu5UiGen
       else if (type == typeof(double) || type == typeof(decimal))
          element = NEF.GetDoubleUI(binding, (decimal)val);
       else if (type == typeof(JominiColor))
-      {
-         var isReadonly = primary.IsPropertyReadOnly(nxProp);
-         element = NEF.GetJominiColorUI(binding, isReadonly);
-      }
+         element = NEF.GetJominiColorUI(binding, primary.IsPropertyReadOnly(nxProp));
       else if (type == typeof(JominiDate))
          element = NEF.GetJominiDateUI(binding);
       else if (type == typeof(object))
@@ -986,14 +983,14 @@ public static class Eu5UiGen
       var desc = NEF.DescriptorBlock(nxProp);
       desc.Margin = new(leftMargin, 0, 0, 0);
 
-      SetUpPropertyContextMenu(primary, nxProp, desc, propertyViewModel);
+      SetUpPropertyContextMenu(primary, nxProp, desc, mspvm);
 
       if (isMarked)
          desc.Background = ControlFactory.MarkedBrush;
 
       SetTooltipIsAny(primary, nxProp, desc);
 
-      GetInferActionButtons(propertyViewModel, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
+      GetInferActionButtons(mspvm, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
 
       var line = NEF.GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
@@ -1001,7 +998,7 @@ public static class Eu5UiGen
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
 
-      var propertyMarker = GetPropertyMarker(propertyViewModel);
+      var propertyMarker = GetPropertyMarker(mspvm);
 
       GridManager.AddToGrid(mainGrid, dockPanel, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid,

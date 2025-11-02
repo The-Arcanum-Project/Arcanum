@@ -17,9 +17,11 @@ public partial class EmbeddedView
 {
    public PropertyEditorViewModel ViewModel { get; set; }
    private AutoCompleteComboBox Selector { get; set; }
+   private MultiSelectPropertyViewModel _mspvm;
 
    public EmbeddedView(PropertyEditorViewModel vm, MultiSelectPropertyViewModel mspvm)
    {
+      _mspvm = mspvm;
       var binding = new Binding(nameof(mspvm.Value))
       {
          Source = mspvm,
@@ -56,7 +58,7 @@ public partial class EmbeddedView
    private void SetEmptyButton_Click(object sender, RoutedEventArgs e)
    {
       var empty = EmptyRegistry.Empties[ViewModel.Target.GetNxPropType(ViewModel.NxProp)];
-      Nx.ForceSet(empty, ViewModel.Target, ViewModel.NxProp);
+      _mspvm.Value = empty;
 
       Selector.SetSelectedItem(empty, string.Empty);
 

@@ -27,8 +27,7 @@ public class PropertyEditorViewModel
       NxProp = nxProp;
       NavH = navH;
       Target = target;
-      object embedded = null!;
-      Nx.ForceGet(target, nxProp, ref embedded);
+      var embedded = Target._getValue(nxProp);
       Debug.Assert(embedded is IEu5Object, "EmbeddedView can only display IEu5Object values.");
       Embedded = (IEu5Object)embedded;
 
@@ -95,7 +94,11 @@ public class PropertyEditorViewModel
             targets.Add(t._getValue(NxProp) as IEu5Object ?? throw new InvalidOperationException());
       }
 
-      Eu5UiGen.PopulateEmbeddedGrid(newGrid, NavH, targets, (IEu5Object)Target._getValue(NxProp), NxProp);
+      Eu5UiGen.PopulateEmbeddedGrid(newGrid,
+                                    NavH,
+                                    targets.Select(x => (IEu5Object)x._getValue(NxProp)).ToList(),
+                                    (IEu5Object)Target._getValue(NxProp),
+                                    NxProp);
 
       ExpandableContentGrid = newGrid;
       _hasRefreshedContent = true;

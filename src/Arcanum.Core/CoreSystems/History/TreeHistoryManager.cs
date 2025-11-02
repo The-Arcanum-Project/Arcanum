@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Timer = System.Threading.Timer;
@@ -67,8 +68,18 @@ public class TreeHistoryManager : IHistoryManager
    private void InvokeTypeUpdate(ICommand command)
    {
       var changedType = command.GetTargetPropertyType();
-      if (changedType != null)
-         ModifiedType?.Invoke(changedType, command.GetTargetProperties() ?? []);
+      if (changedType == null)
+         return;
+
+      if (changedType == typeof(JominiColor))
+         InvokeTypeUpdate(command.GetTargets()[0].GetType(), command.GetTargets());
+      else
+         InvokeTypeUpdate(changedType, command.GetTargetProperties() ?? []);
+   }
+
+   public void InvokeTypeUpdate(Type type, IEu5Object[] targets)
+   {
+      ModifiedType?.Invoke(type, targets);
    }
 
    // Check if there are any commands to undo or redo

@@ -85,7 +85,7 @@ public static partial class MapModeManager
       RecentModes.Insert(0, type);
    }
 
-   public static void DataChanged(Type _, IEu5Object[] objects)
+   public static void DataChanged(Type type, IEu5Object[] objects)
    {
       if (objects.Length == 0)
          return;
