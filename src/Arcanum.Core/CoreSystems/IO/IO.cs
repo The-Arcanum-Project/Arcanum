@@ -25,6 +25,7 @@ public static class IO
    }
 
    public static string GetArcanumDataPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData");
+   public static string GetCrashLogsPath => Path.Combine(GetArcanumDataPath, "CrashLogs");
 
    // Directory Utils
    public static List<string> GetDirectories(string path,

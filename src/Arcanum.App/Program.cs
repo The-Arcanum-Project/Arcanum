@@ -3,6 +3,7 @@ using Arcanum.Core.FlowControlServices;
 using Arcanum.UI;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 
 namespace Arcanum.App;
 
@@ -13,6 +14,19 @@ internal static class Program
    /// </summary>
    [STAThread]
    private static void Main()
+   {
+      try
+      {
+         InternalApplicationRun();
+      }
+      catch (Exception e)
+      {
+         CrashHandler.Show(e);
+         Application.Current?.Shutdown();
+      }
+   }
+
+   private static void InternalApplicationRun()
    {
       var app = new Application { ShutdownMode = ShutdownMode.OnLastWindowClose };
       _ = typeof(BaseWindow);

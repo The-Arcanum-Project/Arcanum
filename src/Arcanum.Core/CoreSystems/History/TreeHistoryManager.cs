@@ -267,6 +267,11 @@ public class TreeHistoryManager : IHistoryManager
       return (depth, total);
    }
 
+   public (List<HistoryNode> add, List<HistoryNode> rmv) GetPathToCurrent()
+   {
+      return GetPathBetweenNodes(Root.Id, Current.Id);
+   }
+
    /// <summary>
    /// Returns the path between two nodes in the history tree.
    /// </summary>
