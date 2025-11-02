@@ -463,7 +463,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       MapModeButtonGrid.Children.Clear();
       MapModeButtonGrid.ColumnDefinitions.Clear();
       _commandToMapModeType.Clear();
-      CommandBindings.Clear();
+      for (var i = CommandBindings.Count; i-- > 0;)
+      {
+         var binding = CommandBindings[i];
+         if (_commandToMapModeType.ContainsKey(binding.Command))
+            CommandBindings.RemoveAt(i);
+      }
 
       for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
       {
