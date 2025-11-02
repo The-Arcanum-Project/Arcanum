@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "src\src_gen\An
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnosticArgsAnalyzer", "src\src_gen\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj", "{96A1FBC0-86B3-4452-BA5B-0D3E5E736196}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\Common\Common.csproj", "{734A6CB3-D436-497D-861C-78EEFE3D5EFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcanum.Common", "src\Arcanum.Common\Arcanum.Common.csproj", "{734A6CB3-D436-497D-861C-78EEFE3D5EFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFixers", "src\src_gen\CodeFixers\CodeFixers.csproj", "{625B13F9-CB34-451D-9336-630B1F26E7FF}"
 EndProject

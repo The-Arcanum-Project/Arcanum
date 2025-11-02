@@ -28,7 +28,7 @@
 
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj"/>
+        <ProjectReference Include="..\Arcanum.Common\Arcanum.Common.csproj"/>
         <ProjectReference Include="..\src_gen\Nexus.Core\Nexus.Core.csproj"/>
         <ProjectReference Include="..\src_gen\Nexus.Analyzer\Nexus.Analyzer.csproj"
                           OutputItemType="Analyzer"
