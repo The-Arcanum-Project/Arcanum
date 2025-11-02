@@ -1,12 +1,29 @@
-﻿namespace Common.Logger;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Common.Logger;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public enum LogLevel
 {
    INF, // Information
    WRN, // Warning
    ERR, // Error
    DBG, // Debug
-   CRT // Critical
+   CRT, // Critical
+}
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public enum CommonLogSource
+{
+   PGM, // Plugin Manager
+   PMS, // Parsing Master
+   FSM, // File System Manager
+   MPS, // Map Processing System
+   SDK, // Software Development Kit
+   SRG, // Source Generator
+   NUI, // NUI
+   AGP, // Generated Parsing system files
+   AGS, // Automatic saving system
 }
 
 public static class ArcLog
@@ -35,6 +52,12 @@ public static class ArcLog
 
    public static void WriteLine(string source, LogLevel level, string message, params object[] args)
       => Log($"[{GetSourceString(source)}] [{level.ToString()}] {string.Format(message, args)}");
+
+   public static void WriteLine(CommonLogSource source, LogLevel level, string message)
+      => Log($"[{GetSourceString(source.ToString())}] [{level.ToString()}] {message}");
+
+   public static void WriteLine(CommonLogSource source, LogLevel level, string message, Exception ex)
+      => Log($"[{GetSourceString(source.ToString())}] [{level.ToString()}] {message} | Exception: {ex}");
 
    private static void Log(string str)
    {
