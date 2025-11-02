@@ -65,12 +65,8 @@ public static class MwCommands
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenConsoleCommand },
    };
 
-   public static readonly RoutedCommand LoadingStepRunnerCommand = new("LoadingStepRunnerCommand", typeof(MainWindowView))
-   {
-      InputGestures = { new KeyGesture(Key.F12) },
-   };
-   
-   
+   public static readonly RoutedCommand LoadingStepRunnerCommand =
+      new("LoadingStepRunnerCommand", typeof(MainWindowView)) { InputGestures = { new KeyGesture(Key.F12) }, };
 
    // Wiki Commands
    public static readonly RoutedCommand OpenEffectWikiCommand = new("OpenEffectWikiCommand", typeof(MainWindowView))
@@ -137,19 +133,19 @@ public static class MwCommands
 
    // Debug Commands
    public static readonly RoutedCommand ExecuteLexer = new("OpenLoadingWindowCommand",
-                                                                   typeof(MainWindowView))
+                                                           typeof(MainWindowView))
    {
       InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },
    };
 
    public static readonly RoutedCommand OpenDebugPanel = new("OpenDebugPanel",
-                                                        typeof(MainWindowView))
+                                                             typeof(MainWindowView))
    {
       InputGestures = { new KeyGesture(Key.D, ModifierKeys.Control | ModifierKeys.Shift) },
    };
-   
+
    public static readonly RoutedCommand OpenGlobalsBrowserCommand = new("OpenGlobalsBrowserCommand",
-                                                                   typeof(MainWindowView))
+                                                                        typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenGlobalsBrowser },
    };
@@ -161,11 +157,11 @@ public static class MwCommands
    };
 
    public static readonly RoutedCommand OpenParsingStepBrowserCommand = new("OpenParsingStepBrowserCommand",
-                                                                   typeof(MainWindowView))
+                                                                            typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenParsingStepBrowser },
    };
-   
+
    public static readonly RoutedCommand TempTestingCommand = new("TempTestingCommand", typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.TempTestingCommand },
@@ -175,14 +171,67 @@ public static class MwCommands
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.GoToPreviousINUI },
    };
-   
+
    public static readonly RoutedCommand GoToNextINUICommand = new("GoToNextINUICommand", typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.GoToNextINUI },
    };
-   
+
    public static readonly RoutedCommand ViewINUIObjectsCommand = new("ViewINUIObjectsCommand", typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.ViewINUIObjects },
    };
+
+   // Map Mode quick access buttons
+
+   public static readonly RoutedCommand MapModeButton_1_Command = new("MapModeButton_1_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_1 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_2_Command = new("MapModeButton_2_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_2 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_3_Command = new("MapModeButton_3_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_3 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_4_Command = new("MapModeButton_4_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_4 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_5_Command = new("MapModeButton_5_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_5 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_6_Command = new("MapModeButton_6_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_6 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_7_Command = new("MapModeButton_7_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_7 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_8_Command = new("MapModeButton_8_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_8 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_9_Command = new("MapModeButton_9_Command", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_9 },
+   };
+
+   public static readonly RoutedCommand MapModeButton_10_Command =
+      new("MapModeButton_10_Command", typeof(MainWindowView))
+      {
+         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_10 },
+      };
 }

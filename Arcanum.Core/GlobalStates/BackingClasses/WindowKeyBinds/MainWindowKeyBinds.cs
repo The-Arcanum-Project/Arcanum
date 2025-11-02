@@ -54,4 +54,16 @@ public class MainWindowKeyBinds : KeyBindProvider
    public KeyGesture OpenParsingStepBrowser { get; set; } = new(Key.F9);
    public KeyGesture TempTestingCommand { get; set; } = new(Key.F5);
    public KeyGesture ViewINUIObjects { get; set; } = new(Key.F6);
+
+   // Map Mode Quick buttons
+   public KeyGesture MapModeButton_1 { get; set; } = new(Key.D1, ModifierKeys.Control);
+   public KeyGesture MapModeButton_2 { get; set; } = new(Key.D2, ModifierKeys.Control);
+   public KeyGesture MapModeButton_3 { get; set; } = new(Key.D3, ModifierKeys.Control);
+   public KeyGesture MapModeButton_4 { get; set; } = new(Key.D4, ModifierKeys.Control);
+   public KeyGesture MapModeButton_5 { get; set; } = new(Key.D5, ModifierKeys.Control);
+   public KeyGesture MapModeButton_6 { get; set; } = new(Key.D6, ModifierKeys.Control);
+   public KeyGesture MapModeButton_7 { get; set; } = new(Key.D7, ModifierKeys.Control);
+   public KeyGesture MapModeButton_8 { get; set; } = new(Key.D8, ModifierKeys.Control);
+   public KeyGesture MapModeButton_9 { get; set; } = new(Key.D9, ModifierKeys.Control);
+   public KeyGesture MapModeButton_10 { get; set; } = new(Key.D0, ModifierKeys.Control);
 }

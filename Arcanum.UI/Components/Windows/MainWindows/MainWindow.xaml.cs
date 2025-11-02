@@ -3,22 +3,20 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -29,7 +27,6 @@ using Common.UI;
 using CommunityToolkit.Mvvm.Input;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
-using ToolTip = System.Windows.Controls.ToolTip;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -309,6 +306,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       Fps = fps;
    }
 
+   private readonly Dictionary<ICommand, MapModeManager.MapModeType> _commandToMapModeType = new();
+
    public event PropertyChangedEventHandler? PropertyChanged;
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -457,32 +456,79 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    }
 
+   #region MapMode Buttons
+
    public void GenerateMapModeButtons()
    {
+      MapModeButtonGrid.Children.Clear();
+      MapModeButtonGrid.ColumnDefinitions.Clear();
+      _commandToMapModeType.Clear();
+      CommandBindings.Clear();
+
       for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
       {
          MapModeButtonGrid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
          var mapMode = MapModeManager.GetMapModeForButtonIndex(i);
+         var routedCommand = GetMapModeButtonCommand(i);
+         if (routedCommand != null && mapMode != null)
+         {
+            _commandToMapModeType[routedCommand] = mapMode.Type;
+            var commandBinding =
+               new CommandBinding(routedCommand, OnMapModeCommandExecuted, OnMapModeCommandCanExecute);
+            CommandBindings.Add(commandBinding);
+         }
 
          var button = new MapModeButton
          {
             Margin = new(2),
             Padding = new(0),
-            Command = new RelayCommand(() =>
-            {
-               if (mapMode != null)
-                  MapModeManager.Activate(mapMode.Type);
-            }),
+            Command = routedCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Bottom,
             Height = 30,
-            ToolTip = mapMode != null ? mapMode.Description : "No map mode assigned to this button.",
+            ToolTip = mapMode != null
+                         ? mapMode.Description +
+                           "\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
+                           (i != 9 ? i + 1 : 0)
+                         : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
+                           (i != 9 ? i + 1 : 0),
             MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Base,
          };
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);
       }
    }
+
+   private void OnMapModeCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      if (_commandToMapModeType.TryGetValue(e.Command, out var mapModeType))
+         MapModeManager.Activate(mapModeType);
+   }
+
+   private void OnMapModeCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
+   {
+      e.CanExecute = _commandToMapModeType.ContainsKey(e.Command);
+   }
+
+   private RoutedCommand? GetMapModeButtonCommand(int index)
+   {
+      return index switch
+      {
+         0 => MwCommands.MapModeButton_1_Command,
+         1 => MwCommands.MapModeButton_2_Command,
+         2 => MwCommands.MapModeButton_3_Command,
+         3 => MwCommands.MapModeButton_4_Command,
+         4 => MwCommands.MapModeButton_5_Command,
+         5 => MwCommands.MapModeButton_6_Command,
+         6 => MwCommands.MapModeButton_7_Command,
+         7 => MwCommands.MapModeButton_8_Command,
+         8 => MwCommands.MapModeButton_9_Command,
+         9 => MwCommands.MapModeButton_10_Command,
+         _ => null,
+      };
+   }
+
+   #endregion
 
    private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
       => e.CanExecute = NUINavigation.Instance.CanBack;
