@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
@@ -136,6 +137,7 @@ public partial class PopType : IEu5Object<PopType>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopTypeSettings;
    public INUINavigation[] Navigations => [];
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopTypeAgsSettings;
    public static Dictionary<string, PopType> GetGlobalItems() => Globals.PopTypes;
 

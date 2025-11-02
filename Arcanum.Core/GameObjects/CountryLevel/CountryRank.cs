@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.CountryLevel;
@@ -91,6 +92,7 @@ public partial class CountryRank : IEu5Object<CountryRank>
    public static Dictionary<string, CountryRank> GetGlobalItems() => Globals.CountryRanks;
 
    public static CountryRank Empty { get; } = new() { UniqueId = "Arcanum_Empty_CountryRank" };
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public override string ToString() => UniqueId;
 

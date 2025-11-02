@@ -752,4 +752,15 @@ public class ParsingError : ILazySingleton
                                                                    "The token count is unexpected. Expected {0}, but found {1}.",
                                                                    "The number of tokens encountered does not match the expected count. Please ensure the correct number of tokens are provided.",
                                                                    DiagnosticReportSeverity.PopupNotify);
+
+   /// <summary>
+   /// <param name="0">The target for the InjectReplace operation that could not be found</param>
+   /// </summary>
+   public DiagnosticDescriptor InjectReplaceTargetNotFound { get; } = new(DiagnosticCategory.Parsing,
+                                                                          78,
+                                                                          "InjectReplace Target Not Found",
+                                                                          DiagnosticSeverity.Error,
+                                                                          "The target for InjectReplace could not be found: '{0}'.",
+                                                                          "The specified target '{0}' for the InjectReplace operation has to exist to replace it. Other options are 'TRY_REPLACE' or 'REPLACE_OR_CREATE' if the target might not exist.\n\nThe replace was NOT performed and saving the containing file can cause data loss.",
+                                                                          DiagnosticReportSeverity.PopupNotify);
 }

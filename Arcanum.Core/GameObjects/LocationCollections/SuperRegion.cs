@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
 
@@ -65,6 +66,7 @@ public partial class SuperRegion
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.SuperRegionAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]

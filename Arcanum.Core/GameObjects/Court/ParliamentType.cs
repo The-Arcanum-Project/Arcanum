@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court;
@@ -50,6 +51,7 @@ public partial class ParliamentType : IEu5Object<ParliamentType>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ParliamentTypeSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentTypeAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, ParliamentType> GetGlobalItems() => Globals.ParliamentTypes;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

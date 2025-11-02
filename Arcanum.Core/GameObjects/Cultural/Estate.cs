@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Cultural;
@@ -162,6 +163,7 @@ public partial class Estate : IEu5Object<Estate>
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateAgsSettings;

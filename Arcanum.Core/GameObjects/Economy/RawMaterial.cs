@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
@@ -132,6 +133,7 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public INUINavigation[] Navigations => [];
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RawMaterialSettings;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.RawMaterialAgsSettings;
    public static Dictionary<string, RawMaterial> GetGlobalItems() => Globals.RawMaterials;

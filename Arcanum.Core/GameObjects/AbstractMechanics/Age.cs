@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
@@ -126,6 +127,7 @@ public partial class Age : IEu5Object<Age>
    public override string ToString() => UniqueId;
 
    protected bool Equals(Age other) => UniqueId == other.UniqueId;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public override bool Equals(object? obj)
    {

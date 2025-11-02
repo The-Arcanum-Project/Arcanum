@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court.State;
@@ -49,6 +50,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    #region IEu5Object Implementation
 
    public string GetNamespace => $"Court.{nameof(RulerTerm)}";
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

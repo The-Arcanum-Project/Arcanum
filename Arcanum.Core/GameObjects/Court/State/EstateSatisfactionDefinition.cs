@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court.State;
@@ -43,6 +44,7 @@ public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactio
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateSatisfactionDefinitionSettings;
    public INUINavigation[] Navigations => [];
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateSatisfactionDefinitionAgsSettings;
    public static Dictionary<string, EstateSatisfactionDefinition> GetGlobalItems() => [];
 

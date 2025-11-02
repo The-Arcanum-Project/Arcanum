@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
@@ -103,6 +104,7 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.VegetationAgsSettings;
    public string SavingKey => UniqueId;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;

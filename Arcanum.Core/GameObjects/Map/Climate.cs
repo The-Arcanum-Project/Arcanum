@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
@@ -127,6 +128,7 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
 
    #endregion
 
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ClimateAgsSettings;
    public string SavingKey => UniqueId;
 

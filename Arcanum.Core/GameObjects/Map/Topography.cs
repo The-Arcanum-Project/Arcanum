@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
@@ -134,6 +135,7 @@ public partial class Topography : IEu5Object<Topography>, IMapInferable
 
    #region Interface Properties
 
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TopographySettings;
    public INUINavigation[] Navigations { get; } = [];

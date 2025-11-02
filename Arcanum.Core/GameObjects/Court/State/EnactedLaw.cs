@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court.State;
@@ -39,6 +40,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Key, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Dictionary<string, EnactedLaw> GetGlobalItems() => [];
 }

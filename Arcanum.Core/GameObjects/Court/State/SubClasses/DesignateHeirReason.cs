@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court.State.SubClasses;
@@ -43,6 +44,7 @@ public partial class DesignateHeirReason : IEu5Object<DesignateHeirReason>
 
    public static DesignateHeirReason Empty { get; } = new() { UniqueId = "Arcanum_Empty_DesignateHeirReason" };
 
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public override string ToString() => UniqueId;
 
    #endregion

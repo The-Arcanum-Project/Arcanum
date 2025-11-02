@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.GameObjects.Common;
 
@@ -129,6 +130,7 @@ public partial class ModifierGameData
       get => "";
       set { }
    }
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Embedded;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => "game_data";

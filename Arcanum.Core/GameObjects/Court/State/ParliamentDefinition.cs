@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court.State;
@@ -35,6 +36,7 @@ public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
    public string SavingKey => string.Empty;
    public static ParliamentDefinition Empty { get; } = new() { Type = ParliamentType.Empty };
    public string GetNamespace => "Court.parliament_definition";
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Type.UniqueId, string.Empty);

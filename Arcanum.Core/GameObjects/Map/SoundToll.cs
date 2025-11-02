@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Nexus.Core;
@@ -53,6 +54,7 @@ public partial class SoundToll : IEu5Object<SoundToll>
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.SoundTollSettings;
    public INUINavigation[] Navigations => [];

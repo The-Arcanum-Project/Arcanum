@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Religious.SubObjects;
@@ -39,6 +40,7 @@ public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
    public static Dictionary<string, ReligiousFocus> GetGlobalItems() => Globals.ReligiousFocuses;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static ReligiousFocus Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousFocus" };
 
    public override string ToString() => UniqueId;

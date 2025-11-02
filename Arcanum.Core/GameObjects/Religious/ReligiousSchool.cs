@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Religious;
@@ -36,6 +37,7 @@ public partial class ReligiousSchool : IEu5Object<ReligiousSchool>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousSchoolSettings;
    public INUINavigation[] Navigations => [];
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolAgsSettings;
    public static Dictionary<string, ReligiousSchool> GetGlobalItems() => Globals.ReligiousSchools;
 

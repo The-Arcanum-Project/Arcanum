@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court.State;
 using Common.UI;
@@ -264,6 +265,7 @@ public partial class Country : IEu5Object<Country>
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.CountryAgsSettings;
    public string SavingKey => UniqueId;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

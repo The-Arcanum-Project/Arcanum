@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -50,6 +51,7 @@ public partial class EstateAttributeDefinition : IEu5Object<EstateAttributeDefin
 
    public string GetNamespace => $"Pops.{nameof(EstateAttributeDefinition)}";
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;

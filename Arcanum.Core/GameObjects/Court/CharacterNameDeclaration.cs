@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Court;
@@ -70,6 +71,7 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    #endregion
 
    public string GetNamespace => $"Characters.{nameof(CharacterNameDeclaration)}";
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 

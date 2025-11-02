@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
 
@@ -46,6 +47,7 @@ public partial class InstitutionManager : IEu5Object<InstitutionManager>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionManagerSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionStateAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Dictionary<string, InstitutionManager> GetGlobalItems()
       => new() { { "State", Globals.State.InstitutionManager } };

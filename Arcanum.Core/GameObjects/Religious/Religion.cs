@@ -13,6 +13,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -250,6 +251,7 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => true;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligionSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligionAgsSettings;

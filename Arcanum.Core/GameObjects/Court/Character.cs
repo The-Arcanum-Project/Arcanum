@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
@@ -224,6 +225,7 @@ public partial class Character : IEu5Object<Character>
 
    #region IEu5Object
 
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public string GetNamespace => $"Court.{nameof(Character)}";
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));

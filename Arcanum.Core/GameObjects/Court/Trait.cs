@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Common.UI;
 
@@ -59,6 +60,7 @@ public partial class Trait : IEu5Object<Trait>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.TraitAgsSettings;
    public static Dictionary<string, Trait> GetGlobalItems() => Globals.Traits;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Trait Empty { get; } = new() { UniqueId = "Arcanum_Empty_Trait" };
 

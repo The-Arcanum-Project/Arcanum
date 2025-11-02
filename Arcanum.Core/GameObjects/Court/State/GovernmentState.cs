@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
@@ -140,6 +141,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    public Eu5FileObj Source { get; set; } = null!;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => "government";
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    private string _privateKey = string.Empty;
 

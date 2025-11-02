@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
@@ -68,6 +69,7 @@ public partial class Location
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs.Cast<IEu5Object>().ToList();
    public List<Location> GetRelevantLocations(IEu5Object[] items) => items.Cast<Location>().ToList();
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base;
 

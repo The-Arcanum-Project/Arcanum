@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using Nexus.Core;
 
@@ -148,6 +149,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    public INUINavigation[] Navigations { get; } = [];
    public static ModifierDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_ModifierDefinition" };
    public static Dictionary<string, ModifierDefinition> GetGlobalItems() => Globals.ModifierDefinitions;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    #endregion
 

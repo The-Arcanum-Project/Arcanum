@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -60,6 +61,6 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TimedModifierAgsSettings;
    public string SavingKey => UniqueId;
    public static Dictionary<string, TimedModifier> GetGlobalItems() => []; // TODO parse static modifiers
-
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static TimedModifier Empty { get; } = new() { UniqueId = "Arcanum_empty_timed_modifier" };
 }

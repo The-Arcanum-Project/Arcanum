@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
@@ -132,6 +133,7 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;
    public INUINavigation[] Navigations => [new NUINavigation(Language == Language.Empty ? null : Language, "Language")];

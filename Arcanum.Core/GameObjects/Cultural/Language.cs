@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Common.UI;
@@ -248,6 +249,7 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LanguageNuiSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.LanguageAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, Language> GetGlobalItems() => Globals.Languages;
 
    public static Language Empty { get; } = new() { UniqueId = "Arcanum_Empty_Language" };

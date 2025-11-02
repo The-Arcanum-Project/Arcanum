@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
 
@@ -63,6 +64,7 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ProvinceAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

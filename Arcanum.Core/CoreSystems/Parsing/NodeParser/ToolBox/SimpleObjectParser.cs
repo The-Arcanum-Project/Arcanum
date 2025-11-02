@@ -1,17 +1,24 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 public static class SimpleObjectParser
 {
+   private static readonly UppercaseWordChecker _irChecker = new([
+      "INJECT", "TRY_INJECT", "INJECT_OR_CREATE", "REPLACE", "TRY_REPLACE", "REPLACE_OR_CREATE",
+   ]);
+
    public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      List<StatementNode> statements,
                                      LocationContext ctx,
@@ -36,6 +43,80 @@ public static class SimpleObjectParser
              instance == null)
             continue;
 
+         // We check if we have an inject/replace and if so custom handling applies
+         // todo: optimize by not calling GetLexeme twice
+         if (_irChecker.IsMatch(bn.KeyNode.GetLexeme(source), out var irType))
+         {
+            // we already have a valid object created, so depending on the irType we now take action
+            switch (irType)
+            {
+               case InjRepType.Inject:
+               case InjRepType.TryInject:
+               case InjRepType.InjectOrCreate:
+                  if (!globals.TryGetValue(instance.UniqueId, out var injTarget))
+                  {
+                     if (irType == InjRepType.TryInject)
+                        break;
+
+                     if (irType == InjRepType.InjectOrCreate)
+                     {
+                        instance.InjRepType = InjRepType.InjectOrCreate;
+                        if (lockObject != null)
+                           lock (lockObject)
+                              globals[instance.UniqueId] = instance;
+                        else
+                           globals[instance.UniqueId] = instance;
+                        break;
+                     }
+
+                     ctx.SetPosition(bn.KeyNode);
+                     De.Warning(ctx,
+                                ParsingError.Instance.InjectReplaceTargetNotFound,
+                                actionStack,
+                                instance.UniqueId);
+                     validation = false;
+                     continue;
+                  }
+
+                  var injectTarget = (IEu5Object)injTarget;
+                  var injectObj = InjectManager.CreateAndRegisterInjectObj(injectTarget, instance, irType);
+                  injectTarget.MergeInjects(injectObj.InjectedProperties);
+
+                  break;
+               case InjRepType.Replace:
+               case InjRepType.TryReplace:
+               case InjRepType.ReplaceOrCreate:
+                  if (!globals.ContainsKey(instance.UniqueId) && irType != InjRepType.ReplaceOrCreate)
+                  {
+                     if (irType == InjRepType.TryReplace)
+                        break;
+
+                     ctx.SetPosition(bn.KeyNode);
+                     De.Warning(ctx,
+                                ParsingError.Instance.InjectReplaceTargetNotFound,
+                                actionStack,
+                                instance.UniqueId);
+                     validation = false;
+                     continue;
+                  }
+
+                  instance.InjRepType = irType;
+                  if (lockObject != null)
+                     lock (lockObject)
+                        globals[instance.UniqueId] = instance;
+                  else
+                     globals[instance.UniqueId] = instance;
+                  break;
+               case InjRepType.None:
+               default:
+                  Debug.Fail("Unhandled InjRepType in SimpleObjectParser.Parse");
+                  break;
+            }
+
+            return;
+         }
+
+         // Otherwise we just add to globals as normal
          if (lockObject != null)
             lock (lockObject)
             {
@@ -123,7 +204,7 @@ public static class SimpleObjectParser
                                                            string source,
                                                            ref bool validation,
                                                            StatementNode sn,
-                                                           out BlockNode? bn,
+                                                           [MaybeNullWhen(false)] out BlockNode bn,
                                                            out TTarget? eu5Obj)
       where TTarget : IEu5Object<TTarget>, new()
    {

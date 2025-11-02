@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
@@ -29,5 +30,6 @@ public partial class EstateCountDefinition : IEmbeddedEu5Object<EstateCountDefin
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static EstateCountDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_EstateDefinition" };
 }

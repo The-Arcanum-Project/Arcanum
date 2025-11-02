@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 
@@ -53,6 +54,7 @@ public partial class Market : IEu5Object<Market>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.MarketAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, Market> GetGlobalItems() => Globals.Markets;
 
    public static Market Empty { get; } = new() { UniqueId = "Arcanum_Empty_Market" };

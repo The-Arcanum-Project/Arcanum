@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -63,6 +64,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopDefinitionAgsSettings;
    public static Dictionary<string, PopDefinition> GetGlobalItems() => [];
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static PopDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_PopDefinition" };
 

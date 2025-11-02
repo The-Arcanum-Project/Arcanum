@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.GameObjects.Map.SubObjects;
 
@@ -26,4 +27,5 @@ public partial class MapMovementAssist : IEmbeddedEu5Object<MapMovementAssist>
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static MapMovementAssist Empty { get; } = new();
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 }

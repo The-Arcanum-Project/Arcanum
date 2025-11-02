@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Pops;
 
@@ -40,6 +41,7 @@ public partial class DemandData : IEmbeddedEu5Object<DemandData>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.DemandDataAgsSettings;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static DemandData Empty { get; } = new();
 }

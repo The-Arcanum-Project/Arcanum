@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using Nexus.Core;
 
@@ -57,6 +58,7 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.StaticModifierSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.StaticModifierAgsSettings;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, StaticModifier> GetGlobalItems() => Globals.StaticModifiers;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

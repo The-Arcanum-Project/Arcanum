@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Cultural.SubObjects;
@@ -48,6 +49,7 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.Eu5ObjOpinionValueAgsSettings;
    public static Dictionary<string, ReligionOpinionValue> GetGlobalItems() => [];
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static ReligionOpinionValue Empty { get; } = new() { UniqueId = "Arcanum_Empty_Eu5ObjOpinionValue" };
 

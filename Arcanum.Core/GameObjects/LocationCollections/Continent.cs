@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
 
@@ -39,6 +40,7 @@ public partial class Continent
 
    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
    public string GetNamespace => $"Map.{nameof(Continent)}";
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
 

@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.BaseTypes;
@@ -42,7 +43,8 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
          UniqueId = uniqueId, Source = source,
       };
       source.ObjectsInFile.Add(instance);
-      FileStateManager.RegisterPath(source.Path);
+      FileStateManager
+        .RegisterPath(source.Path); //TODO: This is a performance killer, only do this once per file loaded
       return instance;
    }
 }
@@ -68,6 +70,11 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// If true this object can not be saved individually and has to have a reference to it's parent
    /// </summary>
    public bool IsEmbeddedObject => false;
+
+   /// <summary>
+   /// Is True if this object is initialized as a <code>REPLACE/TRY_REPLACE/REPLACE_OR_CREATE:UniqueID</code> object.
+   /// </summary>
+   public InjRepType InjRepType { get; set; }
    /// <summary>
    /// Only exists if this object is an embedded object.
    /// </summary>
@@ -78,4 +85,6 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
    public IDictionary GetGlobalItemsNonGeneric();
+
+   public int GetHashCode() => GetType().GetHashCode() ^ UniqueId.GetHashCode() * 21;
 }
