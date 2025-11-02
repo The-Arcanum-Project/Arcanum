@@ -140,7 +140,9 @@
             <DataGrid.Columns>
                 <!-- Severity Icon Column -->
                 <DataGridTemplateColumn Header = "Severity"
-                                        Width = "50">
+                                        Width = "50"
+                                        CanUserReorder = "True"
+                                        CanUserResize = "True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType = "{x:Type dig:Diagnostic}">
                             <Border CornerRadius = "4"
@@ -205,15 +207,21 @@
 
                 <DataGridTextColumn Header = "Error Code"
                                     Binding = "{Binding (dig:Diagnostic.Code)}"
-                                    Width = "250" />
+                                    Width = "250"
+                                    CanUserReorder = "True"
+                                    CanUserResize = "True" />
 
                 <DataGridTextColumn Header = "Action"
                                     Binding = "{Binding (dig:Diagnostic.Action)}"
-                                    Width = "450" />
+                                    Width = "450"
+                                    CanUserReorder = "True"
+                                    CanUserResize = "True" />
 
                 <DataGridTextColumn Header = "Message"
                                     Binding = "{Binding (dig:Diagnostic.Message)}"
-                                    Width = "*" />
+                                    Width = "*"
+                                    CanUserReorder = "True"
+                                    CanUserResize = "True" />
             </DataGrid.Columns>
 
 
