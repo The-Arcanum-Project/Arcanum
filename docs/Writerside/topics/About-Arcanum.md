@@ -8,4 +8,4 @@ files. This allows you to modify game objects with just a few clicks, handling a
 focus on your creative vision. Whether you are making a minor adjustment or undertaking a major overhaul, **Arcanum** aims
 to streamline your workflow and help you bring your ideas to life.
 
-<!--Interested in trying it out yourself? Head directly to the [](Getting-Started.md)section.-->
+Interested in trying it out yourself? Head directly to the Getting Started section.
