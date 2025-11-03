@@ -573,5 +573,14 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
       UIHandle.Instance.LogWindowHandle.CloseWindow();
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+         foreach (Window window in Application.Current.Windows)
+            if (window != this)
+               window.Close();
+      });
+
+      PerformanceCountersHelper.Shutdown();
+      Application.Current.Dispatcher.InvokeShutdown();
    }
 }

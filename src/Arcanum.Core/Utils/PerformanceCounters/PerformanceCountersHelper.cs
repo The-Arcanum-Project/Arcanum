@@ -90,6 +90,13 @@ public static class PerformanceCountersHelper
 
       _window.SetFps($"FPS: [{Math.Round(_fps)}]");
    }
+
+   public static void Shutdown()
+   {
+      Updater.Stop();
+      Updater.Dispose();
+      GPUMonitor.Dispose();
+   }
 }
 
 public interface IPerformanceMeasured

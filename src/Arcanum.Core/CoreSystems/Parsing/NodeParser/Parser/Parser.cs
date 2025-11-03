@@ -29,7 +29,7 @@ public class Parser(LexerResult lexerResult)
       fileObj.GenerateChecksum();
       if (string.IsNullOrWhiteSpace(source))
       {
-         DiagnosticException.CreateAndHandle(new(1, 1, _fileObj.Path.FullPath),
+         DiagnosticException.CreateAndHandle(new(1, 1, fileObj.Path.FullPath),
                                              IOError.Instance.FileReadingError,
                                              "AST-Building",
                                              DiagnosticSeverity.Warning,
