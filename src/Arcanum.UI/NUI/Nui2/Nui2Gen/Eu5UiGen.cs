@@ -605,17 +605,17 @@ public static class Eu5UiGen
 
    private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)
    {
-      if (typeof(IMapMode).IsAssignableFrom(targetType))
+      if (typeof(IMapInferable).IsAssignableFrom(targetType))
       {
-         var mapModeButton = GetMapModeButton(primary);
+         var mapModeButton = GetMapModeButton((IMapInferable)primary);
          panel.Children.Add(mapModeButton);
          DockPanel.SetDock(mapModeButton, dock);
       }
    }
 
-   public static BaseButton GetMapModeButton(IEu5Object primary)
+   public static BaseButton GetMapModeButton(IMapInferable primary)
    {
-      var mmType = ((IMapMode)primary).Type;
+      var mmType = primary.GetMapMode;
       var mapModeButton = new BaseButton
       {
          Content = "M",
