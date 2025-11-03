@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE buildprofiles SYSTEM "https://resources.jetbrains.com/writerside/1.0/build-profiles.dtd">
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+     <variables>
+        <primary-color>
+            emerald
+        </primary-color>
+        <color-preset>
+            soft
+        </color-preset>
+        <header-logo>
+            Arcanum.png
+        </header-logo>
+        <custom-favicons>
+            ArcanumSimplified.ico
+        </custom-favicons>
+         <custom-css>
+             custom.css
+         </custom-css>
+         <showDownloadButton>
+         true
+        </showDownloadButton>
+         <download-title>
+             Get Arcanum
+         </download-title>
+         <download-page>
+             https://github.com/Minnator/Arcanum/releases
+         </download-page>
+         
+    </variables>
+    <footer>
+        <social type="discord" href="https://discord.gg/9878NDb6uf">
+            Join us on Discord
+        </social>
+        <social type="github" href="https://github.com/Minnator/Arcanum">
+            Explore the files on our Github
+        </social>
+    </footer>
+    <build-profile instance="u">
+        <variables>
+            <noindex-content>true</noindex-content>
+        </variables>
+        <sitemap priority="0.35" change-frequency="monthly"/>
+    </build-profile>
+    <build-profile instance="d">
+        <variables>
+            <noindex-content>true</noindex-content>
+        </variables>
+        <sitemap priority="0.35" change-frequency="monthly"/>
+    </build-profile>
+
+</buildprofiles>
