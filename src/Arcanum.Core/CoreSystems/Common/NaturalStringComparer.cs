@@ -22,8 +22,6 @@ public static class NaturalStringComparer
 
 public class PathObjComparer : IComparer<PathObj>
 {
-   public static readonly NaturalStringComparerManual Comparer = new();
-
    public int Compare(PathObj? x, PathObj? y)
    {
       if (ReferenceEquals(x, y))
@@ -33,7 +31,7 @@ public class PathObjComparer : IComparer<PathObj>
       if (x is null)
          return -1;
 
-      return Comparer.Compare(x.Filename, y.Filename);
+      return NaturalStringComparer.Compare(x.Filename, y.Filename);
    }
 }
 

@@ -410,10 +410,11 @@ public static class Eu5UiGen
 
       rebuildPreview();
 
-      propertyViewModel.CollectionContentChanged += (_, _) =>
-      {
-         Application.Current.Dispatcher.Invoke(rebuildPreview);
-      };
+      EventHandler collectionChangedHandler = (_, _) => { Application.Current.Dispatcher.Invoke(rebuildPreview); };
+
+      propertyViewModel.CollectionContentChanged += collectionChangedHandler;
+
+      collectionGrid.Unloaded += (_, _) => { propertyViewModel.CollectionContentChanged -= collectionChangedHandler; };
 
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
@@ -605,17 +606,17 @@ public static class Eu5UiGen
 
    private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)
    {
-      if (typeof(IMapMode).IsAssignableFrom(targetType))
+      if (typeof(IMapInferable).IsAssignableFrom(targetType))
       {
-         var mapModeButton = GetMapModeButton(primary);
+         var mapModeButton = GetMapModeButton((IMapInferable)primary);
          panel.Children.Add(mapModeButton);
          DockPanel.SetDock(mapModeButton, dock);
       }
    }
 
-   public static BaseButton GetMapModeButton(IEu5Object primary)
+   public static BaseButton GetMapModeButton(IMapInferable primary)
    {
-      var mmType = ((IMapMode)primary).Type;
+      var mmType = primary.GetMapMode;
       var mapModeButton = new BaseButton
       {
          Content = "M",
@@ -770,6 +771,7 @@ public static class Eu5UiGen
       };
 
       moreText.MouseLeftButtonUp += clickHandler;
+      moreText.Unloaded += (_, _) => moreText.MouseLeftButtonUp -= clickHandler;
 
       GridManager.AddToGrid(grid,
                             moreText,
@@ -1044,7 +1046,7 @@ public static class Eu5UiGen
          resetItem.SetBinding(UIElement.IsEnabledProperty,
                               new Binding(nameof(MultiSelectPropertyViewModel.IsNonDefaultValue)));
 
-         resetItem.Click += (_, _) =>
+         RoutedEventHandler clickEvent = (_, _) =>
          {
             if (primary.IsCollection(nxProp))
             {
@@ -1054,6 +1056,8 @@ public static class Eu5UiGen
             else
                propertyViewModel.Value = defaultValue;
          };
+         resetItem.Click += clickEvent;
+         resetItem.Unloaded += (_, _) => resetItem.Click -= clickEvent;
 
          if (uiTarget.ContextMenu.Items.Count > 0 && uiTarget.ContextMenu.Items[^1] is not Separator)
             uiTarget.ContextMenu.Items.Add(new Separator());

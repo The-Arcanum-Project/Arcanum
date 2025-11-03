@@ -96,7 +96,7 @@ public class PropertyEditorViewModel
 
       Eu5UiGen.PopulateEmbeddedGrid(newGrid,
                                     NavH,
-                                    targets.Select(x => (IEu5Object)x._getValue(NxProp)).ToList(),
+                                    _isInline ? targets : targets.Select(x => (IEu5Object)x._getValue(NxProp)).ToList(),
                                     (IEu5Object)Target._getValue(NxProp),
                                     NxProp);
 

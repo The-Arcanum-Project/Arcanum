@@ -520,11 +520,15 @@ public static class NEF
       binding.UpdateSourceTrigger = UpdateSourceTrigger.Explicit;
       textBox.SetBinding(TextBox.TextProperty, binding);
 
-      textBox.DebouncedTextChanged += (_, _) =>
+      RoutedEventHandler debouncedHandler = (_, _) =>
       {
          var expr = textBox.GetBindingExpression(TextBox.TextProperty);
          expr?.UpdateSource();
       };
+
+      textBox.DebouncedTextChanged += debouncedHandler;
+
+      textBox.Unloaded += (_, _) => { textBox.DebouncedTextChanged -= debouncedHandler; };
 
       return textBox;
    }

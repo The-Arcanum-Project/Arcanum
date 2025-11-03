@@ -173,9 +173,9 @@ public static class IO
             File.WriteAllText(path, data, encoding);
          return true;
       }
-      catch (IOException)
+      catch (IOException e)
       {
-         /* TODO: Log error */
+         ArcLog.WriteLine("SAV", LogLevel.CRT, $"IO.WriteAllText failed for path: {path}\n{e}");
          return false;
       }
       catch (UnauthorizedAccessException)
