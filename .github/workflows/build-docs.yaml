@@ -14,7 +14,7 @@ env:
   INSTANCE: 'Writerside/all'
   DOCKER_VERSION: '2025.04.8412'
   IS_GROUP: 'true'  # Uncomment to build a group
-  FOLDER_TO_FLATTEN: 'artifacts/ArcanumDocs'
+  FOLDER_TO_FLATTEN: 'artifacts/Arcanum'
 jobs:
   build:
     runs-on: ubuntu-latest

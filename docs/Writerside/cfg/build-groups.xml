@@ -3,7 +3,7 @@
 <build-groups xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-groups.xsd"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <build-group name="all">
-        <instance instance-id="u" alias="User Guide" path="/ArcanumDocs/user"/>
-        <instance instance-id="d" alias="Developer Reference" path="/ArcanumDocs/dev"/>
+        <instance instance-id="u" alias="User Guide" path="/Arcanum/user"/>
+        <instance instance-id="d" alias="Developer Reference" path="/Arcanum/dev"/>
     </build-group>
 </build-groups>
