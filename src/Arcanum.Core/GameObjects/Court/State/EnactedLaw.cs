@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
@@ -36,7 +37,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
    public static EnactedLaw Empty { get; } = new() { Key = string.Empty, Value = string.Empty };
    public string GetNamespace => $"Court.GovernmentState.{nameof(EnactedLaw)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Key, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

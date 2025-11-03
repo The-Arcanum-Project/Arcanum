@@ -17,8 +17,11 @@ namespace Arcanum.UI.NUI.Generator;
 /// This implementation uses the Weak Event Pattern to automatically unsubscribe from
 /// model events, preventing memory leaks without needing to be manually disposed.
 /// </summary>
-public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
+public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisposable
 {
+   private readonly List<WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>>
+      _weakListeners = [];
+
    private readonly IReadOnlyList<INUI> _targets;
    private readonly Enum _property;
    private readonly bool _allowReadonlyWrite;
@@ -62,6 +65,7 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
                 (instance, _, e) => instance.OnModelPropertyChanged(e),
                 weakListener => inpc.PropertyChanged -= weakListener.OnEvent);
 
+            _weakListeners.Add(listener);
             inpc.PropertyChanged += listener.OnEvent;
          }
 
@@ -217,5 +221,20 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
+   }
+
+   public void Dispose()
+   {
+      if (_observableCollection != null)
+      {
+         _observableCollection.CollectionChanged -= OnModelCollectionChanged;
+         _observableCollection = null;
+      }
+
+      foreach (var listener in _weakListeners)
+         listener.Detach();
+      _weakListeners.Clear();
+
+      CollectionContentChanged = null;
    }
 }

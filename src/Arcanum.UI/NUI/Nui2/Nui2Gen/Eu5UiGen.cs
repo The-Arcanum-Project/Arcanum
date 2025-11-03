@@ -414,7 +414,11 @@ public static class Eu5UiGen
 
       propertyViewModel.CollectionContentChanged += collectionChangedHandler;
 
-      collectionGrid.Unloaded += (_, _) => { propertyViewModel.CollectionContentChanged -= collectionChangedHandler; };
+      collectionGrid.Unloaded += (_, _) =>
+      {
+         propertyViewModel.CollectionContentChanged -= collectionChangedHandler;
+         propertyViewModel.Dispose();
+      };
 
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
@@ -999,6 +1003,8 @@ public static class Eu5UiGen
 
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
+
+      dockPanel.Unloaded += (_, _) => { mspvm.Dispose(); };
 
       var propertyMarker = GetPropertyMarker(mspvm);
 
