@@ -4,8 +4,8 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class BaseMapMode : IMapMode
 {
-   public string Name => "Base";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Base;
+   public string Name => "Locations";
+   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Locations;
    public Type DisplayType => typeof(Location);
    public string Description => "The default map mode.";
    public string? IconSource => null;
@@ -14,6 +14,8 @@ public class BaseMapMode : IMapMode
    {
       return location.Color.AsInt();
    }
+
+   public bool IsLandOnly => false;
 
    public string[] GetTooltip(Location location) => [$"Color: {location.Color}"];
 

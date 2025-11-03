@@ -58,7 +58,7 @@ public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocatio
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => $"Map.{nameof(Area)}";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);

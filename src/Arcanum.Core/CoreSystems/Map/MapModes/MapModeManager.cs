@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Windows;
 using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.Logger;
+using Common.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -53,9 +56,10 @@ public static partial class MapModeManager
    #endregion
 
    private static readonly LruCacheManager LruCache = new();
-   public static MapModeType CurrentMode { get; private set; } = MapModeType.Base;
+   public static MapModeType CurrentMode { get; private set; } = MapModeType.Locations;
    public static List<MapModeType> RecentModes { get; } = new(25);
-   private static int _maxRecentModes = 25;
+   private const int MAX_RECENT_MODES = 25;
+   public static bool IsInitialized = false;
 
    private static void InitializeMapModeManager()
    {
@@ -64,6 +68,17 @@ public static partial class MapModeManager
 
    public static void Activate(MapModeType type)
    {
+      if (!IsInitialized)
+      {
+         UIHandle.Instance.PopUpHandle
+                 .ShowMBox("Please wait for the map to finish initializing before changing map modes.",
+                           "Map Initializing");
+         return;
+      }
+
+      if (type == CurrentMode)
+         return;
+
       var sw = RenderMapMode(type);
       ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {type} in {sw.ElapsedMilliseconds} ms");
       CurrentMode = type;
@@ -80,7 +95,7 @@ public static partial class MapModeManager
 
    private static void AddToRecentHistory(MapModeType type)
    {
-      if (RecentModes.Count > _maxRecentModes)
+      if (RecentModes.Count > MAX_RECENT_MODES)
          RecentModes.RemoveAt(RecentModes.Count - 1);
       RecentModes.Insert(0, type);
    }
@@ -104,7 +119,7 @@ public static partial class MapModeManager
       if (Config.Settings.MapModeConfig.QuickAccessMapModes.Count > i)
       {
          var modeType = Config.Settings.MapModeConfig.QuickAccessMapModes[i];
-         return modeType != MapModeType.Base ? Get(modeType) : null;
+         return modeType != MapModeType.Locations ? Get(modeType) : null;
       }
 
       if (!Config.Settings.MapModeConfig.DefaultAssignMapModes)

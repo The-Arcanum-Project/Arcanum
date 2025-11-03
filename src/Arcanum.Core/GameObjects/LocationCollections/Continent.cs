@@ -40,7 +40,7 @@ public partial class Continent
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => $"Map.{nameof(Continent)}";
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 

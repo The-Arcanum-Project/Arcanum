@@ -72,7 +72,7 @@ public partial class Location
    public List<Location> GetRelevantLocations(IEu5Object[] items) => items.Cast<Location>().ToList();
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationSettings;

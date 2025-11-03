@@ -45,8 +45,8 @@ public partial class SuperRegion
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Area)!)
+                                                                             .GetFirstParentOfType(LocationCollectionType
+                                                                                .Area)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -59,7 +59,8 @@ public partial class SuperRegion
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode
+      => MapModeManager.MapModeType.Locations; // TODO: @Minnator Create MapMode
    public string GetNamespace => "Map.Superregion";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
