@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -11,11 +12,13 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>
+public partial class Province
+   : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
@@ -41,8 +44,8 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Province)!)
+                                                                             .GetFirstParentOfType(LocationCollectionType
+                                                                                .Province)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -75,4 +78,7 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(collectionAsPureIdentifierList: true)]
    public ObservableRangeCollection<Location> LocationChildren { get; set; } = [];
+
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

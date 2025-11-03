@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -16,7 +17,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class Continent
-   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>
+   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
@@ -76,4 +77,6 @@ public partial class Continent
    }
 
    public override int GetHashCode() => UniqueId.GetHashCode();
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

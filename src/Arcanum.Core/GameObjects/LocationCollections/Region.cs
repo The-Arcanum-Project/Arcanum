@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -15,7 +16,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>
+public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
@@ -75,4 +76,6 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Area> LocationChildren { get; set; } = [];
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

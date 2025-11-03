@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -18,7 +19,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class SuperRegion
-   : IMapInferable, IEu5Object<SuperRegion>, ILocation, ILocationCollection<Region>
+   : IMapInferable, IEu5Object<SuperRegion>, ILocation, ILocationCollection<Region>, IIndexRandomColor
 {
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
@@ -81,4 +82,6 @@ public partial class SuperRegion
 
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Region> LocationChildren { get; set; } = [];
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

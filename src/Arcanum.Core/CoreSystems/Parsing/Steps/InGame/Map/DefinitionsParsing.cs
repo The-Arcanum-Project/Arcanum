@@ -28,6 +28,46 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       return true;
    }
 
+   public override bool AfterLoadingStep(FileDescriptor descriptor)
+   {
+      var provinces = Globals.Provinces.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      for (var i = 0; i < provinces.Count; i++)
+      {
+         var province = provinces[i];
+         province.Index = i;
+      }
+
+      var areas = Globals.Areas.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      for (var i = 0; i < areas.Count; i++)
+      {
+         var area = areas[i];
+         area.Index = i;
+      }
+
+      var regions = Globals.Regions.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      for (var i = 0; i < regions.Count; i++)
+      {
+         var region = regions[i];
+         region.Index = i;
+      }
+
+      var superRegions = Globals.SuperRegions.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      for (var i = 0; i < superRegions.Count; i++)
+      {
+         var superRegion = superRegions[i];
+         superRegion.Index = i;
+      }
+
+      var continents = Globals.Continents.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      for (var i = 0; i < continents.Count; i++)
+      {
+         var continent = continents[i];
+         continent.Index = i;
+      }
+
+      return true;
+   }
+
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,
