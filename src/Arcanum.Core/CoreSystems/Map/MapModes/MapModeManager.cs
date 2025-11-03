@@ -1,12 +1,8 @@
 ﻿using System.Diagnostics;
-using System.Windows;
 using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Common.Logger;
 using Common.UI;
-using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 

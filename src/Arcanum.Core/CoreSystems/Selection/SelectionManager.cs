@@ -50,6 +50,20 @@ public static class SelectionManager
       Selection.SelectionModified += InvalidateSelection;
    }
 
+   public static List<Location> GetActiveSelectionLocations()
+   {
+      List<Location> locs = [];
+      foreach (var obj in EditableObjects)
+      {
+         if (obj is Location loc)
+            locs.Add(loc);
+         if (obj is IMapInferable inferable)
+            locs.AddRange(inferable.GetRelevantLocations([obj]));
+      }
+
+      return locs;
+   }
+
    /// <summary>
    /// Updates the current selection based on the current selection mode
    /// </summary>
