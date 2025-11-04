@@ -24,6 +24,7 @@ public static class PerformanceCountersHelper
    private const int UPDATE_INTERVAL_MS = 1000;
 
    private static IPerformanceMeasured? _window;
+   public static bool HasDedicatedGpu { get; private set; } = true;
 
    public async static void Initialize(IPerformanceMeasured? window)
    {
@@ -40,6 +41,7 @@ public static class PerformanceCountersHelper
                                                 MessageBoxImage.Warning);
          _gpuUsage = -1;
          _vramUsage = -1;
+         HasDedicatedGpu = false;
       }
 
       Updater = new() { Interval = UPDATE_INTERVAL_MS };
@@ -68,9 +70,12 @@ public static class PerformanceCountersHelper
          _lastCpuTime = currentCpuTime;
       }
 
-      var gpuMetrics = GPUMonitor.GetMetrics();
-      _gpuUsage = gpuMetrics.GpuUsage;
-      _vramUsage = gpuMetrics.VramUsageMb;
+      if (HasDedicatedGpu)
+      {
+         var gpuMetrics = GPUMonitor.GetMetrics();
+         _gpuUsage = gpuMetrics.GpuUsage;
+         _vramUsage = gpuMetrics.VramUsageMb;
+      }
    }
 
    private static void OnTimerTick(object? state, EventArgs eventArgs)
