@@ -55,20 +55,6 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
       if (_targets.Count > 0)
          _defaultValue = _targets[0].GetDefaultValue(_property);
 
-      // Subscribe to the PropertyChanged event of each target using a weak listener.
-      foreach (var target in _targets)
-         if (target is INotifyPropertyChanged inpc)
-         {
-            // The WeakEventListener ensures that the 'inpc' (model) object does not
-            // hold a strong reference back to 'this' (the ViewModel).
-            var listener = new WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>(this,
-                (instance, _, e) => instance.OnModelPropertyChanged(e),
-                weakListener => inpc.PropertyChanged -= weakListener.OnEvent);
-
-            _weakListeners.Add(listener);
-            inpc.PropertyChanged += listener.OnEvent;
-         }
-
       if (Value is INotifyCollectionChanged newCollection)
       {
          _observableCollection = newCollection;
