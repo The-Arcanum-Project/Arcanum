@@ -3,8 +3,11 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.UI.Components.Windows.MainWindows;
 using Common;
+using Common.UI;
 
 namespace Arcanum.UI.Components.Windows.PopUp;
 
@@ -119,10 +122,14 @@ public class FileChangeInfo(WatcherChangeTypes action, string filePath) : Depend
 
 public partial class FileChange
 {
+   private static bool _isWindowOpen;
+   private static readonly object _lock = new();
+   public FileChangedEventArgs Args { get; set; }
+
    public static readonly DependencyProperty FileChangesProperty = DependencyProperty.Register(nameof(FileChanges),
-    typeof(ObservableCollection<FileChangeInfo>),
-    typeof(FileChangeInfo),
-    new PropertyMetadata(default(ObservableCollection<FileChangeInfo>)));
+       typeof(ObservableCollection<FileChangeInfo>),
+       typeof(FileChangeInfo),
+       new(default(ObservableCollection<FileChangeInfo>)));
 
    public ObservableCollection<FileChangeInfo> FileChanges
    {
@@ -134,12 +141,12 @@ public partial class FileChange
       DependencyProperty.Register(nameof(InfoText),
                                   typeof(string),
                                   typeof(FileChange),
-                                  new PropertyMetadata("Rename detected in tracked files. Verify changes below:"));
+                                  new("Rename detected in tracked files. Verify changes below:"));
 
    public string InfoText
    {
-      get { return (string)GetValue(InfoTextProperty); }
-      set { SetValue(InfoTextProperty, value); }
+      get => (string)GetValue(InfoTextProperty);
+      set => SetValue(InfoTextProperty, value);
    }
 
    public bool ShowReloadSaveButtons
@@ -153,8 +160,6 @@ public partial class FileChange
       get => (bool)GetValue(ShowOkButtonProperty);
       set => SetValue(ShowOkButtonProperty, value);
    }
-
-   public static FileChange Instance { get; private set; } = new();
 
    public bool IsShown = false;
 
@@ -171,13 +176,6 @@ public partial class FileChange
    {
       InitializeComponent();
       FileChanges = [];
-      Unloaded += (s, e) =>
-      {
-         lock (Instance)
-         {
-            Instance = new();
-         }
-      };
    }
 
    private void ChangeToPanicMode()
@@ -190,17 +188,35 @@ public partial class FileChange
 
    public static void Show(FileChangedEventArgs args)
    {
+      // This is a quick check to avoid the cost of the dispatcher if the window is already open.
+      // It's not thread-safe, but that's what the lock inside the dispatcher is for.
+      if (_isWindowOpen)
+         return;
+
       Application.Current.Dispatcher.Invoke(() =>
       {
-         Instance.AddFileChangeEvent(args.ChangeType, args.FullPath, args.OldFullPath);
-         lock (Instance)
+         lock (_lock)
          {
-            if (Instance.IsShown)
+            // We re-check the flag inside the lock to handle race conditions
+            // where another thread might have opened the window in the meantime.
+            if (_isWindowOpen)
                return;
-         }
 
-         Instance.Show();
-         Instance.IsShown = true;
+            var window = new FileChange();
+            _isWindowOpen = true;
+
+            window.Closing += (_, _) =>
+            {
+               lock (_lock)
+                  _isWindowOpen = false;
+            };
+
+            window.AddFileChangeEvent(args.ChangeType, args.FullPath, args.OldFullPath);
+            window.Args = args;
+            window.ShowInTaskbar = true;
+            window.Topmost = true;
+            window.ShowDialog();
+         }
       });
    }
 
@@ -227,7 +243,7 @@ public partial class FileChange
       }
       else
       {
-         FileChanges.Add(new FileChangeInfo(action, filePath));
+         FileChanges.Add(new(action, filePath));
       }
 
       if (FileChanges.Any(f => f.Action != "R"))
@@ -238,21 +254,24 @@ public partial class FileChange
 
    private void ButtonBase_OnClickOk(object sender, RoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      Close();
    }
 
    private void ButtonBase_OnClickSave(object sender, RoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      SaveMaster.SaveAll();
+      FileStateManager.ReloadFile(Args);
+      Close();
    }
 
    private void ButtonBase_OnClickDiscard(object sender, RoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      FileStateManager.ReloadFile(Args);
+      Close();
    }
 
    private void ButtonBase_OnClickMenu(object sender, RoutedEventArgs e)
    {
-      throw new NotImplementedException();
+      UIHandle.Instance.MainWindowsHandle.TransferToMainMenuScreen(this, MainMenuScreen.MainMenuScreenView.Arcanum);
    }
 }

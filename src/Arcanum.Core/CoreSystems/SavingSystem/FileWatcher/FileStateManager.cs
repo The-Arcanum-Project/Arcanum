@@ -3,10 +3,13 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
+using System.Windows;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common;
 using Common.Logger;
 using Common.UI;
+using Common.UI.MBox;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
@@ -22,6 +25,44 @@ public static class FileStateManager
 
    // Stores the full paths of all files and folders the user has explicitly registered.
    private static readonly HashSet<PathObj> RegisteredPaths = [];
+
+   public static void ReloadFile(FileChangedEventArgs e)
+   {
+      ArcLog.WriteLine(LOG_SOURCE,
+                       LogLevel.INF,
+                       $"File change detected: {e.ChangeType} - {FileManager.SanitizePath(e.FullPath, '/')}");
+
+      var fo = GetEu5FileObjFromPath(e.FullPath);
+      if (fo == Eu5FileObj.Empty)
+      {
+         ArcLog.WriteLine(LOG_SOURCE,
+                          LogLevel.WRN,
+                          $"No registered file object found for path: {FileManager.SanitizePath(e.FullPath, '/')}. Reload aborted.");
+         UIHandle.Instance.PopUpHandle.ShowMBox("The changed file is not recognized by the system. " +
+                                                "Reload aborted to prevent potential issues.",
+                                                "Reload Aborted\nPlease save any progress and restart the application.",
+                                                MBoxButton.OK,
+                                                MessageBoxImage.Warning);
+         return;
+      }
+
+      fo.Descriptor.LoadingService[0].ReloadFile(fo, fo.Descriptor, null);
+   }
+
+   private static Eu5FileObj GetEu5FileObjFromPath(string fullPath)
+   {
+      foreach (var fo in DescriptorDefinitions.FileDescriptors.SelectMany(descriptor
+                                                                             => descriptor.Files.Where(fo => string
+                                                                               .Equals(fo.Path.FullPath,
+                                                                                 fullPath,
+                                                                                 StringComparison
+                                                                                   .OrdinalIgnoreCase))))
+      {
+         return fo;
+      }
+
+      return Eu5FileObj.Empty;
+   }
 
    /// <summary>
    /// Registers a file or a directory to be watched. This method is thread-safe.
