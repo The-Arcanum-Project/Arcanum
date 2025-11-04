@@ -14,13 +14,18 @@ public partial class D3D11HwndHost : HwndHost
 
    private readonly DispatcherTimer _resizeTimer;
    private SizeChangedInfo _currentSizeInfo = null!;
-
-   public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer)
+   
+   // Loaded event after _renderer.Initialize
+   public new event EventHandler<ID3DRenderer> Loaded;
+   
+   
+   public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer, EventHandler<ID3DRenderer> loaded)
    {
+      Loaded += loaded;
       _hwndHostContainer = hwndHostContainer;
       _renderer = renderer;
       Unloaded += OnUnloaded;
-      Loaded += OnLoaded;
+      base.Loaded += OnLoaded;
       _resizeTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
       _resizeTimer.Tick += ResizeRenderer;
    }
@@ -28,6 +33,7 @@ public partial class D3D11HwndHost : HwndHost
    private void OnLoaded(object sender, RoutedEventArgs e)
    {
       _renderer.Initialize(_hwnd, (int)_hwndHostContainer.ActualWidth, (int)_hwndHostContainer.ActualHeight);
+      Loaded.Invoke(this, _renderer);
    }
 
    protected override HandleRef BuildWindowCore(HandleRef hwndParent)

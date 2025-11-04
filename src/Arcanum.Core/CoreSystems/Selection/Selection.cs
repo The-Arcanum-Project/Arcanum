@@ -50,7 +50,7 @@ public static class Selection
    // State Variables for drag selection
    public static bool IsDragging { get; set; }
    public static List<Vector2> DragPath { get; set; } = [];
-   public static RectangleF DragArea { get; private set; } = RectangleF.Empty;
+   public static RectangleF DragArea { get; set; } = RectangleF.Empty;
 
    public static MapManager MapManager = new();
 
@@ -354,7 +354,7 @@ public static class Selection
          return;
 
       var sType = isLasso ? "Lasso" : "Rectangle";
-      Console.WriteLine($"Selection: {sType,10} | Mouse Position: {mousePos} | Drag Path Count: {DragPath.Count} | Drag Area: {DragArea}");
+      //Console.WriteLine($"Selection: {sType,10} | Mouse Position: {mousePos} | Drag Path Count: {DragPath.Count} | Drag Area: {DragArea}");
 
       DragPath.Add(mousePos);
 
