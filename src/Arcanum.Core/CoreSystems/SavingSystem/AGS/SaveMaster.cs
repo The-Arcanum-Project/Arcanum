@@ -2,6 +2,7 @@
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.History.Commands;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -10,11 +11,17 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SaveMaster
 {
-   private static Dictionary<IEu5Object, List<ICommand>> NeedsToBeSaved { get; } = [];
+   private static Dictionary<IEu5Object, List<Eu5ObjectCommand>> NeedsToBeSaved { get; } = [];
    private static Dictionary<Type, List<IEu5Object>> NewSaveables { get; } = [];
    private static readonly Dictionary<Type, int> ModificationCache = [];
-   private static readonly List<ICommand> ChangesSinceLastSave = [];
+   private static readonly List<Eu5ObjectCommand> ChangesSinceLastSave = [];
 
+   
+   public static Enum[] GetChangesForObject(IEu5Object obj)
+   {
+      return !NeedsToBeSaved.TryGetValue(obj, out var list) ? [] : list.Select(c => c.Attribute).Distinct().ToArray();
+   }
+   
    static SaveMaster()
    {
    }
@@ -24,7 +31,7 @@ public static class SaveMaster
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
    public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewSaveables;
 
-   private static void RemoveChange(ICommand command)
+   private static void RemoveChange(Eu5ObjectCommand command)
    {
       var targets = command.GetTargets();
       foreach (var target in targets)
@@ -45,7 +52,7 @@ public static class SaveMaster
       ChangesSinceLastSave.Remove(command);
    }
 
-   private static void AddSingleCommand(ICommand command, IEu5Object target)
+   private static void AddSingleCommand(Eu5ObjectCommand command, IEu5Object target)
    {
       if (!NeedsToBeSaved.TryGetValue(target, out var list))
       {
@@ -60,7 +67,7 @@ public static class SaveMaster
       list.Add(command);
    }
 
-   private static void AddChange(ICommand command)
+   private static void AddChange(Eu5ObjectCommand command)
    {
       foreach (var target in command.GetTargets())
       {
@@ -70,27 +77,27 @@ public static class SaveMaster
       ChangesSinceLastSave.Add(command);
    }
 
-   public static void CommandExecuted(ICommand command)
+   public static void CommandExecuted(Eu5ObjectCommand command)
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          RemoveChange(command);
       AddChange(command);
    }
 
-   public static void InitCommand(ICommand command, IEu5Object target)
+   public static void InitCommand(Eu5ObjectCommand command, IEu5Object target)
    {
       AddSingleCommand(command, target);
       ChangesSinceLastSave.Add(command);
    }
 
-   public static void AddToCommand(ICommand command, IEu5Object target)
+   public static void AddToCommand(Eu5ObjectCommand command, IEu5Object target)
    {
       Debug.Assert(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command,
                    "The command to add to is not the last executed command.");
       AddSingleCommand(command, target);
    }
 
-   public static void CommandUndone(ICommand command)
+   public static void CommandUndone(Eu5ObjectCommand command)
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          AddChange(command);
