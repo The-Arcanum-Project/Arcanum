@@ -37,8 +37,14 @@ public class MainMenuViewModel : ObservableObject
 
    public string LaunchButtonText => CurrentView switch
    {
-      ArcanumViewModel => "Current Config:",
+      ArcanumViewModel => "Create project:",
       _ => "Last Project:",
+   };
+   
+   public Visibility IsNewProjectButtonVisible => CurrentView switch
+   {
+      ArcanumViewModel => Visibility.Collapsed,
+      _ => Visibility.Visible,
    };
 
    public Visibility IsWindowVisible
@@ -62,6 +68,7 @@ public class MainMenuViewModel : ObservableObject
          _currentView = value;
          OnPropertyChanged();
          OnPropertyChanged(nameof(LaunchButtonText));
+         OnPropertyChanged(nameof(IsNewProjectButtonVisible));
       }
    }
    public required Windows.MainWindows.MainMenuScreen MenuWindow { get; set; }

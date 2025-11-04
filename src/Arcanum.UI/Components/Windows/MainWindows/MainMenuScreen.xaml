@@ -123,25 +123,30 @@
                     <StackPanel Orientation = "Horizontal"
                                 VerticalAlignment = "Center"
                                 HorizontalAlignment = "Center">
+                        
+                        <StackPanel Orientation = "Horizontal"
+                                    VerticalAlignment = "Center"
+                                    HorizontalAlignment = "Center" 
+                                    Visibility="{Binding IsNewProjectButtonVisible}">
+                            <TextBlock VerticalAlignment = "Center"
+                                       Margin = "4"
+                                       FontSize = "14">
+                                New Project:
+                            </TextBlock>
 
-                        <TextBlock VerticalAlignment = "Center"
-                                   Margin = "4"
-                                   FontSize = "14">
-                            New Project:
-                        </TextBlock>
-
-                        <styleClasses:BaseButton x:Name = "CreatNewProjectButton"
-                                                 VerticalAlignment = "Center"
-                                                 Margin = "0"
-                                                 CornerRadius = "7"
-                                                 Height = "25"
-                                                 Width = "25"
-                                                 Click = "CreateNewProjectButton_Click"
-                                                 Background = "{StaticResource GreenColorBrush}"
-                                                 ToolTip = "Create a new Arcanum configuration for a mod">
-                            <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png" />
-
-                        </styleClasses:BaseButton>
+                            <styleClasses:BaseButton x:Name = "CreatNewProjectButton"
+                                                     VerticalAlignment = "Center"
+                                                     Margin = "0"
+                                                     CornerRadius = "7"
+                                                     Height = "25"
+                                                     Width = "25"
+                                                     Click = "CreateNewProjectButton_Click"
+                                                     Background = "{StaticResource GreenColorBrush}"
+                                                     ToolTip = "Create a new Arcanum configuration for a mod">
+                                <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png" />
+                            </styleClasses:BaseButton>
+                        </StackPanel>
+                        
                         <TextBlock Text = "{Binding LaunchButtonText}"
                                    VerticalAlignment = "Center"
                                    Margin = "10, 4, 4,4"

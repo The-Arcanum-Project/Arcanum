@@ -122,7 +122,7 @@ public partial class BaseNumericUpDown
    {
       var currentValue = Value ?? (MinValue > 0 ? MinValue : 0);
 
-      SetCurrentValue(ValueProperty, currentValue + 1);
+      SetCurrentValue(ValueProperty, currentValue - 1);
    }
 
    private void NUDTextBox_TextChanged(object sender, TextChangedEventArgs e)
