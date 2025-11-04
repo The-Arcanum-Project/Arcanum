@@ -8,6 +8,7 @@
              xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
              xmlns:mainMenuScreen = "clr-namespace:Arcanum.UI.Components.Views.MainMenuScreen"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:baseControls="clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
              mc:Ignorable = "d"
              Background = "Transparent"
              d:DesignHeight = "450"
@@ -49,15 +50,13 @@
                    Stretch = "None" />
         </styleClasses:BaseButton>
 
-        <styleClasses:CorneredTextBox Grid.Row = "0"
-                                      Grid.Column = "1"
-                                      Margin = "3"
-                                      FontSize = "14"
-                                      x:Name = "VanillaFolderTextBox"
-                                      VerticalScrollBarVisibility = "Disabled"
-                                      TextWrapping = "NoWrap">
-        </styleClasses:CorneredTextBox>
-
+        <baseControls:TextboxWithPlaceholder Grid.Column="1" 
+                                             Grid.Row="1"
+                                             Margin="3"
+                                             FontSize="14"
+                                             x:Name="VanillaFolderTextBox"
+                                             PlaceholderText="Select mod folder">
+        </baseControls:TextboxWithPlaceholder>
 
         <Border Grid.Column = "2"
                 Grid.Row = "0"
@@ -91,14 +90,13 @@
                    Stretch = "None" />
         </styleClasses:BaseButton>
 
-        <styleClasses:CorneredTextBox Grid.Row = "1"
-                                      Grid.Column = "1"
-                                      Margin = "3"
-                                      FontSize = "14"
-                                      x:Name = "ModFolderTextBox"
-                                      VerticalScrollBarVisibility = "Disabled"
-                                      TextWrapping = "NoWrap">
-        </styleClasses:CorneredTextBox>
+        <baseControls:TextboxWithPlaceholder Grid.Column="1" 
+                                             Grid.Row="1"
+                                             Margin="3"
+                                             FontSize="14"
+                                             x:Name="ModFolderTextBox"
+                                             PlaceholderText="Select mod folder">
+        </baseControls:TextboxWithPlaceholder>
 
         <Border Grid.Column = "2"
                 Grid.Row = "1"
