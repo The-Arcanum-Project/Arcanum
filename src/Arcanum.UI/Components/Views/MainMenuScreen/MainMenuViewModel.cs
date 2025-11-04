@@ -37,7 +37,7 @@ public class MainMenuViewModel : ObservableObject
 
    public string LaunchButtonText => CurrentView switch
    {
-      ArcanumViewModel => "Create project:",
+      ArcanumViewModel => "Launch project:",
       _ => "Last Project:",
    };
    
