@@ -28,10 +28,7 @@ public interface ICommand
    /// <returns></returns>
    public List<int> GetTargetHash();
 
-   /// <summary>
-   /// Returns the target objects affected by this command.
-   /// </summary>
-   public IEu5Object[] GetTargets();
+   
 
    public string GetDescription { get; }
 
@@ -42,17 +39,4 @@ public interface ICommand
    /// <param name="indent"></param>
    /// <returns></returns>
    public string GetDebugInformation(int indent);
-
-   /// <summary>
-   /// Returns the list of properties affected by this command.
-   /// if No properties are affected, return null.
-   /// </summary>
-   /// <returns></returns>
-   public Type? GetTargetPropertyType();
-
-   /// <summary>
-   /// Returns an array of target properties affected by this command.
-   /// If no properties are affected, return null. Or if the properties are not of type IEu5Object, return null.
-   /// </summary>
-   public IEu5Object[]? GetTargetProperties();
 }

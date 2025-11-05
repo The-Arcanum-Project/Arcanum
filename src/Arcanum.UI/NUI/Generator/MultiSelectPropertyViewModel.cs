@@ -22,7 +22,7 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
    private readonly List<WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>>
       _weakListeners = [];
 
-   private readonly IReadOnlyList<INUI> _targets;
+   private readonly IReadOnlyList<IEu5Object> _targets;
    private readonly Enum _property;
    private readonly bool _allowReadonlyWrite;
    private readonly object? _defaultValue;
@@ -32,7 +32,7 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
 
    public bool IsNonDefaultValue { get; private set; }
    public int CollectionCount { get; private set; }
-   public IEu5Object[] Targets => _targets.OfType<IEu5Object>().ToArray();
+   public IEu5Object[] Targets => _targets.ToArray();
    public IEu5Object[] TargetPropObjects
    {
       get
@@ -42,11 +42,11 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
 
          return _targets[0].GetNxPropType(_property).IsAssignableTo(typeof(IEu5Object))
                    ? _targets.Select(t => (IEu5Object)t._getValue(_property)).ToArray()
-                   : _targets.OfType<IEu5Object>().ToArray();
+                   : _targets.ToArray();
       }
    }
 
-   public MultiSelectPropertyViewModel(IReadOnlyList<INUI> targets, Enum property, bool allowReadonlyWrite = false)
+   public MultiSelectPropertyViewModel(IReadOnlyList<IEu5Object> targets, Enum property, bool allowReadonlyWrite = false)
    {
       _targets = targets;
       _property = property;
@@ -173,9 +173,8 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
          if (_targets.Count == 0 || (_targets[0].IsPropertyReadOnly(_property) && !_allowReadonlyWrite))
             return;
 
-         // Apply the new value to every selected object.
-         foreach (var target in _targets)
-            Nx.ForceSet(value, target, _property);
+         Nx.ForceSet(value, _targets.ToArray(), _property);
+
          OnPropertyChanged();
       }
    }

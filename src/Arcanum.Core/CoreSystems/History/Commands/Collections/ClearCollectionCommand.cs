@@ -15,6 +15,8 @@ public class ClearCollectionCommand : Eu5ObjectCommand
 
       _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
+      
+      InvalidateUI();
    }
 
    public override void FinalizeSetup()
@@ -28,7 +30,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
       base.Undo();
       foreach (var target in _targets)
       {
-         target.Target._clearCollection(Attribute);
+         target.Target._addRangeToCollection(Attribute, target.OldValue);
       }
    }
 
@@ -56,6 +58,9 @@ public class ClearCollectionCommand : Eu5ObjectCommand
       Debug.Assert(target._getValue(attribute) is IEnumerable);
       _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
+      
+      InvalidateUI();
+      
       return true;
    }
 
@@ -67,20 +72,5 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override string GetDescription => _targets.Count > 1
                                                ? $"Clear {Attribute} in {_targets.Count} objects of type {Type}"
                                                : $"Clear {Attribute} in {_targets.First().Target}";
-   public override Type? GetTargetPropertyType() => _targets.FirstOrDefault().Target.GetNxItemType(Attribute);
-
-   public override IEu5Object[]? GetTargetProperties()
-   {
-      if (_targets.Count == 0)
-         return null;
-
-      if (_targets[0].Target.GetNxItemType(Attribute) != typeof(IEu5Object))
-         return null;
-
-      List<IEu5Object> allObjects = [];
-      foreach (var target in _targets)
-         allObjects.AddRange(target.Target._getValue(Attribute) as IEnumerable<IEu5Object> ?? []);
-
-      return allObjects.ToArray();
-   }
+  
 }

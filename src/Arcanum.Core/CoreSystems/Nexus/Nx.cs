@@ -35,6 +35,14 @@ public static class Nx
       CommandManager.SetValueCommand((IEu5Object)target, e, value!);
    }
 
+   public static void ForceSet<T>(T value, IEu5Object[] targets, Enum e)
+   {
+      if (targets.Length == 1)
+         ForceSet(value, targets[0], e);
+      else
+         CommandManager.SetValueCommand(targets, e, value!);
+   }
+
    [PropertyGetter]
    public static T Get<T>(
       INexus target,

@@ -238,7 +238,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          return;
       }
 
-      Eu5UiGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter));
+      Eu5UiGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter, true));
    }
 
    private void SetUpToolTip(MapControl mainMap)
@@ -450,7 +450,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       Eu5UiGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)].Value,
                                       true,
-                                      UiPresenter));
+                                      UiPresenter,
+                                      true));
    }
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)

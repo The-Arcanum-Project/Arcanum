@@ -12,7 +12,8 @@ public class NavH
    /// </summary>
    public NavH(List<IEu5Object> targets,
                bool generateSubViews,
-               ContentPresenter root)
+               ContentPresenter root,
+               bool navigate)
    {
       if (targets == null || targets.Count == 0)
          throw new ArgumentException("Target list cannot be null or empty.", nameof(targets));
@@ -27,11 +28,12 @@ public class NavH
       GenerateSubViews = generateSubViews;
       Root = root;
 
-      NUINavigation.Instance.Navigate(this);
+      if (navigate)
+         NUINavigation.Instance.Navigate(this);
    }
 
-   public NavH(IEu5Object target, bool generateSubViews, ContentPresenter root)
-      : this([target], generateSubViews, root)
+   public NavH(IEu5Object target, bool generateSubViews, ContentPresenter root, bool navigate)
+      : this([target], generateSubViews, root, navigate)
    {
    }
 
@@ -69,7 +71,7 @@ public class NavH
       if (navTarget == null)
          return;
 
-      var nav = new NavH(navTarget, subViews, Root);
+      var nav = new NavH(navTarget, subViews, Root, true);
       Eu5UiGen.GenerateAndSetView(nav);
    }
 

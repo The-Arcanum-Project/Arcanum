@@ -90,7 +90,7 @@ public partial class Eu5Gen
       else
          SelectedObjectName = $"{selectedItems.Count} items selected";
 
-      Eu5UiGen.GenerateAndSetView(new(selectedItems, true, ViewPresenter));
+      Eu5UiGen.GenerateAndSetView(new(selectedItems, true, ViewPresenter, true));
 
       //NUIViewGenerator.GenerateAndSetView(new(selectedItems, true, ViewPresenter));
    }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
@@ -14,6 +15,11 @@ public class NUINavigation(int capacity)
 
    private readonly LinkedList<NavH> _items = [];
    private LinkedListNode<NavH>? _current;
+
+   static NUINavigation()
+   {
+      EventDistributor.UpdateNUI += () => Instance.InvalidateUi();
+   }
 
    public void Navigate(NavH item)
    {
@@ -48,6 +54,13 @@ public class NUINavigation(int capacity)
          return;
 
       _current = _current!.Next;
+      Eu5UiGen.GenerateAndSetView(_current!.Value);
+   }
+
+   public void InvalidateUi()
+   {
+      if (_current == null)
+         return;
       Eu5UiGen.GenerateAndSetView(_current!.Value);
    }
 }

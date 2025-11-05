@@ -16,7 +16,13 @@ public static class CommandManager
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
                            () => new SetValueCommand(eu5Object, attribute, value));
    }
-
+   
+   public static bool SetValueCommand(IEu5Object[] eu5Objects, Enum attribute, object value)
+   {
+      return HandleCommand(_ => false,
+                           () => new SetValueCommand(eu5Objects, attribute, value));
+   }
+   
    /// <summary>
    /// Creates a new ClearCollectionCommand or merges with the current one if possible.
    /// </summary>

@@ -18,7 +18,22 @@ public class SetValueCommand : Eu5ObjectCommand
    {
       _value = value;
       _targets.Add(new(target, target._getValue(attribute)));
-      target._setValue(Attribute, _value);
+      target._setValue(Attribute, _value); 
+      //TODO: @Melco make this more pretty, so that InvalidateUI is not called in the constructor and in try add but handled in EU5ObjectCommand
+      InvalidateUI();
+   }
+   
+   public SetValueCommand(IEu5Object[] targets, Enum attribute, object value)
+      : base(targets, attribute)
+   {
+      _value = value;
+      _targets = new ObjectData[targets.Length];
+      for (var i = 0; i < targets.Length; i++)
+      {
+         _targets[i] = new(targets[i], targets[i]._getValue(attribute));
+         targets[i]._setValue(Attribute, _value);
+      }
+      InvalidateUI();
    }
 
    public override IEu5Object[] GetTargets() => _targets.Select(x => x.Target).ToArray();
@@ -31,16 +46,16 @@ public class SetValueCommand : Eu5ObjectCommand
 
    public override void Undo()
    {
-      base.Undo();
       foreach (var data in _targets)
          data.Target._setValue(Attribute, data.OldValue);
+      base.Undo();
    }
 
    public override void Redo()
    {
-      base.Redo();
       foreach (var data in _targets)
          data.Target._setValue(Attribute, _value);
+      base.Redo();
    }
 
    public bool TryAdd(IEu5Object target, Enum attribute, object value)
@@ -50,19 +65,7 @@ public class SetValueCommand : Eu5ObjectCommand
 
       _targets.Add(new(target, target._getValue(attribute)));
       target._setValue(Attribute, _value);
+      InvalidateUI();
       return true;
-   }
-
-   public override Type GetTargetPropertyType() => _targets.FirstOrDefault().Target.GetNxPropType(Attribute);
-
-   public override IEu5Object[]? GetTargetProperties()
-   {
-      if (_targets.Count == 0)
-         return null;
-
-      var attrVal = _targets[0].Target.GetNxPropType(Attribute);
-      return !attrVal.IsAssignableTo(typeof(IEu5Object))
-                ? null
-                : _targets.Select(t => (IEu5Object)t.Target._getValue(Attribute)).ToArray();
    }
 }

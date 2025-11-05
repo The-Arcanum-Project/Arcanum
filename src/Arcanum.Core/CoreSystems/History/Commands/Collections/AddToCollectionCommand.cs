@@ -31,6 +31,4 @@ public class AddToCollectionCommand
       foreach (var r in Targets)
          r._addToCollection(Attribute, Value);
    }
-
-   public override Type? GetTargetPropertyType() => _target.GetNxItemType(Attribute);
 }

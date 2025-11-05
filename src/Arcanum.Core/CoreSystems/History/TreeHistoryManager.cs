@@ -42,8 +42,6 @@ public class TreeHistoryManager : IHistoryManager
    public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
    public event Action<ICommand>? CommandAdded;
 
-   public event Action<Type, IEu5Object[]>? ModifiedType;
-
    private int _lastCompactionDepth;
    private Timer? _autoCompactingTimer;
    private Timer? _updateToolStripTimer;
@@ -62,24 +60,6 @@ public class TreeHistoryManager : IHistoryManager
       Current.Children.Add(newNode);
       Current = newNode;
       CommandAdded?.Invoke(newCommand);
-      InvokeTypeUpdate(newCommand);
-   }
-
-   private void InvokeTypeUpdate(ICommand command)
-   {
-      var changedType = command.GetTargetPropertyType();
-      if (changedType == null)
-         return;
-
-      if (changedType == typeof(JominiColor))
-         InvokeTypeUpdate(command.GetTargets()[0].GetType(), command.GetTargets());
-      else
-         InvokeTypeUpdate(changedType, command.GetTargetProperties() ?? []);
-   }
-
-   public void InvokeTypeUpdate(Type type, IEu5Object[] targets)
-   {
-      ModifiedType?.Invoke(type, targets);
    }
 
    // Check if there are any commands to undo or redo
@@ -139,7 +119,7 @@ public class TreeHistoryManager : IHistoryManager
       }
 
       UndoEvent.Invoke(null, undoCommand);
-      InvokeTypeUpdate(undoCommand!);
+      EventDistribution.EventDistributor.UpdateNUI?.Invoke();
       return undoCommand;
    }
 
@@ -188,7 +168,7 @@ public class TreeHistoryManager : IHistoryManager
       end:
       RedoEvent.Invoke(null, redoCommand);
       redoCommand?.Redo();
-      InvokeTypeUpdate(redoCommand!);
+      EventDistribution.EventDistributor.UpdateNUI?.Invoke();
       return redoCommand;
    }
 

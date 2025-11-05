@@ -58,6 +58,6 @@ public class MainWindowHandleImpl : IMainWindowsHandle
       if (Application.Current.MainWindow is not MainWindow mw)
          return;
 
-      Eu5UiGen.GenerateAndSetView(new(eu5Obj, true, mw.UiPresenter));
+      Eu5UiGen.GenerateAndSetView(new(eu5Obj, true, mw.UiPresenter, true));
    }
 }

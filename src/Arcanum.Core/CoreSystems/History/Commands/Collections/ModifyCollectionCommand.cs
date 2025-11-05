@@ -18,6 +18,8 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
    {
       Value = value;
       Targets.Add(target);
+      
+      InvalidateUI();
    }
 
    public override IEu5Object[] GetTargets() => Targets.ToArray();
@@ -38,23 +40,9 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
          target._addToCollection(Attribute, Value);
       else
          target._removeFromCollection(Attribute, Value);
+      
+      InvalidateUI();
+      
       return true;
-   }
-
-   public override Type? GetTargetPropertyType() => Targets.FirstOrDefault()?.GetNxItemType(Attribute);
-
-   public override IEu5Object[]? GetTargetProperties()
-   {
-      if (Targets.Count == 0)
-         return null;
-
-      if (Targets[0].GetNxItemType(Attribute) != typeof(IEu5Object))
-         return null;
-
-      List<IEu5Object> allObjects = [];
-      foreach (var target in Targets)
-         allObjects.AddRange(target._getValue(Attribute) as IEnumerable<IEu5Object> ?? []);
-
-      return allObjects.ToArray();
    }
 }

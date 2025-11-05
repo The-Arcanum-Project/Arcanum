@@ -58,6 +58,7 @@ public static class SaveMaster
       {
          NeedsToBeSaved[target] = list = [];
          var type = target.GetType();
+         //TODO: @Melco move to a different place for multitarget
          if (ModificationCache.TryGetValue(type, out var value))
             ModificationCache[type] = ++value;
          else
@@ -87,6 +88,15 @@ public static class SaveMaster
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object target)
    {
       AddSingleCommand(command, target);
+      ChangesSinceLastSave.Add(command);
+   }
+   
+   public static void InitCommand(Eu5ObjectCommand command, IEu5Object[] targets)
+   {
+      foreach (var target in targets)
+      {
+         AddSingleCommand(command, target);
+      }
       ChangesSinceLastSave.Add(command);
    }
 

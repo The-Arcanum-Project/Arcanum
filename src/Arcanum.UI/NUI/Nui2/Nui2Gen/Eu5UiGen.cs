@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Arcanum.Core.CoreSystems.CommandSystem;
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -200,7 +201,7 @@ public static class Eu5UiGen
       var inlineTargets = navH.Targets.Select(target => (IEu5Object)target._getValue(nxProp)).ToList();
 
       // TODO @Minnator: https://github.com/users/Minnator/projects/2/views/2?pane=issue&itemId=135643593&issue=Minnator%7CArcanum%7C61
-      var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root);
+      var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root, true);
       GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
@@ -309,7 +310,7 @@ public static class Eu5UiGen
          {
             object embeddedValue = null!;
             Nx.ForceGet(embedded, nxProp, ref embeddedValue);
-            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root),
+            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root, true),
                                                                             (IEu5Object)embeddedValue,
                                                                             nxProp,
                                                                             ControlFactory.SHORT_INFO_ROW_HEIGHT,
@@ -586,9 +587,7 @@ public static class Eu5UiGen
                                     newObj =>
                                     {
                                        mspvm.Value = newObj;
-                                       AppData.HistoryManager.InvokeTypeUpdate(newObj.GetType(),
-                                                                               mspvm.TargetPropObjects);
-
+                                       
                                        // Find the first parent of type EmbeddedView of the createNewButton and refresh its selector
                                        var parent = VisualTreeHelper.GetParent(createNewButton);
                                        while (parent != null && parent is not EmbeddedView)
@@ -1118,7 +1117,7 @@ public static class Eu5UiGen
 
    private static void GenerateShortInfo(NavH navH, IEu5Object primary, Enum nxProp, Grid mainGrid, bool isMarked)
    {
-      var si = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root),
+      var si = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root, true),
                                                                       Nx.ForceGetAs<IEu5Object>(primary, nxProp),
                                                                       nxProp,
                                                                       ControlFactory.SHORT_INFO_ROW_HEIGHT,
