@@ -60,6 +60,8 @@ public partial class MapControl
       HwndHostContainer.MouseWheel += OnMouseWheel;
       HwndHostContainer.MouseLeftButtonDown += OnMouseLeftButtonDown;
       HwndHostContainer.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
+      HwndHostContainer.MouseDown += OnMouseMiddleButtonDown;
+      HwndHostContainer.PreviewMouseUp += OnPreviewMouseMiddleButtonUp;
       HwndHostContainer.MouseMove += OnMouseMove;
       HwndHostContainer.MouseLeave += OnMouseLeave;
 
@@ -85,7 +87,7 @@ public partial class MapControl
    {
       Debug.Assert(colors.Length == _currentBackgroundColor.Length,
                    "Color array length does not match the number of locations.");
-      
+
       _currentBackgroundColor = colors;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       LocationRenderer.UpdateColors(_currentBackgroundColor);
@@ -126,7 +128,7 @@ public partial class MapControl
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
    }
-   
+
    private void OnRendererLoaded(object? sender, ID3DRenderer e)
    {
       UpdateRenderer();
@@ -136,16 +138,16 @@ public partial class MapControl
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
    }
-   
-   private static readonly Color4 SelectionColor = new (0.5f, 0, 0, 0);
-   
+
+   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
+
    private void LocationSelectedAddHandler(List<Location> locations)
    {
       foreach (var loc in locations)
       {
          if (loc == Location.Empty)
             continue;
-         
+
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
       }
 
@@ -340,6 +342,21 @@ public partial class MapControl
       // If we were panning, do not process selection
       if (!_hasPanned)
          SelectionModeTermination(e);
+   }
+
+   private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)
+   {
+      if (e.MiddleButton != MouseButtonState.Pressed || e.ChangedButton != MouseButton.Middle)
+         return;
+
+      if (sender is IInputElement surface)
+         InitializePanning(surface, e);
+   }
+
+   private void OnPreviewMouseMiddleButtonUp(object sender, MouseButtonEventArgs e)
+   {
+      if (e.MiddleButton != MouseButtonState.Released || e.ChangedButton != MouseButton.Middle)
+         return;
 
       ResetPanningState(e);
    }
@@ -355,12 +372,9 @@ public partial class MapControl
          case MouseButton.Left:
             switch (Keyboard.Modifiers)
             {
-               // Unused
+               // Panning is now handled by the middle mouse button.
+               // A simple left-click will fall through to selection on mouse up.
                case ModifierKeys.None:
-                  if (sender is not IInputElement surface)
-                     return;
-
-                  InitializePanning(surface, e);
                   break;
                case ModifierKeys.Control:
                   break;
@@ -396,25 +410,23 @@ public partial class MapControl
       }
    }
 
-
    private void SetSelectionRectangle()
    {
       // In map coordinates
       var upperLeft = Selection.DragPath.First();
       var lowerRight = Selection.DragPath.Last();
-      
+
       //TODO: @Melco Optimize this to cache the data and do not instantiate new arrays every frame
       var topLeftNdc = AbsoluteMapToNDC(new Vector2(upperLeft.X, upperLeft.Y));
       var bottomRightNdc = AbsoluteMapToNDC(new Vector2(lowerRight.X, lowerRight.Y));
 
-      Vector2[] rectangleNdc = [
-         new(topLeftNdc.X, topLeftNdc.Y),
-         new(bottomRightNdc.X, topLeftNdc.Y),
-         new(bottomRightNdc.X, bottomRightNdc.Y),
-         new(topLeftNdc.X, bottomRightNdc.Y),
+      Vector2[] rectangleNdc =
+      [
+         new(topLeftNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, topLeftNdc.Y),
+         new(bottomRightNdc.X, bottomRightNdc.Y), new(topLeftNdc.X, bottomRightNdc.Y),
          new(topLeftNdc.X, topLeftNdc.Y)
       ];
-      
+
       LocationRenderer.UpdateSelectionOutline(rectangleNdc, false);
       _d3dHost.Invalidate();
       // Convert to NDC coordinates
@@ -438,7 +450,7 @@ public partial class MapControl
                {
                   LocationRenderer.Render();
                }
-               
+
                break;
          }
    }
@@ -479,7 +491,7 @@ public partial class MapControl
                case ModifierKeys.Shift:
                   LocationRenderer.ClearSelectionOutline();
                   Selection.EndRectangleSelection(CurrentPos);
-                  
+
                   break;
                case ModifierKeys.Alt:
                   Selection.EndLassoSelection(CurrentPos);
@@ -525,7 +537,7 @@ public partial class MapControl
    private void HandleMousePanning(MouseEventArgs e)
    {
       if (!_hasPanned &&
-          (e.LeftButton != MouseButtonState.Pressed ||
+          (e.MiddleButton != MouseButtonState.Pressed ||
            (!(Math.Abs(e.GetPosition(HwndHostContainer).X - _lastMousePosition.X) >
               SystemParameters.MinimumHorizontalDragDistance) &&
             !(Math.Abs(e.GetPosition(HwndHostContainer).Y - _lastMousePosition.Y) >
