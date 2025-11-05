@@ -6,8 +6,8 @@ namespace Arcanum.Core.CoreSystems.History.Commands;
 
 public abstract class Eu5ObjectCommand : ICommand
 {
-   protected readonly Enum Attribute;
-   protected readonly Type Type;
+   public readonly Enum Attribute;
+   public readonly Type Type;
    private bool _initialized;
    private ICommand _iCommandImplementation;
 

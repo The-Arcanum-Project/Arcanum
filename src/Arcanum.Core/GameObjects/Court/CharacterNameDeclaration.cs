@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
@@ -73,7 +74,7 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    public string GetNamespace => $"Characters.{nameof(CharacterNameDeclaration)}";
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Name, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

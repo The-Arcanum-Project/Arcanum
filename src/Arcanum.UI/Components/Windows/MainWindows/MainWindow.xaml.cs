@@ -188,6 +188,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
                                                               .LoadingService[0]).MapSize;
          Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
+         MapModeManager.IsInitialized = true;
       };
 
       Selection.RectangleSelectionUpdated += _ =>
@@ -216,6 +217,16 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       lock (mapDataParser)
          SetUpToolTip(MainMap);
+
+      SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
+   }
+
+   private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+   {
+      if (e.PropertyName == nameof(SelectionManager.ObjectSelectionMode))
+      {
+         SelectionModeBox.SelectedIndex = (int)SelectionManager.ObjectSelectionMode;
+      }
    }
 
    private void EditableObjectsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -497,7 +508,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
                            (i != 9 ? i + 1 : 0)
                          : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
                            (i != 9 ? i + 1 : 0),
-            MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Base,
+            MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Locations,
          };
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);
@@ -562,15 +573,14 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
       UIHandle.Instance.LogWindowHandle.CloseWindow();
-   }
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+         foreach (Window window in Application.Current.Windows)
+            if (window != this)
+               window.Close();
+      });
 
-   private void SelectionModeToggle_OnUnchecked(object sender, RoutedEventArgs e)
-   {
-      SelectionManager.ObjectSelectionMode = ObjectSelectionMode.LocationSelection;
-   }
-
-   private void SelectionModeToggle_OnChecked(object sender, RoutedEventArgs e)
-   {
-      SelectionManager.ObjectSelectionMode = ObjectSelectionMode.InferSelection;
+      PerformanceCountersHelper.Shutdown();
+      Application.Current.Dispatcher.InvokeShutdown();
    }
 }

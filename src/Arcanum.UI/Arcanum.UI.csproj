@@ -327,4 +327,8 @@
         <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="DirectX\Shaders\Overlay.hlsl" />
+    </ItemGroup>
+
 </Project>

@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural.SubObjects;
@@ -130,7 +131,7 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    #region IEu5Object
 
    public string GetNamespace => $"{nameof(Culture)}";
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

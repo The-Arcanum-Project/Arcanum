@@ -72,6 +72,8 @@ public partial class CrashHandler
 
       var logContent = sb.ToString();
 
-      IO.WriteAllText(IO.GetCrashLogsPath, logContent, Encoding.UTF8);
+      IO.WriteAllText(Path.Combine(IO.GetCrashLogsPath, $"crash_{DateTime.Now.ToFileTime()}.log"),
+                      logContent,
+                      Encoding.UTF8);
    }
 }

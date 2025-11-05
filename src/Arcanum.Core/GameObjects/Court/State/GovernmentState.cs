@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
@@ -130,7 +131,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    #region IEu5Object Implementation
 
    public string GetNamespace => $"Court.{nameof(GovernmentState)}";
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, SavingKey, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

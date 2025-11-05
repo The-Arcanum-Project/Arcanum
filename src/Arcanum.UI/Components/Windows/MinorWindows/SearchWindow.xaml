@@ -5,6 +5,7 @@
         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
         xmlns:userControls = "clr-namespace:Arcanum.UI.Components.UserControls"
         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+        xmlns:search = "clr-namespace:Arcanum.API.UtilServices.Search;assembly=Arcanum.SDK"
         mc:Ignorable = "d"
         Title = "SearchWindow"
         Height = "450"
@@ -27,6 +28,51 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
+
+
+            <DataTemplate DataType = "{x:Type search:ISearchable}"
+                          x:Key = "SearchResultDataTemplate">
+                <StackPanel Orientation = "Horizontal"
+                            Margin = "5, 0, 0, 0">
+                    <Image
+                        Source = "{Binding VisualRepresentation.IconPath, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
+                        Width = "16"
+                        Height = "16"
+                        VerticalAlignment = "Center"
+                        Margin = "0,0,5,0"
+                        RenderOptions.BitmapScalingMode = "Fant" />
+
+                    <TextBlock VerticalAlignment = "Center"
+                               TextTrimming = "CharacterEllipsis">
+                        <TextBlock.Inlines>
+                            <Run Text = "{Binding VisualRepresentation.MainText}"
+                                 Foreground = "{StaticResource GreenForeColorBrush}"
+                                 FontSize = "12" />
+                            <Run Text = "{Binding VisualRepresentation.Description, StringFormat=' {0}'}"
+                                 Foreground = "{StaticResource GreyedOutForeColorBrush}"
+                                 FontSize = "11" />
+                        </TextBlock.Inlines>
+                    </TextBlock>
+
+                    <StackPanel.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                <Run Text = "LMB"
+                                     FontWeight = "Bold" />
+                                <Run Text = " - Select item" />
+                                <LineBreak />
+                                <Run Text = "SHIFT + LMB"
+                                     FontWeight = "Bold" />
+                                <Run Text = " - Add to selection" />
+                                <LineBreak />
+                                <Run Text = "CTRL + LMB"
+                                     FontWeight = "Bold" />
+                                <Run Text = " - Toggle selection" />
+                            </TextBlock>
+                        </ToolTip>
+                    </StackPanel.ToolTip>
+                </StackPanel>
+            </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -78,7 +124,7 @@
                               Click = "SettingsToggleButton_OnClick">
                     <TextBlock FontSize = "15"
                                Margin = "2">
-                        AgsSettings
+                        Settings
                     </TextBlock>
                 </ToggleButton>
                 <ToggleButton Grid.Column = "3"
@@ -145,7 +191,8 @@
                              ItemContainerStyle = "{StaticResource SearchResultItemStyle}"
                              ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
                              BorderThickness = "0"
-                             MouseUp = "SearchResultsListBox_OnMouseUp" />
+                             MouseUp = "SearchResultsListBox_OnMouseUp">
+                    </ListBox>
 
                     <TextBlock x:Name = "NoResultsTextBlock"
                                Grid.Row = "0"

@@ -74,6 +74,12 @@ public sealed class GpuMonitor : IDisposable
    /// </summary>
    public GpuUsageMetrics GetMetrics()
    {
+      if (!PerformanceCountersHelper.HasDedicatedGpu)
+         return new()
+         {
+            GpuUsage = -1, VramUsageMb = -1,
+         };
+
       if (_disposed)
          throw new ObjectDisposedException(nameof(GpuMonitor));
 

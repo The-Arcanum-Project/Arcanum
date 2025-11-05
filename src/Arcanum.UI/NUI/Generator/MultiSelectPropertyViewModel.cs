@@ -17,8 +17,11 @@ namespace Arcanum.UI.NUI.Generator;
 /// This implementation uses the Weak Event Pattern to automatically unsubscribe from
 /// model events, preventing memory leaks without needing to be manually disposed.
 /// </summary>
-public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
+public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisposable
 {
+   private readonly List<WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>>
+      _weakListeners = [];
+
    private readonly IReadOnlyList<INUI> _targets;
    private readonly Enum _property;
    private readonly bool _allowReadonlyWrite;
@@ -51,19 +54,6 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
 
       if (_targets.Count > 0)
          _defaultValue = _targets[0].GetDefaultValue(_property);
-
-      // Subscribe to the PropertyChanged event of each target using a weak listener.
-      foreach (var target in _targets)
-         if (target is INotifyPropertyChanged inpc)
-         {
-            // The WeakEventListener ensures that the 'inpc' (model) object does not
-            // hold a strong reference back to 'this' (the ViewModel).
-            var listener = new WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>(this,
-                (instance, _, e) => instance.OnModelPropertyChanged(e),
-                weakListener => inpc.PropertyChanged -= weakListener.OnEvent);
-
-            inpc.PropertyChanged += listener.OnEvent;
-         }
 
       if (Value is INotifyCollectionChanged newCollection)
       {
@@ -217,5 +207,20 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged
    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
+   }
+
+   public void Dispose()
+   {
+      if (_observableCollection != null)
+      {
+         _observableCollection.CollectionChanged -= OnModelCollectionChanged;
+         _observableCollection = null;
+      }
+
+      foreach (var listener in _weakListeners)
+         listener.Detach();
+      _weakListeners.Clear();
+
+      CollectionContentChanged = null;
    }
 }

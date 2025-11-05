@@ -136,7 +136,7 @@ public partial class SaveWindow
       foreach (var file in _changedObjects.Select(changedObject => changedObject.Source))
       {
          _relevantFiles.Add(file);
-         _descriptorsWithChangedFiles.Add(file.Descriptor);
+         _descriptorsWithChangedFiles.Add(file.Descriptor); //TODO we crashed here once no Idea why?
       }
 
       _descriptorsWithChangedFiles = _descriptorsWithChangedFiles.Distinct().ToList();

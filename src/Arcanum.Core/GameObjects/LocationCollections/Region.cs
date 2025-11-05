@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -14,7 +16,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>
+public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
@@ -55,10 +57,10 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    }
 
    public List<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => "Map.Region";
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
@@ -74,4 +76,6 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Area> LocationChildren { get; set; } = [];
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

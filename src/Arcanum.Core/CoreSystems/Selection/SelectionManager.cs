@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
-using Common.Logger;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -23,6 +23,7 @@ public static class SelectionManager
    /// This is what the UI listens to.
    /// </summary>
    public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
+   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
 
    public static ObjectSelectionMode ObjectSelectionMode
    {
@@ -33,8 +34,8 @@ public static class SelectionManager
             return;
 
          _objectSelectionMode = value;
-         InvalidateSelection();
          OnPropertyChanged(nameof(ObjectSelectionMode));
+         System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
       }
    }
 
@@ -47,6 +48,20 @@ public static class SelectionManager
    static SelectionManager()
    {
       Selection.SelectionModified += InvalidateSelection;
+   }
+
+   public static List<Location> GetActiveSelectionLocations()
+   {
+      List<Location> locs = [];
+      foreach (var obj in EditableObjects)
+      {
+         if (obj is Location loc)
+            locs.Add(loc);
+         if (obj is IMapInferable inferable)
+            locs.AddRange(inferable.GetRelevantLocations([obj]));
+      }
+
+      return locs;
    }
 
    /// <summary>
@@ -70,6 +85,7 @@ public static class SelectionManager
          case ObjectSelectionMode.LocationSelection:
          {
             EditableObjects.ReplaceRange(cLocs);
+            _searchSelectedObjects.Clear();
             break;
          }
          case ObjectSelectionMode.InferSelection:
@@ -80,8 +96,12 @@ public static class SelectionManager
                return;
 
             EditableObjects.ReplaceRange(inferable.GetInferredList(cLocs));
+            _searchSelectedObjects.Clear();
             break;
          }
+         case ObjectSelectionMode.FromSearch:
+            EditableObjects.ReplaceRange(_searchSelectedObjects);
+            break;
          default:
             throw new ArgumentOutOfRangeException(nameof(ObjectSelectionMode), ObjectSelectionMode, null);
       }
@@ -111,5 +131,44 @@ public static class SelectionManager
          return null;
 
       return inferable.GetRelevantLocations(obj);
+   }
+
+   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
+      => _searchSelectedObjects.ReplaceRange(objects);
+
+   public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
+
+   public static void AddSearchSelectedObject(IEu5Object obj) => _searchSelectedObjects.Add(obj);
+
+   public static void RemoveSearchSelectedObject(IEu5Object obj) => _searchSelectedObjects.Remove(obj);
+
+   public static void Eu5ObjectSelectedInSearch(IEu5Object obj)
+   {
+      // if shift is held, add to selection
+      if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+      {
+         AddSearchSelectedObject(obj);
+         if (_searchSelectedObjects.Count > 1)
+            ObjectSelectionMode = ObjectSelectionMode.FromSearch;
+      }
+      else if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+      {
+         // if ctrl is held, toggle selection
+         if (_searchSelectedObjects.Contains(obj))
+            RemoveSearchSelectedObject(obj);
+         else
+            AddSearchSelectedObject(obj);
+
+         if (_searchSelectedObjects.Count > 1)
+            ObjectSelectionMode = ObjectSelectionMode.FromSearch;
+      }
+      else
+      {
+         // otherwise, set selection to only this object
+         SetSearchSelectedObjects([obj]);
+         if (_searchSelectedObjects.Count == 1)
+            if (obj is IMapInferable inferable)
+               EditableObjects.ReplaceRange(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
+      }
    }
 }

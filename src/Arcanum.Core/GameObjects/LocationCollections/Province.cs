@@ -1,20 +1,24 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
+using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>
+public partial class Province
+   : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;
@@ -54,11 +58,11 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public static Province Empty { get; } = new() { UniqueId = "Empty Province" };
    public string GetNamespace => "Map.Province";
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
@@ -74,4 +78,7 @@ public partial class Province : IMapInferable, IEu5Object<Province>, ILocation, 
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(collectionAsPureIdentifierList: true)]
    public ObservableRangeCollection<Location> LocationChildren { get; set; } = [];
+
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

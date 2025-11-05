@@ -14,4 +14,9 @@ public enum ObjectSelectionMode
    /// Depending on the map mode we are inferring what is being selected
    /// </summary>
    InferSelection,
+
+   /// <summary>
+   /// Objects are only added from searching
+   /// </summary>
+   FromSearch,
 }

@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -152,7 +153,7 @@ public partial class Topography : IEu5Object<Topography>, IMapInferable
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+      SelectionManager.Eu5ObjectSelectedInSearch(this);
    }
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));

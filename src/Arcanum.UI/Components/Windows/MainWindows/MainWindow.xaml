@@ -7,6 +7,8 @@
                          xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
+                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
                          Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
@@ -29,6 +31,13 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <ObjectDataProvider MethodName = "GetValues"
+                                ObjectType = "{x:Type sys:Enum}"
+                                x:Key = "SelectionModeEnumValues">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName = "local:ObjectSelectionMode" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
             <Style x:Key = "HeaderButtonStyle"
                    TargetType = "styleClasses:BaseButton"
                    BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
@@ -457,19 +466,17 @@
 
                 <StackPanel Grid.Column = "0"
                             Orientation = "Horizontal">
-                    <ToggleButton x:Name = "SelectionModeToggle"
-                                  Style = "{StaticResource ToggleSwitch}"
-                                  Width = "40"
-                                  Height = "20"
-                                  Margin = "5"
-                                  VerticalAlignment = "Center"
-                                  Checked = "SelectionModeToggle_OnChecked"
-                                  Unchecked = "SelectionModeToggle_OnUnchecked" />
-                    <TextBlock Text = "Toggle Infer Selection Mode"
-                               FontSize = "12"
+                    <TextBlock Text = "Selection Mode: "
                                VerticalAlignment = "Center"
-                               Margin = "0,0,0,0">
-                        <TextBlock.ToolTip>
+                               Margin = "5,0" />
+                    <ComboBox x:Name = "SelectionModeBox"
+                              IsReadOnly = "True"
+                              Margin = "5,0"
+                              Height = "25"
+                              Width = "180"
+                              ItemsSource = "{Binding Source={StaticResource SelectionModeEnumValues}}"
+                              SelectedItem = "{Binding Path=(local:SelectionManager.ObjectSelectionMode), Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ToolTip>
                             <ToolTip>
                                 <TextBlock>
                                     <Run Text = "Infer Selection Mode"
@@ -485,10 +492,16 @@
                                          FontWeight = "Bold" />
                                     <LineBreak />
                                     <Run Text = "Selects clicked locations, regardless of map mode." />
+                                    <LineBreak />
+                                    <Run Text = "Search Result Mode"
+                                         FontWeight = "Bold" />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "Searched objects will be shown in UI until a new search is queried or the mode changed." />
                                 </TextBlock>
                             </ToolTip>
-                        </TextBlock.ToolTip>
-                    </TextBlock>
+                        </ComboBox.ToolTip>
+                    </ComboBox>
                 </StackPanel>
             </Grid>
 

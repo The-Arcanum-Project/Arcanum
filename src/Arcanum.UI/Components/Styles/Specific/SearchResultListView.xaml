@@ -7,38 +7,6 @@
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <DataTemplate DataType = "{x:Type search:ISearchable}"
-                  x:Key = "SearchResultDataTemplate">
-        <Grid Margin = "5,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width = "21" />
-                <ColumnDefinition Width = "*" />
-            </Grid.ColumnDefinitions>
-
-            <Image Grid.Column = "0"
-                   Source = "{Binding VisualRepresentation.IconPath, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
-                   Width = "16"
-                   Height = "16"
-                   VerticalAlignment = "Center"
-                   Margin = "0,0,5,0"
-                   RenderOptions.BitmapScalingMode = "Fant" />
-
-
-            <TextBlock Grid.Column = "1"
-                       VerticalAlignment = "Center"
-                       TextTrimming = "CharacterEllipsis">
-                <TextBlock.Inlines>
-                    <Run Text = "{Binding VisualRepresentation.MainText}"
-                         Foreground = "{StaticResource GreenForeColorBrush}"
-                         FontSize = "12" />
-                    <Run Text = "{Binding VisualRepresentation.Description, StringFormat=' {0}'}"
-                         Foreground = "{StaticResource GreyedOutForeColorBrush}"
-                         FontSize = "11" />
-                </TextBlock.Inlines>
-            </TextBlock>
-        </Grid>
-    </DataTemplate>
-
 
     <Style x:Key = "SearchResultListBoxStyle"
            TargetType = "ListBox">

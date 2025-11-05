@@ -5,7 +5,7 @@ The main difference is that this tool is meant for the game **Europa Universalis
 It is being developed by [Minnator](https://github.com/Minnator) and [MelonCoaster](https://github.com/mel-co).
 We develop this in our spare freetime so the speed of progress may vary from time to time.
 
-![Lines of Code](https://tokei.rs/b1/github/Minnator/Arcanum) ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
+[![Lines of Code](https://tokei.rs/b1/github/XAMPPRocky/tokei)](https://github.com/Minnator/Arcanum) ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
 
 ## Structure of the tool:
 The entire tool is made as modular as possible.

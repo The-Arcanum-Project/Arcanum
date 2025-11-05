@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
@@ -8,6 +9,7 @@ using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -16,7 +18,7 @@ using Common.UI;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
-public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocationCollection<Province>
+public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocationCollection<Province>, IIndexRandomColor
 {
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
@@ -56,10 +58,10 @@ public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocatio
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => $"Map.{nameof(Area)}";
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
@@ -79,4 +81,6 @@ public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocatio
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Province> LocationChildren { get; set; } = [];
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

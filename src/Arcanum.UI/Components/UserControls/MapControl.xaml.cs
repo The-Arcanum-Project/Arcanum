@@ -85,7 +85,7 @@ public partial class MapControl
    {
       Debug.Assert(colors.Length == _currentBackgroundColor.Length,
                    "Color array length does not match the number of locations.");
-
+      
       _currentBackgroundColor = colors;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       LocationRenderer.UpdateColors(_currentBackgroundColor);
@@ -120,11 +120,15 @@ public partial class MapControl
       LocationRenderer = new(vertices, startColor, _imageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      _d3dHost = new(LocationRenderer, HwndHostContainer);
+      _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
 
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
+   }
+   
+   private void OnRendererLoaded(object? sender, ID3DRenderer e)
+   {
       UpdateRenderer();
       SetupEvents();
 
@@ -132,15 +136,17 @@ public partial class MapControl
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
    }
-
+   
+   private static readonly Color4 SelectionColor = new (0.5f, 0, 0, 0);
+   
    private void LocationSelectedAddHandler(List<Location> locations)
    {
       foreach (var loc in locations)
       {
          if (loc == Location.Empty)
             continue;
-
-         _selectionColor[loc.ColorIndex] = new(1, 0, 0, 1);
+         
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
       }
 
       LocationRenderer.UpdateColors(_selectionColor);
@@ -209,6 +215,27 @@ public partial class MapControl
       var mapY = 1.0f - worldY / _imageAspectRatio;
 
       return new(mapX, mapY);
+   }
+
+   public Vector2 AbsoluteMapToNDC(Vector2 mapPoint)
+   {
+      var worldX = mapPoint.X / _imageSize.Item1;
+      var worldY = (1.0f - mapPoint.Y / _imageSize.Item2) * _imageAspectRatio;
+
+      // Apply inverse of pan
+      worldX -= LocationRenderer.Pan.X;
+      worldY -= (1f - LocationRenderer.Pan.Y) * _imageAspectRatio;
+
+      // Convert world coordinates to NDC
+      var width = (float)HwndHostContainer.ActualWidth;
+      var height = (float)HwndHostContainer.ActualHeight;
+      var aspectRatio = width / height;
+
+      var zoomRatio = _imageAspectRatio / (LocationRenderer.Zoom * 2);
+
+      var ndcX = worldX / (aspectRatio * zoomRatio);
+      var ndcY = worldY / zoomRatio;
+      return new(ndcX, ndcY);
    }
 
    public void PanTo(float x, float y)
@@ -369,6 +396,30 @@ public partial class MapControl
       }
    }
 
+
+   private void SetSelectionRectangle()
+   {
+      // In map coordinates
+      var upperLeft = Selection.DragPath.First();
+      var lowerRight = Selection.DragPath.Last();
+      
+      //TODO: @Melco Optimize this to cache the data and do not instantiate new arrays every frame
+      var topLeftNdc = AbsoluteMapToNDC(new Vector2(upperLeft.X, upperLeft.Y));
+      var bottomRightNdc = AbsoluteMapToNDC(new Vector2(lowerRight.X, lowerRight.Y));
+
+      Vector2[] rectangleNdc = [
+         new(topLeftNdc.X, topLeftNdc.Y),
+         new(bottomRightNdc.X, topLeftNdc.Y),
+         new(bottomRightNdc.X, bottomRightNdc.Y),
+         new(topLeftNdc.X, bottomRightNdc.Y),
+         new(topLeftNdc.X, topLeftNdc.Y)
+      ];
+      
+      LocationRenderer.UpdateSelectionOutline(rectangleNdc, false);
+      _d3dHost.Invalidate();
+      // Convert to NDC coordinates
+   }
+
    private void HandleMouseSelection(MouseEventArgs e)
    {
       if (e.LeftButton == MouseButtonState.Pressed)
@@ -376,9 +427,18 @@ public partial class MapControl
          {
             case ModifierKeys.Shift:
                Selection.UpdateDragSelection(CurrentPos, true, false);
+               SetSelectionRectangle();
                break;
             case ModifierKeys.Alt:
                Selection.UpdateDragSelection(CurrentPos, true, true);
+               break;
+            case ModifierKeys.None:
+
+               if (LocationRenderer.ClearSelectionOutline())
+               {
+                  LocationRenderer.Render();
+               }
+               
                break;
          }
    }
@@ -392,6 +452,10 @@ public partial class MapControl
             {
                // Simple LMB Click selection
                case ModifierKeys.None:
+                  //TODO: @Melco Basically everything here needs to be reworked to support proper selection rendering
+                  Selection.DragArea = RectangleF.Empty;
+                  Selection.DragPath.Clear();
+                  LocationRenderer.ClearSelectionOutline();
                   if (!Selection.GetLocation(CurrentPos, out var location1))
                      return;
 
@@ -413,7 +477,9 @@ public partial class MapControl
                                    true);
                   break;
                case ModifierKeys.Shift:
+                  LocationRenderer.ClearSelectionOutline();
                   Selection.EndRectangleSelection(CurrentPos);
+                  
                   break;
                case ModifierKeys.Alt:
                   Selection.EndLassoSelection(CurrentPos);

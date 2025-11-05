@@ -95,10 +95,10 @@ public static class ControlFactory
          {
             Header = nav.ToolStripString, IsEnabled = nav.IsEnabled,
          };
-         menuItem.Click +=
-            (_, _) => navH.NavigateTo((IEu5Object)nav
-                                        .Target
-                                      !); // TODO: @Minnator remove this once we are using this new gen and have changed the interface 
+         // TODO: @Minnator remove this once we are using this new gen and have changed the interface 
+         RoutedEventHandler navigationHandler = (_, _) => navH.NavigateTo((IEu5Object)nav.Target!);
+         menuItem.Click += navigationHandler;
+         menuItem.Unloaded += (_, _) => menuItem.Click -= navigationHandler;
          contextMenu.Items.Add(menuItem);
       }
 

@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -93,7 +94,7 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 
    public void OnSearchSelected()
    {
-      UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+      SelectionManager.Eu5ObjectSelectedInSearch(this);
    }
 
    public ISearchResult VisualRepresentation { get; } = new SearchResultItem(null, "Vegetation", string.Empty);

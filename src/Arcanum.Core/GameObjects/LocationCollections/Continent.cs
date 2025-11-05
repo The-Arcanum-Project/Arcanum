@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -15,7 +17,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [ObjectSaveAs]
 public partial class Continent
-   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>
+   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
@@ -38,11 +40,11 @@ public partial class Continent
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => $"Map.{nameof(Continent)}";
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
-   public void OnSearchSelected() => UIHandle.Instance.MainWindowsHandle.SetToNui(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
@@ -75,4 +77,6 @@ public partial class Continent
    }
 
    public override int GetHashCode() => UniqueId.GetHashCode();
+   // IIndexRandomColor Implementation
+   public int Index { get; set; }
 }

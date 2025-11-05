@@ -114,7 +114,7 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IM
 
    #endregion
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Base;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
       => sLocs.Where(loc => loc.TemplateData == this).Cast<IEu5Object>().ToList();
