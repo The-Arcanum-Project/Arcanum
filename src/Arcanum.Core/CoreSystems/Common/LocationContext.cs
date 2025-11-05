@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Common;
@@ -48,4 +49,9 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
    }
 
    public static LocationContext GetNew(Eu5FileObj fileObj) => new(0, 0, fileObj.Path.FullPath);
+
+   public static bool IsVanillaContext(LocationContext context)
+   {
+      return context.FilePath.StartsWith(FileManager.GetVanillaPath());
+   }
 }

@@ -97,6 +97,10 @@ public sealed class DiagnosticException : Exception
             if (!DebugConfig.Settings.ErrorsToHandle.Any(action.Contains))
                return;
 #endif
+         if (Config.Settings.ErrorLogOptions.SuppressAllErrors ||
+             (!Config.Settings.ErrorLogOptions.VanillaErrorsCausePopups && LocationContext.IsVanillaContext(context)))
+            return;
+
          switch (ReportSeverity)
          {
             case DiagnosticReportSeverity.Silent:

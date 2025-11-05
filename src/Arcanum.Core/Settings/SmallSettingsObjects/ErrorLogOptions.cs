@@ -6,6 +6,8 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
 {
    private bool _probeFiles = true;
+   private bool _vanillaErrorsCausePopups;
+   private bool _suppressAllErrors;
    private string _exportFilePath = string.Empty;
    private string _exportFileName = "ErrorLogExport.csv";
    private string _columnsToExport = "*,*,*,*,";
@@ -39,5 +41,21 @@ public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
    {
       get => _probeFiles;
       set => SetNotifyProperty(ref _probeFiles, value);
+   }
+
+   [Description("If true vanilla errors will also cause popups")]
+   [DefaultValue(false)]
+   public bool VanillaErrorsCausePopups
+   {
+      get => _vanillaErrorsCausePopups;
+      set => SetNotifyProperty(ref _vanillaErrorsCausePopups, value);
+   }
+
+   [Description("If true, all error popups will be suppressed.")]
+   [DefaultValue(false)]
+   public bool SuppressAllErrors
+   {
+      get => _suppressAllErrors;
+      set => SetNotifyProperty(ref _suppressAllErrors, value);
    }
 }
