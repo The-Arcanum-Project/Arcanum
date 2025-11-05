@@ -238,18 +238,18 @@
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Reload File"
-                                           Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand">
-                        <uc:SearchableMenuItem.Icon>
-                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFile16x16.png" />
-                        </uc:SearchableMenuItem.Icon>
-                    </uc:SearchableMenuItem>
-                    <uc:SearchableMenuItem Header = "Reload Folder"
-                                           Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand">
-                        <uc:SearchableMenuItem.Icon>
-                            <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFolder16x16.png" />
-                        </uc:SearchableMenuItem.Icon>
-                    </uc:SearchableMenuItem>
+                    <!-- <uc:SearchableMenuItem Header = "Reload File" -->
+                    <!--                        Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand"> -->
+                    <!--     <uc:SearchableMenuItem.Icon> -->
+                    <!--         <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFile16x16.png" /> -->
+                    <!--     </uc:SearchableMenuItem.Icon> -->
+                    <!-- </uc:SearchableMenuItem> -->
+                    <!-- <uc:SearchableMenuItem Header = "Reload Folder" -->
+                    <!--                        Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand"> -->
+                    <!--     <uc:SearchableMenuItem.Icon> -->
+                    <!--         <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/ReloadFolder16x16.png" /> -->
+                    <!--     </uc:SearchableMenuItem.Icon> -->
+                    <!-- </uc:SearchableMenuItem> -->
                     <Separator />
                     <uc:SearchableMenuItem Header = "Settings"
                                            Command = "mainWindow:MwCommands.OpenSettingsCommand">

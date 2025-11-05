@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using Arcanum.Core.CoreSystems.CommandSystem;
+using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.History.Commands;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Arcanum.UI.NUI.UserControls.BaseControls;
@@ -118,7 +121,7 @@ public partial class Eu5ObjectCreator
       return missingFields.Count == 0;
    }
 
-   public static void ShowPopUp(Type type, Action<object> action, bool addToGlobals = true)
+   public static void ShowPopUp(Type type, Action<object> postCreationAction, bool addToGlobals = true)
    {
       var window = new Eu5ObjectCreator
       {
@@ -137,9 +140,11 @@ public partial class Eu5ObjectCreator
       if (window.CreatedObject != null)
       {
          var newObject = window.CreatedObject!;
-         if (addToGlobals)
-            newObject.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
-         action(newObject);
+         var createCommand = new CreateObjectCommand(newObject, true, addToGlobals);
+         createCommand.Execute();
+         AppData.HistoryManager.AddCommand(createCommand);
+
+         postCreationAction(newObject);
       }
    }
 }

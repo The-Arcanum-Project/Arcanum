@@ -12,16 +12,15 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 public static class SaveMaster
 {
    private static Dictionary<IEu5Object, List<Eu5ObjectCommand>> NeedsToBeSaved { get; } = [];
-   private static Dictionary<Type, List<IEu5Object>> NewSaveables { get; } = [];
+   private static Dictionary<Type, List<IEu5Object>> NewObjects { get; } = [];
    private static readonly Dictionary<Type, int> ModificationCache = [];
    private static readonly List<Eu5ObjectCommand> ChangesSinceLastSave = [];
 
-   
    public static Enum[] GetChangesForObject(IEu5Object obj)
    {
       return !NeedsToBeSaved.TryGetValue(obj, out var list) ? [] : list.Select(c => c.Attribute).Distinct().ToArray();
    }
-   
+
    static SaveMaster()
    {
    }
@@ -29,7 +28,28 @@ public static class SaveMaster
    public static int GetModifiedCount => ModificationCache.Values.Sum();
 
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
-   public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewSaveables;
+   public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewObjects;
+
+   public static void AddNewObject(IEu5Object obj)
+   {
+      var type = obj.GetType();
+      if (!NewObjects.TryGetValue(type, out var list))
+         NewObjects[type] = list = [];
+
+      list.Add(obj);
+   }
+
+   // TODO: @Melco Handle removal of new objects on undo of creation
+   public static void RemoveNewObject(IEu5Object obj)
+   {
+      var type = obj.GetType();
+      if (NewObjects.TryGetValue(type, out var list))
+      {
+         list.Remove(obj);
+         if (list.Count == 0)
+            NewObjects.Remove(type);
+      }
+   }
 
    private static void RemoveChange(Eu5ObjectCommand command)
    {
@@ -90,13 +110,14 @@ public static class SaveMaster
       AddSingleCommand(command, target);
       ChangesSinceLastSave.Add(command);
    }
-   
+
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object[] targets)
    {
       foreach (var target in targets)
       {
          AddSingleCommand(command, target);
       }
+
       ChangesSinceLastSave.Add(command);
    }
 
