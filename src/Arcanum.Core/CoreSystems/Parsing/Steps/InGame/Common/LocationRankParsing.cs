@@ -32,4 +32,12 @@ public partial class LocationRankParsing(IEnumerable<IDependencyNode<string>> de
                                Globals.LocationRanks,
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   LocationRank target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

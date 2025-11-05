@@ -58,4 +58,14 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
             loc.ColorIndex = cIndex++;
       }
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Location target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("LocationFileLoading should only be used in discovery phase.");
+
+   public override bool CanBeReloaded => false;
 }

@@ -38,4 +38,12 @@ public partial class ModifierParsing(IEnumerable<IDependencyNode<string>> depend
                                Globals.ModifierDefinitions,
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   ModifierDefinition target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

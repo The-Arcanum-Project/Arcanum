@@ -9,7 +9,16 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies)
-   : DiscoverThenParseLoadingService<PopType>(true, dependencies);
+   : DiscoverThenParseLoadingService<PopType>(true, dependencies)
+{
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   PopType target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("PopTypeDiscoverer should only be used in discovery phase.");
+}
 
 [ParserFor(typeof(PopType))]
 public partial class PopTypesParsing(IEnumerable<IDependencyNode<string>> dependencies)
@@ -31,4 +40,12 @@ public partial class PopTypesParsing(IEnumerable<IDependencyNode<string>> depend
                                                          ParseProperties,
                                                          GetGlobals());
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   PopType target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

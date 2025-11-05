@@ -17,6 +17,16 @@ public static partial class MarketParsing;
 public class MarketManagerParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Market>(dependencies)
 {
+   public override bool CanBeReloaded => false;
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Market target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("MarketManagerParsing does not support parsing properties to object.");
+
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,

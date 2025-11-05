@@ -30,4 +30,12 @@ public partial class RegencyParsing(IEnumerable<IDependencyNode<string>> depende
                                Globals.Regencies,
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Regency target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

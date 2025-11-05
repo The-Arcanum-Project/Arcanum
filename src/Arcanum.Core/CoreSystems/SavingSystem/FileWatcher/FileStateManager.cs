@@ -46,7 +46,9 @@ public static class FileStateManager
          return;
       }
 
-      fo.Descriptor.LoadingService[0].ReloadFile(fo, fo.Descriptor, null);
+      var validation = false;
+      fo.Descriptor.LoadingService[0]
+        .ReloadSingleFile(fo, null, actionStack: "FileStateManager.ReloadFile", ref validation);
    }
 
    private static Eu5FileObj GetEu5FileObjFromPath(string fullPath)
@@ -57,9 +59,7 @@ public static class FileStateManager
                                                                                  fullPath,
                                                                                  StringComparison
                                                                                    .OrdinalIgnoreCase))))
-      {
          return fo;
-      }
 
       return Eu5FileObj.Empty;
    }
@@ -116,7 +116,6 @@ public static class FileStateManager
    /// <summary>
    /// Unregisters a file or directory from being watched. This method is thread-safe.
    /// </summary>
-   /// <param name="path">The full path to the file or directory.</param>
    public static void UnregisterPath(PathObj pathObj)
    {
       var path = pathObj.FullPath;

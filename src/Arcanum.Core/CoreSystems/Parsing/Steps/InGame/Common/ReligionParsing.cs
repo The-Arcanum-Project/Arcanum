@@ -9,7 +9,18 @@ using Religion = Arcanum.Core.GameObjects.Religious.Religion;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class ReligionDiscovererParsing(IEnumerable<IDependencyNode<string>> dependencies)
-   : DiscoverThenParseLoadingService<Religion>(true, dependencies);
+   : DiscoverThenParseLoadingService<Religion>(true, dependencies)
+{
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Religion target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+   {
+      throw new NotSupportedException("ReligionDiscovererParsing should only be used in discovery phase.");
+   }
+}
 
 [ParserFor(typeof(Religion), IgnoredBlockKeys = ["max_religious_figures_for_religion"])]
 public partial class ReligionParsing(IEnumerable<IDependencyNode<string>> dependencies)
@@ -31,4 +42,12 @@ public partial class ReligionParsing(IEnumerable<IDependencyNode<string>> depend
                                                          ParseProperties,
                                                          GetGlobals());
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Religion target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

@@ -26,6 +26,13 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       return $"Number of polygons: {_parsingPolygons.Count}";
    }
 
+   public override void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation)
+   {
+   }
+
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       using (var bitmap =
@@ -103,4 +110,6 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       // TODO: @MelCo: Implement unloading of map data if necessary
       return true;
    }
+
+   public override bool CanBeReloaded => false;
 }

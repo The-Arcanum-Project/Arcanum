@@ -115,4 +115,12 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
 
       return true;
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   LocationTemplateData target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

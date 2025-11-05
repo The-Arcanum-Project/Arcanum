@@ -12,6 +12,14 @@ public class CharacterDiscovererParsing(IEnumerable<IDependencyNode<string>> dep
    : DiscoverThenParseLoadingService<Character>(true, dependencies)
 {
    public override string[] GroupingNodeNames => ["character_db"];
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Character target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("CharacterDiscovererParsing should not parse to object directly.");
 }
 
 [ParserFor(typeof(Character))]
@@ -45,4 +53,12 @@ public partial class CharacterPropertiesParsing(IEnumerable<IDependencyNode<stri
                                                          ParseProperties,
                                                          GetGlobals());
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Character target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

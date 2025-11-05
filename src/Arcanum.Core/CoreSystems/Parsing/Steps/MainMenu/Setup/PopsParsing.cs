@@ -67,4 +67,12 @@ public partial class PopsParsing(IEnumerable<IDependencyNode<string>> dependenci
          }
       }
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   PopDefinition target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

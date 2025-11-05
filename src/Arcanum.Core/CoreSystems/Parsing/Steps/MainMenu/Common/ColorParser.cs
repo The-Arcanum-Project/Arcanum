@@ -69,4 +69,13 @@ public class ColorParser(IEnumerable<IDependencyNode<string>> dependencies) : Fi
    {
       return true;
    }
+
+   public override bool CanBeReloaded => false;
+
+   public override void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation)
+   {
+   }
 }

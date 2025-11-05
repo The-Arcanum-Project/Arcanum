@@ -9,7 +9,16 @@ using Institution = Arcanum.Core.GameObjects.Cultural.Institution;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public partial class InstitutionParsing(IEnumerable<IDependencyNode<string>> dependencies)
-   : DiscoverThenParseLoadingService<Institution>(true, dependencies);
+   : DiscoverThenParseLoadingService<Institution>(true, dependencies)
+{
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Institution target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("InstitutionParsing should only be used in discovery phase.");
+}
 
 [ParserFor(typeof(Institution))]
 public partial class InstitutionPropertyParsing(IEnumerable<IDependencyNode<string>> dependencies)
@@ -33,4 +42,12 @@ public partial class InstitutionPropertyParsing(IEnumerable<IDependencyNode<stri
                                GetGlobals(),
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Institution target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

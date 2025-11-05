@@ -30,4 +30,12 @@ public partial class ClimateParsing(IEnumerable<IDependencyNode<string>> depende
                                Globals.Climates,
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Climate target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

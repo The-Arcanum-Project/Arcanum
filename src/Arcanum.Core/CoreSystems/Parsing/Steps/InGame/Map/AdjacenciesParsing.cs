@@ -20,6 +20,13 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
              $"\tShortest: \t{Globals.Adjacencies.Values.Min(adj => adj.GetLength())}\n";
    }
 
+   public override void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation)
+   {
+   }
+
    public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var sr))
@@ -147,4 +154,6 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
       Globals.Adjacencies.TrimExcess();
       return true;
    }
+
+   public override bool CanBeReloaded => false;
 }

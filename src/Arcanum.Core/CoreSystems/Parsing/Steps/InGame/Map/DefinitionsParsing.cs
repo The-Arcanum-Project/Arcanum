@@ -192,4 +192,13 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
          }
       }
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Continent target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      //TODO implement reloading of the definitions without destroying any references
+      => throw new NotSupportedException("DefinitionsParsing should only be used in loading phase.");
 }

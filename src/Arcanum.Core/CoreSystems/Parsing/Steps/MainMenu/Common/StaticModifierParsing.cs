@@ -30,4 +30,12 @@ public partial class StaticModifierParsing(IEnumerable<IDependencyNode<string>> 
                                GetGlobals(),
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   StaticModifier target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

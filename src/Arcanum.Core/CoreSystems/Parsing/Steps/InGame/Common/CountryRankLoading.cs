@@ -32,4 +32,12 @@ public partial class CountryRankLoading(IEnumerable<IDependencyNode<string>> dep
                                GetGlobals(),
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   CountryRank target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

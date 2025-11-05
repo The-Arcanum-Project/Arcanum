@@ -47,4 +47,12 @@ public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> depend
       AfterLoadingStep(descriptor);
       return returnVal;
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Language target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

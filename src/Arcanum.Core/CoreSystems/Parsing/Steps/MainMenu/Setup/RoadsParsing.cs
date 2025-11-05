@@ -14,6 +14,15 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : FileLoadingService(dependencies)
 {
+   public override bool CanBeReloaded => false;
+
+   public override void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation)
+   {
+   }
+
    public override List<Type> ParsedObjects { get; } = [typeof(Road)];
 
    public override string GetFileDataDebugInfo()

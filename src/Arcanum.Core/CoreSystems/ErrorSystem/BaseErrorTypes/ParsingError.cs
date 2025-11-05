@@ -763,4 +763,24 @@ public class ParsingError : ILazySingleton
                                                                           "The target for InjectReplace could not be found: '{0}'.",
                                                                           "The specified target '{0}' for the InjectReplace operation has to exist to replace it. Other options are 'TRY_REPLACE' or 'REPLACE_OR_CREATE' if the target might not exist.\n\nThe replace was NOT performed and saving the containing file can cause data loss.",
                                                                           DiagnosticReportSeverity.PopupNotify);
+
+   public DiagnosticDescriptor MissingObjectForKey { get; } = new(DiagnosticCategory.Parsing,
+                                                                  79,
+                                                                  "Missing Object for Key",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "No object found for the given key '{0}'.",
+                                                                  "The provided key '{0}' does not correspond to any known objects. For reloading data this is required.",
+                                                                  DiagnosticReportSeverity.PopupNotify);
+
+   /// <summary>
+   /// <param name="0">The object key that is missing after reload</param>
+   /// <param name="1">The object type for which the key is missing</param>
+   /// </summary>
+   public DiagnosticDescriptor MissingObjectAfterReload { get; } = new(DiagnosticCategory.Parsing,
+                                                                       80,
+                                                                       "Missing Object After Reload",
+                                                                       DiagnosticSeverity.Error,
+                                                                       "No object found after reloading for the given key '{0}'.",
+                                                                       "The provided key '{0}' for an object of type '{1}' does not correspond to any known objects after reloading. Continuing without all objects present again can and will cause file corruption and invalid pointers. Please restart the project to make sure all data is loaded correctly.",
+                                                                       DiagnosticReportSeverity.PopupNotify);
 }

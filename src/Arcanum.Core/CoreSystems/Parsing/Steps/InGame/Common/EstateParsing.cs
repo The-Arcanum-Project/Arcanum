@@ -30,4 +30,12 @@ public partial class EstateParsing(IEnumerable<IDependencyNode<string>> dependen
                                GetGlobals(),
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Estate target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

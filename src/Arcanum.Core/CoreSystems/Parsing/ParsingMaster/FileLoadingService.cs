@@ -39,6 +39,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
    public bool SuccessfullyLoaded { get; set; } = false;
    public virtual bool HasPriority { get; set; } = false;
+   public virtual bool CanBeReloaded => true;
 
    //TODO @MelCo make dependencies optional for automatic dependency resolution
    protected FileLoadingService(IEnumerable<IDependencyNode<string>> dependencies)
@@ -137,6 +138,14 @@ public abstract class FileLoadingService : IDependencyNode<string>
    }
 
    /// <summary>
+   /// Reloads a single file
+   /// </summary>
+   public abstract void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation);
+
+   /// <summary>
    /// This step is called once all files of this step have been loaded.
    /// </summary>
    public virtual bool SingleFileAfterLoadingStep(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
@@ -161,12 +170,6 @@ public abstract class FileLoadingService : IDependencyNode<string>
    public abstract bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 
    public abstract bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
-
-   public virtual void ReloadFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
-      UnloadSingleFileContent(fileObj, descriptor, lockObject);
-      LoadSingleFileWithMetrics(fileObj, descriptor);
-   }
 
    public virtual bool IsFullyParsed => true;
    public string Id => Name;

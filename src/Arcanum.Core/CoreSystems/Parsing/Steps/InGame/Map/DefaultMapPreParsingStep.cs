@@ -17,6 +17,16 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<DefaultMapDefinition>(dependencies)
 {
+   public override bool CanBeReloaded => false;
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   DefaultMapDefinition target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("DefaultMapPreParsingStep should not parse to object directly.");
+
    protected override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,
@@ -26,6 +36,19 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
                                           object? lockObject)
    {
       var dmd = new DefaultMapDefinition { Source = fileObj };
+      ParseProperties(rn, ctx, fileObj, actionStack, source, ref validation, dmd);
+
+      Globals.DefaultMapDefinition = dmd;
+   }
+
+   private static void ParseProperties(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       DefaultMapDefinition dmd)
+   {
       FileStateManager.RegisterPath(fileObj.Path);
 
       foreach (var sn in rn.Statements)
@@ -47,7 +70,5 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
       DescriptorDefinitions.MapTracingDescriptor.SetPathFileName(dmd.ProvinceFileName.TrimQuotes());
       //DescriptorDefinitions.PortsDescriptor.LocalPath[^1] = dmd.Ports.TrimQuotes();
       //DescriptorDefinitions.LocationsTemplatesDescriptor.LocalPath[^1] = dmd.LocationsTemplates.TrimQuotes();
-
-      Globals.DefaultMapDefinition = dmd;
    }
 }

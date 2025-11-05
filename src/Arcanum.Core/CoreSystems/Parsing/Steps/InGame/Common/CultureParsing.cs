@@ -9,7 +9,16 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 public class CultureParsing(IEnumerable<IDependencyNode<string>> dependencies)
-   : DiscoverThenParseLoadingService<Culture>(true, dependencies);
+   : DiscoverThenParseLoadingService<Culture>(true, dependencies)
+{
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Culture target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("CultureParsing should only be used in discovery phase.");
+}
 
 [ParserFor(typeof(Culture))]
 public partial class CultureAfterParsing(IEnumerable<IDependencyNode<string>> dependencies)
@@ -31,4 +40,12 @@ public partial class CultureAfterParsing(IEnumerable<IDependencyNode<string>> de
                                                          ParseProperties,
                                                          GetGlobals());
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Culture target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

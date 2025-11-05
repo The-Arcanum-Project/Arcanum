@@ -98,4 +98,12 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
          }
       }
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Country target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

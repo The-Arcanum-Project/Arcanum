@@ -18,6 +18,8 @@ public static class NexusHelpers
    private const string REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.RequiredAttribute";
    private const string IGNORE_REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.IgnoreRequiredAttribute";
 
+   private const string JOMINI_COLOR_TYPE = "Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor.JominiColor";
+
    /// <summary>
    /// This transform finds any class that implements INexus.
    /// It's the gatekeeper for both generation steps.
@@ -724,6 +726,11 @@ public static class NexusHelpers
                {
                   var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                   defaultValues.Add($"new {fullCollectionTypeName}()");
+               }
+               // Check if we have a JominiColor
+               else if (propertyType.ToDisplayString() == JOMINI_COLOR_TYPE)
+               {
+                  defaultValues.Add($"global::{JOMINI_COLOR_TYPE}.Empty");
                }
                else
                {

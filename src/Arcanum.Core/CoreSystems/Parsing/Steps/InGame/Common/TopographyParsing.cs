@@ -30,4 +30,12 @@ public partial class TopographyParsing(IEnumerable<IDependencyNode<string>> depe
                                Globals.Topography,
                                lockObject);
    }
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   Topography target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }

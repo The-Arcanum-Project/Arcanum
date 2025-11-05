@@ -15,6 +15,15 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : PureParseLoadingService(dependencies)
 {
+   public override bool CanBeReloaded => false;
+
+   public override void ReloadSingleFile(Eu5FileObj fileObj,
+                                         object? lockObject,
+                                         string actionStack,
+                                         ref bool validation)
+   {
+   }
+
    public override List<Type> ParsedObjects => [typeof(InstitutionManager), typeof(ReligiousSchoolRelations)];
    public override string GetFileDataDebugInfo() => "Parsed InstitutionState and ReligiousSchoolState";
 
@@ -119,4 +128,14 @@ public partial class ReligiousSchoolRelationsParsing(IEnumerable<IDependencyNode
                                           object? lockObject)
    {
    }
+
+   public override bool CanBeReloaded => false;
+
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   ReligiousSchoolRelations target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }
