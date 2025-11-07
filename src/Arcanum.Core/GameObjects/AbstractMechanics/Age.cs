@@ -28,32 +28,44 @@ public partial class Age : IEu5Object<Age>
    [SaveAs]
    [DefaultValue(0)]
    [ParseAs("victory_card")]
-   [Description("The factor for victory cards during this age.")]
-   public int VictoryCardFactor { get; set; }
+   [Description("The number of victory cards during this age.")]
+   public int VictoryCardNumber { get; set; }
 
    [SaveAs]
-   [DefaultValue(0)]
+   [DefaultValue(1)]
    [ParseAs("year")]
    [Description("What year the age starts in.")]
-   public int Year { get; set; }
+   public int Year { get; set; } = 1;
 
    [SaveAs]
    [DefaultValue(0)]
+   [ParseAs("months_for_exploration_spread")]
+   [Description("Months after which an exploration of an area spreads to every other country in the same subcontinent. When the exploration spreads one time in the original subcontinent it spreads again to adjacent subcontinents after that amount of time.")]
+   public int MonthsForExplorationSpread { get; set; }
+
+   [SaveAs]
+   [DefaultValue(5f)]
    [ParseAs("max_price")]
-   [Description("The maximum price for goods during this age.")]
-   public int MaxPrice { get; set; }
+   [Description("The maximum price modifier for goods during this age.")]
+   public float MaxPrice { get; set; } = 5f;
+
+   [SaveAs]
+   [DefaultValue(0.1f)]
+   [ParseAs("min_price")]
+   [Description("The minimum price modifier for goods during this age.")]
+   public float MinPrice { get; set; } = 0.1f;
 
    [SaveAs]
    [DefaultValue(1f)]
    [ParseAs("price_stability")]
-   [Description("A modifier to price stability during this age.")]
-   public float PriceStability { get; set; }
+   [Description("A modifier to price stability during this age. Maximum value is 1.")]
+   public float PriceStability { get; set; } = 1f;
 
    [SaveAs]
-   [DefaultValue(1f)]
+   [DefaultValue(0f)]
    [ParseAs("mercenaries")]
-   [Description("The factor for the size of mercenary armies during this age.")]
-   public float Mercenaries { get; set; } = 1f;
+   [Description("Additive modifier to amount of mercenary leaders generated in each age.")]
+   public float Mercenaries { get; set; }
 
    [SaveAs]
    [DefaultValue(false)]
@@ -64,31 +76,31 @@ public partial class Age : IEu5Object<Age>
    [SaveAs]
    [DefaultValue(1f)]
    [ParseAs("efficiency")]
-   [Description("Some economic efficiency modifier during this age.")]
+   [Description("Modifier to the global production efficiency in this age.")]
    public float Efficiency { get; set; } = 1f;
 
    [SaveAs]
-   [DefaultValue(1f)]
+   [DefaultValue(0f)]
    [ParseAs("war_score_from_battles")]
-   [Description("The factor for war score gained from battles during this age.")]
-   public float WarScoreFromBattles { get; set; } = 1f;
+   [Description("Additive modifier to war score gained from battles during this age.")]
+   public float WarScoreFromBattles { get; set; }
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
-   [Description("Modifiers applied during this age.")]
+   [Description("Country modifiers applied during this age.")]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("max_ai_privilege_per_estate", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
-   [Description("The maximum privileges the AI can grant to estates during this age.")]
+   [Description("AI will not grant new privileges if the current amount is equal or above this.")]
    public ObservableRangeCollection<EstateCountDefinition> MaxAiPrivilegesPerEstate { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("min_ai_privilege_per_estate", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
-   [Description("The minimum privileges the AI can grant to estates during this age.")]
+   [Description("AI will not revoke privileges if the current amount is equal or below this.")]
    public ObservableRangeCollection<EstateCountDefinition> MinAiPrivilegesPerEstate { get; set; } = [];
 
    # endregion
