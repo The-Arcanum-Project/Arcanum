@@ -227,7 +227,7 @@ public static class AgsHelper
       var defaultValueLiteral = "null";
       if (prop.DefaultValueAttribute != null && prop.DefaultValueAttribute.ConstructorArguments.Any())
          defaultValueLiteral =
-            Helpers.FormatDefaultValueLiteral(prop.DefaultValueAttribute.ConstructorArguments[0].Value);
+            Helpers.FormatDefaultValueLiteral(prop.DefaultValueAttribute.ConstructorArguments[0]);
 
       sb.AppendLine("                new()");
       sb.AppendLine("                {");

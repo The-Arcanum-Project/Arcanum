@@ -1,7 +1,9 @@
 ﻿// --- START OF FILE Helpers.cs ---
 
 using System.Collections.Immutable;
+using System.Globalization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ParserGenerator;
@@ -36,7 +38,7 @@ public static class Helpers
       {
          var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
 
-         if (semanticModel.GetDeclaredSymbol(classSyntax) is not INamedTypeSymbol
+         if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol
              {
                 TypeKind: TypeKind.Class,
              } classSymbol ||
@@ -73,21 +75,35 @@ public static class Helpers
    /// <summary>
    /// Formats an object from an attribute argument into its C# source code literal representation.
    /// </summary>
-   public static string FormatDefaultValueLiteral(object? value)
+   public static string FormatDefaultValueLiteral(TypedConstant? value)
    {
       if (value is null)
          return "null";
 
-      if (value is string stringValue)
-         return $"@\"{stringValue.Replace("\"", "\"\"")}\"";
+      var arg = value.Value;
 
-      if (value is bool boolValue)
-         return boolValue ? "true" : "false";
+      var formattedValue = arg.Type!.SpecialType switch
+      {
+         SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? "string.Empty", true),
+         SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
+         SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
+         SpecialType.System_Single => ((float?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "f",
+         SpecialType.System_Double => ((double?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "d",
+         SpecialType.System_Decimal => ((decimal?)arg.Value)?.ToString(CultureInfo.InvariantCulture) + "m",
+         SpecialType.System_Int64 => $"{arg.Value}L",
+         SpecialType.System_UInt64 => $"{arg.Value}UL",
+         SpecialType.System_Int32
+         or SpecialType.System_UInt32
+         or SpecialType.System_Int16
+         or SpecialType.System_UInt16
+         or SpecialType.System_Byte
+         or SpecialType.System_SByte => arg.Value?.ToString() ?? "0",
+         _ => arg.Value != null
+                 ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
+                 : "null",
+      };
 
-      if (value.GetType().IsPrimitive || value is decimal)
-         return value.ToString();
-
-      return $"\"{value}\"";
+      return formattedValue;
    }
 
    public static List<ISymbol> FindModifiableMembers(INamedTypeSymbol classSymbol,
