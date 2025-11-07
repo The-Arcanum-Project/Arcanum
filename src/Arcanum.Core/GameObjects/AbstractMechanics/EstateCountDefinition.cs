@@ -10,7 +10,7 @@ using Arcanum.Core.GameObjects.Cultural;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
 
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "EstateCountDefinitionSaving")]
 public partial class EstateCountDefinition : IEmbeddedEu5Object<EstateCountDefinition>
 {
    [SaveAs]

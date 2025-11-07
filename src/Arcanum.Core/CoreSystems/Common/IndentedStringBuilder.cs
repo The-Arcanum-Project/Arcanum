@@ -59,7 +59,7 @@ public class IndentedStringBuilder
 
    #region Configuration Properties (Unchanged)
 
-   public int MaxItemsInCollectionLine { get; init; } = 7;
+   public int MaxItemsInCollectionLine { get; set; } = 7;
    public int MaxCollectionLineLength { get; init; } = 130;
    public bool OneItemPerLine { get; init; } = false;
    public bool PadCollectionItems { get; set; } = false;

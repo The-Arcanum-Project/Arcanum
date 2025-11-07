@@ -1,6 +1,8 @@
 ﻿using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
+using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
@@ -39,7 +41,11 @@ public static class SavingActionProvider
       if (target is not JominiDate date)
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
 
-      sb.AppendLine(date.ToString());
+      if (metadata.Count != 1)
+         return;
+
+      var md = metadata.First();
+      sb.AppendLine($"{md.Keyword} {SavingUtil.GetSeparator(md.Separator)} {date}");
    }
 
    public static void SaveNameDeclaration(IAgs target,
@@ -86,5 +92,27 @@ public static class SavingActionProvider
             InvalidOperationException("MapMovementAssistSaving can only be used with MapMovementAssist instances.");
 
       sb.AppendLine($"movement_assistance = {{ {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
+   }
+
+   public static void EstateCountDefinitionSaving(IAgs target,
+                                                  HashSet<PropertySavingMetadata> metadata,
+                                                  IndentedStringBuilder sb)
+   {
+      if (target is not EstateCountDefinition ecd)
+         throw new
+            InvalidOperationException("EstateCountDefinitionSaving can only be used with EstateCountDefinition instances.");
+
+      sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate)} = {SavingUtil.FormatObjectValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count)}");
+   }
+
+   public static void ModValInstanceSaving(IAgs target,
+                                           HashSet<PropertySavingMetadata> metadata,
+                                           IndentedStringBuilder sb)
+   {
+      if (target is not ModValInstance mvi)
+         throw new
+            InvalidOperationException("ModValInstanceSaving can only be used with ModValInstance instances.");
+
+      sb.AppendLine(SavingUtil.FormatValue(SavingValueType.Modifier, mvi));
    }
 }

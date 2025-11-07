@@ -1673,4 +1673,53 @@ public static class ParsingToolBox
                                            Globals.StaticModifiers,
                                            out value);
    }
+
+   public static bool ArcTryParse_Dynasty(ContentNode node,
+                                          LocationContext ctx,
+                                          string actionName,
+                                          string source,
+                                          [MaybeNullWhen(false)] out Dynasty value,
+                                          ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_Dynasty)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Dynasties,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_CultureGroup(KeyOnlyNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               [MaybeNullWhen(false)] out CultureGroup value,
+                                               ref bool validation)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node.KeyNode,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.CultureGroups,
+                                           out value);
+   }
 }

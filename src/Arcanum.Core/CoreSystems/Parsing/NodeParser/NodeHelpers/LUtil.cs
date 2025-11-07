@@ -101,6 +101,31 @@ public static class LUtil
       return true;
    }
 
+   public static bool TryGetFromGlobalsAndLog<T>(
+      LocationContext ctx,
+      KeyNodeBase node,
+      string source,
+      string actionStack,
+      ref bool validationResult,
+      Dictionary<string, T> globals,
+      [MaybeNullWhen(false)] out T value) where T : IEu5Object
+   {
+      var lexeme = node.GetLexeme(source);
+      if (!globals.TryGetValue(lexeme, out value))
+      {
+         ctx.SetPosition(node);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        $"{actionStack}.TryGetFromGlobals",
+                                        node.GetLexeme(source),
+                                        typeof(T).Name);
+         validationResult = false;
+         return false;
+      }
+
+      return true;
+   }
+
    public static bool TryAddToGlobals<T>(LocationContext ctx,
                                          Token token,
                                          string key,

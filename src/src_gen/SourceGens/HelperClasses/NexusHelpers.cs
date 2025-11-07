@@ -707,85 +707,7 @@ public static class NexusHelpers
          }
 
          var arg = defaultValueAttribute.ConstructorArguments[0];
-         if (arg.Value == null)
-         {
-            // If the value is null we need to check the type of the property
-            var propertyType = propertySymbol.Type;
-            if (propertyType.TypeKind is TypeKind.Class or TypeKind.Interface)
-            {
-               // We have to check if it is of the ieu5ObjectSymbol type
-               if (ieu5ObjectSymbol != null &&
-                   propertyType.AllInterfaces.Contains(ieu5ObjectSymbol,
-                                                       SymbolEqualityComparer.Default))
-               {
-                  // For IEu5Object types we get the empty value from the registry
-                  var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                  defaultValues.Add($"EmptyRegistry.Empties[typeof({typeName})]");
-               }
-               else if (Helpers.IsGenericCollection(propertyType, out _))
-               {
-                  var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                  defaultValues.Add($"new {fullCollectionTypeName}()");
-               }
-               // Check if we have a JominiColor
-               else if (propertyType.ToDisplayString() == JOMINI_COLOR_TYPE)
-               {
-                  defaultValues.Add($"global::{JOMINI_COLOR_TYPE}.Empty");
-               }
-               else
-               {
-                  // For reference types we can just use null
-                  defaultValues.Add("null!");
-               }
-            }
-            else
-            {
-               // For other value types we use the default literal
-               var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-               defaultValues.Add($"default({typeName})");
-            }
-         }
-         else if (arg.Type != null)
-         {
-            if (propertySymbol.Type.BaseType?.ToDisplayString() == "System.Enum")
-            {
-               var enumTypeName = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-               var enumValue = arg.Value?.ToString() ?? "0";
-
-               defaultValues.Add($"({enumTypeName}){enumValue}");
-               continue;
-            }
-
-            // We have to format the value based on its type
-            var formattedValue = arg.Type.SpecialType switch
-            {
-               SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? "string.Empty", true),
-               SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
-               SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
-               SpecialType.System_Single => ((float?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "f",
-               SpecialType.System_Double => ((double?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "d",
-               SpecialType.System_Decimal => ((decimal?)arg.Value)?.ToString(CultureInfo.InvariantCulture) + "m",
-               SpecialType.System_Int64 => $"{arg.Value}L",
-               SpecialType.System_UInt64 => $"{arg.Value}UL",
-               SpecialType.System_Int32
-               or SpecialType.System_UInt32
-               or SpecialType.System_Int16
-               or SpecialType.System_UInt16
-               or SpecialType.System_Byte
-               or SpecialType.System_SByte => arg.Value?.ToString() ?? "0",
-               _ => arg.Value != null
-                       ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
-                       : "null",
-            };
-            if (arg.Type.SpecialType == SpecialType.System_String &&
-                string.IsNullOrWhiteSpace(formattedValue.Substring(1, formattedValue.Length - 2)))
-               formattedValue = "string.Empty";
-            defaultValues.Add(formattedValue);
-         }
-         else
-         {
-            defaultValues.Add("null");
-         }
+         defaultValues.Add(GenerateDefaultValues(ieu5ObjectSymbol, arg, propertySymbol));
       }
 
       // --- Generate a public accessor method for the default value ---
@@ -822,6 +744,86 @@ public static class NexusHelpers
       builder.AppendLine("        return (T)GetDefaultValue(property);");
       builder.AppendLine("    }");
       builder.AppendLine();
+   }
+
+   public static string GenerateDefaultValues(INamedTypeSymbol? ieu5ObjectSymbol,
+                                              TypedConstant arg,
+                                              IPropertySymbol propertySymbol)
+   {
+      if (arg.Value == null)
+      {
+         // If the value is null we need to check the type of the property
+         var propertyType = propertySymbol.Type;
+         if (propertyType.TypeKind is TypeKind.Class or TypeKind.Interface)
+         {
+            // We have to check if it is of the ieu5ObjectSymbol type
+            if (ieu5ObjectSymbol != null &&
+                propertyType.AllInterfaces.Contains(ieu5ObjectSymbol,
+                                                    SymbolEqualityComparer.Default))
+            {
+               // For IEu5Object types we get the empty value from the registry
+               var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               return $"EmptyRegistry.Empties[typeof({typeName})]";
+            }
+
+            if (Helpers.IsGenericCollection(propertyType, out _))
+            {
+               var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               return $"new {fullCollectionTypeName}()";
+            }
+            // Check if we have a JominiColor
+
+            return propertyType.ToDisplayString() == JOMINI_COLOR_TYPE
+                      ? $"global::{JOMINI_COLOR_TYPE}.Empty"
+                      // Fallback SHOULD NEVER BE USED HERE
+                      : "null!";
+         }
+
+         {
+            // For other value types we use the default literal
+            var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return $"default({typeName})";
+         }
+      }
+
+      if (arg.Type != null)
+      {
+         if (propertySymbol.Type.BaseType?.ToDisplayString() == "System.Enum")
+         {
+            var enumTypeName = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var enumValue = arg.Value?.ToString() ?? "0";
+
+            return $"({enumTypeName}){enumValue}";
+         }
+
+         // We have to format the value based on its type
+         var formattedValue = arg.Type.SpecialType switch
+         {
+            SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? "string.Empty", true),
+            SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
+            SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
+            SpecialType.System_Single => ((float?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "f",
+            SpecialType.System_Double => ((double?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "d",
+            SpecialType.System_Decimal => ((decimal?)arg.Value)?.ToString(CultureInfo.InvariantCulture) + "m",
+            SpecialType.System_Int64 => $"{arg.Value}L",
+            SpecialType.System_UInt64 => $"{arg.Value}UL",
+            SpecialType.System_Int32
+            or SpecialType.System_UInt32
+            or SpecialType.System_Int16
+            or SpecialType.System_UInt16
+            or SpecialType.System_Byte
+            or SpecialType.System_SByte => arg.Value?.ToString() ?? "0",
+            _ => arg.Value != null
+                    ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
+                    : "null",
+         };
+         if (arg.Type.SpecialType == SpecialType.System_String &&
+             string.IsNullOrWhiteSpace(formattedValue.Substring(1, formattedValue.Length - 2)))
+            formattedValue = "string.Empty";
+         return formattedValue;
+      }
+
+      return "null";
    }
 
    public struct NuiConfigData(bool isReadOnly, bool isInlined, bool allowEmpty, bool disableMapInferButtons)

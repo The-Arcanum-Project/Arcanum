@@ -19,7 +19,8 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
                              string? collectionSeparator = " ",
                              bool saveEmbeddedAsIdentifier = true,
                              bool collectionAsPureIdentifierList = false,
-                             bool isEmbeddedObject = false
+                             bool isEmbeddedObject = false,
+                             bool isShattered = false
 ) : Attribute
 {
    public SavingValueType ValueType { get; } = valueType;
@@ -32,4 +33,5 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
    public bool SaveEmbeddedAsIdentifier { get; } = saveEmbeddedAsIdentifier;
    public bool CollectionAsPureIdentifierList { get; } = collectionAsPureIdentifierList;
    public bool IsEmbeddedObject { get; } = isEmbeddedObject;
+   public bool IsShattered { get; } = isShattered;
 }

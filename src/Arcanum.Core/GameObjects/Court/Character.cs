@@ -11,7 +11,9 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Religious;
 using Common.UI;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
@@ -64,19 +66,19 @@ public partial class Character : IEu5Object<Character>
    [Description("If true, this character uses a patronymic naming system.")]
    public bool HasPatronym { get; set; }
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("mother")]
    [Description("The mother of this character.")]
    public Character Mother { get; set; } = null!;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("spouse")]
    [Description("The spouse of this character.")]
    public Character Spouse { get; set; } = null!;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("father")]
    [Description("The father of this character.")]
@@ -118,43 +120,43 @@ public partial class Character : IEu5Object<Character>
    [Description("The type of artist this character is.")]
    public string ArtistType { get; set; } = string.Empty;
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("ruler_trait", isShatteredList: true)]
    [Description("The traits of this character.")]
    public ObservableRangeCollection<Trait> RulerTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("artist_trait", isShatteredList: true)]
    [Description("The artistic traits of this character.")]
    public ObservableRangeCollection<Trait> ArtistTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("child_trait", isShatteredList: true)]
    [Description("The traits of this child character.")]
    public ObservableRangeCollection<Trait> ChildTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("religious_figure_trait", isShatteredList: true)]
    [Description("The religous traits of this character.")]
    public ObservableRangeCollection<Trait> ReligiousFigureTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("admiral_trait", isShatteredList: true)]
    [Description("The admiral traits of this character.")]
    public ObservableRangeCollection<Trait> AdmiralTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("general_trait", isShatteredList: true)]
    [Description("The general traits of this character.")]
    public ObservableRangeCollection<Trait> GeneralTraits { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true, isEmbeddedObject: true)]
    [ParseAs("timed_modifier",
               AstNodeType.BlockNode,
               isEmbedded: true,
@@ -170,17 +172,17 @@ public partial class Character : IEu5Object<Character>
    [Description("The estate this character belongs to.")]
    public Estate Estate { get; set; } = Estate.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [ParseAs("culture")]
    [Description("The culture this character belongs to.")]
-   public string Culture { get; set; } = string.Empty;
+   public Culture Culture { get; set; } = Culture.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [ParseAs("religion")]
    [Description("The religion this character follows.")]
-   public string Religion { get; set; } = string.Empty;
+   public Religion Religion { get; set; } = Religion.Empty;
 
    [SaveAs]
    [DefaultValue(null)]
@@ -200,11 +202,11 @@ public partial class Character : IEu5Object<Character>
    [Description("The location where this character was born.")]
    public Location BirthPlace { get; set; } = Location.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [ParseAs("dynasty")]
    [Description("The dynasty of this character")]
-   public string Dynasty { get; set; } = string.Empty;
+   public Dynasty Dynasty { get; set; } = Dynasty.Empty;
 
    [SaveAs]
    [DefaultValue(null)]

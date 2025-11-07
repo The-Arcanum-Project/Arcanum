@@ -25,7 +25,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
-   [SaveAs]
+   [SaveAs(SavingValueType.String)]
    [ParseAs("modifier")]
    [DefaultValue("")]
    [Description("The unique id of the static modifier to apply.")]

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -8,14 +9,13 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Common;
-using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
 /// <summary>
 /// An instance of a modifier definition with an associated value.
 /// </summary>
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "ModValInstanceSaving")]
 public partial class ModValInstance : IEu5Object<ModValInstance>
 {
    /// <summary>
@@ -84,4 +84,31 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Definition.UniqueId, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstanceAgsSettings;
+
+   public string FormatModifierPatternToCode()
+   {
+      switch (Type)
+      {
+         case ModifierType.Boolean:
+            return (bool)Value ? "yes" : "no";
+         case ModifierType.ScriptedValue:
+            return Value.ToString() ??
+                   throw new InvalidOperationException("Identifier modifier value cannot be null");
+         case ModifierType.Percentage:
+         case ModifierType.Float:
+            if (Value is string strValue)
+               return strValue;
+
+            return
+               $"{Convert.ToDouble(Value, CultureInfo.InvariantCulture).ToString($"0.{new string('#', Definition.NumDecimals)}", CultureInfo.InvariantCulture)}";
+         case ModifierType.Integer:
+            if (Value is string strValue2)
+               return strValue2;
+
+            return Convert.ToInt32(Value).ToString();
+         default:
+            throw new
+               ArgumentOutOfRangeException($"Unknown modifier type {Type} for modifier {UniqueId}");
+      }
+   }
 }

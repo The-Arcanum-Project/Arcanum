@@ -22,10 +22,11 @@ public class AGSSettings
    public AgsSettings CountryAgsSettings { get; set; } = new();
    public AgsSettings LocationAgsSettings { get; set; } = new();
    public AgsSettings CultureAgsSettings { get; set; } = new();
-   public AgsSettings TimedModifierAgsSettings { get; set; } = new();
+   public AgsSettings TimedModifierAgsSettings { get; set; } = new() { SkipDefaultValues = false };
    public AgsSettings JominiDateSettings { get; set; } = new();
    public AgsSettings GovernmentStateAgsSettings { get; set; } = new();
    public AgsSettings LocationTemplateDataAgsSettings { get; set; } = new();
+   public AgsSettings CultureGroupAgsSettings { get; set; } = new();
    public AgsSettings RawMaterialAgsSettings { get; set; } = new();
    public AgsSettings DemandDataAgsSettings { get; set; } = new();
    public AgsSettings PopsDemandDataAgsSettings { get; set; } = new();

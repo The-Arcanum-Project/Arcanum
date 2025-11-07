@@ -18,54 +18,87 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height = "*" />
-            <RowDefinition Height = "30" />
+            <RowDefinition Height = "Auto" />
         </Grid.RowDefinitions>
 
-        <ListView Grid.Column = "0"
-                  Grid.Row = "0"
-                  x:Name = "AgsTypesView"
-                  ItemsSource = "{Binding AgsTypes, RelativeSource={RelativeSource AncestorType=Window}}"
-                  SelectionChanged = "AgsItemsView_SelectionChanged"
-                  Margin = "2">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text = "{Binding Name}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <!-- Column 0: Ags Types -->
+        <Grid Grid.Column = "0"
+              Grid.Row = "0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+            <styleClasses:CorneredTextBox Grid.Row = "0"
+                                          x:Name = "TypeSearchBox"
+                                          Margin = "2,2,2,0"
+                                          TextChanged = "OnTypeSearchChanged" />
+            <ListView Grid.Row = "1"
+                      x:Name = "AgsTypesView"
+                      ItemsSource = "{Binding AgsTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                      SelectionChanged = "AgsItemsView_SelectionChanged"
+                      Margin = "2">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text = "{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
-        <ListView Grid.Column = "1"
-                  Grid.Row = "0"
-                  x:Name = "AgsItemsView"
-                  ItemsSource = "{Binding AgsItems, RelativeSource={RelativeSource AncestorType=Window}}"
-                  SelectionChanged = "ObjectSelector_OnSelectionChanged"
-                  Margin = "2">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text = "{Binding UniqueId}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <!-- Column 1: Ags Items -->
+        <Grid Grid.Column = "1"
+              Grid.Row = "0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+            <styleClasses:CorneredTextBox Grid.Row = "0"
+                                          x:Name = "ItemSearchBox"
+                                          Margin = "2,2,2,0"
+                                          TextChanged = "OnItemSearchChanged" />
+            <ListView Grid.Row = "1"
+                      x:Name = "AgsItemsView"
+                      ItemsSource = "{Binding AgsItems, RelativeSource={RelativeSource AncestorType=Window}}"
+                      SelectionChanged = "ObjectSelector_OnSelectionChanged"
+                      Margin = "2">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text = "{Binding UniqueId}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
+        <!-- Column 2: Eu5 Files -->
+        <Grid Grid.Column = "2"
+              Grid.Row = "0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+            <styleClasses:CorneredTextBox Grid.Row = "0"
+                                          x:Name = "FileSearchBox"
+                                          Margin = "2,2,2,0"
+                                          TextChanged = "OnFileSearchChanged" />
+            <ListView Grid.Row = "1"
+                      x:Name = "Eu5FileObj"
+                      ItemsSource = "{Binding FileObjs, RelativeSource={RelativeSource AncestorType=Window}}"
+                      SelectionChanged = "Eu5FileObjSelector_OnSelectionChanged"
+                      MouseDoubleClick = "Eu5FileObjSelector_OnMouseDown"
+                      Margin = "2">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text = "{Binding Path.Filename}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
-        <ListView Grid.Column = "2"
-                  Grid.Row = "0"
-                  x:Name = "Eu5FileObj"
-                  ItemsSource = "{Binding FileObjs, RelativeSource={RelativeSource AncestorType=Window}}"
-                  SelectionChanged = "Eu5FileObjSelector_OnSelectionChanged"
-                  MouseDoubleClick = "Eu5FileObjSelector_OnMouseDown"
-                  Margin = "2">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text = "{Binding Path.Filename}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-
+        <!-- Column 3: Preview and Controls -->
         <styleClasses:CorneredTextBox Grid.Column = "3"
                                       Grid.Row = "0"
                                       x:Name = "AgsSavingText"
+                                      AcceptsReturn = "True"
                                       TextWrapping = "NoWrap"
                                       VerticalScrollBarVisibility = "Auto"
                                       HorizontalScrollBarVisibility = "Auto"
@@ -73,10 +106,11 @@
                                       FontFamily = "Consolas"
                                       FontSize = "12"
                                       Margin = "2"
-                                      Text = "{Binding FormattedText, RelativeSource ={RelativeSource AncestorType=styleClasses:BaseWindow}}" />
+                                      Text = "{Binding FormattedText, RelativeSource ={RelativeSource AncestorType=Window}}" />
 
         <TextBlock Grid.Column = "0"
                    Grid.Row = "1"
+                   Margin = "2"
                    HorizontalAlignment = "Left"
                    VerticalAlignment = "Center"
                    Text = "{Binding Complexity, RelativeSource={RelativeSource AncestorType=Window}}">
@@ -84,6 +118,7 @@
 
         <TextBlock Grid.Column = "1"
                    Grid.Row = "1"
+                   Margin = "2"
                    HorizontalAlignment = "Left"
                    VerticalAlignment = "Center"
                    Text = "{Binding SavingTime, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Saving time: {0} ms'}">
@@ -92,7 +127,8 @@
         <StackPanel Orientation = "Horizontal"
                     Grid.Column = "3"
                     Grid.Row = "1"
-                    HorizontalAlignment = "Right">
+                    HorizontalAlignment = "Right"
+                    Margin = "2">
 
             <CheckBox x:Name = "AllowMultithreadedCheckBox"
                       VerticalAlignment = "Center"

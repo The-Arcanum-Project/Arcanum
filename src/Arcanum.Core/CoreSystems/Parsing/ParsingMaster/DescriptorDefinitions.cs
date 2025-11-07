@@ -207,6 +207,12 @@ public static class DescriptorDefinitions
 
    private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
 
+   public static readonly FileDescriptor RoadsDescriptor =
+      new(["main_menu", "setup", "start", "09_roads.txt"],
+          new("09_roads", "txt", "#"),
+          [new RoadsParsing([LocationDescriptor.LoadingService[0],]),],
+          false);
+
    public static readonly FileDescriptor CountriesDescriptor =
       new(["main_menu", "setup", "start", "10_countries.txt"],
           new("10_countries", "txt", "#"),
@@ -220,25 +226,6 @@ public static class DescriptorDefinitions
           ],
           false);
 
-   public static readonly FileDescriptor RoadsDescriptor =
-      new(["main_menu", "setup", "start", "09_roads.txt"],
-          new("09_roads", "txt", "#"),
-          [new RoadsParsing([LocationDescriptor.LoadingService[0],]),],
-          false);
-
-   public static readonly FileDescriptor CharactersDescriptor =
-      new(["main_menu", "setup", "start", "05_characters.txt"],
-          new("characters", "txt", "#"),
-          ConsequentialLoadingSteps([
-             CharacterDiscovery,
-             new CharacterPropertiesParsing([
-                ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
-                CountriesDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
-                TraitDescriptor.LoadingService[0],
-             ]),
-          ]),
-          false);
-
    public static readonly FileDescriptor CultureDescriptor = new(["in_game", "common", "cultures"],
                                                                  new("cultures", "txt", "#"),
                                                                  ConsequentialLoadingSteps([
@@ -249,6 +236,17 @@ public static class DescriptorDefinitions
                                                                     ]),
                                                                  ]),
                                                                  false);
+
+   public static readonly FileDescriptor CultureGroupDescriptor = new(["in_game", "common", "culture_groups"],
+                                                                      new("culture_groups", "txt", "#"),
+                                                                      [
+                                                                         new CultureGroupParsing([
+                                                                            CultureDescriptor.LoadingService[0],
+                                                                            ModifierDefinitionDescriptor
+                                                                              .LoadingService[0],
+                                                                         ]),
+                                                                      ],
+                                                                      false);
 
    public static readonly FileDescriptor AgeDescriptor = new(["in_game", "common", "age"],
                                                              new("ages", "txt", "#"),
@@ -368,6 +366,20 @@ public static class DescriptorDefinitions
           ],
           false);
 
+   public static readonly FileDescriptor CharactersDescriptor =
+      new(["main_menu", "setup", "start", "05_characters.txt"],
+          new("characters", "txt", "#"),
+          ConsequentialLoadingSteps([
+             CharacterDiscovery, new CharacterPropertiesParsing([
+                ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
+                CountriesDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
+                TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0],
+                CultureDescriptor.LoadingService[0], DynastyManagerDescriptor
+                  .LoadingService[0],
+             ]),
+          ]),
+          false);
+
    //TODO Autogenerate this list
    static DescriptorDefinitions()
    {
@@ -381,7 +393,7 @@ public static class DescriptorDefinitions
          RegenciesDescriptor, CharactersDescriptor, DynastyManagerDescriptor, EstateDescriptor,
          ReligiousGroupDescriptor, ReligionDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
          DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor,
-         LocationTemplateDescriptor, StaticModifiersDescriptor,
+         LocationTemplateDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

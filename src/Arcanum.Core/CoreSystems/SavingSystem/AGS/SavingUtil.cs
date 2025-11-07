@@ -146,6 +146,9 @@ public static class SavingUtil
          case SavingValueType.IAgs:
             throw new InvalidOperationException("IAgs type needs to be handled in advance");
          case SavingValueType.Modifier:
+            if (value is ModValInstance mvi)
+               return $"{mvi.UniqueId} = {mvi.FormatModifierPatternToCode()}";
+
             var instance = (IModifierPattern)value;
             return $"{instance.UniqueId} = {instance.FormatModifierPatternToCode()}";
          default:

@@ -146,6 +146,14 @@ public partial class $type$Parsing(IEnumerable&lt;IDependencyNode&lt;string&gt;&
                                GetGlobals(),
                                lockObject);
    }
+   
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   $type$ target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      =&gt; ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
 }</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5AB809EBFF057241ADE5017D015E5D83/Text/@EntryValue">public class $Name$
 {
@@ -213,7 +221,6 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 #endregion
 
 #pragma warning disable AGS004
-   [ReadonlyNexus]
    [Description("Unique key of this $ClassName$. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;

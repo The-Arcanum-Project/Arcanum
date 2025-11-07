@@ -11,6 +11,7 @@ using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -583,4 +584,15 @@ public class NUISettings
                                                                       Enum.GetValues<EstateCountDefinition.Field>()
                                                                           .Cast<Enum>()
                                                                           .ToArray());
+
+   public NUISetting CultureGroupSettings { get; set; } = new(CultureGroup.Field.UniqueId,
+                                                              Enum.GetValues<CultureGroup.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<CultureGroup.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<CultureGroup.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray());
 }

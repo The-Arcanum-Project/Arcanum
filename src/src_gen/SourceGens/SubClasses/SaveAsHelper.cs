@@ -46,6 +46,7 @@ public class SaveAsMetadata
       SaveEmbeddedAsIdentifier = args.Length <= 7 || ((bool?)args[7].Value ?? true);
       CollectionAsPureIdentifierList = args.Length <= 8 || ((bool?)args[8].Value ?? false);
       IsEmbeddedObject = args.Length > 9 && ((bool?)args[9].Value ?? false);
+      IsShattered = args.Length > 10 && ((bool?)args[10].Value ?? false);
 
       // This part was correct, as it operates on the now-reliable Prop symbol.
       DefaultValueAttribute = Prop.GetAttributes()
@@ -64,6 +65,7 @@ public class SaveAsMetadata
    public bool SaveEmbeddedAsIdentifier { get; }
    public bool CollectionAsPureIdentifierList { get; }
    public bool IsEmbeddedObject { get; }
+   public bool IsShattered { get; }
    public AttributeData? DefaultValueAttribute { get; set; } = null;
 
    private static string GetProviderString(TypedConstant value, string providerName)

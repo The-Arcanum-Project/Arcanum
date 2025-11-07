@@ -74,13 +74,13 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    [Description("Opinions towards other cultures.")]
    public ObservableRangeCollection<CultureOpinionValue> Opinions { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("culture_groups")]
    [Description("The groups this culture belongs to.")]
-   public ObservableRangeCollection<string> CultureGroups { get; set; } = [];
+   public ObservableRangeCollection<CultureGroup> CultureGroups { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("tags")]
    [Description("The tags this culture belongs to.\nConvention is to put the more unique ones first and less unique ones last.")]

@@ -15,15 +15,83 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class AgsWindow
 {
+   // Store the full, unfiltered lists
+   private List<Type> _allAgsTypes = [];
+   private List<IEu5Object> _allAgsItems = [];
+   private List<Eu5FileObj> _allFileObjs = [];
+
    public AgsWindow()
    {
       InitializeComponent();
 
-      var types = AgsRegistry.Ags.ToList();
-      types.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-      AgsTypes = types;
-      AgsItems = [];
+      _allAgsTypes = AgsRegistry.Ags.ToList();
+      _allAgsTypes.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+
+      FilterAndDisplayTypes(); // Initial population
    }
+
+   #region Filtering Logic
+
+   private void OnTypeSearchChanged(object sender, TextChangedEventArgs e)
+   {
+      FilterAndDisplayTypes(TypeSearchBox.Text);
+   }
+
+   private void OnItemSearchChanged(object sender, TextChangedEventArgs e)
+   {
+      FilterAndDisplayItems(ItemSearchBox.Text);
+   }
+
+   private void OnFileSearchChanged(object sender, TextChangedEventArgs e)
+   {
+      FilterAndDisplayFiles(FileSearchBox.Text);
+   }
+
+   private void FilterAndDisplayTypes(string filter = "")
+   {
+      var filtered = string.IsNullOrWhiteSpace(filter)
+                        ? _allAgsTypes
+                        : _allAgsTypes.Where(t => t.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+      AgsTypes = new(filtered);
+
+      if (AgsTypes.Count == 0)
+      {
+         // If filter results in no types, clear downstream lists
+         _allAgsItems.Clear();
+         FilterAndDisplayItems();
+      }
+   }
+
+   private void FilterAndDisplayItems(string filter = "")
+   {
+      var filtered = string.IsNullOrWhiteSpace(filter)
+                        ? _allAgsItems
+                        : _allAgsItems.Where(i => i.UniqueId.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+      AgsItems = new(filtered);
+      AgsItems.Sort((x, y) => string.Compare(x.UniqueId, y.UniqueId, StringComparison.Ordinal));
+
+      if (AgsItems.Count == 0)
+      {
+         // If filter results in no items, clear downstream list
+         _allFileObjs.Clear();
+         FilterAndDisplayFiles();
+      }
+   }
+
+   private void FilterAndDisplayFiles(string filter = "")
+   {
+      var filtered = string.IsNullOrWhiteSpace(filter)
+                        ? _allFileObjs
+                        : _allFileObjs.Where(f => f.Path.Filename.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+      FileObjs = new(filtered);
+   }
+
+   #endregion
+
+   #region Dependency Properties
 
    public List<Type> AgsTypes
    {
@@ -88,29 +156,34 @@ public partial class AgsWindow
       set => SetValue(FileObjsProperty, value);
    }
 
+   #endregion
+
    private void AgsItemsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
    {
-      if (sender is not ListView { SelectedItem: Type type })
-         return;
+      _allAgsItems.Clear(); // Clear previous selection's data
 
-      if (type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out var implementedType) &&
-          implementedType != null)
+      if (sender is ListView { SelectedItem: Type type })
       {
-         var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
-         if (methodInfo != null)
+         if (type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out var implementedType) &&
+             implementedType != null)
          {
-            var allItems = (IDictionary)methodInfo.Invoke(null, null)!;
-            AgsItems = allItems.Values.Cast<IEu5Object>().ToList();
-            AgsItems.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
-            AgsItemsView.SelectedIndex = 0;
-            if (AgsItems.Count > 0)
-               SetComplexity(AgsItems[0]);
-            return;
+            var methodInfo = type.GetMethod("GetGlobalItems", BindingFlags.Public | BindingFlags.Static);
+            if (methodInfo != null)
+            {
+               var allItems = (IDictionary)methodInfo.Invoke(null, null)!;
+               _allAgsItems = allItems.Values.Cast<IEu5Object>().ToList();
+            }
          }
       }
 
-      AgsItems = [];
-      FormattedText = "";
+      // Filter and display the items (will be empty if no type was selected or if type had no items)
+      FilterAndDisplayItems(ItemSearchBox.Text);
+
+      // Automatically select the first item if the list is populated
+      if (AgsItems.Count != 0)
+      {
+         AgsItemsView.SelectedIndex = 0;
+      }
    }
 
    private void SetComplexity(IAgs ags)
@@ -122,7 +195,11 @@ public partial class AgsWindow
    private void Eu5FileObjSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
    {
       if (sender is not ListView { SelectedItem: Eu5FileObj fileObj })
+      {
+         // Clear preview if selection is lost
+         FormattedText = string.Empty;
          return;
+      }
 
       FormatFile(fileObj);
    }
@@ -148,32 +225,35 @@ public partial class AgsWindow
 
       SavingTime = (int)sw.ElapsedMilliseconds;
 
-      if (formattedStr.Length > 10_000)
-         formattedStr = formattedStr[..10_000] + "\n... (truncated, too long)";
-      FormattedText = formattedStr;
+      FormattedText = formattedStr; // Removed truncation for better debugging
    }
 
    private void ObjectSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
    {
-      if (sender is not ListView { SelectedItem: IEu5Object ags })
-         return;
+      _allFileObjs.Clear(); // Clear previous selection's data
+      FormattedText = "";
+      Complexity = "";
 
-      FileObjs = ags.Source.Descriptor.Files;
+      if (sender is ListView { SelectedItem: IEu5Object ags })
+      {
+         _allFileObjs = ags.Source.Descriptor.Files;
+         SetComplexity(ags);
 
-      var context = ags.ToAgsContext();
-      var sb = new IndentedStringBuilder();
-      var sw = System.Diagnostics.Stopwatch.StartNew();
-      context.BuildContext(sb);
-      sw.Stop();
-      SavingTime = (int)sw.ElapsedMilliseconds;
-      var formattedStr = sb.ToString();
-      if (formattedStr.Length > 10_000)
-         formattedStr = formattedStr[..10_000] + "\n... (truncated, too long)";
-      FormattedText = formattedStr;
+         var context = ags.ToAgsContext();
+         var sb = new IndentedStringBuilder();
+         var sw = System.Diagnostics.Stopwatch.StartNew();
+         context.BuildContext(sb);
+         sw.Stop();
+         SavingTime = (int)sw.ElapsedMilliseconds;
+         FormattedText = sb.ToString(); // Removed truncation
+      }
+
+      FilterAndDisplayFiles(FileSearchBox.Text);
    }
 
    private void ExportButton_Click(object sender, RoutedEventArgs e)
    {
+      // Not implemented
    }
 
    private void CopyButton_Click(object sender, RoutedEventArgs e)
@@ -183,11 +263,7 @@ public partial class AgsWindow
 
    private void Eu5FileObjSelector_OnMouseDown(object sender, MouseButtonEventArgs e)
    {
-      var listView = sender as ListView;
-
-      if (listView?.SelectedItem is not Eu5FileObj clickedItem)
-         return;
-
-      FormatFile(clickedItem);
+      if (e.ClickCount == 2 && sender is ListView { SelectedItem: Eu5FileObj clickedItem })
+         FormatFile(clickedItem);
    }
 }

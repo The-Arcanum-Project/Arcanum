@@ -6,6 +6,8 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils;
 
 // ReSharper disable PossibleMultipleEnumeration
@@ -65,6 +67,11 @@ public class PropertySavingMetadata
    /// </summary>
    public required string CollectionSeparator { get; init; } = "";
    public required bool SaveEmbeddedAsIdentifier { get; init; } = true;
+   /// <summary>
+   /// If this list is shattered into multiple parts when saved. <br/>
+   /// Only relevant if IsCollection is true. Default is false.
+   /// </summary>
+   public required bool IsShattered { get; init; } = false;
 
    #region Equality operations
 
@@ -92,24 +99,22 @@ public class PropertySavingMetadata
    #endregion
 
    /// <summary>
-   /// Formats the property and appends it to the provided IndentedStringBuilder.
+   /// Formats the property and appends it to the provided IndentedStringBuilder. <br/>
+   /// Handles comments, collections, and custom saving methods as needed. <br/>
+   /// Properties are only saved if they differ from their default values or are required.
    /// </summary>
-   /// <param name="ags"></param>
-   /// <param name="sb"></param>
-   /// <param name="commentChar"></param>
-   /// <param name="settings"></param>
    public void Format(IAgs ags, IndentedStringBuilder sb, string commentChar, AgsSettings settings)
    {
       if (CommentProvider != null)
          CommentProvider(ags, commentChar, sb);
 
-      object value = null!;
-      Nx.ForceGet(ags, NxProp, ref value);
+      var value = ags._getValue(NxProp);
 
       if (ValueType == SavingValueType.Auto)
          ValueType = SavingUtil.GetSavingValueType(value);
 
-      if (ShouldSkipValueProcessing(settings, value))
+      // Required fields must always be saved
+      if (ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
          return;
 
       if (SavingMethod == null)
@@ -123,11 +128,18 @@ public class PropertySavingMetadata
          if (IsCollection)
          {
             if (value is IEnumerable collection)
-               HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator, collection);
+               if (IsShattered)
+                  HandleShatteredCollection(sb, commentChar, settings.Format, CollectionSeparator, collection);
+               else
+                  HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator, collection);
          }
          else if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
          {
             HandleEnumProperty(sb, value);
+         }
+         else
+         {
+            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value)}");
          }
       }
       else
@@ -166,6 +178,16 @@ public class PropertySavingMetadata
 
             break;
          }
+         case SavingValueType.IAgs:
+         case SavingValueType.Identifier:
+            if (value is IEu5Object eu5Obj)
+            {
+               var defaultValue = EmptyRegistry.Empties[eu5Obj.GetType()];
+               if (eu5Obj.Equals(defaultValue))
+                  return true;
+            }
+
+            break;
       }
 
       return false;
@@ -200,10 +222,64 @@ public class PropertySavingMetadata
 
    private void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)
    {
+      var sm = ags.ClassMetadata.SavingMethod;
+      if (sm != null)
+      {
+         sm.Invoke(ags, [this], sb);
+         return;
+      }
+
       if (SaveEmbeddedAsIdentifier)
          sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ags.SavingKey}");
       else
          ags.ToAgsContext(commentChar).BuildContext(sb);
+   }
+
+   private void HandleShatteredCollection(IndentedStringBuilder sb,
+                                          string commentChar,
+                                          SavingFormat format,
+                                          string collectionSeparator,
+                                          IEnumerable collection)
+   {
+      if (!collection.HasItems())
+         return;
+
+      if (CollectionAsPureIdentifierList)
+      {
+         var maxItemsPerLine = sb.MaxItemsInCollectionLine;
+         sb.MaxItemsInCollectionLine = 1;
+         FormatAsIdentifierList(sb, collection, collectionSeparator);
+         sb.MaxItemsInCollectionLine = maxItemsPerLine;
+      }
+      else if (IsEmbeddedObject)
+      {
+         foreach (var item in collection)
+            if (item is IAgs ia)
+            {
+               sb.Append($"{Keyword}");
+               ia.ToAgsContext(commentChar).BuildContext(sb);
+            }
+            else
+               throw new
+                  InvalidOperationException($"Collection property '{NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");
+      }
+      else
+      {
+         if (!collection.HasItems())
+            return;
+
+         if (format == SavingFormat.Spacious)
+            sb.AppendLine();
+
+         foreach (var item in collection)
+         {
+            var itemType = SavingUtil.GetSavingValueType(item);
+            if (itemType == SavingValueType.IAgs && item is IAgs ia)
+               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ia.SavingKey}");
+            else
+               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(itemType, item)}");
+         }
+      }
    }
 
    private void HandleCollection(IAgs ags,
@@ -266,6 +342,8 @@ public class PropertySavingMetadata
          lineItemCount++;
          isFirstItem = false;
       }
+
+      sb.AppendLine();
    }
 
    private void FormatAsValueList(IndentedStringBuilder sb, IEnumerable collection, string separator)
@@ -332,6 +410,9 @@ public class PropertySavingMetadata
          lineItemCount++;
          isFirstItem = false;
       }
+
+      if (collection.Cast<object?>().Any())
+         sb.AppendLine();
    }
 
    private void FormatAsEmbeddedObjectList(IndentedStringBuilder sb, IEnumerable collection, string commentChar)

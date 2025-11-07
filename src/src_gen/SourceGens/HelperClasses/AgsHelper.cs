@@ -237,6 +237,7 @@ public static class AgsHelper
       sb.AppendLine($"                    SavingMethod = {prop.SavingMethod},");
       sb.AppendLine($"                    ValueType = SavingValueType.{prop.ValueType},");
       sb.AppendLine($"                    DefaultValue = {defaultValueLiteral},");
+      sb.AppendLine($"                    IsShattered = {prop.IsShattered.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    Separator = TokenType.{prop.Separator},");
       sb.AppendLine($"                    CollectionItemKeyProvider = {prop.CollectionKeyMethod},");
       sb.AppendLine($"                    IsCollection = {prop.IsCollection.ToString().ToLowerInvariant()},");
