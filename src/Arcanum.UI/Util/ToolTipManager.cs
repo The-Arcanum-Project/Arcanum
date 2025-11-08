@@ -65,8 +65,8 @@ public class ToolTipManager
          _suppressUntilNotice = false;
       };
 
-      mainMap.OnPanningStarted += SuppressUntilNotice;
-      mainMap.OnPanningEnded += ReenableToolTip;
+      mainMap.MapInteractionManager.NavigationStrategy.OnPanningStarted += SuppressUntilNotice;
+      mainMap.MapInteractionManager.NavigationStrategy.OnPanningEnded += ReenableToolTip;
    }
 
    public void SuppressUntilNotice()

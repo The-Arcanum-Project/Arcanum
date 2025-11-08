@@ -40,5 +40,53 @@ This system will alert you to any issues detected within your mod files.
 
 ## Main Editor
 
+### Map Controls
+
+<table>
+    <tr>
+        <td>Keys</td>
+        <td>Action</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB</shortcut></td>
+        <td>Select / deselect an object on map</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB+CTRL</shortcut></td>
+        <td>Add / remove an object from selection</td>
+    </tr>
+    <tr>
+        <td><shortcut>MMB+Drag</shortcut></td>
+        <td>Pan the map</td>
+    </tr>
+    <tr>
+        <td><shortcut>Scroll</shortcut></td>
+        <td>Adjust zoom of map</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB+Drag</shortcut></td>
+        <td>Add rectangle selection</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB+CTRL+Drag</shortcut></td>
+        <td>Remove rectangle selection</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB+ALT+Drag</shortcut></td>
+        <td>Add lasso selection</td>
+    </tr>
+    <tr>
+        <td><shortcut>LMB+ALT+CTRL+Drag</shortcut></td>
+        <td>Remove lasso selection</td>
+    </tr>
+    <tr>
+        <td><shortcut>C</shortcut></td>
+        <td>Toggle brush selection mode</td>
+    </tr>
+    <tr>
+        <td><shortcut>Esc</shortcut></td>
+        <td>Cancel selection mode → return to pan / zoom</td>
+    </tr>
+</table>
 
 Once loading is complete, you will enter the **Main Editor**, the primary workspace for creating and modifying your mods.

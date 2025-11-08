@@ -329,7 +329,7 @@ public static class Selection
 
    #region LMB Selection
 
-   public static void UpdateDragSelection(Vector2 mousePos, bool isDragging, bool isLasso)
+   public static void UpdateDragSelection(Vector2 mousePos, bool isDragging, bool isLasso, bool remove = false, bool clearAllFirst = false)
    {
       // Dragging just started
       if (isDragging && !IsDragging)
@@ -344,8 +344,8 @@ public static class Selection
          Modify(SelectionTarget.Selection,
                 isLasso ? SelectionMethod.Lasso : SelectionMethod.Rectangle,
                 SelectionPreview,
-                true,
-                false);
+                !remove,
+                false, clearAllFirst);
          Clear(SelectionTarget.SelectionPreview);
       }
 
@@ -503,10 +503,10 @@ public static class Selection
       UpdateDragSelection(startPos, true, false);
    }
 
-   public static void EndRectangleSelection(Vector2 endPos)
+   public static void EndRectangleSelection(Vector2 endPos, bool remove = false, bool clearAllFirst = false)
    {
       Console.WriteLine($"Rectangle selection ended at {endPos} with final area {DragArea}");
-      UpdateDragSelection(endPos, false, false);
+      UpdateDragSelection(endPos, false, false, remove, clearAllFirst);
       DragArea = RectangleF.Empty;
    }
 
