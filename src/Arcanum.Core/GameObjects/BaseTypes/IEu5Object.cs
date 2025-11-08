@@ -49,10 +49,8 @@ public interface IEu5Object<T> : IEu5Object, IEu5ObjectProvider<T>, IEmpty<T>
 
 public interface IEu5Object : ISearchable, INUI, IAgs
 {
-   [Required]
-   [SuppressAgs]
-   [AddModifiable]
-   [NuiConfig(isReadonly: true)]
+   [AddModifiable, SuppressAgs]
+   [PropertyConfig(isReadonly: true, isRequired: true)]
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
    public string UniqueId { get; set; }

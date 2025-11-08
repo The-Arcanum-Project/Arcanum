@@ -84,6 +84,7 @@ public partial class Character : IEu5Object<Character>
    [Description("The father of this character.")]
    public Character Father { get; set; } = null!;
 
+   [PropertyConfig(minValue: 0, maxValue: 100)]
    [SaveAs]
    [DefaultValue(0)]
    [ParseAs("adm")]

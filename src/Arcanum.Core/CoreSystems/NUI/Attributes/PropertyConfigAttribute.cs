@@ -6,10 +6,13 @@ namespace Arcanum.Core.CoreSystems.NUI.Attributes;
 /// If a property is marked with this attribute, it will be displayed as read-only in the NUI.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
-public class NuiConfigAttribute(bool isReadonly = false,
-                                bool isInlined = false,
-                                bool allowEmpty = true,
-                                bool disableMapInferButtons = false) : Attribute
+public class PropertyConfigAttribute(bool isReadonly = false,
+                                     bool isInlined = false,
+                                     bool allowEmpty = true,
+                                     bool disableMapInferButtons = false,
+                                     bool isRequired = false,
+                                     double minValue = double.MinValue,
+                                     double maxValue = double.MaxValue) : Attribute
 {
    /// <summary>
    /// Whether the property is read-only in the NUI.
@@ -31,4 +34,19 @@ public class NuiConfigAttribute(bool isReadonly = false,
    /// Whether to disable map infer buttons for this property in the NUI.
    /// </summary>
    public bool DisableMapInferButtons { get; set; } = disableMapInferButtons;
+
+   /// <summary>
+   /// Whether this property is required to have a value in the NUI.
+   /// </summary>
+   public bool IsRequired { get; set; } = isRequired;
+
+   /// <summary>
+   /// The minimum value allowed for this property in the NUI.
+   /// </summary>
+   public double MinValue { get; set; } = minValue;
+
+   /// <summary>
+   /// The maximum value allowed for this property in the NUI.
+   /// </summary>
+   public double MaxValue { get; set; } = maxValue;
 }

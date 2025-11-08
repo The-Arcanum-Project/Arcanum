@@ -12,7 +12,7 @@ public interface IModifierPattern
    /// The unique identifier for the modifier pattern.
    /// </summary>
    [AddModifiable]
-   [NuiConfig(isReadonly: true)]
+   [PropertyConfig(isReadonly: true)]
    public string UniqueId { get; set; }
 
    /// <summary>

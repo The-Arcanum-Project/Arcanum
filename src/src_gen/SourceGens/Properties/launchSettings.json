@@ -3,7 +3,7 @@
   "profiles": {
     "Generators": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../Arcanum.Core/Arcanum.Core.csproj"
+      "targetProject": "../../Arcanum.Core/Arcanum.Core.csproj"
     }
   }
 }
