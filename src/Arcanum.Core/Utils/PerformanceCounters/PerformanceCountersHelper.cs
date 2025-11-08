@@ -51,30 +51,37 @@ public static class PerformanceCountersHelper
 
    private static void UpdateResources()
    {
-      var process = Process.GetCurrentProcess();
-
-      _memoryUsage = process.WorkingSet64 / 1024.0f / 1024.0f;
-
-      var now = DateTime.UtcNow;
-      // ReSharper disable once PossibleLossOfFraction
-      if ((now - _lastCpuCheck).TotalSeconds >= UPDATE_INTERVAL_MS / 1000)
+      try
       {
-         var currentCpuTime = process.TotalProcessorTime;
+         var process = Process.GetCurrentProcess();
 
-         var cpuUsedMs = (currentCpuTime - _lastCpuTime).TotalMilliseconds;
-         var totalMsPassed = (now - _lastCpuCheck).TotalMilliseconds;
+         _memoryUsage = process.WorkingSet64 / 1024.0f / 1024.0f;
 
-         _cpuUsage = (float)(cpuUsedMs / (Environment.ProcessorCount * totalMsPassed) * 100);
+         var now = DateTime.UtcNow;
+         // ReSharper disable once PossibleLossOfFraction
+         if ((now - _lastCpuCheck).TotalSeconds >= UPDATE_INTERVAL_MS / 1000)
+         {
+            var currentCpuTime = process.TotalProcessorTime;
 
-         _lastCpuCheck = now;
-         _lastCpuTime = currentCpuTime;
+            var cpuUsedMs = (currentCpuTime - _lastCpuTime).TotalMilliseconds;
+            var totalMsPassed = (now - _lastCpuCheck).TotalMilliseconds;
+
+            _cpuUsage = (float)(cpuUsedMs / (Environment.ProcessorCount * totalMsPassed) * 100);
+
+            _lastCpuCheck = now;
+            _lastCpuTime = currentCpuTime;
+         }
+
+         if (HasDedicatedGpu)
+         {
+            var gpuMetrics = GPUMonitor.GetMetrics();
+            _gpuUsage = gpuMetrics.GpuUsage;
+            _vramUsage = gpuMetrics.VramUsageMb;
+         }
       }
-
-      if (HasDedicatedGpu)
+      catch (Exception ex)
       {
-         var gpuMetrics = GPUMonitor.GetMetrics();
-         _gpuUsage = gpuMetrics.GpuUsage;
-         _vramUsage = gpuMetrics.VramUsageMb;
+         ArcLog.WriteLine("PRF", LogLevel.ERR, "Error updating performance counters: " + ex);
       }
    }
 
@@ -99,6 +106,7 @@ public static class PerformanceCountersHelper
    public static void Shutdown()
    {
       Updater.Stop();
+      Updater.Close();
       Updater.Dispose();
       GPUMonitor.Dispose();
    }
