@@ -13,12 +13,13 @@ public static class NexusHelpers
    private const string NUI_CONFIG_ATTRIBUTE_NAME =
       "Arcanum.Core.CoreSystems.NUI.Attributes.NuiConfigAttribute";
 
+   private const string PARSE_AS_ATTRIBUTE_NAME =
+      "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+
    private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
 
    private const string REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.RequiredAttribute";
    private const string IGNORE_REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.IgnoreRequiredAttribute";
-
-   private const string JOMINI_COLOR_TYPE = "Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor.JominiColor";
 
    /// <summary>
    /// This transform finds any class that implements INexus.
@@ -63,7 +64,7 @@ public static class NexusHelpers
                                                       INamedTypeSymbol iListSymbol,
                                                       SourceProductionContext context)
    {
-      var nuiConfig = new List<NuiConfigData?>();
+      var propConfig = new List<PropertyConfigData?>();
       var descriptions = new List<string?>();
 
       // List of all members that are a collection
@@ -95,16 +96,13 @@ public static class NexusHelpers
       builder.AppendLine("    {");
       foreach (var member in members)
       {
-         var memberType = member switch
-         {
-            IPropertySymbol p => p.Type,
-            IFieldSymbol f => f.Type,
-            _ => throw new ArgumentOutOfRangeException(),
-         };
+         if (member is not IPropertySymbol propSym)
+            continue;
 
+         var memberType = propSym.Type;
          propertyTypes.Add(memberType);
 
-         nuiConfig.Add(GetNuiConfigData(member));
+         propConfig.Add(PropertyConfigHelper.GeneratePropertyConfigData(propSym, ieu5ObjectSymbol, context));
 
          // Gather the description (if any)
          var descriptionAttribute = member.GetAttributes()
@@ -120,7 +118,7 @@ public static class NexusHelpers
                                 ? desc
                                 : null);
 
-         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemType = (member as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
          collectionItemTypes.Add(itemType);
 
          if (itemType != null)
@@ -139,8 +137,6 @@ public static class NexusHelpers
 
       builder.AppendLine("    }");
       builder.AppendLine();
-
-      AppendRequiredFilter(builder, classSymbol, members);
 
       AppendDefaultValues(builder, classSymbol, members, enumerableSymbol, ieu5ObjectSymbol, context);
 
@@ -203,7 +199,7 @@ public static class NexusHelpers
       builder.AppendLine();
       builder.AppendLine("#region NUI Config Accessors");
 
-      AppendIntBitsAsBools(builder, nuiConfig);
+      AppendIntBitsAsBools(builder, propConfig);
 
       builder.AppendLine("#endregion");
 
@@ -225,6 +221,8 @@ public static class NexusHelpers
       builder.AppendLine();
 
       #endregion
+
+      AppendMinMax(builder, propConfig);
 
       #region Get and Set Value methods
 
@@ -539,22 +537,88 @@ public static class NexusHelpers
       return builder.ToString();
    }
 
-   private static void AppendIntBitsAsBools(StringBuilder sb, List<NuiConfigData?> nuiConfig)
+   /// <summary>
+   /// Generate the Min and Max method calls which contains a switch over all properties to get their min/max values.
+   /// </summary>
+   public static void AppendMinMax(StringBuilder sb, List<PropertyConfigData?> propConfig)
+   {
+      sb.AppendLine("# region Min/Max Value Accessors");
+      sb.AppendLine();
+      sb.AppendLine("    public T? GetMinValue<T>(Enum property)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        Debug.Assert(_getValue(property).GetType() == typeof(T));");
+      sb.AppendLine("        return (T?)GetMinValue(property);");
+      sb.AppendLine("    }");
+      sb.AppendLine();
+
+      // --- GetMinValue ---
+      sb.AppendLine("    public object? GetMinValue(Enum property)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        switch (property)");
+      sb.AppendLine("        {");
+      for (var i = 0; i < propConfig.Count; i++)
+      {
+         var config = propConfig[i];
+         if (config?.MinValue is "null" or null)
+            continue;
+
+         sb.AppendLine($"            case Field.{config.PropertyName}:");
+         sb.AppendLine($"                return {config.MinValue};");
+      }
+
+      sb.AppendLine("            default:");
+      sb.AppendLine("                return null;");
+      sb.AppendLine("        }");
+      sb.AppendLine("    }");
+      sb.AppendLine();
+
+      // --- GetMaxValue ---
+      sb.AppendLine("    public T? GetMaxValue<T>(Enum property)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        Debug.Assert(_getValue(property).GetType() == typeof(T));");
+      sb.AppendLine("        return (T?)GetMaxValue(property);");
+      sb.AppendLine("    }");
+      sb.AppendLine();
+
+      sb.AppendLine("    public object? GetMaxValue(Enum property)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        switch (property)");
+      sb.AppendLine("        {");
+      for (var i = 0; i < propConfig.Count; i++)
+      {
+         var config = propConfig[i];
+         if (config?.MaxValue is "null" or null)
+            continue;
+
+         sb.AppendLine($"            case Field.{config.PropertyName}:");
+         sb.AppendLine($"                return {config.MaxValue};");
+      }
+
+      sb.AppendLine("            default:");
+      sb.AppendLine("                return null;");
+      sb.AppendLine("        }");
+      sb.AppendLine("    }");
+      sb.AppendLine();
+      sb.AppendLine("# endregion");
+      sb.AppendLine();
+   }
+
+   private static void AppendIntBitsAsBools(StringBuilder sb, List<PropertyConfigData?> nuiConfig)
    {
       var bitArrays = new int[nuiConfig.Count];
       for (var i = 0; i < nuiConfig.Count; i++)
       {
-         var dataNull = nuiConfig[i];
+         var data = nuiConfig[i];
          bitArrays[i] = 0;
 
-         if (!dataNull.HasValue)
+         if (data == null)
             continue;
 
-         var data = dataNull.Value;
          bitArrays[i] |= data.IsInlined ? 1 << 0 : 0;
-         bitArrays[i] |= data.IsReadOnly ? 1 << 1 : 0;
+         bitArrays[i] |= data.IsReadonly ? 1 << 1 : 0;
          bitArrays[i] |= data.AllowEmpty ? 1 << 2 : 0;
          bitArrays[i] |= data.DisableMapInferButtons ? 1 << 3 : 0;
+         bitArrays[i] |= data.IsRequired ? 1 << 4 : 0;
       }
 
       sb.AppendLine($"    /// <summary>");
@@ -563,6 +627,7 @@ public static class NexusHelpers
       sb.AppendLine($"    /// Bit 1: IsReadOnly <br/>");
       sb.AppendLine($"    /// Bit 2: AllowEmpty <br/>");
       sb.AppendLine($"    /// Bit 3: DisableMapInferButtons <br/>");
+      sb.AppendLine($"    /// Bit 4: IsRequired <br/>");
       sb.AppendLine($"    /// </summary>");
       // the int[] in binary format for easier debugging
       var arrayInitializer = string.Join(", ",
@@ -575,6 +640,7 @@ public static class NexusHelpers
       sb.AppendLine("    private const int IS_READONLY = 1 << 1;");
       sb.AppendLine("    private const int ALLOW_EMPTY = 1 << 2;");
       sb.AppendLine("    private const int DISABLE_MAP_INFER_BUTTONS = 1 << 3;");
+      sb.AppendLine("    private const int IS_REQUIRED = 1 << 4;");
 
       sb.AppendLine();
 
@@ -606,6 +672,13 @@ public static class NexusHelpers
       sb.AppendLine("    public bool IsMapInferButtonsDisabled(Enum property)");
       sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & DISABLE_MAP_INFER_BUTTONS) != 0;");
       sb.AppendLine();
+
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property is marked as required.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool IsRequired(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IS_REQUIRED) != 0;");
+      sb.AppendLine();
    }
 
    private static NuiConfigData? GetNuiConfigData(ISymbol member)
@@ -620,54 +693,15 @@ public static class NexusHelpers
 
       var nuiConfigData = new NuiConfigData
       {
-         IsReadOnly = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 0, "isReadOnly"),
-         IsInlined = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 1, "isInlined"),
-         AllowEmpty = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute, 2, "allowEmpty"),
-         DisableMapInferButtons = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(nuiConfigAttribute,
-          3,
-          "disableMapInferButtons"),
+         IsReadOnly = AttributeHelper.SimpleGetAttrArgValue<bool>(nuiConfigAttribute, 0, "isReadOnly"),
+         IsInlined = AttributeHelper.SimpleGetAttrArgValue<bool>(nuiConfigAttribute, 1, "isInlined"),
+         AllowEmpty = AttributeHelper.SimpleGetAttrArgValue<bool>(nuiConfigAttribute, 2, "allowEmpty"),
+         DisableMapInferButtons = AttributeHelper.SimpleGetAttrArgValue<bool>(nuiConfigAttribute,
+                                                                              3,
+                                                                              "disableMapInferButtons"),
       };
 
       return nuiConfigData;
-   }
-
-   private static void AppendRequiredFilter(StringBuilder builder, INamedTypeSymbol classSymbol, List<ISymbol> members)
-   {
-      // For each property we are going to look at the attributes including inheritance if it is marked with [Required]
-      // or if the [Required] attribute is overridden with [IgnoreRequired] in a derived class
-      var requiredProperties = new List<bool>();
-      foreach (var member in members)
-      {
-         if (member is not IPropertySymbol propertySymbol)
-            continue;
-
-         var requiredAttribute = Helpers.GetEffectiveAttribute(classSymbol, propertySymbol, REQUIRED_ATTRIBUTE_NAME);
-         var ignoreRequiredAttribute =
-            Helpers.GetEffectiveAttribute(classSymbol, propertySymbol, IGNORE_REQUIRED_ATTRIBUTE_NAME);
-
-         requiredProperties.Add(requiredAttribute != null && ignoreRequiredAttribute == null);
-      }
-
-      // ------- Required Property Array -------
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// A pre-generated array indicating whether a property is required.");
-      builder.AppendLine("    /// Accessed via the 'Field' enum index.");
-      builder.AppendLine("    /// </summary>");
-
-      var arrayInitializer = string.Join(", ", requiredProperties.Select(s => s.ToString().ToLower()));
-      builder.AppendLine($"    private static readonly bool[] _isRequired = {{ {arrayInitializer} }};");
-      builder.AppendLine();
-
-      // --- Generate a public accessor method for the required status ---
-      builder.AppendLine("    /// <summary>");
-      builder.AppendLine("    /// Checks if a property is marked as required.");
-      builder.AppendLine("    /// </summary>");
-      builder.AppendLine("    public bool IsRequired(Enum property)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        Debug.Assert(Enum.IsDefined(typeof(Field), property), \"Invalid property enum value\");");
-      builder.AppendLine("        return _isRequired[(int)((Field)property)];");
-      builder.AppendLine("    }");
-      builder.AppendLine();
    }
 
    private static void AppendDefaultValues(StringBuilder builder,
@@ -707,7 +741,7 @@ public static class NexusHelpers
          }
 
          var arg = defaultValueAttribute.ConstructorArguments[0];
-         defaultValues.Add(GenerateDefaultValues(ieu5ObjectSymbol, arg, propertySymbol));
+         defaultValues.Add(PropertyConfigHelper.GenerateDefaultValue(ieu5ObjectSymbol, arg, propertySymbol));
       }
 
       // --- Generate a public accessor method for the default value ---
@@ -744,86 +778,6 @@ public static class NexusHelpers
       builder.AppendLine("        return (T)GetDefaultValue(property);");
       builder.AppendLine("    }");
       builder.AppendLine();
-   }
-
-   public static string GenerateDefaultValues(INamedTypeSymbol? ieu5ObjectSymbol,
-                                              TypedConstant arg,
-                                              IPropertySymbol propertySymbol)
-   {
-      if (arg.Value == null)
-      {
-         // If the value is null we need to check the type of the property
-         var propertyType = propertySymbol.Type;
-         if (propertyType.TypeKind is TypeKind.Class or TypeKind.Interface)
-         {
-            // We have to check if it is of the ieu5ObjectSymbol type
-            if (ieu5ObjectSymbol != null &&
-                propertyType.AllInterfaces.Contains(ieu5ObjectSymbol,
-                                                    SymbolEqualityComparer.Default))
-            {
-               // For IEu5Object types we get the empty value from the registry
-               var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-               return $"EmptyRegistry.Empties[typeof({typeName})]";
-            }
-
-            if (Helpers.IsGenericCollection(propertyType, out _))
-            {
-               var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-               return $"new {fullCollectionTypeName}()";
-            }
-            // Check if we have a JominiColor
-
-            return propertyType.ToDisplayString() == JOMINI_COLOR_TYPE
-                      ? $"global::{JOMINI_COLOR_TYPE}.Empty"
-                      // Fallback SHOULD NEVER BE USED HERE
-                      : "null!";
-         }
-
-         {
-            // For other value types we use the default literal
-            var typeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            return $"default({typeName})";
-         }
-      }
-
-      if (arg.Type != null)
-      {
-         if (propertySymbol.Type.BaseType?.ToDisplayString() == "System.Enum")
-         {
-            var enumTypeName = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var enumValue = arg.Value?.ToString() ?? "0";
-
-            return $"({enumTypeName}){enumValue}";
-         }
-
-         // We have to format the value based on its type
-         var formattedValue = arg.Type.SpecialType switch
-         {
-            SpecialType.System_String => SymbolDisplay.FormatLiteral(arg.Value?.ToString() ?? "string.Empty", true),
-            SpecialType.System_Char => SymbolDisplay.FormatLiteral((char)(arg.Value ?? '\0'), true),
-            SpecialType.System_Boolean => arg.Value?.ToString()?.ToLower() ?? "false",
-            SpecialType.System_Single => ((float?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "f",
-            SpecialType.System_Double => ((double?)arg.Value)?.ToString("R", CultureInfo.InvariantCulture) + "d",
-            SpecialType.System_Decimal => ((decimal?)arg.Value)?.ToString(CultureInfo.InvariantCulture) + "m",
-            SpecialType.System_Int64 => $"{arg.Value}L",
-            SpecialType.System_UInt64 => $"{arg.Value}UL",
-            SpecialType.System_Int32
-            or SpecialType.System_UInt32
-            or SpecialType.System_Int16
-            or SpecialType.System_UInt16
-            or SpecialType.System_Byte
-            or SpecialType.System_SByte => arg.Value?.ToString() ?? "0",
-            _ => arg.Value != null
-                    ? $"({arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){arg.Value}"
-                    : "null",
-         };
-         if (arg.Type.SpecialType == SpecialType.System_String &&
-             string.IsNullOrWhiteSpace(formattedValue.Substring(1, formattedValue.Length - 2)))
-            formattedValue = "string.Empty";
-         return formattedValue;
-      }
-
-      return "null";
    }
 
    public struct NuiConfigData(bool isReadOnly, bool isInlined, bool allowEmpty, bool disableMapInferButtons)

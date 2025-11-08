@@ -97,6 +97,7 @@ public partial class Character : IEu5Object<Character>
    [Description("The religious school of this character.")]
    public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
 
+   [PropertyConfig(minValue: 0, maxValue: 100)]
    [SaveAs]
    [DefaultValue(0)]
    [ParseAs("adm")]

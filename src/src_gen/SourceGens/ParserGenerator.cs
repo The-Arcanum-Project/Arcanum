@@ -1090,16 +1090,16 @@ public class ParserSourceGenerator : IIncrementalGenerator
       {
          Symbol = symbol;
 
-         IsShatteredList = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 3, "isShatteredList");
+         IsShatteredList = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 3, "isShatteredList");
          CustomParserMethodName =
-            AttributeHelper.SimpleGetAttributeArgumentValue<string?>(attribute, 2, "customParser");
+            AttributeHelper.SimpleGetAttrArgValue<string?>(attribute, 2, "customParser");
          ItemNodeType =
-            AttributeHelper.SimpleGetAttributeArgumentValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
-         IsEmbedded = AttributeHelper.SimpleGetAttributeArgumentValue<bool>(attribute, 5, "isEmbedded");
+            AttributeHelper.SimpleGetAttrArgValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
+         IsEmbedded = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 5, "isEmbedded");
          IEu5KeyType =
-            AttributeHelper.SimpleGetAttributeArgumentValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
+            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
          CustomGlobalsSource =
-            AttributeHelper.SimpleGetAttributeArgumentValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
+            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
          IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
          IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
                      "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";

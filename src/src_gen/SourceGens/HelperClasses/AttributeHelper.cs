@@ -55,10 +55,10 @@ public static class AttributeHelper
    /// <param name="attribute"></param>
    /// <param name="position"></param>
    /// <returns>The argument's value cast to T, or the provided default value.</returns>
-   public static T? SimpleGetAttributeArgumentValue<T>(AttributeData attribute,
-                                                       int position,
-                                                       string name,
-                                                       T? defaultValue = default)
+   public static T? SimpleGetAttrArgValue<T>(AttributeData attribute,
+                                             int position,
+                                             string name,
+                                             T? defaultValue = default)
    {
       object? rawValue = GetAttributeArgumentValue(attribute, position, name);
 

@@ -19,64 +19,55 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
 {
    #region Nexus Properties
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("provinces")]
    [DefaultValue("locations.png")]
    [Description("The filename of the location map image.")]
    public string ProvinceFileName { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("rivers")]
    [DefaultValue("rivers.png")]
    [Description("The filename of the rivers map image.")]
    public string Rivers { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("topology")]
    [Description("The filename of the heightmap image.")]
    [DefaultValue("heightmap.heightmap")]
    public string HeightMap { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("adjacencies")]
    [Description("The filename of the adjacencies CSV file.")]
    [DefaultValue("adjacencies.csv")]
    public string Adjacencies { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("setup")]
    [Description("The filename of the setup definitions file.")]
    [DefaultValue("definitions.txt")]
    public string Setup { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("ports")]
    [Description("The filename of the ports CSV file.")]
    [DefaultValue("ports.csv")]
    public string Ports { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("location_templates")]
    [Description("The filename of the location templates CSV file.")]
    [DefaultValue("locations_templates.csv")]
    public string LocationsTemplates { get; set; } = string.Empty;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("wrap_x")]
    [DefaultValue(true)]
    [Description("Whether the map wraps around the X axis (horizontally).")]
    public bool WrapX { get; set; } = true;
 
-   [Required]
-   [SaveAs]
+   [SaveAs, PropertyConfig(isRequired: true)]
    [ParseAs("equator_y")]
    [DefaultValue(-1)]
    [Description("At what Y coordinate the equator is located on the map image.")]
