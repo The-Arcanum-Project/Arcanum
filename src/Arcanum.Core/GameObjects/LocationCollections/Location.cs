@@ -21,12 +21,13 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-[ObjectSaveAs(savingMethod: "LocationSaving")]
+[ObjectSaveAs]
 public partial class Location
    : IMapInferable, IEu5Object<Location>, ILocation
 {
    #region game/in_game/map_data/named_locations.txt
 
+   [PropertyConfig(isReadonly: true)]
    [SuppressAgs]
    [ToStringArguments("X")]
    [Description("The color of the location in the map data.")]
