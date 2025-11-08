@@ -45,6 +45,7 @@ public class AGSSettings
    public AgsSettings EstateAgsSettings { get; set; } = new();
    public AgsSettings EnactedLawAgsSettings { get; set; } = new();
    public AgsSettings InstitutionAgsSettings { get; set; } = new();
+   public AgsSettings ArtistTypeAgsSettings { get; set; } = new();
    public AgsSettings ModValInstanceAgsSettings { get; set; } = new();
    public AgsSettings EstateCountDefinitonAgsSettings { get; set; } = new();
    public AgsSettings RegnalNumberAgsSettings { get; set; } = new();

@@ -25,6 +25,7 @@ using ReligiousFaction = Arcanum.Core.GameObjects.Religious.ReligiousFaction;
 using ReligiousFocus = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousFocus;
 using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 using Road = Arcanum.Core.GameObjects.Map.Road;
+using ArtistType = Arcanum.Core.GameObjects.Cultural.ArtistType;
 
 namespace Arcanum.Core.GlobalStates;
 
@@ -52,6 +53,7 @@ public static class Globals
 
    public static Dictionary<string, Country> Countries { get; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
+   public static Dictionary<string, ArtistType> ArtistTypes { get; set; } = [];
 
    #region Religion
 

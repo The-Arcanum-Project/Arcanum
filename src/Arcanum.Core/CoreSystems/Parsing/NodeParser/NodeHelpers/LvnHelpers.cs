@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Culture = Arcanum.Core.GameObjects.Cultural.Culture;
@@ -438,4 +439,20 @@ public static class LvnHelpers
                                            Globals.ParliamentTypes,
                                            out value);
    }
+
+    public static bool TryParseArtistType(this LiteralValueNode lvn,
+                                 LocationContext ctx,
+                                 string actionName,
+                                 string source,
+                                 ref bool validationResult,
+                                 [MaybeNullWhen(false)] out ArtistType value)
+    {
+        return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                             lvn.Value,
+                                             source,
+                                             actionName,
+                                             ref validationResult,
+                                             Globals.ArtistTypes,
+                                             out value);
+    }
 }

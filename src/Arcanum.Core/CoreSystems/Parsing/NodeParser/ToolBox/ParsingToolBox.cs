@@ -1722,4 +1722,47 @@ public static class ParsingToolBox
                                            Globals.CultureGroups,
                                            out value);
    }
+
+   public static bool ArcTryParse_ArtistType(KeyOnlyNode node,
+                                     LocationContext ctx,
+                                     string actionName,
+                                     string source,
+                                     [MaybeNullWhen(false)] out ArtistType value,
+                                     ref bool validation)
+    {
+        return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node.KeyNode,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.ArtistTypes,
+                                           out value);
+    }
+
+    public static bool ArcTryParse_ArtistType(ContentNode node,
+                                        LocationContext ctx,
+                                        string actionName,
+                                        string source,
+                                        [MaybeNullWhen(false)] out ArtistType value,
+                                        ref bool validation)
+    {
+        if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                               TokenType.Equals,
+                                               ctx,
+                                               $"{actionName}.{nameof(ArcTryParse_ArtistType)}"))
+        {
+            validation = false;
+            value = null;
+            return false;
+        }
+
+        if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+        {
+            validation = false;
+            value = null;
+            return false;
+        }
+
+        return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
+    }
 }

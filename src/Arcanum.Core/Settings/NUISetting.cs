@@ -137,7 +137,19 @@ public class NUISettings
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 
-   public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.UniqueId,
+
+    public NUISetting ArtistTypeSettings { get; set; } = new(ArtistType.Field.UniqueId,
+                                                              Enum.GetValues<ArtistType.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<ArtistType.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray(),
+                                                              Enum.GetValues<ArtistType.Field>()
+                                                                  .Cast<Enum>()
+                                                                  .ToArray());
+
+    public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.UniqueId,
                                                                  Enum.GetValues<ReligiousSchool.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray(),

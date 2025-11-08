@@ -366,7 +366,14 @@ public static class DescriptorDefinitions
           ],
           false);
 
-   public static readonly FileDescriptor CharactersDescriptor =
+    public static readonly FileDescriptor ArtistTypeDescriptor = new(["in_game", "common", "artist_types"],
+                                                     new("artist_types", "txt", "#"),
+                                                     [
+                                                        new ArtistTypeParsing([]),
+                                                     ],
+                                                     false);
+
+    public static readonly FileDescriptor CharactersDescriptor =
       new(["main_menu", "setup", "start", "05_characters.txt"],
           new("characters", "txt", "#"),
           ConsequentialLoadingSteps([
@@ -375,7 +382,7 @@ public static class DescriptorDefinitions
                 CountriesDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
                 TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0],
                 CultureDescriptor.LoadingService[0], DynastyManagerDescriptor
-                  .LoadingService[0],
+                  .LoadingService[0], ArtistTypeDescriptor.LoadingService[0],
              ]),
           ]),
           false);
@@ -393,7 +400,7 @@ public static class DescriptorDefinitions
          RegenciesDescriptor, CharactersDescriptor, DynastyManagerDescriptor, EstateDescriptor,
          ReligiousGroupDescriptor, ReligionDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
          DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor,
-         LocationTemplateDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor,
+         LocationTemplateDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);
