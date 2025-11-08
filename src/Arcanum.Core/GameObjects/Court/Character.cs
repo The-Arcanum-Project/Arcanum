@@ -16,6 +16,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religious;
 using Common.UI;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
+using ArtistType = Arcanum.Core.GameObjects.Cultural.ArtistType;
 
 namespace Arcanum.Core.GameObjects.Court;
 
@@ -25,7 +26,7 @@ public partial class Character : IEu5Object<Character>
    public Character()
    {
       Mother = Empty;
-      Spouse = Empty;
+      PregnancyRealFather = Empty;
       Father = Empty;
    }
 
@@ -72,17 +73,29 @@ public partial class Character : IEu5Object<Character>
    [Description("The mother of this character.")]
    public Character Mother { get; set; } = null!;
 
-   [SaveAs(SavingValueType.Identifier)]
+   [SaveAs(SavingValueType.Identifier, isShattered: true)]
    [DefaultValue(null)]
-   [ParseAs("spouse")]
-   [Description("The spouse of this character.")]
-   public Character Spouse { get; set; } = null!;
+   [ParseAs("spouse", isShatteredList: true, itemNodeType: AstNodeType.ContentNode)]
+   [Description("The spouse of this character. Can have multiple.")]
+   public ObservableRangeCollection<Character> Spouses { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("father")]
    [Description("The father of this character.")]
    public Character Father { get; set; } = null!;
+
+   [SaveAs(SavingValueType.Identifier)]
+   [DefaultValue(null)]
+   [ParseAs("pregnancy_real_father")]
+   [Description("The real father of this character.")]
+   public Character PregnancyRealFather { get; set; } = null!;
+
+   [SaveAs]
+   [ParseAs("religious_school")]
+   [DefaultValue(null)]
+   [Description("The religious school of this character.")]
+   public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
 
    [SaveAs]
    [DefaultValue(0)]
@@ -114,12 +127,13 @@ public partial class Character : IEu5Object<Character>
    [Description("The artistic skill of this character.")]
    public float ArtistSkill { get; set; }
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [ParseAs("artist")]
    [Description("The type of artist this character is.")]
-   public string ArtistType { get; set; } = string.Empty;
+   public ArtistType ArtistType { get; set; } = ArtistType.Empty;
 
+    //TODO: Alias 'traits'
    [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("ruler_trait", isShatteredList: true)]
@@ -131,6 +145,12 @@ public partial class Character : IEu5Object<Character>
    [ParseAs("artist_trait", isShatteredList: true)]
    [Description("The artistic traits of this character.")]
    public ObservableRangeCollection<Trait> ArtistTraits { get; set; } = [];
+
+   [SaveAs(isShattered: true)]
+   [DefaultValue(null)]
+   [ParseAs("explorer_trait", isShatteredList: true)]
+   [Description("The explorer traits of this character.")]
+   public ObservableRangeCollection<Trait> ExplorerTraits { get; set; } = [];
 
    [SaveAs(isShattered: true)]
    [DefaultValue(null)]
@@ -208,6 +228,7 @@ public partial class Character : IEu5Object<Character>
    [Description("The dynasty of this character")]
    public Dynasty Dynasty { get; set; } = Dynasty.Empty;
 
+   //TODO: Alias 'country'
    [SaveAs]
    [DefaultValue(null)]
    [ParseAs("tag")]
@@ -243,8 +264,8 @@ public partial class Character : IEu5Object<Character>
    {
       var emptyChar = new Character("Arcanum_Empty_Character");
       emptyChar.Mother = emptyChar;
-      emptyChar.Spouse = emptyChar;
       emptyChar.Father = emptyChar;
+      emptyChar.PregnancyRealFather = emptyChar;
 
       return emptyChar;
    });
