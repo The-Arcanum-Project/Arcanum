@@ -20,6 +20,9 @@ public abstract record JominiColor : IEmpty<JominiColor>
       return (_cachedIntValue = (mediaColor.A << 24) | (mediaColor.B << 16) | (mediaColor.G << 8) | mediaColor.R).Value;
    }
 
+   public int AsHex() => AsInt() & 0xFFFFFF;
+   public string AsHexString() => AsHex().ToString("X6");
+
    public abstract Color ToMediaColor();
    public abstract JominiColorType Type { get; }
 

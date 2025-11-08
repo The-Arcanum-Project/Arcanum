@@ -56,7 +56,7 @@ public partial class LocationRank : IEu5Object<LocationRank>
    [Description("The frame tier associated with this LocationRank.")]
    public int FrameTier { get; set; }
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [ParseAs("construction_demand")]
    [Description("The construction demand associated with this LocationRank.")]

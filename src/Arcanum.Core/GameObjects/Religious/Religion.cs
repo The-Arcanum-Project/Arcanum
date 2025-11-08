@@ -198,13 +198,13 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    [Description("Opinions towards other religions.")]
    public ObservableRangeCollection<ReligionOpinionValue> Opinions { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("tags", itemNodeType: AstNodeType.KeyOnlyNode)]
    [Description("Tags associated with this Religion.")]
    public ObservableRangeCollection<string> Tags { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("custom_tags", itemNodeType: AstNodeType.KeyOnlyNode)]
    [Description("Custom tags associated with this Religion.")]

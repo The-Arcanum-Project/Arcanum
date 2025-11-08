@@ -55,13 +55,13 @@ public partial class Dynasty : IEu5Object<Dynasty>
    [Description("The home location of this dynasty.")]
    public Location Home { get; set; } = Location.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("male_names")]
    [Description("The list of possible male names for members of this dynasty.")]
    public ObservableRangeCollection<string> MaleNames { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("female_names")]
    [Description("The list of possible female names for members of this dynasty.")]

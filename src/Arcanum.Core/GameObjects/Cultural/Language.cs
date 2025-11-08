@@ -42,7 +42,7 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    [ParseAs("first_name_conjoiner")]
    public string FirstNameConjoiner { get; set; } = string.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [Description("The string used for family names, e.g. 'de', 'von', 'bin', etc.")]
    [ParseAs("family")]

@@ -21,7 +21,7 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "LocationSaving")]
 public partial class Location
    : IMapInferable, IEu5Object<Location>, ILocation
 {

@@ -111,7 +111,7 @@ public partial class PopType : IEu5Object<PopType>
    [Description(Globals.REPLACE_DESCRIPTION)]
    public ObservableRangeCollection<ModValInstance> PopPercentageImpact { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isEmbeddedObject: true)]
    [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [DefaultValue(null)]
    [Description("List of estate attribute definitions associated with this pop type.")]

@@ -11,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Cultural;
@@ -118,9 +119,9 @@ public partial class Estate : IEu5Object<Estate>
 
    [SaveAs]
    [ParseAs("characters_have_dynasty")]
-   [DefaultValue("")]
+   [DefaultValue(CharactersHaveDynasty.Sometimes)]
    [Description("If characters will spawn with a dynasty or not but some how weirdly defined.")]
-   public string CharactersHaveDynasty { get; set; } = string.Empty;
+   public CharactersHaveDynasty CharactersHaveDynasty { get; set; } = CharactersHaveDynasty.Sometimes;
 
    [SaveAs]
    [ParseAs("high_power", itemNodeType: AstNodeType.ContentNode)]

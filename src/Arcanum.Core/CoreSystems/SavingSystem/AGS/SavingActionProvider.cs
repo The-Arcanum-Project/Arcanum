@@ -6,6 +6,7 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Map.SubObjects;
 
@@ -114,5 +115,46 @@ public static class SavingActionProvider
             InvalidOperationException("ModValInstanceSaving can only be used with ModValInstance instances.");
 
       sb.AppendLine(SavingUtil.FormatValue(SavingValueType.Modifier, mvi));
+   }
+
+   public static void SoundTollsSaving(IAgs target,
+                                       HashSet<PropertySavingMetadata> metadata,
+                                       IndentedStringBuilder sb)
+   {
+      if (target is not SoundToll st)
+         throw new
+            InvalidOperationException("SoundTollsSaving can only be used with SoundTolls instances.");
+
+      sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne)} = {SavingUtil.FormatObjectValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo)}");
+   }
+
+   public static void DefaultMapDefinitionSaving(IAgs target,
+                                                 HashSet<PropertySavingMetadata> metadata,
+                                                 IndentedStringBuilder sb)
+   {
+      if (target is not DefaultMapDefinition dmd)
+         throw new
+            InvalidOperationException("DefaultMapDefinitionSaving can only be used with DefaultMapDefinition instances.");
+
+      var settings = dmd.AgsSettings;
+      var orderedProperties = metadata.ToList();
+      for (var i = 0; i < orderedProperties.Count; i++)
+      {
+         var prop = orderedProperties[i];
+         if (settings.Format == SavingFormat.Spacious && i > 0)
+            sb.AppendLine();
+         prop.Format(dmd, sb, "#", settings);
+      }
+   }
+
+   public static void LocationSaving(IAgs target,
+                                     HashSet<PropertySavingMetadata> metadata,
+                                     IndentedStringBuilder sb)
+   {
+      if (target is not Location loc)
+         throw new
+            InvalidOperationException("LocationSaving can only be used with Location instances.");
+
+      sb.AppendLine($"{loc.UniqueId} = {loc.Color.AsHexString().ToLower()}");
    }
 }

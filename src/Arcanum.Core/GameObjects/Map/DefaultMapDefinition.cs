@@ -14,59 +14,68 @@ using Common.UI;
 
 namespace Arcanum.Core.GameObjects.Map;
 
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "DefaultMapDefinitionSaving")]
 public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
 {
    #region Nexus Properties
 
+   [Required]
    [SaveAs]
    [ParseAs("provinces")]
    [DefaultValue("locations.png")]
    [Description("The filename of the location map image.")]
    public string ProvinceFileName { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("rivers")]
    [DefaultValue("rivers.png")]
    [Description("The filename of the rivers map image.")]
    public string Rivers { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("topology")]
    [Description("The filename of the heightmap image.")]
    [DefaultValue("heightmap.heightmap")]
    public string HeightMap { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("adjacencies")]
    [Description("The filename of the adjacencies CSV file.")]
    [DefaultValue("adjacencies.csv")]
    public string Adjacencies { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("setup")]
    [Description("The filename of the setup definitions file.")]
    [DefaultValue("definitions.txt")]
    public string Setup { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("ports")]
    [Description("The filename of the ports CSV file.")]
    [DefaultValue("ports.csv")]
    public string Ports { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("location_templates")]
    [Description("The filename of the location templates CSV file.")]
    [DefaultValue("locations_templates.csv")]
    public string LocationsTemplates { get; set; } = string.Empty;
 
+   [Required]
    [SaveAs]
    [ParseAs("wrap_x")]
    [DefaultValue(true)]
    [Description("Whether the map wraps around the X axis (horizontally).")]
    public bool WrapX { get; set; } = true;
 
+   [Required]
    [SaveAs]
    [ParseAs("equator_y")]
    [DefaultValue(-1)]
@@ -79,37 +88,37 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
    [Description("List of pairs of locations that are connected by sound tolls.")]
    public ObservableRangeCollection<SoundToll> SoundTolls { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("volcanoes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that contain volcanoes.")]
    public ObservableHashSet<Location> Volcanoes { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("earthquakes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are prone to earthquakes.")]
    public ObservableHashSet<Location> Earthquakes { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("sea_zones", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are sea zones.")]
    public ObservableHashSet<Location> SeaZones { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("lakes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are lakes.")]
    public ObservableHashSet<Location> Lakes { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("non_ownable", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that cannot be owned by any country.")]
    public ObservableHashSet<Location> NotOwnable { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("impassable_mountains", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are impassable due to mountains.")]

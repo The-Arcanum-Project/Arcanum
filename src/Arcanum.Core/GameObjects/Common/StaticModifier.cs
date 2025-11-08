@@ -33,7 +33,7 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
               itemNodeType: AstNodeType.ContentNode,
               customGlobalsSource: typeof(ModifierDefinition))]
    [Description("Collection of modifiers applied by this StaticModifier.")]
-   [SaveAs]
+   [SaveAs(isEmbeddedObject: true)]
    [DefaultValue(null)]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
 

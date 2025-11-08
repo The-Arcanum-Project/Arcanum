@@ -15,7 +15,7 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.Map;
 
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "SoundTollsSaving")]
 public partial class SoundToll : IEu5Object<SoundToll>
 {
    #region Nexus Properties
