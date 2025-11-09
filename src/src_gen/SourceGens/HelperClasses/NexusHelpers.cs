@@ -118,7 +118,7 @@ public static class NexusHelpers
                                 ? desc
                                 : null);
 
-         var itemType = (member as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+         var itemType = (memberType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
          collectionItemTypes.Add(itemType);
 
          if (itemType != null)

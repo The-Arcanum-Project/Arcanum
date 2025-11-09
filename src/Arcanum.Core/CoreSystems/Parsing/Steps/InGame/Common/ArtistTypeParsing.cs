@@ -11,32 +11,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
 [ParserFor(typeof(ArtistType))]
 public partial class ArtistTypeParsing(IEnumerable<IDependencyNode<string>> dependencies)
-   : ParserValidationLoadingService<ArtistType>(dependencies)
+   : DiscoverThenParseLoadingService<ArtistType>(true, dependencies)
 {
-    protected override void LoadSingleFile(RootNode rn,
-                                           LocationContext ctx,
-                                           Eu5FileObj fileObj,
-                                           string actionStack,
-                                           string source,
-                                           ref bool validation,
-                                           object? lockObject)
-    {
-        SimpleObjectParser.Parse(fileObj,
-                                 rn,
-                                 ctx,
-                                 actionStack,
-                                 source,
-                                 ref validation,
-                                 ParseProperties,
-                                 Globals.ArtistTypes,
-                                 lockObject);
-    }
-
-    protected override void ParsePropertiesToObject(BlockNode block,
-                                                    ArtistType target,
-                                                    LocationContext ctx,
-                                                    string source,
-                                                    ref bool validation,
-                                                    bool allowUnknownNodes)
-       => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+   protected override void ParsePropertiesToObject(BlockNode block,
+                                                   ArtistType target,
+                                                   LocationContext ctx,
+                                                   string source,
+                                                   ref bool validation,
+                                                   bool allowUnknownNodes)
+      => throw new NotSupportedException("ArtistTypeParsing does not support ParsePropertiesToObject.");
 }
