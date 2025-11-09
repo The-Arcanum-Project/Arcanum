@@ -4,15 +4,17 @@ namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 public static class InjectManager
 {
-   public readonly static Dictionary<IEu5Object, List<InjectObj>> Injects = new();
+   public static readonly Dictionary<IEu5Object, List<InjectObj>> Injects = new();
 
    public static InjectObj CreateAndRegisterInjectObj(IEu5Object target, IEu5Object injectSource, InjRepType type)
    {
       var injectObj = new InjectObj
       {
          InjRepType = type,
-         Target = injectSource,
-         InjectedProperties = target.GetInjects(),
+         Target = target,
+         InjectedProperties = injectSource.GetInjects(),
+         SourceFile = injectSource.Source,
+         SourceLocation = injectSource.FileLocation,
       };
 
       if (!Injects.TryGetValue(target, out var list))
@@ -29,21 +31,11 @@ public static class InjectManager
    {
       List<KeyValuePair<Enum, object>> ips = [];
 
-      foreach (var prop in target.GetAllProperties())
-      {
-         var defaultValue = target.GetDefaultValue(prop);
-         var currentValue = target._getValue(prop);
+      if (!Injects.TryGetValue(target, out var injectObjs))
+         return ips.ToArray();
 
-         // Determine if the property value has changed.
-         bool areDifferent;
-         if (target.IsCollection(prop))
-            areDifferent = !AreCollectionsLogicallyEqual(currentValue, defaultValue);
-         else
-            areDifferent = !Equals(currentValue, defaultValue);
-
-         if (areDifferent)
-            ips.Add(new(prop, currentValue));
-      }
+      foreach (var injectObj in injectObjs)
+         ips.AddRange(injectObj.InjectedProperties);
 
       return ips.ToArray();
    }

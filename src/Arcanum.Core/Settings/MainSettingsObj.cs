@@ -21,7 +21,7 @@ public class MainSettingsObj
 
    public MapSettingsObj MapSettings { get; set; } = new();
 
-   public AgsConfig AgsConfig { get; set; } = new();
+   public AgsConfig SavingConfig { get; set; } = new();
 
    [JsonIgnore]
    [IsSubMenu("Error Handling")]

@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
@@ -259,7 +260,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void SaveAllModified_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      // TODO @MelCo link this to the actual save logic
+      SaveMaster.SaveAll();
    }
 
    private void OpenSaveSelector_OnExecuted(object sender, ExecutedRoutedEventArgs e)

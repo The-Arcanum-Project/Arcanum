@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.CoreSystems.Common;
 
@@ -189,6 +190,29 @@ public class IndentedStringBuilder
       var closingBrace = SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken);
 
       PrependIndentIfNecessary();
+      _builder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
+      _builder.AppendLine();
+      _isAtStartOfLine = true;
+
+      return new(this, closingBrace, addNewLine);
+   }
+
+   public BlockScope BlockWithNameAndInjection(IAgs ags, InjRepType injRepType)
+   {
+      if (injRepType == InjRepType.None)
+         return BlockWithName(ags, ags.AgsSettings.Format);
+
+      var addNewLine = ags.AgsSettings.Format == SavingFormat.Spacious;
+      if (addNewLine)
+         AppendLine();
+
+      var key = ags.SavingKey;
+      var separator = SavingUtil.GetSeparator(ags.ClassMetadata.Separator);
+      var openingBrace = SavingUtil.GetBrace(ags.ClassMetadata.OpeningToken);
+      var closingBrace = SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken);
+
+      PrependIndentIfNecessary();
+      _builder.AppendInjectionType(injRepType).Append(':');
       _builder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
       _builder.AppendLine();
       _isAtStartOfLine = true;

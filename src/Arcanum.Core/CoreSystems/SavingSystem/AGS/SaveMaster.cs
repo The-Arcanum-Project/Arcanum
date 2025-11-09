@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -135,48 +137,65 @@ public static class SaveMaster
       RemoveChange(command);
    }
 
-   public static void HandleNewSaveables(IEu5Object obj)
-   {
-   }
-
-   public static void SaveAll(bool onlyModified = true)
-   {
-      Save([..Enum.GetValues<SaveableType>()], onlyModified);
-   }
-
    public static ObjState GetState(IEu5Object obj)
    {
-      return ObjState.Unchanged;
+      if (NeedsToBeSaved.ContainsKey(obj))
+         return ObjState.Modified;
+
+      return NewObjects.Values.Any(list => list.Contains(obj)) ? ObjState.New : ObjState.Unchanged;
    }
 
-   public static void Save(List<SaveableType> saveableTypes, bool onlyModified = true)
+   public static void SaveAll()
    {
-      /*
-       How to handle Dependencies
+      Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList());
+   }
 
-      FileObj is the instance of a single File
-      FileInformationProvider more or less defines the behavior of it
+   public static void Save(List<Type> typesToSave)
+   {
+      List<IEu5Object> objsToSave = [];
+      foreach (var obj in NeedsToBeSaved.Keys)
+         if (typesToSave.Contains(obj.GetType()))
+            objsToSave.Add(obj);
 
-         Where to put the Information of the dependency?
-         We have to load a folder of files anyway -> But the files should share a FileInformationProvider
+      if (objsToSave.Count == 0)
+         return;
 
-      So the FileInformationProvider will have to have the dependency information
+      // We save the objects without any replace and inject logic by simply inserting them into the file they originate from
+      if (!Config.Settings.SavingConfig.UseInjectReplaceCalls)
+      {
+         SaveObjects(objsToSave);
+         return;
+      }
 
-      Why not directly make a class for all the saveabletypes
-         -> then the dependency can be made as static?
-         -> Then we need some sort of static method, which can be inherited and generate a FileObj?
-         -> Does that make sense if we have like 50 different file types, or does it not really change since we would need 50 different IFileInformationProvider implementations anyway?
-      */
+      InjectionHelper.HandleObjectsWithOptionalInjectLogic(objsToSave);
+   }
+
+   /// <summary>
+   /// Sorts the given objects by their source file and saves each file with the modified objects. <br/>
+   /// DOES NOT USE INJECT / REPLACE LOGIC!
+   /// </summary>
+   public static void SaveObjects(List<IEu5Object> objectsToSave)
+   {
+      var fileGroups = objectsToSave.GroupBy(o => o.Source);
+
+      foreach (var group in fileGroups)
+         SaveFile(group.ToList());
    }
 
    /// <summary>
    /// A list of any modified objects and the file they belong to.
    /// This list can contain nested objects.
    /// </summary>
-   /// <param name="modifiedObjects"></param>
-   /// <param name="fileObj"></param>
-   public static bool SaveFile(List<IEu5Object> modifiedObjects, Eu5FileObj fileObj)
+   public static bool SaveFile(List<IEu5Object> modifiedObjects)
    {
+      if (modifiedObjects.Count == 0)
+         return false;
+
+      var fileObj = modifiedObjects[0].Source;
+
+      if (modifiedObjects.Any(o => o.Source != fileObj))
+         throw new ArgumentException("All modified objects must belong to the same file.");
+
       var topLevelModObjs = FilterOutNestedObjects(modifiedObjects);
       var sb = FormatFileAndUpdateLocationForGivenObjects(fileObj, topLevelModObjs);
 
@@ -185,6 +204,46 @@ public static class SaveMaster
 
       IO.IO.WriteAllText(fileObj.Path.FullPath, sb.ToString(), Encoding.UTF8);
       fileObj.GenerateChecksum();
+      return true;
+   }
+
+   public static bool AppendOrCreateFileWithInjects(List<CategorizedSaveable> cssos)
+   {
+      Dictionary<Eu5FileObj, List<CategorizedSaveable>> fileGroups = [];
+      foreach (var csso in cssos)
+      {
+         if (!fileGroups.TryGetValue(csso.SaveLocation, out var list))
+            fileGroups[csso.SaveLocation] = list = [];
+
+         list.Add(csso);
+      }
+
+      PropertyOrderCache.Clear();
+
+      foreach (var (fo, value) in fileGroups)
+      {
+         var sb = new IndentedStringBuilder();
+         var fileExisted = IO.IO.FileExists(fo.Path.FullPath);
+         if (!fileExisted)
+            File.Create(fo.Path.FullPath).Close();
+         else
+            sb.InnerBuilder.Append(IO.IO.ReadAllText(fo.Path.FullPath, Encoding.UTF8));
+
+         // We have non -inject/replace objects that just override the file
+         if (value[0].SavingCategory == SavingCategory.FileOverride)
+         {
+            SaveFile(fo, true);
+            continue;
+         }
+
+         foreach (var csso in value)
+            csso.Target.ToAgsContext()
+                .BuildContext(sb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy());
+
+         IO.IO.WriteAllTextUtf8WithBom(fo.Path.FullPath, sb.ToString(), fileExisted);
+         fo.GenerateChecksum();
+      }
+
       return true;
    }
 
@@ -253,7 +312,7 @@ public static class SaveMaster
 
       var sb = new IndentedStringBuilder(original.Length + modifiedObjects.Count * 20);
       var currentPos = 0;
-      var spaces = Config.Settings.AgsConfig.SpacesPerIndent;
+      var spaces = Config.Settings.SavingConfig.SpacesPerIndent;
       var isb = new IndentedStringBuilder();
       var sortedMods = modifiedObjects.OrderBy(o => o.FileLocation.CharPos).ToList();
 

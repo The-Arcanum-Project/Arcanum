@@ -2,9 +2,12 @@
 using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.vdfParser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
@@ -22,7 +25,8 @@ public static class FileManager
 
    private static readonly char DefaultSeparationChar = Path.DirectorySeparatorChar;
    private static readonly char AlternativeSeparationChar = Path.AltDirectorySeparatorChar;
-   private const char DEFAULT_PATH_POINTING_CHAR = '>';
+
+   private static readonly Dictionary<Type, FileDescriptor> FileDescriptorCache = new();
 
    static FileManager()
    {
@@ -40,6 +44,13 @@ public static class FileManager
              eu5Path.Split(Path.DirectorySeparatorChar),
              DataSpace.AccessType.ReadOnly),
       ];
+
+      foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
+      {
+         foreach (var type in descriptor.LoadingService[0]
+                                        .ParsedObjects.Where(type => !FileDescriptorCache.TryAdd(type, descriptor)))
+            Debug.Fail($"FileDescriptorCache already contains a descriptor for type {type.FullName}");
+      }
    }
 
    public static string SanitizePath(string path, char separationChar = '.')
@@ -343,45 +354,39 @@ public static class FileManager
       return subPaths;
    }
 
-   // public static void GenerateCustomSavingCatalog()
-   // {
-   //    // TODO: Implement for existing saveables
-   //
-   //    // For new saveable, we need to set the file dropdown to a new default value
-   //    // List of a tuple of a string and corresponding FileObj
-   //    // The default option is marked with the FileObj.Empty
-   //
-   //    Dictionary<FileInformation, List<(string, FileObj)>> groupedSaveables = [];
-   //
-   //    foreach (var fileInformation in NewSaveables.Select(saveable => saveable.FileInformation()))
-   //    {
-   //       if (groupedSaveables.TryGetValue(fileInformation, out var fileList))
-   //          continue;
-   //
-   //       fileList = GenerateFileSelection(fileInformation);
-   //       groupedSaveables[fileInformation] = fileList;
-   //    }
-   // }
-   //
-   // public static List<(string, FileObj)> GenerateFileSelection(FileInformation fileInformation)
-   // {
-   //    var descriptor = fileInformation.Descriptor;
-   //    var allowsOverwrite = fileInformation.AllowsOverwrite;
-   //    if (!allowsOverwrite)
-   //    {
-   //       // We need to Test if a file with the given name already exists for the descriptor
-   //       var files = descriptor.Files;
-   //       if (files.Count > 0)
-   //       {
-   //          // There exist at least one file, so we need to check if the file name already exists
-   //          if (files.Any(file => !file.AllowMultipleInstances && file.Path.Filename == fileInformation.FileName))
-   //          {
-   //             throw new
-   //                InvalidOperationException($"A file with the name '{fileInformation.FileName}' already exists for the Path '{descriptor.GetFilePath()}' and does not allow multiple instances.");
-   //          }
-   //       }
-   //    }
-   //
-   //    return [];
-   // }
+   public static (string[] path, FileDescriptor descriptor) GeneratePathForNewObject(
+      IEu5Object no,
+      bool allowReuseOfExistingArcFile)
+   {
+      if (!FileDescriptorCache.TryGetValue(no.GetType(), out var descriptor))
+         throw new
+            OhShitHereWeGoAgainException($"No FileDescriptor found for type {no.GetType().FullName}. Cannot generate path for new object.");
+
+      var folderPath = descriptor.LocalPath.Aggregate(ModDataSpace.FullPath, Path.Combine);
+      return ([
+                 ..ModDataSpace.Path, ..descriptor.LocalPath, GetDefaultFileNameForFolder(folderPath,
+                  no.GetType(),
+                  descriptor.FileType.FileEnding,
+                  allowReuseOfExistingArcFile),
+              ],
+              descriptor);
+   }
+
+   public const string ARCANUM_FILE_NAME_WATERMARK = "_Arcanum";
+   // TODO: Create a hidden settings option to disable this watermark in generated file names for contributors and Patreon Members
+
+   public static string GetDefaultFileNameForFolder(string folder,
+                                                    Type objectType,
+                                                    string fileEnding,
+                                                    bool allowReuseOfExistingArcFile)
+   {
+      IO.IO.EnsureDirectoryExists(folder);
+
+      var num = 0;
+      string name;
+      do
+         name = $"{num++:D2}{ARCANUM_FILE_NAME_WATERMARK}_{objectType.Name}.{fileEnding}";
+      while (File.Exists(Path.Combine(folder, name)) && allowReuseOfExistingArcFile);
+      return name;
+   }
 }

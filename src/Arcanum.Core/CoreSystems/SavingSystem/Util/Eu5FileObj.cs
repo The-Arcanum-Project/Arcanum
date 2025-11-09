@@ -18,6 +18,9 @@ public class Eu5FileObj
    public static Eu5FileObj Embedded { get; } = new(PathObj.Empty, FileDescriptor.Empty);
    public byte[] Checksum { get; private set; } = [];
 
+   public bool IsVanilla => Path.DataSpace == FileManager.VanillaDataSpace;
+   public bool IsModded => !IsVanilla;
+
    public void GenerateChecksum()
    {
       Checksum = Task.Run(() => FileStateManager.CalculateSha256(Path.FullPath)).Result;

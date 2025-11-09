@@ -6,8 +6,8 @@ namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 public class InjectObj
 {
    public InjRepType InjRepType { get; init; }
-
    public IEu5Object Target { get; init; }
-
    public KeyValuePair<Enum, object>[] InjectedProperties { get; init; }
+   public Eu5ObjectLocation SourceLocation { get; init; }
+   public Eu5FileObj SourceFile { get; init; }
 }
