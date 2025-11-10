@@ -33,7 +33,7 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
       return $"Line {Line}, Char {Column}, Length {Length}, Overall Pos {CharPos}";
    }
 
-   public static Eu5ObjectLocation Empty => new(-1, -1, -1, -1);
+   public static Eu5ObjectLocation Empty { get; } = new(-1, -1, -1, -1);
 
    public void Update(int length, int line, int column, int charPos)
    {

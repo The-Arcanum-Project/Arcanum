@@ -14,7 +14,6 @@ namespace Arcanum.Core.CoreSystems.History;
 public class TreeHistoryManager : IHistoryManager
 {
    private int _nodeId;
-   private HistoryNode _root;
    private bool _compacting;
 
    /// <summary>
@@ -29,7 +28,7 @@ public class TreeHistoryManager : IHistoryManager
    {
       Settings = settings;
       Current = new(_nodeId++, new CInitial(), HistoryEntryType.Normal);
-      _root = Current;
+      Root = Current;
 
       UndoEvent += TriggerCompaction;
       RedoEvent += TriggerCompaction;
@@ -202,6 +201,21 @@ public class TreeHistoryManager : IHistoryManager
       Current = redo[^1];
    }
 
+   public List<Eu5ObjectCommand> GetCommandsSinceLastSave(HistoryNode lastSaveNode)
+   {
+      var (up, down) = GetPathBetweenNodes(lastSaveNode.Id, Current.Id);
+      List<Eu5ObjectCommand> commands = [];
+      foreach (var node in down)
+         if (node.Command is Eu5ObjectCommand cmd)
+            commands.Add(cmd);
+
+      foreach (var node in up)
+         if (node.Command is Eu5ObjectCommand cmd)
+            commands.Add(cmd);
+
+      return commands;
+   }
+
    /// <summary>
    /// Calculates the undo depth and the total number of undoable commands in the history tree.
    /// </summary>
@@ -254,23 +268,23 @@ public class TreeHistoryManager : IHistoryManager
 
    /// <summary>
    /// Returns the path between two nodes in the history tree.
+   /// TODO: This might not behave 100% like expected in all tree scenarios.
    /// </summary>
-   /// <param name="from"></param>
-   /// <param name="to"></param>
    /// <returns></returns>
-   private (List<HistoryNode>, List<HistoryNode>) GetPathBetweenNodes(int from, int to)
+   private (List<HistoryNode> upwards, List<HistoryNode> downwards) GetPathBetweenNodes(int from, int to)
    {
-      List<HistoryNode> p1 = [];
-      List<HistoryNode> p2 = [];
+      List<HistoryNode> upwards = [];
+      List<HistoryNode> downwards = [];
 
-      GetPath(_root, p1, from);
-      GetPath(_root, p2, to);
+      GetPath(Root, upwards, from);
+      GetPath(Root, downwards, to);
 
+      /*
       int i = 0,
           intersection = -1;
 
-      var a = i != p1.Count;
-      var b = i != p2.Count;
+      var a = i != upwards.Count;
+      var b = i != downwards.Count;
 
       while (a && b)
       {
@@ -280,7 +294,7 @@ public class TreeHistoryManager : IHistoryManager
             break;
          }
 
-         if (p1[i] == p2[i])
+         if (upwards[i] == downwards[i])
          {
             i++;
          }
@@ -290,19 +304,30 @@ public class TreeHistoryManager : IHistoryManager
             break;
          }
 
-         a = i != p1.Count;
-         b = i != p2.Count;
+         a = i != upwards.Count;
+         b = i != downwards.Count;
       }
 
       for (var j = 0; j <= intersection; j++)
       {
-         p1.RemoveAt(0);
-         p2.RemoveAt(0);
+         upwards.RemoveAt(0);
+         downwards.RemoveAt(0);
+      }
+      */
+
+      // if both contain the same items we clear the upwards list
+      if (upwards.Count == downwards.Count && upwards.SequenceEqual(downwards))
+         upwards.Clear();
+
+      while (upwards.Count > 0 && downwards.Count > 0 && upwards[0] == downwards[0])
+      {
+         upwards.RemoveAt(0);
+         downwards.RemoveAt(0);
       }
 
-      p1.Reverse();
+      upwards.Reverse();
 
-      return (p1, p2);
+      return (upwards, downwards);
    }
 
    private static bool GetPath(HistoryNode subRoot, List<HistoryNode> path, int id)
@@ -315,15 +340,15 @@ public class TreeHistoryManager : IHistoryManager
       if (subRoot.Id == id)
          return true;
 
-      if (subRoot.Children.Any(child => GetPath(child, path, id)))
-         return true;
+      foreach (var child in subRoot.Children)
+         if (GetPath(child, path, id))
+            return true;
 
       path.Remove(subRoot);
-
       return false;
    }
 
-   public HistoryNode Root => _root;
+   public HistoryNode Root { get; private set; }
    public bool CanStepRedo
    {
       get
@@ -348,8 +373,8 @@ public class TreeHistoryManager : IHistoryManager
    public void Clear()
    {
       _nodeId = 0;
-      _root = Current = new(_nodeId++, new CInitial(), HistoryEntryType.Normal);
-      Current = _root;
+      Root = Current = new(_nodeId++, new CInitial(), HistoryEntryType.Normal);
+      Current = Root;
    }
 
    /// <summary>
@@ -379,7 +404,7 @@ public class TreeHistoryManager : IHistoryManager
    /// <returns>The history node with the specified identifier if found; otherwise, null.</returns>
    public HistoryNode GetNodeWithId(int id)
    {
-      return GetNodeWithId(_root, id);
+      return GetNodeWithId(Root, id);
    }
 
    private static HistoryNode GetNodeWithId(HistoryNode node, int id)
@@ -426,9 +451,9 @@ public class TreeHistoryManager : IHistoryManager
 
       _compacting = true;
       // We need to uncompact the tree first so that we can find all optimal groups
-      Uncompact(_root);
+      Uncompact(Root);
 
-      var groups = FindGroups(_root);
+      var groups = FindGroups(Root);
       var compGroups = FindCompactableGroups(groups);
 
       foreach (var group in compGroups)

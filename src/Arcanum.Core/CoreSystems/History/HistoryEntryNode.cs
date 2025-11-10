@@ -114,6 +114,11 @@ public class HistoryNode(int id, ICommand command, HistoryEntryType entryType, H
          foreach (var descendant in Traverse(child, level + 1))
             yield return descendant;
    }
+
+   public override string ToString()
+   {
+      return $"HistoryNode(Id={Id}, Children={Children.Count}, Command={Command})";
+   }
 }
 
 /// <summary>

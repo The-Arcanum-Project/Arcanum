@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
+using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
@@ -15,17 +18,20 @@ public static class InjectionHelper
       EnsureCompatibilityWithExistingInjections(categorized);
       PickFilesForInjection(categorized);
       // Every object now knows how and where it needs to be saved.
-      CalculateFinalInjects(categorized);
+      CalculateFinalInjects(categorized, out var toRemoveFromFiles);
       // We now know that all objects are compatible, have a file to save to and have their final injects calculated.
-      SaveMaster.AppendOrCreateFileWithInjects(categorized);
+      SaveMaster.AppendOrCreateFileWithInjects(categorized, toRemoveFromFiles);
    }
 
-   private static void CalculateFinalInjects(List<CategorizedSaveable> cssos)
+   private static void CalculateFinalInjects(List<CategorizedSaveable> cssos, out List<InjectObj> toRemoveFromFiles)
    {
+      toRemoveFromFiles = [];
+      Dictionary<IEu5Object, List<Enum>> changedProperties = new();
+      CalculatedChangedProperties(changedProperties);
+
       foreach (var csso in cssos)
       {
          List<(Enum, object)> finalInjects = [];
-         var existingInjects = csso.Target.GetInjects();
 
          var target = csso.Target;
          if (!target.Source.IsVanilla)
@@ -40,44 +46,142 @@ public static class InjectionHelper
             continue;
          }
 
-         // TODO: Get the info from commands otherwise this shit
-         foreach (var prop in target.GetAllProperties())
+         if (!changedProperties.TryGetValue(target, out var changedProps))
          {
-            var dVal = target.GetDefaultValue(prop);
-            var curVal = target._getValue(prop);
+#if DEBUG
+            Debug.Fail("Changed properties not found for an object that is supposed to be saved.");
+#else
+            ArcLog.WriteLine("IJH",
+                             LogLevel.CRT,
+                             "Changed properties not found for an object that is supposed to be saved.");
+            UIHandle.Instance.PopUpHandle
+                    .ShowMBox("Changed properties not found for an object that is supposed to be saved.",
+                              "Internal Error",
+                              MBoxButton.OK,
+                              MessageBoxImage.Error);
+#endif
+            continue;
+         }
 
-            // No change
-            if (Equals(dVal, curVal))
-               continue;
-
-            if (csso.SavingCategory.IsReplace())
+         // TODO: For now this is "dumb" injection handling for collections.
+         // In the future we have to only do this if we have a remove or clear operation on the collection,
+         // or if we are adding smth that is already contained in the collection to prevent it showing up twice in game.
+         foreach (var cp in changedProps)
+            if (csso.Target.IsCollection(cp))
             {
-               // In case of a replace we do not care about existing injects
-               finalInjects.Add((prop, curVal));
-               continue;
+               csso.SavingCategory =
+                  SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
+               break;
             }
 
-            if (existingInjects.Length != 0)
-               for (var i = 0; i < existingInjects.Length; i++)
+         switch (csso.SavingCategory)
+         {
+            case SavingCategory.FileOverride:
+               Debug.Fail("FileOverride should not be handled here.");
+               break;
+            case SavingCategory.Inject:
+            case SavingCategory.TryInject:
+            case SavingCategory.InjectOrCreate:
+               foreach (var cp in changedProps)
+                  finalInjects.Add((cp, target._getValue(cp)));
+
+               var existingInjects = csso.Target.GetInjectsForTarget();
+               // We have existing injects, so we check if they are in the same file and category so that we can merge them.
+               if (existingInjects.Length > 0)
                {
-                  var (@enum, value) = existingInjects[i];
-                  if (Equals(@enum, prop))
+                  // At this point we know that all existing injects are of the same type (inject) and compatible.
+                  // The only time we could have switched type is the collection check which would have made us replace.
+                  // So we simply add all existing injects to the final injects to be saved.
+                  foreach (var ei in existingInjects)
                   {
-                     // Found the property in the existing injects but the value is different than
-                     // what we have now so we need to update it
-                     if (!Equals(value, curVal))
-                        finalInjects.Add((@enum, curVal));
-                     // We handled this property, break
-                     break;
+                     // Stuff in base mods cannot be merged into our mod inject so we skip them.
+                     if (ei.Source.IsVanilla)
+                     {
+                        // TODO: Create a Replace here
+                        continue;
+                     }
+
+                     foreach (var prop in ei.InjectedProperties)
+                     {
+                        if (csso.Target.IsCollection(prop.Key))
+                        {
+                           finalInjects.Add((prop.Key, prop.Value));
+                           continue;
+                        }
+
+                        // If we have already added this property from the changed properties we skip it. 
+                        // This might not be the ideal action to take as they might be complementing each other but for now this is fine.
+                        // This check is skipped if we have a collection as we want to always add all changes in that case.
+                        if (finalInjects.Exists(fi => fi.Item1.Equals(prop.Key)))
+                           continue;
+
+                        finalInjects.Add((prop.Key, prop.Value));
+                     }
+
+                     // We mark the existing inject for removal as we are merging it into our new inject.
+                     toRemoveFromFiles.Add(ei);
+                     InjectManager.UnregisterInjectObj(ei);
                   }
                }
 
-            // If we reach this point the property was not found in existing injects
-            // so we need to add it
-            finalInjects.Add((prop, curVal));
+               var newInjectObj = new InjectObj
+               {
+                  Target = csso.Target,
+                  Source = csso.SaveLocation,
+                  InjRepType = csso.SavingCategory.ToInjRepStrategy(),
+                  InjectedProperties =
+                     finalInjects.Select(fi => new KeyValuePair<Enum, object>(fi.Item1, fi.Item2)).ToArray(),
+                  FileLocation = Eu5ObjectLocation.Empty,
+               };
+               InjectManager.RegisterInjectObj(newInjectObj);
+               csso.InjectedObj = newInjectObj;
+
+               break;
+            case SavingCategory.Replace:
+            case SavingCategory.TryReplace:
+            case SavingCategory.ReplaceOrCreate:
+               foreach (var prop in target.GetAllProperties())
+                  finalInjects.Add((prop, target._getValue(prop)));
+
+               // If we have any existing injects we have an error and should have never gotten here.
+               if (csso.Target.GetInjectsForTarget().Length > 0)
+               {
+#if DEBUG
+                  Debug.Fail("Existing injects found for an object that is being replaced.");
+#else
+                  ArcLog.WriteLine("IJH",
+                                   LogLevel.CRT,
+                                   "Existing injects found for an object that is being replaced.");
+                  UIHandle.Instance.PopUpHandle
+                          .ShowMBox("Existing injects found for an object that is being replaced.",
+                                    "Internal Error",
+                                    MBoxButton.OK,
+                                    MessageBoxImage.Error);
+#endif
+               }
+
+               break;
+            default:
+               throw new ArgumentOutOfRangeException();
          }
 
          csso.Injects = finalInjects.ToArray();
+      }
+   }
+
+   private static void CalculatedChangedProperties(Dictionary<IEu5Object, List<Enum>> cps)
+   {
+      var commands =
+         AppData.HistoryManager.GetCommandsSinceLastSave(SaveMaster.LastSavedHistoryNode ??
+                                                         AppData.HistoryManager.Root);
+      foreach (var command in commands)
+      {
+         foreach (var target in command.GetTargets())
+         {
+            if (!cps.ContainsKey(target))
+               cps[target] = [];
+            cps[target].Add(command.Attribute);
+         }
       }
    }
 
@@ -132,8 +236,7 @@ public static class InjectionHelper
 
       foreach (var typeGroup in byType.Values)
       {
-         var (path, descriptor) = FileManager.GeneratePathForNewObject(typeGroup[0].Target, true);
-         var fo = new Eu5FileObj(new(path[..^1], path[^1], FileManager.ModDataSpace), descriptor);
+         var fo = FileStateManager.CreateEu5FileObject(typeGroup[0].Target);
 
          foreach (var csso in typeGroup)
             if (csso.SaveLocation == Eu5FileObj.Empty)
@@ -173,8 +276,8 @@ public static class InjectionHelper
             // We check if they are the of the same category (inject vs replace)
             if (SavingCategoryExtensions.FromInjRepStrategy(ej.InjRepType).IsInject() == isInject)
             {
-               if (ej.SourceFile.IsModded)
-                  injectsInModFiles.Add(ej.SourceFile);
+               if (ej.Source.IsModded)
+                  injectsInModFiles.Add(ej.Source);
                continue;
             }
 

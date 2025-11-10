@@ -57,7 +57,10 @@ public class AgsObjectSavingContext
       }
    }
 
-   public void BuildContext(IndentedStringBuilder sb, HashSet<PropertySavingMetadata> properties, InjRepType strategy)
+   public void BuildContext(IndentedStringBuilder sb,
+                            HashSet<PropertySavingMetadata> properties,
+                            InjRepType strategy,
+                            bool alwaysSerializeAll = false)
    {
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
          Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
@@ -77,7 +80,7 @@ public class AgsObjectSavingContext
 
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
-            prop.Format(Ags, sb, CommentChar, Settings);
+            prop.Format(Ags, sb, CommentChar, Settings, alwaysSerializeAll);
          }
    }
 }

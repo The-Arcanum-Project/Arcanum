@@ -1,11 +1,15 @@
 ﻿#define IS_DEBUG
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common;
 using Common.Logger;
 using Common.UI;
@@ -221,5 +225,12 @@ public static class FileStateManager
    public static string CalculateSha256Hex(string filePath)
    {
       return BitConverter.ToString(CalculateSha256(filePath)).Replace("-", "").ToLowerInvariant();
+   }
+
+   public static Eu5FileObj CreateEu5FileObject(IEu5Object target)
+   {
+      var (path, descriptor) = FileManager.GeneratePathForNewObject(target, true);
+      var fo = new Eu5FileObj(new(path[..^1], path[^1], FileManager.ModDataSpace), descriptor);
+      return fo;
    }
 }
