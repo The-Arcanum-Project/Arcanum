@@ -91,7 +91,7 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IM
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
 #pragma warning restore AGS004
 
    #region IEu5Object

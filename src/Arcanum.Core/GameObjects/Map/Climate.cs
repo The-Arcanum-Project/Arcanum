@@ -46,7 +46,7 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
    public string UniqueId { get; set; } = null!;
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
