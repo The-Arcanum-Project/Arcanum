@@ -18,13 +18,19 @@ public static class InjectionHelper
       EnsureCompatibilityWithExistingInjections(categorized);
       PickFilesForInjection(categorized);
       // Every object now knows how and where it needs to be saved.
-      CalculateFinalInjects(categorized, out var toRemoveFromFiles);
+      CalculateFinalInjects(categorized, out var toRemoveFromFiles, out var abort);
+      if (abort)
+         return;
+
       // We now know that all objects are compatible, have a file to save to and have their final injects calculated.
       SaveMaster.AppendOrCreateFileWithInjects(categorized, toRemoveFromFiles);
    }
 
-   private static void CalculateFinalInjects(List<CategorizedSaveable> cssos, out List<InjectObj> toRemoveFromFiles)
+   private static void CalculateFinalInjects(List<CategorizedSaveable> cssos,
+                                             out List<InjectObj> toRemoveFromFiles,
+                                             out bool abort)
    {
+      abort = false;
       toRemoveFromFiles = [];
       Dictionary<IEu5Object, List<Enum>> changedProperties = new();
       CalculatedChangedProperties(changedProperties);
@@ -60,6 +66,7 @@ public static class InjectionHelper
                               MBoxButton.OK,
                               MessageBoxImage.Error);
 #endif
+            abort = true;
             continue;
          }
 
@@ -124,18 +131,6 @@ public static class InjectionHelper
                   }
                }
 
-               var newInjectObj = new InjectObj
-               {
-                  Target = csso.Target,
-                  Source = csso.SaveLocation,
-                  InjRepType = csso.SavingCategory.ToInjRepStrategy(),
-                  InjectedProperties =
-                     finalInjects.Select(fi => new KeyValuePair<Enum, object>(fi.Item1, fi.Item2)).ToArray(),
-                  FileLocation = Eu5ObjectLocation.Empty,
-               };
-               InjectManager.RegisterInjectObj(newInjectObj);
-               csso.InjectedObj = newInjectObj;
-
                break;
             case SavingCategory.Replace:
             case SavingCategory.TryReplace:
@@ -143,27 +138,56 @@ public static class InjectionHelper
                foreach (var prop in target.GetAllProperties())
                   finalInjects.Add((prop, target._getValue(prop)));
 
-               // If we have any existing injects we have an error and should have never gotten here.
-               if (csso.Target.GetInjectsForTarget().Length > 0)
+               var eInjects = csso.Target.GetInjectsForTarget();
+
+               // We have existing injects are are now going to perform a check if we can simply bundle them into a single replace.
+               // This is only possible if there are no conflicting properties.
+               if (eInjects.Length > 0)
                {
+                  foreach (var injObject in eInjects)
+                  {
+                     if (injObject.Source.IsVanilla)
+                     {
+                        // Any action we take will cause issues with the base mod. So we abort here.
+                        // TODO: Ass a setting or use the DialogResult here to determine if we should continue taking the risk
 #if DEBUG
-                  Debug.Fail("Existing injects found for an object that is being replaced.");
+                        Debug.Fail("Existing injects from a base mod found for an object that is being replaced.");
 #else
-                  ArcLog.WriteLine("IJH",
-                                   LogLevel.CRT,
-                                   "Existing injects found for an object that is being replaced.");
-                  UIHandle.Instance.PopUpHandle
-                          .ShowMBox("Existing injects found for an object that is being replaced.",
-                                    "Internal Error",
-                                    MBoxButton.OK,
-                                    MessageBoxImage.Error);
+                        ArcLog.WriteLine("IJH",
+                                         LogLevel.CRT,
+                                         "Existing injects in a basemod found for an object that is being replaced.");
+                        UIHandle.Instance.PopUpHandle
+                                .ShowMBox("Existing injects found for an object that is being replaced.",
+                                          "Internal Error",
+                                          MBoxButton.OK,
+                                          MessageBoxImage.Error);
 #endif
+                        abort = true;
+                        return;
+                     }
+
+                     // As we are replacing which is pulling all properties from the objects we can simply remove all existing injects.
+                     // And as all injects are already in the finalInjects we don't have to do anything special here.
+                     toRemoveFromFiles.Add(injObject);
+                  }
                }
 
                break;
             default:
                throw new ArgumentOutOfRangeException();
          }
+
+         var newInjectObj = new InjectObj
+         {
+            Target = csso.Target,
+            Source = csso.SaveLocation,
+            InjRepType = csso.SavingCategory.ToInjRepStrategy(),
+            InjectedProperties =
+               finalInjects.Select(fi => new KeyValuePair<Enum, object>(fi.Item1, fi.Item2)).ToArray(),
+            FileLocation = Eu5ObjectLocation.Empty,
+         };
+         InjectManager.RegisterInjectObj(newInjectObj);
+         csso.InjectedObj = newInjectObj;
 
          csso.Injects = finalInjects.ToArray();
       }
@@ -273,8 +297,9 @@ public static class InjectionHelper
          List<Eu5FileObj> injectsInModFiles = [];
          foreach (var ej in existingInj)
          {
+            var ejStrat = SavingCategoryExtensions.FromInjRepStrategy(ej.InjRepType);
             // We check if they are the of the same category (inject vs replace)
-            if (SavingCategoryExtensions.FromInjRepStrategy(ej.InjRepType).IsInject() == isInject)
+            if (ejStrat.IsInject() == isInject)
             {
                if (ej.Source.IsModded)
                   injectsInModFiles.Add(ej.Source);

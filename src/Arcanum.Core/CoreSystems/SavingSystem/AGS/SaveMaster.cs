@@ -231,6 +231,7 @@ public static class SaveMaster
    public static bool AppendOrCreateFileWithInjects(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
    {
       RemoveObjectsFromFile(removeFromFiles.Cast<IEu5Object>().ToList());
+
       foreach (var injectObj in removeFromFiles)
       {
          injectObj.FileLocation = Eu5ObjectLocation.Empty;
