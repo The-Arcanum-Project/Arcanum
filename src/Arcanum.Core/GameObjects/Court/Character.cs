@@ -104,24 +104,28 @@ public partial class Character : IEu5Object<Character>
    [Description("The administrative skill of this character.")]
    public int Adm { get; set; }
 
+   [PropertyConfig(minValue: 0, maxValue: 100)]
    [SaveAs]
    [DefaultValue(0)]
    [ParseAs("dip")]
    [Description("The diplomatic skill of this character.")]
    public int Dip { get; set; }
 
+   [PropertyConfig(minValue: 0, maxValue: 100)]
    [SaveAs]
    [DefaultValue(0)]
    [ParseAs("mil")]
    [Description("The military skill of this character.")]
    public int Mil { get; set; }
 
+   [PropertyConfig(minValue: 0, maxValue: 100 )]
    [SaveAs]
-   [DefaultValue(0)]
+   [DefaultValue(0f)]
    [ParseAs("fertility")]
    [Description("The fertility of this character.")]
-   public int Fertility { get; set; }
+   public float Fertility { get; set; }
 
+   [PropertyConfig(minValue: 0, maxValue: 1)]
    [SaveAs]
    [DefaultValue(0f)]
    [ParseAs("artist_skill")]

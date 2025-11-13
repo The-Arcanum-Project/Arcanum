@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Windows;
 using Arcanum.UI.Components.UserControls;
+using Vector = System.Numerics.Vector;
 
 namespace Arcanum.UI.MapInteraction;
 
@@ -41,6 +42,11 @@ public class MapCoordinateConverter(MapControl mapControl, (int width, int heigh
     public Vector2 MapToNdc(Vector2 mapPoint)
     {
         return NormToNdc(MapToNorm(mapPoint));
+    }
+    
+    public Vector2 NdcToMap(Vector2 ndcPoint)
+    {
+        return NormToMap(NdcToNorm(ndcPoint));
     }
     
     public Vector2 PixelToMap(Vector2 pixelPoint)
@@ -105,6 +111,16 @@ public class MapCoordinateConverter(MapControl mapControl, (int width, int heigh
         var worldY = ndcPoint.Y * zoomRatio / ImageAspectRatio + 1f - mapControl.LocationRenderer.Pan.Y;
 
         return new(worldX, 1 - worldY);
+    }
+
+    public float NdcToMap(float ndcLength)
+    {
+        var width = (float)mapControl.HwndHostContainer.ActualWidth;
+        var height = (float)mapControl.HwndHostContainer.ActualHeight;
+        
+        var zoomRatio = ImageAspectRatio / (mapControl.LocationRenderer.Zoom * 2);
+
+        return ndcLength * zoomRatio * imageSize.width;
     }
 
     /// <summary>

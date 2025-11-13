@@ -35,7 +35,7 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
     {
         if (e.ChangedButton != MouseButton.Left)
             return;
-        _startPos = map.CurrentPos;
+        _startPos = _map.Coords.CurrentPosition.Map;
         _lastMousePosition = e.GetPosition(map.HwndHostContainer);
     }
 
@@ -45,15 +45,18 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
         var deltaX = currentPos.X - _lastMousePosition.X;
         var deltaY = currentPos.Y - _lastMousePosition.Y;
 
-        if (!_hasMoved &&
-            Math.Abs(deltaX) < SystemParameters.MinimumHorizontalDragDistance &&
-            Math.Abs(deltaY) < SystemParameters.MinimumVerticalDragDistance)
+        if (!_hasMoved)
         {
-            return;
+            if(Math.Abs(deltaX) < SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(deltaY) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                return;
+            }
+            _hasMoved = true;
+            Selection.StartRectangleSelection(_map.Coords.CurrentPosition.Map);
         }
-        Selection.StartRectangleSelection(map.CurrentPos);
-        _hasMoved = true;
-        Selection.UpdateDragSelection(_map.CurrentPos, true, false);
+
+        Selection.UpdateDragSelection(_map.Coords.CurrentPosition.Map, true, false);
         SetSelectionRectangle();
     }
 
@@ -64,15 +67,20 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
         
         if (!_hasMoved)
         {
-            if (!Selection.GetLocation(_map.CurrentPos, out var location1))
+            if (!Selection.GetLocation(_map.Coords.CurrentPosition.Map, out var location1))
                 return;
 
             // TODO: @MelCo: In the future make Control only deselect
-            if (isControlPressed || isShiftPressed)
+            if (isShiftPressed)
                 Selection.Modify(SelectionTarget.Selection,
                     SelectionMethod.Simple,
                     [location1],
                     true);
+            else if (isControlPressed)
+                Selection.Modify(SelectionTarget.Selection,
+                    SelectionMethod.Simple,
+                    [location1],
+                    false, false);
             else // TODO: @MelCo: In the future make a select if there are multiple selected not inverted -> not intuitive
                 Selection.Modify(SelectionTarget.Selection,
                     SelectionMethod.Simple,

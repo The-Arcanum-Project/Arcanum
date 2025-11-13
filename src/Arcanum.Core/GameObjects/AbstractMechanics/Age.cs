@@ -43,18 +43,23 @@ public partial class Age : IEu5Object<Age>
    [Description("Months after which an exploration of an area spreads to every other country in the same subcontinent. When the exploration spreads one time in the original subcontinent it spreads again to adjacent subcontinents after that amount of time.")]
    public int MonthsForExplorationSpread { get; set; }
 
+   //TODO: Not exactly true, just must be >0 as there is a division in code
+   [PropertyConfig(minValue: 0.001)]
    [SaveAs]
    [DefaultValue(5f)]
    [ParseAs("max_price")]
    [Description("The maximum price modifier for goods during this age.")]
    public float MaxPrice { get; set; } = 5f;
 
+   //TODO: Not exactly true, just must be >0 as there is a division in code
+   [PropertyConfig(minValue: 0.001)]
    [SaveAs]
    [DefaultValue(0.1f)]
    [ParseAs("min_price")]
    [Description("The minimum price modifier for goods during this age.")]
    public float MinPrice { get; set; } = 0.1f;
 
+   [PropertyConfig(maxValue: 1)]
    [SaveAs]
    [DefaultValue(1f)]
    [ParseAs("price_stability")]
