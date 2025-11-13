@@ -67,7 +67,7 @@ public partial class DebugPanelGrid
 
    private void ObjectCreatorButton_Click(object sender, RoutedEventArgs e)
    {
-      Eu5ObjectCreator.ShowDialog(typeof(Character), out _);
+      Eu5ObjectCreator.ShowDialog(typeof(Location), out _);
    }
 
    private void ModifierCreatorButton_Click(object sender, RoutedEventArgs e)

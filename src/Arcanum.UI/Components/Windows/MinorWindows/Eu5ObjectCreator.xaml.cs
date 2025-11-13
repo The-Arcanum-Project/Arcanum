@@ -99,7 +99,7 @@ public partial class Eu5ObjectCreator
          if (CreatedObject.IsRequired(prop))
             requiredProps.Add(prop);
 
-      ObjectUI = Eu5UiGen.GenerateView(new(CreatedObject, false, ContentPresenter, false), requiredProps, false, true);
+      ObjectUI = Eu5UiGen.GenerateView(new(CreatedObject, true, ContentPresenter, false), requiredProps, false, true);
    }
 
    private bool AreRequiredFieldsFilled(out List<Enum> missingFields)
