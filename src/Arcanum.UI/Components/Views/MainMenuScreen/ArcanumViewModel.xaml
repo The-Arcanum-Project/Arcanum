@@ -55,7 +55,7 @@
                                              Margin="3"
                                              FontSize="14"
                                              x:Name="VanillaFolderTextBox"
-                                             PlaceholderText="Select mod folder">
+                                             PlaceholderText="Select the EU5 vanilla folder">
         </baseControls:TextboxWithPlaceholder>
 
         <Border Grid.Column = "2"
