@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.Registry;
 using Common.UI;
 using Common.UI.MBox;
 
@@ -23,7 +25,7 @@ public static class InjectionHelper
          return;
 
       // We now know that all objects are compatible, have a file to save to and have their final injects calculated.
-      SaveMaster.AppendOrCreateFileWithInjects(categorized, toRemoveFromFiles);
+      SaveMaster.AppendOrCreateFiles(categorized, toRemoveFromFiles);
    }
 
    private static void CalculateFinalInjects(List<CategorizedSaveable> cssos,
@@ -32,14 +34,25 @@ public static class InjectionHelper
    {
       abort = false;
       toRemoveFromFiles = [];
+
       Dictionary<IEu5Object, List<Enum>> changedProperties = new();
       CalculatedChangedProperties(changedProperties);
 
       foreach (var csso in cssos)
       {
+         if (csso.SavingCategory == SavingCategory.FileOverride)
+         {
+            csso.SaveLocation.ObjectsInFile.Add(csso.Target);
+            continue;
+         }
+
          List<(Enum, object)> finalInjects = [];
 
          var target = csso.Target;
+         // If the target's source is Empty we know that we have a newly created object that does not get saved by injection.
+         if (target.Source == Eu5FileObj.Empty)
+            continue;
+
          if (!target.Source.IsVanilla)
          {
             UIHandle.Instance.PopUpHandle
@@ -217,25 +230,45 @@ public static class InjectionHelper
       for (var i = 0; i < objsToSave.Count; i++)
       {
          var obj = objsToSave[i];
-         var numOfProperties = obj.GetAllProperties().Count;
-         var changes = SaveMaster.GetChangesForObject(obj);
-         var percentageModified = changes.Length / (float)numOfProperties;
 
          SavingCategory category;
-         if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject)
+         var descriptor = DescriptorDefinitions.TypeToDescriptor[obj.GetType()];
+         // we have an object type that must be saved in a single file only
+         if (!descriptor.AllowMultipleFiles || obj.FileLocation == Eu5ObjectLocation.Empty)
          {
-            category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
-            // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
-            // TryInject would also work if you count no errors as working but we don't.
-            if (!obj.Source.IsVanilla && category is SavingCategory.Inject or SavingCategory.TryInject)
-               category = SavingCategory.InjectOrCreate;
+            if (obj.FileLocation == Eu5ObjectLocation.Empty)
+            {
+               // We have a new object that is not saved via injection
+               category = SavingCategory.FileOverride;
+            }
+            else
+            {
+               // We get the single allowed path and do not move it to our mod as the saving does so
+               categorized[i] = new(obj, SavingCategory.FileOverride) { SaveLocation = descriptor.Files[0] };
+               continue;
+            }
          }
          else
          {
-            category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
-            // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate
-            if (!obj.Source.IsVanilla && category is SavingCategory.Replace or SavingCategory.TryReplace)
-               category = SavingCategory.ReplaceOrCreate;
+            var numOfProperties = obj.GetAllProperties().Count;
+            var changes = SaveMaster.GetChangesForObject(obj);
+            var percentageModified = changes.Length / (float)numOfProperties;
+
+            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject)
+            {
+               category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
+               // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
+               // TryInject would also work if you count no errors as working but we don't.
+               if (!obj.Source.IsVanilla && category is SavingCategory.Inject or SavingCategory.TryInject)
+                  category = SavingCategory.InjectOrCreate;
+            }
+            else
+            {
+               category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
+               // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate)
+               if (!obj.Source.IsVanilla && category is SavingCategory.Replace or SavingCategory.TryReplace)
+                  category = SavingCategory.ReplaceOrCreate;
+            }
          }
 
          categorized[i] = new(obj, category);
@@ -260,7 +293,11 @@ public static class InjectionHelper
 
       foreach (var typeGroup in byType.Values)
       {
-         var fo = FileStateManager.CreateEu5FileObject(typeGroup[0].Target);
+         var obj = typeGroup[0];
+         if (obj.SavingCategory == SavingCategory.FileOverride && obj.SaveLocation != Eu5FileObj.Empty)
+            continue;
+
+         var fo = FileStateManager.CreateEu5FileObject(obj.Target);
 
          foreach (var csso in typeGroup)
             if (csso.SaveLocation == Eu5FileObj.Empty)

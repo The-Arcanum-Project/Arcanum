@@ -180,7 +180,7 @@ public static class IO
       }
       catch (UnauthorizedAccessException)
       {
-         /* TODO: Log error */
+         ArcLog.WriteLine("SAV", LogLevel.CRT, $"IO.WriteAllText unauthorized access for path: {path}");
          return false;
       }
    }

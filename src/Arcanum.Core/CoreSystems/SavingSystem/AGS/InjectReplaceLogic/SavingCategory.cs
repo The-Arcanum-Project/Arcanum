@@ -4,6 +4,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 
 public enum SavingCategory
 {
+   ForcedOverride, // If there is a specific file objects of this type must be saved to.
    FileOverride,
    Inject,
    TryInject,

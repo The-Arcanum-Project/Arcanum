@@ -210,23 +210,6 @@ public static class FileStateManager
 #endif
    }
 
-   public static byte[] CalculateSha256(Eu5FileObj fo)
-   {
-      return CalculateSha256(fo.Path.FullPath);
-   }
-
-   public static byte[] CalculateSha256(string filePath)
-   {
-      using var sha256 = SHA256.Create();
-      using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-      return sha256.ComputeHash(fileStream);
-   }
-
-   public static string CalculateSha256Hex(string filePath)
-   {
-      return BitConverter.ToString(CalculateSha256(filePath)).Replace("-", "").ToLowerInvariant();
-   }
-
    public static Eu5FileObj CreateEu5FileObject(IEu5Object target)
    {
       var (path, descriptor) = FileManager.GeneratePathForNewObject(target, true);

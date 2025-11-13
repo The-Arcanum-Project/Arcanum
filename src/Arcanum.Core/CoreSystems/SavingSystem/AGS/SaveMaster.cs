@@ -228,7 +228,7 @@ public static class SaveMaster
       return true;
    }
 
-   public static bool AppendOrCreateFileWithInjects(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
+   public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
    {
       RemoveObjectsFromFile(removeFromFiles.Cast<IEu5Object>().ToList());
 
@@ -251,6 +251,24 @@ public static class SaveMaster
 
       foreach (var (fo, value) in fileGroups)
       {
+         // We have non -inject/replace objects that just override the file
+         if (value[0].SavingCategory == SavingCategory.FileOverride)
+         {
+            Debug.Assert(value.All(csso => csso.SavingCategory == SavingCategory.FileOverride),
+                         "All objects must be of FileOverride category.");
+
+            // If we have a newly created object it's Source property is still Empty so we need to set it here
+            foreach (var csso in value)
+               if (csso.Target.Source == Eu5FileObj.Empty)
+                  csso.Target.Source = fo;
+
+            Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
+                         "All objects must have a valid file location matching the file they are being saved to.");
+
+            SaveFile(fo, true);
+            continue;
+         }
+
          var sb = new IndentedStringBuilder();
          var fileExisted = IO.IO.FileExists(fo.Path.FullPath);
          if (!fileExisted)
@@ -258,38 +276,30 @@ public static class SaveMaster
          else
             sb.InnerBuilder.Append(IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath));
 
-         // We have non -inject/replace objects that just override the file
-         if (value[0].SavingCategory == SavingCategory.FileOverride)
-         {
-            SaveFile(fo, true);
-         }
-         else
-         {
-            // TODO: Always creates new file, we want to make it append to existing files if they exist
+         // TODO: Always creates new file, we want to make it append to existing files if they exist
 
-            foreach (var csso in value)
-            {
-               var objSb = new IndentedStringBuilder();
-               csso.Target.ToAgsContext()
-                   .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
-               Debug.Assert(csso.InjectedObj != InjectObj.Empty,
-                            "InjectedObj should not be empty when saving with inject/replace logic.");
-               if (csso.InjectedObj.FileLocation == Eu5ObjectLocation.Empty)
-                  csso.InjectedObj.FileLocation = new(0,
-                                                      CountNewLinesInStringBuilder(sb.InnerBuilder),
-                                                      objSb.InnerBuilder.Length,
-                                                      sb.InnerBuilder.Length);
-               else
-                  csso.InjectedObj.FileLocation.Update(objSb.InnerBuilder.Length,
-                                                       CountNewLinesInStringBuilder(objSb.InnerBuilder),
-                                                       0,
-                                                       sb.InnerBuilder.Length);
-               objSb.Merge(sb);
-               RemoveObjectFromChanges(csso.Target);
-            }
-
-            WriteFile(sb.InnerBuilder, fo);
+         foreach (var csso in value)
+         {
+            var objSb = new IndentedStringBuilder();
+            csso.Target.ToAgsContext()
+                .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
+            Debug.Assert(csso.InjectedObj != InjectObj.Empty,
+                         "InjectedObj should not be empty when saving with inject/replace logic.");
+            if (csso.InjectedObj.FileLocation == Eu5ObjectLocation.Empty)
+               csso.InjectedObj.FileLocation = new(0,
+                                                   CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                                   objSb.InnerBuilder.Length,
+                                                   sb.InnerBuilder.Length);
+            else
+               csso.InjectedObj.FileLocation.Update(objSb.InnerBuilder.Length,
+                                                    CountNewLinesInStringBuilder(objSb.InnerBuilder),
+                                                    0,
+                                                    sb.InnerBuilder.Length);
+            objSb.Merge(sb);
+            RemoveObjectFromChanges(csso.Target);
          }
+
+         WriteFile(sb.InnerBuilder, fo);
       }
 
       return true;
@@ -305,14 +315,6 @@ public static class SaveMaster
    {
       if (fileObj == Eu5FileObj.Empty)
          return false;
-
-      // If the file is not exactly how we left it of we cannot save it,
-      // as the positions we have saved from our lexer/parser are not valid anymore
-      if (FileStateManager.CalculateSha256(fileObj) != fileObj.Checksum || fileObj.Checksum == Array.Empty<byte>())
-      {
-         IllegalFileState(fileObj);
-         return false;
-      }
 
       IndentedStringBuilder? sb;
 
@@ -344,23 +346,38 @@ public static class SaveMaster
          return null;
 
       Debug.Assert(objs.All(o => o.Source == objs[0].Source), "All objects must belong to the same source file.");
-      Debug.Assert(objs.All(o => o.FileLocation != Eu5ObjectLocation.Empty),
-                   "All objects must have a valid FileLocation.");
+
+      List<IEu5Object> existingObjs = [];
+      List<IEu5Object> newObjs = [];
+
+      foreach (var obj in objs)
+         if (obj.FileLocation == Eu5ObjectLocation.Empty)
+            newObjs.Add(obj);
+         else
+            existingObjs.Add(obj);
+
       // Initialize StringBuilder with estimated size to avoid multiple resizes and a bit more,
       // in case we have to adjust indentation
-      var original = IO.IO.ReadAllTextUtf8(objs[0].Source.Path.FullPath);
+
+      var original = existingObjs.Count > 0
+                        ? IO.IO.ReadAllTextUtf8(existingObjs[0].Source.Path.FullPath)
+                        : string.Empty;
 
       if (string.IsNullOrEmpty(original))
-         return WriteObjectsToNewFile(objs);
+         if (newObjs.Count > 0 && existingObjs.Count > 0)
+            throw
+               new InvalidOperationException("File is empty but contains existing objects with valid FileLocations.");
+         else
+            return WriteObjectsToNewFile(newObjs, false);
 
       // Make sure we start with a fresh cache in case settings have changed.
       PropertyOrderCache.Clear();
 
-      var sb = new IndentedStringBuilder(original.Length + objs.Count * 20);
+      var sb = new IndentedStringBuilder(original.Length + existingObjs.Count * 20);
       var currentPos = 0;
       var spaces = Config.Settings.SavingConfig.SpacesPerIndent;
       var isb = new IndentedStringBuilder();
-      var sortedMods = objs.OrderBy(o => o.FileLocation.CharPos).ToList();
+      var sortedMods = existingObjs.OrderBy(o => o.FileLocation.CharPos).ToList();
 
       foreach (var obj in sortedMods)
       {
@@ -385,6 +402,17 @@ public static class SaveMaster
          sb.Merge(isb.InnerBuilder);
       }
 
+      foreach (var obj in newObjs)
+      {
+         isb.Clear();
+         obj.ToAgsContext().BuildContext(isb);
+         obj.FileLocation = new(0,
+                                CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                isb.InnerBuilder.Length,
+                                sb.InnerBuilder.Length);
+         sb.Merge(isb.InnerBuilder);
+      }
+
       sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
       return sb;
    }
@@ -399,7 +427,7 @@ public static class SaveMaster
          var fo = FileStateManager.CreateEu5FileObject(objs[0]);
          foreach (var obj in objs)
          {
-            if (obj.Source != Eu5FileObj.Empty)
+            if (obj.Source == Eu5FileObj.Empty)
             {
                ArcLog.WriteLine(CommonLogSource.FSM,
                                 LogLevel.ERR,
@@ -412,19 +440,12 @@ public static class SaveMaster
       }
 
       Debug.Assert(objs.All(o => o.Source == objs[0].Source), "All objects must belong to the same source file.");
-      Debug.Assert(objs.All(o => o.FileLocation != Eu5ObjectLocation.Empty),
-                   "All objects must have a valid FileLocation.");
-
-      var sample = objs[0];
-      if (sample.Source == Eu5FileObj.Empty || sample.FileLocation == Eu5ObjectLocation.Empty)
-      {
-         ArcLog.WriteLine(CommonLogSource.FSM, LogLevel.ERR, "InjectObj has no valid source file object.");
-         Debug.Fail("InjectObj has no valid source file object.");
-         return null;
-      }
 
       var sb = new IndentedStringBuilder();
+      var objBuilder = new IndentedStringBuilder();
       foreach (var obj in objs)
+      {
+         objBuilder.Clear();
          if (obj is InjectObj injectObj)
          {
             ArcLog.WriteLine(CommonLogSource.FSM,
@@ -435,12 +456,20 @@ public static class SaveMaster
          }
          else
          {
-            obj.ToAgsContext().BuildContext(sb);
-            obj.FileLocation.Update(sb.InnerBuilder.Length,
-                                    CountNewLinesInStringBuilder(sb.InnerBuilder),
-                                    0,
-                                    sb.InnerBuilder.Length - sb.InnerBuilder.Length);
+            obj.ToAgsContext().BuildContext(objBuilder);
+            if (obj.FileLocation == Eu5ObjectLocation.Empty)
+               obj.FileLocation = new(0,
+                                      CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                      objBuilder.InnerBuilder.Length,
+                                      sb.InnerBuilder.Length);
+            else
+               obj.FileLocation.Update(objBuilder.InnerBuilder.Length,
+                                       CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                       0,
+                                       sb.InnerBuilder.Length);
+            objBuilder.Merge(sb);
          }
+      }
 
       return sb;
    }
@@ -456,8 +485,8 @@ public static class SaveMaster
       if (!fileObj.IsModded)
          fileObj.Path.MoveToMod();
 
-      IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
-      fileObj.GenerateChecksum();
+      var np = fileObj.Path.FullPath;
+      IO.IO.WriteAllTextUtf8WithBom(np, sb.ToString());
    }
 
    public static void RemoveObjectsFromFiles(List<IEu5Object> objs)
@@ -626,5 +655,11 @@ public static class SaveMaster
    private static void IllegalFileState(Eu5FileObj fileObj)
    {
       // TODO: Reload? Shutdown? Ignore?
+   }
+
+   public static void SaveFiles(List<Eu5FileObj> toList)
+   {
+      foreach (var fo in toList)
+         SaveFile(fo);
    }
 }
