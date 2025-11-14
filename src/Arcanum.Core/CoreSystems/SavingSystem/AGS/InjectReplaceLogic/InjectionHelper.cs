@@ -117,7 +117,7 @@ public static class InjectionHelper
                      // Stuff in base mods cannot be merged into our mod inject so we skip them.
                      if (ei.Source.IsVanilla)
                      {
-                        // TODO: Create a Replace here
+                        // TODO: Create a Replace here if valid? @Stiopa
                         continue;
                      }
 

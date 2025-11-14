@@ -254,45 +254,38 @@ public static class SaveMaster
          // We have non -inject/replace objects that just override the file
          if (value[0].SavingCategory == SavingCategory.FileOverride)
          {
-            Debug.Assert(value.All(csso => csso.SavingCategory == SavingCategory.FileOverride),
-                         "All objects must be of FileOverride category.");
-
-            // If we have a newly created object it's Source property is still Empty so we need to set it here
-            foreach (var csso in value)
-               if (csso.Target.Source == Eu5FileObj.Empty)
-                  csso.Target.Source = fo;
-
-            Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
-                         "All objects must have a valid file location matching the file they are being saved to.");
-
-            SaveFile(fo, true);
+            HandleFileOverrides(value, fo);
             continue;
          }
 
+         var originalFile = string.Empty;
          var sb = new IndentedStringBuilder();
 
-         if (!IO.IO.FileExists(fo.Path.FullPath))
-            File.Create(fo.Path.FullPath).Close();
-         else
-            sb.InnerBuilder.Append(IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath));
+         // The file already exists so we just append it's content first
+         if (IO.IO.FileExists(fo.Path.FullPath))
+         {
+            originalFile = IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath)!;
+            sb.InnerBuilder.Append(originalFile);
+         }
 
+         var objSb = new IndentedStringBuilder();
          foreach (var csso in value)
          {
-            var objSb = new IndentedStringBuilder();
+            objSb.Clear();
+
             csso.Target.ToAgsContext()
                 .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
-            Debug.Assert(csso.InjectedObj != InjectObj.Empty,
+            var cssoInj = csso.InjectedObj;
+
+            Debug.Assert(cssoInj != InjectObj.Empty,
                          "InjectedObj should not be empty when saving with inject/replace logic.");
-            if (csso.InjectedObj.FileLocation == Eu5ObjectLocation.Empty)
-               csso.InjectedObj.FileLocation = new(0,
-                                                   CountNewLinesInStringBuilder(sb.InnerBuilder),
-                                                   objSb.InnerBuilder.Length,
-                                                   sb.InnerBuilder.Length);
-            else
-               csso.InjectedObj.FileLocation.Update(objSb.InnerBuilder.Length,
-                                                    CountNewLinesInStringBuilder(objSb.InnerBuilder),
-                                                    0,
-                                                    sb.InnerBuilder.Length);
+
+            cssoInj.FileLocation = new(0,
+                                       CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                       objSb.InnerBuilder.Length,
+                                       sb.InnerBuilder.Length);
+            cssoInj.Source.ObjectsInFile.Add(cssoInj);
+
             objSb.Merge(sb);
             RemoveObjectFromChanges(csso.Target);
          }
@@ -301,6 +294,22 @@ public static class SaveMaster
       }
 
       return true;
+   }
+
+   private static void HandleFileOverrides(List<CategorizedSaveable> value, Eu5FileObj fo)
+   {
+      Debug.Assert(value.All(csso => csso.SavingCategory == SavingCategory.FileOverride),
+                   "All objects must be of FileOverride category.");
+
+      // If we have a newly created object it's Source property is still Empty so we need to set it here
+      foreach (var csso in value)
+         if (csso.Target.Source == Eu5FileObj.Empty)
+            csso.Target.Source = fo;
+
+      Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
+                   "All objects must have a valid file location matching the file they are being saved to.");
+
+      SaveFile(fo, true);
    }
 
    /// <summary>
@@ -605,14 +614,15 @@ public static class SaveMaster
                    "All objects must have a valid FileLocation.");
 
       var sample = obj[0];
-      if (sample.Source == Eu5FileObj.Empty || sample.FileLocation == Eu5ObjectLocation.Empty)
+      var fo = sample.Source;
+      if (fo == Eu5FileObj.Empty || sample.FileLocation == Eu5ObjectLocation.Empty)
       {
          ArcLog.WriteLine(CommonLogSource.FSM, LogLevel.ERR, "InjectObj has no valid source file object.");
          Debug.Fail("InjectObj has no valid source file object.");
          return null;
       }
 
-      var original = IO.IO.ReadAllTextUtf8(sample.Source.Path.FullPath);
+      var original = IO.IO.ReadAllTextUtf8(fo.Path.FullPath);
 
       if (string.IsNullOrEmpty(original))
          return null;
@@ -622,10 +632,14 @@ public static class SaveMaster
 
       PropertyOrderCache.Clear();
       var sb = new StringBuilder(original.Length);
-      var currentPos = 0;
-      var sortedObjs = obj.OrderBy(o => o.FileLocation.CharPos).ToHashSet();
-      var objInFile = sample.Source.ObjectsInFile;
+      // The position we are in the source string we are removing content from
+      var srcPos = 0;
+      var srcPointer = 0;
+      var toRemove = obj.OrderBy(o => o.FileLocation.CharPos).ToArray();
+      var objInFile = fo.ObjectsInFile.OrderBy(o => o.FileLocation.CharPos).ToArray();
 
+      var deltaLines = 0;
+      var deltaCharPos = 0;
       foreach (var o in objInFile)
       {
          // If we find an object that is yet to be written we skip it
@@ -633,30 +647,43 @@ public static class SaveMaster
             continue;
 
          var objectLength = o.FileLocation.Length;
-         if (sortedObjs.Contains(o))
+         // if we are not yet at the location of the first we can just append and proceed as if nothing happened
+         if (toRemove[0].FileLocation.CharPos > o.FileLocation.CharPos)
          {
-            // Skip over the object to be removed
-            currentPos = o.FileLocation.CharPos + objectLength;
+            sb.Append(original, srcPos, objectLength);
             continue;
          }
 
-         sb.Append(original, currentPos, objectLength);
-         currentPos = o.FileLocation.CharPos + objectLength;
+         // We found the next object we want to remove.
+         if (srcPointer < toRemove.Length && toRemove[srcPointer].FileLocation.CharPos == o.FileLocation.CharPos)
+         {
+            // Skip over the object to be removed
+            srcPos = o.FileLocation.CharPos + objectLength;
+            deltaLines -= CountLinesInOriginal(original, o.FileLocation);
+            deltaCharPos -= objectLength;
+            fo.ObjectsInFile.Remove(toRemove[srcPointer]);
+            srcPointer++;
+            continue;
+         }
 
-         o.FileLocation.Update(objectLength,
-                               CountNewLinesInStringBuilder(new(original,
-                                                                currentPos - objectLength,
-                                                                objectLength,
-                                                                objectLength)),
-                               o.FileLocation.Column,
-                               sb.Length - objectLength);
+         // We add the object back to the new file
+         sb.Append(original, srcPos, objectLength);
+         srcPos = o.FileLocation.CharPos + objectLength;
+
+         // As this object 
+         var fl = o.FileLocation;
+         o.FileLocation = new(0, fl.Line + deltaLines, fl.Length, fl.CharPos + deltaCharPos);
       }
 
 #if DEBUG
       var newFileLength = sb.Length;
       var lastEndPos = -1;
-      foreach (var ob in objInFile)
+      foreach (var ob in fo.ObjectsInFile)
       {
+         // An unsaved new object will not have a valid FileLocation
+         if (ob.FileLocation == Eu5ObjectLocation.Empty)
+            continue;
+
          Debug.Assert(ob.FileLocation is { CharPos: >= 0, Length: >= 0 } &&
                       ob.FileLocation.CharPos + ob.FileLocation.Length <= newFileLength,
                       "All modified objects must have a valid FileLocation within the bounds of the new file.");

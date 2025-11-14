@@ -27,7 +27,6 @@ public static class InjectManager
       if (Injects.TryGetValue(obj.Target, out var list))
       {
          list.Remove(obj);
-         obj.Source.ObjectsInFile.Remove(obj);
       }
       else
       {
