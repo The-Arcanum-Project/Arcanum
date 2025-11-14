@@ -12,10 +12,12 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class PopType : IEu5Object<PopType>
 {
@@ -143,8 +145,6 @@ public partial class PopType : IEu5Object<PopType>
    public static Dictionary<string, PopType> GetGlobalItems() => Globals.PopTypes;
 
    public static PopType Empty { get; } = new() { UniqueId = "Arcanum_Empty_PopType" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

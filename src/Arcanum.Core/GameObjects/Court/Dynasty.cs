@@ -11,9 +11,11 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Dynasty : IEu5Object<Dynasty>
 {
@@ -93,8 +95,6 @@ public partial class Dynasty : IEu5Object<Dynasty>
    public static Dictionary<string, Dynasty> GetGlobalItems() => Globals.Dynasties;
 
    public static Dynasty Empty { get; } = new() { UniqueId = "Arcanum_Empty_Dynasty" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

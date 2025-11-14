@@ -10,9 +10,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Religious.SubObjects;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ReligiousSchoolRelations : IEu5Object<ReligiousSchoolRelations>
 {
@@ -60,8 +62,6 @@ public partial class ReligiousSchoolRelations : IEu5Object<ReligiousSchoolRelati
 
    public static ReligiousSchoolRelations Empty { get; } =
       new() { UniqueId = "Arcanum_Empty_ReligiousSchoolRelations" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

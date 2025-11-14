@@ -39,20 +39,5 @@ public partial class ReligiousSchoolOpinionValue
 
    protected bool Equals(ReligiousSchoolOpinionValue other) => Key.Equals(other.Key) && Value.Equals(other.Value);
 
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((ReligiousSchoolOpinionValue)obj);
-   }
-
-   // ReSharper disable twice NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => HashCode.Combine(Key, Value);
-
    #endregion
 }

@@ -7,9 +7,11 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
+[NexusConfig(generateEquality: false)]
 [ObjectSaveAs]
 public partial class InjectObj : IEu5Object<InjectObj>
 {

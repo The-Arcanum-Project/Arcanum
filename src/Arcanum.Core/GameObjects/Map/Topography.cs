@@ -16,10 +16,12 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
+using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Topography : IEu5Object<Topography>, IMapInferable
 {
@@ -164,8 +166,6 @@ public partial class Topography : IEu5Object<Topography>, IMapInferable
 
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TopographyAgsSettings;
    public string SavingKey => UniqueId;
-
-   public override string ToString() => UniqueId;
 
    #region IMapInferable
 

@@ -66,7 +66,5 @@ public partial class SoundToll : IEu5Object<SoundToll>
 
    public static SoundToll Empty { get; } = new() { UniqueId = "Arcanum_Empty_SoundToll" };
 
-   public override string ToString() => UniqueId;
-
    #endregion
 }

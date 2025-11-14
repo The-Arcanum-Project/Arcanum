@@ -18,6 +18,7 @@ using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
@@ -39,6 +40,7 @@ public enum Opinion
    Kindred,
 }
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Culture : IEu5Object<Culture>, IMapInferable
 {
@@ -144,8 +146,6 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    public static Culture Empty { get; } = new() { UniqueId = "Arcanum_Empty_Culture" };
 
    #endregion
-
-   public override string ToString() => UniqueId;
 
    #region IMapInferable
 

@@ -12,9 +12,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class RulerTerm : IEu5Object<RulerTerm>
 {
@@ -72,32 +74,6 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public static Dictionary<string, RulerTerm> GetGlobalItems() => [];
 
    public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };
-
-   #endregion
-
-   #region Equality Members
-
-   protected bool Equals(RulerTerm other) => CharacterId == other.CharacterId &&
-                                             StartDate.Equals(other.StartDate) &&
-                                             EndDate.Equals(other.EndDate) &&
-                                             RegnalNumber == other.RegnalNumber;
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((RulerTerm)obj);
-   }
-
-   [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-   public override int GetHashCode() => HashCode.Combine(CharacterId, StartDate, EndDate, RegnalNumber);
-
-   public override string ToString() => $"{CharacterId} ({StartDate} - {EndDate})";
 
    #endregion
 }

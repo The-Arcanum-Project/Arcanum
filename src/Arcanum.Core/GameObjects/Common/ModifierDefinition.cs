@@ -11,6 +11,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Common;
 
@@ -94,6 +95,7 @@ public enum ModifierFormat
    FormatGold,
 }
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
 {
@@ -171,23 +173,4 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    [SuppressAgs]
    [IgnoreModifiable]
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
-
-   public override string ToString() => UniqueId;
-
-   protected bool Equals(ModifierDefinition other) => UniqueId == other.UniqueId;
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((ModifierDefinition)obj);
-   }
-
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => UniqueId.GetHashCode();
 }

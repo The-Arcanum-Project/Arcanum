@@ -60,6 +60,4 @@ public partial class EffectDefinition(string name) : INUI, ICollectionProvider<E
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EffectDefinitionSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, EffectDefinition> GetGlobalItems() => EffectRegistry.Effects;
-
-   public override string ToString() => Name;
 }

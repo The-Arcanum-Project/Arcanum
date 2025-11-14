@@ -13,9 +13,11 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Province
    : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>, IIndexRandomColor

@@ -11,9 +11,11 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Trait : IEu5Object<Trait>
 {
@@ -63,8 +65,6 @@ public partial class Trait : IEu5Object<Trait>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Trait Empty { get; } = new() { UniqueId = "Arcanum_Empty_Trait" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

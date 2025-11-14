@@ -4,9 +4,11 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.CoreSystems.Jomini.AudioTags;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class AudioTag : INUI, IEmpty<AudioTag>, IModifierPattern
 {
@@ -25,23 +27,4 @@ public partial class AudioTag : INUI, IEmpty<AudioTag>, IModifierPattern
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AudioTagSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static AudioTag Empty { get; } = new() { UniqueId = "Arcanum_empty_audio_tag", Value = 1f };
-
-   public override string ToString() => UniqueId;
-
-   protected bool Equals(AudioTag other) => UniqueId == other.UniqueId && Value.Equals(other.Value);
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((AudioTag)obj);
-   }
-
-   // ReSharper disable twice NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => HashCode.Combine(UniqueId, Value);
 }

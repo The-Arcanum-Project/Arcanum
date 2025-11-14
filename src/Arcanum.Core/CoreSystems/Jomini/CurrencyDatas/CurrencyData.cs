@@ -4,9 +4,11 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class CurrencyData : INUI, IEmpty<CurrencyData>, IModifierPattern
 {
@@ -26,22 +28,4 @@ public partial class CurrencyData : INUI, IEmpty<CurrencyData>, IModifierPattern
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.CurrencyDataSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static CurrencyData Empty { get; } = new() { UniqueId = "Arcanum_empty_currency_data", Value = 0 };
-
-   public override string ToString() => UniqueId;
-   protected bool Equals(CurrencyData other) => UniqueId == other.UniqueId && Value.Equals(other.Value);
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((CurrencyData)obj);
-   }
-
-   // ReSharper disable twice NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => HashCode.Combine(UniqueId, Value);
 }

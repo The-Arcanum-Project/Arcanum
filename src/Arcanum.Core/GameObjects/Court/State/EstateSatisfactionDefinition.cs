@@ -10,9 +10,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactionDefinition>
 {
@@ -51,8 +53,6 @@ public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactio
 
    public static EstateSatisfactionDefinition Empty { get; } =
       new() { UniqueId = "Arcanum_Empty_EstateSatisfactionDefinition" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

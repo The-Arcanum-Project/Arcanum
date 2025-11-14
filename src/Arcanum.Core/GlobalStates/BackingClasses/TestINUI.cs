@@ -86,7 +86,6 @@ public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>,
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, EmbeddedObject> GetGlobalItems() => [];
 
-   public override string ToString() => string.Empty;
    public static EmbeddedObject Empty { get; } = new();
 }
 #endif

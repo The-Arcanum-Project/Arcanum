@@ -16,10 +16,12 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court.State;
 using Common.UI;
+using Nexus.Core.Attributes;
 using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Country : IEu5Object<Country>
 {
@@ -251,7 +253,6 @@ public partial class Country : IEu5Object<Country>
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Country> GetGlobalItems() => Globals.Countries;
 
-   public override string ToString() => UniqueId;
    public static Country Empty { get; } = new() { UniqueId = "Arcanum_EMPTY_Country" };
    public string GetNamespace => "Map.Country";
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

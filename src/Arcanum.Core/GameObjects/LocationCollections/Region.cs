@@ -12,9 +12,11 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>, IIndexRandomColor
 {

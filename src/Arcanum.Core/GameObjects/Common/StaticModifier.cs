@@ -11,9 +11,11 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Common;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class StaticModifier : IEu5Object<StaticModifier>
 {
@@ -63,8 +65,6 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static StaticModifier Empty { get; } = new() { UniqueId = "Arcanum_Empty_StaticModifier" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

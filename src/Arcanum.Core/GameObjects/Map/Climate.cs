@@ -16,10 +16,12 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
+using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Climate : IEu5Object<Climate>, IMapInferable
 {
@@ -133,7 +135,6 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.ClimateAgsSettings;
    public string SavingKey => UniqueId;
 
-   public override string ToString() => UniqueId;
    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Climate;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)

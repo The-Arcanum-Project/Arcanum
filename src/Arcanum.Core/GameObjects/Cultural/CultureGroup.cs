@@ -9,9 +9,11 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class CultureGroup : IEu5Object<CultureGroup>
 {
@@ -61,8 +63,6 @@ public partial class CultureGroup : IEu5Object<CultureGroup>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static CultureGroup Empty { get; } = new() { UniqueId = "Arcanum_Empty_CultureGroup" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

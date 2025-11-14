@@ -11,9 +11,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class TimedModifier : IEu5Object<TimedModifier>
 {

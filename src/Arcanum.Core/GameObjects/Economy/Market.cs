@@ -16,7 +16,7 @@ namespace Arcanum.Core.GameObjects.Economy;
 
 /// <summary>
 /// Placeholder for the market type. Not sure how to do it yet.
-/// </summary>
+/// </summary>[NexusConfig]
 [ObjectSaveAs]
 public partial class Market : IEu5Object<Market>
 {
@@ -59,8 +59,6 @@ public partial class Market : IEu5Object<Market>
    public static Dictionary<string, Market> GetGlobalItems() => Globals.Markets;
 
    public static Market Empty { get; } = new() { UniqueId = "Arcanum_Empty_Market" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

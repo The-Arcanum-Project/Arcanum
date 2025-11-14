@@ -9,9 +9,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Religious.SubObjects;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
 {
@@ -43,8 +45,6 @@ public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
 
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static ReligiousFocus Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousFocus" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

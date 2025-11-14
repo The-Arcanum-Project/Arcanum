@@ -11,9 +11,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Regency : IEu5Object<Regency>
 {

@@ -10,10 +10,12 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class InstitutionManager : IEu5Object<InstitutionManager>
 {
@@ -54,8 +56,6 @@ public partial class InstitutionManager : IEu5Object<InstitutionManager>
       => new() { { "State", Globals.State.InstitutionManager } };
 
    public static InstitutionManager Empty { get; } = new() { UniqueId = "Arcanum_Empty_InstitutionState" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

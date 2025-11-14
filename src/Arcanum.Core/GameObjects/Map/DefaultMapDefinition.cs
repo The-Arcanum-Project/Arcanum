@@ -146,7 +146,5 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
 
    public static DefaultMapDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_DefaultMapDefinition" };
 
-   public override string ToString() => UniqueId;
-
    #endregion
 }

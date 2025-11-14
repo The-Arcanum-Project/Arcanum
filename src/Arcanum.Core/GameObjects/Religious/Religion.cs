@@ -21,9 +21,11 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Religious.SubObjects;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Religious;
 
+[NexusConfig]
 [ObjectSaveAs]
 [DebuggerDisplay("{UniqueId,nq}")]
 public partial class Religion : IEu5Object<Religion>, IMapInferable
@@ -260,8 +262,6 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static Religion Empty { get; } = new() { UniqueId = "Arcanum_Empty_Religion" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 

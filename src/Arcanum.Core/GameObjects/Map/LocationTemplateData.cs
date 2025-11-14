@@ -18,12 +18,14 @@ using Arcanum.Core.GameObjects.Map.SubObjects;
 using Arcanum.Core.GameObjects.Religious;
 using Common.Logger;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Map;
 
 [ParserFor(typeof(MapMovementAssist))]
 public static partial class MapMovementAssistParsingWhy;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IMapInferable
 {
@@ -109,8 +111,6 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IM
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static LocationTemplateData Empty { get; } = new() { UniqueId = "Arcanum_Empty_LocationTemplateData" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 

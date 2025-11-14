@@ -10,10 +10,12 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.AbstractMechanics;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Age : IEu5Object<Age>
 {
@@ -142,23 +144,5 @@ public partial class Age : IEu5Object<Age>
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
    public string SavingKey => UniqueId;
 
-   public override string ToString() => UniqueId;
-
-   protected bool Equals(Age other) => UniqueId == other.UniqueId;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((Age)obj);
-   }
-
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => UniqueId.GetHashCode();
 }

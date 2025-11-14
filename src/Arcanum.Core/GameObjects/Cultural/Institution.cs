@@ -11,9 +11,11 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Institution : IEu5Object<Institution>
 {
@@ -51,8 +53,6 @@ public partial class Institution : IEu5Object<Institution>
    public static Dictionary<string, Institution> GetGlobalItems() => Globals.Institutions;
 
    public static Institution Empty { get; } = new() { UniqueId = "Arcanum_Empty_Institution" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

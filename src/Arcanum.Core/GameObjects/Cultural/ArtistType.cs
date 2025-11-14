@@ -11,9 +11,11 @@ using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ArtistType : IEu5Object<ArtistType>
 {
@@ -45,8 +47,6 @@ public partial class ArtistType : IEu5Object<ArtistType>
    public static Dictionary<string, ArtistType> GetGlobalItems() => Globals.ArtistTypes;
 
    public static ArtistType Empty { get; } = new() { UniqueId = "Arcanum_Empty_ArtistType" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

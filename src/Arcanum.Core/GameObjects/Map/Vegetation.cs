@@ -16,10 +16,12 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
+using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.GameObjects.Map;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 {
@@ -143,8 +145,6 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 
       return locations;
    }
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

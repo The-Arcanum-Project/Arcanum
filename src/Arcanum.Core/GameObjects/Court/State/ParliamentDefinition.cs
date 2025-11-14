@@ -9,9 +9,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 
+[NexusConfig]
 [ObjectSaveAs]
 #pragma warning disable ARC002
 public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>

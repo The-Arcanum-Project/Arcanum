@@ -118,7 +118,7 @@ public partial class Character : IEu5Object<Character>
    [Description("The military skill of this character.")]
    public int Mil { get; set; }
 
-   [PropertyConfig(minValue: 0, maxValue: 100 )]
+   [PropertyConfig(minValue: 0, maxValue: 100)]
    [SaveAs]
    [DefaultValue(0f)]
    [ParseAs("fertility")]
@@ -281,27 +281,4 @@ public partial class Character : IEu5Object<Character>
    public static Character RandomCharacter => RandomInstance.Value;
 
    #endregion
-
-   #region Equality Members
-
-   protected bool Equals(Character other) => UniqueId == other.UniqueId;
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is null)
-         return false;
-      if (ReferenceEquals(this, obj))
-         return true;
-      if (obj.GetType() != GetType())
-         return false;
-
-      return Equals((Character)obj);
-   }
-
-   // ReSharper disable once NonReadonlyMemberInGetHashCode
-   public override int GetHashCode() => UniqueId.GetHashCode();
-
-   #endregion
-
-   public override string ToString() => UniqueId;
 }

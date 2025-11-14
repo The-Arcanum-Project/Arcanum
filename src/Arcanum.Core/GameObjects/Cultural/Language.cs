@@ -16,9 +16,11 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Language : IEu5Object<Language>, IMapInferable
 {
@@ -256,8 +258,6 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    public static Language Empty { get; } = new() { UniqueId = "Arcanum_Empty_Language" };
 
    #endregion
-
-   public override string ToString() => UniqueId;
 
    #region IMapInferable
 

@@ -9,9 +9,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court.State.SubClasses;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class DesignateHeirReason : IEu5Object<DesignateHeirReason>
 {
@@ -46,7 +48,6 @@ public partial class DesignateHeirReason : IEu5Object<DesignateHeirReason>
    public static DesignateHeirReason Empty { get; } = new() { UniqueId = "Arcanum_Empty_DesignateHeirReason" };
 
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public override string ToString() => UniqueId;
 
    #endregion
 }

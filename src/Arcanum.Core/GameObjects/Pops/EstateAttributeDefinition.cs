@@ -10,9 +10,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class EstateAttributeDefinition : IEu5Object<EstateAttributeDefinition>
 {
@@ -63,8 +65,6 @@ public partial class EstateAttributeDefinition : IEu5Object<EstateAttributeDefin
 
    public static EstateAttributeDefinition Empty { get; } =
       new() { UniqueId = "Arcanum_Empty_EstateAttributeDefinition" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

@@ -12,9 +12,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.CountryLevel;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class CountryRank : IEu5Object<CountryRank>
 {
@@ -94,8 +96,6 @@ public partial class CountryRank : IEu5Object<CountryRank>
 
    public static CountryRank Empty { get; } = new() { UniqueId = "Arcanum_Empty_CountryRank" };
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

@@ -54,7 +54,5 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
 
    public static ReligionOpinionValue Empty { get; } = new() { UniqueId = "Arcanum_Empty_Eu5ObjOpinionValue" };
 
-   public override string ToString() => UniqueId;
-
    #endregion
 }

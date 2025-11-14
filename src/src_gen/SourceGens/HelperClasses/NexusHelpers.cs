@@ -13,13 +13,9 @@ public static class NexusHelpers
    private const string NUI_CONFIG_ATTRIBUTE_NAME =
       "Arcanum.Core.CoreSystems.NUI.Attributes.NuiConfigAttribute";
 
-   private const string PARSE_AS_ATTRIBUTE_NAME =
-      "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+   private const string NEXUS_CONFIG_ATTRIBUTE_NAME = "Nexus.Core.Attributes.NexusConfigAttribute";
 
    private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
-
-   private const string REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.RequiredAttribute";
-   private const string IGNORE_REQUIRED_ATTRIBUTE_NAME = "Arcanum.Core.GameObjects.BaseTypes.IgnoreRequiredAttribute";
 
    /// <summary>
    /// This transform finds any class that implements INexus.
@@ -532,9 +528,87 @@ public static class NexusHelpers
 
       #endregion
 
+      // ToString and Equals/GetHashCode
+      AppendNexusObjectOverrides(builder, classSymbol);
+
       builder.AppendLine("}"); // Close class
 
       return builder.ToString();
+   }
+
+   private static void AppendNexusObjectOverrides(StringBuilder builder, INamedTypeSymbol classSymbol)
+   {
+      // we get the NexusConfig class attribute to find the bool whether to generate these overrides
+      var nexusConfigAttribute = classSymbol.GetAttributes()
+                                            .FirstOrDefault(ad =>
+                                                               string.Equals(ad.AttributeClass?.ToDisplayString(),
+                                                                             NEXUS_CONFIG_ATTRIBUTE_NAME,
+                                                                             StringComparison.Ordinal));
+
+      if (nexusConfigAttribute == null)
+         return;
+
+      var generateOverrides = AttributeHelper.GetAttributeArgumentValue(nexusConfigAttribute, 0, "generateEquality");
+      if (generateOverrides is not true)
+         return;
+
+      var c = classSymbol.Name;
+      var classType = classSymbol.ToDisplayString();
+
+      builder.AppendLine();
+      builder.AppendLine("# region Nexus Object Overrides");
+      builder.AppendLine();
+
+      // ToString override
+      builder.AppendLine("    public override string ToString()");
+      builder.AppendLine("    {");
+      builder.AppendLine($"        return _getValue({c}.Field.UniqueId)?.ToString() ?? $\"{c} (no UniqueId)\";");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // Equals override
+      builder.AppendLine("    public override bool Equals(object? obj)");
+      builder.AppendLine("    {");
+      builder.AppendLine($"        if (obj is not {c} other)");
+      builder.AppendLine("            return false;");
+      builder.AppendLine($"        return EqualityComparer<{classType}?>.Equals(_getValue({c}.Field.UniqueId), other._getValue({c}.Field.UniqueId));");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      builder.AppendLine($"    public bool Equals({classType}? other)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        if (other is null)");
+      builder.AppendLine("            return false;");
+      builder.AppendLine($"        return EqualityComparer<{classType}?>.Equals(_getValue({c}.Field.UniqueId), other._getValue({c}.Field.UniqueId));");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // GetHashCode override
+      builder.AppendLine("    public override int GetHashCode()");
+      builder.AppendLine("    {");
+      builder.AppendLine($"        return _getValue({c}.Field.UniqueId).GetHashCode() ^ typeof({classType}).GetHashCode();");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      // == and != operators
+      builder.AppendLine($"    public static bool operator ==({classType}? left, {classType}? right)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        if (left is null && right is null)");
+      builder.AppendLine("            return true;");
+      builder.AppendLine("        if (left is null || right is null)");
+      builder.AppendLine("            return false;");
+      builder.AppendLine("        return left.Equals(right);");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      builder.AppendLine($"    public static bool operator !=({classType}? left, {classType}? right)");
+      builder.AppendLine("    {");
+      builder.AppendLine("        return !(left == right);");
+      builder.AppendLine("    }");
+      builder.AppendLine();
+
+      builder.AppendLine("# endregion");
+      builder.AppendLine();
    }
 
    /// <summary>

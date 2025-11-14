@@ -13,9 +13,11 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Cultural;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Estate : IEu5Object<Estate>
 {
@@ -172,8 +174,6 @@ public partial class Estate : IEu5Object<Estate>
    public static Dictionary<string, Estate> GetGlobalItems() => Globals.Estates;
 
    public static Estate Empty { get; } = new() { UniqueId = "Arcanum_Empty_Estate" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

@@ -9,9 +9,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Religious;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ReligiousFaction : IEu5Object<ReligiousFaction>
 {
@@ -45,8 +47,6 @@ public partial class ReligiousFaction : IEu5Object<ReligiousFaction>
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static ReligiousFaction Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousFaction" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

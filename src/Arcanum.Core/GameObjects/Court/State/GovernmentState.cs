@@ -13,10 +13,12 @@ using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 
 namespace Arcanum.Core.GameObjects.Court.State;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class GovernmentState : IEu5Object<GovernmentState>
 {

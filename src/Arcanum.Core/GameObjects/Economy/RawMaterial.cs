@@ -16,9 +16,11 @@ using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Economy;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
 {
@@ -140,8 +142,6 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static RawMaterial Empty { get; } = new() { UniqueId = "Arcanum_Empty_RawMaterial" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 

@@ -10,9 +10,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Pops;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class PopDefinition : IEu5Object<PopDefinition>
 {
@@ -68,8 +70,6 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static PopDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_PopDefinition" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

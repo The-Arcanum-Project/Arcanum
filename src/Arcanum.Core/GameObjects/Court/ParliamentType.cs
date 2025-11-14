@@ -10,9 +10,11 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Court;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class ParliamentType : IEu5Object<ParliamentType>
 {
@@ -56,8 +58,6 @@ public partial class ParliamentType : IEu5Object<ParliamentType>
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
    public static ParliamentType Empty { get; } = new() { UniqueId = "Arcanum_Empty_ParliamentType" };
-
-   public override string ToString() => UniqueId;
 
    #endregion
 }

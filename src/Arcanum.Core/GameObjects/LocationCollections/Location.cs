@@ -18,9 +18,11 @@ using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Common.UI;
 using Nexus.Core;
+using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
+[NexusConfig]
 [ObjectSaveAs]
 public partial class Location
    : IMapInferable, IEu5Object<Location>, ILocation
@@ -61,7 +63,6 @@ public partial class Location
 
    #endregion
 
-   public override string ToString() => UniqueId;
    public List<Location> GetLocations() => throw new NotImplementedException();
 
    public LocationCollectionType LcType => LocationCollectionType.Location;
