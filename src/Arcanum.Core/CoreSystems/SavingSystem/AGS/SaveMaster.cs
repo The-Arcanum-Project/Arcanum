@@ -270,13 +270,11 @@ public static class SaveMaster
          }
 
          var sb = new IndentedStringBuilder();
-         var fileExisted = IO.IO.FileExists(fo.Path.FullPath);
-         if (!fileExisted)
+
+         if (!IO.IO.FileExists(fo.Path.FullPath))
             File.Create(fo.Path.FullPath).Close();
          else
             sb.InnerBuilder.Append(IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath));
-
-         // TODO: Always creates new file, we want to make it append to existing files if they exist
 
          foreach (var csso in value)
          {
@@ -446,15 +444,7 @@ public static class SaveMaster
 
       while (oldObjIndex < sortedOldObjects.Length)
       {
-         var oldCP = sortedOldObjects[oldObjIndex].FileLocation.CharPos;
          var newCp = sortedOldObjects[oldObjIndex].FileLocation.CharPos + deltaCharPos;
-         // Console.WriteLine("Updated From CharPos: " + oldCP +
-         //                   " To CharPos: " +
-         //                   newCp);
-
-         if (oldCP + deltaCharPos != newCp)
-            Debug.Fail("Character position update mismatch.");
-
          var oldObj = sortedOldObjects[oldObjIndex];
          oldObj.FileLocation.CharPos = newCp;
          oldObj.FileLocation.Line += deltaLines;
@@ -662,6 +652,22 @@ public static class SaveMaster
                                sb.Length - objectLength);
       }
 
+#if DEBUG
+      var newFileLength = sb.Length;
+      var lastEndPos = -1;
+      foreach (var ob in objInFile)
+      {
+         Debug.Assert(ob.FileLocation is { CharPos: >= 0, Length: >= 0 } &&
+                      ob.FileLocation.CharPos + ob.FileLocation.Length <= newFileLength,
+                      "All modified objects must have a valid FileLocation within the bounds of the new file.");
+
+         if (lastEndPos != -1)
+            if (ob.FileLocation.CharPos <= lastEndPos)
+               Debug.Fail("Original objects must not overlap in the new file after removal of objects.");
+
+         lastEndPos = ob.FileLocation.CharPos + ob.FileLocation.Length - 1;
+      }
+#endif
       return sb;
    }
 
