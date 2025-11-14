@@ -372,7 +372,7 @@ public static class FileManager
               descriptor);
    }
 
-   public const string ARCANUM_FILE_NAME_WATERMARK = "_Arcanum";
+   public const string ARCANUM_FILE_NAME_WATERMARK = "_ARC";
    // TODO: Create a hidden settings option to disable this watermark in generated file names for contributors and Patreon Members
 
    public static string GetDefaultFileNameForFolder(string folder,
@@ -386,7 +386,7 @@ public static class FileManager
       string name;
       do
          name = $"{num++:D2}{ARCANUM_FILE_NAME_WATERMARK}_{objectType.Name}.{fileEnding}";
-      while (File.Exists(Path.Combine(folder, name)) && allowReuseOfExistingArcFile);
+      while (File.Exists(Path.Combine(folder, name)) && !allowReuseOfExistingArcFile);
       return name;
    }
 }
