@@ -347,24 +347,24 @@ public static class SaveMaster
 
       Debug.Assert(objs.All(o => o.Source == objs[0].Source), "All objects must belong to the same source file.");
 
-      List<IEu5Object> existingObjs = [];
+      List<IEu5Object> toUpdateObjs = [];
       List<IEu5Object> newObjs = [];
 
       foreach (var obj in objs)
          if (obj.FileLocation == Eu5ObjectLocation.Empty)
             newObjs.Add(obj);
          else
-            existingObjs.Add(obj);
+            toUpdateObjs.Add(obj);
 
       // Initialize StringBuilder with estimated size to avoid multiple resizes and a bit more,
       // in case we have to adjust indentation
 
-      var original = existingObjs.Count > 0
-                        ? IO.IO.ReadAllTextUtf8(existingObjs[0].Source.Path.FullPath)
+      var original = toUpdateObjs.Count > 0
+                        ? IO.IO.ReadAllTextUtf8(toUpdateObjs[0].Source.Path.FullPath)
                         : string.Empty;
 
       if (string.IsNullOrEmpty(original))
-         if (newObjs.Count > 0 && existingObjs.Count > 0)
+         if (newObjs.Count > 0 && toUpdateObjs.Count > 0)
             throw
                new InvalidOperationException("File is empty but contains existing objects with valid FileLocations.");
          else
@@ -373,14 +373,26 @@ public static class SaveMaster
       // Make sure we start with a fresh cache in case settings have changed.
       PropertyOrderCache.Clear();
 
-      var sb = new IndentedStringBuilder(original.Length + existingObjs.Count * 20);
+      var sb = new IndentedStringBuilder(original.Length + toUpdateObjs.Count * 20);
       var currentPos = 0;
       var spaces = Config.Settings.SavingConfig.SpacesPerIndent;
       var isb = new IndentedStringBuilder();
-      var sortedMods = existingObjs.OrderBy(o => o.FileLocation.CharPos).ToList();
+      var sortedToUpdate = toUpdateObjs.OrderBy(o => o.FileLocation.CharPos).ToList();
+      Debug.Assert(sortedToUpdate.All(o => o.FileLocation.CharPos + o.FileLocation.Length <= original.Length),
+                   "All modified objects must have a valid FileLocation within the bounds of the file.");
 
-      foreach (var obj in sortedMods)
+      var sortedOldObjects = objs[0]
+                            .Source.ObjectsInFile.Except(sortedToUpdate)
+                            .Where(o => o.FileLocation != Eu5ObjectLocation.Empty)
+                            .OrderBy(o => o.FileLocation.CharPos)
+                            .ToArray();
+
+      var oldObjIndex = 0;
+      var deltaLines = 0;
+      var deltaCharPos = 0;
+      for (var i = 0; i < sortedToUpdate.Count; i++)
       {
+         var obj = sortedToUpdate[i];
          isb.Clear();
          sb.InnerBuilder.Append(original, currentPos, obj.FileLocation.CharPos - currentPos);
          currentPos = obj.FileLocation.CharPos + obj.FileLocation.Length;
@@ -394,12 +406,59 @@ public static class SaveMaster
 
          isb.SetIndentLevel(indentLevel);
          obj.ToAgsContext().BuildContext(isb);
-         obj.FileLocation.Update(isb.InnerBuilder.Length,
-                                 CountNewLinesInStringBuilder(isb.InnerBuilder),
-                                 indentLevel * spaces,
-                                 sb.InnerBuilder.Length);
+         var lineOffset = CountNewLinesInStringBuilder(isb.InnerBuilder);
+         var charPosOffset = isb.InnerBuilder.Length;
+         var oldLineCount = CountLinesInOriginal(original, obj.FileLocation);
+         var oldCharCount = Math.Max(0, obj.FileLocation.Length);
 
-         sb.Merge(isb.InnerBuilder);
+         obj.FileLocation.CharPos = sb.InnerBuilder.Length;
+         obj.FileLocation.Length = charPosOffset;
+         obj.FileLocation.Line = indentLevel == 0
+                                    ? CountNewLinesInStringBuilder(sb.InnerBuilder) + 1
+                                    : CountNewLinesInStringBuilder(sb.InnerBuilder);
+         obj.FileLocation.Column = indentLevel * spaces;
+
+         // Any object before this one has to get it's FileLocation updated as well
+         while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+         {
+            // We can skip the first one as everything before it is just copied over from before.
+            if (i == 0)
+            {
+               while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+                  oldObjIndex++;
+               break;
+            }
+
+            // We only need to update objects that are not being modified right now
+            // We update the line and char pos offsets based on the changes made so far
+            var oldObj = sortedOldObjects[oldObjIndex];
+            oldObj.FileLocation.CharPos += deltaCharPos;
+            oldObj.FileLocation.Line += deltaLines;
+            oldObjIndex++;
+         }
+
+         deltaLines += lineOffset - oldLineCount;
+         deltaCharPos += charPosOffset - oldCharCount;
+         isb.Merge(sb);
+      }
+
+      sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
+
+      while (oldObjIndex < sortedOldObjects.Length)
+      {
+         var oldCP = sortedOldObjects[oldObjIndex].FileLocation.CharPos;
+         var newCp = sortedOldObjects[oldObjIndex].FileLocation.CharPos + deltaCharPos;
+         // Console.WriteLine("Updated From CharPos: " + oldCP +
+         //                   " To CharPos: " +
+         //                   newCp);
+
+         if (oldCP + deltaCharPos != newCp)
+            Debug.Fail("Character position update mismatch.");
+
+         var oldObj = sortedOldObjects[oldObjIndex];
+         oldObj.FileLocation.CharPos = newCp;
+         oldObj.FileLocation.Line += deltaLines;
+         oldObjIndex++;
       }
 
       foreach (var obj in newObjs)
@@ -407,14 +466,42 @@ public static class SaveMaster
          isb.Clear();
          obj.ToAgsContext().BuildContext(isb);
          obj.FileLocation = new(0,
-                                CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                CountNewLinesInStringBuilder(isb.InnerBuilder),
                                 isb.InnerBuilder.Length,
                                 sb.InnerBuilder.Length);
-         sb.Merge(isb.InnerBuilder);
+         isb.Merge(sb);
       }
 
-      sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
+#if DEBUG
+      // Verify that all modified objects have valid FileLocations within the bounds of the new file and do not overlap
+      var newFileLength = sb.InnerBuilder.Length;
+      var lastEndPos = -1;
+      foreach (var obj in objs[0].Source.ObjectsInFile)
+      {
+         Debug.Assert(obj.FileLocation is { CharPos: >= 0, Length: >= 0 } &&
+                      obj.FileLocation.CharPos + obj.FileLocation.Length <= newFileLength,
+                      "All modified objects must have a valid FileLocation within the bounds of the new file.");
+
+         if (lastEndPos != -1)
+            if (obj.FileLocation.CharPos <= lastEndPos)
+               Debug.Fail("Modified objects must not overlap in the new file.");
+
+         lastEndPos = obj.FileLocation.CharPos + obj.FileLocation.Length - 1;
+      }
+#endif
+
       return sb;
+   }
+
+   private static int CountLinesInOriginal(string originalText, Eu5ObjectLocation location)
+   {
+      var lineCount = 0;
+      var endPos = Math.Min(location.CharPos + location.Length, originalText.Length);
+      for (var i = location.CharPos; i < endPos; i++)
+         if (originalText[i] == '\n')
+            lineCount++;
+
+      return location.Length > 0 ? lineCount + 1 : 0;
    }
 
    public static IndentedStringBuilder? WriteObjectsToNewFile(List<IEu5Object> objs, bool generateFileName = true)

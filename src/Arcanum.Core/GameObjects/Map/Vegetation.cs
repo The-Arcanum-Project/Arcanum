@@ -144,5 +144,7 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
       return locations;
    }
 
+   public override string ToString() => UniqueId;
+
    #endregion
 }
