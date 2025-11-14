@@ -18,13 +18,11 @@ public class Eu5FileObj
    public static Eu5FileObj Embedded { get; } = new(PathObj.Empty, FileDescriptor.Empty);
    public byte[] Checksum { get; private set; } = [];
 
-   public void GenerateChecksum()
-   {
-      Checksum = Task.Run(() => FileStateManager.CalculateSha256(Path.FullPath)).Result;
-   }
+   public bool IsVanilla => Path.DataSpace == FileManager.VanillaDataSpace;
+   public bool IsModded => !IsVanilla;
 
    private bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);
-   public override string ToString() => $"{Descriptor} @ {Path}";
+   public override string ToString() => $"@ {string.Join('/', Path.LocalPath)} ({Descriptor} )";
 
    public override bool Equals(object? obj)
    {

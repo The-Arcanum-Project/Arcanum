@@ -1,51 +1,74 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 
 namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 public static class InjectManager
 {
-   public readonly static Dictionary<IEu5Object, List<InjectObj>> Injects = new();
+   public static readonly Dictionary<IEu5Object, List<InjectObj>> Injects = new();
 
    public static InjectObj CreateAndRegisterInjectObj(IEu5Object target, IEu5Object injectSource, InjRepType type)
    {
       var injectObj = new InjectObj
       {
          InjRepType = type,
-         Target = injectSource,
-         InjectedProperties = target.GetInjects(),
+         Target = target,
+         InjectedProperties = injectSource.GetInjectedProperties(),
+         Source = injectSource.Source,
+         FileLocation = injectSource.FileLocation,
       };
 
-      if (!Injects.TryGetValue(target, out var list))
-      {
-         list = [];
-         Injects[target] = list;
-      }
-
-      list.Add(injectObj);
+      RegisterInjectObj(injectObj);
       return injectObj;
    }
 
-   public static KeyValuePair<Enum, object>[] GetInjects(this IEu5Object target)
+   public static void UnregisterInjectObj(InjectObj obj)
+   {
+      if (Injects.TryGetValue(obj.Target, out var list))
+      {
+         list.Remove(obj);
+         obj.Source.ObjectsInFile.Remove(obj);
+      }
+      else
+      {
+         Debug.Fail("Tried to unregister an InjectObj that was not registered.");
+         ArcLog.WriteLine("IMN",
+                          LogLevel.ERR,
+                          "Tried to unregister an InjectObj that was not registered.");
+      }
+   }
+
+   public static void RegisterInjectObj(InjectObj obj)
+   {
+      if (!Injects.TryGetValue(obj.Target, out var list))
+      {
+         list = [];
+         Injects[obj.Target] = list;
+      }
+
+      list.Add(obj);
+      obj.Source.ObjectsInFile.Add(obj);
+   }
+
+   public static KeyValuePair<Enum, object>[] GetInjectedProperties(this IEu5Object target)
    {
       List<KeyValuePair<Enum, object>> ips = [];
 
-      foreach (var prop in target.GetAllProperties())
-      {
-         var defaultValue = target.GetDefaultValue(prop);
-         var currentValue = target._getValue(prop);
+      if (!Injects.TryGetValue(target, out var injectObjs))
+         return ips.ToArray();
 
-         // Determine if the property value has changed.
-         bool areDifferent;
-         if (target.IsCollection(prop))
-            areDifferent = !AreCollectionsLogicallyEqual(currentValue, defaultValue);
-         else
-            areDifferent = !Equals(currentValue, defaultValue);
-
-         if (areDifferent)
-            ips.Add(new(prop, currentValue));
-      }
+      foreach (var injectObj in injectObjs)
+         ips.AddRange(injectObj.InjectedProperties);
 
       return ips.ToArray();
+   }
+
+   public static InjectObj[] GetInjectsForTarget(this IEu5Object target)
+   {
+      if (!Injects.TryGetValue(target, out var injectObjs))
+         return [];
+
+      return injectObjs.ToArray();
    }
 
    /// <summary>

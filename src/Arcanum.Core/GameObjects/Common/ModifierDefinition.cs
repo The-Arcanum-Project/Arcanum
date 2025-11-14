@@ -170,7 +170,7 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
 
    [SuppressAgs]
    [IgnoreModifiable]
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
 
    public override string ToString() => UniqueId;
 

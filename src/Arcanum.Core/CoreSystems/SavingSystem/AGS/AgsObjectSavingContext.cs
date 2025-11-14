@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -54,5 +55,32 @@ public class AgsObjectSavingContext
             prop.Format(Ags, sb, CommentChar, Settings);
          }
       }
+   }
+
+   public void BuildContext(IndentedStringBuilder sb,
+                            HashSet<PropertySavingMetadata> properties,
+                            InjRepType strategy,
+                            bool alwaysSerializeAll = false)
+   {
+      if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
+         Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
+
+      if (Ags.ClassMetadata.SavingMethod != null)
+      {
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb);
+         return;
+      }
+
+      using (sb.BlockWithNameAndInjection(Ags, strategy))
+         for (var i = 0; i < OrderedProperties.Count; i++)
+         {
+            var prop = OrderedProperties[i];
+            if (!properties.Contains(prop))
+               continue;
+
+            if (Settings.Format == SavingFormat.Spacious && i > 0)
+               sb.AppendLine();
+            prop.Format(Ags, sb, CommentChar, Settings, alwaysSerializeAll);
+         }
    }
 }

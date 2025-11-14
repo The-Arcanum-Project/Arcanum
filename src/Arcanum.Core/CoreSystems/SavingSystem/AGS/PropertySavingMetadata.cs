@@ -103,7 +103,11 @@ public class PropertySavingMetadata
    /// Handles comments, collections, and custom saving methods as needed. <br/>
    /// Properties are only saved if they differ from their default values or are required.
    /// </summary>
-   public void Format(IAgs ags, IndentedStringBuilder sb, string commentChar, AgsSettings settings)
+   public void Format(IAgs ags,
+                      IndentedStringBuilder sb,
+                      string commentChar,
+                      AgsSettings settings,
+                      bool alwaysSerializeAll = false)
    {
       if (CommentProvider != null)
          CommentProvider(ags, commentChar, sb);
@@ -114,7 +118,7 @@ public class PropertySavingMetadata
          ValueType = SavingUtil.GetSavingValueType(value);
 
       // Required fields must always be saved
-      if (ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
+      if (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
          return;
 
       if (SavingMethod == null)
@@ -148,7 +152,7 @@ public class PropertySavingMetadata
 
    private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
    {
-      if (Config.Settings.AgsConfig.WriteAllDefaultValues)
+      if (Config.Settings.SavingConfig.WriteAllDefaultValues)
          return false;
 
       if (!settings.SkipDefaultValues)

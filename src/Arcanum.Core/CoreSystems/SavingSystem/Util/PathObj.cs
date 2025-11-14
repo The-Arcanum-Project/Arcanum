@@ -20,7 +20,7 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
 
    public readonly string[] LocalPath = localPath;
    public string Filename { get; set; } = filename;
-   public readonly DataSpace DataSpace = dataSpace;
+   public DataSpace DataSpace { get; private set; } = dataSpace;
 
    public void AddSearchTerms(ICollection<string> terms)
    {
@@ -29,6 +29,17 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
       terms.Add(Filename);
       terms.Add(FilenameWithoutExtension);
    }
+
+   public void MoveToMod()
+   {
+      // We tell the FileStateManager to stop watching this path first and then re-register it under the new DataSpace.
+      RegisterWatcher();
+      DataSpace = FileManager.ModDataSpace;
+      UnregisterWatcher();
+   }
+
+   public void RegisterWatcher() => FileWatcher.FileStateManager.RegisterPath(this);
+   public void UnregisterWatcher() => FileWatcher.FileStateManager.UnregisterPath(this);
 
    public string FilenameWithoutExtension => Path.GetFileNameWithoutExtension(Filename);
 

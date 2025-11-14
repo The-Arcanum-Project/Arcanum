@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using System.Text;
 using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -49,6 +51,25 @@ public static class SavingUtil
          kvp.Value.Merge(finalBuilder);
 
       return finalBuilder;
+   }
+
+   public static StringBuilder AppendInjectionType(this StringBuilder sb, InjRepType type)
+   {
+      return sb.Append(FormatInjectionType(type));
+   }
+
+   public static string FormatInjectionType(InjRepType type)
+   {
+      return type switch
+      {
+         InjRepType.Inject => "INJECT",
+         InjRepType.TryInject => "TRY_INJECT",
+         InjRepType.InjectOrCreate => "INJECT_OR_CREATE",
+         InjRepType.Replace => "REPLACE",
+         InjRepType.TryReplace => "TRY_REPLACE",
+         InjRepType.ReplaceOrCreate => "REPLACE_OR_CREATE",
+         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+      };
    }
 
    /// <summary>

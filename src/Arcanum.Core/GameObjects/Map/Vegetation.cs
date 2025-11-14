@@ -108,7 +108,7 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    [SuppressAgs]
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
 
    #region IMapInferable
 
@@ -143,6 +143,8 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 
       return locations;
    }
+
+   public override string ToString() => UniqueId;
 
    #endregion
 }

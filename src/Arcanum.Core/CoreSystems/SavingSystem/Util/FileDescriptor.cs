@@ -13,6 +13,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public readonly FileTypeInformation FileType;
    public FileLoadingService[] LoadingService { get; }
    private List<Eu5FileObj> _files = [];
+   public bool AllowMultipleFiles { get; init; } = true;
 
    public List<Eu5FileObj> Files
    {
@@ -37,6 +38,10 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
       FileType = fileType;
       LoadingService = loadingService;
       IsMultithreadable = isMultithreadable;
+
+      // We assume that if the last part of the path contains a dot, it's a file name.
+      if (LocalPath.Length > 1 && LocalPath[^1].Contains('.'))
+         AllowMultipleFiles = false;
    }
 
    public void CalculateFiles()

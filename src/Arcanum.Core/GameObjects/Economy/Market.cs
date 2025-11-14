@@ -41,7 +41,7 @@ public partial class Market : IEu5Object<Market>
    }
 
    [SuppressAgs]
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 

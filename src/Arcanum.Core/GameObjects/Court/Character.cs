@@ -138,7 +138,7 @@ public partial class Character : IEu5Object<Character>
    [Description("The type of artist this character is.")]
    public ArtistType ArtistType { get; set; } = ArtistType.Empty;
 
-    //TODO: Alias 'traits'
+   //TODO: Alias 'traits'
    [SaveAs(isShattered: true)]
    [DefaultValue(null)]
    [ParseAs("ruler_trait", isShatteredList: true)]
@@ -248,7 +248,7 @@ public partial class Character : IEu5Object<Character>
    public string UniqueId { get; set; } = null!;
 
    [SuppressAgs]
-   public Eu5FileObj Source { get; set; } = null!;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 #pragma warning restore AGS004
 
