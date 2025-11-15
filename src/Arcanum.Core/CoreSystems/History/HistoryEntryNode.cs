@@ -74,7 +74,7 @@ public class HistoryNode(int id, ICommand command, HistoryEntryType entryType, H
    /// have been merged into a single entity for optimization or simplification purposes.
    /// </remarks>
    public bool IsCompacted { get; set; } = false;
-
+   
    /// <summary>
    /// Retrieves a child node with the specified identifier from the list of children.
    /// </summary>

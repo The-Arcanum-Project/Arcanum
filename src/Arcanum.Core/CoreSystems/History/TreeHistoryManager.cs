@@ -40,6 +40,8 @@ public class TreeHistoryManager : IHistoryManager
    public EventHandler<ICommand?> UndoEvent { get; } = delegate { };
    public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
    public event Action<ICommand>? CommandAdded;
+   
+   public event Action<HistoryNode>? NodeSwitched;
 
    private int _lastCompactionDepth;
    private Timer? _autoCompactingTimer;
@@ -55,6 +57,8 @@ public class TreeHistoryManager : IHistoryManager
    /// <param name="type">The type of the history entry associated with the command.</param>
    public void AddCommand(ICommand newCommand, HistoryEntryType type = HistoryEntryType.Normal)
    {
+      if(CommandManager.IgnoreCommands)
+         return;
       var newNode = new HistoryNode(_nodeId++, newCommand, type, Current);
       Current.Children.Add(newNode);
       Current = newNode;
@@ -66,12 +70,19 @@ public class TreeHistoryManager : IHistoryManager
 
    // Check if there are any commands to redo
    public bool CanRedo => Current.Children.Count > 0 || Current is CompactHistoryNode { HasStepRedo: true };
+
+   private HistoryNode _current;
+   
    /// <summary>
    /// Represents the current node in the history tree managed by <see cref="TreeHistoryManager"/>.
    /// This property tracks the node that corresponds to the latest command or state in the history.
    /// It is updated whenever a new command is added, undone, or redone.
    /// </summary>
-   public HistoryNode Current { get; private set; }
+   public HistoryNode Current
+   {
+      get => _current;
+      private set => SwitchHistoryNode(value);
+   }
 
    public ICommand CurrentCommand => Current.Command;
 
@@ -90,7 +101,7 @@ public class TreeHistoryManager : IHistoryManager
    {
       if (!CanUndo)
          return null;
-
+      
       ICommand? undoCommand = null;
       if (Current.EntryType == HistoryEntryType.Compacted && Current is CompactHistoryNode compNode)
       {
@@ -116,7 +127,7 @@ public class TreeHistoryManager : IHistoryManager
          undoCommand.Undo();
          Current = Current.Parent;
       }
-
+      
       UndoEvent.Invoke(null, undoCommand);
       EventDistribution.EventDistributor.UpdateNUI?.Invoke();
       return undoCommand;
@@ -135,7 +146,7 @@ public class TreeHistoryManager : IHistoryManager
          childIndex += Current.Children.Count;
       if (!CanRedo || childIndex >= Current.Children.Count)
          return null;
-
+      
       ICommand? redoCommand = null;
       if (Current is CompactHistoryNode compNode)
       {
@@ -574,6 +585,14 @@ public class TreeHistoryManager : IHistoryManager
 
          CompactionInXSize.Invoke(null, Settings.AutoCompactingMinSize + _lastCompactionDepth - undoDepth);
       }
+   }
+
+   private void SwitchHistoryNode(HistoryNode node)
+   {
+      if (_current == node)
+         return;
+      _current = node;
+      NodeSwitched?.Invoke(_current);
    }
 
    private void InitializeTimers()

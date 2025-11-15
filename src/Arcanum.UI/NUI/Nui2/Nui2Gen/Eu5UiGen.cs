@@ -586,8 +586,6 @@ public static class Eu5UiGen
          Eu5ObjectCreator.ShowPopUp(type,
                                     newObj =>
                                     {
-                                       mspvm.Value = newObj;
-                                       
                                        // Find the first parent of type EmbeddedView of the createNewButton and refresh its selector
                                        var parent = VisualTreeHelper.GetParent(createNewButton);
                                        while (parent != null && parent is not EmbeddedView)
@@ -595,6 +593,9 @@ public static class Eu5UiGen
 
                                        if (parent is EmbeddedView ev)
                                           ev.RefreshSelector();
+                                       
+                                       // Has to happen after refreshing the selector to avoid adding the command twice to history
+                                       mspvm.Value = newObj;
                                     });
       };
 

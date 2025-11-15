@@ -38,6 +38,7 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType = "{x:Type history:HistoryNode}"
                                           ItemsSource = "{Binding Children}">
+                    <!-- Mark this grid in a Color -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width = "16" />
