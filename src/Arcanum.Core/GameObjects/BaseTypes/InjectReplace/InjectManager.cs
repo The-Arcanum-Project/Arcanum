@@ -46,7 +46,6 @@ public static class InjectManager
       }
 
       list.Add(obj);
-      obj.Source.ObjectsInFile.Add(obj);
    }
 
    public static KeyValuePair<Enum, object>[] GetInjectedProperties(this IEu5Object target)

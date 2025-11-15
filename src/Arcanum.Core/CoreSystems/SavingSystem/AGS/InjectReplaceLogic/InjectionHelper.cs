@@ -162,7 +162,7 @@ public static class InjectionHelper
                      if (injObject.Source.IsVanilla)
                      {
                         // Any action we take will cause issues with the base mod. So we abort here.
-                        // TODO: Ass a setting or use the DialogResult here to determine if we should continue taking the risk
+                        // TODO: Add a setting or use the DialogResult here to determine if we should continue taking the risk
 #if DEBUG
                         Debug.Fail("Existing injects from a base mod found for an object that is being replaced.");
 #else
@@ -201,6 +201,7 @@ public static class InjectionHelper
          };
          InjectManager.RegisterInjectObj(newInjectObj);
          csso.InjectedObj = newInjectObj;
+         csso.InjectedObj.Source.ObjectsInFile.Add(csso.InjectedObj);
 
          csso.Injects = finalInjects.ToArray();
       }

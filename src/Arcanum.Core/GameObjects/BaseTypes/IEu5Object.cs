@@ -81,6 +81,4 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
    public IDictionary GetGlobalItemsNonGeneric();
-
-   public int GetHashCode() => GetType().GetHashCode() ^ UniqueId.GetHashCode() * 21;
 }

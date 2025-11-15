@@ -284,7 +284,6 @@ public static class SaveMaster
                                        CountNewLinesInStringBuilder(sb.InnerBuilder),
                                        objSb.InnerBuilder.Length,
                                        sb.InnerBuilder.Length);
-            cssoInj.Source.ObjectsInFile.Add(cssoInj);
 
             objSb.Merge(sb);
             RemoveObjectFromChanges(csso.Target);
@@ -661,7 +660,7 @@ public static class SaveMaster
             srcPos = o.FileLocation.CharPos + objectLength;
             deltaLines -= CountLinesInOriginal(original, o.FileLocation);
             deltaCharPos -= objectLength;
-            fo.ObjectsInFile.Remove(toRemove[srcPointer]);
+            fo.ObjectsInFile.Remove(o);
             srcPointer++;
             continue;
          }

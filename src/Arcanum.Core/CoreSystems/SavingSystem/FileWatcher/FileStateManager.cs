@@ -213,7 +213,18 @@ public static class FileStateManager
    public static Eu5FileObj CreateEu5FileObject(IEu5Object target)
    {
       var (path, descriptor) = FileManager.GeneratePathForNewObject(target, true);
+      // We have already objects for that so we need to check if any of the existing Eu5FileObj is an Arcanum generated file
+      // so that we can reuse it.
+      if (DescriptorDefinitions.TypeToDescriptor.TryGetValue(target.GetType(), out var descr))
+      {
+         var combinedPath = Path.Combine(path);
+         foreach (var existingFo in descr.Files)
+            if (string.Equals(existingFo.Path.FullPath, combinedPath, StringComparison.Ordinal))
+               return existingFo;
+      }
+
       var fo = new Eu5FileObj(new(path[..^1], path[^1], FileManager.ModDataSpace), descriptor);
+      descriptor.Files.Add(fo);
       return fo;
    }
 }
