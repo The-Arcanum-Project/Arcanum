@@ -1,6 +1,7 @@
 ﻿using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
 namespace Arcanum.Core.CoreSystems.IO;
 
@@ -164,6 +165,7 @@ public static class IO
 
       try
       {
+         FileStateManager.IgnoreNextChange(path);
          if (!EnsureFileDirectoryExists(path))
             return false;
 

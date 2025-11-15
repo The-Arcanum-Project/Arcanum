@@ -26,7 +26,7 @@
                                      Padding = "4"
                                      Click = "FindNullMarketsButton_Click" />
 
-            <styleClasses:BaseButton Content = "Null location in Market"
+            <styleClasses:BaseButton Content = "Utility"
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "FindNullLocationInMarketButton_Click" />

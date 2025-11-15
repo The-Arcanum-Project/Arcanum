@@ -3,10 +3,12 @@ using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands;
 
-public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlobals) : ICommand
+public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlobals)
+   : Eu5ObjectCommand([eu5Object], null)
 {
-   public void Execute()
+   public override void Execute()
    {
+      base.Execute();
       if (addToGlobals)
       {
          var globals = eu5Object.GetGlobalItemsNonGeneric();
@@ -19,8 +21,9 @@ public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlo
       SaveMaster.AddNewObject(eu5Object);
    }
 
-   public void Undo()
+   public override void Undo()
    {
+      base.Undo();
       if (addToGlobals)
       {
          var globals = eu5Object.GetGlobalItemsNonGeneric();
@@ -33,15 +36,12 @@ public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlo
       SaveMaster.RemoveNewObject(eu5Object);
    }
 
-   public void Redo()
+   public override void Redo()
    {
       Execute();
    }
 
-   public List<int> GetTargetHash() => [eu5Object.GetHashCode()];
-
-   public string GetDescription
+   public override string GetDescription
       => isAdd ? "Create Object" : "Delete Object" + $": {eu5Object.UniqueId} ({eu5Object.GetType().Name})";
-
-   public string GetDebugInformation(int indent) => GetDescription;
+   public override IEu5Object[] GetTargets() => [eu5Object];
 }

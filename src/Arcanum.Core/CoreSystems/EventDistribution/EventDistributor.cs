@@ -15,9 +15,9 @@ public static class EventDistributor
    /// </summary>
    public static Action<Type, Enum, IEu5Object[]>? ObjectOfTypeModified;
 
-   public static void RegisterChanges(Type type, Enum nxProp, IEu5Object[] targets)
+   public static void RegisterChanges(Type type, Enum? nxProp, IEu5Object[] targets)
    {
-      if (targets.Length == 0)
+      if (targets.Length == 0 || nxProp is null)
          return;
 
       var itemType = targets[0].GetNxItemType(nxProp);
@@ -35,7 +35,7 @@ public static class EventDistributor
                if (item is IEu5Object eu5Object)
                   allNestedObjects.Add(eu5Object);
          }
-         
+
          ObjectOfTypeModified?.Invoke(type, nxProp, allNestedObjects.ToArray());
       }
       // We have a normal property
@@ -46,7 +46,7 @@ public static class EventDistributor
          // We have nested objects and want to invoke for them instead.
          if (nxPropType.IsAssignableTo(typeof(IEu5Object)))
          {
-            HashSet<IEu5Object> nestedObjects = new (targets.Length);
+            HashSet<IEu5Object> nestedObjects = new(targets.Length);
             for (var i = 0; i < targets.Length; i++)
                nestedObjects.Add((IEu5Object)targets[i]._getValue(nxProp));
 

@@ -6,23 +6,24 @@ namespace Arcanum.Core.CoreSystems.History.Commands;
 
 public abstract class Eu5ObjectCommand : ICommand
 {
-   public readonly Enum Attribute;
+   public readonly Enum? Attribute;
    public readonly Type Type;
    private bool _initialized;
 
    public abstract string GetDescription { get; }
 
-   protected Eu5ObjectCommand(IEu5Object target, Enum attribute)
+   protected Eu5ObjectCommand(IEu5Object target, Enum? attribute)
    {
       Type = target.GetType();
       Attribute = attribute;
       SaveMaster.InitCommand(this, target);
    }
 
-   protected Eu5ObjectCommand(IEu5Object[] targets, Enum attribute)
+   protected Eu5ObjectCommand(IEu5Object[] targets, Enum? attribute)
    {
-      if(targets.Length == 0)
+      if (targets.Length == 0)
          throw new ArgumentException("Targets array cannot be empty.", nameof(targets));
+
       Type = targets[0].GetType();
       Attribute = attribute;
       _initialized = true;

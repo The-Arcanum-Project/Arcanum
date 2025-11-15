@@ -7,7 +7,6 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.vdfParser;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
@@ -364,10 +363,10 @@ public static class FileManager
 
       var folderPath = descriptor.LocalPath.Aggregate(ModDataSpace.FullPath, Path.Combine);
       return ([
-                 ..ModDataSpace.Path, ..descriptor.LocalPath, GetDefaultFileNameForFolder(folderPath,
-                  no.GetType(),
-                  descriptor.FileType.FileEnding,
-                  allowReuseOfExistingArcFile),
+                 ..descriptor.LocalPath, GetDefaultFileNameForFolder(folderPath,
+                                                                     no.GetType(),
+                                                                     descriptor.FileType.FileEnding,
+                                                                     allowReuseOfExistingArcFile),
               ],
               descriptor);
    }

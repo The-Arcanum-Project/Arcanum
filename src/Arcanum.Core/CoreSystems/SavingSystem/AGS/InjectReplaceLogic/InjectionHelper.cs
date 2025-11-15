@@ -1,12 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Windows;
-using Arcanum.Core.CoreSystems.History.Commands;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.Registry;
 using Common.UI;
 using Common.UI.MBox;
 
@@ -62,6 +60,7 @@ public static class InjectionHelper
                               "Invalid Injection Target",
                               MBoxButton.OK,
                               MessageBoxImage.Error);
+            abort = true;
             continue;
          }
 

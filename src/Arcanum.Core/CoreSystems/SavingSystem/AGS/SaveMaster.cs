@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
@@ -19,11 +18,13 @@ public static class SaveMaster
    private static readonly Dictionary<Type, int> ModificationCache = [];
    private static readonly List<Eu5ObjectCommand> ChangesSinceLastSave = [];
 
-   public static HistoryNode? LastSavedHistoryNode = null;
+   public static HistoryNode? LastSavedHistoryNode;
 
    public static Enum[] GetChangesForObject(IEu5Object obj)
    {
-      return !NeedsToBeSaved.TryGetValue(obj, out var list) ? [] : list.Select(c => c.Attribute).Distinct().ToArray();
+      return !NeedsToBeSaved.TryGetValue(obj, out var list)
+                ? []
+                : list.Select(c => c.Attribute).OfType<Enum>().Distinct().ToArray();
    }
 
    static SaveMaster()
@@ -31,6 +32,7 @@ public static class SaveMaster
    }
 
    public static int GetModifiedCount => ModificationCache.Values.Sum();
+   public static int GetNeedsToBeSaveCount => NeedsToBeSaved.Count;
 
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
    public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewObjects;
@@ -58,6 +60,10 @@ public static class SaveMaster
 
    private static void RemoveChange(Eu5ObjectCommand command)
    {
+      //TODO REMOVE THIS
+      if (CommandManager.IgnoreCommands)
+         return;
+
       var targets = command.GetTargets();
       foreach (var target in targets)
       {
@@ -77,6 +83,12 @@ public static class SaveMaster
       ChangesSinceLastSave.Remove(command);
    }
 
+   private static void RemoveObjectsFromChanges(ICollection<IEu5Object> targets)
+   {
+      foreach (var target in targets)
+         RemoveObjectFromChanges(target);
+   }
+
    // TODO: @Melco Handle removal of all changes for an objects saved with injection as it is not saved on a on command basis.
    private static void RemoveObjectFromChanges(IEu5Object target)
    {
@@ -93,6 +105,10 @@ public static class SaveMaster
 
    private static void AddSingleCommand(Eu5ObjectCommand command, IEu5Object target)
    {
+      // TODO REMOVE THIS
+      if (CommandManager.IgnoreCommands)
+         return;
+
       if (!NeedsToBeSaved.TryGetValue(target, out var list))
       {
          NeedsToBeSaved[target] = list = [];
@@ -109,6 +125,10 @@ public static class SaveMaster
 
    private static void AddChange(Eu5ObjectCommand command)
    {
+      //TODO REMOVE THIS
+      if (CommandManager.IgnoreCommands)
+         return;
+
       foreach (var target in command.GetTargets())
       {
          AddSingleCommand(command, target);
@@ -224,7 +244,7 @@ public static class SaveMaster
       if (sb == null)
          return false;
 
-      WriteFile(sb.InnerBuilder, fileObj);
+      WriteFile(sb.InnerBuilder, fileObj, true);
       return true;
    }
 
@@ -258,15 +278,11 @@ public static class SaveMaster
             continue;
          }
 
-         var originalFile = string.Empty;
          var sb = new IndentedStringBuilder();
 
          // The file already exists so we just append it's content first
          if (IO.IO.FileExists(fo.Path.FullPath))
-         {
-            originalFile = IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath)!;
-            sb.InnerBuilder.Append(originalFile);
-         }
+            sb.InnerBuilder.Append(IO.IO.ReadAllTextUtf8WithBom(fo.Path.FullPath));
 
          var objSb = new IndentedStringBuilder();
          foreach (var csso in value)
@@ -289,7 +305,7 @@ public static class SaveMaster
             RemoveObjectFromChanges(csso.Target);
          }
 
-         WriteFile(sb.InnerBuilder, fo);
+         WriteFile(sb.InnerBuilder, fo, true);
       }
 
       return true;
@@ -302,13 +318,18 @@ public static class SaveMaster
 
       // If we have a newly created object it's Source property is still Empty so we need to set it here
       foreach (var csso in value)
+      {
          if (csso.Target.Source == Eu5FileObj.Empty)
             csso.Target.Source = fo;
+      }
 
       Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
                    "All objects must have a valid file location matching the file they are being saved to.");
 
       SaveFile(fo, true);
+
+      foreach (var csso in value)
+         RemoveObjectFromChanges(csso.Target);
    }
 
    /// <summary>
@@ -335,9 +356,7 @@ public static class SaveMaster
       if (sb == null)
          return false;
 
-      WriteFile(sb.InnerBuilder, fileObj);
-
-      // TODO: @Melco remove this from the modified list and all caches.
+      WriteFile(sb.InnerBuilder, fileObj, true);
       return true;
    }
 
@@ -467,6 +486,7 @@ public static class SaveMaster
                                 CountNewLinesInStringBuilder(isb.InnerBuilder),
                                 isb.InnerBuilder.Length,
                                 sb.InnerBuilder.Length);
+         obj.Source.ObjectsInFile.Add(obj);
          isb.Merge(sb);
       }
 
@@ -562,9 +582,10 @@ public static class SaveMaster
    /// <summary>
    /// Handles the writing of the given StringBuilder to the file represented by the given Eu5FileObj. <br/>
    /// Moves the file to the modded data space if it is not there yet. <br/>
-   /// Updates the checksum of the file after writing.
+   /// Updates the checksum of the file after writing. <br/>
+   /// Registers the file path with the FileStateManager if register is true and the file is not yet registered.
    /// </summary>
-   public static void WriteFile(StringBuilder sb, Eu5FileObj fileObj)
+   public static void WriteFile(StringBuilder sb, Eu5FileObj fileObj, bool register)
    {
       // We need to move the file to the modded data space if it is not there yet
       if (!fileObj.IsModded)
@@ -572,6 +593,8 @@ public static class SaveMaster
 
       var np = fileObj.Path.FullPath;
       IO.IO.WriteAllTextUtf8WithBom(np, sb.ToString());
+      if (register)
+         FileStateManager.RegisterPath(fileObj.Path);
    }
 
    public static void RemoveObjectsFromFiles(List<IEu5Object> objs)
@@ -584,7 +607,7 @@ public static class SaveMaster
          if (sb == null)
             continue;
 
-         WriteFile(sb, group.Key);
+         WriteFile(sb, group.Key, false);
       }
    }
 
@@ -594,7 +617,7 @@ public static class SaveMaster
       if (sb == null)
          return;
 
-      WriteFile(sb, objs[0].Source);
+      WriteFile(sb, objs[0].Source, false);
    }
 
    /// <summary>
@@ -769,16 +792,5 @@ public static class SaveMaster
       }
 
       return topLevel;
-   }
-
-   private static void IllegalFileState(Eu5FileObj fileObj)
-   {
-      // TODO: Reload? Shutdown? Ignore?
-   }
-
-   public static void SaveFiles(List<Eu5FileObj> toList)
-   {
-      foreach (var fo in toList)
-         SaveFile(fo);
    }
 }

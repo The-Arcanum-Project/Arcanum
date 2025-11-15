@@ -1,17 +1,11 @@
 ﻿#define IS_DEBUG
 
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common;
-using Common.Logger;
 using Common.UI;
 using Common.UI.MBox;
 
@@ -29,6 +23,7 @@ public static class FileStateManager
 
    // Stores the full paths of all files and folders the user has explicitly registered.
    private static readonly HashSet<PathObj> RegisteredPaths = [];
+   private static readonly HashSet<string> IgnoredNextChanges = [];
 
    public static void ReloadFile(FileChangedEventArgs e)
    {
@@ -177,11 +172,19 @@ public static class FileStateManager
    private static void OnRenamedEvent(object sender, RenamedEventArgs e)
    {
       HandleEvent(e.ChangeType, e.FullPath, e.OldFullPath);
-      // TODO: @Minnator actually change the data structures to reflect the rename.
    }
 
    private static void HandleEvent(WatcherChangeTypes changeType, string fullPath, string? oldFullPath = null)
    {
+      // Check if this change should be ignored.
+      if (IgnoredNextChanges.Remove(fullPath))
+      {
+#if IS_DEBUG
+         Console.WriteLine($"[Ignored] Change to '{fullPath}' was ignored as per request.");
+#endif
+         return;
+      }
+
       // No lock needed here because we are only reading from _registeredPaths.
       // Even if the collection changes on another thread, a stale read is acceptable
       // and won't cause a crash. A lock is primarily for protecting writes.
@@ -203,6 +206,16 @@ public static class FileStateManager
       FileChanged?.Invoke(null, args);
    }
 
+   /// <summary>
+   /// If an external change is detected on the specified file path, it will be ignored once.
+   /// This is useful for scenarios where the application itself modifies a file and you want to prevent
+   /// redundant processing of that change.
+   /// </summary>
+   public static void IgnoreNextChange(string fullPath) => IgnoredNextChanges.Add(fullPath);
+
+   public static void IgnoreNextChange(PathObj pathObj) => IgnoreNextChange(pathObj.FullPath);
+   public static void IgnoreNextChange(Eu5FileObj fo) => IgnoreNextChange(fo.Path.FullPath);
+
    private static void OnError(object sender, ErrorEventArgs e)
    {
 #if IS_DEBUG
@@ -210,6 +223,9 @@ public static class FileStateManager
 #endif
    }
 
+   /// <summary>
+   /// This should be the only point where IEu5FileObj are created after the initial parsing of files.
+   /// </summary>
    public static Eu5FileObj CreateEu5FileObject(IEu5Object target)
    {
       var (path, descriptor) = FileManager.GeneratePathForNewObject(target, true);
@@ -219,7 +235,7 @@ public static class FileStateManager
       {
          var combinedPath = Path.Combine(path);
          foreach (var existingFo in descr.Files)
-            if (string.Equals(existingFo.Path.FullPath, combinedPath, StringComparison.Ordinal))
+            if (string.Equals(existingFo.Path.RelativePath, combinedPath, StringComparison.Ordinal))
                return existingFo;
       }
 
