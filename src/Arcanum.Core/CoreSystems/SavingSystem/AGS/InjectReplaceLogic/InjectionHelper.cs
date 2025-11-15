@@ -53,6 +53,13 @@ public static class InjectionHelper
 
          if (!target.Source.IsVanilla)
          {
+            // If the target is not a replace or inject we just have a mod defined object that has to be rewritten.
+            if (target.InjRepType == InjRepType.None)
+            {
+               csso.SavingCategory = SavingCategory.Modify;
+               continue;
+            }
+
             UIHandle.Instance.PopUpHandle
                     .ShowMBox("Attempted to save an injection for an object from a non vanilla source. " +
                               "This is not allowed as only vanilla objects can be modified directly. \n" +

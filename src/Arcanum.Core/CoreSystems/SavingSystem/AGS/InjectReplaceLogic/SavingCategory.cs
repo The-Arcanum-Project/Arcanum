@@ -12,6 +12,7 @@ public enum SavingCategory
    Replace,
    TryReplace,
    ReplaceOrCreate,
+   Modify,
 }
 
 public static class SavingCategoryExtensions

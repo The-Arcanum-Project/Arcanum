@@ -211,7 +211,13 @@ public static class FileStateManager
    /// This is useful for scenarios where the application itself modifies a file and you want to prevent
    /// redundant processing of that change.
    /// </summary>
-   public static void IgnoreNextChange(string fullPath) => IgnoredNextChanges.Add(fullPath);
+   public static void IgnoreNextChange(string fullPath)
+   {
+      ArcLog.WriteLine(LOG_SOURCE,
+                       LogLevel.INF,
+                       $"Next change to '{FileManager.SanitizePath(fullPath, '/')}' will be ignored as per request.");
+      IgnoredNextChanges.Add(fullPath);
+   }
 
    public static void IgnoreNextChange(PathObj pathObj) => IgnoreNextChange(pathObj.FullPath);
    public static void IgnoreNextChange(Eu5FileObj fo) => IgnoreNextChange(fo.Path.FullPath);

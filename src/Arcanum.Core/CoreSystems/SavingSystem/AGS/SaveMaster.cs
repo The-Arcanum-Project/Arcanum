@@ -278,6 +278,12 @@ public static class SaveMaster
             continue;
          }
 
+         if (value[0].SavingCategory == SavingCategory.Modify)
+         {
+            SaveFile(fo, true);
+            continue;
+         }
+
          var sb = new IndentedStringBuilder();
 
          // The file already exists so we just append it's content first
@@ -444,23 +450,24 @@ public static class SaveMaster
          obj.FileLocation.Column = indentLevel * spaces;
 
          // Any object before this one has to get it's FileLocation updated as well
-         while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
-         {
-            // We can skip the first one as everything before it is just copied over from before.
-            if (i == 0)
+         if (sortedOldObjects.Length > 0)
+            while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
             {
-               while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
-                  oldObjIndex++;
-               break;
-            }
+               // We can skip the first one as everything before it is just copied over from before.
+               if (i == 0)
+               {
+                  while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+                     oldObjIndex++;
+                  break;
+               }
 
-            // We only need to update objects that are not being modified right now
-            // We update the line and char pos offsets based on the changes made so far
-            var oldObj = sortedOldObjects[oldObjIndex];
-            oldObj.FileLocation.CharPos += deltaCharPos;
-            oldObj.FileLocation.Line += deltaLines;
-            oldObjIndex++;
-         }
+               // We only need to update objects that are not being modified right now
+               // We update the line and char pos offsets based on the changes made so far
+               var oldObj = sortedOldObjects[oldObjIndex];
+               oldObj.FileLocation.CharPos += deltaCharPos;
+               oldObj.FileLocation.Line += deltaLines;
+               oldObjIndex++;
+            }
 
          deltaLines += lineOffset - oldLineCount;
          deltaCharPos += charPosOffset - oldCharCount;
