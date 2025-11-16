@@ -97,8 +97,9 @@
 
             <Button x:Name = "OpenPatreonButton"
                     Grid.Column = "0"
-                    Margin = "50, 25"
-                    Padding = "10, 5"
+                    Width="140"
+                    Height="140"
+                    Padding = "0, 0"
                     FontSize = "16"
                     Click = "OpenPatreonButton_Click">
 
@@ -109,8 +110,9 @@
             </Button>
             <styleClasses:BaseButton x:Name = "OpenDiscordButton"
                                      Grid.Column = "1"
-                                     Margin = "50, 25"
-                                     Padding = "10, 5"
+                                     Width="140"
+                                     Height="140"
+                                     Padding = "0, 0"
                                      FontSize = "16"
                                      Click = "OpenGithubButton_OnClick"
                                      Background = "Transparent"
@@ -136,12 +138,13 @@
                 </styleClasses:BaseButton.Style>
                 <Image Source = "/Arcanum_UI;component/Assets/Images/github_mark_white.png"
                        Stretch = "Uniform"
-                       RenderOptions.BitmapScalingMode = "HighQuality" />
+                       RenderOptions.BitmapScalingMode = "HighQuality"/>
             </styleClasses:BaseButton>
             <styleClasses:BaseButton x:Name = "OpenGithubButton"
                                      Grid.Column = "2"
-                                     Margin = "50, 25"
-                                     Padding = "10, 5"
+                                     Width="140"
+                                     Height="140"
+                                     Padding = "0, 0"
                                      FontSize = "16"
                                      Click = "OpenDiscordButton_OnClick"
                                      Background = "Transparent"

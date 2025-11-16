@@ -26,7 +26,7 @@
              Get Arcanum
          </download-title>
          <download-page>
-             https://github.com/Minnator/Arcanum/releases
+             https://github.com/The-Arcanum-Project/Arcanum/releases
          </download-page>
          
     </variables>
@@ -34,7 +34,7 @@
         <social type="discord" href="https://discord.gg/9878NDb6uf">
             Join us on Discord
         </social>
-        <social type="github" href="https://github.com/Minnator/Arcanum">
+        <social type="github" href="https://github.com/The-Arcanum-Project/Arcanum">
             Explore the files on our Github
         </social>
     </footer>

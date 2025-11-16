@@ -15,7 +15,7 @@ Arcanum is fully portable, meaning no installer is required. Place the executabl
     <tab id="executable-install" title="Executable">
       <procedure title="Install using Executable" id="executable-id">
           <step>
-            Go to the <a href="https://github.com/Minnator/Arcanum/releases">Releases tab</a>.
+            Go to the <a href="https://github.com/The-Arcanum-Project/Arcanum/releases">Releases tab</a>.
           </step>
           <step>
             Download the latest version of the <b>Arcanum executable</b> (<code>Arcanum.exe</code>).
@@ -38,7 +38,7 @@ Arcanum is fully portable, meaning no installer is required. Place the executabl
          <step>
            <b>Clone the Repository:</b> Open a terminal/command prompt and run:
            <code-block language="bash">
-               git clone https://github.com/Minnator/Arcanum.git
+               git clone https://github.com/The-Arcanum-Project/Arcanum.git
                cd Arcanum
            </code-block>
          </step>
