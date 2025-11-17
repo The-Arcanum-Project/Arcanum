@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -553,7 +552,6 @@ public static class NexusHelpers
          return;
 
       var c = classSymbol.Name;
-      var classType = classSymbol.ToDisplayString();
 
       builder.AppendLine();
       builder.AppendLine("# region Nexus Object Overrides");
@@ -563,47 +561,6 @@ public static class NexusHelpers
       builder.AppendLine("    public override string ToString()");
       builder.AppendLine("    {");
       builder.AppendLine($"        return _getValue({c}.Field.UniqueId)?.ToString() ?? $\"{c} (no UniqueId)\";");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // Equals override
-      builder.AppendLine("    public override bool Equals(object? obj)");
-      builder.AppendLine("    {");
-      builder.AppendLine($"        if (obj is not {c} other)");
-      builder.AppendLine("            return false;");
-      builder.AppendLine($"        return EqualityComparer<{classType}?>.Equals(_getValue({c}.Field.UniqueId), other._getValue({c}.Field.UniqueId));");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      builder.AppendLine($"    public bool Equals({classType}? other)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        if (other is null)");
-      builder.AppendLine("            return false;");
-      builder.AppendLine($"        return EqualityComparer<{classType}?>.Equals(_getValue({c}.Field.UniqueId), other._getValue({c}.Field.UniqueId));");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // GetHashCode override
-      builder.AppendLine("    public override int GetHashCode()");
-      builder.AppendLine("    {");
-      builder.AppendLine($"        return _getValue({c}.Field.UniqueId).GetHashCode() ^ typeof({classType}).GetHashCode();");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      // == and != operators
-      builder.AppendLine($"    public static bool operator ==({classType}? left, {classType}? right)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        if (left is null && right is null)");
-      builder.AppendLine("            return true;");
-      builder.AppendLine("        if (left is null || right is null)");
-      builder.AppendLine("            return false;");
-      builder.AppendLine("        return left.Equals(right);");
-      builder.AppendLine("    }");
-      builder.AppendLine();
-
-      builder.AppendLine($"    public static bool operator !=({classType}? left, {classType}? right)");
-      builder.AppendLine("    {");
-      builder.AppendLine("        return !(left == right);");
       builder.AppendLine("    }");
       builder.AppendLine();
 
