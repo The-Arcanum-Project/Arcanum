@@ -257,7 +257,7 @@ public static class InjectionHelper
          }
          else
          {
-            var numOfProperties = obj.GetAllProperties().Count;
+            var numOfProperties = obj.GetAllProperties().Length;
             var changes = SaveMaster.GetChangesForObject(obj);
             var percentageModified = changes.Length / (float)numOfProperties;
 

@@ -15,10 +15,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 public static class SimpleObjectParser
 {
-   private static readonly UppercaseWordChecker _irChecker = new([
-      "INJECT", "TRY_INJECT", "INJECT_OR_CREATE", "REPLACE", "TRY_REPLACE", "REPLACE_OR_CREATE",
-   ]);
-
    public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      List<StatementNode> statements,
                                      LocationContext ctx,
@@ -39,28 +35,29 @@ public static class SimpleObjectParser
                                         ref validation,
                                         sn,
                                         out var bn,
-                                        out TTarget? instance) ||
+                                        out TTarget? instance,
+                                        out var irType) ||
              instance == null)
             continue;
 
          // We check if we have an inject/replace and if so custom handling applies
-         // todo: optimize by not calling GetLexeme twice
-         if (_irChecker.IsMatch(bn.KeyNode.GetLexeme(source), out var irType))
+         if (irType != InjRepType.None)
          {
+            propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
             // we already have a valid object created, so depending on the irType we now take action
             switch (irType)
             {
-               case InjRepType.Inject:
-               case InjRepType.TryInject:
-               case InjRepType.InjectOrCreate:
+               case InjRepType.INJECT:
+               case InjRepType.TRY_INJECT:
+               case InjRepType.INJECT_OR_CREATE:
                   if (!globals.TryGetValue(instance.UniqueId, out var injTarget))
                   {
-                     if (irType == InjRepType.TryInject)
+                     if (irType == InjRepType.TRY_INJECT)
                         break;
 
-                     if (irType == InjRepType.InjectOrCreate)
+                     if (irType == InjRepType.INJECT_OR_CREATE)
                      {
-                        instance.InjRepType = InjRepType.InjectOrCreate;
+                        instance.InjRepType = InjRepType.INJECT_OR_CREATE;
                         if (lockObject != null)
                            lock (lockObject)
                               globals[instance.UniqueId] = instance;
@@ -83,12 +80,12 @@ public static class SimpleObjectParser
                   injectTarget.MergeInjects(injectObj.InjectedProperties);
 
                   break;
-               case InjRepType.Replace:
-               case InjRepType.TryReplace:
-               case InjRepType.ReplaceOrCreate:
-                  if (!globals.ContainsKey(instance.UniqueId) && irType != InjRepType.ReplaceOrCreate)
+               case InjRepType.REPLACE:
+               case InjRepType.TRY_REPLACE:
+               case InjRepType.REPLACE_OR_CREATE:
+                  if (!globals.ContainsKey(instance.UniqueId) && irType != InjRepType.REPLACE_OR_CREATE)
                   {
-                     if (irType == InjRepType.TryReplace)
+                     if (irType == InjRepType.TRY_REPLACE)
                         break;
 
                      ctx.SetPosition(bn.KeyNode);
@@ -107,7 +104,6 @@ public static class SimpleObjectParser
                   else
                      globals[instance.UniqueId] = instance;
                   break;
-               case InjRepType.None:
                default:
                   Debug.Fail("Unhandled InjRepType in SimpleObjectParser.Parse");
                   break;
@@ -146,7 +142,7 @@ public static class SimpleObjectParser
             continue;
          }
 
-         propsParser(bn!, instance, ctx, source, ref validation, allowUnknownBlocks);
+         propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
       }
    }
 
@@ -190,7 +186,8 @@ public static class SimpleObjectParser
                                      ref validation,
                                      sn,
                                      out var bn,
-                                     out instance) ||
+                                     out instance,
+                                     out _) ||
           instance == null)
          return false;
 
@@ -205,16 +202,19 @@ public static class SimpleObjectParser
                                                            ref bool validation,
                                                            StatementNode sn,
                                                            [MaybeNullWhen(false)] out BlockNode bn,
-                                                           out TTarget? eu5Obj)
+                                                           out TTarget? eu5Obj,
+                                                           out InjRepType irType)
       where TTarget : IEu5Object<TTarget>, new()
    {
       if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out bn))
       {
          eu5Obj = default;
+         irType = InjRepType.None;
          return false;
       }
 
-      eu5Obj = Eu5Activator.CreateInstance<TTarget>(bn.KeyNode.GetLexeme(source), fileObj, bn);
+      UppercaseWordChecker.IsMatch(bn.KeyNode.GetLexeme(source), out irType, out var trueKey);
+      eu5Obj = Eu5Activator.CreateInstance<TTarget>(trueKey, fileObj, bn);
       return true;
    }
 

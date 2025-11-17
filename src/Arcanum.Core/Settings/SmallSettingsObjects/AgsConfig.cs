@@ -26,14 +26,14 @@ public class AgsConfig
    public float MaxPercentageToInject { get; set; } = 0.5f;
 
    [Description("Default INJECT behavior when none is specified.")]
-   [DefaultValue(InjRepType.Inject)]
-   public InjRepType DefaultInjectType { get; set; } = InjRepType.Inject;
+   [DefaultValue(InjRepType.INJECT)]
+   public InjRepType DefaultInjectType { get; set; } = InjRepType.INJECT;
 
    [Description("Default REPLACE behavior when none is specified.")]
-   [DefaultValue(InjRepType.Replace)]
-   public InjRepType DefaultReplaceType { get; set; } = InjRepType.Replace;
+   [DefaultValue(InjRepType.REPLACE)]
+   public InjRepType DefaultReplaceType { get; set; } = InjRepType.REPLACE;
 
    [Description("The strategy to use in case there already is an inject in a base mod for the value being injected.\n Recommended to keep as Inject.")]
-   [DefaultValue(InjRepType.Inject)]
-   public InjRepType InjectCollisionResolveStrategy { get; set; } = InjRepType.Inject;
+   [DefaultValue(InjRepType.INJECT)]
+   public InjRepType InjectCollisionResolveStrategy { get; set; } = InjRepType.INJECT;
 }
