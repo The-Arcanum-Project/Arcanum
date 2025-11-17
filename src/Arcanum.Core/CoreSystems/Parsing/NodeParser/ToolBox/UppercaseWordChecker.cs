@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+﻿using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -7,33 +6,34 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 /// Optimized lookup if a word is contained in a predefined set of words.
 /// Where each word starts with a capital letter.
 /// </summary>
-public class UppercaseWordChecker
+public static class UppercaseWordChecker
 {
-   public UppercaseWordChecker(IEnumerable<string> words)
-   {
-      foreach (var word in words)
-         _targetWords.Add(word);
-
-      _targetWords.TrimExcess();
-   }
-
-   private readonly HashSet<string> _targetWords = new(StringComparer.Ordinal);
-
-   public bool IsMatch(string input, out InjRepType type)
+   public static bool IsMatch(string input, out InjRepType type, out string key)
    {
       if (string.IsNullOrEmpty(input) || input[0] < 'A' || input[0] > 'Z')
       {
          type = InjRepType.None;
+         key = input;
          return false;
       }
 
-      if (_targetWords.Contains(input))
+      var parts = input.Split(':', StringSplitOptions.RemoveEmptyEntries);
+      if (parts.Length != 2)
       {
-         type = Enum.Parse<InjRepType>(input);
+         type = InjRepType.None;
+         key = input;
+         return false;
+      }
+
+      if (Enum.TryParse<InjRepType>(parts[0], out var parsedType))
+      {
+         type = parsedType;
+         key = parts[1];
          return true;
       }
 
       type = InjRepType.None;
+      key = input;
       return false;
    }
 }

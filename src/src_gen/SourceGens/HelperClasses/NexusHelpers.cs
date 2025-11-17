@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -494,9 +493,13 @@ public static class NexusHelpers
       #region GetAllProperties
 
       builder.AppendLine();
-      builder.AppendLine("    public List<Enum> GetAllProperties()");
+      builder.AppendLine("    // Lazy array of all properties");
+      builder.AppendLine("    private static Enum[]? _allProps;");
+      builder.AppendLine("    public Enum[] GetAllProperties()");
       builder.AppendLine("    {");
-      builder.AppendLine("        return Enum.GetValues(typeof(Field)).Cast<Enum>().ToList();");
+      builder.AppendLine("        if (_allProps == null)");
+      builder.AppendLine("            _allProps = Enum.GetValues(typeof(Field)).Cast<Enum>().ToArray();");
+      builder.AppendLine("        return _allProps!;");
       builder.AppendLine("    }");
 
       #endregion

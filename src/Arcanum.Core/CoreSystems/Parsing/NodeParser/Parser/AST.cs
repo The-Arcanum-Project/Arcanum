@@ -53,7 +53,7 @@ public class ScopedKeyNode(Token scope, Token name) : KeyNodeBase(scope.Start, n
    public Token Name { get; } = name;
    public override (int, int) GetLocation() => (Scope.Line, Scope.Column);
    public override (int line, int charPos) GetEndLocation() => GetTokenEnd(Name);
-   public override string GetKeyText(string source) => $"{Scope.GetLexeme(source)}:{Name.GetLexeme(source)}";
+   public override string GetKeyText(string source) => $"{Name.GetLexeme(source)}";
 }
 
 /// <summary>
