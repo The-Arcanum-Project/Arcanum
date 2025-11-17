@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
-using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -21,7 +20,7 @@ public partial class InjectObj : IEu5Object<InjectObj>
 
    [IgnoreModifiable]
    [SuppressAgs]
-   public KeyValuePair<Enum, object>[] InjectedProperties { get; init; } = [];
+   public KeyValuePair<Enum, object>[] InjectedProperties { get; set; } = [];
 
 #pragma warning disable AGS004
    [Description("Unique key of this InjectObj. Must be unique among all objects of this type.")]
