@@ -74,10 +74,11 @@ public interface INexus : INotifyPropertyChanged
    string? GetDescription(Enum property);
 
    /// <summary>
-   /// Returns all properties defined in the Nexus as a list of enum values.
+   /// Returns all properties defined in the Nexus as a list of enum values. <br/>
+   /// Lazily initialized on first call.
    /// </summary>
    /// <returns></returns>
-   List<Enum> GetAllProperties();
+   Enum[] GetAllProperties();
 
    /// <summary>
    /// Returns the type of the given property.

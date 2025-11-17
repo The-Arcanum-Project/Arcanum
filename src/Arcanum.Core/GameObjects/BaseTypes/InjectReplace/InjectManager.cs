@@ -13,7 +13,7 @@ public static class InjectManager
       {
          InjRepType = type,
          Target = target,
-         InjectedProperties = injectSource.GetInjectedProperties(),
+         InjectedProperties = injectSource.GetNonDefaultProperties(),
          Source = injectSource.Source,
          FileLocation = injectSource.FileLocation,
       };
@@ -48,19 +48,6 @@ public static class InjectManager
       list.Add(obj);
    }
 
-   public static KeyValuePair<Enum, object>[] GetInjectedProperties(this IEu5Object target)
-   {
-      List<KeyValuePair<Enum, object>> ips = [];
-
-      if (!Injects.TryGetValue(target, out var injectObjs))
-         return ips.ToArray();
-
-      foreach (var injectObj in injectObjs)
-         ips.AddRange(injectObj.InjectedProperties);
-
-      return ips.ToArray();
-   }
-
    public static InjectObj[] GetInjectsForTarget(this IEu5Object target)
    {
       if (!Injects.TryGetValue(target, out var injectObjs))
@@ -73,7 +60,7 @@ public static class InjectManager
    /// Compares two collections for logical equality with high performance.
    /// Handles ordered (List, Array) and unordered (HashSet) collections correctly.
    /// </summary>
-   private static bool AreCollectionsLogicallyEqual(object current, object @default)
+   public static bool AreCollectionsLogicallyEqual(object current, object @default)
    {
       if (ReferenceEquals(current, @default))
          return true; // Both are same instance or both are null

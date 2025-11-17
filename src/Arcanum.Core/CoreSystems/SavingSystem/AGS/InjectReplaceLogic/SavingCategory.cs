@@ -31,12 +31,12 @@ public static class SavingCategoryExtensions
    {
       return strategy switch
       {
-         InjRepType.Inject => SavingCategory.Inject,
-         InjRepType.TryInject => SavingCategory.TryInject,
-         InjRepType.InjectOrCreate => SavingCategory.InjectOrCreate,
-         InjRepType.Replace => SavingCategory.Replace,
-         InjRepType.TryReplace => SavingCategory.TryReplace,
-         InjRepType.ReplaceOrCreate => SavingCategory.ReplaceOrCreate,
+         InjRepType.INJECT => SavingCategory.Inject,
+         InjRepType.TRY_INJECT => SavingCategory.TryInject,
+         InjRepType.INJECT_OR_CREATE => SavingCategory.InjectOrCreate,
+         InjRepType.REPLACE => SavingCategory.Replace,
+         InjRepType.TRY_REPLACE => SavingCategory.TryReplace,
+         InjRepType.REPLACE_OR_CREATE => SavingCategory.ReplaceOrCreate,
          _ => SavingCategory.FileOverride,
       };
    }
@@ -45,12 +45,12 @@ public static class SavingCategoryExtensions
    {
       return category switch
       {
-         SavingCategory.Inject => InjRepType.Inject,
-         SavingCategory.TryInject => InjRepType.TryInject,
-         SavingCategory.InjectOrCreate => InjRepType.InjectOrCreate,
-         SavingCategory.Replace => InjRepType.Replace,
-         SavingCategory.TryReplace => InjRepType.TryReplace,
-         SavingCategory.ReplaceOrCreate => InjRepType.ReplaceOrCreate,
+         SavingCategory.Inject => InjRepType.INJECT,
+         SavingCategory.TryInject => InjRepType.TRY_INJECT,
+         SavingCategory.InjectOrCreate => InjRepType.INJECT_OR_CREATE,
+         SavingCategory.Replace => InjRepType.REPLACE,
+         SavingCategory.TryReplace => InjRepType.TRY_REPLACE,
+         SavingCategory.ReplaceOrCreate => InjRepType.REPLACE_OR_CREATE,
          _ => InjRepType.None,
       };
    }

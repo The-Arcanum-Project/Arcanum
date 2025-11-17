@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
 using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.Common;
@@ -62,12 +63,12 @@ public static class SavingUtil
    {
       return type switch
       {
-         InjRepType.Inject => "INJECT",
-         InjRepType.TryInject => "TRY_INJECT",
-         InjRepType.InjectOrCreate => "INJECT_OR_CREATE",
-         InjRepType.Replace => "REPLACE",
-         InjRepType.TryReplace => "TRY_REPLACE",
-         InjRepType.ReplaceOrCreate => "REPLACE_OR_CREATE",
+         InjRepType.INJECT => "INJECT",
+         InjRepType.TRY_INJECT => "TRY_INJECT",
+         InjRepType.INJECT_OR_CREATE => "INJECT_OR_CREATE",
+         InjRepType.REPLACE => "REPLACE",
+         InjRepType.TRY_REPLACE => "TRY_REPLACE",
+         InjRepType.REPLACE_OR_CREATE => "REPLACE_OR_CREATE",
          _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
       };
    }
@@ -151,11 +152,11 @@ public static class SavingUtil
          case SavingValueType.Int:
             return ((int)value).ToString();
          case SavingValueType.Float:
-            return ((float)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+            return ((float)value).ToString("0.##", CultureInfo.InvariantCulture);
          case SavingValueType.Bool:
             return (bool)value ? "yes" : "no";
          case SavingValueType.Double:
-            return ((double)value).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+            return ((double)value).ToString("0.##", CultureInfo.InvariantCulture);
          case SavingValueType.Identifier:
             return $"{value}";
          case SavingValueType.Color:
