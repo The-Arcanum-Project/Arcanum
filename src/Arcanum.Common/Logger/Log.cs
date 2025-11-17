@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Common.Logger;
 
@@ -28,12 +29,35 @@ public enum CommonLogSource
 
 public static class ArcLog
 {
-   static DateTime _startTime = DateTime.Now;
+   private static readonly DateTime StartTime = DateTime.Now;
+   private static readonly BlockingCollection<string> _logQueue = new();
 
    // We want to log messages but in this format: [<Source>] [<Level>] <Message> 
    // The Source should be either a 3-letter or a word which will be converted to 3-letter
    // The Level should be one of the following: INF, WRN, ERR, DBG, CRT
    // The Message is the actual log message
+
+   static ArcLog()
+   {
+      var loggingThread = new Thread(() =>
+      {
+         // This loop will run for the entire lifetime of the application.
+         // GetConsumingEnumerable() will block until an item is available in the queue.
+         // When .CompleteAdding() is called, the loop will finish.
+         foreach (var message in _logQueue.GetConsumingEnumerable())
+            Console.WriteLine(message);
+      })
+      {
+         IsBackground = true, Name = "ArcLog Worker",
+      };
+      loggingThread.Start();
+   }
+
+   // TODO: Add to lifecycle shutdown
+   public static void Shutdown()
+   {
+      _logQueue.CompleteAdding();
+   }
 
    public static void Write(string source, LogLevel level, string message)
       => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
@@ -61,12 +85,12 @@ public static class ArcLog
 
    private static void Log(string str)
    {
-      Console.WriteLine($"{GetTimestamp()} - {str}");
+      _logQueue.Add($"{GetTimestamp()} - {str}");
    }
 
    private static string GetTimestamp()
    {
-      return (DateTime.Now - _startTime).ToString(@"mm\:ss\.ff");
+      return (DateTime.Now - StartTime).ToString(@"mm\:ss\.ff");
    }
 
    private static string GetSourceString(string source)

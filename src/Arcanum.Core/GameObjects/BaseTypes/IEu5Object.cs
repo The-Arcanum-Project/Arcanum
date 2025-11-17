@@ -5,7 +5,6 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
-using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core;
@@ -81,4 +80,35 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// It calls the static abstract method guaranteed by the <see cref="IEu5ObjectProvider{T}"/> contract.
    /// </summary>
    public IDictionary GetGlobalItemsNonGeneric();
+
+   /// <summary>
+   /// Returns an array of all properties that have non-default values.
+   /// </summary>
+   /// <returns></returns>
+   public KeyValuePair<Enum, object>[] GetNonDefaultProperties()
+   {
+      // Is not as bad as it looks as GetAllProperties() is cached.
+      var nonDefaultProps = new KeyValuePair<Enum, object>[GetAllProperties().Length];
+
+      var index = 0;
+      foreach (var prop in GetAllProperties())
+      {
+         var currentValue = _getValue(prop);
+         var defaultValue = GetDefaultValue(prop);
+
+         if (IsCollection(prop) && InjectManager.AreCollectionsLogicallyEqual(currentValue, defaultValue))
+            continue;
+
+         if (currentValue.Equals(defaultValue))
+            continue;
+
+         // Skip UniqueId property
+         if (prop.ToString() == "UniqueId")
+            continue;
+
+         nonDefaultProps[index++] = new(prop, currentValue);
+      }
+
+      return nonDefaultProps[..index];
+   }
 }
