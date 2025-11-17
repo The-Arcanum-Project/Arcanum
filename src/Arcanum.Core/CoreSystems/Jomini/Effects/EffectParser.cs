@@ -5,12 +5,14 @@ namespace Arcanum.Core.CoreSystems.Jomini.Effects;
 
 public static class EffectParser
 {
+   public static string DocumentsFolder => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
    public static void ParseEffectDefinitions()
    {
       if (EffectRegistry.Effects.Count > 0)
          return;
 
-      var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData/effects.log");
+      var path = Path.Combine(DocumentsFolder, @"Paradox Interactive\Europa Universalis V\docs\effects.log");
       var lines = File.ReadAllLines(path);
       if (lines == null! || lines.Length == 0)
          return;
