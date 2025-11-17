@@ -1,37 +1,45 @@
-# The Arcanum Project
-
-This project aims to build and improve upon what its predecessor [Minnator's Modforge](https://github.com/Minnator/Minnators-Modforge) has achieved.
-The main difference is that this tool is meant for the game **Europa Universalis V** former known as Project Ceasar.
-It is being developed by [Minnator](https://github.com/Minnator) and [MelonCoaster](https://github.com/mel-co).
-We develop this in our spare freetime so the speed of progress may vary from time to time.
-
 [![Lines of Code](https://tokei.rs/b1/github/XAMPPRocky/tokei)](https://github.com/Minnator/Arcanum) ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
 
-## Structure of the tool:
-The entire tool is made as modular as possible.
-Many of the parts are generated automatically when compiling.
-The entire pipeline consists of a handfull of powerfull engines:
-- APG (Automatic Parsing Generator):
-  This source generator can take simple object definitions and generate entire parsing pipelines for them.
-- Errorhandling: Across the entire loading, lexing, parsing, interpreting process we gather and handle errors to provide an exact line and char pos for each error or inconsistency detected.
-- NUI (Navigateable User Interface): This is our UI engine which completely automatically generates interfaces to interact with and modify any object parsed and underlines it with powerfull customization and navigation.
-- AGS (Automatically Generated Saving): Another sourcegenerator which creates a list of rules and informations about each and every property and object being saved, which speeds up the runtime process of saving drastically.
-- Queastor: Search everywhere. Every object and property loaded can be searched here in an instance. Even settings and UI elements can be included.
-- Nexus: Custom implementation of a property system for enhanced performance and history support
+# The Arcanum Project
 
-## What are we aiming for?
-Minnator's Modforge already has a nice suite of tools and decent performance, but we want to shadow this:
-- Shader based map rendering
-- Project files to reduce loading times and resume where ever you left of
-- Full plugin support to have users add or expand features how they like it; Limited on release to Aplha 1.0.0
+The **Arcanum Project** is a bundle of tools to ease the modding of Europa Universalis 5.
+The tools is mainly being developed by [Minnator](https://github.com/Minnator) and [MelonCoaster](https://github.com/mel-co) with the help of [CzerstfyChlep](https://github.com/CzerstfyChlep), [zulacecek](https://github.com/zulacecek) and other contributors alike.
+
+This tool is in active development and will become more feature rich and polished in the future.
+
+## Quick Setup Guide
+1. Backup your modfiles
+2. Aquire the latest release
+3. Run the `docs` command in EUV to generate the documentation data
+4. Run Arcanum and enter the required mod and vanilla paths in the main menu
+5. Lauch the current config and start modding.
+
+## Editing - Quick Guide
+- Any object can be selected via search or the map using different selection modes.
+- Ones an object is selected it is loaded to a custom UI (NUI)
+- Edit any values you want in NUI
+- Before you hit `Ctrl+S` to save all changes check with the settings for saving if they are to your liking
+- Save all your changes
+
+## Implemented Features
 - Smart history tree to be able to undo and redo any action taken
-- Quick and consistent loading times
-- All ingame mapmodes (New ones will be added once the respected objects are prased)
-- Interactive map for selection and editing
-- PDX map editor for all games which share the same format of province definition in a `.bmp` file.
-- Detailed error detection and pinpointing to file, line and char (later inline editing via the error log)
+- Interactive map with map modes
+- Detailed error detection and pinpointing to file, line and char
 - Hot reloading support for mod and game files
-An overview of what is currently being worked on can be seen in [this](https://github.com/users/Minnator/projects/2/views/2) project.
+- Support for more than **40** different game objects to be edited.
+
+## Current limitations
+- Anything from the `menu_screen/start/setup` folder can not yet be saved and thus is readonly
+- No objects with the posibility of effects and triggers can be edited
+
+## Future features
+- Map editor
+- Intelligent map design aides
+- Automatic error correction
+- Plugin support
+- User defined map modes
+- Map exporting
+- Heightmap and normals on the interactive map
 
 ## Input and contribution:
 Currently we are *not* actively looking for people to contribute, however we are open to ideas and suggestions. 
