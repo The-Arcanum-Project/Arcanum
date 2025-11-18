@@ -60,15 +60,22 @@ public static class InjectionHelper
                continue;
             }
 
-            UIHandle.Instance.PopUpHandle
-                    .ShowMBox("Attempted to save an injection for an object from a non vanilla source. " +
-                              "This is not allowed as only vanilla objects can be modified directly. \n" +
-                              "WHY DON'T WE SUPPORT THIS? \n Ask Stiopa",
-                              "Invalid Injection Target",
-                              MBoxButton.OK,
-                              MessageBoxImage.Error);
-            abort = true;
-            continue;
+            // We can not inject into an object that is not from a vanilla source unless we are replacing it.
+            if (target.InjRepType is InjRepType.INJECT or InjRepType.TRY_INJECT or InjRepType.INJECT_OR_CREATE)
+            {
+               UIHandle.Instance.PopUpHandle
+                       .ShowMBox("Attempted to save an injection for an object from a non vanilla source. " +
+                                 "This is not allowed as only vanilla objects can be modified directly. \n" +
+                                 "WHY DON'T WE SUPPORT THIS? \n Ask Stiopa",
+                                 "Invalid Injection Target",
+                                 MBoxButton.OK,
+                                 MessageBoxImage.Error);
+               abort = true;
+               continue;
+            }
+
+            Debug.Assert(csso.SavingCategory.IsReplace(),
+                         "Saving category is not replace for an object that is marked as replace.");
          }
 
          if (!changedProperties.TryGetValue(target, out var changedProps))
@@ -159,10 +166,18 @@ public static class InjectionHelper
 
                var eInjects = csso.Target.GetInjectsForTarget();
 
+               if (csso.Target.InjRepType is InjRepType.REPLACE
+                                          or InjRepType.TRY_REPLACE
+                                          or InjRepType.REPLACE_OR_CREATE)
+               {
+                  // If the target is already a replace we can simply modify it
+                  csso.SavingCategory = SavingCategory.Modify;
+                  continue;
+               }
+
                // We have existing injects are are now going to perform a check if we can simply bundle them into a single replace.
                // This is only possible if there are no conflicting properties.
                if (eInjects.Length > 0)
-               {
                   foreach (var injObject in eInjects)
                   {
                      if (injObject.Source.IsVanilla)
@@ -189,7 +204,6 @@ public static class InjectionHelper
                      // And as all injects are already in the finalInjects we don't have to do anything special here.
                      toRemoveFromFiles.Add(injObject);
                   }
-               }
 
                break;
             default:
@@ -261,7 +275,8 @@ public static class InjectionHelper
             var changes = SaveMaster.GetChangesForObject(obj);
             var percentageModified = changes.Length / (float)numOfProperties;
 
-            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject)
+            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject ||
+                obj.InjRepType is InjRepType.REPLACE or InjRepType.TRY_REPLACE or InjRepType.REPLACE_OR_CREATE)
             {
                category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
                // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
@@ -347,6 +362,15 @@ public static class InjectionHelper
             {
                if (ej.Source.IsModded)
                   injectsInModFiles.Add(ej.Source);
+               continue;
+            }
+
+            // If we have a replace already in the mod for this object and we want to inject, we promote the inject to 
+            // a replace which will just rewrite the entire object.
+            if (ejStrat.IsReplace() && isInject && ej.Source.IsModded)
+            {
+               csso.SavingCategory =
+                  SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
                continue;
             }
 

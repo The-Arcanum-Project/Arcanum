@@ -109,7 +109,7 @@ public static class SimpleObjectParser
                   break;
             }
 
-            return;
+            continue;
          }
 
          // Otherwise we just add to globals as normal

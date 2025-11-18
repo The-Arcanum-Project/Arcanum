@@ -281,6 +281,8 @@ public static class SaveMaster
          if (value[0].SavingCategory == SavingCategory.Modify)
          {
             SaveFile(fo, true);
+            foreach (var csso in value)
+               RemoveObjectFromChanges(csso.Target);
             continue;
          }
 
@@ -436,7 +438,10 @@ public static class SaveMaster
             isb.InnerBuilder.AppendLine();
 
          isb.SetIndentLevel(indentLevel);
-         obj.ToAgsContext().BuildContext(isb);
+         if (obj.InjRepType != InjRepType.None)
+            obj.ToAgsContext().BuildContext(isb, [.. obj.SaveableProps], obj.InjRepType, true);
+         else
+            obj.ToAgsContext().BuildContext(isb);
          var lineOffset = CountNewLinesInStringBuilder(isb.InnerBuilder);
          var charPosOffset = isb.InnerBuilder.Length;
          var oldLineCount = CountLinesInOriginal(original, obj.FileLocation);
@@ -662,47 +667,51 @@ public static class SaveMaster
       PropertyOrderCache.Clear();
       var sb = new StringBuilder(original.Length);
       // The position we are in the source string we are removing content from
-      var srcPos = 0;
+
       var srcPointer = 0;
       var toRemove = obj.OrderBy(o => o.FileLocation.CharPos).ToArray();
       var objInFile = fo.ObjectsInFile.OrderBy(o => o.FileLocation.CharPos).ToArray();
 
+      var lastWrittenObject = 0;
       var deltaLines = 0;
       var deltaCharPos = 0;
-      foreach (var o in objInFile)
+      for (var i = 0; i < objInFile.Length; i++)
       {
+         var o = objInFile[i];
          // If we find an object that is yet to be written we skip it
          if (o.FileLocation == Eu5ObjectLocation.Empty)
-            continue;
-
-         var objectLength = o.FileLocation.Length;
-         // if we are not yet at the location of the first we can just append and proceed as if nothing happened
-         if (toRemove[0].FileLocation.CharPos > o.FileLocation.CharPos)
          {
-            sb.Append(original, srcPos, objectLength);
+            lastWrittenObject = i + 1;
             continue;
          }
 
          // We found the next object we want to remove.
          if (srcPointer < toRemove.Length && toRemove[srcPointer].FileLocation.CharPos == o.FileLocation.CharPos)
          {
+            // Write everything up to the object to be removed
+            sb.Append(original,
+                      objInFile[lastWrittenObject].FileLocation.CharPos,
+                      o.FileLocation.CharPos - objInFile[lastWrittenObject].FileLocation.CharPos);
+
             // Skip over the object to be removed
-            srcPos = o.FileLocation.CharPos + objectLength;
             deltaLines -= CountLinesInOriginal(original, o.FileLocation);
-            deltaCharPos -= objectLength;
+            deltaCharPos -= o.FileLocation.Length;
             fo.ObjectsInFile.Remove(o);
             srcPointer++;
+            lastWrittenObject = i + 1;
             continue;
          }
 
-         // We add the object back to the new file
-         sb.Append(original, srcPos, objectLength);
-         srcPos = o.FileLocation.CharPos + objectLength;
-
-         // As this object 
+         // We are after the object to be removed, so we need to update the FileLocation
          var fl = o.FileLocation;
          o.FileLocation = new(0, fl.Line + deltaLines, fl.Length, fl.CharPos + deltaCharPos);
       }
+
+      // Write any remaining content after the last removed object
+      if (lastWrittenObject < objInFile.Length)
+         sb.Append(original,
+                   objInFile[lastWrittenObject].FileLocation.CharPos,
+                   original.Length - objInFile[lastWrittenObject].FileLocation.CharPos);
 
 #if DEBUG
       var newFileLength = sb.Length;

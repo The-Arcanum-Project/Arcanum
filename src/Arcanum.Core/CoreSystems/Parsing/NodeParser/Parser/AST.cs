@@ -11,9 +11,12 @@ public abstract class AstNode(int start, int length)
 
    public abstract (int line, int charPos) GetEndLocation();
 
-   protected static (int, int) GetTokenEnd(Token token)
+   /// <summary>
+   /// Returns the end location (line and character position) of a given token.
+   /// </summary>
+   protected static (int line, int charPos) GetTokenEnd(Token token)
    {
-      return (token.Line, token.Column + token.Length);
+      return (token.Line, token.Start + token.Length);
    }
 
    public int Start => start;
@@ -105,7 +108,7 @@ public class BlockNode : StatementNode
    public override (int line, int charPos) GetEndLocation()
    {
       if (ClosingToken != null)
-         return GetTokenEnd(ClosingToken.Value);
+         return (ClosingToken.Value.Line, ClosingToken.Value.End);
 
       return Children.Count > 0 ? Children.Last().GetEndLocation() : KeyNode.GetEndLocation();
    }
