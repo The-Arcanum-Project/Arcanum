@@ -30,7 +30,6 @@ public class BrushSelectionStrategy : IMapInteractionStrategy
     {
         GenerateBrushPoints(pos, _brushRadius);
         _brushMapRadius = map.Coords.NdcToMap(_brushRadius);
-        Console.WriteLine(_brushMapRadius);
         map.LocationRenderer.UpdateSelectionOutline(_brushPoints, true);
         map.LocationRenderer.Render();
     }
