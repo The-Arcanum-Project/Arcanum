@@ -45,7 +45,15 @@ public static class ArcLog
          // GetConsumingEnumerable() will block until an item is available in the queue.
          // When .CompleteAdding() is called, the loop will finish.
          foreach (var message in _logQueue.GetConsumingEnumerable())
-            Console.WriteLine(message);
+            try
+            {
+               Console.WriteLine(message);
+            }
+            catch (Exception)
+            {
+               // In case logging fails, we don't want to crash the application. But shut down logging.
+               return;
+            }
       })
       {
          IsBackground = true, Name = "ArcLog Worker",
