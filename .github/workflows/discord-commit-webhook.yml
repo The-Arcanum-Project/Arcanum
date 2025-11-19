@@ -1,0 +1,50 @@
+# .github/workflows/discord-commit-webhook.yml
+
+name: Discord Push Webhook
+
+on:
+  push:
+    branches:
+      - dev  # Change this to 'main' or your default branch if needed
+
+jobs:
+  send-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Commit Message
+        id: build_message
+        run: |
+          # The github context contains the JSON payload of the event.
+          # We use `jq` to parse it and format the commit messages.
+          # The result is a multi-line string that we can use in the next step.
+          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` " + .message + " - *" + .author.name + "*"')
+          
+          # We need to escape newlines for the JSON payload.
+          COMMIT_MESSAGES="${COMMIT_MESSAGES//'%'/'%25'}"
+          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\n'/'\n'}"
+          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\r'/'\r'}"
+          
+          echo "message<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Send Discord Webhook
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: ""
+          embeds: |
+            [
+              {
+                "author": {
+                  "name": "${{ github.event.sender.login }}",
+                  "url": "${{ github.event.sender.html_url }}",
+                  "icon_url": "${{ github.event.sender.avatar_url }}"
+                },
+                "title": "[${{ github.repository }}:${{ github.ref_name }}] ${{ GITHUB_EVENT_NAME }} has ${{_payload.commits_length}} new commits",
+                "url": "${{ github.event.compare }}",
+                "description": "${{ env.message }}",
+                "color": "3447003",
+                "timestamp": "${{ github.event.head_commit.timestamp }}"
+              }
+            ]
