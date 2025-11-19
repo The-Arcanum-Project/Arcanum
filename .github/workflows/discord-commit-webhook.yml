@@ -5,7 +5,7 @@ name: Discord Push Webhook
 on:
   push:
     branches:
-      - dev  # Change this to 'main' or your default branch if needed
+      - dev  # Change this to your default branch if needed
 
 jobs:
   send-to-discord:
@@ -14,9 +14,6 @@ jobs:
       - name: Build Commit Message
         id: build_message
         run: |
-          # The github context contains the JSON payload of the event.
-          # We use `jq` to parse it and format the commit messages.
-          # The result is a multi-line string that we can use in the next step.
           COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` " + .message + " - *" + .author.name + "*"')
           
           # We need to escape newlines for the JSON payload.
@@ -41,7 +38,7 @@ jobs:
                   "url": "${{ github.event.sender.html_url }}",
                   "icon_url": "${{ github.event.sender.avatar_url }}"
                 },
-                "title": "[${{ github.repository }}:${{ github.ref_name }}] ${{ GITHUB_EVENT_NAME }} has ${{_payload.commits_length}} new commits",
+                "title": "[${{ github.ref_name }}] ${{ length(github.event.commits) }} new commit(s)",
                 "url": "${{ github.event.compare }}",
                 "description": "${{ env.message }}",
                 "color": "3447003",
