@@ -15,15 +15,12 @@ jobs:
       - name: Build Commit Message and Count
         id: build_message
         run: |
-          # Format the commit messages into a single string
+          # Format the commit messages into a single string.
+          # jq outputs each formatted commit on a new line.
           COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` - " + .message + " - *" + .author.name + "*"')
           
-          # Escape characters for JSON
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//'%'/'%25'}"
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\n'/'\n'}"
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\r'/'\r'}"
-          
-          # Set the message as a multi-line environment variable for the job
+          # Set the message as a multi-line environment variable for the job.
+          # The EOF heredoc syntax correctly preserves the newlines from the jq output.
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
