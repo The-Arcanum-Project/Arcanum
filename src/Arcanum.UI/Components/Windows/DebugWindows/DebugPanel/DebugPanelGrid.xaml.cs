@@ -7,6 +7,7 @@ using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
+using Common.Logger;
 using MultiCollectionEditor = Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors.MultiCollectionEditor;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
@@ -110,5 +111,10 @@ public partial class DebugPanelGrid
                                                      targets.Select(x => x.LocationChildren),
                                                      Globals.Locations.Values);
       Debug.WriteLine($"Result: {result}");
+   }
+
+   private void InsertLogSpacerButton_Click(object sender, RoutedEventArgs e)
+   {
+      ArcLog.WriteLine("DBP", LogLevel.INF, "----------------------------------------");
    }
 }

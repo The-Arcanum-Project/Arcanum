@@ -173,6 +173,10 @@ public static class IO
             File.AppendAllText(path, data, encoding);
          else
             File.WriteAllText(path, data, encoding);
+
+#if DEBUG
+         ArcLog.WriteLine("SAV", LogLevel.INF, $"IO.WriteAllText succeeded for path: {path}");
+#endif
          return true;
       }
       catch (IOException e)

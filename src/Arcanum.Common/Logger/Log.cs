@@ -51,8 +51,8 @@ public static class ArcLog
             }
             catch (Exception)
             {
-               // In case logging fails, we don't want to crash the application. But shut down logging.
-               return;
+               // In case logging fails, we don't want to crash the application. B
+               // So we silently ignore logging errors.
             }
       })
       {

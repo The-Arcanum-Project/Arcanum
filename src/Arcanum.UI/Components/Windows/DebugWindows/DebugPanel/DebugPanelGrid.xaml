@@ -87,6 +87,11 @@
                                      Margin = "2"
                                      Padding = "4"
                                      Click = "ButtonBase_OnClick" />
+
+            <styleClasses:BaseButton Content = "Insert Log Spacer"
+                                     Margin = "2"
+                                     Padding = "4"
+                                     Click = "InsertLogSpacerButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1"
