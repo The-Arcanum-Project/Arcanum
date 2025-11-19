@@ -3,9 +3,12 @@
 # The Arcanum Project
 
 The **Arcanum Project** is a bundle of tools to ease the modding of Europa Universalis 5.
-The tools is mainly being developed by [Minnator](https://github.com/Minnator) and [MelonCoaster](https://github.com/mel-co) with the help of [CzerstfyChlep](https://github.com/CzerstfyChlep), [zulacecek](https://github.com/zulacecek) and other contributors alike.
+The tools are mainly being developed by [Minnator](https://github.com/Minnator) and [MelonCoaster](https://github.com/mel-co) with the help of [CzerstfyChlep](https://github.com/CzerstfyChlep), [zulacecek](https://github.com/zulacecek) and other contributors alike.
 
 This tool is in active development and will become more feature rich and polished in the future.
+
+## Documentation
+Our documentation is very much WIP but the already existing parts can be accessed [here](https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html)
 
 ## Quick Setup Guide
 1. Backup your modfiles
@@ -16,9 +19,9 @@ This tool is in active development and will become more feature rich and polishe
 
 ## Editing - Quick Guide
 - Any object can be selected via search or the map using different selection modes.
-- Ones an object is selected it is loaded to a custom UI (NUI)
+- Onces an object is selected it is loaded to a custom UI (NUI)
 - Edit any values you want in NUI
-- Before you hit `Ctrl+S` to save all changes check with the settings for saving if they are to your liking
+- Before you hit `Ctrl+S`, to save all changes, check with the settings for saving if they are to your liking
 - Save all your changes
 
 ## Implemented Features
@@ -40,6 +43,7 @@ This tool is in active development and will become more feature rich and polishe
 - User defined map modes
 - Map exporting
 - Heightmap and normals on the interactive map
+- Editing support for all objects
 
 ## Input and contribution:
 Currently we are *not* actively looking for people to contribute, however we are open to ideas and suggestions. 
