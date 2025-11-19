@@ -16,7 +16,7 @@ jobs:
         id: build_message
         run: |
           # Format the commit messages into a single string
-          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` " + .message + " - *" + .author.name + "*"')
+          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` - " + .message + " - *" + .author.name + "*"')
           
           # Escape characters for JSON
           COMMIT_MESSAGES="${COMMIT_MESSAGES//'%'/'%25'}"
