@@ -101,6 +101,12 @@ public static class SaveMaster
       }
 
       NeedsToBeSaved.Remove(target);
+      if (NewObjects.TryGetValue(target.GetType(), out var newList))
+      {
+         newList.Remove(target);
+         if (newList.Count == 0)
+            NewObjects.Remove(target.GetType());
+      }
    }
 
    private static void AddSingleCommand(Eu5ObjectCommand command, IEu5Object target)
@@ -280,6 +286,12 @@ public static class SaveMaster
 
          if (value[0].SavingCategory == SavingCategory.Modify)
          {
+            foreach (var csso in value)
+            {
+               fo.ObjectsInFile.Add(csso.Target);
+               csso.Target.Source = fo;
+            }
+
             SaveFile(fo, true);
             foreach (var csso in value)
                RemoveObjectFromChanges(csso.Target);
@@ -394,7 +406,9 @@ public static class SaveMaster
 
       var original = toUpdateObjs.Count > 0
                         ? IO.IO.ReadAllTextUtf8(toUpdateObjs[0].Source.Path.FullPath)
-                        : string.Empty;
+                        : newObjs.Count > 0
+                           ? IO.IO.ReadAllTextUtf8(newObjs[0].Source.Path.FullPath)
+                           : string.Empty;
 
       if (string.IsNullOrEmpty(original))
          if (newObjs.Count > 0 && toUpdateObjs.Count > 0)
@@ -456,12 +470,14 @@ public static class SaveMaster
 
          // Any object before this one has to get it's FileLocation updated as well
          if (sortedOldObjects.Length > 0)
-            while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+            while (oldObjIndex < sortedOldObjects.Length &&
+                   sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
             {
                // We can skip the first one as everything before it is just copied over from before.
                if (i == 0)
                {
-                  while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+                  while (oldObjIndex < sortedOldObjects.Length &&
+                         sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
                      oldObjIndex++;
                   break;
                }
@@ -519,6 +535,9 @@ public static class SaveMaster
          lastEndPos = obj.FileLocation.CharPos + obj.FileLocation.Length - 1;
       }
 #endif
+
+      foreach (var obj in objs)
+         RemoveObjectFromChanges(obj);
 
       return sb;
    }
@@ -603,8 +622,7 @@ public static class SaveMaster
       if (!fileObj.IsModded)
          fileObj.Path.MoveToMod();
 
-      var np = fileObj.Path.FullPath;
-      IO.IO.WriteAllTextUtf8WithBom(np, sb.ToString());
+      IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
       if (register)
          FileStateManager.RegisterPath(fileObj.Path);
    }

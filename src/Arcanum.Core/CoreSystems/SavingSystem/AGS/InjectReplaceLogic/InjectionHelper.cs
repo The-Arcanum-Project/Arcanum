@@ -48,6 +48,7 @@ public static class InjectionHelper
 
          var target = csso.Target;
          // If the target's source is Empty we know that we have a newly created object that does not get saved by injection.
+         // So we just add it to the objects in the file and it will be saved via Modification write.
          if (target.Source == Eu5FileObj.Empty)
             continue;
 
@@ -254,13 +255,13 @@ public static class InjectionHelper
 
          SavingCategory category;
          var descriptor = DescriptorDefinitions.TypeToDescriptor[obj.GetType()];
-         // we have an object type that must be saved in a single file only
          if (!descriptor.AllowMultipleFiles || obj.FileLocation == Eu5ObjectLocation.Empty)
          {
+            // we have an object type that must be saved in a single file only if the object is not Empty
             if (obj.FileLocation == Eu5ObjectLocation.Empty)
             {
                // We have a new object that is not saved via injection
-               category = SavingCategory.FileOverride;
+               category = SavingCategory.Modify;
             }
             else
             {
