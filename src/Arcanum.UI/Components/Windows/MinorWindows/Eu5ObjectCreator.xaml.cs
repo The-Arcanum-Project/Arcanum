@@ -61,6 +61,7 @@ public partial class Eu5ObjectCreator
             Close();
          }
       }
+      // Check if we would create a duplicate Unique ID
       else if (CreatedObject?.GetGlobalItemsNonGeneric().Contains(CreatedObject.UniqueId) ?? false)
       {
          MBox.Show("An object with the same Unique ID already exists in the global items. Please change the Unique ID to a different value.",
