@@ -81,7 +81,7 @@ public partial class Eu5ObjectCreator
       Close();
    }
 
-   public static bool ShowDialog(Type eu5ObjectType, out IEu5Object? newObject, bool addToGlobals = false)
+   public static bool ShowDialog(Type eu5ObjectType, bool addToGlobals = false)
    {
       var window = new Eu5ObjectCreator
       {
@@ -91,7 +91,7 @@ public partial class Eu5ObjectCreator
       };
       window.MarkRequiredFields();
 
-      newObject = window.CreatedObject;
+      var newObject = window.CreatedObject;
       if (addToGlobals)
          newObject?.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
       return window.ShowDialog() == true;
