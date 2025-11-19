@@ -12,34 +12,54 @@ jobs:
   send-to-discord:
     runs-on: ubuntu-latest
     steps:
-      - name: Build Commit Message and Count
-        id: build_message
+      - name: Build Commit Data
+        id: build_data
         run: |
-          # Format the commit messages into a single string
-          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "```ansi\n\u001b[1;34m" + .id[0:7] + "\u001b[0m - " + .message + " - *" + .author.name + "*\n```"')
+          # 1. Build the description string with ANSI color codes
+          #    - We replace newlines in the commit message with '\\n' for valid JSON.
+          #    - We wrap each commit in its own ANSI code block.
+          DESCRIPTION=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '[.[] | .message |= gsub("\\n"; "\\n") | "```ansi\n\u001b[1;34m" + .id[0:7] + "\u001b[0m - " + .message + " - *" + .author.name + "*\n```"] | join("\n")')
           
-          # Escape characters for JSON
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//'%'/'%25'}"
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\n'/'\n'}"
-          COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\r'/'\r'}"
+          # 2. Set the description as a multiline output for the next step
+          echo "description<<EOF" >> $GITHUB_OUTPUT
+          echo "$DESCRIPTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           
-          # Set the message as a multi-line environment variable for the job
-          echo "message<<EOF" >> $GITHUB_ENV
-          echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # 3. Calculate the commit count
+          echo "count=$(echo '${{ toJSON(github.event.commits) }}' | jq 'length')" >> $GITHUB_OUTPUT
 
-          # Calculate the commit count using jq and save it as an environment variable
-          echo "COMMIT_COUNT=$(echo '${{ toJSON(github.event.commits) }}' | jq 'length')" >> $GITHUB_ENV
-
-      - name: Send Discord Webhook
-        uses: tsickert/discord-webhook@v5.3.0
-        with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          embed-title: "[${{ github.ref_name }}] ${{ env.COMMIT_COUNT }} new commit(s)"
-          embed-description: "${{ env.message }}"
-          embed-url: "${{ github.event.compare }}"
-          embed-color: "3447003"
-          embed-timestamp: "${{ github.event.head_commit.timestamp }}"
-          embed-author-name: "${{ github.event.sender.login }}"
-          embed-author-url: "${{ github.event.sender.html_url }}"
-          embed-author-icon-url: "${{ github.event.sender.avatar_url }}"
+      - name: Send Discord Webhook via curl
+        run: |
+          # We use jq to construct the final JSON payload.
+          # --argjson is used for numbers, --arg for strings.
+          # This is the safest way to build valid JSON.
+          JSON_PAYLOAD=$(jq -n \
+            --arg author_name "${{ github.event.sender.login }}" \
+            --arg author_url "${{ github.event.sender.html_url }}" \
+            --arg author_icon_url "${{ github.event.sender.avatar_url }}" \
+            --arg title "[${{ github.ref_name }}] ${{ steps.build_data.outputs.count }} new commit(s)" \
+            --arg url "${{ github.event.compare }}" \
+            --arg description "${{ steps.build_data.outputs.description }}" \
+            --argjson color 3447003 \
+            --arg timestamp "${{ github.event.head_commit.timestamp }}" \
+            '{
+              "embeds": [
+                {
+                  "author": {
+                    "name": $author_name,
+                    "url": $author_url,
+                    "icon_url": $author_icon_url
+                  },
+                  "title": $title,
+                  "url": $url,
+                  "description": $description,
+                  "color": $color,
+                  "timestamp": $timestamp
+                }
+              ]
+            }')
+            
+          # Send the payload using curl
+          curl -X POST -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD" \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}"
