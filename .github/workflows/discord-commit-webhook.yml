@@ -35,19 +35,11 @@ jobs:
         uses: tsickert/discord-webhook@v5.3.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          content: ""
-          embeds: |
-            [
-              {
-                "author": {
-                  "name": "${{ github.event.sender.login }}",
-                  "url": "${{ github.event.sender.html_url }}",
-                  "icon_url": "${{ github.event.sender.avatar_url }}"
-                },
-                "title": "[${{ github.ref_name }}] ${{ env.COMMIT_COUNT }} new commit(s)",
-                "url": "${{ github.event.compare }}",
-                "description": "${{ env.message }}",
-                "color": "3447003",
-                "timestamp": "${{ github.event.head_commit.timestamp }}"
-              }
-            ]
+          embed-title: "[${{ github.ref_name }}] ${{ env.COMMIT_COUNT }} new commit(s)"
+          embed-description: "${{ env.message }}"
+          embed-url: "${{ github.event.compare }}"
+          embed-color: "3447003"
+          embed-timestamp: "${{ github.event.head_commit.timestamp }}"
+          embed-author-name: "${{ github.event.sender.login }}"
+          embed-author-url: "${{ github.event.sender.html_url }}"
+          embed-author-icon-url: "${{ github.event.sender.avatar_url }}"
