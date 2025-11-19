@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - dev
-      - main 
+      - main
 
 jobs:
   send-to-discord:
@@ -23,13 +23,13 @@ jobs:
           COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\n'/'\n'}"
           COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\r'/'\r'}"
           
-          # Set the message as a multi-line output variable for the job
+          # Set the message as a multi-line environment variable for the job
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          # Calculate the commit count and save it as an environment variable
-          echo "COMMIT_COUNT=${{ length(github.event.commits) }}" >> $GITHUB_ENV
+          # Calculate the commit count using jq and save it as an environment variable
+          echo "COMMIT_COUNT=$(echo '${{ toJSON(github.event.commits) }}' | jq 'length')" >> $GITHUB_ENV
 
       - name: Send Discord Webhook
         uses: tsickert/discord-webhook@v5.3.0
