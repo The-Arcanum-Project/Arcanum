@@ -5,25 +5,31 @@ name: Discord Push Webhook
 on:
   push:
     branches:
-      - dev  # Change this to your default branch if needed
+      - dev
+      - main 
 
 jobs:
   send-to-discord:
     runs-on: ubuntu-latest
     steps:
-      - name: Build Commit Message
+      - name: Build Commit Message and Count
         id: build_message
         run: |
+          # Format the commit messages into a single string
           COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` " + .message + " - *" + .author.name + "*"')
           
-          # We need to escape newlines for the JSON payload.
+          # Escape characters for JSON
           COMMIT_MESSAGES="${COMMIT_MESSAGES//'%'/'%25'}"
           COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\n'/'\n'}"
           COMMIT_MESSAGES="${COMMIT_MESSAGES//$'\r'/'\r'}"
           
+          # Set the message as a multi-line output variable for the job
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
+          # Calculate the commit count and save it as an environment variable
+          echo "COMMIT_COUNT=${{ length(github.event.commits) }}" >> $GITHUB_ENV
 
       - name: Send Discord Webhook
         uses: tsickert/discord-webhook@v5.3.0
@@ -38,7 +44,7 @@ jobs:
                   "url": "${{ github.event.sender.html_url }}",
                   "icon_url": "${{ github.event.sender.avatar_url }}"
                 },
-                "title": "[${{ github.ref_name }}] ${{ length(github.event.commits) }} new commit(s)",
+                "title": "[${{ github.ref_name }}] ${{ env.COMMIT_COUNT }} new commit(s)",
                 "url": "${{ github.event.compare }}",
                 "description": "${{ env.message }}",
                 "color": "3447003",
