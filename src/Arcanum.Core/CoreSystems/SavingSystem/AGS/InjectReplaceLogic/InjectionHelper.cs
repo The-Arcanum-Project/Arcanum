@@ -285,8 +285,21 @@ public static class InjectionHelper
             {
                category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
                // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate)
-               if (!obj.Source.IsVanilla && category is SavingCategory.Replace or SavingCategory.TryReplace)
-                  category = SavingCategory.ReplaceOrCreate;
+
+               if (!obj.Source.IsVanilla)
+               {
+                  if (category is SavingCategory.Replace or SavingCategory.TryReplace)
+                     category = SavingCategory.ReplaceOrCreate;
+               }
+               else
+               {
+                  Debug.Assert(obj.Source != Eu5FileObj.Empty,
+                               "Object source is empty in injection categorization despite previous checks.");
+                  Debug.Assert(obj.Source.IsVanilla,
+                               "Object source is not vanilla in injection categorization despite previous checks.");
+                  categorized[i] = new(obj, category) { SaveLocation = obj.Source };
+                  continue;
+               }
             }
          }
 
