@@ -143,6 +143,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public MainWindow()
    {
       InitializeComponent();
+#if !DEBUG
+      DebugPanel.Visibility = Visibility.Collapsed;
+#else
+      DebugPanel.Visibility = Visibility.Visible;
+#endif
+
       PerformanceCountersHelper.Initialize(this);
    }
 

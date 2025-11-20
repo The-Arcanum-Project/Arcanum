@@ -8,7 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
-        <AssemblyName>Arcanum Alpha 0.9</AssemblyName>
+        <AssemblyName>Arcanum Alpha 0.9.1</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
