@@ -1,11 +1,11 @@
-#define USE_CRASH_HANDLER
-
 using System.Windows;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.UI;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
+#if !DEBUG
 using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
+#endif
 
 namespace Arcanum.App;
 
@@ -17,7 +17,7 @@ internal static class Program
    [STAThread]
    private static void Main()
    {
-#if !USE_CRASH_HANDLER
+#if !DEBUG
       try
       {
          InternalApplicationRun();
