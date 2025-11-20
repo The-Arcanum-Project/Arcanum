@@ -326,8 +326,19 @@ public static class InjectionHelper
       foreach (var typeGroup in byType.Values)
       {
          var obj = typeGroup[0];
-         if (obj.SavingCategory == SavingCategory.FileOverride && obj.SaveLocation != Eu5FileObj.Empty)
-            continue;
+
+         if (obj.SavingCategory == SavingCategory.FileOverride)
+         {
+            if (obj.SaveLocation != Eu5FileObj.Empty)
+               continue;
+
+            // If we want to edit vanilla files we have to save to the original source
+            if (!Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
+            {
+               obj.SaveLocation = obj.Target.Source;
+               continue;
+            }
+         }
 
          var fo = FileStateManager.CreateEu5FileObject(obj.Target);
 

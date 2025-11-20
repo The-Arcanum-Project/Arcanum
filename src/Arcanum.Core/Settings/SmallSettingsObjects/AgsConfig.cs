@@ -36,4 +36,8 @@ public class AgsConfig
    [Description("The strategy to use in case there already is an inject in a base mod for the value being injected.\n Recommended to keep as Inject.")]
    [DefaultValue(InjRepType.INJECT)]
    public InjRepType InjectCollisionResolveStrategy { get; set; } = InjRepType.INJECT;
+
+   [Description("If true, when saving objects to files, files will be moved to the modded data space.")]
+   [DefaultValue(true)]
+   public bool MoveFilesToModdedDataSpaceOnSaving { get; set; } = true;
 }

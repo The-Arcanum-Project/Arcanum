@@ -610,7 +610,7 @@ public static class SaveMaster
    public static void WriteFile(StringBuilder sb, Eu5FileObj fileObj, bool register)
    {
       // We need to move the file to the modded data space if it is not there yet
-      if (!fileObj.IsModded)
+      if (!fileObj.IsModded && Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
          fileObj.Path.MoveToMod();
 
       IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
