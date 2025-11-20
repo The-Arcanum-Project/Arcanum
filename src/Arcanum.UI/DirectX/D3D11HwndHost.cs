@@ -14,11 +14,10 @@ public partial class D3D11HwndHost : HwndHost
 
    private readonly DispatcherTimer _resizeTimer;
    private SizeChangedInfo _currentSizeInfo = null!;
-   
+
    // Loaded event after _renderer.Initialize
    public new event EventHandler<ID3DRenderer> Loaded;
-   
-   
+
    public D3D11HwndHost(ID3DRenderer renderer, Border hwndHostContainer, EventHandler<ID3DRenderer> loaded)
    {
       Loaded += loaded;
@@ -92,9 +91,7 @@ public partial class D3D11HwndHost : HwndHost
    {
       _renderer.Dispose();
       if (!DestroyWindow(hwnd.Handle))
-      {
          throw new InvalidOperationException("Could not destroy window");
-      }
    }
 
    private void OnUnloaded(object sender, RoutedEventArgs e)

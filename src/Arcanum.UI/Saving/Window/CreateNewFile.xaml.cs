@@ -10,15 +10,15 @@ namespace Arcanum.UI.Saving.Window;
 
 public partial class CreateNewFile
 {
-   public PathObj NewPath => new PathObj(FileDescriptor.LocalPath,
-                                         FileName + "." + FileDescriptor.FileType.FileEnding,
-                                         FileManager.ModDataSpace);
+   public PathObj NewPath => new(FileDescriptor.LocalPath,
+                                 FileName + "." + FileDescriptor.FileType.FileEnding,
+                                 FileManager.ModDataSpace);
 
    public static readonly DependencyProperty FileNameProperty =
       DependencyProperty.Register(nameof(FileName),
                                   typeof(string),
                                   typeof(CreateNewFile),
-                                  new PropertyMetadata(default(string)));
+                                  new(default(string)));
 
    private FileDescriptor FileDescriptor { get; }
 
@@ -35,7 +35,7 @@ public partial class CreateNewFile
 
       var binding = new Binding("FileName")
       {
-         RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(CreateNewFile), 1),
+         RelativeSource = new(RelativeSourceMode.FindAncestor, typeof(CreateNewFile), 1),
          UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
       };
 

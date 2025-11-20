@@ -32,15 +32,15 @@ public partial class MapControl
 {
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
-   
+
    public readonly MapInteractionManager MapInteractionManager;
 
    public MapCoordinateConverter Coords { get; private set; } = null!;
-   
-   private Color4[] _currentBackgroundColor;
-   private Color4[] _selectionColor;
+
+   private Color4[] _currentBackgroundColor = null!;
+   private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
-   
+
    public static event Action? OnMapLoaded;
 
    public static readonly DependencyProperty CurrentPosProperty =
@@ -53,8 +53,7 @@ public partial class MapControl
    }
 
    // Command to load the project in the Arcanum view
-   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(args => { });
-   
+   public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(_ => { });
 
    public MapControl()
    {
@@ -68,8 +67,8 @@ public partial class MapControl
       HwndHostContainer.MouseDown += OnMouseMiddleButtonDown;
       HwndHostContainer.PreviewMouseUp += OnPreviewMouseMiddleButtonUp;
       HwndHostContainer.MouseMove += OnMouseMove;
-      HwndHostContainer.MouseEnter += (s, e) => Window.GetWindow(this).KeyDown += MapInteractionManager.HandleKeyDown;
-      HwndHostContainer.MouseLeave += (s, e) => Window.GetWindow(this).KeyDown -= MapInteractionManager.HandleKeyDown;
+      HwndHostContainer.MouseEnter += (_, _) => Window.GetWindow(this)!.KeyDown += MapInteractionManager.HandleKeyDown;
+      HwndHostContainer.MouseLeave += (_, _) => Window.GetWindow(this)!.KeyDown -= MapInteractionManager.HandleKeyDown;
 
       OnAbsolutePositionChanged += pos =>
       {
@@ -100,7 +99,7 @@ public partial class MapControl
       _d3dHost.Invalidate();
    }
 
-   private static Color4[] CreateColors(Polygon[] polygons)
+   private static Color4[] CreateColors()
    {
       var locations = Globals.Locations.Values;
       var colors = new Color4[locations.Count];
@@ -122,7 +121,7 @@ public partial class MapControl
       Coords = new(this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
-      var startColor = CreateColors(polygons);
+      var startColor = CreateColors();
       LocationRenderer = new(vertices, startColor, Coords.ImageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
@@ -181,6 +180,7 @@ public partial class MapControl
       LocationRenderer.Pan.Y = Math.Clamp(y, -0.1f, 1.1f);
       UpdateRenderer();
    }
+
    public void EnsureVisible(RectangleF area)
    {
       var areaAspectRatio = area.Width / area.Height;
@@ -218,7 +218,7 @@ public partial class MapControl
    }
 
    #region Events
-   
+
    private void OnMouseWheel(object sender, MouseWheelEventArgs e)
    {
       MapInteractionManager.HandleMouseWheel(e);
@@ -235,6 +235,7 @@ public partial class MapControl
       Coords.InvalidateCache(position);
       OnAbsolutePositionChanged?.Invoke(CurrentPos);
    }
+
    private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)
    {
       MapInteractionManager.HandleMouseDown(e);

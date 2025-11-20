@@ -6,7 +6,6 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Pops;
 
 namespace Arcanum.Core.GameObjects.Economy.SubClasses;

@@ -1,13 +1,14 @@
 ﻿using System.Collections;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
-using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
 
@@ -50,7 +51,7 @@ public static class CustomShortInfoGenerators
          LastChildFill = true,
       };
 
-      var sb = new System.Text.StringBuilder();
+      var sb = new StringBuilder();
 
       foreach (var nxProp in primary.NUISettings.ShortInfoFields)
       {
@@ -78,7 +79,7 @@ public static class CustomShortInfoGenerators
                                          fontSize,
                                          height,
                                          true);
-      headerBlock.SetBinding(FrameworkElement.TagProperty, new System.Windows.Data.Binding { Source = primary, });
+      headerBlock.SetBinding(FrameworkElement.TagProperty, new Binding { Source = primary, });
       headerBlock.Margin = new(6, 0, 0, 0);
 
       var dashBlock = ControlFactory.GetDashBlock(fontSize);

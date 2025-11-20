@@ -74,7 +74,7 @@ public enum SavingValueType
    FlagsEnum,
 
    /// <summary>
-   /// A modifiers instance <see cref="Arcanum.Core.CoreSystems.Jomini.ModifierSystem"/>
+   /// A modifiers instance 
    /// </summary>
    Modifier,
 }

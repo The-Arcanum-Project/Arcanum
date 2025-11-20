@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.PathAccessorEngine;
-using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
-using Nexus.Core;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 

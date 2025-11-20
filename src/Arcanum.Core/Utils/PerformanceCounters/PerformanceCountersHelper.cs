@@ -12,7 +12,7 @@ public static class PerformanceCountersHelper
    private static float _cpuUsage;
    private static float _gpuUsage;
    private static float _vramUsage;
-   private static float _fps;
+   private static float _fps; // TODO: Hook this up to actual FPS counter
 
    private static Timer Updater { get; set; } = null!;
 

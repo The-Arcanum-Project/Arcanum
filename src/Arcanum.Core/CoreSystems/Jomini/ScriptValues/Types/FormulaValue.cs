@@ -19,9 +19,7 @@ public class FormulaValue : IScriptValue
 
       // Execute each operation in the order they were defined.
       foreach (var operation in _operations)
-      {
          currentValue = operation.Execute(currentValue, context);
-      }
 
       return currentValue;
    }

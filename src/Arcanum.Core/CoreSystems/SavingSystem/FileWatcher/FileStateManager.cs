@@ -232,7 +232,7 @@ public static class FileStateManager
       var expiry = DateTime.UtcNow.AddMilliseconds(IGNORE_COOLDOWN_MILLISECONDS).Ticks;
 
       // Atomically adds or updates the key with the new expiry time.
-      IgnoreRequests.AddOrUpdate(path, expiry, (key, oldExpiry) => expiry);
+      IgnoreRequests.AddOrUpdate(path, expiry, (_, _) => expiry);
 
       ArcLog.WriteLine(LOG_SOURCE,
                        LogLevel.INF,

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -11,10 +12,6 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
 // Add these using statements
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Controls;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
@@ -28,7 +25,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
    private Type? _selectedType;
 
    // Store the full, unfiltered lists
-   private List<Type> _allTypes = [];
+   private readonly List<Type> _allTypes;
    private List<Eu5FileObj> _allAvailableFiles = [];
    private List<string> _allObjectsInFile = [];
 
@@ -52,14 +49,12 @@ public partial class ExportFileWindow : INotifyPropertyChanged
    {
       InitializeComponent();
 
-      _allTypes = new List<Type>(AgsRegistry.Ags);
+      _allTypes = new(AgsRegistry.Ags);
       FilterAndDisplayTypes(); // Initial population
 
       if (AvailableTypes.Count > 0)
-      {
          // Select the first type by default, which will trigger the subsequent loads
          TypesListView.SelectedIndex = 0;
-      }
    }
 
    #region Filtering Logic
@@ -87,9 +82,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       AvailableTypes.Clear();
       foreach (var type in filtered.OrderBy(t => t.Name))
-      {
          AvailableTypes.Add(type);
-      }
    }
 
    private void FilterAndDisplayFiles(string filter = "")
@@ -101,9 +94,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       AvailableFiles.Clear();
       foreach (var file in filtered.OrderBy(f => f.Path.Filename))
-      {
          AvailableFiles.Add(file);
-      }
    }
 
    private void FilterAndDisplayObjectsInFile(string filter = "")
@@ -114,9 +105,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       ObjectsInFile.Clear();
       foreach (var objId in filtered.OrderBy(id => id))
-      {
          ObjectsInFile.Add(objId);
-      }
    }
 
    #endregion
@@ -196,7 +185,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
       }
 
       // Populate the full list and then apply the current filter
-      _allAvailableFiles = new List<Eu5FileObj>(_filesDict.Keys);
+      _allAvailableFiles = new(_filesDict.Keys);
       FilterAndDisplayFiles(FileSearchBox.Text);
 
       if (AvailableFiles.Any())

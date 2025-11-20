@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +17,7 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 public partial class AgsWindow
 {
    // Store the full, unfiltered lists
-   private List<Type> _allAgsTypes = [];
+   private readonly List<Type> _allAgsTypes;
    private List<IEu5Object> _allAgsItems = [];
    private List<Eu5FileObj> _allFileObjs = [];
 
@@ -163,7 +164,6 @@ public partial class AgsWindow
       _allAgsItems.Clear(); // Clear previous selection's data
 
       if (sender is ListView { SelectedItem: Type type })
-      {
          if (type.ImplementsGenericInterface(typeof(IEu5ObjectProvider<>), out var implementedType) &&
              implementedType != null)
          {
@@ -174,16 +174,13 @@ public partial class AgsWindow
                _allAgsItems = allItems.Values.Cast<IEu5Object>().ToList();
             }
          }
-      }
 
       // Filter and display the items (will be empty if no type was selected or if type had no items)
       FilterAndDisplayItems(ItemSearchBox.Text);
 
       // Automatically select the first item if the list is populated
       if (AgsItems.Count != 0)
-      {
          AgsItemsView.SelectedIndex = 0;
-      }
    }
 
    private void SetComplexity(IAgs ags)
@@ -207,7 +204,7 @@ public partial class AgsWindow
    private void FormatFile(Eu5FileObj fileObj)
    {
       var objs = fileObj.ObjectsInFile;
-      var sw = System.Diagnostics.Stopwatch.StartNew();
+      var sw = Stopwatch.StartNew();
       string formattedStr;
       if (AllowMultithreadedCheckBox.IsChecked == true)
       {
@@ -241,7 +238,7 @@ public partial class AgsWindow
 
          var context = ags.ToAgsContext();
          var sb = new IndentedStringBuilder();
-         var sw = System.Diagnostics.Stopwatch.StartNew();
+         var sw = Stopwatch.StartNew();
          context.BuildContext(sb);
          sw.Stop();
          SavingTime = (int)sw.ElapsedMilliseconds;

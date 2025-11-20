@@ -249,10 +249,8 @@ public static class FileManager
          return ModDataSpace;
 
       foreach (var dependentDataSpace in DependentDataSpaces)
-      {
          if (fullPath.StartsWith(dependentDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
             return dependentDataSpace;
-      }
 
       return DataSpace.Empty;
    }

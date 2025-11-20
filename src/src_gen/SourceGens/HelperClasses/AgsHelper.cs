@@ -128,7 +128,6 @@ public static class AgsHelper
       // Only if we haven't found attributes yet, check the interfaces.
       // This ensures class attributes always override interface attributes.
       if (suppressAttr == null && saveAsAttribute == null)
-      {
          foreach (var iface in classSymbol.AllInterfaces)
          {
             var memberOnIface = iface.GetMembers(memberName).FirstOrDefault();
@@ -142,7 +141,6 @@ public static class AgsHelper
                                                                       SAVE_AS_ATTRIBUTE);
             }
          }
-      }
 
       return (suppressAttr, saveAsAttribute);
    }
@@ -300,18 +298,14 @@ public static class AgsHelper
       foreach (var prop in allProperties)
       {
          if (prop is null || prop.Type.TypeKind != TypeKind.Enum)
-         {
             continue;
-         }
 
          var enumTypeSymbol = (INamedTypeSymbol)prop.Type;
          var enumFullName = enumTypeSymbol.ToDisplayString();
 
          // Use the temporary, per-class cache.
          if (analysisCacheForThisClass.ContainsKey(enumFullName))
-         {
             continue;
-         }
 
          // --- This is a new enum for this class, analyze it fully. ---
          var fieldResults = new List<EnumFieldAnalysisResult>();
@@ -343,12 +337,10 @@ public static class AgsHelper
          if (!analysisResult.IsValid)
          {
             foreach (var fieldResult in analysisResult.FieldResults.Where(fr => !fr.IsValid))
-            {
                context.ReportDiagnostic(Diagnostic.Create(DefinedDiagnostics.MissingEnumAgsDataAttribute,
                                                           fieldResult.FieldSymbol.Locations.FirstOrDefault(),
                                                           enumTypeSymbol.Name,
                                                           fieldResult.FieldSymbol.Name));
-            }
          }
          else
          {

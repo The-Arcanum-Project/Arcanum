@@ -1,6 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using Arcanum.UI.Components.Helpers;
+﻿using System.Windows.Controls;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 

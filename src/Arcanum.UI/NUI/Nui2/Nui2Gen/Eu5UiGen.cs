@@ -7,12 +7,10 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Arcanum.Core.CoreSystems.CommandSystem;
-using Arcanum.Core.CoreSystems.EventDistribution;
-using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -24,17 +22,14 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
-using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Common.Logger;
 using Common.UI;
 using Common.UI.MBox;
-using Nexus.Core;
 using Binding = System.Windows.Data.Binding;
 using Control = System.Windows.Controls.Control;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -593,7 +588,7 @@ public static class Eu5UiGen
 
                                        if (parent is EmbeddedView ev)
                                           ev.RefreshSelector();
-                                       
+
                                        // Has to happen after refreshing the selector to avoid adding the command twice to history
                                        mspvm.Value = newObj;
                                     });
@@ -897,19 +892,6 @@ public static class Eu5UiGen
          Content = desc, MaxWidth = 400,
       };
       tb.ToolTip = toolTip;
-   }
-
-   private static void GetNotSupportedForMultiSelect(Enum nxProp, Grid mainGrid, int rowIndex)
-   {
-      var text = $"{nxProp} (Not supported in multi-select views)";
-      var tb = ControlFactory.GetHeaderTextBlock(ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                 false,
-                                                 text,
-                                                 height: ControlFactory.SHORT_INFO_ROW_HEIGHT,
-                                                 alignment: HorizontalAlignment.Left,
-                                                 leftMargin: 17);
-
-      GridManager.AddToGrid(mainGrid, tb, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
    private static void GetTypeSpecificUI(NavH navH,

@@ -52,9 +52,7 @@ public static class NativeMethods
 
       var monitorInfo = new MonitorInfoEx();
       if (GetMonitorInfo(new(null, monitor), monitorInfo))
-      {
          return monitorInfo.rcMonitor;
-      }
 
       return new();
    }

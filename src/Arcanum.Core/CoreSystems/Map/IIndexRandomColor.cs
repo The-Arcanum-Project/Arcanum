@@ -1,4 +1,6 @@
-﻿using Nexus.Core;
+﻿using System.Collections.Concurrent;
+using Arcanum.Core.CoreSystems.Map.MapModes;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Map;
 
@@ -11,7 +13,7 @@ public interface IIndexRandomColor
    [IgnoreModifiable]
    public int Index { get; set; }
 
-   private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, int> Cache = new();
+   private static readonly ConcurrentDictionary<int, int> Cache = new();
 
-   int Color => Cache.GetOrAdd(Index, MapModes.MapModeImplementations.MapModeColorHelper.GetMapColor(Index, true));
+   int Color => Cache.GetOrAdd(Index, MapModeColorHelper.GetMapColor(Index, true));
 }

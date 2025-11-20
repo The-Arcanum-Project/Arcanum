@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -9,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Common.UI;
+using Arcanum.Core.GameObjects.Cultural;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -30,7 +29,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    [ParseAs("culture")]
    [DefaultValue(null)]
    [Description("The culture associated with this PopDefinition.")]
-   public Cultural.Culture Culture { get; set; } = Cultural.Culture.Empty;
+   public Culture Culture { get; set; } = Culture.Empty;
 
    [SaveAs]
    [ParseAs("religion")]

@@ -90,7 +90,6 @@ public static class DocumentationParser
 
          // Parse remaining lines for specific properties
          foreach (var line in lines.Skip(2))
-         {
             if (line.StartsWith("Requires Data:"))
             {
                definition.RequiresData = line.Contains("yes", StringComparison.OrdinalIgnoreCase);
@@ -105,7 +104,6 @@ public static class DocumentationParser
                var scopeStr = line["Output Scopes:".Length..].Trim();
                definition.OutputType = ParseScopeTypes(scopeStr);
             }
-         }
 
          definitions.Add(definition);
       }

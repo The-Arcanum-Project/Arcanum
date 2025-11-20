@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.UI.Components.Windows.MainWindows;
@@ -19,9 +20,7 @@ public class MapHandleImpl : IMapHandle
          var colorArray = new Color4[colors.Length];
 
          for (var index = 0; index < colors.Length; index++)
-         {
             colorArray[index] = new(colors[index]);
-         }
 
          mainWindow.MainMap.SetColors(colorArray);
       });
@@ -35,7 +34,8 @@ public class MapHandleImpl : IMapHandle
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
          throw new ApplicationException("MapHandleImpl.NotifyMapLoaded");
 
-      _ = mainWindow.MainMap.SetupRenderer(tracing.Polygons, tracing.MapSize);
+      Debug.Assert(tracing.Polygons is not null, "tracing.Polygons is not null");
+      _ = mainWindow.MainMap.SetupRenderer(tracing.Polygons!, tracing.MapSize);
    }
 
    public static void LoadMap()

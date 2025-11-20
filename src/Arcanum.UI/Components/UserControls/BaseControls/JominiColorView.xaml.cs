@@ -1,9 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Data;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.UI.Components.Helpers;
-using Arcanum.UI.Components.Windows.MinorWindows;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 

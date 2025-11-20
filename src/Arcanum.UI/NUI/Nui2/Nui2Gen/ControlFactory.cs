@@ -23,7 +23,7 @@ public static class ControlFactory
 
    public static BaseView GetBaseView()
    {
-      return new() { };
+      return new();
    }
 
    /// <summary>

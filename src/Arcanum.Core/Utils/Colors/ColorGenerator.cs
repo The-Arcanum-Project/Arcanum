@@ -1,6 +1,6 @@
-﻿namespace Arcanum.Core.Utils.Colors;
+﻿using Color = System.Windows.Media.Color;
 
-using System.Windows.Media;
+namespace Arcanum.Core.Utils.Colors;
 
 public static class ColorGenerator
 {
@@ -270,7 +270,7 @@ public static class ColorGenerator
       var max = Math.Max(r, Math.Max(g, b));
       var min = Math.Min(r, Math.Min(g, b));
       double h = 0,
-             s = 0,
+             s,
              l = (max + min) / 2;
 
       if (Math.Abs(max - min) < 0.001)

@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.BaseTypes;
+﻿using System.Diagnostics;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands.Collections;
 
@@ -18,7 +19,7 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
    {
       Value = value;
       Targets.Add(target);
-      
+
       InvalidateUI();
    }
 
@@ -36,13 +37,14 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
          return false;
 
       Targets.Add(target);
+      Debug.Assert(Attribute != null, "Attribute != null");
       if (isAdd)
          target._addToCollection(Attribute, Value);
       else
          target._removeFromCollection(Attribute, Value);
-      
+
       InvalidateUI();
-      
+
       return true;
    }
 }

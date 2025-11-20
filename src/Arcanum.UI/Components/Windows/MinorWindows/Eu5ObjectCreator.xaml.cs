@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Media;
-using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
@@ -144,9 +144,7 @@ public partial class Eu5ObjectCreator
       window.BorderBrush = Brushes.Gray;
 
       using (CommandManager.DisableCommands())
-      {
          window.ShowDialog();
-      }
 
       if (window.CreatedObject == null)
          return;

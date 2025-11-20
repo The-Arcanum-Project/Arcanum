@@ -246,22 +246,6 @@ public static class ModifierManager
       return false;
    }
 
-   private static bool IsIntegerModifier(ModifierDefinition definition)
-   {
-      if (definition.NumDecimals != 0)
-         return false;
-
-      if (definition is { IsPercentage: false, IsAlreadyPercent: false, IsBoolean: false })
-         return true;
-
-      DiagnosticException.LogWarning(LocationContext.Empty,
-                                     ParsingError.Instance.InconclusiveModifierTypeDefinition,
-                                     $"{nameof(InferModifierType)}.{nameof(IsIntegerModifier)}",
-                                     definition.UniqueId,
-                                     "An integer modifier cannot be a percentage, already_percent, or boolean.");
-      return false;
-   }
-
    private static bool IsFloatingModifier(ModifierDefinition definition)
    {
       if (definition is { IsPercentage: false, IsAlreadyPercent: false, IsBoolean: false })
@@ -349,14 +333,6 @@ public static class ModifierManager
                            MessageBoxImage.Warning);
 
       return result == MBoxResult.OK;
-   }
-
-   private static List<string> GetDefaultValuesForModifier(string modifierKey)
-   {
-      if (!Globals.ModifierDefinitions.TryGetValue(modifierKey, out var definition))
-         return [];
-
-      return GetDefaultValuesForModifier(definition);
    }
 
    public static List<string> GetDefaultValuesForModifier(ModifierDefinition definition)

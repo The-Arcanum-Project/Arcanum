@@ -213,6 +213,7 @@ public static class GraphLayout
          scale = 1.0f; // Don't enlarge if it fits
       if (scale < 0.5 && nodes.Count > 1)
          scale = 0.5f; // Prevent it from becoming too small
+      // TODO: this value is never used. Is this intended?
 
       // If scale is applied, nodes need to be scaled relative to the graph's center
       // For now, let's just focus on translation first, as scaling can add complexity to rendering.

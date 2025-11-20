@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Arcanum.Core.CoreSystems.EventDistribution;
-using Arcanum.UI.NUI.Generator;
+﻿using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
@@ -61,6 +58,7 @@ public class NUINavigation(int capacity)
    {
       if (_current == null)
          return;
+
       Eu5UiGen.GenerateAndSetView(_current!.Value);
    }
 }

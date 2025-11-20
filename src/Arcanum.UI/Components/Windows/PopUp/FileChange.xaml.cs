@@ -45,34 +45,22 @@ public class FileChangeInfo(WatcherChangeTypes action, string filePath) : Depend
 
       // The logic is structured to handle the highest priority cases first.
       if (isCreated && isDeleted)
-      {
          // Special case: An item created and then deleted within the same operation
          // is effectively a change from the initial state, resulting in no new file.
          action = "C";
-      }
       else if (isCreated)
-      {
          // 'Created' takes precedence over 'Changed' and 'Renamed'.
          action = "A";
-      }
       else if (isDeleted)
-      {
          // 'Deleted' takes precedence over 'Renamed'.
          action = "D";
-      }
       else if (isChanged)
-      {
          // 'Changed' takes precedence over 'Renamed'.
          action = "C";
-      }
       else if (isRenamed)
-      {
          action = "R";
-      }
       else
-      {
          action = "U"; // Unknown or no change detected.
-      }
 
       return action;
    }
@@ -123,10 +111,11 @@ public class FileChangeInfo(WatcherChangeTypes action, string filePath) : Depend
 public partial class FileChange
 {
    public FileChangedEventArgs Args = null!;
+
    public static readonly DependencyProperty FileChangesProperty = DependencyProperty.Register(nameof(FileChanges),
-    typeof(ObservableCollection<FileChangeInfo>),
-    typeof(FileChangeInfo),
-    new PropertyMetadata(default(ObservableCollection<FileChangeInfo>)));
+       typeof(ObservableCollection<FileChangeInfo>),
+       typeof(FileChangeInfo),
+       new(default(ObservableCollection<FileChangeInfo>)));
 
    public ObservableCollection<FileChangeInfo> FileChanges
    {
@@ -138,7 +127,7 @@ public partial class FileChange
       DependencyProperty.Register(nameof(InfoText),
                                   typeof(string),
                                   typeof(FileChange),
-                                  new PropertyMetadata("Rename detected in tracked files. Verify changes below:"));
+                                  new("Rename detected in tracked files. Verify changes below:"));
 
    public string InfoText
    {
@@ -160,7 +149,7 @@ public partial class FileChange
 
    public static FileChange Instance { get; private set; } = new();
 
-   public bool IsShown = false;
+   public bool IsShown;
 
    public static readonly DependencyProperty ShowOkButtonProperty =
       DependencyProperty.Register(nameof(ShowOkButton), typeof(bool), typeof(FileChange), new(true));
@@ -175,7 +164,7 @@ public partial class FileChange
    {
       InitializeComponent();
       FileChanges = [];
-      Unloaded += (s, e) =>
+      Unloaded += (_, _) =>
       {
          lock (Instance)
             Instance = new();
@@ -212,29 +201,23 @@ public partial class FileChange
       if (existingChange != null)
       {
          if (action.HasFlag(WatcherChangeTypes.Renamed) && oldFilePath != null)
-         {
             existingChange.FilePath = filePath;
-         }
 
          // remove the old entry if the file was delteded and created before
          if (existingChange.TypeAction.HasFlag(WatcherChangeTypes.Created) &&
              action.HasFlag(WatcherChangeTypes.Deleted) &&
              !existingChange.TypeAction.HasFlag(WatcherChangeTypes.Deleted))
-         {
             FileChanges.Remove(existingChange);
-         }
 
          existingChange.TypeAction |= action;
       }
       else
       {
-         FileChanges.Add(new FileChangeInfo(action, filePath));
+         FileChanges.Add(new(action, filePath));
       }
 
       if (FileChanges.Any(f => f.Action != "R"))
-      {
          ChangeToPanicMode();
-      }
    }
 
    private void ButtonBase_OnClickOk(object sender, RoutedEventArgs e)

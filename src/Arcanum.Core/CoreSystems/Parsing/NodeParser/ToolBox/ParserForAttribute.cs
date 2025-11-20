@@ -18,8 +18,8 @@ public class ParserForAttribute : Attribute
    /// </summary>
    public string[] IgnoredContentKeys { get; set; }
 
-   public bool ContainsOnlyChildObjects { get; set; } = false;
-   public string? ChildObjectList { get; set; } = null;
+   public bool ContainsOnlyChildObjects { get; set; }
+   public string? ChildObjectList { get; set; }
 
    /// <param name="targetType">The data model class (e.g., typeof(ToolBoxObj)) that this parser is for.</param>
    /// <param name="allowUnknownNodes"></param>

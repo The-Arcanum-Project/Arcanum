@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+﻿namespace Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 
 public class ListItemViewModel<T> : ViewModelBase where T : notnull
 {

@@ -61,7 +61,6 @@ public partial class LoadingScreen : INotifyPropertyChanged
    }
 
    private string _stepName = "Step: Initializing...";
-   private TimeSpan _estimatedTime = TimeSpan.Zero;
    private double _totalProgressPercentage;
 
    public async Task<bool> StartLoading()

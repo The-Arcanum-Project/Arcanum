@@ -30,33 +30,29 @@ public static class ExistingModsLoader
       var modPath = Path.Combine(modFolder, ".metadata", "metadata.json");
       var content = IO.IO.ReadAllTextUtf8(modPath);
       if (string.IsNullOrEmpty(content))
-      {
          return null;
-      }
 
       using var doc = JsonDocument.Parse(content);
       var root = doc.RootElement;
 
       var modName = root.GetProperty("name").GetString();
       if (string.IsNullOrEmpty(modName))
-      {
          return null;
-      }
 
       var metadata = new ModMetadata(modName);
 
-      var hasId = root.TryGetProperty("id", out var id);
+      var hasId = root.TryGetProperty("id", out _);
       metadata.Id = !hasId ? string.Empty : root.GetProperty("id").GetString() ?? string.Empty;
 
-      var hasDescription = root.TryGetProperty("short_description", out var description);
+      var hasDescription = root.TryGetProperty("short_description", out _);
       metadata.ShortDescription = !hasDescription
                                      ? string.Empty
                                      : root.GetProperty("short_description").GetString() ?? string.Empty;
 
-      var hasVersion = root.TryGetProperty("version", out var version);
+      var hasVersion = root.TryGetProperty("version", out _);
       metadata.Version = !hasVersion ? DEFAULT_VERSION : root.GetProperty("version").GetString() ?? DEFAULT_VERSION;
 
-      var hasSupportedGameVersion = root.TryGetProperty("supported_game_version", out var supportedGameVersion);
+      var hasSupportedGameVersion = root.TryGetProperty("supported_game_version", out _);
       metadata.SupportedGameVersion = !hasSupportedGameVersion
                                          ? DEFAULT_VERSION
                                          : root.GetProperty("supported_game_version").GetString() ?? DEFAULT_VERSION;
@@ -67,7 +63,7 @@ public static class ExistingModsLoader
                          : tags
                           .EnumerateArray()
                           .Select(tag => tag.GetString() ?? string.Empty)
-                          .ToArray() ?? [];
+                          .ToArray();
 
       var hasPicture = root.TryGetProperty("picture", out var picture);
       metadata.ThumbnailPath = !hasPicture ? string.Empty : picture.GetString() ?? string.Empty;
@@ -78,9 +74,9 @@ public static class ExistingModsLoader
                                  : dependencies
                                   .EnumerateArray()
                                   .Select(dep => dep.GetString() ?? string.Empty)
-                                  .ToArray() ?? [];
+                                  .ToArray();
 
-      var hasCustomData = root.TryGetProperty("game_custom_data", out var customData);
+      var hasCustomData = root.TryGetProperty("game_custom_data", out _);
       if (!hasCustomData)
       {
          metadata.IsMultiplayerSynchronized = false;
@@ -102,7 +98,7 @@ public static class ExistingModsLoader
                                  : replacePaths
                                   .EnumerateArray()
                                   .Select(path => path.GetString() ?? string.Empty)
-                                  .ToArray() ?? [];
+                                  .ToArray();
 
       return metadata;
    }

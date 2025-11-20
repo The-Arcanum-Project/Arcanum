@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem;
+﻿using System.Diagnostics;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands.Collections;
@@ -16,6 +16,7 @@ public class RemoveFromCollectionCommand
    public override void Undo()
    {
       base.Undo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var target in Targets)
          target._addToCollection(Attribute, Value);
    }
@@ -23,6 +24,7 @@ public class RemoveFromCollectionCommand
    public override void Redo()
    {
       base.Redo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var target in Targets)
          target._removeFromCollection(Attribute, Value);
    }

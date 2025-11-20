@@ -12,8 +12,6 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
-using Common.UI;
-using Nexus.Core;
 using Nexus.Core.Attributes;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 

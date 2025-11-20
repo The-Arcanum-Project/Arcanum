@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
-using Common.UI.Interfaces;
 
 namespace Arcanum.Core.CoreSystems.Map;
 

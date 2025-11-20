@@ -46,7 +46,6 @@ public class AgsObjectSavingContext
       }
 
       using (sb.BlockWithName(Ags, Settings.Format))
-      {
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
@@ -54,7 +53,6 @@ public class AgsObjectSavingContext
                sb.AppendLine();
             prop.Format(Ags, sb, CommentChar, Settings);
          }
-      }
    }
 
    public void BuildContext(IndentedStringBuilder sb,

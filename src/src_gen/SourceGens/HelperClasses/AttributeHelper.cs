@@ -1,9 +1,7 @@
 ﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 
 namespace ParserGenerator.HelperClasses;
-
-using Microsoft.CodeAnalysis;
-using System.Linq;
 
 public static class AttributeHelper
 {
@@ -21,15 +19,11 @@ public static class AttributeHelper
       // This is the most specific way a user can provide a value.
       var namedArg = attribute.NamedArguments.FirstOrDefault(arg => arg.Key == name);
       if (namedArg.Key is not null)
-      {
          return namedArg.Value.Value;
-      }
 
       // Priority 2: Check for a Positional Argument at the given index.
       if (position < attribute.ConstructorArguments.Length)
-      {
          return attribute.ConstructorArguments[position].Value;
-      }
 
       // Priority 3: Fallback to the default value from the constructor's signature.
       var constructor = attribute.AttributeConstructor;
@@ -37,9 +31,7 @@ public static class AttributeHelper
       {
          var parameter = constructor.Parameters[position];
          if (parameter.Name == name && parameter.HasExplicitDefaultValue)
-         {
             return parameter.ExplicitDefaultValue;
-         }
       }
 
       // No value was provided and no default exists.
@@ -95,10 +87,8 @@ public static class AttributeHelper
             // The argument was not provided, try to get the default from the constructor signature
             var param = attribute.AttributeConstructor?.Parameters.ElementAtOrDefault(position);
             if (param != null && param.HasExplicitDefaultValue)
-            {
                if (param.ExplicitDefaultValue is T val)
                   return val;
-            }
 
             return defaultValue;
          }
@@ -125,17 +115,13 @@ public static class AttributeHelper
       {
          // Check if the caller is *expecting* an array.
          if (!typeof(T).IsArray)
-         {
             // Type mismatch: attribute provided an array, but caller wants a single value.
             return defaultValue;
-         }
 
          ImmutableArray<TypedConstant> arrayValues = argumentConstant.Values;
          if (arrayValues.IsDefaultOrEmpty)
-         {
             // Return an empty array of the correct type, or the default.
-            return defaultValue ?? (T)(object)System.Array.CreateInstance(typeof(T).GetElementType()!, 0);
-         }
+            return defaultValue ?? (T)(object)Array.CreateInstance(typeof(T).GetElementType()!, 0);
 
          Type? elementType = typeof(T).GetElementType();
          if (elementType == null)
@@ -143,22 +129,17 @@ public static class AttributeHelper
 
          var resultArray = Array.CreateInstance(elementType, arrayValues.Length);
          for (int i = 0; i < arrayValues.Length; i++)
-         {
             resultArray.SetValue(arrayValues[i].Value, i);
-         }
 
          return (T)(object)resultArray;
       }
 
       // Case B: The argument is a single value
       if (argumentConstant.Value is T typedValue)
-      {
          return typedValue;
-      }
 
       // Handle cases where the type might need conversion (e.g., int to Enum)
       if (typeof(T).IsEnum && argumentConstant.Value is int intValue)
-      {
          try
          {
             return (T)Enum.ToObject(typeof(T), intValue);
@@ -167,7 +148,6 @@ public static class AttributeHelper
          {
             return defaultValue;
          }
-      }
 
       return defaultValue;
    }

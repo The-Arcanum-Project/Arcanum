@@ -50,8 +50,7 @@
                                 Value = "Left" />
                     </Style>
 
-                    <Style x:Key = "SocialHeaderText"
-                           TargetType = "TextBlock">
+                    <Style TargetType = "TextBlock">
                         <Setter Property = "FontSize"
                                 Value = "20" />
                         <Setter Property = "TextAlignment"
@@ -66,25 +65,8 @@
                                 Value = "2,12,5,0" />
                     </Style>
 
-                    <Style x:Key = "SocialBodyText"
-                           TargetType = "TextBlock">
-                        <Setter Property = "FontSize"
-                                Value = "22" />
-                        <Setter Property = "TextAlignment"
-                                Value = "Center" />
-                        <Setter Property = "Foreground"
-                                Value = "LightGray" />
-                        <Setter Property = "HorizontalAlignment"
-                                Value = "Center" />
-                        <Setter Property = "VerticalAlignment"
-                                Value = "Center" />
-                        <Setter Property = "Margin"
-                                Value = "5,20,5,5" />
-                    </Style>
-
                     <!-- Image Style -->
-                    <Style x:Key = "SocialIconStyle"
-                           TargetType = "Image">
+                    <Style TargetType = "Image">
                         <Setter Property = "Width"
                                 Value = "60" />
                         <Setter Property = "Height"

@@ -48,9 +48,7 @@ public partial class NaturalStringComparerManual : Comparer<string>, IDisposable
    public override int Compare(string? x, string? y)
    {
       if (x == y)
-      {
          return 0;
-      }
 
       if (x == null)
          return -1;
@@ -70,22 +68,14 @@ public partial class NaturalStringComparerManual : Comparer<string>, IDisposable
       }
 
       for (var i = 0; i < x1.Length && i < y1.Length; i++)
-      {
          if (x1[i] != y1[i])
-         {
             return PartCompare(x1[i], y1[i]);
-         }
-      }
 
       if (y1.Length > x1.Length)
-      {
          return 1;
-      }
 
       if (x1.Length > y1.Length)
-      {
          return -1;
-      }
 
       return 0;
    }
@@ -93,9 +83,7 @@ public partial class NaturalStringComparerManual : Comparer<string>, IDisposable
    private static int PartCompare(string left, string right)
    {
       if (!int.TryParse(left, out var x) || !int.TryParse(right, out var y))
-      {
          return string.Compare(left, right, StringComparison.Ordinal);
-      }
 
       return x.CompareTo(y);
    }

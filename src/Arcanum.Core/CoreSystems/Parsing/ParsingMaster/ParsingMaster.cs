@@ -4,9 +4,6 @@
 
 using System.Diagnostics;
 using System.Windows;
-#if DEBUG_PARSING_STEP_TIMES
-using System.Globalization;
-#endif
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -15,10 +12,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
-using Common.Logger;
 using Common.UI;
 using Common.UI.MBox;
 using JetBrains.Annotations;
+#if DEBUG_PARSING_STEP_TIMES
+using System.Globalization;
+#endif
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
@@ -75,7 +74,7 @@ public class ParsingMaster
       //_sortedLoadingSteps =
       //   new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
 
-      var (s1, s2) = PartitionStepsByPriority(DescriptorDefinitions.LoadingStepsList);
+      var (s1, _) = PartitionStepsByPriority(DescriptorDefinitions.LoadingStepsList);
 
       var sortedPrioritySteps = TopologicalSort.Sort<string, FileLoadingService>(s1);
       var sortedRemainingSteps =
@@ -101,6 +100,7 @@ public class ParsingMaster
    /// and one for all remaining tasks.
    /// </summary>
    /// <param name="allAvailableSteps">The complete, unsorted list of all loading steps.</param>
+   // ReSharper disable once UnusedTupleComponentInReturnValue
    private static (List<FileLoadingService> priority, List<FileLoadingService> remaining) PartitionStepsByPriority(
       IEnumerable<FileLoadingService> allAvailableSteps)
    {
@@ -153,13 +153,12 @@ public class ParsingMaster
 
          List<Task<bool>> currentBatchTasks = [];
          foreach (var step in readySteps)
-         {
             if (step.IsHeavyStep)
                currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
                                                               {
                                                                  try
                                                                  {
-                                                                    var sw = Stopwatch.StartNew();
+                                                                    var startNew = Stopwatch.StartNew();
                                                                     var wrapper = step.GetParsingStep();
                                                                     var result = wrapper.Execute();
                                                                     lock (lockObj)
@@ -174,7 +173,7 @@ public class ParsingMaster
                                                                               100.0);
                                                                        }
 
-                                                                    step.LastTotalLoadingDuration = sw.Elapsed;
+                                                                    step.LastTotalLoadingDuration = startNew.Elapsed;
                                                                     return result;
                                                                  }
                                                                  catch (Exception e)
@@ -236,7 +235,6 @@ public class ParsingMaster
                                                                               }
                                                                            },
                                                                            cts.Token));
-         }
 
          while (currentBatchTasks.Count > 0)
          {
@@ -323,7 +321,7 @@ public class ParsingMaster
          if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
             continue;
 
-         if (!SimpleObjectParser.StripGroupingNodes(bn!,
+         if (!SimpleObjectParser.StripGroupingNodes(bn,
                                                     ctx,
                                                     actionStack,
                                                     source,

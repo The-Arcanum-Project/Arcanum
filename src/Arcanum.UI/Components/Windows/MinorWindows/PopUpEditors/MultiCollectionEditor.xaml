@@ -14,7 +14,6 @@
     <Window.Resources>
         <!-- Ensure you have these converters in your project -->
         <converters:StateToBackgroundConverter x:Key = "StateToBackgroundConverter" />
-        <BooleanToVisibilityConverter x:Key = "BooleanToVisibilityConverter" />
     </Window.Resources>
 
     <Grid>
@@ -77,12 +76,14 @@
                 <DataTemplate>
                     <StackPanel Orientation = "Horizontal"
                                 Height = "23">
+                        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                         <Border Width = "10"
                                 Height = "10"
                                 CornerRadius = "3"
                                 HorizontalAlignment = "Left"
                                 VerticalAlignment = "Center"
                                 Background = "{Binding State, Converter={StaticResource StateToBackgroundConverter}}" />
+                        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                         <TextBlock Text = "{Binding DisplayText}"
                                    VerticalAlignment = "Center"
                                    Margin = "5,3" />
@@ -131,6 +132,7 @@
 
             <ListView.ItemTemplate>
                 <DataTemplate>
+                    <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                     <TextBlock Text = "{Binding DisplayText}"
                                Padding = "5,3" />
                 </DataTemplate>

@@ -77,7 +77,7 @@ public class RootNode(int start, int length) : AstNode(start, length)
 public abstract class StatementNode(int start, int length) : AstNode(start, length)
 {
    // Changed from Token KeyNode to KeyNodeBase Key
-   public KeyNodeBase KeyNode { get; init; }
+   public KeyNodeBase KeyNode { get; init; } = null!;
 }
 
 /// <summary>

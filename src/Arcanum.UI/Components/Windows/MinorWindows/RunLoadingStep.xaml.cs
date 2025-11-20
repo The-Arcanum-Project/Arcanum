@@ -21,7 +21,6 @@ public partial class RunLoadingStep
       // Execute the selected LoadingStep
       if (sender is BaseButton { Tag: FileLoadingService service })
       {
-         var descriptor = service.Descriptor;
          var step = service.GetParsingStep();
          step.UnloadAllFiles();
          if (!step.Execute())
@@ -41,7 +40,6 @@ public partial class RunLoadingStep
       const int numOfExecutions = 10;
       if (sender is BaseButton { Tag: FileLoadingService service })
       {
-         var descriptor = service.Descriptor;
          var step = service.GetParsingStep();
          var durations = new TimeSpan[numOfExecutions];
          for (var i = 0; i < numOfExecutions; i++)

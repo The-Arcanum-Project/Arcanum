@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;

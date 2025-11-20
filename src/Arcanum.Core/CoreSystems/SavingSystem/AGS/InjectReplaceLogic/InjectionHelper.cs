@@ -122,7 +122,6 @@ public static class InjectionHelper
                var existingInjects = csso.Target.GetInjectsForTarget();
                // We have existing injects, so we check if they are in the same file and category so that we can merge them.
                if (existingInjects.Length > 0)
-               {
                   // At this point we know that all existing injects are of the same type (inject) and compatible.
                   // The only time we could have switched type is the collection check which would have made us replace.
                   // So we simply add all existing injects to the final injects to be saved.
@@ -130,10 +129,8 @@ public static class InjectionHelper
                   {
                      // Stuff in base mods cannot be merged into our mod inject so we skip them.
                      if (ei.Source.IsVanilla)
-                     {
                         // TODO: Create a Replace here if valid? @Stiopa
                         continue;
-                     }
 
                      foreach (var prop in ei.InjectedProperties)
                      {
@@ -156,7 +153,6 @@ public static class InjectionHelper
                      toRemoveFromFiles.Add(ei);
                      InjectManager.UnregisterInjectObj(ei);
                   }
-               }
 
                break;
             case SavingCategory.Replace:
@@ -239,7 +235,7 @@ public static class InjectionHelper
          {
             if (!cps.ContainsKey(target))
                cps[target] = [];
-            cps[target].Add(command.Attribute);
+            cps[target].Add(command.Attribute!);
          }
       }
    }
@@ -334,8 +330,6 @@ public static class InjectionHelper
    /// <br/>
    /// <br/>
    /// Also sets the fileObject to save to.
-   /// <br/>
-   /// TODO: In the future we can also think about merging injections if they are compatible. 
    /// </summary>
    public static void EnsureCompatibilityWithExistingInjections(List<CategorizedSaveable> cssos)
    {

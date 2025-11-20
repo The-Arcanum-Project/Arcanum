@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using Arcanum.Core.CoreSystems.CommandSystem;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.UI.Components.Converters;

@@ -3,19 +3,18 @@ using Arcanum.Core.CoreSystems.Queastor;
 
 namespace UnitTests.CoreSystems.Search;
 
-public class MockSearchable(float relevance = 1.0f, params string[] terms) : ISearchable
+public class MockSearchable(params string[] terms) : ISearchable
 {
    public string GetNamespace => string.Empty;
-   public string ResultName { get; } = null!;
-   public List<string> SearchTerms { get; set; } = terms.ToList();
+   public string ResultName => null!;
+   public List<string> SearchTerms { get; } = terms.ToList();
 
    public void OnSearchSelected()
    {
    }
 
-   public float GetRelevanceScore(string query) => relevance;
-   public ISearchResult VisualRepresentation { get; } = null!;
-   public Enum SearchCategory { get; } = IQueastorSearchSettings.DefaultCategories.All;
+   public ISearchResult VisualRepresentation => null!;
+   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.All;
 }
 
 [TestFixture]
@@ -63,7 +62,7 @@ public class QueastorTests
    public void MultipleTerms_MappedCorrectly()
    {
       var queastor = new Queastor(new());
-      var obj = new MockSearchable(1f, "Button", "Control", "Widget");
+      var obj = new MockSearchable("Button", "Control", "Widget");
 
       queastor.AddToIndex(obj);
 
@@ -84,7 +83,7 @@ public class QueastorTests
    public void RemoveFromIndex_RemovesItemCompletely()
    {
       var queastor = new Queastor(new());
-      var item = new MockSearchable(1f, "Alpha", "Beta");
+      var item = new MockSearchable("Alpha", "Beta");
       queastor.AddToIndex(item);
 
       queastor.RemoveFromIndex(item);
@@ -128,7 +127,7 @@ public class QueastorTests
    public void ModifyInIndex_UpdatesTermsCorrectly_RemovesObsoleteTerms()
    {
       var queastor = new Queastor(new());
-      var item = new MockSearchable(1f, "Alpha", "Beta");
+      var item = new MockSearchable("Alpha", "Beta");
       queastor.AddToIndex(item);
 
       item.SearchTerms.Clear();
@@ -149,7 +148,7 @@ public class QueastorTests
    public void ModifyInIndex_HandlesNoChangesGracefully()
    {
       var queastor = new Queastor(new());
-      var item = new MockSearchable(1f, "Alpha", "Beta");
+      var item = new MockSearchable("Alpha", "Beta");
       queastor.AddToIndex(item);
 
       queastor.ModifyInIndex(item, ["Alpha", "Beta"]);

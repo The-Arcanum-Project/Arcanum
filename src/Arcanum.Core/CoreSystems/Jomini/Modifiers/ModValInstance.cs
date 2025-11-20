@@ -40,6 +40,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
    /// The definition of the modifier.
    /// </summary>
    [Description("The definition of the modifier.")]
+   [SuppressAgs]
    [DefaultValue(null)]
    public ModifierDefinition Definition { get; set; } = null!;
 
@@ -56,12 +57,14 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
    /// </summary>
    [Description("The value of the modifier.")]
    [DefaultValue(0)]
+   [SuppressAgs]
    public object Value { get; set; } = null!;
    /// <summary>
    /// The type of the modifier, inferred from the definition.
    /// </summary>
    [Description("The type of the modifier, inferred from the definition.")]
    [DefaultValue(ModifierType.Float)]
+   [SuppressAgs]
    public ModifierType Type { get; set; }
 
    public static Dictionary<string, ModValInstance> GetGlobalItems() => [];

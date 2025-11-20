@@ -1,13 +1,10 @@
 ﻿using System.Buffers;
-using System.Windows.Media;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils.Colors;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.Cache;
-
-using System.Collections.Generic;
 
 public class LruCacheManager
 {

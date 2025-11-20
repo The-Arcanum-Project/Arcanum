@@ -85,7 +85,9 @@ public static class SnNodesHelpers
                                   ref bool validationResult,
                                   [MaybeNullWhen(false)] out BlockNode value)
    {
+#pragma warning disable CS0618 // Type or member is obsolete
       var returnVal = node.IsBlockNode(ctx, source, className + ".StatementNode.IsBlockNode", out value);
+#pragma warning restore CS0618 // Type or member is obsolete
       validationResult &= returnVal;
       return returnVal;
    }

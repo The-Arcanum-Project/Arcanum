@@ -1,7 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.History.Commands;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.CoreSystems.EventDistribution;
+using Arcanum.Core.CoreSystems.History.Commands;
 using Timer = System.Threading.Timer;
 
 namespace Arcanum.Core.CoreSystems.History;
@@ -40,7 +38,7 @@ public class TreeHistoryManager : IHistoryManager
    public EventHandler<ICommand?> UndoEvent { get; } = delegate { };
    public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
    public event Action<ICommand>? CommandAdded;
-   
+
    public event Action<HistoryNode>? NodeSwitched;
 
    private int _lastCompactionDepth;
@@ -57,8 +55,9 @@ public class TreeHistoryManager : IHistoryManager
    /// <param name="type">The type of the history entry associated with the command.</param>
    public void AddCommand(ICommand newCommand, HistoryEntryType type = HistoryEntryType.Normal)
    {
-      if(CommandManager.IgnoreCommands)
+      if (CommandManager.IgnoreCommands)
          return;
+
       var newNode = new HistoryNode(_nodeId++, newCommand, type, Current);
       Current.Children.Add(newNode);
       Current = newNode;
@@ -71,8 +70,8 @@ public class TreeHistoryManager : IHistoryManager
    // Check if there are any commands to redo
    public bool CanRedo => Current.Children.Count > 0 || Current is CompactHistoryNode { HasStepRedo: true };
 
-   private HistoryNode _current;
-   
+   private HistoryNode _current = null!;
+
    /// <summary>
    /// Represents the current node in the history tree managed by <see cref="TreeHistoryManager"/>.
    /// This property tracks the node that corresponds to the latest command or state in the history.
@@ -101,7 +100,7 @@ public class TreeHistoryManager : IHistoryManager
    {
       if (!CanUndo)
          return null;
-      
+
       ICommand? undoCommand = null;
       if (Current.EntryType == HistoryEntryType.Compacted && Current is CompactHistoryNode compNode)
       {
@@ -127,9 +126,9 @@ public class TreeHistoryManager : IHistoryManager
          undoCommand.Undo();
          Current = Current.Parent;
       }
-      
+
       UndoEvent.Invoke(null, undoCommand);
-      EventDistribution.EventDistributor.UpdateNUI?.Invoke();
+      EventDistributor.UpdateNUI?.Invoke();
       return undoCommand;
    }
 
@@ -146,7 +145,7 @@ public class TreeHistoryManager : IHistoryManager
          childIndex += Current.Children.Count;
       if (!CanRedo || childIndex >= Current.Children.Count)
          return null;
-      
+
       ICommand? redoCommand = null;
       if (Current is CompactHistoryNode compNode)
       {
@@ -178,7 +177,7 @@ public class TreeHistoryManager : IHistoryManager
       end:
       RedoEvent.Invoke(null, redoCommand);
       redoCommand?.Redo();
-      EventDistribution.EventDistributor.UpdateNUI?.Invoke();
+      EventDistributor.UpdateNUI?.Invoke();
       return redoCommand;
    }
 
@@ -591,6 +590,7 @@ public class TreeHistoryManager : IHistoryManager
    {
       if (_current == node)
          return;
+
       _current = node;
       NodeSwitched?.Invoke(_current);
    }

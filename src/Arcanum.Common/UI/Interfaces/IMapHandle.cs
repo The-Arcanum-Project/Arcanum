@@ -1,6 +1,4 @@
-﻿using System.Runtime.Intrinsics;
-
-namespace Common.UI.Interfaces;
+﻿namespace Common.UI.Interfaces;
 
 public interface IMapHandle
 {

@@ -96,9 +96,7 @@ public static class SaveMaster
          return;
 
       foreach (var command in list)
-      {
          ChangesSinceLastSave.Remove(command);
-      }
 
       NeedsToBeSaved.Remove(target);
       if (NewObjects.TryGetValue(target.GetType(), out var newList))
@@ -136,9 +134,7 @@ public static class SaveMaster
          return;
 
       foreach (var target in command.GetTargets())
-      {
          AddSingleCommand(command, target);
-      }
 
       ChangesSinceLastSave.Add(command);
    }
@@ -159,9 +155,7 @@ public static class SaveMaster
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object[] targets)
    {
       foreach (var target in targets)
-      {
          AddSingleCommand(command, target);
-      }
 
       ChangesSinceLastSave.Add(command);
    }
@@ -234,10 +228,10 @@ public static class SaveMaster
    /// A list of any modified objects and the file they belong to.
    /// This list can contain nested objects.
    /// </summary>
-   private static bool SaveFile(List<IEu5Object> modifiedObjects)
+   private static void SaveFile(List<IEu5Object> modifiedObjects)
    {
       if (modifiedObjects.Count == 0)
-         return false;
+         return;
 
       var fileObj = modifiedObjects[0].Source;
 
@@ -248,10 +242,9 @@ public static class SaveMaster
       var sb = UpdateEu5ObjectsInFile(topLevelModObjs);
 
       if (sb == null)
-         return false;
+         return;
 
       WriteFile(sb.InnerBuilder, fileObj, true);
-      return true;
    }
 
    public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
@@ -338,10 +331,8 @@ public static class SaveMaster
 
       // If we have a newly created object it's Source property is still Empty so we need to set it here
       foreach (var csso in value)
-      {
          if (csso.Target.Source == Eu5FileObj.Empty)
             csso.Target.Source = fo;
-      }
 
       Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
                    "All objects must have a valid file location matching the file they are being saved to.");
@@ -786,10 +777,6 @@ public static class SaveMaster
             newlineCount++;
 
       return newlineCount;
-   }
-
-   private static void UpdateFileLocations(IEu5Object obj, int delta, int deltaLines)
-   {
    }
 
    private static List<IEu5Object> FilterOutNestedObjects(List<IEu5Object> allMods)

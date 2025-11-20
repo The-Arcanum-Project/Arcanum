@@ -46,12 +46,11 @@ public static class EffectManager
          type = existingDefinition.ModifierType;
       }
 
-      return CreateInstance(ctx, token, source, value, ref validationResult, type, existingDefinition, out instance);
+      return CreateInstance(ctx, token, value, ref validationResult, type, existingDefinition, out instance);
    }
 
    private static bool CreateInstance(LocationContext ctx,
                                       Token token,
-                                      string source,
                                       string value,
                                       ref bool validationResult,
                                       ModifierType type,

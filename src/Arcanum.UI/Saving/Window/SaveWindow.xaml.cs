@@ -1,11 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -46,6 +45,7 @@ public partial class SaveWindow
 
    private FileDescriptor? _currentDescriptor;
 
+   // TODO: @Melco: ???
    private bool _showOnlyChangedFiles = true;
 
    private readonly HashSet<IEu5Object> _changedObjects;
@@ -59,7 +59,7 @@ public partial class SaveWindow
    public static readonly DependencyProperty SearchResultProperty = DependencyProperty.Register(nameof(SearchResult),
        typeof(ObservableCollection<ISearchable>),
        typeof(SaveWindow),
-       new PropertyMetadata(default(ObservableCollection<ISearchable>)));
+       new(default(ObservableCollection<ISearchable>)));
 
    public ObservableCollection<ISearchable> SearchResult
    {
@@ -102,7 +102,7 @@ public partial class SaveWindow
    }
 
    public static readonly DependencyProperty NewFileModeProperty =
-      DependencyProperty.Register(nameof(NewFileMode), typeof(bool), typeof(SaveWindow), new PropertyMetadata(false));
+      DependencyProperty.Register(nameof(NewFileMode), typeof(bool), typeof(SaveWindow), new(false));
 
    public bool NewFileMode
    {
@@ -197,8 +197,8 @@ public partial class SaveWindow
    {
       NewFileMode = true;
       DescriptorsColumn.MinWidth = 0;
-      DescriptorsColumn.Width = new GridLength(0);
-      SplitterColumn.Width = new GridLength(0);
+      DescriptorsColumn.Width = new(0);
+      SplitterColumn.Width = new(0);
       ShownFiles.Clear();
       ShownObjects = new(_newObjects);
    }
@@ -207,7 +207,7 @@ public partial class SaveWindow
    {
       NewFileMode = false;
       DescriptorsColumn.MinWidth = 100;
-      DescriptorsColumn.Width = new GridLength(1, GridUnitType.Star);
+      DescriptorsColumn.Width = new(1, GridUnitType.Star);
       SplitterColumn.Width = GridLength.Auto;
       _currentDescriptor = null;
       ShownFiles.Clear();
@@ -218,9 +218,7 @@ public partial class SaveWindow
    private void SearchBoxRequestSearch(string obj)
    {
       if (NewFileMode)
-      {
          SearchResult = new(_newFileQuaestor.Search(obj));
-      }
    }
 
    private void OpenSettingsWindow()
@@ -276,9 +274,7 @@ public partial class SaveWindow
          // Check if the file is the same:
          var file = GetFileFromItem(sender);
          if (Equals(file, FileListView.SelectedItem))
-         {
             e.Effects = DragDropEffects.None;
-         }
       }
 
       e.Handled = true;
@@ -420,9 +416,7 @@ public partial class SaveWindow
    private Eu5FileObj GetFileFromItem(object sender)
    {
       if (FileListView.ContainerFromElement((DependencyObject)sender) is ListViewItem container)
-      {
          return (Eu5FileObj)container.Content; // Source object
-      }
 
       throw new ArgumentException("Sender is not a ListViewItem");
    }
@@ -532,7 +526,7 @@ public partial class SaveWindow
    private void OpenFileTransferPopup(ListViewItem selectedItem)
    {
       MoveObjectPopup.PlacementTarget = selectedItem;
-      MoveObjectPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+      MoveObjectPopup.Placement = PlacementMode.Bottom;
       MoveObjectPopup.HorizontalOffset = 0;
       MoveObjectPopup.VerticalOffset = 0;
       MoveObjectPopup.IsOpen = true;
@@ -542,7 +536,7 @@ public partial class SaveWindow
 
    private void OpenFileTransferPopup()
    {
-      MoveObjectPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+      MoveObjectPopup.Placement = PlacementMode.MousePoint;
       MoveObjectPopup.HorizontalOffset = -10;
       MoveObjectPopup.VerticalOffset = -10;
       MoveObjectPopup.IsOpen = true;
@@ -556,9 +550,7 @@ public partial class SaveWindow
          return;
 
       if (string.IsNullOrEmpty(obj))
-      {
          ValidFiles = _savingWrapperManager.GetAllFiles(_currentDescriptor);
-      }
    }
 
    private void TransferToFileSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -582,15 +574,11 @@ public partial class SaveWindow
          Console.WriteLine("File: " + change.FileObj);
          Console.WriteLine("| Added: ");
          foreach (var addedObject in change.AddedObjects)
-         {
             Console.WriteLine("|  " + addedObject.ResultName);
-         }
 
          Console.WriteLine("| Transferred: ");
          foreach (var transferredObject in change.TransferredObjects)
-         {
             Console.WriteLine("|  " + transferredObject.ResultName);
-         }
 
          Console.WriteLine("-------------------");
       }

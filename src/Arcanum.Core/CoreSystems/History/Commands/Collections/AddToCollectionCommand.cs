@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem;
+﻿using System.Diagnostics;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands.Collections;
@@ -8,11 +8,8 @@ public class AddToCollectionCommand
    : ModifyCollectionCommand
 #pragma warning restore CS9107 // Parameter is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well.
 {
-   private readonly IEu5Object _target;
-
    public AddToCollectionCommand(IEu5Object target, Enum attribute, object value) : base(target, attribute, value)
    {
-      _target = target;
       target._addToCollection(attribute, value);
    }
 
@@ -21,6 +18,7 @@ public class AddToCollectionCommand
    public override void Undo()
    {
       base.Undo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var r in Targets)
          r._removeFromCollection(Attribute, Value);
    }
@@ -28,6 +26,7 @@ public class AddToCollectionCommand
    public override void Redo()
    {
       base.Redo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var r in Targets)
          r._addToCollection(Attribute, Value);
    }

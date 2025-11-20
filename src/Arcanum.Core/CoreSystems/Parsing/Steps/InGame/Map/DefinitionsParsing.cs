@@ -81,7 +81,6 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       var regionGlobals = Region.GetGlobalItems();
       var areaGlobals = Area.GetGlobalItems();
       var provinceGlobals = Province.GetGlobalItems();
-      var locationGlobals = Location.GetGlobalItems();
 
       foreach (var sn in rn.Statements)
       {

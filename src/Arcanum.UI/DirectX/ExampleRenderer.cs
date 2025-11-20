@@ -1,8 +1,5 @@
-﻿using System.IO;
-using System.Numerics;
-using System.Reflection;
+﻿using System.Numerics;
 using System.Windows.Controls;
-using Vortice.D3DCompiler;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -20,7 +17,7 @@ public readonly struct VertexPositionColor(in Vector3 position, in Color4 color)
 
 public class ExampleRenderer : ID3DRenderer
 {
-   private const int TriangleCount = 5_000;
+   private const int TRIANGLE_COUNT = 5_000;
    private ID3D11Device? _device;
    private ID3D11DeviceContext? _context;
    private IDXGISwapChain? _swapChain;
@@ -39,9 +36,7 @@ public class ExampleRenderer : ID3DRenderer
    public void Initialize(IntPtr hwnd, int width, int height)
    {
       if (width <= 0 || height <= 0)
-      {
          return;
-      }
 
       var swapChainDesc = new SwapChainDescription
       {
@@ -66,9 +61,7 @@ public class ExampleRenderer : ID3DRenderer
            .CheckError();
 
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
-      {
          _renderTargetView = _device.CreateRenderTargetView(backBuffer);
-      }
 
       InputElementDescription[] inputElementDescs =
       [
@@ -83,7 +76,7 @@ public class ExampleRenderer : ID3DRenderer
       _inputLayout = _device.CreateInputLayout(inputElementDescs, vertexShaderByteCode.Span);
       //_constantBuffer = _device.CreateBuffer(new((uint)Unsafe.SizeOf<Constants>(), BindFlags.ConstantBuffer, ResourceUsage.Dynamic, CpuAccessFlags.Write));
 
-      var vertices = new List<VertexPositionColor>(TriangleCount * 3);
+      var vertices = new List<VertexPositionColor>(TRIANGLE_COUNT * 3);
 
       // Define the total area to be covered by the triangles.
       const float areaWidth = 2.0f;
@@ -91,9 +84,9 @@ public class ExampleRenderer : ID3DRenderer
       const float startX = -1.0f;
       const float startY = -1.0f;
 
-      if (TriangleCount > 0)
+      if (TRIANGLE_COUNT > 0)
       {
-         var numQuads = (TriangleCount + 1) / 2;
+         var numQuads = (TRIANGLE_COUNT + 1) / 2;
          var divisionsX = (int)Math.Ceiling(Math.Sqrt(numQuads));
          var divisionsY = (int)Math.Ceiling((double)numQuads / divisionsX);
 
@@ -102,9 +95,9 @@ public class ExampleRenderer : ID3DRenderer
 
          var trianglesGenerated = 0;
 
-         for (var y = 0; y < divisionsY && trianglesGenerated < TriangleCount; ++y)
+         for (var y = 0; y < divisionsY && trianglesGenerated < TRIANGLE_COUNT; ++y)
          {
-            for (var x = 0; x < divisionsX && trianglesGenerated < TriangleCount; ++x)
+            for (var x = 0; x < divisionsX && trianglesGenerated < TRIANGLE_COUNT; ++x)
             {
                var currentX = startX + x * quadWidth;
                var currentY = startY + y * quadHeight;
@@ -120,10 +113,8 @@ public class ExampleRenderer : ID3DRenderer
                vertices.Add(new(bottomRight, new(0.0f, 1.0f, 0.0f)));
                trianglesGenerated++;
 
-               if (trianglesGenerated >= TriangleCount)
-               {
+               if (trianglesGenerated >= TRIANGLE_COUNT)
                   break;
-               }
 
                // Second triangle (bottom-right, top-left, top-right) - Now also CCW!
                vertices.Add(new(bottomRight, new(0.0f, 1.0f, 0.0f)));
@@ -137,7 +128,7 @@ public class ExampleRenderer : ID3DRenderer
 
       _vertexCount = (uint)vertices.Count;
       _vertexBuffer = _device.CreateBuffer(vertices.ToArray(), BindFlags.VertexBuffer);
-      _context.RSSetViewport(new Viewport(width, height));
+      _context.RSSetViewport(new(width, height));
       _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
       _context.VSSetShader(_vertexShader);
       _context.PSSetShader(_pixelShader);
@@ -159,21 +150,19 @@ public class ExampleRenderer : ID3DRenderer
 
    public void SetupEvents(Border parent)
    {
-      parent.MouseLeftButtonDown += (s, e) => { ignoreResize = !ignoreResize; };
+      parent.MouseLeftButtonDown += (_, _) => { _ignoreResize = !_ignoreResize; };
    }
 
-   private bool ignoreResize = false;
+   private bool _ignoreResize;
 
    public void EndResize(int width, int height)
    {
-      if (ignoreResize)
+      if (_ignoreResize)
          return;
 
       // Guard against invalid size or uninitialized state
       if (width <= 0 || height <= 0 || _context == null || _swapChain == null || _device == null)
-      {
          return;
-      }
 
       // 1. Release the old render target view
       _renderTargetView?.Dispose();
@@ -184,12 +173,10 @@ public class ExampleRenderer : ID3DRenderer
 
       // 3. Recreate the render target view from the new back buffer
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
-      {
          _renderTargetView = _device.CreateRenderTargetView(backBuffer);
-      }
 
       // 4. Set the new viewport
-      _context.RSSetViewport(new Viewport(width, height));
+      _context.RSSetViewport(new(width, height));
    }
 
    public void Dispose()

@@ -57,16 +57,16 @@ public class SaveAsMetadata
    public IPropertySymbol Prop { get; }
    public string ValueType { get; }
    public string Separator { get; }
-   public string? SavingMethod { get; } = null;
-   public string? CommentMethod { get; } = null;
-   public string? CollectionKeyMethod { get; } = null;
-   public bool IsCollection { get; } = false;
+   public string? SavingMethod { get; }
+   public string? CommentMethod { get; }
+   public string? CollectionKeyMethod { get; }
+   public bool IsCollection { get; }
    public string? CollectionSeparator { get; }
    public bool SaveEmbeddedAsIdentifier { get; }
    public bool CollectionAsPureIdentifierList { get; }
    public bool IsEmbeddedObject { get; }
    public bool IsShattered { get; }
-   public AttributeData? DefaultValueAttribute { get; set; } = null;
+   public AttributeData? DefaultValueAttribute { get; set; }
 
    private static string GetProviderString(TypedConstant value, string providerName)
    {

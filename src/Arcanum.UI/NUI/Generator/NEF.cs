@@ -6,9 +6,6 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Arcanum.Core.CoreSystems.CommandSystem;
-using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.UI.Components.Converters;
@@ -17,13 +14,23 @@ using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
 
 // ReSharper disable once InconsistentNaming
 public static class NEF
 {
+   public static DockPanel PropertyTitlePanel(int leftMargin)
+   {
+      return new()
+      {
+         LastChildFill = false,
+         HorizontalAlignment = HorizontalAlignment.Stretch,
+         VerticalAlignment = VerticalAlignment.Center,
+         Margin = new(leftMargin, 0, 0, 0),
+      };
+   }
+
    public static TextBlock InlineHeaderPanel(Enum nxProp, string type, int columnSpan)
    {
       var tb = new TextBlock
@@ -76,102 +83,6 @@ public static class NEF
       return objectSelector;
    }
 
-   public static Grid CreateHeaderGrid<T>() where T : INUI
-   {
-      var headerGrid = new Grid
-      {
-         ColumnDefinitions =
-         {
-            new() { Width = new(5, GridUnitType.Star) },
-            new() { Width = new(5, GridUnitType.Star) },
-            new() { Width = new(20, GridUnitType.Auto) },
-            new() { Width = new(20, GridUnitType.Auto) },
-         },
-      };
-      return headerGrid;
-   }
-
-   public static Grid CreateDefaultGrid(int leftMargin)
-   {
-      var grid = new Grid
-      {
-         ColumnDefinitions =
-         {
-            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(1, GridUnitType.Star) },
-         },
-         Margin = new(leftMargin, 0, 0, 0),
-      };
-      return grid;
-   }
-
-   public static TextBlock CreateInfoTextBlock(Enum nxProp, int leftMargin)
-   {
-      var info = new TextBlock
-      {
-         Text = $"{nxProp}: (Cannot edit collections with multiple objects selected)",
-         FontStyle = FontStyles.Italic,
-         Margin = new(leftMargin, 4, 0, 4)
-      };
-      return info;
-   }
-
-   public static DockPanel PropertyTitlePanel(int leftMargin)
-   {
-      return new()
-      {
-         LastChildFill = false,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Center,
-         Margin = new(leftMargin, 0, 0, 0),
-      };
-   }
-
-   public static Grid CreateGridForProperty()
-   {
-      var grid = new Grid
-      {
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Top,
-         RowDefinitions = { new() { Height = new(25, GridUnitType.Pixel) } },
-         ColumnDefinitions =
-         {
-            new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(6, GridUnitType.Star) },
-         },
-      };
-      return grid;
-   }
-
-   public static Rectangle CreateDashedBorderRectangle()
-   {
-      var rect = new Rectangle
-      {
-         Width = 1,
-         Fill = Brushes.Transparent,
-         Stroke = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
-         StrokeThickness = 2,
-         StrokeDashArray = new([4, 6]),
-         StrokeDashCap = PenLineCap.Flat,
-         HorizontalAlignment = HorizontalAlignment.Left,
-         VerticalAlignment = VerticalAlignment.Stretch,
-         SnapsToDevicePixels = true,
-      };
-      return rect;
-   }
-
-   public static Grid CreateHeaderGrid()
-   {
-      var headerGrid = new Grid
-      {
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Center,
-         ColumnDefinitions =
-         {
-            new() { Width = new(7, GridUnitType.Star) }, new() { Width = new(3, GridUnitType.Star) },
-         },
-      };
-      return headerGrid;
-   }
-
    public static BaseButton GetEyeButton()
    {
       return new()
@@ -222,36 +133,6 @@ public static class NEF
                                          UriKind.RelativeOrAbsolute)),
             Stretch = Stretch.UniformToFill,
          },
-      };
-   }
-
-   public static BaseButton GetCollapseButton(bool isExpanded)
-   {
-      const string arrowPathData = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z";
-      var path = new Path
-      {
-         Data = Geometry.Parse(arrowPathData),
-         Fill = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!,
-         Stretch = Stretch.None,
-         HorizontalAlignment = HorizontalAlignment.Center,
-         VerticalAlignment = VerticalAlignment.Center,
-         LayoutTransform = new RotateTransform
-         {
-            Angle = isExpanded ? 180 : 0,
-            CenterX = 4,
-            CenterY = 3,
-         },
-      };
-
-      return new()
-      {
-         Content = path,
-         ToolTip = "Collapse/Expand",
-         Margin = new(4, 0, 2, 0),
-         Width = 20,
-         Height = 20,
-         BorderThickness = new(1),
-         VerticalAlignment = VerticalAlignment.Center,
       };
    }
 
@@ -312,62 +193,6 @@ public static class NEF
       return addButton;
    }
 
-   public static Border EmbedMarker(Grid baseGrid)
-   {
-      var embedMarker = GetEmbedBorder();
-      embedMarker.BorderBrush = Brushes.Purple;
-      baseGrid.Children.Add(embedMarker);
-      Grid.SetRow(embedMarker, 0);
-      Grid.SetColumn(embedMarker, 0);
-      return embedMarker;
-   }
-
-   public static void CreateSimpleHeaderGrid(TextBlock headerBlock, BaseButton collapseButton, Grid baseGrid)
-   {
-      var simpleHeaderGrid = new Grid
-      {
-         ColumnDefinitions =
-         {
-            new() { Width = new(1, GridUnitType.Star) }, new() { Width = new(20, GridUnitType.Auto) },
-         },
-      };
-
-      headerBlock.Margin = new(6, 0, 0, 0);
-      simpleHeaderGrid.Children.Add(headerBlock);
-      Grid.SetColumn(headerBlock, 0);
-
-      simpleHeaderGrid.Children.Add(collapseButton);
-      Grid.SetColumn(collapseButton, 1);
-
-      baseGrid.Children.Add(simpleHeaderGrid);
-      Grid.SetRow(simpleHeaderGrid, 0);
-      Grid.SetColumn(simpleHeaderGrid, 0);
-   }
-
-   public static void AddSpacerToGrid(Grid baseGrid, Enum[] embeddedFields, List<FrameworkElement> collapsibleElements)
-   {
-      var spacer = new Border { Height = 4 };
-      baseGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Auto) });
-      baseGrid.Children.Add(spacer);
-      Grid.SetRow(spacer, embeddedFields.Length + 1);
-      Grid.SetColumn(spacer, 0);
-      collapsibleElements.Add(spacer);
-   }
-
-   public static BaseButton CreateMapModeButton(IMapMode mapMode)
-   {
-      var mapModeButton = new BaseButton
-      {
-         Content = "M",
-         ToolTip = $"Set to '{mapMode.Name}' Map Mode",
-         Margin = new(1),
-         Width = 20,
-         Height = 20,
-         BorderThickness = new(1),
-      };
-      return mapModeButton;
-   }
-
    public static Border GetEmbedBorder()
    {
       return new()
@@ -386,70 +211,6 @@ public static class NEF
    public static TextBlock DescriptorBlock(Enum nxProp)
    {
       var textBlock = new TextBlock { Text = $"{nxProp}: ", VerticalAlignment = VerticalAlignment.Center };
-      return textBlock;
-   }
-
-   public static TextBlock CreateHeaderTextBlock<T>(int fontSize, FontWeight? fontWeight, int height) where T : INUI
-   {
-      var header = new TextBlock
-      {
-         Background = Brushes.Transparent,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontWeight = fontWeight ?? FontWeights.Bold,
-         Margin = new(4, 0, 0, 0),
-         FontSize = fontSize,
-         Height = height,
-         Foreground = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!,
-      };
-      return header;
-   }
-
-   public static TextBlock CreateDashBlock<T>(int fontSize) where T : INUI
-   {
-      var dashBlock = new TextBlock
-      {
-         Text = " — ",
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = fontSize,
-         Height = fontSize + 4,
-      };
-      return dashBlock;
-   }
-
-   public static TextBlock CreateShortInfoBlock<T>(List<string> shortInfoParts, int fontSize) where T : INUI
-   {
-      var infoBlock = new TextBlock
-      {
-         Text = string.Join(", ", shortInfoParts),
-         TextTrimming = TextTrimming.CharacterEllipsis,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = fontSize,
-         Height = fontSize + 4,
-      };
-      return infoBlock;
-   }
-
-   public static StackPanel CreateHeaderStackPanel()
-   {
-      var headerStack = new StackPanel
-      {
-         Orientation = Orientation.Horizontal,
-         HorizontalAlignment = HorizontalAlignment.Stretch,
-         VerticalAlignment = VerticalAlignment.Center,
-      };
-      return headerStack;
-   }
-
-   public static TextBlock CreateItemsCountTextBlock(Enum nxProp, IList modifiableList)
-   {
-      var textBlock = new TextBlock
-      {
-         Text = $"{nxProp}: {modifiableList.Count} Items",
-         FontWeight = FontWeights.Bold,
-         VerticalAlignment = VerticalAlignment.Center,
-         FontSize = 14,
-      };
       return textBlock;
    }
 
@@ -490,18 +251,6 @@ public static class NEF
       };
       numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
       return numericUpDown;
-   }
-
-   public static UserControl GetModValInstanceUI(ModValInstance instance, int height = 23, int fontSize = 12)
-   {
-      ModValViewer viewer = new(instance)
-      {
-         Height = height,
-         FontSize = fontSize,
-         Margin = new(0),
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
-      };
-      return viewer;
    }
 
    public static CorneredTextBox GetStringUI(Binding binding, int height = 23, int fontSize = 12)

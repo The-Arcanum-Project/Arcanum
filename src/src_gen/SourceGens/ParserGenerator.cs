@@ -67,7 +67,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       }
 
       foreach (var parserSymbol in parsers.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
-      {
          try
          {
             var attr = parserSymbol.GetAttributes()
@@ -105,7 +104,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                        parserSymbol.Name,
                                                        ex.ToString()));
          }
-      }
    }
 
    private static (string HintName, string Source) GenerateParserClass(INamedTypeSymbol parserSymbol,
@@ -1172,7 +1170,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
          if (parseAsAttr != null)
             propertiesToParse.Add(new(member, parseAsAttr));
          else
-         {
             // Report warning
             context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
                                                            title: "Missing [ParseAs] Attribute",
@@ -1182,7 +1179,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                            DiagnosticSeverity.Warning,
                                                            isEnabledByDefault: true),
                                                        Location.None));
-         }
       }
    }
 

@@ -188,14 +188,6 @@ public partial class FloatNumericUpDown
       }
    }
 
-   private void RevertText()
-   {
-      NudTextBox.Text = Value.HasValue
-                           ? Value.Value.ToString(StringFormat, CultureInfo.InvariantCulture)
-                           : INTERMEDIATE_TEXT;
-      NudTextBox.SelectionStart = NudTextBox.Text.Length;
-   }
-
    private void NudTextBox_MouseWheel(object sender, MouseWheelEventArgs e)
    {
       if (e.Delta > 0)

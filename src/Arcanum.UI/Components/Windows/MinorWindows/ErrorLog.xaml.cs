@@ -561,7 +561,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          sb.AppendLine($"--> Description: {kvp.Value.First().Descriptor.Description.Replace("\n", "\n    ")}");
          sb.AppendLine();
          foreach (var diagnostic in kvp.Value)
-            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FilePath, '.')} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
+            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FilePath)} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
          sb.AppendLine();
       }
 
