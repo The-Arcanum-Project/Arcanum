@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
@@ -77,6 +78,12 @@ public static class GridManager
                                                bool pureHeader = false)
 
    {
+      if (navH.Targets.Count > 1)
+      {
+         var empty = EmptyRegistry.Empties[navH.Targets[0].GetType()];
+         isNavigation = navH.Targets.TrueForAll(t => !t.Equals(empty));
+      }
+
       var header = pureHeader
                       ? ControlFactory.PureHeaderTextBlock(isNavigation)
                       : ControlFactory.GetHeaderTextBlock(fontSize,

@@ -55,6 +55,17 @@ public static class Eu5UiGen
 
    public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true)
    {
+      if (navh.Targets.Count > 0)
+      {
+         var empty = EmptyRegistry.Empties[navh.Targets[0].GetType()];
+         if (navh.Targets.Any(t => t.Equals(empty)))
+         {
+            // We do not want to show empties
+            navh.Root.Content = null;
+            return;
+         }
+      }
+
       navh.Root.Content = GenerateView(navh, markedProps ?? [], hasHeader);
    }
 
