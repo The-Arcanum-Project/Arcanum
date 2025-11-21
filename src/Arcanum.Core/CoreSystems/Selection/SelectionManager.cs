@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
+using Application = System.Windows.Application;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -35,7 +37,7 @@ public static class SelectionManager
 
          _objectSelectionMode = value;
          OnPropertyChanged(nameof(ObjectSelectionMode));
-         System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
+         Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
       }
    }
 
@@ -69,7 +71,7 @@ public static class SelectionManager
    /// </summary>
    private static void InvalidateSelection()
    {
-      var sw = System.Diagnostics.Stopwatch.StartNew();
+      var sw = Stopwatch.StartNew();
       IncrementalInvalidateSelection(Selection.GetSelectedLocations);
       sw.Stop();
       ArcLog.WriteLine("SMN", LogLevel.DBG, $"InvalidateSelection took {sw.ElapsedMilliseconds}ms");
@@ -107,11 +109,9 @@ public static class SelectionManager
       }
    }
 
-   public static List<IEu5Object>? GetInferredObjectsForLocations(List<Location> cLocs)
+   public static List<IEu5Object>? GetInferredObjectsForLocations(List<Location> cLocs, Type type)
    {
-      var mapMode = MapModeManager.GetCurrent();
-
-      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
+      if (!EmptyRegistry.TryGet(type, out var empty) || empty is not IMapInferable inferable)
          return null;
 
       return inferable.GetInferredList(cLocs);

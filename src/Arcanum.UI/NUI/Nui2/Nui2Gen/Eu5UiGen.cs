@@ -285,7 +285,12 @@ public static class Eu5UiGen
 
       RoutedEventHandler setClick = (_, _) =>
       {
-         var inferred = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
+         if (mspvm.Targets.Length < 1)
+            return;
+
+         var inferred =
+            SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations,
+                                                            mspvm.Targets[0].GetNxPropType(nxProp));
 
          if (inferred == null || inferred.Count < 1)
             return;
@@ -497,24 +502,32 @@ public static class Eu5UiGen
 
          RoutedEventHandler addClick = (_, _) =>
          {
-            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
-            Debug.Assert(enumerable != null, "enumerable != null");
-            if (mspvm.Value == null)
+            if (mspvm.Value == null || mspvm.Targets.Length < 1)
                return;
 
+            var itemType = mspvm.Targets[0].GetNxItemType(nxProp)!;
+
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
+
+            Debug.Assert(enumerable != null, "enumerable != null");
             foreach (var obj in enumerable)
-               Nx.AddToCollection((IEu5Object)mspvm.Value, nxProp, obj);
+               foreach (var target in mspvm.Targets)
+                  Nx.AddToCollection(target, nxProp, obj);
          };
 
          RoutedEventHandler removeClick = (_, _) =>
          {
-            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
-            Debug.Assert(enumerable != null, "enumerable != null");
-            if (mspvm.Value == null)
+            if (mspvm.Value == null || mspvm.Targets.Length < 1)
                return;
 
+            var itemType = mspvm.Targets[0].GetNxItemType(nxProp)!;
+
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
+            Debug.Assert(enumerable != null, "enumerable != null");
+
             foreach (var obj in enumerable)
-               Nx.RemoveFromCollection((IEu5Object)mspvm.Value, nxProp, obj);
+               foreach (var target in mspvm.Targets)
+                  Nx.RemoveFromCollection(target, nxProp, obj);
          };
 
          panel.Children.Add(addButton);
