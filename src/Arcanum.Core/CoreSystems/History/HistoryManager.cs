@@ -12,13 +12,13 @@ public interface IHistoryManager
    /// This event provides the ability to react to undo actions and can include
    /// additional information about the command being undone.
    /// </summary>
-   public EventHandler<ICommand?> UndoEvent { get; }
+   public static event Action<ICommand?>? UndoEvent;
    /// <summary>
    /// An event that is triggered when a redo operation occurs in the command history system.
    /// Provides notifications that allow handling or reacting to redo actions, with
    /// additional context about the command being redone.
    /// </summary>
-   public EventHandler<ICommand?> RedoEvent { get; }
+   public static event Action<ICommand?>? RedoEvent;
 
    /// <summary>
    /// Adds a command to the history manager for potential undo and redo operations.

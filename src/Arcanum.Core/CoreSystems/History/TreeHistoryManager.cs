@@ -35,8 +35,8 @@ public class TreeHistoryManager : IHistoryManager
    }
 
    // Events for when the undo/redo depth changes
-   public EventHandler<ICommand?> UndoEvent { get; } = delegate { };
-   public EventHandler<ICommand?> RedoEvent { get; } = delegate { };
+   public event Action<ICommand?>? UndoEvent;
+   public event Action<ICommand?>? RedoEvent;
    public event Action<ICommand>? CommandAdded;
 
    public event Action<HistoryNode>? NodeSwitched;
@@ -127,7 +127,7 @@ public class TreeHistoryManager : IHistoryManager
          Current = Current.Parent;
       }
 
-      UndoEvent.Invoke(null, undoCommand);
+      UndoEvent?.Invoke(undoCommand);
       EventDistributor.UpdateNUI?.Invoke();
       return undoCommand;
    }
@@ -175,9 +175,9 @@ public class TreeHistoryManager : IHistoryManager
       }
 
       end:
-      RedoEvent.Invoke(null, redoCommand);
       redoCommand?.Redo();
       EventDistributor.UpdateNUI?.Invoke();
+      RedoEvent?.Invoke(redoCommand);
       return redoCommand;
    }
 
@@ -569,7 +569,7 @@ public class TreeHistoryManager : IHistoryManager
    /// </summary>
    public readonly EventHandler<TimeSpan> CompactingInXMinutes = delegate { };
 
-   private void TriggerCompaction(object? sender, ICommand? command)
+   private void TriggerCompaction(ICommand? command)
    {
       var (undoDepth, _) = GetUndoDepth();
       if (Settings.CompactingStrategy == AutoCompactingStrategy.AfterXSize)
@@ -613,7 +613,7 @@ public class TreeHistoryManager : IHistoryManager
 
    private void OnTimerTick(object? sender)
    {
-      TriggerCompaction(null, null);
+      TriggerCompaction(null);
       _nextCompactionTime = DateTime.Now + TimeSpan.FromMinutes(Settings.AutoCompactingDelay);
    }
 

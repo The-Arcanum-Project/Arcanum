@@ -142,6 +142,8 @@ public partial class MapControl
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
       MapModeManager.OnMapModeChanged += _ => RefreshSelectionColors();
+      AppData.HistoryManager.UndoEvent += _ => RefreshSelectionColors();
+      AppData.HistoryManager.RedoEvent += _ => RefreshSelectionColors();
    }
 
    private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
