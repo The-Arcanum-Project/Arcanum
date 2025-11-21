@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
+﻿using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 

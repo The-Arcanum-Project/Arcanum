@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -11,14 +12,14 @@ public class ToolTipManager
 {
    private readonly ToolTip _mapToolTip;
    private Location _lastShownTooltipLocation = Location.Empty;
-   private bool _suppressUntilNotice = false;
+   private bool _suppressUntilNotice;
 
    public ToolTipManager()
    {
       _mapToolTip = new()
       {
          Focusable = false,
-         Placement = System.Windows.Controls.Primitives.PlacementMode.Relative,
+         Placement = PlacementMode.Relative,
          UseLayoutRounding = true,
          SnapsToDevicePixels = true,
          BorderThickness = new(1),

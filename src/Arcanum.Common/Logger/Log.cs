@@ -30,7 +30,7 @@ public enum CommonLogSource
 public static class ArcLog
 {
    private static readonly DateTime StartTime = DateTime.Now;
-   private static readonly BlockingCollection<string> _logQueue = new();
+   private static readonly BlockingCollection<string> LogQueue = new();
 
    // We want to log messages but in this format: [<Source>] [<Level>] <Message> 
    // The Source should be either a 3-letter or a word which will be converted to 3-letter
@@ -44,8 +44,16 @@ public static class ArcLog
          // This loop will run for the entire lifetime of the application.
          // GetConsumingEnumerable() will block until an item is available in the queue.
          // When .CompleteAdding() is called, the loop will finish.
-         foreach (var message in _logQueue.GetConsumingEnumerable())
-            Console.WriteLine(message);
+         foreach (var message in LogQueue.GetConsumingEnumerable())
+            try
+            {
+               Console.WriteLine(message);
+            }
+            catch (Exception)
+            {
+               // In case logging fails, we don't want to crash the application. B
+               // So we silently ignore logging errors.
+            }
       })
       {
          IsBackground = true, Name = "ArcLog Worker",
@@ -56,7 +64,7 @@ public static class ArcLog
    // TODO: Add to lifecycle shutdown
    public static void Shutdown()
    {
-      _logQueue.CompleteAdding();
+      LogQueue.CompleteAdding();
    }
 
    public static void Write(string source, LogLevel level, string message)
@@ -85,7 +93,7 @@ public static class ArcLog
 
    private static void Log(string str)
    {
-      _logQueue.Add($"{GetTimestamp()} - {str}");
+      LogQueue.Add($"{GetTimestamp()} - {str}");
    }
 
    private static string GetTimestamp()

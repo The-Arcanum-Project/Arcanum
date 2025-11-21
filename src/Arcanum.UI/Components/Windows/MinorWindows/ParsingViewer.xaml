@@ -55,6 +55,7 @@
                 <DataTemplate>
                     <Border Margin = "2">
                         <StackPanel Orientation = "Horizontal">
+                            <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                             <CheckBox IsChecked = "{Binding LoadingService.IsFullyParsed, Mode=OneWay}"
                                       IsEnabled = "False">
                             </CheckBox>
@@ -97,6 +98,7 @@
                    FontSize = "14"
                    FontWeight = "Bold" />
 
+        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
         <ListView Grid.Column = "2"
                   Grid.Row = "1"
                   Margin = "2"
@@ -104,6 +106,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Border Margin = "2">
+                        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                         <TextBlock Text = "{Binding Name}" />
                     </Border>
                 </DataTemplate>

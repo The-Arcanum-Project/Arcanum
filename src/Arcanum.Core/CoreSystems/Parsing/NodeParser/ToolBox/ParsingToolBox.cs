@@ -12,7 +12,6 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -1724,45 +1723,45 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_ArtistType(KeyOnlyNode node,
-                                     LocationContext ctx,
-                                     string actionName,
-                                     string source,
-                                     [MaybeNullWhen(false)] out ArtistType value,
-                                     ref bool validation)
-    {
-        return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out ArtistType value,
+                                             ref bool validation)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
                                            node.KeyNode,
                                            source,
                                            actionName,
                                            ref validation,
                                            Globals.ArtistTypes,
                                            out value);
-    }
+   }
 
-    public static bool ArcTryParse_ArtistType(ContentNode node,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        [MaybeNullWhen(false)] out ArtistType value,
-                                        ref bool validation)
-    {
-        if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                               TokenType.Equals,
-                                               ctx,
-                                               $"{actionName}.{nameof(ArcTryParse_ArtistType)}"))
-        {
-            validation = false;
-            value = null;
-            return false;
-        }
+   public static bool ArcTryParse_ArtistType(ContentNode node,
+                                             LocationContext ctx,
+                                             string actionName,
+                                             string source,
+                                             [MaybeNullWhen(false)] out ArtistType value,
+                                             ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_ArtistType)}"))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
 
-        if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-        {
-            validation = false;
-            value = null;
-            return false;
-        }
+      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
 
-        return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
-    }
+      return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
+   }
 }

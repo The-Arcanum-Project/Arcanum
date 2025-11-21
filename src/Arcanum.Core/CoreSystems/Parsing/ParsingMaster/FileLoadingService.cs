@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -11,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 /// How to add it to the loading / parsing system:<br/>
 /// 1. Create a new instance of <see cref="FileLoadingService"/> and a <see cref="Arcanum.Core.CoreSystems.SavingSystem.Services.ISavingService"/> <br/>
 /// 2. Create a new <see cref="FileDescriptor"/> with the instance of these in <see cref="DescriptorDefinitions"/><br/>
-/// 3. Make sure to define all dependencies in the <see cref="FileDescriptor.Dependencies"/> <br/>
+/// 3. Make sure to define all dependencies in the Dependencies <br/>
 /// 4. Add it to the <see cref="DescriptorDefinitions.FileDescriptors"/> list<br/>
 /// </summary>
 public abstract class FileLoadingService : IDependencyNode<string>
@@ -44,7 +45,6 @@ public abstract class FileLoadingService : IDependencyNode<string>
    //TODO @MelCo make dependencies optional for automatic dependency resolution
    protected FileLoadingService(IEnumerable<IDependencyNode<string>> dependencies)
    {
-      dependencies ??= [];
       Dependencies = dependencies;
       Name = GetType().Name;
    }
@@ -54,7 +54,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    /// </summary>
    public abstract List<Type> ParsedObjects { get; }
 
-   protected string GetActionName([System.Runtime.CompilerServices.CallerMemberName] string caller = "")
+   protected string GetActionName([CallerMemberName] string caller = "")
    {
       var declaringType = GetType();
       return $"{declaringType.FullName}.{caller}";

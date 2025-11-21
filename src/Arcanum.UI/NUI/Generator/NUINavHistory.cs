@@ -43,7 +43,7 @@ public class NUINavHistory
    public INUINavigation[] GetNavigations()
    {
       if (Targets.Count == 1)
-         return Targets[0].Navigations;
+         return Targets[0].Navigations!;
 
       List<INUINavigation> combinedNavigations = [];
       foreach (var target in Targets)

@@ -1,7 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.UI.Components.StyleClasses;
@@ -21,7 +19,7 @@ public partial class JominiDateTextBox : CorneredTextBox
    }
 
    private string? _valueOnMouseEnter;
-   private bool _hasScrolledSinceEnter = false;
+   private bool _hasScrolledSinceEnter;
    private readonly List<DateSegment> _segments = [];
 
    #region Format Dependency Property

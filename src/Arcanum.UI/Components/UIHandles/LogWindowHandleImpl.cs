@@ -1,9 +1,9 @@
-﻿using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.Components.Windows.MinorWindows;
+﻿using Arcanum.UI.Components.Windows.MinorWindows;
+using Common.UI.Interfaces;
 
 namespace Arcanum.UI.Components.UIHandles;
 
-public class LogWindowHandleImpl : Common.UI.Interfaces.ILogWindowHandle
+public class LogWindowHandleImpl : ILogWindowHandle
 {
    private bool _isVisible;
    private LogWindow? _logWindow;
@@ -15,7 +15,7 @@ public class LogWindowHandleImpl : Common.UI.Interfaces.ILogWindowHandle
 
       if (_logWindow == null)
       {
-         _logWindow = new LogWindow();
+         _logWindow = new();
          _logWindow.Show();
       }
       else

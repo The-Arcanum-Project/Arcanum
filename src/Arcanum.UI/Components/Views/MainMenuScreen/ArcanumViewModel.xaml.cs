@@ -66,7 +66,7 @@ public partial class ArcanumViewModel
 
    private void VanillaFolderButton_Click(object sender, RoutedEventArgs e)
    {
-      var defaultPath = VdfParser.GetEu5Path();
+      var defaultPath = Path.Combine(VdfParser.GetEu5Path(), "game");
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
       VanillaFolderTextBox.Text = path ?? string.Empty;
    }

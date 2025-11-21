@@ -51,8 +51,9 @@ public class MainWindowHandleImpl : IMainWindowsHandle
       {
 #if DEBUG
          throw new InvalidDataException("Object is not of type IEu5Object");
-#endif
+#else
          return;
+#endif
       }
 
       if (Application.Current.MainWindow is not MainWindow mw)

@@ -46,10 +46,13 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
 
    private static void HandleCurrentAgeParsing(ContentNode rootCn, string source, LocationContext ctx)
    {
+      // TODO: Use the currentAge variable in custom saving
+      // ReSharper disable once NotAccessedVariable
       string currentAge;
       const string currentAgeKey = "current_age";
       if (rootCn.KeyNode.GetLexeme(source).Equals(currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
       {
+         // ReSharper disable once RedundantAssignment
          currentAge = lvn.Value.GetLexeme(source);
          return;
       }
@@ -72,7 +75,6 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
                                           object? lockObject)
    {
       foreach (var rootStatement in rn.Statements)
-      {
          switch (rootStatement)
          {
             case ContentNode rootCn:
@@ -96,7 +98,6 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
                break;
             }
          }
-      }
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,

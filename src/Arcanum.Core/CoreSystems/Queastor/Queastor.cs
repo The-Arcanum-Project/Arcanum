@@ -75,9 +75,7 @@ public class Queastor : IQueastor
    public void RemoveFromIndex(ISearchable item)
    {
       foreach (var term in item.SearchTerms)
-      {
          RemoveFromIndex(item, term);
-      }
    }
 
    /// <summary>
@@ -131,9 +129,7 @@ public class Queastor : IQueastor
       HashSet<SearchResult> filteredResults = [];
       // Fuzzy matches via BK-Tree
       foreach (var term in _bkTree.Search(query, Settings.MaxLevinsteinDistance))
-      {
          if (UsesDefaultEnum)
-         {
             if (_invertedIndex.TryGetValue(term, out var items))
             {
                if ((IQueastorSearchSettings.DefaultCategories)Settings.SearchCategory ==
@@ -149,8 +145,6 @@ public class Queastor : IQueastor
                   if ((Convert.ToInt64(Settings.SearchCategory) & Convert.ToInt64(item.SearchCategory)) != 0)
                      filteredResults.Add(new(term, item));
             }
-         }
-      }
 
 #if TIME_QUEASTOR
       Debug.WriteLine($"Queastor Search took: {sw.ElapsedMilliseconds} ms for query: {query} with {exact.Count} exact matches and {filteredResults

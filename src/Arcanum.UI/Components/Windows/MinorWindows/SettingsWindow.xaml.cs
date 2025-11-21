@@ -337,7 +337,7 @@ public partial class SettingsWindow
 
    private void Window_Closed(object sender, EventArgs e)
    {
-      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.Settings);
+      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_NAME), Config.Settings);
       LastSelectedProperty = GetCurrentSettingPath(SettingsTabControl);
    }
 

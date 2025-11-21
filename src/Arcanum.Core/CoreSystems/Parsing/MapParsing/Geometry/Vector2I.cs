@@ -1,7 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Runtime.CompilerServices;
 
-using System;
-using System.Runtime.CompilerServices;
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
 [Serializable]
 public struct Vector2I(int x, int y) : IEquatable<Vector2I>
@@ -21,12 +20,12 @@ public struct Vector2I(int x, int y) : IEquatable<Vector2I>
       get => X * X + Y * Y;
    }
 
-   public static Vector2I Zero { get; } = new Vector2I(0, 0);
-   public static Vector2I One { get; } = new Vector2I(1, 1);
-   public static Vector2I Up { get; } = new Vector2I(0, 1);
-   public static Vector2I Down { get; } = new Vector2I(0, -1);
-   public static Vector2I Left { get; } = new Vector2I(-1, 0);
-   public static Vector2I Right { get; } = new Vector2I(1, 0);
+   public static Vector2I Zero { get; } = new(0, 0);
+   public static Vector2I One { get; } = new(1, 1);
+   public static Vector2I Up { get; } = new(0, 1);
+   public static Vector2I Down { get; } = new(0, -1);
+   public static Vector2I Left { get; } = new(-1, 0);
+   public static Vector2I Right { get; } = new(1, 0);
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public void Set(int x, int y)
@@ -46,19 +45,19 @@ public struct Vector2I(int x, int y) : IEquatable<Vector2I>
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I Min(Vector2I a, Vector2I b)
    {
-      return new Vector2I(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y));
+      return new(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y));
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I Max(Vector2I a, Vector2I b)
    {
-      return new Vector2I(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y));
+      return new(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y));
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I Scale(Vector2I a, Vector2I b)
    {
-      return new Vector2I(a.X * b.X, a.Y * b.Y);
+      return new(a.X * b.X, a.Y * b.Y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,37 +79,37 @@ public struct Vector2I(int x, int y) : IEquatable<Vector2I>
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator +(Vector2I a, Vector2I b)
    {
-      return new Vector2I(a.X + b.X, a.Y + b.Y);
+      return new(a.X + b.X, a.Y + b.Y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator -(Vector2I a, Vector2I b)
    {
-      return new Vector2I(a.X - b.X, a.Y - b.Y);
+      return new(a.X - b.X, a.Y - b.Y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator *(Vector2I a, Vector2I b)
    {
-      return new Vector2I(a.X * b.X, a.Y * b.Y);
+      return new(a.X * b.X, a.Y * b.Y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator *(int a, Vector2I b)
    {
-      return new Vector2I(a * b.X, a * b.Y);
+      return new(a * b.X, a * b.Y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator *(Vector2I a, int b)
    {
-      return new Vector2I(a.X * b, a.Y * b);
+      return new(a.X * b, a.Y * b);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static Vector2I operator /(Vector2I a, int b)
    {
-      return new Vector2I(a.X / b, a.Y / b);
+      return new(a.X / b, a.Y / b);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]

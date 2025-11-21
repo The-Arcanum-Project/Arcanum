@@ -184,54 +184,54 @@ public static class MwCommands
 
    // Map Mode quick access buttons
 
-   public static readonly RoutedCommand MapModeButton_1_Command = new("MapModeButton_1_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton1Command = new("MapModeButton_1_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_1 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton1 },
    };
 
-   public static readonly RoutedCommand MapModeButton_2_Command = new("MapModeButton_2_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton2Command = new("MapModeButton_2_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_2 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton2 },
    };
 
-   public static readonly RoutedCommand MapModeButton_3_Command = new("MapModeButton_3_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton3Command = new("MapModeButton_3_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_3 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton3 },
    };
 
-   public static readonly RoutedCommand MapModeButton_4_Command = new("MapModeButton_4_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton4Command = new("MapModeButton_4_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_4 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton4 },
    };
 
-   public static readonly RoutedCommand MapModeButton_5_Command = new("MapModeButton_5_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton5Command = new("MapModeButton_5_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_5 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton5 },
    };
 
-   public static readonly RoutedCommand MapModeButton_6_Command = new("MapModeButton_6_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton6Command = new("MapModeButton_6_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_6 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton6 },
    };
 
-   public static readonly RoutedCommand MapModeButton_7_Command = new("MapModeButton_7_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton7Command = new("MapModeButton_7_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_7 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton7 },
    };
 
-   public static readonly RoutedCommand MapModeButton_8_Command = new("MapModeButton_8_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton8Command = new("MapModeButton_8_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_8 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton8 },
    };
 
-   public static readonly RoutedCommand MapModeButton_9_Command = new("MapModeButton_9_Command", typeof(MainWindowView))
+   public static readonly RoutedCommand MapModeButton9Command = new("MapModeButton_9_Command", typeof(MainWindowView))
    {
-      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_9 },
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton9 },
    };
 
-   public static readonly RoutedCommand MapModeButton_10_Command =
+   public static readonly RoutedCommand MapModeButton10Command =
       new("MapModeButton_10_Command", typeof(MainWindowView))
       {
-         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton_10 },
+         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton10 },
       };
 }

@@ -14,24 +14,6 @@ public partial class HomeViewModel
       //LatestNewsText.Text = latestNews;
    }
 
-   private void DiscordTextBlock_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-   {
-      if (e.ChangedButton == MouseButton.Left)
-      {
-         e.Handled = true;
-         ProcessHelper.OpenDiscordLinkIfDiscordRunning(GitDataService.MODFORGE_DISCORD_URL);
-      }
-   }
-
-   private void GitHubTextBlock_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-   {
-      if (e.ChangedButton == MouseButton.Left)
-      {
-         e.Handled = true;
-         ProcessHelper.OpenLink(GitDataService.ARCANUM_REPOSITORY_URL);
-      }
-   }
-
    private void OpenGithub(object sender, MouseButtonEventArgs e)
    {
       ProcessHelper.OpenLink(GitDataService.ARCANUM_REPOSITORY_URL);

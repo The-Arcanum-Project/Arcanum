@@ -16,7 +16,7 @@ public partial class ModforgeViewModel
 
    private void SetReleaseText()
    {
-      var latestRelease = AppData.GitDataDescriptor.LatestVersion;
+      var latestRelease = AppData.ModforgeDataDescriptor.LatestVersion;
       if (latestRelease is { Data: not null })
       {
          var name = latestRelease.RepositoryName.StartsWith("Minnators-")
@@ -31,25 +31,6 @@ public partial class ModforgeViewModel
       }
    }
 
-   private void DiscordTextBlock_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-   {
-      if (e.ChangedButton == MouseButton.Left)
-      {
-         e.Handled = true;
-         ProcessHelper.OpenDiscordLinkIfDiscordRunning(GitDataService.MODFORGE_DISCORD_URL);
-      }
-   }
-
-   /*
-      private void GitHubTextBlock_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-      {
-         if (e.ChangedButton == MouseButton.Left)
-         {
-            e.Handled = true;
-            ProcessHelper.OpenLink(GitDataService.MODFORGE_REPOSITORY_URL);
-         }
-      }
-   */
    private void OpenGithub(object sender, MouseButtonEventArgs e)
    {
       ProcessHelper.OpenLink(GitDataService.MODFORGE_REPOSITORY_URL);

@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Common.UI;
+using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.GameObjects.Cultural.SubObjects;
 
@@ -20,7 +19,7 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
    [SuppressAgs]
    [DefaultValue(null)]
    [Description("The culture this opinion is about.")]
-   public Religious.Religion Key { get; set; } = Religious.Religion.Empty;
+   public Religion Key { get; set; } = Religion.Empty;
 
    [SuppressAgs]
    [DefaultValue(Opinion.Neutral)]

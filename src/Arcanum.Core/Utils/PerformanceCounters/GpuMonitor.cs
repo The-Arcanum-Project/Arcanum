@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Common.Logger;
 
 namespace Arcanum.Core.Utils.PerformanceCounters;
 

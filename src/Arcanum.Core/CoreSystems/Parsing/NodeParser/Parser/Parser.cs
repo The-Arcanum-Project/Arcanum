@@ -326,13 +326,11 @@ public class Parser(LexerResult lexerResult)
    private void SkipUnexpectedTokens()
    {
       while (_tokens[_current].Type == TokenType.Unexpected)
-      {
          if (_current < _tokensCount)
             _current++;
          else
             // The last token is always EOF, which is not Unexpected.
             break;
-      }
    }
 
    #endregion
@@ -351,9 +349,7 @@ public class Parser(LexerResult lexerResult)
          case BlockNode block:
             var name = block.KeyNode.GetKeyText(source);
             if (block.KeyNode is SimpleKeyNode skn && skn.KeyToken.Type == TokenType.LeftBrace)
-            {
                name = "Array Block";
-            }
 
             sb.AppendLine($"{indent}Block: '{name}'");
             block.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));

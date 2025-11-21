@@ -167,6 +167,8 @@ public static class JsonProcessor
       if (string.IsNullOrEmpty(path))
          throw new ArgumentException("Path cannot be null or empty.", nameof(path));
 
+      IO.EnsureFileDirectoryExists(path);
+
       File.WriteAllText(path, Serialize(value, rules), encoding ?? Encoding.UTF8);
    }
 

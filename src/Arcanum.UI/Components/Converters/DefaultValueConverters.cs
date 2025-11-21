@@ -15,12 +15,10 @@ public class IsNonDefaultToImageSourceConverter : IValueConverter
    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {
       if (value is bool isNonDefault)
-      {
          // The logic from your old GetPropertyMarker method is now here
          // Note: Your original URIs seemed reversed. I've corrected them based on the tooltips.
          // isNonDefault == true means it WILL be saved.
          return isNonDefault ? SaveIcon : DontSaveIcon;
-      }
 
       return null;
    }
@@ -37,11 +35,9 @@ public class IsNonDefaultToTooltipConverter : IValueConverter
    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {
       if (value is bool isNonDefault)
-      {
          return isNonDefault
                    ? "This property is set to a NON-default value and will be saved to file."
                    : "This property is set to its default value and will NOT be saved to file.";
-      }
 
       return "Unknown state.";
    }

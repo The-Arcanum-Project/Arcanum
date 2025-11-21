@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.Utils.Colors;
 
-namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
+namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
 public static class MapModeColorHelper
 {

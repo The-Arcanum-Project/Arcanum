@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -12,11 +10,11 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Common;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map.SubObjects;
 using Arcanum.Core.GameObjects.Religious;
-using Common.Logger;
 using Common.UI;
 using Nexus.Core.Attributes;
 
@@ -53,13 +51,13 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IM
    [ParseAs("religion")]
    [Description("The dominant religion of this location template.")]
    [DefaultValue(null)]
-   public Religious.Religion Religion { get; set; } = Religious.Religion.Empty;
+   public Religion Religion { get; set; } = Religion.Empty;
 
    [SaveAs(SavingValueType.Identifier)]
    [ParseAs("culture")]
    [Description("The dominant culture of this location template.")]
    [DefaultValue(null)]
-   public Cultural.Culture Culture { get; set; } = Cultural.Culture.Empty;
+   public Culture Culture { get; set; } = Culture.Empty;
 
    [SaveAs]
    [ParseAs("raw_material")]

@@ -15,7 +15,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
 
       _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
-      
+
       InvalidateUI();
    }
 
@@ -28,10 +28,9 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override void Undo()
    {
       base.Undo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var target in _targets)
-      {
          target.Target._addRangeToCollection(Attribute, target.OldValue);
-      }
    }
 
    /// <summary>
@@ -41,10 +40,9 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override void Redo()
    {
       base.Redo();
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var target in _targets)
-      {
          target.Target._clearCollection(Attribute);
-      }
    }
 
    /// <summary>
@@ -58,9 +56,9 @@ public class ClearCollectionCommand : Eu5ObjectCommand
       Debug.Assert(target._getValue(attribute) is IEnumerable);
       _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
-      
+
       InvalidateUI();
-      
+
       return true;
    }
 
@@ -72,5 +70,4 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override string GetDescription => _targets.Count > 1
                                                ? $"Clear {Attribute} in {_targets.Count} objects of type {Type}"
                                                : $"Clear {Attribute} in {_targets.First().Target}";
-  
 }

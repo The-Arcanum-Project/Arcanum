@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Reflection;
-using System.Windows.Controls;
 using Vortice.D3DCompiler;
 
 namespace Arcanum.UI.DirectX;

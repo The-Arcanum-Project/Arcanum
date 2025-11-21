@@ -4,7 +4,6 @@
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
-             xmlns:global = "clr-namespace:"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
              xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
@@ -18,7 +17,6 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:ColorToBrushConverter x:Key = "ColorToBrushConverter" />
             <converters:ColorToContrastingBrushConverter x:Key = "ContrastingBrushConverter" />
-            <converters:HexToColorConverter x:Key = "HexToColorConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 

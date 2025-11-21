@@ -1,5 +1,6 @@
 ﻿#define IS_DEBUG
 
+using System.Collections.Concurrent;
 using System.IO;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -23,7 +24,14 @@ public static class FileStateManager
 
    // Stores the full paths of all files and folders the user has explicitly registered.
    private static readonly HashSet<PathObj> RegisteredPaths = [];
-   private static readonly HashSet<string> IgnoredNextChanges = [];
+
+   // Cooldown period to ignore subsequent changes after an ignore request.
+   private const int IGNORE_COOLDOWN_MILLISECONDS = 500;
+
+   // Key: Full path of the file to ignore.
+   // Value: The timestamp (in Ticks) when the ignore should expire.
+   private static readonly ConcurrentDictionary<string, long> IgnoreRequests =
+      new(StringComparer.OrdinalIgnoreCase);
 
    public static void ReloadFile(FileChangedEventArgs e)
    {
@@ -177,12 +185,19 @@ public static class FileStateManager
    private static void HandleEvent(WatcherChangeTypes changeType, string fullPath, string? oldFullPath = null)
    {
       // Check if this change should be ignored.
-      if (IgnoredNextChanges.Remove(fullPath))
+      if (IgnoreRequests.TryGetValue(fullPath, out var expiryTicks))
       {
+         // If the ignore period has not expired yet, ignore this event.
+         if (DateTime.UtcNow.Ticks < expiryTicks)
+         {
 #if IS_DEBUG
-         Console.WriteLine($"[Ignored] Change to '{fullPath}' was ignored as per request.");
+            Console.WriteLine($"[Ignored within cooldown] Change to '{fullPath}'");
 #endif
-         return;
+            return;
+         }
+
+         // If the time has expired, the request is stale. Remove it and process the event.
+         IgnoreRequests.TryRemove(fullPath, out _);
       }
 
       // No lock needed here because we are only reading from _registeredPaths.
@@ -213,10 +228,15 @@ public static class FileStateManager
    /// </summary>
    public static void IgnoreNextChange(string fullPath)
    {
+      var path = Path.GetFullPath(fullPath); // Normalize the path
+      var expiry = DateTime.UtcNow.AddMilliseconds(IGNORE_COOLDOWN_MILLISECONDS).Ticks;
+
+      // Atomically adds or updates the key with the new expiry time.
+      IgnoreRequests.AddOrUpdate(path, expiry, (_, _) => expiry);
+
       ArcLog.WriteLine(LOG_SOURCE,
                        LogLevel.INF,
-                       $"Next change to '{FileManager.SanitizePath(fullPath, '/')}' will be ignored as per request.");
-      IgnoredNextChanges.Add(fullPath);
+                       $"Next change to '{FileManager.SanitizePath(path, '/')}' will be ignored as per request.");
    }
 
    public static void IgnoreNextChange(PathObj pathObj) => IgnoreNextChange(pathObj.FullPath);

@@ -7,7 +7,6 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
-using Arcanum.UI.NUI.Generator;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 

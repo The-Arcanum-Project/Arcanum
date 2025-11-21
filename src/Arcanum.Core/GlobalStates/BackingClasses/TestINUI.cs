@@ -5,7 +5,9 @@ using Arcanum.Core.GameObjects.BaseTypes;
 namespace Arcanum.Core.GlobalStates.BackingClasses;
 
 #if DEBUG
+#pragma warning disable ARC002
 public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<TestINUI>
+#pragma warning restore ARC002
 {
    public static ObservableRangeCollection<EmbeddedObject> EmbeddedObjects { get; } =
    [
@@ -70,7 +72,9 @@ public partial class TestINUI : INUI, ICollectionProvider<TestINUI>, IEmpty<Test
    public static TestINUI Empty { get; } = new();
 }
 
+#pragma warning disable ARC002
 public partial class EmbeddedObject : INUI, ICollectionProvider<EmbeddedObject>, IEmpty<EmbeddedObject>
+#pragma warning restore ARC002
 {
    [DefaultValue(42)]
    public int SomeInt { get; set; } = 42;

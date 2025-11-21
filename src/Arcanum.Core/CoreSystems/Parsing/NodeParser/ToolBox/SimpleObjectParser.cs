@@ -109,7 +109,7 @@ public static class SimpleObjectParser
                   break;
             }
 
-            return;
+            continue;
          }
 
          // Otherwise we just add to globals as normal
@@ -118,7 +118,7 @@ public static class SimpleObjectParser
             {
                if (!globals.TryAdd(instance.UniqueId, instance))
                {
-                  ctx.SetPosition(bn!.KeyNode);
+                  ctx.SetPosition(bn.KeyNode);
                   DiagnosticException.LogWarning(ctx,
                                                  ParsingError.Instance.DuplicateObjectDefinition,
                                                  actionStack,
@@ -131,7 +131,7 @@ public static class SimpleObjectParser
             }
          else if (!globals.TryAdd(instance.UniqueId, instance))
          {
-            ctx.SetPosition(bn!.KeyNode);
+            ctx.SetPosition(bn.KeyNode);
             DiagnosticException.LogWarning(ctx,
                                            ParsingError.Instance.DuplicateObjectDefinition,
                                            actionStack,
@@ -191,7 +191,7 @@ public static class SimpleObjectParser
           instance == null)
          return false;
 
-      propsParser(bn!, instance, ctx, source, ref validation, allowUnknownBlocks);
+      propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
       return true;
    }
 

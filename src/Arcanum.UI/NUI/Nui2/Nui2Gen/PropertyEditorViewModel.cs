@@ -1,18 +1,12 @@
-﻿using System.Collections;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Media;
-using Arcanum.Core.CoreSystems.CommandSystem;
+using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Registry;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
-
-using System.ComponentModel;
-using System.Windows.Controls;
 
 public class PropertyEditorViewModel
    : INotifyPropertyChanged

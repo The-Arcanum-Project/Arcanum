@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.UI.Components.Windows.PopUp;
-using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
@@ -78,22 +79,22 @@ public partial class ParserTest : INotifyPropertyChanged
    public void RunLexer()
    {
       var filePath = ParserTesting.GetFilePath(SelectedFile);
-      if (!System.IO.File.Exists(filePath))
+      if (!File.Exists(filePath))
          return;
 
-      var source = System.IO.File.ReadAllText(filePath);
+      var source = File.ReadAllText(filePath);
       if (source.Length < MAX_OUTPUT_LENGTH)
          InputText = source;
       else
          InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
       var lexer = new Lexer(source);
 
-      var watch = System.Diagnostics.Stopwatch.StartNew();
+      var watch = Stopwatch.StartNew();
       var result = lexer.ScanTokens();
       watch.Stop();
       Time = $"Lexing: {watch.ElapsedMilliseconds} ms";
 
-      var sb = new System.Text.StringBuilder();
+      var sb = new StringBuilder();
 
       if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
       {
@@ -130,7 +131,7 @@ public partial class ParserTest : INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -156,16 +157,16 @@ public partial class ParserTest : INotifyPropertyChanged
    private void RunParser()
    {
       var filePath = ParserTesting.GetFilePath(SelectedFile);
-      if (!System.IO.File.Exists(filePath))
+      if (!File.Exists(filePath))
          return;
 
-      var source = System.IO.File.ReadAllText(filePath);
+      var source = File.ReadAllText(filePath);
       if (source.Length < MAX_OUTPUT_LENGTH)
          InputText = source;
       else
          InputText = $"--- Input truncated due to length ({source.Length} chars) ---";
       var lexer = new Lexer(source);
-      var watch = System.Diagnostics.Stopwatch.StartNew();
+      var watch = Stopwatch.StartNew();
       var result = lexer.ScanTokens();
       watch.Stop();
       Time = $"Lexing {watch.ElapsedMilliseconds} ms";
@@ -175,7 +176,7 @@ public partial class ParserTest : INotifyPropertyChanged
       var ast = parser.Parse();
       watch.Stop();
 
-      var sb = new System.Text.StringBuilder();
+      var sb = new StringBuilder();
       if (result.Tokens.Count > MAX_OUTPUT_LENGTH)
          sb.AppendLine($"--- Output truncated due to length ({result.Tokens.Count} tokens) ---\n");
       else

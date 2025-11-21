@@ -4,7 +4,7 @@ using Arcanum.API.Attributes;
 
 namespace Arcanum.API.UtilServices.Search.SearchableSetting;
 
-public abstract partial class SearchableSettings : ISearchable
+public abstract class SearchableSettings : ISearchable
 {
    private readonly Type _topLevelType;
    private readonly object _root;

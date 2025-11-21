@@ -9,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Queastor;
-using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;
@@ -74,6 +73,8 @@ public partial class SearchWindow : INotifyPropertyChanged
       {
          SearchTextBox.SearchInputTextBox.Text = _lastSearchQuery;
          SearchTextBox.SearchInputTextBox.CaretIndex = _lastSearchQuery.Length;
+         SearchTextBox.SearchInputTextBox.Focus();
+         SearchTextBox.SearchInputTextBox.SelectAll();
       };
    }
 

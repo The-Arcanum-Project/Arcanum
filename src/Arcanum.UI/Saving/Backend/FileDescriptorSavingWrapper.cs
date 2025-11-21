@@ -16,8 +16,6 @@ public class FileDescriptorSavingWrapper : ISearchable
 {
    private readonly FileDescriptor _descriptor;
 
-   private readonly List<FileSavingWrapper> _newFiles = [];
-
    public readonly List<Eu5FileObj> AllFiles;
 
    public FileDescriptorSavingWrapper(FileDescriptor descriptor)
@@ -30,7 +28,6 @@ public class FileDescriptorSavingWrapper : ISearchable
 
    public void AddNewFile(FileSavingWrapper file)
    {
-      _newFiles.Add(file);
       var binarySearch = AllFiles.BinarySearch(file.FileObj, new Eu5FileComparer());
       if (binarySearch < 0)
          binarySearch = ~binarySearch;

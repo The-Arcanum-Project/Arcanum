@@ -17,8 +17,8 @@ public class ParserClassMetadata
    /// </summary>
    public string[] IgnoredContentKeys { get; set; }
 
-   public bool ContainsOnlyChildObjects { get; set; } = false;
-   public string? ChildObjectList { get; set; } = null;
+   public bool ContainsOnlyChildObjects { get; set; }
+   public string? ChildObjectList { get; set; }
 
    public ParserClassMetadata(AttributeData attr)
    {

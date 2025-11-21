@@ -93,8 +93,8 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       return new("DefaultMod",
                  new("example", [], DataSpace.AccessType.ReadOnly),
                  [
-                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
-                    new DataSpace("example", [], DataSpace.AccessType.ReadOnly),
+                    new("example", [], DataSpace.AccessType.ReadOnly),
+                    new("example", [], DataSpace.AccessType.ReadOnly),
                  ],
                  new("example", [], DataSpace.AccessType.ReadOnly));
    }

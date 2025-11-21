@@ -61,6 +61,7 @@
                       HorizontalAlignment = "Center"
                       VerticalAlignment = "Center">
                     <Path.LayoutTransform>
+                        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                         <RotateTransform
                             Angle = "{Binding IsExpanded, Converter={StaticResource BoolToAngleConverter}}"
                             CenterX = "4"
@@ -83,6 +84,7 @@
             </styleClasses:BaseButton>
         </DockPanel>
 
+        <!-- ReSharper disable twice Xaml.BindingWithContextNotResolved -->
         <ContentPresenter Grid.Row = "1"
                           Grid.Column = "0"
                           Grid.ColumnSpan = "2"

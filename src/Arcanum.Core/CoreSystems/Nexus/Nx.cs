@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
 
-namespace Arcanum.Core.CoreSystems.CommandSystem;
+namespace Arcanum.Core.CoreSystems.Nexus;
 
 public static class Nx
 {
@@ -82,9 +82,9 @@ public static class Nx
                              [LinkedPropertyEnum(nameof(_))] Enum e)
    {
       return e.GetType()
-              .GetField(e.ToString())
-              .GetCustomAttribute<ExpectedTypeAttribute>()
-              .Type; // TODO @Melco replace this with sourgenerated lookup as this is slow af
+              .GetField(e.ToString())!
+              .GetCustomAttribute<ExpectedTypeAttribute>()!
+              .Type; // TODO @Melco replace this with source generated lookup as this is slow af
    }
 
    /// <summary>
@@ -113,7 +113,7 @@ public static class Nx
    {
       Debug.Assert(value != null, nameof(value) + " != null");
       CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
-      target._addToCollection(e, value!);
+      target._addToCollection(e, value);
    }
 
    public static void RemoveFromCollection<T>(

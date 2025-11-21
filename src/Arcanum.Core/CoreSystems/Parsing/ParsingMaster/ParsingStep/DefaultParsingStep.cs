@@ -11,7 +11,6 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 public class DefaultParsingStep
 {
    private readonly Stopwatch _stopwatch = new();
-   private readonly List<double> _durations = []; // Stores the durations of each step in milliseconds
    private readonly object _lock = new();
 
    private bool _isSuccessful;
@@ -157,7 +156,6 @@ public class DefaultParsingStep
 
       _stopwatch.Restart();
       Duration = TimeSpan.Zero;
-      _durations.Clear();
       SubPercentageCompleted = 0.0;
       SubStepsDone = 0;
    }

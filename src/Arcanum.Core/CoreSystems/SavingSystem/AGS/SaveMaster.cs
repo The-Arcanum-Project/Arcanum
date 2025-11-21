@@ -96,11 +96,15 @@ public static class SaveMaster
          return;
 
       foreach (var command in list)
-      {
          ChangesSinceLastSave.Remove(command);
-      }
 
       NeedsToBeSaved.Remove(target);
+      if (NewObjects.TryGetValue(target.GetType(), out var newList))
+      {
+         newList.Remove(target);
+         if (newList.Count == 0)
+            NewObjects.Remove(target.GetType());
+      }
    }
 
    private static void AddSingleCommand(Eu5ObjectCommand command, IEu5Object target)
@@ -130,9 +134,7 @@ public static class SaveMaster
          return;
 
       foreach (var target in command.GetTargets())
-      {
          AddSingleCommand(command, target);
-      }
 
       ChangesSinceLastSave.Add(command);
    }
@@ -153,9 +155,7 @@ public static class SaveMaster
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object[] targets)
    {
       foreach (var target in targets)
-      {
          AddSingleCommand(command, target);
-      }
 
       ChangesSinceLastSave.Add(command);
    }
@@ -228,10 +228,10 @@ public static class SaveMaster
    /// A list of any modified objects and the file they belong to.
    /// This list can contain nested objects.
    /// </summary>
-   private static bool SaveFile(List<IEu5Object> modifiedObjects)
+   private static void SaveFile(List<IEu5Object> modifiedObjects)
    {
       if (modifiedObjects.Count == 0)
-         return false;
+         return;
 
       var fileObj = modifiedObjects[0].Source;
 
@@ -242,10 +242,9 @@ public static class SaveMaster
       var sb = UpdateEu5ObjectsInFile(topLevelModObjs);
 
       if (sb == null)
-         return false;
+         return;
 
       WriteFile(sb.InnerBuilder, fileObj, true);
-      return true;
    }
 
    public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
@@ -280,7 +279,15 @@ public static class SaveMaster
 
          if (value[0].SavingCategory == SavingCategory.Modify)
          {
+            foreach (var csso in value)
+            {
+               fo.ObjectsInFile.Add(csso.Target);
+               csso.Target.Source = fo;
+            }
+
             SaveFile(fo, true);
+            foreach (var csso in value)
+               RemoveObjectFromChanges(csso.Target);
             continue;
          }
 
@@ -324,10 +331,8 @@ public static class SaveMaster
 
       // If we have a newly created object it's Source property is still Empty so we need to set it here
       foreach (var csso in value)
-      {
          if (csso.Target.Source == Eu5FileObj.Empty)
             csso.Target.Source = fo;
-      }
 
       Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
                    "All objects must have a valid file location matching the file they are being saved to.");
@@ -392,7 +397,9 @@ public static class SaveMaster
 
       var original = toUpdateObjs.Count > 0
                         ? IO.IO.ReadAllTextUtf8(toUpdateObjs[0].Source.Path.FullPath)
-                        : string.Empty;
+                        : newObjs.Count > 0
+                           ? IO.IO.ReadAllTextUtf8(newObjs[0].Source.Path.FullPath)
+                           : string.Empty;
 
       if (string.IsNullOrEmpty(original))
          if (newObjs.Count > 0 && toUpdateObjs.Count > 0)
@@ -436,7 +443,10 @@ public static class SaveMaster
             isb.InnerBuilder.AppendLine();
 
          isb.SetIndentLevel(indentLevel);
-         obj.ToAgsContext().BuildContext(isb);
+         if (obj.InjRepType != InjRepType.None)
+            obj.ToAgsContext().BuildContext(isb, [.. obj.SaveableProps], obj.InjRepType, true);
+         else
+            obj.ToAgsContext().BuildContext(isb);
          var lineOffset = CountNewLinesInStringBuilder(isb.InnerBuilder);
          var charPosOffset = isb.InnerBuilder.Length;
          var oldLineCount = CountLinesInOriginal(original, obj.FileLocation);
@@ -451,12 +461,14 @@ public static class SaveMaster
 
          // Any object before this one has to get it's FileLocation updated as well
          if (sortedOldObjects.Length > 0)
-            while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+            while (oldObjIndex < sortedOldObjects.Length &&
+                   sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
             {
                // We can skip the first one as everything before it is just copied over from before.
                if (i == 0)
                {
-                  while (sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
+                  while (oldObjIndex < sortedOldObjects.Length &&
+                         sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
                      oldObjIndex++;
                   break;
                }
@@ -514,6 +526,9 @@ public static class SaveMaster
          lastEndPos = obj.FileLocation.CharPos + obj.FileLocation.Length - 1;
       }
 #endif
+
+      foreach (var obj in objs)
+         RemoveObjectFromChanges(obj);
 
       return sb;
    }
@@ -595,11 +610,10 @@ public static class SaveMaster
    public static void WriteFile(StringBuilder sb, Eu5FileObj fileObj, bool register)
    {
       // We need to move the file to the modded data space if it is not there yet
-      if (!fileObj.IsModded)
+      if (!fileObj.IsModded && Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
          fileObj.Path.MoveToMod();
 
-      var np = fileObj.Path.FullPath;
-      IO.IO.WriteAllTextUtf8WithBom(np, sb.ToString());
+      IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
       if (register)
          FileStateManager.RegisterPath(fileObj.Path);
    }
@@ -662,47 +676,51 @@ public static class SaveMaster
       PropertyOrderCache.Clear();
       var sb = new StringBuilder(original.Length);
       // The position we are in the source string we are removing content from
-      var srcPos = 0;
+
       var srcPointer = 0;
       var toRemove = obj.OrderBy(o => o.FileLocation.CharPos).ToArray();
       var objInFile = fo.ObjectsInFile.OrderBy(o => o.FileLocation.CharPos).ToArray();
 
+      var lastWrittenObject = 0;
       var deltaLines = 0;
       var deltaCharPos = 0;
-      foreach (var o in objInFile)
+      for (var i = 0; i < objInFile.Length; i++)
       {
+         var o = objInFile[i];
          // If we find an object that is yet to be written we skip it
          if (o.FileLocation == Eu5ObjectLocation.Empty)
-            continue;
-
-         var objectLength = o.FileLocation.Length;
-         // if we are not yet at the location of the first we can just append and proceed as if nothing happened
-         if (toRemove[0].FileLocation.CharPos > o.FileLocation.CharPos)
          {
-            sb.Append(original, srcPos, objectLength);
+            lastWrittenObject = i + 1;
             continue;
          }
 
          // We found the next object we want to remove.
          if (srcPointer < toRemove.Length && toRemove[srcPointer].FileLocation.CharPos == o.FileLocation.CharPos)
          {
+            // Write everything up to the object to be removed
+            sb.Append(original,
+                      objInFile[lastWrittenObject].FileLocation.CharPos,
+                      o.FileLocation.CharPos - objInFile[lastWrittenObject].FileLocation.CharPos);
+
             // Skip over the object to be removed
-            srcPos = o.FileLocation.CharPos + objectLength;
             deltaLines -= CountLinesInOriginal(original, o.FileLocation);
-            deltaCharPos -= objectLength;
+            deltaCharPos -= o.FileLocation.Length;
             fo.ObjectsInFile.Remove(o);
             srcPointer++;
+            lastWrittenObject = i + 1;
             continue;
          }
 
-         // We add the object back to the new file
-         sb.Append(original, srcPos, objectLength);
-         srcPos = o.FileLocation.CharPos + objectLength;
-
-         // As this object 
+         // We are after the object to be removed, so we need to update the FileLocation
          var fl = o.FileLocation;
          o.FileLocation = new(0, fl.Line + deltaLines, fl.Length, fl.CharPos + deltaCharPos);
       }
+
+      // Write any remaining content after the last removed object
+      if (lastWrittenObject < objInFile.Length)
+         sb.Append(original,
+                   objInFile[lastWrittenObject].FileLocation.CharPos,
+                   original.Length - objInFile[lastWrittenObject].FileLocation.CharPos);
 
 #if DEBUG
       var newFileLength = sb.Length;
@@ -759,10 +777,6 @@ public static class SaveMaster
             newlineCount++;
 
       return newlineCount;
-   }
-
-   private static void UpdateFileLocations(IEu5Object obj, int delta, int deltaLines)
-   {
    }
 
    private static List<IEu5Object> FilterOutNestedObjects(List<IEu5Object> allMods)

@@ -31,5 +31,12 @@ public static class Eu5Activator
    }
 
    private static Eu5ObjectLocation GetLocationData(this StatementNode node)
-      => new(node.KeyNode.Column, node.KeyNode.Line, node.GetEndLocation().charPos, node.KeyNode.Start);
+   {
+      var (_, charPos) = node.GetEndLocation();
+      var length = charPos - node.KeyNode.Start;
+      return new(node.KeyNode.Column,
+                 node.KeyNode.Line,
+                 length,
+                 node.KeyNode.Start);
+   }
 }

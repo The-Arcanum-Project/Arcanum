@@ -4,10 +4,9 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Arcanum.Core.CoreSystems.CommandSystem;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -19,9 +18,6 @@ namespace Arcanum.UI.NUI.Generator;
 /// </summary>
 public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisposable
 {
-   private readonly List<WeakEventListener<MultiSelectPropertyViewModel, object, PropertyChangedEventArgs>>
-      _weakListeners = [];
-
    private readonly IReadOnlyList<IEu5Object> _targets;
    private readonly Enum _property;
    private readonly bool _allowReadonlyWrite;
@@ -46,7 +42,9 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
       }
    }
 
-   public MultiSelectPropertyViewModel(IReadOnlyList<IEu5Object> targets, Enum property, bool allowReadonlyWrite = false)
+   public MultiSelectPropertyViewModel(IReadOnlyList<IEu5Object> targets,
+                                       Enum property,
+                                       bool allowReadonlyWrite = false)
    {
       _targets = targets;
       _property = property;
@@ -70,26 +68,6 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
       UpdateIsNonDefaultState();
       UpdateCollectionCount();
       CollectionContentChanged?.Invoke(this, EventArgs.Empty);
-   }
-
-   /// <summary>
-   /// This method is called weakly from the models.
-   /// </summary>
-   private void OnModelPropertyChanged(PropertyChangedEventArgs e)
-   {
-      if (e.PropertyName != _property.ToString())
-         return;
-
-      if (_observableCollection != null)
-         _observableCollection.CollectionChanged -= OnModelCollectionChanged;
-
-      if (Value is INotifyCollectionChanged newCollection)
-      {
-         _observableCollection = newCollection;
-         _observableCollection.CollectionChanged += OnModelCollectionChanged;
-      }
-
-      Refresh();
    }
 
    public void Refresh()
@@ -215,10 +193,6 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
          _observableCollection.CollectionChanged -= OnModelCollectionChanged;
          _observableCollection = null;
       }
-
-      foreach (var listener in _weakListeners)
-         listener.Detach();
-      _weakListeners.Clear();
 
       CollectionContentChanged = null;
    }

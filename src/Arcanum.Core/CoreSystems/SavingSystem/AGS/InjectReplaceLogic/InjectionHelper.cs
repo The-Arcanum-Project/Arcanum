@@ -48,6 +48,7 @@ public static class InjectionHelper
 
          var target = csso.Target;
          // If the target's source is Empty we know that we have a newly created object that does not get saved by injection.
+         // So we just add it to the objects in the file and it will be saved via Modification write.
          if (target.Source == Eu5FileObj.Empty)
             continue;
 
@@ -60,15 +61,22 @@ public static class InjectionHelper
                continue;
             }
 
-            UIHandle.Instance.PopUpHandle
-                    .ShowMBox("Attempted to save an injection for an object from a non vanilla source. " +
-                              "This is not allowed as only vanilla objects can be modified directly. \n" +
-                              "WHY DON'T WE SUPPORT THIS? \n Ask Stiopa",
-                              "Invalid Injection Target",
-                              MBoxButton.OK,
-                              MessageBoxImage.Error);
-            abort = true;
-            continue;
+            // We can not inject into an object that is not from a vanilla source unless we are replacing it.
+            if (target.InjRepType is InjRepType.INJECT or InjRepType.TRY_INJECT or InjRepType.INJECT_OR_CREATE)
+            {
+               UIHandle.Instance.PopUpHandle
+                       .ShowMBox("Attempted to save an injection for an object from a non vanilla source. " +
+                                 "This is not allowed as only vanilla objects can be modified directly. \n" +
+                                 "WHY DON'T WE SUPPORT THIS? \n Ask Stiopa",
+                                 "Invalid Injection Target",
+                                 MBoxButton.OK,
+                                 MessageBoxImage.Error);
+               abort = true;
+               continue;
+            }
+
+            Debug.Assert(csso.SavingCategory.IsReplace(),
+                         "Saving category is not replace for an object that is marked as replace.");
          }
 
          if (!changedProperties.TryGetValue(target, out var changedProps))
@@ -114,7 +122,6 @@ public static class InjectionHelper
                var existingInjects = csso.Target.GetInjectsForTarget();
                // We have existing injects, so we check if they are in the same file and category so that we can merge them.
                if (existingInjects.Length > 0)
-               {
                   // At this point we know that all existing injects are of the same type (inject) and compatible.
                   // The only time we could have switched type is the collection check which would have made us replace.
                   // So we simply add all existing injects to the final injects to be saved.
@@ -122,10 +129,8 @@ public static class InjectionHelper
                   {
                      // Stuff in base mods cannot be merged into our mod inject so we skip them.
                      if (ei.Source.IsVanilla)
-                     {
                         // TODO: Create a Replace here if valid? @Stiopa
                         continue;
-                     }
 
                      foreach (var prop in ei.InjectedProperties)
                      {
@@ -148,7 +153,6 @@ public static class InjectionHelper
                      toRemoveFromFiles.Add(ei);
                      InjectManager.UnregisterInjectObj(ei);
                   }
-               }
 
                break;
             case SavingCategory.Replace:
@@ -159,10 +163,18 @@ public static class InjectionHelper
 
                var eInjects = csso.Target.GetInjectsForTarget();
 
+               if (csso.Target.InjRepType is InjRepType.REPLACE
+                                          or InjRepType.TRY_REPLACE
+                                          or InjRepType.REPLACE_OR_CREATE)
+               {
+                  // If the target is already a replace we can simply modify it
+                  csso.SavingCategory = SavingCategory.Modify;
+                  continue;
+               }
+
                // We have existing injects are are now going to perform a check if we can simply bundle them into a single replace.
                // This is only possible if there are no conflicting properties.
                if (eInjects.Length > 0)
-               {
                   foreach (var injObject in eInjects)
                   {
                      if (injObject.Source.IsVanilla)
@@ -189,7 +201,6 @@ public static class InjectionHelper
                      // And as all injects are already in the finalInjects we don't have to do anything special here.
                      toRemoveFromFiles.Add(injObject);
                   }
-               }
 
                break;
             default:
@@ -224,7 +235,7 @@ public static class InjectionHelper
          {
             if (!cps.ContainsKey(target))
                cps[target] = [];
-            cps[target].Add(command.Attribute);
+            cps[target].Add(command.Attribute!);
          }
       }
    }
@@ -240,13 +251,13 @@ public static class InjectionHelper
 
          SavingCategory category;
          var descriptor = DescriptorDefinitions.TypeToDescriptor[obj.GetType()];
-         // we have an object type that must be saved in a single file only
          if (!descriptor.AllowMultipleFiles || obj.FileLocation == Eu5ObjectLocation.Empty)
          {
+            // we have an object type that must be saved in a single file only if the object is not Empty
             if (obj.FileLocation == Eu5ObjectLocation.Empty)
             {
                // We have a new object that is not saved via injection
-               category = SavingCategory.FileOverride;
+               category = SavingCategory.Modify;
             }
             else
             {
@@ -261,7 +272,8 @@ public static class InjectionHelper
             var changes = SaveMaster.GetChangesForObject(obj);
             var percentageModified = changes.Length / (float)numOfProperties;
 
-            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject)
+            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject ||
+                obj.InjRepType is InjRepType.REPLACE or InjRepType.TRY_REPLACE or InjRepType.REPLACE_OR_CREATE)
             {
                category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
                // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
@@ -273,8 +285,21 @@ public static class InjectionHelper
             {
                category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
                // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate)
-               if (!obj.Source.IsVanilla && category is SavingCategory.Replace or SavingCategory.TryReplace)
-                  category = SavingCategory.ReplaceOrCreate;
+
+               if (!obj.Source.IsVanilla)
+               {
+                  if (category is SavingCategory.Replace or SavingCategory.TryReplace)
+                     category = SavingCategory.ReplaceOrCreate;
+               }
+               else
+               {
+                  Debug.Assert(obj.Source != Eu5FileObj.Empty,
+                               "Object source is empty in injection categorization despite previous checks.");
+                  Debug.Assert(obj.Source.IsVanilla,
+                               "Object source is not vanilla in injection categorization despite previous checks.");
+                  categorized[i] = new(obj, category) { SaveLocation = obj.Source };
+                  continue;
+               }
             }
          }
 
@@ -301,8 +326,19 @@ public static class InjectionHelper
       foreach (var typeGroup in byType.Values)
       {
          var obj = typeGroup[0];
-         if (obj.SavingCategory == SavingCategory.FileOverride && obj.SaveLocation != Eu5FileObj.Empty)
-            continue;
+
+         if (obj.SavingCategory == SavingCategory.FileOverride)
+         {
+            if (obj.SaveLocation != Eu5FileObj.Empty)
+               continue;
+
+            // If we want to edit vanilla files we have to save to the original source
+            if (!Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
+            {
+               obj.SaveLocation = obj.Target.Source;
+               continue;
+            }
+         }
 
          var fo = FileStateManager.CreateEu5FileObject(obj.Target);
 
@@ -318,8 +354,6 @@ public static class InjectionHelper
    /// <br/>
    /// <br/>
    /// Also sets the fileObject to save to.
-   /// <br/>
-   /// TODO: In the future we can also think about merging injections if they are compatible. 
    /// </summary>
    public static void EnsureCompatibilityWithExistingInjections(List<CategorizedSaveable> cssos)
    {
@@ -347,6 +381,15 @@ public static class InjectionHelper
             {
                if (ej.Source.IsModded)
                   injectsInModFiles.Add(ej.Source);
+               continue;
+            }
+
+            // If we have a replace already in the mod for this object and we want to inject, we promote the inject to 
+            // a replace which will just rewrite the entire object.
+            if (ejStrat.IsReplace() && isInject && ej.Source.IsModded)
+            {
+               csso.SavingCategory =
+                  SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
                continue;
             }
 

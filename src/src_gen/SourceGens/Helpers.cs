@@ -321,7 +321,6 @@ public static class Helpers
       // Only if we haven't found attributes yet, check the interfaces.
       // This ensures class attributes always override interface attributes.
       if (ignoreAttr == null && addAttr == null)
-      {
          foreach (var iface in classSymbol.AllInterfaces)
          {
             var memberOnIface = iface.GetMembers(memberName).FirstOrDefault();
@@ -335,7 +334,6 @@ public static class Helpers
                                                               MODIFIABLE_ATTRIBUTE_STRING);
             }
          }
-      }
 
       return (ignoreAttr, addAttr);
    }
@@ -407,9 +405,7 @@ public static class Helpers
    {
       itemType = null;
       if (typeSymbol is not INamedTypeSymbol namedType)
-      {
          return false;
-      }
 
       // Find the implementation of IEnumerable<T>
       var ienumerable = namedType.AllInterfaces.FirstOrDefault(i =>

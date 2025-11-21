@@ -8,6 +8,9 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Utils.vdfParser;
+#if !DEBUG
+using Common.UI;
+#endif
 
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
@@ -246,10 +249,8 @@ public static class FileManager
          return ModDataSpace;
 
       foreach (var dependentDataSpace in DependentDataSpaces)
-      {
          if (fullPath.StartsWith(dependentDataSpace.FullPath, StringComparison.OrdinalIgnoreCase))
             return dependentDataSpace;
-      }
 
       return DataSpace.Empty;
    }

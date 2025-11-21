@@ -1,6 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections;
 using System.Windows;
-using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common;
@@ -44,7 +43,7 @@ public class PopUpHandleImpl : IPopUpHandle
       if (obj is null)
          throw new ArgumentNullException(nameof(obj), "Object cannot be null");
 
-      if (obj is System.Collections.IEnumerable enumerable)
+      if (obj is IEnumerable enumerable)
          return new BaseCollectionView(enumerable);
 
       return new PropertyGridWindow(obj);

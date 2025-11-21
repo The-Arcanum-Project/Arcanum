@@ -17,9 +17,7 @@ public static class DispatcherGeneratorHelper
       sb.AppendLine("using System.Collections.Concurrent;");
       sb.AppendLine("using System.Reflection;");
       foreach (var configUsing in config.Usings)
-      {
          sb.AppendLine($"using {configUsing};");
-      }
 
       sb.AppendLine();
       sb.AppendLine($"namespace {config.Namespace};");

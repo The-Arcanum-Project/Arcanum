@@ -1,5 +1,4 @@
-﻿using System.Drawing.Drawing2D;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.GameObjects.BaseTypes;

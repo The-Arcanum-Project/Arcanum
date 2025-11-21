@@ -43,7 +43,6 @@ public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    {
       var rn = Parser.Parse(fileObj, out var source);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
-      var validation = true;
 
       Parser.VerifyNodeTypes([..rn.Statements],
                              [typeof(BlockNode), typeof(ContentNode)],

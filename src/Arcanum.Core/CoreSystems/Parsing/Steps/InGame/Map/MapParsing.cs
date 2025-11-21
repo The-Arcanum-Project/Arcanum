@@ -5,7 +5,6 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
-using Common.Logger;
 using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
@@ -90,9 +89,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             continue;
 
          foreach (var polygon in polygonList)
-         {
             polygon.ColorIndex = loc.ColorIndex;
-         }
       }
 
       lock (this)

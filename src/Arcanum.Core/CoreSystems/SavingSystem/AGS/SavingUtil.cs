@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
-using Arcanum.Core.CoreSystems.CommandSystem;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;

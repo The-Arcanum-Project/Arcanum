@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;

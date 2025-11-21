@@ -121,10 +121,8 @@ public class Node : ICoordinateAdder
    public CacheNodeInfo GetSegment(Direction dir)
    {
       foreach (var segment in Segments)
-      {
          if (segment.Dir == dir)
             return segment;
-      }
 
       throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
    }
@@ -164,9 +162,7 @@ public class Node : ICoordinateAdder
                      [MaybeNullWhen(false)] out Node node)
    {
       if (input.Segment.Points.Count == 0)
-      {
          return Visit(ref direction, out segment, out node);
-      }
 
       // Get last point based on the direction
       var point = input.IsForward ? input.Segment.Points[^1] : input.Segment.Points[0];
@@ -219,13 +215,9 @@ public class Node : ICoordinateAdder
       // Not only check the right direction, since it is a T-shaped intersection a possible path is straight ahead.
       var newDirection = direction.RotateRight();
       if (TryGetSegment(newDirection, out var cache))
-      {
          direction = newDirection;
-      }
       else
-      {
          cache = GetSegment(direction);
-      }
 
       if (cache.Segment.HasValue)
       {

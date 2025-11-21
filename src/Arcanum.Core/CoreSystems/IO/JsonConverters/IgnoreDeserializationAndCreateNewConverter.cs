@@ -1,13 +1,14 @@
 ﻿#define DEBUG_RESET_SETTINGS
-namespace Arcanum.Core.CoreSystems.IO.JsonConverters;
-
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
+namespace Arcanum.Core.CoreSystems.IO.JsonConverters;
 
 public class IgnoreDeserializationAndCreateNewConverter<T> : JsonConverter<T> where T : new()
 {
    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
    {
+      // TODO: why is this here what did this do
 #if DEBUG_RESET_SETTINGS
       reader.Skip();
       return new();

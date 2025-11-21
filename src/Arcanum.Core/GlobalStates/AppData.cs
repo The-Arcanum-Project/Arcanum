@@ -8,9 +8,10 @@ namespace Arcanum.Core.GlobalStates;
 public static class AppData
 {
    internal const string APP_NAME = "Arcanum";
-   internal const string APP_VERSION = "1.0.0-beta";
+   internal const string APP_VERSION = "0.9.2 Alpha";
 
-   public static GitDataDescriptor GitDataDescriptor { get; } = new();
+   public static GitDataDescriptor ModforgeDataDescriptor { get; } = new(GitDataService.MOD_FORGE_GIT_REPOSITORY);
+   public static GitDataDescriptor ArcanumDataDescriptor { get; } = new(GitDataService.ARCANUM_GIT_REPOSITORY);
    public static MainMenuScreenDescriptor MainMenuScreenDescriptor { get; set; } = null!;
 
    public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new();

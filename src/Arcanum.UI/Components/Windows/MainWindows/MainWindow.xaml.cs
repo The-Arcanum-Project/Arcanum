@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,7 +26,6 @@ using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Arcanum.UI.Util;
 using Common.UI;
-using CommunityToolkit.Mvvm.Input;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 
@@ -41,8 +41,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private string _gpuUsage = "GPU: [0%]";
    private string _vramUsage = "VRAM: [0 MB]";
    private string _fps = "FPS: [0]";
-   private string _hoveredLocation;
-   private string _rectangleBounds;
+   private string _hoveredLocation = null!;
+   private string _rectangleBounds = null!;
 
    private readonly ToolTipManager _toolTipManager = new();
 
@@ -143,6 +143,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public MainWindow()
    {
       InitializeComponent();
+#if !DEBUG
+      DebugPanel.Visibility = Visibility.Collapsed;
+#else
+      DebugPanel.Visibility = Visibility.Visible;
+#endif
+
       PerformanceCountersHelper.Initialize(this);
    }
 
@@ -177,7 +183,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       lock (mapDataParser)
          if (mapDataParser.FinishedTesselation)
-            _ = MainMap.SetupRenderer(mapDataParser.Polygons, mapDataParser.MapSize);
+         {
+            Debug.Assert(mapDataParser.Polygons != null,
+                         "Map data parser has finished tesselation but polygons are null.");
+            _ = MainMap.SetupRenderer(mapDataParser.Polygons!, mapDataParser.MapSize);
+         }
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
@@ -225,9 +235,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
    {
       if (e.PropertyName == nameof(SelectionManager.ObjectSelectionMode))
-      {
          SelectionModeBox.SelectedIndex = (int)SelectionManager.ObjectSelectionMode;
-      }
    }
 
    private void EditableObjectsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -532,16 +540,16 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       return index switch
       {
-         0 => MwCommands.MapModeButton_1_Command,
-         1 => MwCommands.MapModeButton_2_Command,
-         2 => MwCommands.MapModeButton_3_Command,
-         3 => MwCommands.MapModeButton_4_Command,
-         4 => MwCommands.MapModeButton_5_Command,
-         5 => MwCommands.MapModeButton_6_Command,
-         6 => MwCommands.MapModeButton_7_Command,
-         7 => MwCommands.MapModeButton_8_Command,
-         8 => MwCommands.MapModeButton_9_Command,
-         9 => MwCommands.MapModeButton_10_Command,
+         0 => MwCommands.MapModeButton1Command,
+         1 => MwCommands.MapModeButton2Command,
+         2 => MwCommands.MapModeButton3Command,
+         3 => MwCommands.MapModeButton4Command,
+         4 => MwCommands.MapModeButton5Command,
+         5 => MwCommands.MapModeButton6Command,
+         6 => MwCommands.MapModeButton7Command,
+         7 => MwCommands.MapModeButton8Command,
+         8 => MwCommands.MapModeButton9Command,
+         9 => MwCommands.MapModeButton10Command,
          _ => null,
       };
    }

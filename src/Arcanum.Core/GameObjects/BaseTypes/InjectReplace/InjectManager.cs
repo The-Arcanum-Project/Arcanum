@@ -13,13 +13,53 @@ public static class InjectManager
       {
          InjRepType = type,
          Target = target,
-         InjectedProperties = injectSource.GetNonDefaultProperties(),
+         InjectedProperties = GetInjectedProperties(target, injectSource),
          Source = injectSource.Source,
          FileLocation = injectSource.FileLocation,
       };
 
       RegisterInjectObj(injectObj);
       return injectObj;
+   }
+
+   public static KeyValuePair<Enum, object>[] GetInjectedProperties(IEu5Object target, IEu5Object injectSource)
+   {
+      // Is not as bad as it looks as GetAllProperties() is cached.
+      var nonDefaultProps = new KeyValuePair<Enum, object>[target.GetAllProperties().Length];
+
+      var index = 0;
+      foreach (var prop in target.GetAllProperties())
+      {
+         var currentValue = target._getValue(prop);
+         var injectValue = injectSource._getValue(prop);
+
+         if (target.IsCollection(prop) &&
+             (AreCollectionsLogicallyEqual(currentValue, injectValue) || (ICollection)injectValue is { Count: 0 }))
+            continue;
+
+         if (currentValue.Equals(injectValue))
+            continue;
+
+         // Skip UniqueId property
+         if (prop.ToString() == "UniqueId")
+            continue;
+
+         // TODO: this can be done much better but requires changes to how parsing works. We would need a system to set 
+         // TODO: which properties were explicitly set during parsing instead of relying on default value comparison.
+         // If it is of a primitive type, then we assume it is injected anyhow
+         // If it is a complex type, we only want to inject if it is different from the default value
+         if (!target.GetNxPropType(prop).IsPrimitive)
+         {
+            // Yes any empty list would be ignored but then again they have to be created as a replace
+            var defaultValue = target.GetDefaultValue(prop);
+            if (injectValue.Equals(defaultValue))
+               continue;
+         }
+
+         nonDefaultProps[index++] = new(prop, injectValue);
+      }
+
+      return nonDefaultProps[..index];
    }
 
    public static void UnregisterInjectObj(InjectObj obj)

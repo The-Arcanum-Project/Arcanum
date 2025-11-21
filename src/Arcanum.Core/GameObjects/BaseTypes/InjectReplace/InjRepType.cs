@@ -1,5 +1,8 @@
-﻿namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public enum InjRepType
 {
    /// <summary>

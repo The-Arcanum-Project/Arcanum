@@ -8,7 +8,7 @@ using Institution = Arcanum.Core.GameObjects.Cultural.Institution;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-public partial class InstitutionParsing(IEnumerable<IDependencyNode<string>> dependencies)
+public class InstitutionParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : DiscoverThenParseLoadingService<Institution>(true, dependencies)
 {
    protected override void ParsePropertiesToObject(BlockNode block,

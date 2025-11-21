@@ -1,10 +1,12 @@
-﻿namespace Arcanum.Core.Utils;
+﻿using System.Diagnostics.CodeAnalysis;
+using Color = System.Windows.Media.Color;
 
-using System.Windows.Media;
+namespace Arcanum.Core.Utils;
 
 public static class ColorConversion
 {
    // Converts RGB to HSV
+   [SuppressMessage("ReSharper", "InconsistentNaming")]
    public static (double hue, double saturation, double value) RgbToHsv(byte r, byte g, byte b)
    {
       var R = r / 255.0;
@@ -45,6 +47,7 @@ public static class ColorConversion
       var i = (int)Math.Floor(h / 60) % 6;
       var f = h / 60 - Math.Floor(h / 60);
 
+      // ReSharper disable once InconsistentNaming
       var V = (byte)(v * 255);
       var p = (byte)(v * (1 - s) * 255);
       var q = (byte)(v * (1 - f * s) * 255);

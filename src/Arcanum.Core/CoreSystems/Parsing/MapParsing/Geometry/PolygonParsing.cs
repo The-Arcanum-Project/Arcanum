@@ -26,22 +26,21 @@ public class PolygonParsing(int color)
       var contour = new ContourVertex[points.Count];
 
       for (var i = 0; i < points.Count; i++)
-         contour[i] = new ContourVertex(new(points[i].X, points[i].Y, 0));
+         contour[i] = new(new(points[i].X, points[i].Y, 0));
 
       tess.AddContour(contour);
       if (Holes.Count > 0)
-      {
          foreach (var hole in Holes)
          {
             var holePoints = hole.GetAllPoints();
             var holeContour = new ContourVertex[holePoints.Count];
 
             for (var i = 0; i < holePoints.Count; i++)
-               holeContour[i] = new ContourVertex(new(holePoints[i].X, holePoints[i].Y, 0));
+               holeContour[i] = new(new(holePoints[i].X, holePoints[i].Y, 0));
 
             tess.AddContour(holeContour);
          }
-      }
+
       tess.Tessellate();
 
       var vertices = new Vector2[tess.VertexCount];
@@ -59,7 +58,7 @@ public class PolygonParsing(int color)
    {
       var points = GetAllPoints();
       if (points.Count == 0)
-         return new Rectangle(0, 0, 0, 0);
+         return new(0, 0, 0, 0);
 
       var minX = points[0].X;
       var maxX = points[0].X;
@@ -93,18 +92,17 @@ public class PolygonParsing(int color)
          var borderPoint = points[i];
          // Horizontal line
          if (point.X == cachedPoint.X)
-         {
             if (point.Y >= Math.Min(borderPoint.Y, cachedPoint.Y) && point.Y <= Math.Max(borderPoint.Y, cachedPoint.Y))
                return true;
-         }
+
          // Vertical line
          if (point.Y == cachedPoint.Y)
-         {
             if (point.Y >= Math.Min(borderPoint.X, cachedPoint.X) && point.Y <= Math.Max(borderPoint.X, cachedPoint.X))
                return true;
-         }
+
          cachedPoint = borderPoint;
       }
+
       return false;
    }
 
@@ -112,15 +110,13 @@ public class PolygonParsing(int color)
    {
       var numberHoles = Holes.Count;
 
-      var points = new List<Vector2I>[numberHoles+1];
+      var points = new List<Vector2I>[numberHoles + 1];
 
       for (var i = 0; i < numberHoles; i++)
-      {
          points[i + 1] = Holes[i].GetAllPoints();
-      }
 
       points[0] = GetAllPoints();
-      
+
       return points.Any(pts => IsOnBorder(pts, point));
    }
 }

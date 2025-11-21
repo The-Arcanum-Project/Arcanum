@@ -10,7 +10,7 @@ public class WindowDrag : Behavior<FrameworkElement>
 {
    private Point? _lastMousePosition;
    private Window _window = null!;
-   private bool _enableMove = false;
+   private bool _enableMove;
 
    public static readonly DependencyProperty EnableDoubleClickMaximizeProperty =
       DependencyProperty.Register(nameof(EnableDoubleClickMaximize),

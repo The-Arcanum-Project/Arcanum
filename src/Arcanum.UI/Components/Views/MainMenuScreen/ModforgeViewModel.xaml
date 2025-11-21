@@ -50,8 +50,7 @@
                                 Value = "Left" />
                     </Style>
 
-                    <Style x:Key = "SocialHeaderText"
-                           TargetType = "TextBlock">
+                    <Style TargetType = "TextBlock">
                         <Setter Property = "FontSize"
                                 Value = "20" />
                         <Setter Property = "TextAlignment"
@@ -66,25 +65,8 @@
                                 Value = "2,12,5,0" />
                     </Style>
 
-                    <Style x:Key = "SocialBodyText"
-                           TargetType = "TextBlock">
-                        <Setter Property = "FontSize"
-                                Value = "22" />
-                        <Setter Property = "TextAlignment"
-                                Value = "Center" />
-                        <Setter Property = "Foreground"
-                                Value = "LightGray" />
-                        <Setter Property = "HorizontalAlignment"
-                                Value = "Center" />
-                        <Setter Property = "VerticalAlignment"
-                                Value = "Center" />
-                        <Setter Property = "Margin"
-                                Value = "5,20,5,5" />
-                    </Style>
-
                     <!-- Image Style -->
-                    <Style x:Key = "SocialIconStyle"
-                           TargetType = "Image">
+                    <Style TargetType = "Image">
                         <Setter Property = "Width"
                                 Value = "60" />
                         <Setter Property = "Height"
@@ -162,27 +144,30 @@
                         <TextBlock Text = "Latest Release"
                                    Style = "{StaticResource TitleText}"
                                    HorizontalAlignment = "Center"
-                                   Margin = "10,20,10,20"
+                                   Margin = "10,20,10,10"
                                    FontSize = "38" />
                         <TextBlock x:Name = "LatestReleaseNameTextBox"
                                    Text = "Fetching data..."
                                    Foreground = "{StaticResource AccentBackColorBrush}"
                                    TextAlignment = "Center"
                                    FontSize = "25"
-                                   Margin = "20,15,20,0" />
+                                   Margin = "20,5,20,0"
+                                   Width = "250" />
                         <TextBlock x:Name = "LatestReleaseVersionTextBox"
                                    Text = "Version 1.1.0.0-beta"
                                    Foreground = "LightGray"
                                    TextAlignment = "Center"
                                    FontSize = "16"
-                                   Margin = "20,0,20,20" />
+                                   Margin = "20,0,20,20"
+                                   Width = "250" />
                         <TextBlock x:Name = "LatestReleaseUpdateTextBox"
                                    Text = "Get it now!"
                                    Foreground = "White"
                                    TextWrapping = "WrapWithOverflow"
                                    FontSize = "26"
                                    HorizontalAlignment = "Center"
-                                   Margin = "20,15,20,20" />
+                                   Margin = "20,15,20,20"
+                                   Width = "250" />
                     </StackPanel>
                 </Border>
             </Grid>

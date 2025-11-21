@@ -58,6 +58,9 @@ public static partial class MapModeManager
    private const int MAX_RECENT_MODES = 25;
    public static bool IsInitialized = false;
 
+   // Event to notify that the mapmode has been changed.
+   public static event Action<MapModeType>? OnMapModeChanged;
+
    private static void InitializeMapModeManager()
    {
       EventDistributor.ObjectOfTypeModified += DataChanged;
@@ -79,6 +82,7 @@ public static partial class MapModeManager
       var sw = RenderMapMode(type);
       ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {type} in {sw.ElapsedMilliseconds} ms");
       CurrentMode = type;
+      OnMapModeChanged?.Invoke(type);
       AddToRecentHistory(type);
    }
 

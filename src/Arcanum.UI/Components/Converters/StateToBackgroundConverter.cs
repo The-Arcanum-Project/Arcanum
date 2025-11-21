@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
-using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 
 namespace Arcanum.UI.Components.Converters;

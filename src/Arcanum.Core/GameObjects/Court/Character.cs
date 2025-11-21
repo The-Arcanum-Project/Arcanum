@@ -14,7 +14,6 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religious;
-using Common.UI;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 using ArtistType = Arcanum.Core.GameObjects.Cultural.ArtistType;
 

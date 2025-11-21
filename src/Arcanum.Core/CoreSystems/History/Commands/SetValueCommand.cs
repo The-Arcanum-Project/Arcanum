@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem;
+﻿using System.Diagnostics;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands;
@@ -16,16 +16,18 @@ public class SetValueCommand : Eu5ObjectCommand
    public SetValueCommand(IEu5Object target, Enum attribute, object value)
       : base(target, attribute)
    {
+      Debug.Assert(Attribute != null, "Attribute != null");
       _value = value;
       _targets.Add(new(target, target._getValue(attribute)));
-      target._setValue(Attribute, _value); 
+      target._setValue(Attribute, _value);
       //TODO: @Melco make this more pretty, so that InvalidateUI is not called in the constructor and in try add but handled in EU5ObjectCommand
       InvalidateUI();
    }
-   
+
    public SetValueCommand(IEu5Object[] targets, Enum attribute, object value)
       : base(targets, attribute)
    {
+      Debug.Assert(Attribute != null, "Attribute != null");
       _value = value;
       _targets = new ObjectData[targets.Length];
       for (var i = 0; i < targets.Length; i++)
@@ -33,6 +35,7 @@ public class SetValueCommand : Eu5ObjectCommand
          _targets[i] = new(targets[i], targets[i]._getValue(attribute));
          targets[i]._setValue(Attribute, _value);
       }
+
       InvalidateUI();
    }
 
@@ -46,6 +49,7 @@ public class SetValueCommand : Eu5ObjectCommand
 
    public override void Undo()
    {
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var data in _targets)
          data.Target._setValue(Attribute, data.OldValue);
       base.Undo();
@@ -53,6 +57,7 @@ public class SetValueCommand : Eu5ObjectCommand
 
    public override void Redo()
    {
+      Debug.Assert(Attribute != null, "Attribute != null");
       foreach (var data in _targets)
          data.Target._setValue(Attribute, _value);
       base.Redo();
@@ -63,6 +68,7 @@ public class SetValueCommand : Eu5ObjectCommand
       if (DisallowMerge(target, attribute) || !_value.Equals(value))
          return false;
 
+      Debug.Assert(Attribute != null, "Attribute != null");
       _targets.Add(new(target, target._getValue(attribute)));
       target._setValue(Attribute, _value);
       InvalidateUI();

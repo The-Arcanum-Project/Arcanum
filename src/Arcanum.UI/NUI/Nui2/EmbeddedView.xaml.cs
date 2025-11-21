@@ -1,15 +1,10 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using Arcanum.Core.CoreSystems.CommandSystem;
-using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
-using Nexus.Core;
 
 namespace Arcanum.UI.NUI.Nui2;
 

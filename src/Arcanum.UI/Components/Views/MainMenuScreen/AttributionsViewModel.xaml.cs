@@ -1,5 +1,4 @@
-﻿using System.Windows.Input;
-using System.Windows.Navigation;
+﻿using System.Windows.Navigation;
 using Common;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
