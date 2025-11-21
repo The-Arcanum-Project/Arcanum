@@ -7,8 +7,8 @@ namespace Arcanum.Core.GlobalStates;
 /// </summary>
 public static class Config
 {
-   public const string CONFIG_FILE_PATH = "config.json";
-   internal const string DIAGNOSTIC_CONFIG_PATH = "diagnostics.json";
+   public const string CONFIG_FILE_NAME = "config.json";
+   internal const string DIAGNOSTIC_CONFIG_NAME = "diagnostics.json";
    public const int START_DRAG_DISTANCE = 5;
    public static MainSettingsObj Settings { get; set; } = new();
 }

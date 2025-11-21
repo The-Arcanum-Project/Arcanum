@@ -144,27 +144,30 @@
                         <TextBlock Text = "Latest Release"
                                    Style = "{StaticResource TitleText}"
                                    HorizontalAlignment = "Center"
-                                   Margin = "10,20,10,20"
+                                   Margin = "10,20,10,10"
                                    FontSize = "38" />
                         <TextBlock x:Name = "LatestReleaseNameTextBox"
                                    Text = "Fetching data..."
                                    Foreground = "{StaticResource AccentBackColorBrush}"
                                    TextAlignment = "Center"
                                    FontSize = "25"
-                                   Margin = "20,15,20,0" />
+                                   Margin = "20,5,20,0"
+                                   Width = "250" />
                         <TextBlock x:Name = "LatestReleaseVersionTextBox"
                                    Text = "Version 1.1.0.0-beta"
                                    Foreground = "LightGray"
                                    TextAlignment = "Center"
                                    FontSize = "16"
-                                   Margin = "20,0,20,20" />
+                                   Margin = "20,0,20,20"
+                                   Width = "250" />
                         <TextBlock x:Name = "LatestReleaseUpdateTextBox"
                                    Text = "Get it now!"
                                    Foreground = "White"
                                    TextWrapping = "WrapWithOverflow"
                                    FontSize = "26"
                                    HorizontalAlignment = "Center"
-                                   Margin = "20,15,20,20" />
+                                   Margin = "20,15,20,20"
+                                   Width = "250" />
                     </StackPanel>
                 </Border>
             </Grid>

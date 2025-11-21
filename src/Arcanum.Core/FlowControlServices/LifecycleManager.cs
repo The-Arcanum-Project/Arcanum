@@ -71,14 +71,14 @@ public class LifecycleManager
    private void LoadDebugElements()
    {
       DebugConfig.Settings =
-         JsonProcessor.DefaultDeserialize<DebugConfigSettings>(Path.Combine(IO.GetArcanumDataPath,
+         JsonProcessor.DefaultDeserialize<DebugConfigSettings>(Path.Combine(IO.GetConfigPath,
                                                                             DebugConfig.DEBUG_CONFIG_FILE_PATH)) ??
          new DebugConfigSettings();
    }
 
    private void SaveDebugElements()
    {
-      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, DebugConfig.DEBUG_CONFIG_FILE_PATH),
+      JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, DebugConfig.DEBUG_CONFIG_FILE_PATH),
                               DebugConfig.Settings);
    }
 #endif
@@ -95,13 +95,14 @@ public class LifecycleManager
       // This might include saving state, closing files, etc.
 
       // Shutdown the core application
-      ArcanumDataHandler.SaveAllGitData(new());
+      ArcanumDataHandler.SaveAllGitData();
 
       MainMenuScreenDescriptor.SaveData();
 
       // Save configs
-      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_PATH), Config.Settings);
-      JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.DIAGNOSTIC_CONFIG_PATH),
+      var conifigPath = Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME);
+      JsonProcessor.Serialize(conifigPath, Config.Settings);
+      JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, Config.DIAGNOSTIC_CONFIG_NAME),
                               Config.Settings.ErrorDescriptors.Save());
 
 #if DEBUG
@@ -116,8 +117,8 @@ public class LifecycleManager
    {
       try
       {
-         var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetArcanumDataPath,
-                                                                               Config.CONFIG_FILE_PATH));
+         var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath,
+                                                                               Config.CONFIG_FILE_NAME));
          Config.Settings = parsedObj ?? new();
       }
       catch (Exception)
@@ -126,8 +127,8 @@ public class LifecycleManager
       }
 
       var edcs =
-         JsonProcessor.DefaultDeserialize<List<ErrorDataClass>>(Path.Combine(IO.GetArcanumDataPath,
-                                                                             Config.DIAGNOSTIC_CONFIG_PATH)) ?? [];
+         JsonProcessor.DefaultDeserialize<List<ErrorDataClass>>(Path.Combine(IO.GetConfigPath,
+                                                                             Config.DIAGNOSTIC_CONFIG_NAME)) ?? [];
       Config.Settings.ErrorDescriptors.WriteConfig(edcs);
    }
 

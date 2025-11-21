@@ -16,7 +16,7 @@ public partial class ModforgeViewModel
 
    private void SetReleaseText()
    {
-      var latestRelease = AppData.GitDataDescriptor.LatestVersion;
+      var latestRelease = AppData.ModforgeDataDescriptor.LatestVersion;
       if (latestRelease is { Data: not null })
       {
          var name = latestRelease.RepositoryName.StartsWith("Minnators-")

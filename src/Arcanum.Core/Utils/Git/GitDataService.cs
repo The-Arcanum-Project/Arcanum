@@ -6,13 +6,17 @@ namespace Arcanum.Core.Utils.Git;
 public static class GitDataService
 {
    public const string MOD_FORGE_LATEST_VERSION_KEY = "ModForgeLatestVersion";
-   private const string GIT_OWNER = "Minnator";
-   private const string MOD_FORGE_GIT_REPOSITORY = "Minnators-Modforge";
+   public const string GIT_OWNER = "Minnator";
+   public const string MOD_FORGE_GIT_REPOSITORY = "Minnators-Modforge";
+
+   public const string ARCANUM_GIT_REPOSITORY = "Arcanum";
+   public const string ARCANUM_GIT_OWNER = "The-Arcanum-Project";
+   public const string ARCANUM_LATEST_VERSION_KEY = "ArcanumLatestVersion";
+
    public const string ARCANUM_REPOSITORY_URL = "https://github.com/The-Arcanum-Project/Arcanum";
 
    public const string ARCANUM_RELEASES_URL = ARCANUM_REPOSITORY_URL + "/releases";
 
-   //TODO: @MelCo Update documentation URL when docs are available
    public const string ARCANUM_DOCUMENTATION_URL = "https://the-arcanum-project.github.io/Arcanum";
    public const string ARCANUM_USER_GUIDE_URL = ARCANUM_DOCUMENTATION_URL + "/user/about-arcanum.html";
    public const string ARCANUM_DEV_DOCUMENTATION_URL = ARCANUM_DOCUMENTATION_URL + "/dev/about-arcanum.html";
@@ -40,34 +44,48 @@ public static class GitDataService
       return GetFileFromRepositoryUrl(owner, repository, branch, filePath);
    }
 
-   public static GitReleaseObject GetLatestVersion()
+   public static GitReleaseObject GetLatestVersion(string repoName, string repoOwner, string dataKey)
    {
-      var gdo = AppData.GitDataDescriptor.LatestVersion ??
+      var gdo = AppData.ModforgeDataDescriptor.LatestVersion ??
                 new()
                 {
-                   RepositoryName = MOD_FORGE_GIT_REPOSITORY,
-                   RepositoryOwner = GIT_OWNER,
-                   DataKey = MOD_FORGE_LATEST_VERSION_KEY,
+                   RepositoryName = repoName,
+                   RepositoryOwner = repoOwner,
+                   DataKey = dataKey,
                 };
 
       // We still have data and it is not outdated, return it
       if (gdo.IsDataAvailable() && !gdo.IsDataOutdated)
          return gdo;
 
-      var client = CreateClient();
-      var latestRelease = client.Repository.Release.GetLatest(GIT_OWNER, MOD_FORGE_GIT_REPOSITORY).Result;
+      var client = CreateClient(repoOwner);
 
-      Console.WriteLine("GitDataService: Fetched latest release from GitHub");
-
-      gdo.Data = new()
+      try
       {
-         Name = latestRelease.Name,
-         TagName = latestRelease.TagName,
-         Body = latestRelease.Body,
-      };
+         var latestRelease = client.Repository.Release.GetLatest(repoOwner, repoName).Result;
+
+         Console.WriteLine("GitDataService: Fetched latest release from GitHub");
+
+         gdo.Data = new()
+         {
+            Name = latestRelease.Name,
+            TagName = latestRelease.TagName,
+            Body = latestRelease.Body,
+         };
+      }
+      catch (NotFoundException e)
+      {
+         ArcLog.WriteLine("GDS", LogLevel.ERR, "GitDataService: Unable to find the specified repository or releases.");
+         ArcLog.WriteLine("GDS", LogLevel.ERR, e.ToString());
+      }
+      catch (AggregateException e)
+      {
+         ArcLog.WriteLine("GDS", LogLevel.ERR, "GitDataService: Error fetching latest release from GitHub.");
+         ArcLog.WriteLine("GDS", LogLevel.ERR, e.ToString());
+      }
 
       return gdo;
    }
 
-   private static GitHubClient CreateClient() => new(new ProductHeaderValue(GIT_OWNER));
+   private static GitHubClient CreateClient(string gitOwner) => new(new ProductHeaderValue(gitOwner));
 }

@@ -22,27 +22,56 @@ public static class ArcanumDataHandler
 
    private static void LoadGitData()
    {
-      GetFromAppData(AppData.GitDataDescriptor.InternalPathLatestRelease, out var latestReleaseJson);
+      GetFromAppData(AppData.ModforgeDataDescriptor.InternalPathLatestRelease, out var latestModForgeRelease);
 
-      if (latestReleaseJson is null)
-         AppData.GitDataDescriptor.LatestVersion = GitDataService.GetLatestVersion();
+      if (latestModForgeRelease is null)
+         AppData.ModforgeDataDescriptor.LatestVersion =
+            GitDataService.GetLatestVersion(GitDataService.MOD_FORGE_GIT_REPOSITORY,
+                                            GitDataService.GIT_OWNER,
+                                            GitDataService.MOD_FORGE_LATEST_VERSION_KEY);
       else
       {
-         var gitDataObject = JsonProcessor.Deserialize<GitReleaseObject>(latestReleaseJson) ??
-                             GitDataService.GetLatestVersion();
-         AppData.GitDataDescriptor.LatestVersion = gitDataObject;
+         var gitDataObject = JsonProcessor.Deserialize<GitReleaseObject>(latestModForgeRelease) ??
+                             GitDataService.GetLatestVersion(GitDataService.MOD_FORGE_GIT_REPOSITORY,
+                                                             GitDataService.GIT_OWNER,
+                                                             GitDataService.MOD_FORGE_LATEST_VERSION_KEY);
+         AppData.ModforgeDataDescriptor.LatestVersion = gitDataObject;
+      }
+
+      GetFromAppData(AppData.ArcanumDataDescriptor.InternalPathLatestRelease, out var latestArcanumRelease);
+
+      if (latestArcanumRelease is null)
+         AppData.ArcanumDataDescriptor.LatestVersion =
+            GitDataService.GetLatestVersion(GitDataService.ARCANUM_GIT_REPOSITORY,
+                                            GitDataService.ARCANUM_GIT_OWNER,
+                                            GitDataService.ARCANUM_LATEST_VERSION_KEY);
+      else
+      {
+         var gdo = JsonProcessor.Deserialize<GitReleaseObject>(latestArcanumRelease) ??
+                   GitDataService.GetLatestVersion(GitDataService.ARCANUM_GIT_REPOSITORY,
+                                                   GitDataService.ARCANUM_GIT_OWNER,
+                                                   GitDataService.ARCANUM_LATEST_VERSION_KEY);
+         AppData.ArcanumDataDescriptor.LatestVersion = gdo;
       }
    }
 
    #region Saving
 
-   public static void SaveAllGitData(ArcanumDataDescriptor descriptor)
+   public static void SaveAllGitData()
    {
-      var gitDescriptor = AppData.GitDataDescriptor;
+      var gitDescriptor = AppData.ModforgeDataDescriptor;
       if (gitDescriptor.LatestVersion is not null)
       {
          var latestReleaseJson = JsonProcessor.Serialize(gitDescriptor.LatestVersion);
          var filePath = Path.Combine(IO.IO.GetArcanumDataPath, gitDescriptor.InternalPathLatestRelease);
+         IO.IO.WriteAllText(filePath, latestReleaseJson, Encoding.UTF8);
+      }
+
+      var arcanumGitDescriptor = AppData.ArcanumDataDescriptor;
+      if (arcanumGitDescriptor.LatestVersion is not null)
+      {
+         var latestReleaseJson = JsonProcessor.Serialize(arcanumGitDescriptor.LatestVersion);
+         var filePath = Path.Combine(IO.IO.GetArcanumDataPath, arcanumGitDescriptor.InternalPathLatestRelease);
          IO.IO.WriteAllText(filePath, latestReleaseJson, Encoding.UTF8);
       }
    }

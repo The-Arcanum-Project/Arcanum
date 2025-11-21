@@ -25,7 +25,8 @@ public static class IO
       NoBomUtf8Encoding = new(false); // UTF-8 without BOM (same as Encoding.UTF8 default)
    }
 
-   public static string GetArcanumDataPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArcanumData");
+   public static string GetArcanumDataPath => Path.Combine(GetUserDocumentsPath, "Arcanum");
+   public static string GetConfigPath => Path.Combine(GetArcanumDataPath, "Config");
    public static string GetCrashLogsPath => Path.Combine(GetArcanumDataPath, "CrashLogs");
 
    // Directory Utils

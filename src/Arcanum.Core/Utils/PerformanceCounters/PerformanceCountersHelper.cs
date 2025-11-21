@@ -105,10 +105,15 @@ public static class PerformanceCountersHelper
 
    public static void Shutdown()
    {
-      Updater.Stop();
-      Updater.Close();
-      Updater.Dispose();
-      GPUMonitor.Dispose();
+      if (Updater != null!)
+      {
+         Updater.Stop();
+         Updater.Close();
+         Updater.Dispose();
+      }
+
+      if (GPUMonitor != null!)
+         GPUMonitor.Dispose();
    }
 }
 

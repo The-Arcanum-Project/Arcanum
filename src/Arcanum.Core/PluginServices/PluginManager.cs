@@ -126,6 +126,8 @@ public class PluginManager : ISubroutineLogger
    /// </summary>
    public void LoadAndInitializePlugins()
    {
+      return;
+
       Log("Loading plugins from folder...");
 
       var loadedPlugins = LoadPluginsFromFolder();
