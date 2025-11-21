@@ -42,7 +42,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
                                                                                  .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Area)!)
+                                                                                        .Region)!)
                                                                           .Distinct()
                                                                           .ToList();
 

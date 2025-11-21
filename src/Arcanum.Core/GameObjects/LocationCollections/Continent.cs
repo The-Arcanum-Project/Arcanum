@@ -26,7 +26,7 @@ public partial class Continent
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
                                                                                  .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Area)!)
+                                                                                        .Continent)!)
                                                                           .Distinct()
                                                                           .ToList();
 

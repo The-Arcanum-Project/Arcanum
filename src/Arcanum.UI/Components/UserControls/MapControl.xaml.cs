@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -140,6 +141,7 @@ public partial class MapControl
       OnMapLoaded?.Invoke();
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
+      MapModeManager.OnMapModeChanged += _ => RefreshSelectionColors();
    }
 
    private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
@@ -147,6 +149,20 @@ public partial class MapControl
    private void LocationSelectedAddHandler(List<Location> locations)
    {
       foreach (var loc in locations)
+      {
+         if (loc == Location.Empty)
+            continue;
+
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
+      }
+
+      LocationRenderer.UpdateColors(_selectionColor);
+      _d3dHost.Invalidate();
+   }
+
+   private void RefreshSelectionColors()
+   {
+      foreach (var loc in SelectionManager.GetActiveSelectionLocations())
       {
          if (loc == Location.Empty)
             continue;

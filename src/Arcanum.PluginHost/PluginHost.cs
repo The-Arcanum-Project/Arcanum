@@ -9,7 +9,7 @@ namespace Arcanum.PluginHost;
 
 public static class HostInfo
 {
-   public static Version Version => new(1, 0, 0, 0);
+   public static Version Version => new(0, 9, 2, 0);
 }
 
 public class PluginHost : IPluginHost
