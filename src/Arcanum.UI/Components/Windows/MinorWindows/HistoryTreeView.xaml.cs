@@ -16,15 +16,24 @@ public partial class HistoryTreeView
    {
       InitializeComponent();
       // TODO: @Melco Make this cleaner in the future
-      AppData.HistoryManager.NodeSwitched += (_) => MarkTreeViewItems();
+      AppData.HistoryManager.NodeSwitched += OnHistoryManagerOnNodeSwitched;
       DataContext = this;
       Loaded += (_, _) =>
       {
          Nodes.Clear();
          Nodes.Add(AppData.HistoryManager.Root);
          ExpandAll(NodesTreeView);
+         MarkTreeViewItems();
+      };
+      Closed += (_, _) =>
+      { 
+         AppData.HistoryManager.NodeSwitched -= OnHistoryManagerOnNodeSwitched;
       };
       Nodes.CollectionChanged += (_, _) => ExpandAll(NodesTreeView);
+   }
+
+   private void OnHistoryManagerOnNodeSwitched(HistoryNode _)
+   {
       MarkTreeViewItems();
    }
 
