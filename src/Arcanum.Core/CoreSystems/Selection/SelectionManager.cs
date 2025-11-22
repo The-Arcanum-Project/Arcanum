@@ -20,6 +20,7 @@ namespace Arcanum.Core.CoreSystems.Selection;
 public static class SelectionManager
 {
    private static ObjectSelectionMode _objectSelectionMode = ObjectSelectionMode.LocationSelection;
+   private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
    /// <summary>
    /// This is the collection of objects that are currently editable in the UI. <br/>
    /// This is what the UI listens to.
@@ -71,6 +72,10 @@ public static class SelectionManager
    /// </summary>
    private static void InvalidateSelection()
    {
+      // If we are frozen, do nothing
+      if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
+         return;
+
       var sw = Stopwatch.StartNew();
       IncrementalInvalidateSelection(Selection.GetSelectedLocations);
       sw.Stop();
@@ -107,6 +112,17 @@ public static class SelectionManager
          default:
             throw new ArgumentOutOfRangeException(nameof(ObjectSelectionMode), ObjectSelectionMode, null);
       }
+   }
+
+   public static void ToggleFreeze()
+   {
+      if (ObjectSelectionMode != ObjectSelectionMode.Frozen)
+      {
+         _previousObjectSelectionMode = ObjectSelectionMode;
+         ObjectSelectionMode = ObjectSelectionMode.Frozen;
+      }
+      else
+         ObjectSelectionMode = _previousObjectSelectionMode;
    }
 
    public static List<IEu5Object>? GetInferredObjectsForLocations(List<Location> cLocs, Type type)
@@ -165,6 +181,10 @@ public static class SelectionManager
       else
       {
          // otherwise, set selection to only this object
+         // but if we are frozen, do not change the selection
+         if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
+            return;
+
          SetSearchSelectedObjects([obj]);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)

@@ -19,4 +19,9 @@ public enum ObjectSelectionMode
    /// Objects are only added from searching
    /// </summary>
    FromSearch,
+
+   /// <summary>
+   /// Nothing can modify the current selection until unfrozen
+   /// </summary>
+   Frozen,
 }

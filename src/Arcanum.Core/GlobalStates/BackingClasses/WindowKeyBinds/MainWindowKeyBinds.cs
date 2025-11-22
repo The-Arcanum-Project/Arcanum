@@ -66,4 +66,8 @@ public class MainWindowKeyBinds : KeyBindProvider
    public KeyGesture MapModeButton8 { get; set; } = new(Key.D8, ModifierKeys.Control);
    public KeyGesture MapModeButton9 { get; set; } = new(Key.D9, ModifierKeys.Control);
    public KeyGesture MapModeButton10 { get; set; } = new(Key.D0, ModifierKeys.Control);
+
+   // Misc
+
+   public KeyGesture FreezeSelection { get; set; } = new(Key.W, ModifierKeys.Control);
 }

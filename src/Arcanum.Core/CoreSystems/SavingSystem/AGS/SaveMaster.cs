@@ -249,6 +249,21 @@ public static class SaveMaster
 
    public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
    {
+      if (cssos.Count == 0 && removeFromFiles.Count == 0)
+         return false;
+
+      // TODO: This can be done way better but we have a unique challenge for game/in_game/map_data/definitions.txt
+      // As we have nested objects in there we can not just append or update into the file
+      if (cssos.Count > 0 && cssos[0].Target.Source.Descriptor.FilePath.EndsWith("definitions.txt"))
+      {
+         // We just format all continents fully into the file
+         var sortedContinents =
+            Globals.Continents.Values.OrderBy(c => c.FileLocation.CharPos).Cast<IEu5Object>().ToList();
+         var sb = SavingUtil.FormatFilesMultithreadedIf(sortedContinents);
+         WriteFile(sb.InnerBuilder, cssos[0].Target.Source, true);
+         return true;
+      }
+
       RemoveObjectsFromFile(removeFromFiles.Cast<IEu5Object>().ToList());
 
       foreach (var injectObj in removeFromFiles)

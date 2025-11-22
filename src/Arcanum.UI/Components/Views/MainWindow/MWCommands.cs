@@ -234,4 +234,9 @@ public static class MwCommands
       {
          InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton10 },
       };
+
+   public static readonly RoutedCommand FreezeSelectionCommand = new("FreezeSelectionCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.FreezeSelection },
+   };
 }
