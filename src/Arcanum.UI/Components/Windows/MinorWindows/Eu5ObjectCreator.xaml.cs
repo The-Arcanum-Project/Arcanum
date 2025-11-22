@@ -6,7 +6,7 @@ using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
+using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Common.UI.MBox;
 

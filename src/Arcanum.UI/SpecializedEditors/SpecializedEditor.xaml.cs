@@ -1,0 +1,114 @@
+﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.UI.SpecializedEditors.Management;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Arcanum.UI.SpecializedEditors;
+
+public partial class SpecializedEditor
+{
+   public static readonly DependencyProperty EditorContentProperty =
+      DependencyProperty.Register(nameof(EditorContent),
+                                  typeof(Control),
+                                  typeof(SpecializedEditor),
+                                  new(default(Control)));
+
+   public static readonly DependencyProperty TargetablePropertiesProperty =
+      DependencyProperty.Register(nameof(TargetableProperties),
+                                  typeof(string[]),
+                                  typeof(SpecializedEditor),
+                                  new(default(string[])));
+
+   public static readonly DependencyProperty RequirementsStatusTextProperty =
+      DependencyProperty.Register(nameof(RequirementsStatusText),
+                                  typeof(string),
+                                  typeof(SpecializedEditor),
+                                  new("Available"));
+
+   public string[] TargetableProperties
+   {
+      get => (string[])GetValue(TargetablePropertiesProperty);
+      set => SetValue(TargetablePropertiesProperty, value);
+   }
+
+   public string RequirementsStatusText
+   {
+      get => (string)GetValue(RequirementsStatusTextProperty);
+      set => SetValue(RequirementsStatusTextProperty, value);
+   }
+   public Control EditorContent
+   {
+      get => (Control)GetValue(EditorContentProperty);
+      set => SetValue(EditorContentProperty, value);
+   }
+   public RelayCommand CheckRequirementsCommand => new(UpdateRequirementsStatus);
+
+   private readonly ISpecializedEditor _specializedEditor = null!;
+   private object[] _targets = null!;
+   private Enum?[] _targetProperty = null!;
+
+   public SpecializedEditor()
+   {
+      InitializeComponent();
+   }
+
+   public SpecializedEditor(ISpecializedEditor spe) : this()
+   {
+      _specializedEditor = spe;
+   }
+
+   private void UpdateRequirementsStatus()
+   {
+      var index = PropertySelector.SelectedIndex;
+      index = Math.Min(index, TargetableProperties.Length - 1);
+      index = Math.Max(index, 0);
+
+      var canEdit = _specializedEditor.CanEdit(_targets, _targetProperty[index]);
+
+      RequirementsStatusText = canEdit ? "Available" : "Requirements not met.";
+      EditorContent.IsEnabled = canEdit;
+   }
+
+   /// <summary>
+   /// As we want to cache the specialized editor instances, we need to reset them for each new target.
+   /// </summary>
+   public void UpdateForNewTarget(List<Enum?> props, IEu5Object target)
+   {
+      Debug.Assert(_specializedEditor != null, "Specialized editor instance must be provided.");
+      Debug.Assert(props.Count > 0, "At least one targetable property must be provided.");
+      Debug.Assert(!_specializedEditor.SupportsMultipleTargets,
+                   "This method should not be used for editors that support multiple targets.");
+
+      _targets = [target];
+      _targetProperty = props.ToArray();
+      TargetableProperties = props.Select(p => p?.ToString() ?? _targets[0].GetType().Name).ToArray();
+      _specializedEditor.ResetFor(_targets);
+      UpdateRequirementsStatus();
+      EditorContent = _specializedEditor.GetEditorControl();
+   }
+
+   public void UpdateForNewTargets(List<Enum?> props, List<IEu5Object> targets)
+   {
+      Debug.Assert(_specializedEditor != null, "Specialized editor instance must be provided.");
+      Debug.Assert(props.Count > 0, "At least one targetable property must be provided.");
+      Debug.Assert(_specializedEditor.SupportsMultipleTargets,
+                   "This method should only be used for editors that support multiple targets.");
+
+      _targets = targets.Cast<object>().ToArray();
+      _targetProperty = props.ToArray();
+      TargetableProperties = props.Select(p => p?.ToString() ?? _targets[0].GetType().Name).ToArray();
+      _specializedEditor.ResetFor(_targets);
+      UpdateRequirementsStatus();
+      EditorContent = _specializedEditor.GetEditorControl();
+   }
+
+   private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+   {
+      if (sender is not ComboBox comboBox)
+         return;
+
+      UpdateRequirementsStatus();
+   }
+}

@@ -4,9 +4,8 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public static class GridManager
 {

@@ -23,7 +23,7 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
+using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Util;
 using Common.UI;
 using Application = System.Windows.Application;
@@ -145,9 +145,14 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       InitializeComponent();
 #if !DEBUG
       DebugPanel.Visibility = Visibility.Collapsed;
+      MainGrid.ColumnDefinitions.RemoveAt(6);
+      MainGrid.ColumnDefinitions.RemoveAt(5);
+      DebugPanelGridSplitter.Visibility = Visibility.Collapsed;
+
 #else
       DebugPanel.Visibility = Visibility.Visible;
 #endif
+      MainWindowGen.Initialize(SpecializedEditorPresenter);
 
       PerformanceCountersHelper.Initialize(this);
    }
@@ -247,7 +252,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          return;
       }
 
-      Eu5UiGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter, true));
+      MainWindowGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter, true));
    }
 
    private void SetUpToolTip(MapControl mainMap)
@@ -457,10 +462,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      Eu5UiGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)].Value,
-                                      true,
-                                      UiPresenter,
-                                      true));
+      MainWindowGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)]
+                                                  .Value,
+                                           true,
+                                           UiPresenter,
+                                           true));
    }
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)

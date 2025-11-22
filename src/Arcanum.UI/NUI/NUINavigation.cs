@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
+using Arcanum.UI.NUI.Generator;
+using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI;
 
@@ -42,7 +42,7 @@ public class NUINavigation(int capacity)
          return;
 
       _current = _current!.Previous;
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      InvalidateUi();
    }
 
    public void Forward()
@@ -51,7 +51,7 @@ public class NUINavigation(int capacity)
          return;
 
       _current = _current!.Next;
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      InvalidateUi();
    }
 
    public void InvalidateUi()
@@ -59,6 +59,6 @@ public class NUINavigation(int capacity)
       if (_current == null)
          return;
 
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      MainWindowGen.GenerateAndSetView(_current!.Value);
    }
 }

@@ -2,9 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public static class EventHandlers
 {

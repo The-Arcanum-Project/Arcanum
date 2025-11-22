@@ -24,8 +24,7 @@ using Arcanum.UI.Components.Converters;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
-using Arcanum.UI.NUI.Generator;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
+using Arcanum.UI.NUI.Nui2;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 using Common.Logger;
 using Common.UI;
@@ -35,13 +34,13 @@ using Control = System.Windows.Controls.Control;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using ToolTip = System.Windows.Controls.ToolTip;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global")]
 public static class Eu5UiGen
 {
    public readonly static Dictionary<Type, Func<object, Enum, int, int, FrameworkElement>> CustomShortInfoGenerators =
-      new() { { typeof(ModValInstance), Nui2Gen.CustomShortInfoGenerators.GetModValInstanceShortInfo }, };
+      new() { { typeof(ModValInstance), Generator.CustomShortInfoGenerators.GetModValInstanceShortInfo }, };
 
    public readonly static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
 
@@ -321,13 +320,13 @@ public static class Eu5UiGen
          {
             object embeddedValue = null!;
             Nx.ForceGet(embedded, nxProp, ref embeddedValue);
-            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root, true),
-                                                                            (IEu5Object)embeddedValue,
-                                                                            nxProp,
-                                                                            ControlFactory.SHORT_INFO_ROW_HEIGHT,
-                                                                            ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                                            0,
-                                                                            2);
+            var ui = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root, true),
+                                                                              (IEu5Object)embeddedValue,
+                                                                              nxProp,
+                                                                              ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                                              ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                              0,
+                                                                              2);
 
             GridManager.AddToGrid(grid, ui, 1 + index, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
             continue;
@@ -832,13 +831,13 @@ public static class Eu5UiGen
       {
          if (item is IEu5Object eu5Obj)
          {
-            var ui = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(navH,
-                                                                            eu5Obj,
-                                                                            nxProp,
-                                                                            ControlFactory.SHORT_INFO_ROW_HEIGHT - 4,
-                                                                            ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                                            margin + 6,
-                                                                            0);
+            var ui = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(navH,
+                                                                              eu5Obj,
+                                                                              nxProp,
+                                                                              ControlFactory.SHORT_INFO_ROW_HEIGHT - 4,
+                                                                              ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                              margin + 6,
+                                                                              0);
             GridManager.AddToGrid(grid, ui, rowIndex + i, 0, 0, ControlFactory.SHORT_INFO_ROW_HEIGHT);
          }
          else
@@ -1124,13 +1123,13 @@ public static class Eu5UiGen
 
    private static void GenerateShortInfo(NavH navH, IEu5Object primary, Enum nxProp, Grid mainGrid, bool isMarked)
    {
-      var si = Nui2Gen.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root, true),
-                                                                      Nx.ForceGetAs<IEu5Object>(primary, nxProp),
-                                                                      nxProp,
-                                                                      ControlFactory.SHORT_INFO_ROW_HEIGHT,
-                                                                      ControlFactory.SHORT_INFO_FONT_SIZE,
-                                                                      0,
-                                                                      2);
+      var si = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root, true),
+                                                                        Nx.ForceGetAs<IEu5Object>(primary, nxProp),
+                                                                        nxProp,
+                                                                        ControlFactory.SHORT_INFO_ROW_HEIGHT,
+                                                                        ControlFactory.SHORT_INFO_FONT_SIZE,
+                                                                        0,
+                                                                        2);
       if (isMarked)
          si.Background = ControlFactory.MarkedBrush;
 
