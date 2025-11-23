@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Windows.Controls;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
+using Arcanum.UI.SpecializedEditors.Editors;
 using Arcanum.UI.SpecializedEditors.Management;
 
 namespace Arcanum.UI.NUI.Generator.SpecificGenerators;
@@ -15,6 +17,7 @@ public static class MainWindowGen
    {
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
       // TODO: Initialize all the Editors to the manager
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new ProvinceEditor());
 
       _specialEditorsHost = specialEditorsHost;
       _isInitialized = true;
@@ -47,6 +50,9 @@ public static class MainWindowGen
 
    private static void SetSpecializedEditors(NavH navh)
    {
-      _specialEditorsHost.Content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
+      var content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
+      _specialEditorsHost.Content = content;
+      if (content is TabControl tc)
+         tc.SelectedIndex = 0;
    }
 }

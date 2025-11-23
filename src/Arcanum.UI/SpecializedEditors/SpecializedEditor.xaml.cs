@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.SpecializedEditors.Management;
 using CommunityToolkit.Mvvm.Input;
@@ -11,9 +12,9 @@ public partial class SpecializedEditor
 {
    public static readonly DependencyProperty EditorContentProperty =
       DependencyProperty.Register(nameof(EditorContent),
-                                  typeof(Control),
+                                  typeof(FrameworkElement),
                                   typeof(SpecializedEditor),
-                                  new(default(Control)));
+                                  new(default(FrameworkElement)));
 
    public static readonly DependencyProperty TargetablePropertiesProperty =
       DependencyProperty.Register(nameof(TargetableProperties),
@@ -38,9 +39,9 @@ public partial class SpecializedEditor
       get => (string)GetValue(RequirementsStatusTextProperty);
       set => SetValue(RequirementsStatusTextProperty, value);
    }
-   public Control EditorContent
+   public FrameworkElement? EditorContent
    {
-      get => (Control)GetValue(EditorContentProperty);
+      get => (FrameworkElement)GetValue(EditorContentProperty);
       set => SetValue(EditorContentProperty, value);
    }
    public RelayCommand CheckRequirementsCommand => new(UpdateRequirementsStatus);
@@ -68,7 +69,12 @@ public partial class SpecializedEditor
       var canEdit = _specializedEditor.CanEdit(_targets, _targetProperty[index]);
 
       RequirementsStatusText = canEdit ? "Available" : "Requirements not met.";
-      EditorContent.IsEnabled = canEdit;
+      if (canEdit)
+         RequirementsStatusTextBlock.Foreground = Brushes.Green;
+      else
+         RequirementsStatusTextBlock.Foreground = Brushes.Red;
+      if (EditorContent != null)
+         EditorContent.IsEnabled = canEdit;
    }
 
    /// <summary>
@@ -87,6 +93,7 @@ public partial class SpecializedEditor
       _specializedEditor.ResetFor(_targets);
       UpdateRequirementsStatus();
       EditorContent = _specializedEditor.GetEditorControl();
+      PropertySelector.SelectedIndex = 0;
    }
 
    public void UpdateForNewTargets(List<Enum?> props, List<IEu5Object> targets)
@@ -102,6 +109,7 @@ public partial class SpecializedEditor
       _specializedEditor.ResetFor(_targets);
       UpdateRequirementsStatus();
       EditorContent = _specializedEditor.GetEditorControl();
+      PropertySelector.SelectedIndex = 0;
    }
 
    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)

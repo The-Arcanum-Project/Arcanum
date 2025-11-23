@@ -18,7 +18,8 @@
                    Margin = "2"
                    LastChildFill = "False">
             <TextBlock DockPanel.Dock = "Left"
-                       Text = "Target Property:" />
+                       Text = "Target Property:"
+                       VerticalAlignment = "Center" />
             <ComboBox DockPanel.Dock = "Right"
                       MinWidth = "200"
                       x:Name = "PropertySelector"
@@ -30,17 +31,26 @@
                    Margin = "2"
                    LastChildFill = "False">
             <TextBlock DockPanel.Dock = "Left"
-                       Text = "Fulfills Requirements:" />
+                       Text = "Fulfills Requirements:"
+                       VerticalAlignment = "Center" />
 
             <styleClasses:BaseButton DockPanel.Dock = "Right"
                                      Content = "Verify"
                                      Width = "50"
-                                     Command = "{Binding CheckRequirementsCommand, RelativeSource={RelativeSource AncestorType= UserControl}}" />
+                                     Command = "{Binding CheckRequirementsCommand, RelativeSource={RelativeSource AncestorType= UserControl}}"
+                                     BorderThickness = "1">
+                <styleClasses:BaseButton.ToolTip>
+                    <ToolTip
+                        Content = "Runs expensive checks to verify if all preconditions to use this editor are met." />
+                </styleClasses:BaseButton.ToolTip>
+            </styleClasses:BaseButton>
 
             <TextBlock DockPanel.Dock = "Right"
+                       x:Name = "RequirementsStatusTextBlock"
                        Text = "{Binding RequirementsStatusText, RelativeSource={RelativeSource AncestorType= UserControl}}"
-                       Margin = "0, 1, 5, 0"
-                       HorizontalAlignment = "Center" />
+                       Margin = "0, 1, 15, 0"
+                       HorizontalAlignment = "Center"
+                       VerticalAlignment = "Center" />
         </DockPanel>
 
         <ContentControl Grid.Row = "2"

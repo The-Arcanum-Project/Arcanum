@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace Arcanum.UI.SpecializedEditors.Management;
 
@@ -36,12 +37,6 @@ public interface ISpecializedEditor
    public bool CanEdit(object[] targets, Enum? prop);
 
    /// <summary>
-   /// Is called the first time the editor is used for a specific target.
-   /// Should be used to setup any necessary state or variables.
-   /// </summary>
-   public void Initialize(object[] targets);
-
-   /// <summary>
    /// Resets the editor to its initial state.
    /// This is called when the target object changes.
    /// </summary>
@@ -55,7 +50,7 @@ public interface ISpecializedEditor
    /// <summary>
    /// Returns the TabItem control representing the editor UI.
    /// </summary>
-   public Control GetEditorControl();
+   public FrameworkElement GetEditorControl();
 
    /// <summary>
    /// Custom context menu actions which will use available in NUI when right-clicking on the object being edited. <br/>
