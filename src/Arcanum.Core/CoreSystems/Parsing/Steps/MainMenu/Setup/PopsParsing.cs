@@ -17,13 +17,13 @@ public partial class PopsParsing(IEnumerable<IDependencyNode<string>> dependenci
 {
    public override bool IsHeavyStep => true;
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       if (rn.Statements.Count != 1)
       {

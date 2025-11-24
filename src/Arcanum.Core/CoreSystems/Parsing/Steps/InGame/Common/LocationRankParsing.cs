@@ -14,13 +14,13 @@ public partial class LocationRankParsing(IEnumerable<IDependencyNode<string>> de
 {
    public override bool IsFullyParsed => false;
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,

@@ -27,7 +27,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
    {
    }
 
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var sr))
       {

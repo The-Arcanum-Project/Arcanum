@@ -12,13 +12,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 public partial class StaticModifierParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<StaticModifier>(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,

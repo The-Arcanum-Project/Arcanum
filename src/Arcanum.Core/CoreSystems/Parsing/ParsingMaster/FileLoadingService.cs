@@ -97,7 +97,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
       while (repeatLoading)
          try
          {
-            LoadSingleFile(fileObj, descriptor, lockObject);
+            LoadSingleFile(fileObj, lockObject);
             repeatLoading = false;
          }
          catch (ReloadFileException ex)
@@ -121,7 +121,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
          try
          {
             if (isReloading)
-               LoadSingleFile(fileObj, descriptor, lockObject);
+               LoadSingleFile(fileObj, lockObject);
             SingleFileAfterLoadingStep(fileObj, descriptor, lockObject);
             repeatLoading = false;
          }
@@ -167,7 +167,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    /// Has to be thread-safe and should not be called directly but always by a manager that handles the performance measurement.
    /// </summary>
    /// <returns></returns>
-   public abstract bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
+   public abstract bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject);
 
    public abstract bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject);
 

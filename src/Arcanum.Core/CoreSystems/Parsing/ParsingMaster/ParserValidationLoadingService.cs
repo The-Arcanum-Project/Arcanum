@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Diagnostics;
-using System.Reflection;
+﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
@@ -15,61 +13,12 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 public abstract class
    ParserValidationLoadingService<T>(IEnumerable<IDependencyNode<string>> dependencies)
-   : FileLoadingService(dependencies) where T : IEu5Object<T>, new()
+   : GeneralFileLoadingService(dependencies) where T : IEu5Object<T>, new()
 {
-   private const string ACTION_STACK = nameof(ParserValidationLoadingService<T>);
-
    public virtual string[] GroupingNodeNames => [];
    public virtual Dictionary<string, T> GetGlobals() => T.GetGlobalItems();
 
-   public override List<Type> ParsedObjects => [typeof(T)];
-
-   public override string GetFileDataDebugInfo()
-   {
-      var str = "Parsed File Data Summary:\n";
-
-      foreach (var type in ParsedObjects)
-      {
-         var getGlobalItemsMethod = type.GetMethod("GetGlobalItems",
-                                                   BindingFlags.Public | BindingFlags.Static);
-
-         string countStr;
-
-         if (getGlobalItemsMethod != null)
-         {
-            var collectionAsObject = getGlobalItemsMethod.Invoke(null, null);
-            countStr = collectionAsObject switch
-            {
-               ICollection collection => collection.Count.ToString(),
-               IEnumerable enumerable => enumerable.Cast<object>().Count().ToString(),
-               _ => "[Returned null or not a collection]",
-            };
-         }
-         else
-            countStr = "[Method Not Found]";
-
-         str += $"\t\t{type.Name}: {countStr}\n";
-      }
-
-      return str;
-   }
-
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
-      var rn = Parser.Parse(fileObj, out var source, out var ctx);
-      var validation = true;
-
-      LoadSingleFile(rn, ctx, fileObj, ACTION_STACK, source, ref validation, lockObject);
-
-      return validation;
-   }
-
-   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
-      return UnloadSingleFileContent(fileObj, lockObject);
-   }
-
-   protected virtual bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
       var globals = GetGlobals();
       if (lockObject != null)
@@ -82,13 +31,7 @@ public abstract class
       return true;
    }
 
-   protected abstract void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject);
+   public override List<Type> ParsedObjects => [typeof(T)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject,
@@ -154,16 +97,4 @@ public abstract class
                                                    string source,
                                                    ref bool validation,
                                                    bool allowUnknownNodes);
-
-   protected virtual void ResetObjectProperties(IEu5Object eu5Obj)
-   {
-      foreach (var prop in eu5Obj.GetAllProperties())
-      {
-         if (prop.ToString() == "UniqueId" || prop.ToString() == "Source")
-            continue;
-
-         var defaultVal = eu5Obj.GetDefaultValue(prop);
-         eu5Obj._setValue(prop, defaultVal);
-      }
-   }
 }

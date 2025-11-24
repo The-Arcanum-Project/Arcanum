@@ -11,7 +11,7 @@ public abstract class PureParseLoadingService(IEnumerable<IDependencyNode<string
    private const string ACTION_STACK = nameof(PureParseLoadingService);
    public virtual string[] GroupingNodeNames => [];
 
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       var rn = Parser.Parse(fileObj, out var source, out var ctx);
       var validation = true;
