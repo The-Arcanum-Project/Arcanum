@@ -15,6 +15,7 @@ using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Map.SubObjects;
@@ -137,19 +138,18 @@ public class NUISettings
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 
+   public NUISetting ArtistTypeSettings { get; set; } = new(ArtistType.Field.UniqueId,
+                                                            Enum.GetValues<ArtistType.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray(),
+                                                            Enum.GetValues<ArtistType.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray(),
+                                                            Enum.GetValues<ArtistType.Field>()
+                                                                .Cast<Enum>()
+                                                                .ToArray());
 
-    public NUISetting ArtistTypeSettings { get; set; } = new(ArtistType.Field.UniqueId,
-                                                              Enum.GetValues<ArtistType.Field>()
-                                                                  .Cast<Enum>()
-                                                                  .ToArray(),
-                                                              Enum.GetValues<ArtistType.Field>()
-                                                                  .Cast<Enum>()
-                                                                  .ToArray(),
-                                                              Enum.GetValues<ArtistType.Field>()
-                                                                  .Cast<Enum>()
-                                                                  .ToArray());
-
-    public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.UniqueId,
+   public NUISetting ReligiousSchoolSettings { get; set; } = new(ReligiousSchool.Field.UniqueId,
                                                                  Enum.GetValues<ReligiousSchool.Field>()
                                                                      .Cast<Enum>()
                                                                      .ToArray(),
@@ -395,18 +395,18 @@ public class NUISettings
                                                                                .ToArray());
 
    public NUISetting ReligiousSchoolRelationsSettings { get; set; } = new(ReligiousSchoolRelations.Field.UniqueId,
-                                                                          Enum.GetValues<ReligiousSchoolRelations.
-                                                                                  Field>()
-                                                                              .Cast<Enum>()
-                                                                              .ToArray(),
-                                                                          Enum.GetValues<ReligiousSchoolRelations.
-                                                                                  Field>()
-                                                                              .Cast<Enum>()
-                                                                              .ToArray(),
-                                                                          Enum.GetValues<ReligiousSchoolRelations.
-                                                                                  Field>()
-                                                                              .Cast<Enum>()
-                                                                              .ToArray());
+                                                                          Enum
+                                                                            .GetValues<ReligiousSchoolRelations.Field>()
+                                                                            .Cast<Enum>()
+                                                                            .ToArray(),
+                                                                          Enum
+                                                                            .GetValues<ReligiousSchoolRelations.Field>()
+                                                                            .Cast<Enum>()
+                                                                            .ToArray(),
+                                                                          Enum
+                                                                            .GetValues<ReligiousSchoolRelations.Field>()
+                                                                            .Cast<Enum>()
+                                                                            .ToArray());
 
    public NUISetting PopDefinitionSettings { get; set; } = new(PopDefinition.Field.UniqueId,
                                                                Enum.GetValues<PopDefinition.Field>()
@@ -607,4 +607,15 @@ public class NUISettings
                                                               Enum.GetValues<CultureGroup.Field>()
                                                                   .Cast<Enum>()
                                                                   .ToArray());
+
+   public NUISetting CountryDefinitionSettings { get; set; } = new(CountryDefinition.Field.UniqueId,
+                                                                   Enum.GetValues<CountryDefinition.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray(),
+                                                                   Enum.GetValues<CountryDefinition.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray(),
+                                                                   Enum.GetValues<CountryDefinition.Field>()
+                                                                       .Cast<Enum>()
+                                                                       .ToArray());
 }

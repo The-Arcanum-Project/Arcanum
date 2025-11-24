@@ -6,6 +6,7 @@ using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GlobalStates.BackingClasses;
@@ -51,7 +52,7 @@ public static class Globals
    public static Dictionary<string, CountryRank> CountryRanks { get; } = [];
    public static Dictionary<string, Road> Roads { get; set; } = [];
 
-   public static Dictionary<string, Country> Countries { get; } = [];
+   public static Dictionary<string, Country> Countries { get; set; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ArtistType> ArtistTypes { get; set; } = [];
 
@@ -75,6 +76,7 @@ public static class Globals
    #region Map
 
    public static Dictionary<string, LocationTemplateData> LocationTemplateData { get; } = [];
+   public static Dictionary<string, CountryDefinition> CountryDefinitions { get; } = [];
    public static Dictionary<string, Climate> Climates { get; set; } = [];
    public static Dictionary<string, Vegetation> Vegetation { get; set; } = [];
    public static Dictionary<string, Topography> Topography { get; set; } = [];

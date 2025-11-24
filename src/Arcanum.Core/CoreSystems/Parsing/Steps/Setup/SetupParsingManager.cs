@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 /*
@@ -20,6 +21,9 @@ public static class SetupParsingManager
 {
    private const string SETUP_START_NODE_PARSING = "Setup.Start.NodeParsing";
    private static readonly Dictionary<string, SetupFileLoadingService> SetupFileLoaders = new();
+
+   // Each file which edits the given object will be listed here if it originates from the setup folder.
+   private static readonly Dictionary<IEu5Object, List<Eu5FileObj>> PartDefinitions = [];
 
    static SetupParsingManager()
    {
