@@ -132,8 +132,22 @@ public static class LvnHelpers
                                    bool complainOnError = true)
    {
       var lexeme = lvn.Value.GetLexeme(source);
-      if (bool.TryParse(lexeme, out value) || !complainOnError)
-         return true;
+
+      switch (lexeme)
+      {
+         case "yes":
+            value = true;
+            return true;
+         case "no":
+            value = false;
+            return true;
+      }
+
+      if (!complainOnError)
+      {
+         value = false;
+         return false;
+      }
 
       ctx.SetPosition(lvn.Value);
       DiagnosticException.LogWarning(ctx.GetInstance(),
@@ -440,19 +454,19 @@ public static class LvnHelpers
                                            out value);
    }
 
-    public static bool TryParseArtistType(this LiteralValueNode lvn,
-                                 LocationContext ctx,
-                                 string actionName,
-                                 string source,
-                                 ref bool validationResult,
-                                 [MaybeNullWhen(false)] out ArtistType value)
-    {
-        return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                             lvn.Value,
-                                             source,
-                                             actionName,
-                                             ref validationResult,
-                                             Globals.ArtistTypes,
-                                             out value);
-    }
+   public static bool TryParseArtistType(this LiteralValueNode lvn,
+                                         LocationContext ctx,
+                                         string actionName,
+                                         string source,
+                                         ref bool validationResult,
+                                         [MaybeNullWhen(false)] out ArtistType value)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           lvn.Value,
+                                           source,
+                                           actionName,
+                                           ref validationResult,
+                                           Globals.ArtistTypes,
+                                           out value);
+   }
 }

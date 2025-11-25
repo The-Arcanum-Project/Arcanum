@@ -10,8 +10,12 @@ public class AGSSettings
    public AgsSettings AgeAgsSettings { get; set; } = new();
    public AgsSettings VegetationAgsSettings { get; set; } = new();
    public AgsSettings OpinionValueAgsSettings { get; set; } = new();
+   public AgsSettings TownSetupAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
+   public AgsSettings BuildingLevelAgsSettings { get; set; } = new();
+   public AgsSettings InstitutionPresenceAgsSettings { get; set; } = new();
    public AgsSettings InstitutionStateAgsSettings { get; set; } = new();
+   public AgsSettings BuildingAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
    public AgsSettings ProvinceAgsSettings { get; set; } = new();
@@ -52,6 +56,7 @@ public class AGSSettings
    public AgsSettings CountryRankAgsSettings { get; set; } = new();
    public AgsSettings ParliamentDefinitionAgsSettings { get; set; } = new();
    public AgsSettings ReligiousSchoolRelationsAgsSettings { get; set; } = new();
+   public AgsSettings CountryDefinitionAgsSettings { get; set; } = new();
    public AgsSettings RegencyAgsSettings { get; set; } = new();
    public AgsSettings MarketAgsSettings { get; set; } = new();
    public AgsSettings LocationRankAgsSettings { get; set; } = new();

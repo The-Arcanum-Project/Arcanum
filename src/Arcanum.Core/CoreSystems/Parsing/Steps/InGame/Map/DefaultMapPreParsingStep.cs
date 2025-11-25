@@ -5,8 +5,8 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.Map;
-using Common;
 using Arcanum.Core.Utils.Sorting;
+using Common;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
@@ -27,13 +27,13 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("DefaultMapPreParsingStep should not parse to object directly.");
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       var dmd = new DefaultMapDefinition { Source = fileObj };
       ParseProperties(rn, ctx, fileObj, actionStack, source, ref validation, dmd);

@@ -7,8 +7,10 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Map.SubObjects;
+using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -46,7 +48,7 @@ public static class SavingActionProvider
          return;
 
       var md = metadata.First();
-      sb.AppendLine($"{md.Keyword} {SavingUtil.GetSeparator(md.Separator)} {date}");
+      sb.AppendLine($"{md.Keyword} {GetSeparator(md.Separator)} {date}");
    }
 
    public static void SaveNameDeclaration(IAgs target,
@@ -77,11 +79,11 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
 
       if (dd.TargetAll > 0f)
-         sb.AppendLine($"all = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}");
+         sb.AppendLine($"all = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}");
       else if (dd.TargetUpper > 0f)
-         sb.AppendLine($"upper = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+         sb.AppendLine($"upper = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
       else
-         sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {SavingUtil.FormatObjectValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+         sb.AppendLine($"{FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
    }
 
    public static void MapMovementAssistSaving(IAgs target,
@@ -92,7 +94,7 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("MapMovementAssistSaving can only be used with MapMovementAssist instances.");
 
-      sb.AppendLine($"movement_assistance = {{ {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {SavingUtil.FormatObjectValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
+      sb.AppendLine($"movement_assistance = {{ {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
    }
 
    public static void EstateCountDefinitionSaving(IAgs target,
@@ -103,7 +105,7 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("EstateCountDefinitionSaving can only be used with EstateCountDefinition instances.");
 
-      sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate)} = {SavingUtil.FormatObjectValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count)}");
+      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate)} = {FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count)}");
    }
 
    public static void ModValInstanceSaving(IAgs target,
@@ -114,7 +116,7 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("ModValInstanceSaving can only be used with ModValInstance instances.");
 
-      sb.AppendLine(SavingUtil.FormatValue(SavingValueType.Modifier, mvi));
+      sb.AppendLine(FormatValue(SavingValueType.Modifier, mvi));
    }
 
    public static void SoundTollsSaving(IAgs target,
@@ -125,7 +127,7 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("SoundTollsSaving can only be used with SoundTolls instances.");
 
-      sb.AppendLine($"{SavingUtil.FormatObjectValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne)} = {SavingUtil.FormatObjectValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo)}");
+      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne)} = {FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo)}");
    }
 
    public static void DefaultMapDefinitionSaving(IAgs target,
@@ -156,5 +158,16 @@ public static class SavingActionProvider
             InvalidOperationException("LocationSaving can only be used with Location instances.");
 
       sb.AppendLine($"{loc.UniqueId} = {loc.Color.AsHexString().ToLower()}");
+   }
+
+   public static void InstitutionPresenceSaving(IAgs target,
+                                                HashSet<PropertySavingMetadata> metadata,
+                                                IndentedStringBuilder sb)
+   {
+      if (target is not InstitutionPresence ip)
+         throw new
+            InvalidOperationException("InstitutionPresenceSaving can only be used with InstitutionPresence instances.");
+
+      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, ip, InstitutionPresence.Field.Institution)} = {FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent)}");
    }
 }

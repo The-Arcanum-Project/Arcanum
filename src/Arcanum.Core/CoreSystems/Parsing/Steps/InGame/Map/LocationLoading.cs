@@ -16,13 +16,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Location>(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       var cIndex = 0;
       foreach (var sn in rn.Statements)

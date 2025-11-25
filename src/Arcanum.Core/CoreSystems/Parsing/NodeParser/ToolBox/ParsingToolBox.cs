@@ -12,6 +12,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -23,6 +24,7 @@ using Arcanum.Core.GameObjects.Cultural.SubObjects;
 using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religious;
@@ -1738,6 +1740,78 @@ public static class ParsingToolBox
                                            out value);
    }
 
+   public static bool ArcTryParse_TownSetup(ContentNode node,
+                                            LocationContext ctx,
+                                            string actionName,
+                                            string source,
+                                            [MaybeNullWhen(false)] out TownSetup value,
+                                            ref bool validation)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.TownSetups,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_LocationRank(ContentNode node,
+                                               LocationContext ctx,
+                                               string actionName,
+                                               string source,
+                                               [MaybeNullWhen(false)] out LocationRank value,
+                                               ref bool validation)
+   {
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.LocationRanks,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_InstitutionPresence(ContentNode node,
+                                                      LocationContext ctx,
+                                                      string actionName,
+                                                      string source,
+                                                      [MaybeNullWhen(false)] out InstitutionPresence value,
+                                                      ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_InstitutionPresence)}") ||
+          !node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn) ||
+          !lvn.TryParseBool(ctx, actionName, source, ref validation, out var isPresent))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var key = node.KeyNode.GetLexeme(source);
+      if (!Globals.Institutions.TryGetValue(key, out var institution))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        actionName,
+                                        key,
+                                        nameof(Institution));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new()
+      {
+         Institution = institution, IsPresent = isPresent,
+      };
+      return true;
+   }
+
    public static bool ArcTryParse_ArtistType(ContentNode node,
                                              LocationContext ctx,
                                              string actionName,
@@ -1763,5 +1837,45 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
+   }
+
+   public static bool ArcTryParse_BuildingLevel(ContentNode node,
+                                                LocationContext ctx,
+                                                string actionName,
+                                                string source,
+                                                [MaybeNullWhen(false)] out BuildingLevel value,
+                                                ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_BuildingLevel)}") ||
+          !node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvnValue) ||
+          !lvnValue.TryParseInt(ctx, actionName, source, ref validation, out var level))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var key = node.KeyNode.GetLexeme(source);
+      if (!Globals.Buildings.TryGetValue(key, out var building))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        actionName,
+                                        key,
+                                        nameof(Building));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new()
+      {
+         Building = building, Level = level,
+      };
+      return true;
    }
 }
