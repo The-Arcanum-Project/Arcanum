@@ -1,10 +1,12 @@
-﻿using Arcanum.Core.GameObjects.AbstractMechanics;
+﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy;
+using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
@@ -55,6 +57,8 @@ public static class Globals
    public static Dictionary<string, Country> Countries { get; set; } = [];
    public static Dictionary<string, Institution> Institutions { get; set; } = [];
    public static Dictionary<string, ArtistType> ArtistTypes { get; set; } = [];
+   public static Dictionary<string, TownSetup> TownSetups { get; set; } = [];
+   public static Dictionary<string, BuildingLevel> BuildingLevels { get; set; } = [];
 
    #region Religion
 
@@ -112,6 +116,7 @@ public static class Globals
 
    #region Economy
 
+   public static Dictionary<string, Building> Buildings { get; } = [];
    public static Dictionary<string, RawMaterial> RawMaterials { get; } = [];
    public static Dictionary<string, Market> Markets { get; } = [];
 

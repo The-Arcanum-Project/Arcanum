@@ -10,8 +10,11 @@ public class AGSSettings
    public AgsSettings AgeAgsSettings { get; set; } = new();
    public AgsSettings VegetationAgsSettings { get; set; } = new();
    public AgsSettings OpinionValueAgsSettings { get; set; } = new();
+   public AgsSettings TownSetupAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
+   public AgsSettings BuildingLevelAgsSettings { get; set; } = new();
    public AgsSettings InstitutionStateAgsSettings { get; set; } = new();
+   public AgsSettings BuildingAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
    public AgsSettings RoadAgsSettings { get; set; } = new();
    public AgsSettings ProvinceAgsSettings { get; set; } = new();

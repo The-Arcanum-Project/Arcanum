@@ -1,4 +1,6 @@
-﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:s="clr-namespace:System;assembly=mscorlib"
+                        xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/CodeStyle/CodeFormatting/XmlFormatter/ProcessingInstructionAttributesFormat/@EntryValue">FirstAttributeOnSingleLine</s:String>
 	<s:String x:Key="/Default/CodeStyle/CodeFormatting/XmlFormatter/TagAttributesFormat/@EntryValue">FirstAttributeOnSingleLine</s:String>
     <s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=GPU/@EntryIndexedValue">GPU</s:String>
@@ -128,7 +130,7 @@
 public partial class $type$Parsing(IEnumerable&lt;IDependencyNode&lt;string&gt;&gt; dependencies)
    : ParserValidationLoadingService&lt;$type$&gt;(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
+   public override void LoadSingleFile(RootNode rn,
                                           LocationContext ctx,
                                           Eu5FileObj fileObj,
                                           string actionStack,
@@ -213,6 +215,7 @@ public partial class $type$Parsing(IEnumerable&lt;IDependencyNode&lt;string&gt;&
     <s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Shortcut/@EntryValue">eu5Object</s:String>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
     <s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FC00A90438BC342B5E3376A5BDAB83F/Text/@EntryValue">[ObjectSaveAs]
+[NexusConfig]
 public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 {
 
@@ -244,8 +247,6 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static $ClassName$ Empty { get; } = new() { UniqueId = "Arcanum_Empty_$ClassName$" };
-   
-   public override string ToString() =&gt; UniqueId;
    
 #endregion
 }</s:String>

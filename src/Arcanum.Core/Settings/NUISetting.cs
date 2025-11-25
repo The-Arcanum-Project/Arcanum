@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -63,6 +64,17 @@ public class NUISettings
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting BuildingLevelSettings { get; set; } = new(BuildingLevel.Field.UniqueId,
+                                                               Enum.GetValues<BuildingLevel.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<BuildingLevel.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray(),
+                                                               Enum.GetValues<BuildingLevel.Field>()
+                                                                   .Cast<Enum>()
+                                                                   .ToArray());
    public NUISetting ProvinceSettings { get; set; } = new(Province.Field.UniqueId,
                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Province.Field>().Cast<Enum>().ToArray(),
@@ -618,4 +630,14 @@ public class NUISettings
                                                                    Enum.GetValues<CountryDefinition.Field>()
                                                                        .Cast<Enum>()
                                                                        .ToArray());
+
+   public NUISetting BuildingSettings { get; set; } = new(Building.Field.UniqueId,
+                                                          Enum.GetValues<Building.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Building.Field>().Cast<Enum>().ToArray(),
+                                                          Enum.GetValues<Building.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting TownSetupSettings { get; set; } = new(TownSetup.Field.UniqueId,
+                                                           Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray());
 }

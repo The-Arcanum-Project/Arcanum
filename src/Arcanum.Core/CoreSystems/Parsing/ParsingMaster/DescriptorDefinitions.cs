@@ -50,6 +50,12 @@ public static class DescriptorDefinitions
           [new DesignateHeirReasonParsing([])],
           false);
 
+   public static readonly FileDescriptor BuildingDescriptor =
+      new(["in_game", "common", "building_types"],
+          new("buildings", "txt", "#"),
+          [new BuildingParsing([])],
+          false);
+
    public static readonly FileDescriptor TraitDescriptor = new(["in_game", "common", "traits"],
                                                                new("traits", "txt", "#"),
                                                                [
@@ -314,6 +320,12 @@ public static class DescriptorDefinitions
           ],
           false);
 
+   public static readonly FileDescriptor TownSetupDescriptor =
+      new(["in_game", "common", "town_setups"],
+          new("town_setup", "txt", "#"),
+          [new TownSetupParsing([BuildingDescriptor.LoadingService[0]])],
+          false);
+
    public static readonly FileDescriptor ArtistTypeDescriptor = new(["in_game", "common", "artist_types"],
                                                                     new("artist_types", "txt", "#"),
                                                                     [new ArtistTypeParsing([])],
@@ -355,9 +367,9 @@ public static class DescriptorDefinitions
          AdjacenciesDescriptor, PopTypeDescriptor, LocationRankDescriptor, CountryRankDescriptor,
          ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser, LanguageDescriptor,
          AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor,
-         RegenciesDescriptor, EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor,
+         RegenciesDescriptor, EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor, TownSetupDescriptor,
          ReligiousFactionParsing, ReligiousFocusParsing, DesignateHeirReasonDescriptor, TraitDescriptor,
-         ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor,
+         ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor, BuildingDescriptor,
          StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
          MainMenuSetupParsingDescriptor,
       ];

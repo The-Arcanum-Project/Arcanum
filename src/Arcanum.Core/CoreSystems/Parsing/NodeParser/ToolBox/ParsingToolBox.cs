@@ -1764,4 +1764,44 @@ public static class ParsingToolBox
 
       return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
    }
+
+   public static bool ArcTryParse_BuildingLevel(ContentNode node,
+                                                LocationContext ctx,
+                                                string actionName,
+                                                string source,
+                                                [MaybeNullWhen(false)] out BuildingLevel value,
+                                                ref bool validation)
+   {
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ctx,
+                                             $"{actionName}.{nameof(ArcTryParse_BuildingLevel)}") ||
+          !node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvnValue) ||
+          !lvnValue.TryParseInt(ctx, actionName, source, ref validation, out var level))
+      {
+         validation = false;
+         value = null;
+         return false;
+      }
+
+      var key = node.KeyNode.GetLexeme(source);
+      if (!Globals.Buildings.TryGetValue(key, out var building))
+      {
+         ctx.SetPosition(node.KeyNode);
+         DiagnosticException.LogWarning(ctx.GetInstance(),
+                                        ParsingError.Instance.UnknownKey,
+                                        actionName,
+                                        key,
+                                        nameof(Building));
+         value = null;
+         validation = false;
+         return false;
+      }
+
+      value = new()
+      {
+         Building = building, Level = level,
+      };
+      return true;
+   }
 }
