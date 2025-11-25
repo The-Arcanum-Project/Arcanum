@@ -185,7 +185,7 @@ public static class SavingUtil
    /// <param name="target"></param>
    /// <param name="nxProp"></param>
    /// <returns></returns>
-   public static string FormatObjectValue(SavingValueType svl, INexus target, Enum nxProp)
+   public static string FormatValue(SavingValueType svl, INexus target, Enum nxProp)
    {
       object value = null!;
       Nx.ForceGet(target, nxProp, ref value);

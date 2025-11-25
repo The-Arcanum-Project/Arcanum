@@ -354,6 +354,7 @@ public static class DescriptorDefinitions
                 LanguageDescriptor.LoadingService[0],
                 DesignateHeirReasonDescriptor.LoadingService[0],
                 ParliamentTypeParsingDescriptor.LoadingService[0],
+                InstitutionsDescriptor.LoadingService[0],
              ]),
           ],
           false);

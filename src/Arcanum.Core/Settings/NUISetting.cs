@@ -65,6 +65,17 @@ public class NUISettings
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray());
 
+   public NUISetting InstitutionPresenceSettings { get; set; } = new(InstitutionPresence.Field.UniqueId,
+                                                                     Enum.GetValues<InstitutionPresence.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray(),
+                                                                     Enum.GetValues<InstitutionPresence.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray(),
+                                                                     Enum.GetValues<InstitutionPresence.Field>()
+                                                                         .Cast<Enum>()
+                                                                         .ToArray());
+
    public NUISetting BuildingLevelSettings { get; set; } = new(BuildingLevel.Field.UniqueId,
                                                                Enum.GetValues<BuildingLevel.Field>()
                                                                    .Cast<Enum>()

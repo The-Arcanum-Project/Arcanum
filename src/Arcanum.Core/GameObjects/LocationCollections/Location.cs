@@ -6,13 +6,16 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
 using Nexus.Core;
@@ -36,13 +39,40 @@ public partial class Location
 
    #endregion
 
-   #region Pops: game/main_menu/setup/start/06_pops.txt
+   #region main_menu/setup/start
 
-   [SuppressAgs]
+   [SaveAs]
    [ParseAs("define_pop", isShatteredList: true, itemNodeType: AstNodeType.BlockNode, isEmbedded: true)]
    [Description("The pops residing in this location.")]
    [DefaultValue(null)]
    public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("institution_presence",
+              isShatteredList: true,
+              itemNodeType: AstNodeType.ContentNode,
+              iEu5KeyType: typeof(Institution))]
+   [Description("The institution presences in this location.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<InstitutionPresence> InstitutionPresences { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("rank")]
+   [Description("The rank of this location.")]
+   [DefaultValue(null)]
+   public LocationRank Rank { get; set; } = LocationRank.Empty;
+
+   [SaveAs]
+   [ParseAs("town_setup")]
+   [Description("The town setup associated with this location.")]
+   [DefaultValue(null)]
+   public TownSetup TownSetup { get; set; } = TownSetup.Empty;
+
+   [SaveAs]
+   [ParseAs("prosperity")]
+   [Description("The prosperity of this location.")]
+   [DefaultValue(0f)]
+   public float Prosperity { get; set; }
 
    #endregion
 

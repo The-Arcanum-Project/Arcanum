@@ -13,6 +13,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 {
    private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParserForAttribute";
    private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+   private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.SaveAsAttribute";
    private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParsingToolBox";
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -1169,7 +1170,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                  .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
          if (parseAsAttr != null)
             propertiesToParse.Add(new(member, parseAsAttr));
-         else
+         else if (member.GetAttributes()
+                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE) !=
+                  null)
             // Report warning
             context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
                                                            title: "Missing [ParseAs] Attribute",
