@@ -13,6 +13,7 @@ public class AGSSettings
    public AgsSettings TownSetupAgsSettings { get; set; } = new();
    public AgsSettings TopographyAgsSettings { get; set; } = new();
    public AgsSettings BuildingLevelAgsSettings { get; set; } = new();
+   public AgsSettings InstitutionPresenceAgsSettings { get; set; } = new();
    public AgsSettings InstitutionStateAgsSettings { get; set; } = new();
    public AgsSettings BuildingAgsSettings { get; set; } = new();
    public AgsSettings ClimateAgsSettings { get; set; } = new();
