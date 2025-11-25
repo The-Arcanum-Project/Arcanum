@@ -12,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 public partial class ModifierParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<ModifierDefinition>(dependencies)
 {
-   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.ObjectsInFile)
          Globals.ModifierDefinitions.Remove(obj.UniqueId);

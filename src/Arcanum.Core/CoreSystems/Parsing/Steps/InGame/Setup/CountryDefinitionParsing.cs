@@ -59,7 +59,7 @@ public partial class CountryDefinitionParsing(IEnumerable<IDependencyNode<string
       return true;
    }
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
       var result = base.UnloadSingleFileContent(fileObj, lockObject);
       foreach (var obj in fileObj.ObjectsInFile)

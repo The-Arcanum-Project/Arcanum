@@ -48,7 +48,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
 #pragma warning disable AGS004
    [Description("Unique key of this PopDefinition. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueId { get; set; } = null!;
+   public string UniqueId { get; set; } = string.Empty;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

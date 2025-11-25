@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -35,15 +36,10 @@ public partial class Location
 
    #endregion
 
-   #region Market: game/main_menu/setup/start
-
-   public bool HasMarket => Globals.Markets.ContainsKey($"{UniqueId}_market");
-
-   #endregion
-
    #region Pops: game/main_menu/setup/start/06_pops.txt
 
    [SuppressAgs]
+   [ParseAs("define_pop", isShatteredList: true, itemNodeType: AstNodeType.BlockNode, isEmbedded: true)]
    [Description("The pops residing in this location.")]
    [DefaultValue(null)]
    public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];

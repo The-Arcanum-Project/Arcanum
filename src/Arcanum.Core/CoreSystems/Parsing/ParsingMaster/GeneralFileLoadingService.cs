@@ -28,7 +28,7 @@ public abstract class GeneralFileLoadingService(IEnumerable<IDependencyNode<stri
       return UnloadSingleFileContent(fileObj, lockObject);
    }
 
-   protected abstract bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject);
+   public abstract bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject);
 
    protected static void ResetObjectProperties(IEu5Object eu5Obj)
    {

@@ -19,7 +19,7 @@ public abstract class SetupFileLoadingService(IEnumerable<IDependencyNode<string
       throw new NotSupportedException("Setup files are not loaded via this method.");
    }
 
-   public abstract bool LoadSetupFile(StatementNode sn,
+   public abstract void LoadSetupFile(StatementNode sn,
                                       LocationContext ctx,
                                       Eu5FileObj fileObj,
                                       string actionStack,

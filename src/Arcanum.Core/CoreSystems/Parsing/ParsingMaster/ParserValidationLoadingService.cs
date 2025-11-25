@@ -18,7 +18,7 @@ public abstract class
    public virtual string[] GroupingNodeNames => [];
    public virtual Dictionary<string, T> GetGlobals() => T.GetGlobalItems();
 
-   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
       var globals = GetGlobals();
       if (lockObject != null)

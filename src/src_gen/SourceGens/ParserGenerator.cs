@@ -676,7 +676,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                         isEnabledByDefault: true),
                                                     Location.None));
 
-         sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}'.");
+         sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}', after looking for {nestedParserSymbol}");
          return true;
       }
 

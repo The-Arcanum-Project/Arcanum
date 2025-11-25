@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common.UI;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
@@ -111,13 +112,6 @@ public static class DescriptorDefinitions
                                                                      [new AdjacencyFileLoading([])],
                                                                      false);
 
-   // TODO:
-   // public static readonly FileDescriptor MarketDescriptor =
-   //    new(["main_menu", "setup", "start", "03_markets.txt"],
-   //        new("03_markets", "txt", "#"),
-   //        [new MarketManagerParsing([LocationDescriptor.LoadingService[0]])],
-   //        false);
-
    public static readonly FileDescriptor EstateDescriptor = new(["in_game", "common", "estates"],
                                                                 new("estates", "txt", "#"),
                                                                 [
@@ -150,19 +144,6 @@ public static class DescriptorDefinitions
 
    private static readonly CultureParsing CultureDiscovery =
       new([ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0]]);
-
-   // TODO:
-   // public static readonly FileDescriptor PopDescriptor = new(["main_menu", "setup", "start", "06_pops.txt"],
-   //                                                           new("06_pops", "txt", "#"),
-   //                                                           [
-   //                                                              new PopsParsing([
-   //                                                                 PopTypeDescriptor.LoadingService[0],
-   //                                                                 CultureDiscovery,
-   //                                                                 LocationDescriptor.LoadingService[0],
-   //                                                                 ColorParser.LoadingService[0],
-   //                                                              ]),
-   //                                                           ],
-   //                                                           false);
 
    public static readonly FileDescriptor LocationRankDescriptor = new(["in_game", "common", "location_ranks"],
                                                                       new("location_ranks", "txt", "#"),
@@ -197,40 +178,7 @@ public static class DescriptorDefinitions
                                                                       [new InstitutionParsing([])],
                                                                       false);
 
-   // TODO:
-   // public static readonly FileDescriptor InstitutionsAndReligiousSchools =
-   //    new(["main_menu", "setup", "start", "02_core.txt"],
-   //        new("02_core", "txt", "#"),
-   //        [
-   //           new InstitutionStateReligiousSchoolStateParsing([
-   //              LocationDescriptor.LoadingService[0], ReligiousSchoolsDescriptor.LoadingService[0],
-   //              InstitutionsDescriptor.LoadingService[0],
-   //           ]),
-   //        ],
-   //        false);
-
    private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
-
-   // TODO:
-   // public static readonly FileDescriptor RoadsDescriptor =
-   //    new(["main_menu", "setup", "start", "09_roads.txt"],
-   //        new("09_roads", "txt", "#"),
-   //        [new RoadsParsing([LocationDescriptor.LoadingService[0],]),],
-   //        false);
-   //
-   // TODO:
-   // public static readonly FileDescriptor CountriesDescriptor =
-   //    new(["main_menu", "setup", "start", "10_countries.txt"],
-   //        new("10_countries", "txt", "#"),
-   //        [
-   //           new CountryParsing([
-   //              LocationDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
-   //              ReligiousSchoolsDescriptor.LoadingService[0], ColorParser.LoadingService[0], CharacterDiscovery,
-   //              LanguageDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
-   //              DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
-   //           ]),
-   //        ],
-   //        false);
 
    public static readonly FileDescriptor CultureDescriptor = new(["in_game", "common", "cultures"],
                                                                  new("cultures", "txt", "#"),
@@ -299,13 +247,6 @@ public static class DescriptorDefinitions
                                                                       ]),
                                                                    ],
                                                                    true);
-
-   // TODO:
-   // public static readonly FileDescriptor DynastyManagerDescriptor =
-   //    new(["main_menu", "setup", "start", "04_dynasties.txt"],
-   //        new("04_dynasties", "txt", "#"),
-   //        [new DynastyManagerParsing([LocationDescriptor.LoadingService[0],]),],
-   //        false);
 
    public static readonly FileDescriptor ReligiousFactionParsing = new(["in_game", "common", "religious_factions"],
                                                                        new("religious_factions", "txt", "#"),
@@ -384,20 +325,26 @@ public static class DescriptorDefinitions
           [new CountryDefinitionParsing([ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0]])],
           false);
 
-   // TODO:
-   // public static readonly FileDescriptor CharactersDescriptor =
-   //   new(["main_menu", "setup", "start", "05_characters.txt"],
-   //       new("characters", "txt", "#"),
-   //       ConsequentialLoadingSteps([
-   //          CharacterDiscovery, new CharacterPropertiesParsing([
-   //             ColorParser.LoadingService[0], LocationDescriptor.LoadingService[0],
-   //             CountriesDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
-   //             TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0],
-   //             CultureDescriptor.LoadingService[0], DynastyManagerDescriptor
-   //               .LoadingService[0], ArtistTypeDescriptor.LoadingService[0],
-   //          ]),
-   //       ]),
-   //       false);
+   public static readonly FileDescriptor MainMenuSetupParsingDescriptor =
+      new(["main_menu", "setup", "start"],
+          new("main_menu_setup", "txt", "#"),
+          [
+             new SetupParsingStep([
+                CountryDefinitionDescriptor.LoadingService[0],
+                // CharacterDiscovery.LoadingService[0],
+                LocationDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
+                // CountriesDescriptor.LoadingService[0],
+                TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0],
+                CultureDescriptor.LoadingService[0], ArtistTypeDescriptor.LoadingService[0],
+                PopTypeDescriptor.LoadingService[0], ColorParser.LoadingService[0],
+                ReligiousSchoolsDescriptor.LoadingService[0],
+                InstitutionsDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
+                LanguageDescriptor.LoadingService[0],
+                DesignateHeirReasonDescriptor.LoadingService[0],
+                ParliamentTypeParsingDescriptor.LoadingService[0],
+             ]),
+          ],
+          false);
 
    //TODO Autogenerate this list
    static DescriptorDefinitions()
@@ -412,6 +359,7 @@ public static class DescriptorDefinitions
          ReligiousFactionParsing, ReligiousFocusParsing, DesignateHeirReasonDescriptor, TraitDescriptor,
          ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor,
          StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
+         MainMenuSetupParsingDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);
