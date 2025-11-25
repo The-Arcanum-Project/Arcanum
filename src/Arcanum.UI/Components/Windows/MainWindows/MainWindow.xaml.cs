@@ -33,8 +33,8 @@ namespace Arcanum.UI.Components.Windows.MainWindows;
 
 public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
-   public const int DEFAULT_WIDTH = 1920;
-   public const int DEFAULT_HEIGHT = 1080;
+   private const int DEFAULT_WIDTH = 1920;
+   private const int DEFAULT_HEIGHT = 1080;
 
    private string _ramUsage = "RAM: [0 MB]";
    private string _cpuUsage = "CPU: [0%]";
