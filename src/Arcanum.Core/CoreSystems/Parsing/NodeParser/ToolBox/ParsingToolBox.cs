@@ -123,18 +123,6 @@ public static class ParsingToolBox
       return false;
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a literal integer value into an int.
-   /// Validates that the ContentNode's separator is one of the supported types for integer values.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Int32(ContentNode node,
                                         LocationContext ctx,
                                         string actionName,
@@ -229,18 +217,6 @@ public static class ParsingToolBox
       return true;
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a literal boolean value into a bool.
-   /// Validates that the ContentNode's separator is an equals sign.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Boolean(ContentNode node,
                                           LocationContext ctx,
                                           string actionName,
@@ -481,18 +457,6 @@ public static class ParsingToolBox
       return true;
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a location definition into a Location object.
-   /// Utilizes the LocationContext to resolve the location.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(ContentNode node,
                                            LocationContext ctx,
                                            string actionName,
@@ -503,18 +467,6 @@ public static class ParsingToolBox
       return node.TryGetLocation(ctx, actionName, source, ref validation, out value);
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a location definition into a Location object.
-   /// Utilizes the LocationContext to resolve the location.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(KeyOnlyNode node,
                                            LocationContext ctx,
                                            string actionName,
@@ -627,18 +579,6 @@ public static class ParsingToolBox
       return true;
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a religious school identifier into a ReligiousSchool object.
-   /// Utilizes the global ReligiousSchools dictionary to resolve the identifier.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_ReligiousSchool(ContentNode node,
                                                   LocationContext ctx,
                                                   string actionName,
@@ -646,71 +586,29 @@ public static class ParsingToolBox
                                                   [MaybeNullWhen(false)] out ReligiousSchool value,
                                                   ref bool validation)
    {
-      if (node.TryGetIdentifierNode(ctx, actionName, source, out var rsName))
-      {
-         if (!Globals.ReligiousSchools.TryGetValue(rsName, out var rs))
-         {
-            ctx.SetPosition(node.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.UnknownObjectKey,
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
                                            actionName,
-                                           rsName,
-                                           nameof(ReligiousSchool));
-            value = null;
-            validation = false;
-            return false;
-         }
-
-         value = rs;
-         return true;
-      }
-
-      value = null;
-      validation = false;
-      return false;
+                                           ref validation,
+                                           Globals.ReligiousSchools,
+                                           out value);
    }
 
-   /// <summary>
-   /// Parses a ContentNode containing a country rank identifier into a CountryRank object.
-   /// Utilizes the global CountryRanks list to resolve the identifier.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
-   /// </summary>
-   /// <param name="cn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
-   public static bool ArcTryParse_CountryRank(ContentNode cn,
+   public static bool ArcTryParse_CountryRank(ContentNode node,
                                               LocationContext ctx,
                                               string actionName,
                                               string source,
                                               [MaybeNullWhen(false)] out CountryRank value,
                                               ref bool validation)
    {
-      if (!cn.TryGetIdentifierNode(ctx, actionName, source, out var crlName))
-      {
-         value = null;
-         validation = false;
-         return false;
-      }
-
-      Globals.CountryRanks.TryGetValue(crlName, out value);
-      if (value != null)
-         return true;
-
-      {
-         ctx.SetPosition(cn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidCountryRankKey,
-                                        actionName,
-                                        crlName,
-                                        Globals.CountryRanks.Keys);
-         value = null;
-         validation = false;
-         return false;
-      }
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.CountryRanks,
+                                           out value);
    }
 
    public static bool ArcTryParse_JominiDate(ContentNode node,
@@ -805,24 +703,13 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out Country value,
                                           ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_RegnalNumber)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseCountry(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Countries,
+                                           out value);
    }
 
    public static bool ArcTryParse_Language(ContentNode node,
@@ -1037,24 +924,13 @@ public static class ParsingToolBox
                                             [MaybeNullWhen(false)] out Character value,
                                             ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Character)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseCharacter(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Characters,
+                                           out value);
    }
 
    public static bool ArcTryParse_CharacterNameDeclaration(ContentNode node,
@@ -1174,24 +1050,13 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out PopType value,
                                           ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_PopType)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParsePopType(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.PopTypes,
+                                           out value);
    }
 
    public static bool ArcTryParse_Culture(ContentNode node,
@@ -1201,19 +1066,13 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out Culture value,
                                           ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Culture)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseCulture(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Cultures,
+                                           out value);
    }
 
    public static bool ArcTryParse_ReligionGroup(ContentNode node,
@@ -1223,19 +1082,13 @@ public static class ParsingToolBox
                                                 [MaybeNullWhen(false)] out ReligionGroup value,
                                                 ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ReligionGroup)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseReligionGroup(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.ReligionGroups,
+                                           out value);
    }
 
    public static bool ArcTryParse_Religion(ContentNode node,
@@ -1245,19 +1098,13 @@ public static class ParsingToolBox
                                            [MaybeNullWhen(false)] out Religion value,
                                            ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Religion)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseReligion(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Religions,
+                                           out value);
    }
 
    public static bool ArcTryParse_SoundToll(ContentNode node,
@@ -1308,24 +1155,13 @@ public static class ParsingToolBox
                                                       [MaybeNullWhen(false)] out DesignateHeirReason value,
                                                       ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_DesignateHeirReason)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseDesignateHeirReason(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.DesignateHeirReasons,
+                                           out value);
    }
 
    public static bool ArcTryParse_Estate(ContentNode node,
@@ -1335,24 +1171,13 @@ public static class ParsingToolBox
                                          [MaybeNullWhen(false)] out Estate value,
                                          ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Estate)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseEstate(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Estates,
+                                           out value);
    }
 
    public static bool ArcTryParse_Trait(KeyOnlyNode node,
@@ -1372,24 +1197,13 @@ public static class ParsingToolBox
                                         [MaybeNullWhen(false)] out Trait value,
                                         ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Trait)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseTrait(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.Traits,
+                                           out value);
    }
 
    public static bool ArcTryParse_ParliamentType(ContentNode node,
@@ -1399,24 +1213,13 @@ public static class ParsingToolBox
                                                  [MaybeNullWhen(false)] out ParliamentType value,
                                                  ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ParliamentType)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseParliamentType(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.ParliamentTypes,
+                                           out value);
    }
 
    public static bool ArcTryParse_DemandData(ContentNode node,
@@ -1542,20 +1345,8 @@ public static class ParsingToolBox
                                              [MaybeNullWhen(false)] out Topography value,
                                              ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Topography)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1570,20 +1361,8 @@ public static class ParsingToolBox
                                              [MaybeNullWhen(false)] out Vegetation value,
                                              ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Vegetation)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1598,20 +1377,8 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out Climate value,
                                           ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Climate)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1626,20 +1393,8 @@ public static class ParsingToolBox
                                               [MaybeNullWhen(false)] out RawMaterial value,
                                               ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_RawMaterial)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1654,20 +1409,8 @@ public static class ParsingToolBox
                                                  [MaybeNullWhen(false)] out StaticModifier value,
                                                  ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_StaticModifier)}"))
-         validation = false;
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1682,25 +1425,8 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out Dynasty value,
                                           ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Dynasty)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
       return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
+                                           node,
                                            source,
                                            actionName,
                                            ref validation,
@@ -1819,24 +1545,13 @@ public static class ParsingToolBox
                                              [MaybeNullWhen(false)] out ArtistType value,
                                              ref bool validation)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
-                                             TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ArtistType)}"))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
-      {
-         validation = false;
-         value = null;
-         return false;
-      }
-
-      return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
+      return LUtil.TryGetFromGlobalsAndLog(ctx,
+                                           node,
+                                           source,
+                                           actionName,
+                                           ref validation,
+                                           Globals.ArtistTypes,
+                                           out value);
    }
 
    public static bool ArcTryParse_BuildingLevel(ContentNode node,
