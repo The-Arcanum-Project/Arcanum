@@ -1,10 +1,12 @@
 ﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 /*
@@ -32,6 +34,80 @@ public static class SetupParsingManager
             objs.UnionWith(subList);
          return objs.ToArray();
       }
+   }
+
+   public static bool IsSetupObject(IEu5Object obj) => PartDefinitions.ContainsKey(obj.GetType());
+
+   public static (List<Eu5FileObj> files, List<Type> types) GetAllFilesToOverwrite(List<IEu5Object> objects)
+   {
+      HashSet<Type> typesToProcess = [];
+      foreach (var obj in objects)
+         typesToProcess.Add(obj.GetType());
+
+      HashSet<Eu5FileObj> files = [];
+      HashSet<Type> processedTypes = [];
+
+      foreach (var et in typesToProcess)
+      {
+         var (etFiles, etTypes) = GetAllFilesToOverwrite(et);
+         files.UnionWith(etFiles);
+         processedTypes.UnionWith(etTypes);
+      }
+
+      Debug.Assert(files.Count > 0, "There should be at least one file to process.");
+      Debug.Assert(processedTypes.Count > 0, "There should be at least one type processed.");
+
+      return ([.. files], [.. processedTypes]);
+   }
+
+   public static (List<Eu5FileObj> files, List<Type> types) GetAllFilesToOverwrite(Type editedType)
+   {
+      Debug.Assert(PartDefinitions.ContainsKey(editedType), "Type must be a setup edited type.");
+
+      Dictionary<Eu5FileObj, List<Type>> invertedParts = [];
+
+      foreach (var (type, file) in PartDefinitions)
+         foreach (var fo in file)
+            if (!invertedParts.TryAdd(fo, [type]))
+               invertedParts[fo].Add(type);
+
+      var filesToProcess = new Queue<Eu5FileObj>(PartDefinitions[editedType]);
+      List<Eu5FileObj> files = [];
+      List<Type> processedTypes = [editedType];
+
+      while (filesToProcess.Count > 0)
+      {
+         var currentFile = filesToProcess.Dequeue();
+         if (files.Contains(currentFile))
+            continue;
+
+         files.Add(currentFile);
+
+         if (!invertedParts.TryGetValue(currentFile, out var typesInFile))
+            continue;
+
+         foreach (var type in typesInFile)
+         {
+            if (processedTypes.Contains(type))
+               continue;
+
+            processedTypes.Add(type);
+            if (!PartDefinitions.TryGetValue(type, out var relatedFiles))
+               continue;
+
+            foreach (var relatedFile in relatedFiles)
+               if (!filesToProcess.Contains(relatedFile))
+                  filesToProcess.Enqueue(relatedFile);
+         }
+      }
+
+      Debug.Assert(files.Count > 0, "There should be at least one file to process.");
+      Debug.Assert(processedTypes.Count > 0, "There should be at least one type processed.");
+
+      Debug.Assert(files.Count == files.Distinct().Count(), "Files to process should be distinct.");
+      Debug.Assert(processedTypes.Count == processedTypes.Distinct().Count(), "Processed types should be distinct.");
+
+      return (files, processedTypes);
    }
 
    public static List<SetupFileLoadingService> RegisteredServices => SetupFileLoaders.Values.ToList();

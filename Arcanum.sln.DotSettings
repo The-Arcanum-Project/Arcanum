@@ -163,8 +163,9 @@ public partial class $type$Parsing(IEnumerable&lt;IDependencyNode&lt;string&gt;&
 
    public static $Name$ Instance =&gt; LazyInstance.Value;
    
-      private ErrorDescriptors()
+   private ErrorDescriptors()
    {
+       $END$
    }
 }</s:String>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=623DE4B4FF060F48A9FA07C8C2EC788F/@KeyIndexDefined">True</s:Boolean>
