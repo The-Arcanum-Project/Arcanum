@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
@@ -60,5 +61,28 @@ public class NUINavigation(int capacity)
          return;
 
       Eu5UiGen.GenerateAndSetView(_current!.Value);
+   }
+
+   public void InvalidateUi(IEu5Object target)
+   {
+      if (_current == null)
+         return;
+
+      // Find the first NavH in the history that contains the target
+      var node = _current;
+      while (true)
+      {
+         if (node.Value.Targets.Contains(target))
+         {
+            _current = node;
+            InvalidateUi();
+            return;
+         }
+
+         if (node.Previous == null)
+            break;
+
+         node = node.Previous;
+      }
    }
 }

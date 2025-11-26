@@ -8,7 +8,7 @@ namespace Arcanum.Core.GlobalStates;
 public static class AppData
 {
    public const string APP_NAME = "Arcanum";
-   public const string APP_VERSION = "0.9.3 Alpha";
+   public const string APP_VERSION = "0.9.4 Alpha";
 
    public static GitDataDescriptor ModforgeDataDescriptor { get; } = new(GitDataService.MOD_FORGE_GIT_REPOSITORY);
    public static GitDataDescriptor ArcanumDataDescriptor { get; } = new(GitDataService.ARCANUM_GIT_REPOSITORY);

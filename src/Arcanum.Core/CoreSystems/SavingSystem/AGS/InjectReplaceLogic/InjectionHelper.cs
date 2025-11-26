@@ -253,53 +253,42 @@ public static class InjectionHelper
          var descriptor = DescriptorDefinitions.TypeToDescriptor[obj.GetType()];
          if (!descriptor.AllowMultipleFiles || obj.FileLocation == Eu5ObjectLocation.Empty)
          {
-            // we have an object type that must be saved in a single file only if the object is not Empty
-            if (obj.FileLocation == Eu5ObjectLocation.Empty)
-            {
-               // We have a new object that is not saved via injection
-               category = SavingCategory.Modify;
-            }
-            else
-            {
-               // We get the single allowed path and do not move it to our mod as the saving does so
-               categorized[i] = new(obj, SavingCategory.FileOverride) { SaveLocation = descriptor.Files[0] };
-               continue;
-            }
+            // We get the single allowed path and do not move it to our mod as the saving does so
+            categorized[i] = new(obj, SavingCategory.FileOverride) { SaveLocation = descriptor.Files[0] };
+            continue;
+         }
+
+         var numOfProperties = obj.GetAllProperties().Length;
+         var changes = SaveMaster.GetChangesForObject(obj);
+         var percentageModified = changes.Length / (float)numOfProperties;
+
+         if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject ||
+             obj.InjRepType is InjRepType.REPLACE or InjRepType.TRY_REPLACE or InjRepType.REPLACE_OR_CREATE)
+         {
+            category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
+            // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
+            // TryInject would also work if you count no errors as working but we don't.
+            if (!obj.Source.IsVanilla && category is SavingCategory.Inject or SavingCategory.TryInject)
+               category = SavingCategory.InjectOrCreate;
          }
          else
          {
-            var numOfProperties = obj.GetAllProperties().Length;
-            var changes = SaveMaster.GetChangesForObject(obj);
-            var percentageModified = changes.Length / (float)numOfProperties;
+            category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
+            // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate)
 
-            if (percentageModified >= Config.Settings.SavingConfig.MaxPercentageToInject ||
-                obj.InjRepType is InjRepType.REPLACE or InjRepType.TRY_REPLACE or InjRepType.REPLACE_OR_CREATE)
+            if (!obj.Source.IsVanilla)
             {
-               category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultReplaceType);
-               // The object is not from vanilla so we cannot just inject to it but have to create it if it does not exist
-               // TryInject would also work if you count no errors as working but we don't.
-               if (!obj.Source.IsVanilla && category is SavingCategory.Inject or SavingCategory.TryInject)
-                  category = SavingCategory.InjectOrCreate;
+               if (category is SavingCategory.Replace or SavingCategory.TryReplace)
+                  category = SavingCategory.ReplaceOrCreate;
             }
             else
             {
-               category = SavingCategoryExtensions.FromInjRepStrategy(Config.Settings.SavingConfig.DefaultInjectType);
-               // The object is not from a vanilla source (this includes base mods so we have to use ReplaceOrCreate)
-
-               if (!obj.Source.IsVanilla)
-               {
-                  if (category is SavingCategory.Replace or SavingCategory.TryReplace)
-                     category = SavingCategory.ReplaceOrCreate;
-               }
-               else
-               {
-                  Debug.Assert(obj.Source != Eu5FileObj.Empty,
-                               "Object source is empty in injection categorization despite previous checks.");
-                  Debug.Assert(obj.Source.IsVanilla,
-                               "Object source is not vanilla in injection categorization despite previous checks.");
-                  categorized[i] = new(obj, category) { SaveLocation = obj.Source };
-                  continue;
-               }
+               Debug.Assert(obj.Source != Eu5FileObj.Empty,
+                            "Object source is empty in injection categorization despite previous checks.");
+               Debug.Assert(obj.Source.IsVanilla,
+                            "Object source is not vanilla in injection categorization despite previous checks.");
+               categorized[i] = new(obj, category) { SaveLocation = obj.Source };
+               continue;
             }
          }
 
