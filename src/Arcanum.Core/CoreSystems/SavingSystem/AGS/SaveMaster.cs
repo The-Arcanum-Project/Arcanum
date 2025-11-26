@@ -298,14 +298,24 @@ public static class SaveMaster
       if (Config.Settings.SavingConfig.CompactSetupFolder)
          SaveSetupCompacted(files, types);
       else
-         SaveSetupSplit(files, types);
+         SaveSetupSplit(types);
 
       return true;
    }
 
-   private static void SaveSetupSplit(List<Eu5FileObj> files, List<Type> types)
+   private static void SaveSetupSplit(List<Type> types)
    {
-      // TODO do the final logic to pick the right writers, invoke them, and finally write the files.
+      Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
+      Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
+                   "All types must have a corresponding SetupFileWriter.");
+      Debug.Assert(types.Count == types.Distinct().Count(), "Types list must not contain duplicates.");
+
+      foreach (var type in types)
+      {
+         var writers = SetupFileWritersByType[type];
+         foreach (var writer in writers)
+            WriteFile(writer.WriteFile().InnerBuilder, writer.FullPath);
+      }
    }
 
    private static void SaveSetupCompacted(List<Eu5FileObj> files, List<Type> types)
@@ -694,9 +704,14 @@ public static class SaveMaster
       if (!fileObj.IsModded && Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
          fileObj.Path.MoveToMod();
 
-      IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
+      WriteFile(sb, fileObj.Path.FullPath);
       if (register)
          FileStateManager.RegisterPath(fileObj.Path);
+   }
+
+   private static void WriteFile(StringBuilder sb, string path)
+   {
+      IO.IO.WriteAllTextUtf8WithBom(path, sb.ToString());
    }
 
    public static void RemoveObjectsFromFiles(List<IEu5Object> objs)
