@@ -7,8 +7,21 @@
              mc:Ignorable = "d"
              d:DesignHeight = "600"
              d:DesignWidth = "400">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    
     <Grid Margin = "3">
         <Grid.RowDefinitions>
+            <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "*" />
@@ -22,6 +35,7 @@
                        VerticalAlignment = "Center" />
             <ComboBox DockPanel.Dock = "Right"
                       MinWidth = "200"
+                      Height="23"
                       x:Name = "PropertySelector"
                       ItemsSource = "{Binding TargetableProperties, RelativeSource={RelativeSource AncestorType= UserControl}}"
                       SelectionChanged = "Selector_OnSelectionChanged" />
@@ -52,9 +66,11 @@
                        HorizontalAlignment = "Center"
                        VerticalAlignment = "Center" />
         </DockPanel>
-
-        <ContentControl Grid.Row = "2"
+        <Border Grid.Row="2" Height="4" Margin="5" CornerRadius="2" Background="{StaticResource DefaultBorderColorBrush}"/>
+        <ContentControl Grid.Row = "3"
                         Margin = "2"
+                        VerticalContentAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
                         Content = "{Binding EditorContent, RelativeSource={RelativeSource AncestorType= UserControl}}" />
     </Grid>
 </UserControl>

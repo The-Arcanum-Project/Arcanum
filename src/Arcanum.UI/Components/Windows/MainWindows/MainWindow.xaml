@@ -548,9 +548,9 @@
                 BorderThickness = "2"
                 CornerRadius = "8"
                 Margin = "2, 0">
-            <ScrollViewer>
-                <ContentPresenter x:Name = "SpecializedEditorPresenter" />
-            </ScrollViewer>
+            
+            <ContentPresenter x:Name = "SpecializedEditorPresenter" />
+            
 
         </Border>
 

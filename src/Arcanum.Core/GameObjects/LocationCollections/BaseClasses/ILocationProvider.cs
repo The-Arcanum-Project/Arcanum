@@ -7,7 +7,7 @@ using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
-public interface ILocationCollection<T> where T : ILocation
+public interface ILocationCollection<T> : ILocationCollection where T : ILocation
 {
    [SuppressAgs]
    [ParseAs("THIS_SHOULD_NEVER_BE_USED")]
@@ -15,6 +15,13 @@ public interface ILocationCollection<T> where T : ILocation
    [Description("The child locations of this location.")]
    [DefaultValue(null)]
    public ObservableRangeCollection<T> LocationChildren { get; set; }
+
+   List<ILocation> ILocationCollection.LocationChildrenGeneral => LocationChildren.Cast<ILocation>().ToList();
+}
+
+public interface ILocationCollection : ILocation
+{
+   public List<ILocation> LocationChildrenGeneral { get; }
 }
 
 public interface ILocation : IEu5Object

@@ -3,29 +3,83 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:userControls="clr-namespace:Arcanum.UI.Components.UserControls"
+             xmlns:styleClasses="clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:autoCompleteBox="clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
              mc:Ignorable = "d"
              d:DesignHeight = "300"
              d:DesignWidth = "300">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height = "25" />
-            <RowDefinition Height = "25" />
-            <RowDefinition Height = "25" />
+            <RowDefinition Height = "Auto" />
+            <RowDefinition Height = "Auto" />
+            <RowDefinition Height = "Auto" />
+            <RowDefinition Height = "Auto" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row = "0">
-            <Button Width = "21"
-                    Margin = "2, 1, 0, 1"
-                    DockPanel.Dock = "Right">
-                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" />
-            </Button>
+            <styleClasses:BaseButton
+                DockPanel.Dock="Right"
+                Width="21"
+                Height="21"
+                Margin="2,0">
+                <Image Source="/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" />
+            </styleClasses:BaseButton>
 
-            <ComboBox Height = "23"
-                      Margin = "0, 1, 0, 1"
-                      FontSize = "11"
-                      x:Name = "CollectionSelector">
-            </ComboBox>
+            <autoCompleteBox:AutoCompleteComboBox Height = "23"
+                                  Margin = "0, 1, 0, 1"
+                                  FontSize = "11"
+                                  x:Name = "CollectionSelector" SelectionChanged="CollectionSelector_OnSelectionChanged">
+            </autoCompleteBox:AutoCompleteComboBox>
         </DockPanel>
+        <Rectangle Grid.Row="1" Height="2" Margin="2" Fill="{StaticResource DefaultBorderColorBrush}"/>
+        <DockPanel Grid.Row="2" LastChildFill="True">
+            <styleClasses:BaseButton
+                DockPanel.Dock="Right"
+                Width="21"
+                Height="21"
+                Margin="2,0">
+                <Image Source="/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" />
+            </styleClasses:BaseButton>
+
+            <styleClasses:BaseButton
+                DockPanel.Dock="Right"
+                Width="21"
+                Height="21"
+                Margin="2,0">
+                <Image Source="/Arcanum_UI;component/Assets/Icons/20x20/Minimize20x20.png" />
+            </styleClasses:BaseButton>
+
+            <autoCompleteBox:AutoCompleteComboBox Height = "23"
+                                                  Margin = "0, 1, 0, 1"
+                                                  FontSize = "11"
+                                                  x:Name = "LocationSelector">
+            </autoCompleteBox:AutoCompleteComboBox>
+        </DockPanel>
+        <Rectangle Grid.Row="3" Height="2" Margin="2" Fill="{StaticResource DefaultBorderColorBrush}"/>
+        <ListView Grid.Row="4"
+                 x:Name="LocationListBox"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 SelectionMode="Extended"
+                 ItemsSource="{Binding LocationCollection, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding UniqueId}" HorizontalAlignment="Left" Margin="5,0,0,0"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </UserControl>

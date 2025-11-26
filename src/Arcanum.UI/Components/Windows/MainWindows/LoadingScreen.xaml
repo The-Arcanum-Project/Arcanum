@@ -64,6 +64,7 @@
             <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
                    HorizontalAlignment = "Center"
                    VerticalAlignment = "Center"
+                   RenderOptions.BitmapScalingMode = "HighQuality"
                    Stretch = "Uniform"
                    Margin = "0,0,25,0" />
         </Border>
