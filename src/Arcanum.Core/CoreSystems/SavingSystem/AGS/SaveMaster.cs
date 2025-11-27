@@ -346,8 +346,14 @@ public static class SaveMaster
 
       // If we have a newly created object it's Source property is still Empty so we need to set it here
       foreach (var csso in value)
+      {
          if (csso.Target.Source == Eu5FileObj.Empty)
+         {
+            // Set the source to the file we are saving to
             csso.Target.Source = fo;
+            fo.ObjectsInFile.Add(csso.Target);
+         }
+      }
 
       Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
                    "All objects must have a valid file location matching the file they are being saved to.");
@@ -512,6 +518,7 @@ public static class SaveMaster
          oldObjIndex++;
       }
 
+      sb.AppendLine();
       foreach (var obj in newObjs)
       {
          isb.Clear();

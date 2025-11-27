@@ -80,7 +80,7 @@
                         </ToggleButton>
 
                         <!-- The TextBox sits in the first column, leaving space for the arrow -->
-                        <styleClasses:CorneredTextBox x:Name = "PART_EditableTextBox"
+                        <TextBox x:Name = "PART_EditableTextBox"
                                                       Grid.Column = "0"
                                                       HorizontalAlignment = "Stretch"
                                                       VerticalAlignment = "Center"

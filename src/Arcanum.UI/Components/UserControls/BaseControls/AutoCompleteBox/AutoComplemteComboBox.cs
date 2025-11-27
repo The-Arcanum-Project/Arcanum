@@ -16,6 +16,8 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       private CancellationTokenSource _filterCancellationTokenSource = new();
       private readonly SerialDisposable _disposable = new(); // For Debouncing
 
+      private object? _lastSelectedItem;
+      
       private bool _isUpdatingText;
       private bool _isInitialized;
 
@@ -89,10 +91,14 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 
          _editableTextBoxCache.KeyDown += OnEditableTextBoxKeyDown;
 
-         if (!IsDropdownOnly)
-            ApplyFilter(Text);
-
+         _editableTextBoxCache.LostFocus += editableTextBoxCacheOnLostFocus;
+         
          _isInitialized = true;
+      }
+
+      private void editableTextBoxCacheOnLostFocus(object? sender, RoutedEventArgs e)
+      {
+         OnUserLeft();
       }
 
       private void OnEditableTextBoxKeyDown(object sender, KeyEventArgs e)
@@ -107,6 +113,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          }
          else if (e.Key == Key.Escape)
          {
+            ResetToLastSelectedItem();
             IsDropDownOpen = false;
             e.Handled = true;
          }
@@ -115,7 +122,10 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       private void OnUnloaded(object sender, RoutedEventArgs e)
       {
          if (_editableTextBoxCache != null!)
+         {
             _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown; // Unhook keydown
+            _editableTextBoxCache.LostFocus -= editableTextBoxCacheOnLostFocus;
+         }
 
          Unloaded -= OnUnloaded;
       }
@@ -246,7 +256,51 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             textBox.Select(_selectionStart, _selectionLength);
          }
       }
+      
+      private void ResetToLastSelectedItem(string text)
+      {
+         if (_lastSelectedItem == null) return;
+         SetSelectedItem(_lastSelectedItem, text);
+         _editableTextBoxCache.CaretIndex = text.Length;
+      }
+      
+      private void ResetToLastSelectedItem()
+      {
+         if (_lastSelectedItem == null) return;
+         var text = TextFromItem(_lastSelectedItem);
+         SetSelectedItem(_lastSelectedItem, text);
+         _editableTextBoxCache.CaretIndex = text.Length;
+      }
+      
+      private void OnUserLeft()
+      {
+         if (Equals(ItemsSource, _fullItemsSource) || _fullItemsSource == null) return;
+         using (new TextBoxStatePreserver(EditableTextBox))
+         {
+            ItemsSource = _fullItemsSource;
+         }
+         
+         
+         if (_lastSelectedItem == null || _textFromItemDelegate == null) return;
+         var lastText = _textFromItemDelegate(_lastSelectedItem);
+         if (lastText == Text) return;
+         var matchingItem = FullItemsSource.Cast<object>().FirstOrDefault(i => _textFromItemDelegate(i) == Text);
+         if (matchingItem is not null)
+         {
+            SelectedItem = matchingItem;
+         }else
+            ResetToLastSelectedItem(lastText);
+      }
 
+      private bool _ignoreDropDownCloseReset = false;
+      
+      protected override void OnDropDownClosed(EventArgs e)
+      {
+         base.OnDropDownClosed(e);
+         if(_ignoreDropDownCloseReset) return;
+         OnUserLeft();
+      }
+      
       private async void ApplyFilter(string currentText)
       {
          if (IsDropdownOnly)
@@ -269,7 +323,10 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          if (string.IsNullOrEmpty(currentText))
             filteredItems = _fullItemsSource?.Cast<object>() ?? [];
          else
-            filteredItems = await Task.Run(GetFilteredItems, token);
+         {
+            var fullItems = _fullItemsSource?.Cast<object>() ?? [];
+            filteredItems = await Task.Run(() => GetFilteredItems(fullItems), token);
+         }
 
          if (token.IsCancellationRequested)
             return;
@@ -283,19 +340,18 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
             if (filteredItems != null && itemsSource.Count > 0 && EditableTextBox.IsFocused)
                IsDropDownOpen = true;
             else
+            {
+               _ignoreDropDownCloseReset = true;
                IsDropDownOpen = false;
+               _ignoreDropDownCloseReset = false;
+            }
 
             Unselect();
          });
          return;
 
-         IEnumerable<object> GetFilteredItems()
+         IEnumerable<object> GetFilteredItems(IEnumerable fullItems)
          {
-            if (_fullItemsSource == null)
-               return [];
-
-            var fullItems = _fullItemsSource.Cast<object>();
-
             var results = new List<object>();
             foreach (var item in fullItems)
             {
@@ -336,6 +392,9 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
          _isUpdatingText = true;
          base.OnSelectionChanged(e); // This will update the Text property
          _isUpdatingText = false;
+         
+         if(SelectedItem != null)
+            _lastSelectedItem = SelectedItem;
       }
 
       /// <summary>
@@ -348,7 +407,7 @@ namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
       public void SetSelectedItem(object item, string displayText)
       {
          _isUpdatingText = true;
-
+         
          SelectedItem = item;
 
          if (EditableTextBox.Text != displayText)
