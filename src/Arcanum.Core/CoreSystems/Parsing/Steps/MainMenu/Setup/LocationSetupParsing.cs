@@ -17,7 +17,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : SetupFileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects => [typeof(PopDefinition)];
+   public override List<Type> ParsedObjects => [typeof(Location)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject,

@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 
@@ -25,6 +26,23 @@ public static class SetupParsingManager
    // Each file which edits the given object will be listed here if it originates from the setup folder.
    private static readonly Dictionary<Type, List<Eu5FileObj>> PartDefinitions = [];
 
+   private static Type[]? _parsedTypes;
+   public static Type[] ParsedTypes
+   {
+      get
+      {
+         if (_parsedTypes == null)
+         {
+            List<Type> types = [];
+            foreach (var service in RegisteredServices)
+               types.AddRange(service.ParsedObjects);
+            _parsedTypes = [.. types];
+         }
+
+         return _parsedTypes;
+      }
+   }
+
    public static Eu5FileObj[] LoadedFiles
    {
       get
@@ -38,11 +56,18 @@ public static class SetupParsingManager
 
    public static bool IsSetupObject(IEu5Object obj) => PartDefinitions.ContainsKey(obj.GetType());
 
-   public static (List<Eu5FileObj> files, List<Type> types) GetAllFilesToOverwrite(List<IEu5Object> objects)
+   public static Type[] GetSetupTypesToProcess(List<IEu5Object> objects)
    {
       HashSet<Type> typesToProcess = [];
-      foreach (var obj in objects)
-         typesToProcess.Add(obj.GetType());
+      for (var i = objects.Count - 1; i >= 0; i--)
+      {
+         var obj = objects[i];
+         if (SaveMaster.SetupFileWritersByType.ContainsKey(obj.GetType()))
+         {
+            typesToProcess.Add(obj.GetType());
+            objects.RemoveAt(i);
+         }
+      }
 
       HashSet<Eu5FileObj> files = [];
       HashSet<Type> processedTypes = [];
@@ -57,7 +82,7 @@ public static class SetupParsingManager
       Debug.Assert(files.Count > 0, "There should be at least one file to process.");
       Debug.Assert(processedTypes.Count > 0, "There should be at least one type processed.");
 
-      return ([.. files], [.. processedTypes]);
+      return [.. processedTypes];
    }
 
    public static (List<Eu5FileObj> files, List<Type> types) GetAllFilesToOverwrite(Type editedType)

@@ -43,5 +43,5 @@ public class AgsConfig
 
    [Description("If true, the setup folder will save all e.g. location specific data into a single file. If false, separate files will be used as in vanilla.")]
    [DefaultValue(true)]
-   public bool CompactSetupFolder { get; set; } = true;
+   public bool CompactSetupFolder { get; set; } = false;
 }

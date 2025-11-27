@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.Religious;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -25,17 +26,17 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    [Description("The type of population this PopDefinition represents.")]
    public PopType PopType { get; set; } = PopType.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("culture")]
    [DefaultValue(null)]
    [Description("The culture associated with this PopDefinition.")]
    public Culture Culture { get; set; } = Culture.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("religion")]
    [DefaultValue("")]
    [Description("The religion associated with this PopDefinition.")]
-   public string Religion { get; set; } = string.Empty;
+   public Religion Religion { get; set; } = Religion.Empty;
 
    [SaveAs]
    [ParseAs("size")]

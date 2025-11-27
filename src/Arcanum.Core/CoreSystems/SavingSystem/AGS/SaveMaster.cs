@@ -24,7 +24,7 @@ public static class SaveMaster
 
    public static HistoryNode? LastSavedHistoryNode;
 
-   private static readonly FrozenDictionary<Type, List<SetupFileWriter>> SetupFileWritersByType;
+   public static readonly FrozenDictionary<Type, List<SetupFileWriter>> SetupFileWritersByType;
 
    public static Enum[] GetChangesForObject(IEu5Object obj)
    {
@@ -238,6 +238,8 @@ public static class SaveMaster
          if (typesToSave.Contains(obj.GetType()))
             objsToSave.Add(obj);
 
+      SaveSetupFolder(objsToSave);
+
       if (objsToSave.Count == 0)
          return;
 
@@ -288,27 +290,30 @@ public static class SaveMaster
       WriteFile(sb.InnerBuilder, fileObj, true);
    }
 
+   /// <summary>
+   /// Extracts all setup objects from the list and removes them as they are already handled.
+   /// </summary>
    private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects)
    {
-      var (files, types) = SetupParsingManager.GetAllFilesToOverwrite(modifiedObjects);
+      var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
       // we have 2 modes to save:
       // - Vanilla Split: pops / ranks / institutions are in separate files
       // - Combined: all pops / ranks / institutions are in a single file (I prefer this one)
 
       if (Config.Settings.SavingConfig.CompactSetupFolder)
-         SaveSetupCompacted(files, types);
+         SaveSetupCompacted(types);
       else
          SaveSetupSplit(types);
 
       return true;
    }
 
-   private static void SaveSetupSplit(List<Type> types)
+   private static void SaveSetupSplit(Type[] types)
    {
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
       Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
                    "All types must have a corresponding SetupFileWriter.");
-      Debug.Assert(types.Count == types.Distinct().Count(), "Types list must not contain duplicates.");
+      Debug.Assert(types.Length == types.Distinct().Count(), "Types list must not contain duplicates.");
 
       foreach (var type in types)
       {
@@ -318,13 +323,18 @@ public static class SaveMaster
       }
    }
 
-   private static void SaveSetupCompacted(List<Eu5FileObj> files, List<Type> types)
+   private static void SaveSetupCompacted(Type[] types)
    {
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
 
       // Create the dummy files:
-      foreach (var df in files)
-         WriteFile(new(), df, true);
+      var emptySb = new StringBuilder(0);
+      foreach (var t in types)
+      {
+         var writers = SetupFileWritersByType[t];
+         foreach (var writer in writers)
+            WriteFile(emptySb, writer.FullPath);
+      }
 
       // Now save all objects into a single new file.
       foreach (var type in types)

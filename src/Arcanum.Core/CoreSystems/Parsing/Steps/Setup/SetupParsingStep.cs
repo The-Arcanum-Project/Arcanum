@@ -7,16 +7,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 
 public class SetupParsingStep(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects
-   {
-      get
-      {
-         List<Type> types = [];
-         foreach (var service in SetupParsingManager.RegisteredServices)
-            types.AddRange(service.ParsedObjects);
-         return types;
-      }
-   }
+   public override List<Type> ParsedObjects => [];
 
    public override string GetFileDataDebugInfo()
    {

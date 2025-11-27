@@ -14,7 +14,10 @@ public class PopsWriter() : SetupFileWriter([typeof(Location)], "06_pops.txt")
             if (location.Pops.Count > 0)
                using (sb.BlockWithName(location.UniqueId))
                   foreach (var pop in location.Pops)
+                  {
+                     sb.Append("define_pop");
                      ((IEu5Object)pop).ToAgsContext().BuildContext(sb);
+                  }
 
       return sb;
    }

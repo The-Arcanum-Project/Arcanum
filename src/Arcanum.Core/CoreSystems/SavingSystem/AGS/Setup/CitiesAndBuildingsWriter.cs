@@ -28,27 +28,27 @@ public class CitiesAndBuildingsWriter() : SetupFileWriter([typeof(Location)], "0
                continue;
 
             sb.Append(SavingUtil.FormatValue(SavingValueType.Identifier, location, idEnum));
-            sb.Append("\t\t\t = {");
+            sb.Append(" = { ");
 
             if (hasRank)
             {
                sb.Append("rank = ");
                sb.Append(SavingUtil.FormatValue(SavingValueType.Identifier, location, rankEnum));
-               sb.Append("\t\t");
+               sb.Append(" ");
             }
 
             if (hasTown)
             {
                sb.Append("town_setup = ");
                sb.Append(SavingUtil.FormatValue(SavingValueType.Identifier, location, townSetupEnum));
-               sb.Append("\t\t");
+               sb.Append(" ");
             }
 
             if (hasProsperity)
             {
                sb.Append("prosperity = ");
                sb.Append(SavingUtil.FormatValue(SavingValueType.Float, location, prosperityEnum));
-               sb.Append("\t\t");
+               sb.Append(" ");
             }
 
             sb.AppendLine("}");
