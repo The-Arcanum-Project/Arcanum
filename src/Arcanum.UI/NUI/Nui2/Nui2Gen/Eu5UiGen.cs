@@ -953,7 +953,7 @@ public static class Eu5UiGen
       else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
          element = NEF.GetIntUI(binding, (int)val);
       else if (type == typeof(double) || type == typeof(decimal))
-         element = NEF.GetDoubleUI(binding, (decimal)val);
+         element = NEF.GetDoubleUI(binding, Convert.ToDecimal(val));
       else if (type == typeof(JominiColor))
          element = NEF.GetJominiColorUI(binding, primary.IsPropertyReadOnly(nxProp));
       else if (type == typeof(JominiDate))

@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
@@ -16,7 +17,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : SetupFileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects => [typeof(Location)];
+   public override List<Type> ParsedObjects => [typeof(Location), typeof(PopDefinition)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject,

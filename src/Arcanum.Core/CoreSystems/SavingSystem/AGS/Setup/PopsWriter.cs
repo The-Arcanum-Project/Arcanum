@@ -1,10 +1,11 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class PopsWriter() : SetupFileWriter([typeof(Location)], "06_pops.txt")
+public class PopsWriter() : SetupFileWriter([typeof(Location), typeof(PopDefinition)], "06_pops.txt")
 {
    public override IndentedStringBuilder WriteFile()
    {

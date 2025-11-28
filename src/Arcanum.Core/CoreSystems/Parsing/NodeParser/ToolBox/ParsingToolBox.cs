@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
@@ -298,7 +299,10 @@ public static class ParsingToolBox
       }
 
       var lexeme = lvn.Value.GetLexeme(source);
-      if (!double.TryParse(lexeme, out value))
+      if (!double.TryParse(lexeme.Replace(',', '.'),
+                           NumberStyles.Float,
+                           CultureInfo.InvariantCulture,
+                           out value))
       {
          ctx.SetPosition(lvn.Value);
          DiagnosticException.LogWarning(ctx.GetInstance(),

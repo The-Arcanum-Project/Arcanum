@@ -38,11 +38,11 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    [Description("The religion associated with this PopDefinition.")]
    public Religion Religion { get; set; } = Religion.Empty;
 
-   [SaveAs]
+   [SaveAs(numOfDecimalPlaces: 3)]
    [ParseAs("size")]
-   [DefaultValue(0f)]
+   [DefaultValue(0)]
    [Description("The size of the population.")]
-   public float Size { get; set; }
+   public double Size { get; set; }
 
    #endregion
 

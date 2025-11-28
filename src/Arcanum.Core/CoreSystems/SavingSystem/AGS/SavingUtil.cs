@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
@@ -9,7 +10,6 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -135,12 +135,7 @@ public static class SavingUtil
    /// <summary>
    /// Formats a value according to the specified SavingValueType.
    /// </summary>
-   /// <param name="svl"></param>
-   /// <param name="value"></param>
-   /// <returns></returns>
-   /// <exception cref="InvalidOperationException"></exception>
-   /// <exception cref="ArgumentOutOfRangeException"></exception>
-   public static string FormatValue(SavingValueType svl, object value)
+   public static string FormatValue(SavingValueType svl, object value, PropertySavingMetadata? psm)
    {
       if (svl == SavingValueType.Auto)
          svl = GetSavingValueType(value);
@@ -152,11 +147,13 @@ public static class SavingUtil
          case SavingValueType.Int:
             return ((int)value).ToString();
          case SavingValueType.Float:
-            return ((float)value).ToString("0.##", CultureInfo.InvariantCulture);
+            Debug.Assert(psm != null, "PropertySavingMetadata must be provided for float formatting.");
+            return ((float)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Bool:
             return (bool)value ? "yes" : "no";
          case SavingValueType.Double:
-            return ((double)value).ToString("0.##", CultureInfo.InvariantCulture);
+            Debug.Assert(psm != null, "PropertySavingMetadata must be provided for double formatting.");
+            return ((double)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Identifier:
             return $"{value}";
          case SavingValueType.Color:
@@ -181,15 +178,17 @@ public static class SavingUtil
    /// <summary>
    /// Formats a property value from a Nexus object according to the specified SavingValueType.
    /// </summary>
-   /// <param name="svl"></param>
-   /// <param name="target"></param>
-   /// <param name="nxProp"></param>
-   /// <returns></returns>
-   public static string FormatValue(SavingValueType svl, INexus target, Enum nxProp)
+   public static string FormatValue(SavingValueType svl, IEu5Object target, Enum nxProp)
    {
-      object value = null!;
-      Nx.ForceGet(target, nxProp, ref value);
-      return FormatValue(svl, value);
+      PropertySavingMetadata? psm = null;
+      if (!nxProp.ToString().EndsWith("UniqueId"))
+      {
+         psm = target.SaveableProps.FirstOrDefault(psm => psm.NxProp.Equals(nxProp));
+         Debug.Assert(psm != null,
+                      $"PropertySavingMetadata for property {nxProp} not found in {target.GetType().Name}.");
+      }
+
+      return FormatValue(svl, target._getValue(nxProp), psm);
    }
 
    /// <summary>
