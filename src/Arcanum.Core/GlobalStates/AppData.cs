@@ -9,6 +9,7 @@ public static class AppData
 {
    internal const string APP_NAME = "Arcanum";
    internal const string APP_VERSION = "0.9.2 Alpha";
+   internal const string SHOULD_NEVER_BE_USED = "THIS_SHOULD_NEVER_BE_USED";
 
    public static GitDataDescriptor ModforgeDataDescriptor { get; } = new(GitDataService.MOD_FORGE_GIT_REPOSITORY);
    public static GitDataDescriptor ArcanumDataDescriptor { get; } = new(GitDataService.ARCANUM_GIT_REPOSITORY);

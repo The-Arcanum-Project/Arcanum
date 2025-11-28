@@ -142,7 +142,7 @@ public static class SetupParsingManager
       // All dependencies can be empty here as this is enforced to be last.
       SetupFileLoaders = new Dictionary<string, SetupFileLoadingService>
       {
-         { "locations", new LocationSetupParsing([]) },
+         { "locations", new LocationSetupParsing([]) }, { "building_manager", new BuildingManagerParsing([]) },
       }.ToFrozenDictionary();
    }
 

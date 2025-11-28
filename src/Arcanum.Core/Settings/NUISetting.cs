@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -59,6 +60,28 @@ public class NUISettings
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray(),
                                                           Enum.GetValues<Location.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting BuildingsManagerSettings { get; set; } = new(BuildingsManager.Field.UniqueId,
+                                                                  Enum.GetValues<BuildingsManager.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<BuildingsManager.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray(),
+                                                                  Enum.GetValues<BuildingsManager.Field>()
+                                                                      .Cast<Enum>()
+                                                                      .ToArray());
+
+   public NUISetting BuildingDefinitionSettings { get; set; } = new(BuildingDefinition.Field.UniqueId,
+                                                                    Enum.GetValues<BuildingDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<BuildingDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray(),
+                                                                    Enum.GetValues<BuildingDefinition.Field>()
+                                                                        .Cast<Enum>()
+                                                                        .ToArray());
 
    public NUISetting MarketSettings { get; set; } = new(Market.Field.Location,
                                                         Enum.GetValues<Market.Field>().Cast<Enum>().ToArray(),

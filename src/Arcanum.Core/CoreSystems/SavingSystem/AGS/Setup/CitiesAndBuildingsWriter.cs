@@ -1,10 +1,13 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CitiesAndBuildingsWriter() : SetupFileWriter([typeof(Location)], "07_cities_and_buildings.txt")
+public class CitiesAndBuildingsWriter()
+   : SetupFileWriter([typeof(Location), typeof(BuildingDefinition)], "07_cities_and_buildings.txt")
 {
    public override IndentedStringBuilder WriteFile()
    {
@@ -57,8 +60,22 @@ public class CitiesAndBuildingsWriter() : SetupFileWriter([typeof(Location)], "0
 
       // TODO: Buildings
       using (sb.BlockWithName("building_manager"))
-      {
-      }
+         foreach (var bd in Globals.BuildingsManager.BuildingDefinitions)
+         {
+            Debug.Assert(bd.Level >= 0, "Building level should be non-negative.");
+            Debug.Assert(bd.Location != Location.Empty, "Building should be associated with a location.");
+            Debug.Assert(bd.Owner != Country.Empty, "Building should have an owner country.");
+
+            sb.Append(SavingUtil.FormatValue(SavingValueType.Identifier, bd, BuildingDefinition.Field.UniqueId))
+              .Append(" = { ")
+              .Append("tag = ")
+              .Append(SavingUtil.FormatValue(SavingValueType.Identifier, bd, BuildingDefinition.Field.Owner))
+              .Append(" level = ")
+              .Append(SavingUtil.FormatValue(SavingValueType.Int, bd, BuildingDefinition.Field.Level))
+              .Append(" location = ")
+              .Append(SavingUtil.FormatValue(SavingValueType.Identifier, bd, BuildingDefinition.Field.Location))
+              .AppendLine(" }");
+         }
 
       return sb;
    }

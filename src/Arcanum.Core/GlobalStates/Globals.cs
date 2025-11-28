@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -119,6 +120,7 @@ public static class Globals
    public static Dictionary<string, Building> Buildings { get; } = [];
    public static Dictionary<string, RawMaterial> RawMaterials { get; } = [];
    public static Dictionary<string, Market> Markets { get; } = [];
+   public static BuildingsManager BuildingsManager { get; set; } = new();
 
    #endregion
 
