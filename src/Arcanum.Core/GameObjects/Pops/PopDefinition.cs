@@ -62,7 +62,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => true;
+   public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopDefinitionSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopDefinitionAgsSettings;
