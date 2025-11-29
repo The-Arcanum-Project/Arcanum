@@ -545,13 +545,13 @@ public static class Selection
    // For Rectangle Selection we can just call UpdateDragSelection with isLasso = false
    public static void StartRectangleSelection(Vector2 startPos)
    {
-      Console.WriteLine($"Rectangle selection started at {startPos} with initial area {DragArea}");
+      ArcLog.WriteLine("SEL", LogLevel.DBG,$"Rectangle selection started at {startPos} with initial area {DragArea}");
       UpdateDragSelection(startPos, true, false);
    }
 
    public static void EndRectangleSelection(Vector2 endPos, bool remove = false, bool clearAllFirst = false)
    {
-      Console.WriteLine($"Rectangle selection ended at {endPos} with final area {DragArea}");
+      ArcLog.WriteLine("SEL", LogLevel.DBG,$"Rectangle selection ended at {endPos} with final area {DragArea}");
       UpdateDragSelection(endPos, false, false, remove, clearAllFirst);
       DragArea = RectangleF.Empty;
    }

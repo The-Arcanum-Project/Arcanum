@@ -258,6 +258,13 @@ public static class Eu5UiGen
       {
          MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
       };
+      
+      ebv.Unloaded += (_, _) =>
+      {
+         mspvm.Dispose();
+         pevm.Dispose();
+      };
+      
       GridManager.AddToGrid(mainGrid, ebv, rowIndex, 0, 2, ControlFactory.EMBEDDED_VIEW_HEIGHT);
       if (IsExpandedCache.TryGetValue(nxProp, out var isExpanded) && isExpanded)
          ebv.ViewModel.IsExpanded = true;
