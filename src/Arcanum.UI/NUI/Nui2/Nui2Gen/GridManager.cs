@@ -128,10 +128,15 @@ public static class GridManager
 
       header.MouseEnter += onMouseEnter;
       header.MouseLeave += onMouseLeave;
-      header.Unloaded += (_, _) =>
+
+      header.Unloaded += OnHeaderOnUnloaded;
+      return;
+
+      void OnHeaderOnUnloaded(object o, RoutedEventArgs routedEventArgs)
       {
          header.MouseEnter -= onMouseEnter;
          header.MouseLeave -= onMouseLeave;
-      };
+         header.Unloaded -= OnHeaderOnUnloaded;
+      }
    }
 }

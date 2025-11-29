@@ -277,9 +277,15 @@ public static class NEF
 
       textBox.DebouncedTextChanged += debouncedHandler;
 
-      textBox.Unloaded += (_, _) => { textBox.DebouncedTextChanged -= debouncedHandler; };
+      textBox.Unloaded += OnTextBoxOnUnloaded;
 
       return textBox;
+
+      void OnTextBoxOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         textBox.DebouncedTextChanged -= debouncedHandler;
+         textBox.Unloaded -= OnTextBoxOnUnloaded;
+      }
    }
 
    public static JominiDateTextBox GetJominiDateUI(Binding binding)

@@ -298,7 +298,15 @@ public static class Eu5UiGen
       };
 
       setButton.Click += setClick;
-      setButton.Unloaded += (_, _) => setButton.Click -= setClick;
+
+      setButton.Unloaded += OnSetButtonOnUnloaded;
+      return;
+
+      void OnSetButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         setButton.Click -= setClick;
+         setButton.Unloaded -= OnSetButtonOnUnloaded;
+      }
    }
 
    public static void PopulateEmbeddedGrid(Grid grid,
@@ -421,13 +429,17 @@ public static class Eu5UiGen
 
       propertyViewModel.CollectionContentChanged += collectionChangedHandler;
 
-      collectionGrid.Unloaded += (_, _) =>
+      collectionGrid.Unloaded += OnCollectionGridOnUnloaded;
+
+      GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      return;
+
+      void OnCollectionGridOnUnloaded(object o, RoutedEventArgs routedEventArgs)
       {
          propertyViewModel.CollectionContentChanged -= collectionChangedHandler;
          propertyViewModel.Dispose();
-      };
-
-      GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+         collectionGrid.Unloaded -= OnCollectionGridOnUnloaded;
+      }
    }
 
    private static void ClearCollectionPreview(Grid grid)
@@ -524,14 +536,27 @@ public static class Eu5UiGen
 
          addButton.Click += addClick;
          removeButton.Click += removeClick;
-         addButton.Unloaded += (_, _) => addButton.Click -= addClick;
-         removeButton.Unloaded += (_, _) => removeButton.Click -= removeClick;
+
+         addButton.Unloaded += OnAddButtonOnUnloaded;
+         removeButton.Unloaded += OnRemoveButtonOnUnloaded;
 
          if (CustomItemTypeButtons.TryGetValue(nxItemType, out var customButtonFunc))
          {
             var customButton = customButtonFunc(mspvm, nxProp);
             panel.Children.Add(customButton);
             DockPanel.SetDock(customButton, Dock.Right);
+         }
+
+         void OnAddButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            addButton.Click -= addClick;
+            addButton.Unloaded -= OnAddButtonOnUnloaded;
+         }
+
+         void OnRemoveButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            removeButton.Click -= removeClick;
+            removeButton.Unloaded -= OnRemoveButtonOnUnloaded;
          }
       }
 
@@ -606,12 +631,20 @@ public static class Eu5UiGen
       };
 
       createNewButton.Click += createNewClick;
-      createNewButton.Unloaded += (_, _) => createNewButton.Click -= createNewClick;
+
+      createNewButton.Unloaded += OnCreateNewButtonOnUnloaded;
       createNewButton.ToolTip =
          $"Create a new {primary.GetNxItemType(nxProp)?.Name ?? primary.GetNxPropType(nxProp).Name} and set it to the '{nxProp}' property.";
 
       panel.Children.Add(createNewButton);
       DockPanel.SetDock(createNewButton, dock);
+      return;
+
+      void OnCreateNewButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         createNewButton.Click -= createNewClick;
+         createNewButton.Unloaded -= OnCreateNewButtonOnUnloaded;
+      }
    }
 
    private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)
@@ -638,8 +671,15 @@ public static class Eu5UiGen
       };
       RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.Activate(mmType); };
       mapModeButton.Click += mapModeButtonClick;
-      mapModeButton.Unloaded += (_, _) => mapModeButton.Click -= mapModeButtonClick;
+
+      mapModeButton.Unloaded += OnMapModeButtonOnUnloaded;
       return mapModeButton;
+
+      void OnMapModeButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         mapModeButton.Click -= mapModeButtonClick;
+         mapModeButton.Unloaded -= OnMapModeButtonOnUnloaded;
+      }
    }
 
    private static void GetCollectionEditorButton(NavH navh,
@@ -698,10 +738,18 @@ public static class Eu5UiGen
       };
 
       eyeButton.Click += clickHandler;
-      eyeButton.Unloaded += (_, _) => eyeButton.Click -= clickHandler;
+
+      eyeButton.Unloaded += OnEyeButtonOnUnloaded;
       eyeButton.ToolTip = $"Open collection editor for {property}";
 
       panel.Children.Add(eyeButton);
+      return;
+
+      void OnEyeButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         eyeButton.Click -= clickHandler;
+         eyeButton.Unloaded -= OnEyeButtonOnUnloaded;
+      }
    }
 
    private static void GetCollectionLiner(Grid grid, int margin)
@@ -781,7 +829,8 @@ public static class Eu5UiGen
       };
 
       moreText.MouseLeftButtonUp += clickHandler;
-      moreText.Unloaded += (_, _) => moreText.MouseLeftButtonUp -= clickHandler;
+
+      moreText.Unloaded += OnMoreTextOnUnloaded;
 
       GridManager.AddToGrid(grid,
                             moreText,
@@ -790,6 +839,13 @@ public static class Eu5UiGen
                             0,
                             ControlFactory.SHORT_INFO_ROW_HEIGHT,
                             leftMargin: margin + 4);
+      return;
+
+      void OnMoreTextOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         moreText.MouseLeftButtonUp -= clickHandler;
+         moreText.Unloaded -= OnMoreTextOnUnloaded;
+      }
    }
 
    private static void ClearCollectionPreview(Grid grid, int startingRow)
@@ -997,7 +1053,7 @@ public static class Eu5UiGen
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
 
-      dockPanel.Unloaded += (_, _) => { mspvm.Dispose(); };
+      dockPanel.Unloaded += OnDockPanelOnUnloaded;
 
       var propertyMarker = GetPropertyMarker(mspvm);
 
@@ -1011,6 +1067,13 @@ public static class Eu5UiGen
                             leftMargin: leftMargin);
       GridManager.AddToGrid(mainGrid, element, rowIndex, 1, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      return;
+
+      void OnDockPanelOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         mspvm.Dispose();
+         dockPanel.Unloaded -= OnDockPanelOnUnloaded;
+      }
    }
 
    private static void SetUpPropertyContextMenu(IEu5Object primary,
@@ -1056,16 +1119,32 @@ public static class Eu5UiGen
                propertyViewModel.Value = defaultValue;
          };
          resetItem.Click += clickEvent;
-         resetItem.Unloaded += (_, _) => resetItem.Click -= clickEvent;
+
+         resetItem.Unloaded += OnResetItemOnUnloaded;
 
          if (uiTarget.ContextMenu.Items.Count > 0 && uiTarget.ContextMenu.Items[^1] is not Separator)
             uiTarget.ContextMenu.Items.Add(new Separator());
 
          uiTarget.ContextMenu.Items.Add(resetItem);
+         return;
+
+         void OnResetItemOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            resetItem.Click -= clickEvent;
+            resetItem.Unloaded -= OnResetItemOnUnloaded;
+         }
       };
 
       uiTarget.MouseRightButtonUp += mouseUpHandler;
-      uiTarget.Unloaded += (_, _) => uiTarget.MouseRightButtonUp -= mouseUpHandler;
+
+      uiTarget.Unloaded += OnUITargetOnUnloaded;
+      return;
+
+      void OnUITargetOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         uiTarget.MouseRightButtonUp -= mouseUpHandler;
+         uiTarget.Unloaded -= OnUITargetOnUnloaded;
+      }
    }
 
    private static Image GetPropertyMarker(MultiSelectPropertyViewModel vm)
@@ -1142,10 +1221,17 @@ public static class Eu5UiGen
       };
 
       graphButton.Click += graphClick;
-      graphButton.Unloaded += (_, _) => graphButton.Click -= graphClick;
+
+      graphButton.Unloaded += OnGraphButtonOnUnloaded;
 
       panel.Children.Add(graphButton);
       DockPanel.SetDock(graphButton, Dock.Right);
       return graphButton;
+
+      void OnGraphButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         graphButton.Click -= graphClick;
+         graphButton.Unloaded -= OnGraphButtonOnUnloaded;
+      }
    }
 }
