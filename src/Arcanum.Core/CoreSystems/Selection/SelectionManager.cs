@@ -55,11 +55,6 @@ public static class SelectionManager
 
    public static List<Location> GetActiveSelectionLocations()
    {
-      //If frozen, return nothing
-      // TODO: @Minnator we need a method to get all the locations which are selected which are not in the frozen state
-      // or we continue to ignore new selected locations while frozen
-      if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
-         return [];
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
