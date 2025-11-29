@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
-using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -95,8 +94,12 @@ public partial class MapControl
                    "Color array length does not match the number of locations.");
 
       _currentBackgroundColor = colors;
-      _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      LocationRenderer.UpdateColors(_currentBackgroundColor);
+      _selectionColor = (colors.Clone() as Color4[])!;
+      foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
+      {
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
+      }
+      LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }
 
@@ -141,20 +144,14 @@ public partial class MapControl
       OnMapLoaded?.Invoke();
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
-      MapModeManager.OnMapModeChanged += _ => RefreshSelectionColors();
-      AppData.HistoryManager.UndoEvent += _ => RefreshSelectionColors();
-      AppData.HistoryManager.RedoEvent += _ => RefreshSelectionColors();
    }
 
    private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
 
    private void LocationSelectedAddHandler(List<Location> locations)
    {
-      foreach (var loc in locations)
+      foreach (var loc in locations.Where(loc => loc != Location.Empty))
       {
-         if (loc == Location.Empty)
-            continue;
-
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
       }
 
@@ -164,11 +161,8 @@ public partial class MapControl
 
    private void RefreshSelectionColors()
    {
-      foreach (var loc in SelectionManager.GetActiveSelectionLocations())
+      foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
       {
-         if (loc == Location.Empty)
-            continue;
-
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
       }
 

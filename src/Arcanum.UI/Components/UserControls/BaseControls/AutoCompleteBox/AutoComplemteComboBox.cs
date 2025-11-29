@@ -7,491 +7,496 @@ using static System.Linq.Expressions.Expression;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox
 {
-   /// <summary>
-   /// AutoCompleteComboBox.xaml
-   /// </summary>
-   public class AutoCompleteComboBox : ComboBox
-   {
-      // Use a CancellationTokenSource to cancel previous search tasks
-      private CancellationTokenSource _filterCancellationTokenSource = new();
-      private readonly SerialDisposable _disposable = new(); // For Debouncing
+    /// <summary>
+    /// AutoCompleteComboBox.xaml
+    /// </summary>
+    public class AutoCompleteComboBox : ComboBox
+    {
+        // Use a CancellationTokenSource to cancel previous search tasks
+        private CancellationTokenSource _filterCancellationTokenSource = new();
+        private readonly SerialDisposable _disposable = new(); // For Debouncing
 
-      private object? _lastSelectedItem;
-      
-      private bool _isUpdatingText;
-      private bool _isInitialized;
+        private object? _lastSelectedItem;
 
-      private TextBox _editableTextBoxCache = null!;
-      private Func<object, string>? _textFromItemDelegate;
-      private string? _cachedTextSearchTextPath;
-      private string? _cachedDisplayMemberPath;
-      private Type? _itemType;
+        private bool _isUpdatingText;
+        private bool _isInitialized;
 
-      private IEnumerable? _fullItemsSource;
+        private TextBox _editableTextBoxCache = null!;
+        private Func<object, string>? _textFromItemDelegate;
+        private string? _cachedTextSearchTextPath;
+        private string? _cachedDisplayMemberPath;
+        private Type? _itemType;
 
-      public TextBox EditableTextBox
-      {
-         get
-         {
-            if (_editableTextBoxCache == null!)
+        private IEnumerable? _fullItemsSource;
+
+        public TextBox EditableTextBox
+        {
+            get
             {
-               const string name = "PART_EditableTextBox";
-               _editableTextBoxCache = (TextBox)VisualTreeModule.FindChild(this, name)!;
+                if (_editableTextBoxCache == null!)
+                {
+                    const string name = "PART_EditableTextBox";
+                    _editableTextBoxCache = (TextBox)VisualTreeModule.FindChild(this, name)!;
+                }
+
+                return _editableTextBoxCache;
+            }
+        }
+
+        #region IsDropdownOnly DependencyProperty
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the ComboBox should behave as a simple dropdown
+        /// without any text filtering.
+        /// </summary>
+        public bool IsDropdownOnly
+        {
+            get => (bool)GetValue(IsDropdownOnlyProperty);
+            init
+            {
+                SetValue(IsDropdownOnlyProperty, value);
+                IsReadOnly = value;
+            }
+        }
+
+        public static readonly DependencyProperty IsDropdownOnlyProperty =
+            DependencyProperty.Register(nameof(IsDropdownOnly),
+                typeof(bool),
+                typeof(AutoCompleteComboBox),
+                new(false, OnIsDropdownOnlyChanged));
+
+        private static void OnIsDropdownOnlyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var comboBox = (AutoCompleteComboBox)d;
+            var isDropdownOnly = (bool)e.NewValue;
+
+            comboBox.IsReadOnly = isDropdownOnly;
+            if (isDropdownOnly)
+                comboBox.ItemsSource = comboBox.FullItemsSource;
+            else
+                // Re-filter based on the current text when switching back to autocomplete mode.
+                _ = comboBox.ApplyFilter(comboBox.Text);
+        }
+
+        #endregion
+
+        public override void OnApplyTemplate()
+        {
+            if (_editableTextBoxCache != null!)
+                _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown;
+
+            base.OnApplyTemplate();
+            _editableTextBoxCache =
+                GetTemplateChild("PART_EditableTextBox") as TextBox ?? throw new InvalidOperationException();
+
+            _editableTextBoxCache.KeyDown += OnEditableTextBoxKeyDown;
+
+            _editableTextBoxCache.LostFocus += editableTextBoxCacheOnLostFocus;
+
+            _isInitialized = true;
+        }
+
+        private void editableTextBoxCacheOnLostFocus(object? sender, RoutedEventArgs e)
+        {
+            OnUserLeft();
+        }
+
+
+        private void OnEditableTextBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (IsDropDownOpen && Items.Count > 0)
+                    SelectedItem = Items[0];
+
+                IsDropDownOpen = false;
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                ResetToLastSelectedItem();
+                IsDropDownOpen = false;
+                e.Handled = true;
+            }
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (_editableTextBoxCache != null!)
+            {
+                _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown; // Unhook keydown
+                _editableTextBoxCache.LostFocus -= editableTextBoxCacheOnLostFocus;
             }
 
-            return _editableTextBoxCache;
-         }
-      }
+            Unloaded -= OnUnloaded;
+        }
 
-      #region IsDropdownOnly DependencyProperty
+        /// <summary>
+        /// Gets text to match with the query from an item.
+        /// Never null.
+        /// </summary>
+        /// <param name="item"/>
+        private string TextFromItem(object item)
+        {
+            if (item == null!)
+                return string.Empty;
 
-      /// <summary>
-      /// Gets or sets a value indicating whether the ComboBox should behave as a simple dropdown
-      /// without any text filtering.
-      /// </summary>
-      public bool IsDropdownOnly
-      {
-         get => (bool)GetValue(IsDropdownOnlyProperty);
-         set
-         {
-            SetValue(IsDropdownOnlyProperty, value);
-            IsReadOnly = value;
-         }
-      }
+            // Lazy initialization of the delegate
+            if (_textFromItemDelegate == null ||
+                (_itemType == null && _fullItemsSource != null && _fullItemsSource.Cast<object>().Any()))
+                InitializeTextFromItemDelegate();
 
-      public static readonly DependencyProperty IsDropdownOnlyProperty =
-         DependencyProperty.Register(nameof(IsDropdownOnly),
-                                     typeof(bool),
-                                     typeof(AutoCompleteComboBox),
-                                     new(false, OnIsDropdownOnlyChanged));
+            return _textFromItemDelegate?.Invoke(item) ?? string.Empty;
+        }
 
-      private static void OnIsDropdownOnlyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-      {
-         var comboBox = (AutoCompleteComboBox)d;
-         var isDropdownOnly = (bool)e.NewValue;
+        private void InitializeTextFromItemDelegate()
+        {
+            _textFromItemDelegate = null;
+            _itemType = null;
 
-         comboBox.IsReadOnly = isDropdownOnly;
-         if (isDropdownOnly)
-            comboBox.ItemsSource = comboBox.FullItemsSource;
-         else
-            // Re-filter based on current text when switching back to autocomplete mode.
-            comboBox.ApplyFilter(comboBox.Text);
-      }
+            var textPath = _cachedTextSearchTextPath;
+            var memberPath = _cachedDisplayMemberPath ?? textPath;
 
-      #endregion
+            if (_fullItemsSource != null)
+                _itemType = _fullItemsSource.Cast<object>().FirstOrDefault()?.GetType();
 
-      public override void OnApplyTemplate()
-      {
-         if (_editableTextBoxCache != null!)
-            _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown;
+            if (_itemType == null || string.IsNullOrEmpty(memberPath))
+            {
+                _textFromItemDelegate = item => item.ToString() ?? string.Empty;
+                return;
+            }
 
-         base.OnApplyTemplate();
-         _editableTextBoxCache =
-            GetTemplateChild("PART_EditableTextBox") as TextBox ?? throw new InvalidOperationException();
+            var parameter = Parameter(typeof(object), "item");
+            var typedParameter = Convert(parameter, _itemType);
+            var propertyAccess = PropertyOrField(typedParameter, memberPath);
+            var nullCheck = Condition(Equal(propertyAccess, Constant(null, propertyAccess.Type)),
+                Constant(string.Empty),
+                Call(propertyAccess, typeof(object).GetMethod(nameof(object.ToString))!));
+            var nullItemCheck = Condition(Equal(parameter, Constant(null)),
+                Constant(string.Empty),
+                nullCheck);
 
-         _editableTextBoxCache.KeyDown += OnEditableTextBoxKeyDown;
+            var lambda = Lambda<Func<object, string>>(nullItemCheck, parameter);
+            _textFromItemDelegate = lambda.Compile();
+        }
 
-         _editableTextBoxCache.LostFocus += editableTextBoxCacheOnLostFocus;
-         
-         _isInitialized = true;
-      }
+        #region ItemsSource
 
-      private void editableTextBoxCacheOnLostFocus(object? sender, RoutedEventArgs e)
-      {
-         OnUserLeft();
-      }
+        public static readonly DependencyProperty FullItemsSourceProperty =
+            DependencyProperty.Register(nameof(FullItemsSource),
+                typeof(IEnumerable),
+                typeof(AutoCompleteComboBox),
+                new(null, FullItemsSourcePropertyChanged));
 
-      private void OnEditableTextBoxKeyDown(object sender, KeyEventArgs e)
-      {
-         if (e.Key == Key.Enter)
-         {
-            if (IsDropDownOpen && Items.Count > 0)
-               SelectedItem = Items[0];
+        public IEnumerable FullItemsSource
+        {
+            get => (IEnumerable)GetValue(FullItemsSourceProperty);
+            set => SetValue(FullItemsSourceProperty, value);
+        }
 
-            IsDropDownOpen = false;
-            e.Handled = true;
-         }
-         else if (e.Key == Key.Escape)
-         {
-            ResetToLastSelectedItem();
-            IsDropDownOpen = false;
-            e.Handled = true;
-         }
-      }
+        static AutoCompleteComboBox()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(AutoCompleteComboBox),
+                new FrameworkPropertyMetadata(typeof(AutoCompleteComboBox)));
+        }
 
-      private void OnUnloaded(object sender, RoutedEventArgs e)
-      {
-         if (_editableTextBoxCache != null!)
-         {
-            _editableTextBoxCache.KeyDown -= OnEditableTextBoxKeyDown; // Unhook keydown
-            _editableTextBoxCache.LostFocus -= editableTextBoxCacheOnLostFocus;
-         }
+        public AutoCompleteComboBox()
+        {
+            AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler(OnTextChanged));
+            Unloaded += OnUnloaded;
+        }
 
-         Unloaded -= OnUnloaded;
-      }
+        private static void FullItemsSourcePropertyChanged(DependencyObject dependencyObject,
+            DependencyPropertyChangedEventArgs dpcea)
+        {
+            var comboBox = (AutoCompleteComboBox)dependencyObject;
+            comboBox._fullItemsSource = dpcea.NewValue as IEnumerable;
 
-      /// <summary>
-      /// Gets text to match with the query from an item.
-      /// Never null.
-      /// </summary>
-      /// <param name="item"/>
-      private string TextFromItem(object item)
-      {
-         if (item == null!)
-            return string.Empty;
+            comboBox._cachedTextSearchTextPath = TextSearch.GetTextPath(comboBox);
+            comboBox._cachedDisplayMemberPath = comboBox.DisplayMemberPath;
+            comboBox._textFromItemDelegate = null;
+            comboBox._itemType = null;
+            comboBox.InitializeTextFromItemDelegate();
 
-         // Lazy initialization of the delegate
-         if (_textFromItemDelegate == null ||
-             (_itemType == null && _fullItemsSource != null && _fullItemsSource.Cast<object>().Any()))
-            InitializeTextFromItemDelegate();
+            if (comboBox.IsLoaded == false)
+                comboBox.ItemsSource = comboBox._fullItemsSource;
+        }
 
-         return _textFromItemDelegate?.Invoke(item) ?? string.Empty;
-      }
+        #endregion ItemsSource
 
-      private void InitializeTextFromItemDelegate()
-      {
-         _textFromItemDelegate = null;
-         _itemType = null;
+        #region Setting
 
-         var textPath = _cachedTextSearchTextPath;
-         var memberPath = _cachedDisplayMemberPath ?? textPath;
+        private static DependencyProperty SettingProperty { get; } = DependencyProperty.Register(nameof(Setting),
+            typeof(AutoCompleteComboBoxSetting),
+            typeof(AutoCompleteComboBox));
 
-         if (_fullItemsSource != null)
-            _itemType = _fullItemsSource.Cast<object>().FirstOrDefault()?.GetType();
+        public AutoCompleteComboBoxSetting? Setting
+        {
+            get => (AutoCompleteComboBoxSetting)GetValue(SettingProperty);
+            set => SetValue(SettingProperty, value);
+        }
 
-         if (_itemType == null || string.IsNullOrEmpty(memberPath))
-         {
-            _textFromItemDelegate = item => item.ToString() ?? string.Empty;
-            return;
-         }
+        private AutoCompleteComboBoxSetting SettingOrDefault => Setting ?? AutoCompleteComboBoxSetting.Default;
 
-         var parameter = Parameter(typeof(object), "item");
-         var typedParameter = Convert(parameter, _itemType);
-         var propertyAccess = PropertyOrField(typedParameter, memberPath);
-         var nullCheck = Condition(Equal(propertyAccess, Constant(null, propertyAccess.Type)),
-                                   Constant(string.Empty),
-                                   Call(propertyAccess, typeof(object).GetMethod(nameof(object.ToString))!));
-         var nullItemCheck = Condition(Equal(parameter, Constant(null)),
-                                       Constant(string.Empty),
-                                       nullCheck);
+        #endregion
 
-         var lambda = Lambda<Func<object, string>>(nullItemCheck, parameter);
-         _textFromItemDelegate = lambda.Compile();
-      }
+        #region OnTextChanged and Filtering Logic (Modified)
 
-      #region ItemsSource
+        private long _revisionId;
+        private string _previousText = null!;
 
-      public static readonly DependencyProperty FullItemsSourceProperty =
-         DependencyProperty.Register(nameof(FullItemsSource),
-                                     typeof(IEnumerable),
-                                     typeof(AutoCompleteComboBox),
-                                     new(null, FullItemsSourcePropertyChanged));
+        private readonly struct TextBoxStatePreserver(TextBox textBox) : IDisposable
+        {
+            private readonly int _selectionStart = textBox.SelectionStart;
+            private readonly int _selectionLength = textBox.SelectionLength;
+            private readonly string _text = textBox.Text;
 
-      public IEnumerable FullItemsSource
-      {
-         get => (IEnumerable)GetValue(FullItemsSourceProperty);
-         set => SetValue(FullItemsSourceProperty, value);
-      }
+            public void Dispose()
+            {
+                textBox.Text = _text;
+                textBox.Select(_selectionStart, _selectionLength);
+            }
+        }
 
-      static AutoCompleteComboBox()
-      {
-         DefaultStyleKeyProperty.OverrideMetadata(typeof(AutoCompleteComboBox),
-                                                  new FrameworkPropertyMetadata(typeof(AutoCompleteComboBox)));
-      }
+        private void ResetToLastSelectedItem(string text)
+        {
+            if (_lastSelectedItem == null) return;
+            SetSelectedItem(_lastSelectedItem, text);
+            _editableTextBoxCache.CaretIndex = text.Length;
+        }
 
-      public AutoCompleteComboBox()
-      {
-         AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler(OnTextChanged));
-         Unloaded += OnUnloaded;
-      }
+        private void ResetToLastSelectedItem()
+        {
+            if (_lastSelectedItem == null) return;
+            var text = TextFromItem(_lastSelectedItem);
+            SetSelectedItem(_lastSelectedItem, text);
+            _editableTextBoxCache.CaretIndex = text.Length;
+        }
 
-      private static void FullItemsSourcePropertyChanged(DependencyObject dependencyObject,
-                                                         DependencyPropertyChangedEventArgs dpcea)
-      {
-         var comboBox = (AutoCompleteComboBox)dependencyObject;
-         comboBox._fullItemsSource = dpcea.NewValue as IEnumerable;
+        private void OnUserLeft()
+        {
+            if (!Equals(ItemsSource, _fullItemsSource) && _fullItemsSource != null)
+                using (new TextBoxStatePreserver(EditableTextBox))
+                {
+                    ItemsSource = _fullItemsSource;
+                }
 
-         comboBox._cachedTextSearchTextPath = TextSearch.GetTextPath(comboBox);
-         comboBox._cachedDisplayMemberPath = comboBox.DisplayMemberPath;
-         comboBox._textFromItemDelegate = null;
-         comboBox._itemType = null;
-         comboBox.InitializeTextFromItemDelegate();
 
-         if (comboBox.IsLoaded == false)
-            comboBox.ItemsSource = comboBox._fullItemsSource;
-      }
+            if (_lastSelectedItem == null || _textFromItemDelegate == null) return;
+            var lastText = _textFromItemDelegate(_lastSelectedItem);
+            if (lastText == Text) return;
+            var matchingItem = FullItemsSource.Cast<object>().FirstOrDefault(i => _textFromItemDelegate(i) == Text);
+            if (matchingItem is not null)
+            {
+                SelectedItem = matchingItem;
+            }
+            else
+                ResetToLastSelectedItem(lastText);
+        }
 
-      #endregion ItemsSource
+        private bool _ignoreDropDownCloseReset;
 
-      #region Setting
+        protected override void OnDropDownClosed(EventArgs e)
+        {
+            base.OnDropDownClosed(e);
+            if (_ignoreDropDownCloseReset) return;
+            OnUserLeft();
+        }
 
-      public static DependencyProperty SettingProperty { get; } = DependencyProperty.Register(nameof(Setting),
-       typeof(AutoCompleteComboBoxSetting),
-       typeof(AutoCompleteComboBox));
+        private async Task ApplyFilter(string currentText)
+        {
+            if (IsDropdownOnly)
+            {
+                // Should never reach here but just in case
+                ItemsSource = FullItemsSource;
+                return;
+            }
 
-      public AutoCompleteComboBoxSetting? Setting
-      {
-         get => (AutoCompleteComboBoxSetting)GetValue(SettingProperty);
-         set => SetValue(SettingProperty, value);
-      }
+            var setting = SettingOrDefault;
+            var maxSuggestionCount = setting.MaxSuggestionCount;
+            var currentFilterDelegate = setting.GetFilter(currentText, TextFromItem);
 
-      private AutoCompleteComboBoxSetting SettingOrDefault => Setting ?? AutoCompleteComboBoxSetting.Default;
+            await _filterCancellationTokenSource.CancelAsync();
+            _filterCancellationTokenSource = new();
+            var token = _filterCancellationTokenSource.Token;
 
-      #endregion
+            IEnumerable<object>? filteredItems;
 
-      #region OnTextChanged and Filtering Logic (Modified)
-
-      private long _revisionId;
-      private string _previousText = null!;
-
-      private struct TextBoxStatePreserver(TextBox textBox) : IDisposable
-      {
-         private readonly int _selectionStart = textBox.SelectionStart;
-         private readonly int _selectionLength = textBox.SelectionLength;
-         private readonly string _text = textBox.Text;
-
-         public void Dispose()
-         {
-            textBox.Text = _text;
-            textBox.Select(_selectionStart, _selectionLength);
-         }
-      }
-      
-      private void ResetToLastSelectedItem(string text)
-      {
-         if (_lastSelectedItem == null) return;
-         SetSelectedItem(_lastSelectedItem, text);
-         _editableTextBoxCache.CaretIndex = text.Length;
-      }
-      
-      private void ResetToLastSelectedItem()
-      {
-         if (_lastSelectedItem == null) return;
-         var text = TextFromItem(_lastSelectedItem);
-         SetSelectedItem(_lastSelectedItem, text);
-         _editableTextBoxCache.CaretIndex = text.Length;
-      }
-      
-      private void OnUserLeft()
-      {
-         if (Equals(ItemsSource, _fullItemsSource) || _fullItemsSource == null) return;
-         using (new TextBoxStatePreserver(EditableTextBox))
-         {
-            ItemsSource = _fullItemsSource;
-         }
-         
-         
-         if (_lastSelectedItem == null || _textFromItemDelegate == null) return;
-         var lastText = _textFromItemDelegate(_lastSelectedItem);
-         if (lastText == Text) return;
-         var matchingItem = FullItemsSource.Cast<object>().FirstOrDefault(i => _textFromItemDelegate(i) == Text);
-         if (matchingItem is not null)
-         {
-            SelectedItem = matchingItem;
-         }else
-            ResetToLastSelectedItem(lastText);
-      }
-
-      private bool _ignoreDropDownCloseReset = false;
-      
-      protected override void OnDropDownClosed(EventArgs e)
-      {
-         base.OnDropDownClosed(e);
-         if(_ignoreDropDownCloseReset) return;
-         OnUserLeft();
-      }
-      
-      private async void ApplyFilter(string currentText)
-      {
-         if (IsDropdownOnly)
-         {
-            // Should never reach here but just in case
-            ItemsSource = FullItemsSource;
-            return;
-         }
-
-         var setting = SettingOrDefault;
-         var maxSuggestionCount = setting.MaxSuggestionCount;
-         var currentFilterDelegate = setting.GetFilter(currentText, TextFromItem);
-
-         await _filterCancellationTokenSource.CancelAsync();
-         _filterCancellationTokenSource = new();
-         var token = _filterCancellationTokenSource.Token;
-
-         IEnumerable<object>? filteredItems;
-
-         if (string.IsNullOrEmpty(currentText))
-            filteredItems = _fullItemsSource?.Cast<object>() ?? [];
-         else
-         {
-            var fullItems = _fullItemsSource?.Cast<object>() ?? [];
-            filteredItems = await Task.Run(() => GetFilteredItems(fullItems), token);
-         }
-
-         if (token.IsCancellationRequested)
-            return;
-
-         Dispatcher.Invoke(() =>
-         {
-            var itemsSource = filteredItems.ToList();
-            using (new TextBoxStatePreserver(EditableTextBox))
-               ItemsSource = itemsSource;
-
-            if (filteredItems != null && itemsSource.Count > 0 && EditableTextBox.IsFocused)
-               IsDropDownOpen = true;
+            if (string.IsNullOrEmpty(currentText))
+                filteredItems = _fullItemsSource?.Cast<object>() ?? [];
             else
             {
-               _ignoreDropDownCloseReset = true;
-               IsDropDownOpen = false;
-               _ignoreDropDownCloseReset = false;
+                var fullItems = _fullItemsSource?.Cast<object>() ?? [];
+                filteredItems = await Task.Run(() => GetFilteredItems(fullItems), token);
             }
 
-            Unselect();
-         });
-         return;
+            if (token.IsCancellationRequested)
+                return;
 
-         IEnumerable<object> GetFilteredItems(IEnumerable fullItems)
-         {
-            var results = new List<object>();
-            foreach (var item in fullItems)
+            Dispatcher.Invoke(() =>
             {
-               if (token.IsCancellationRequested)
-                  return [];
+                var itemsSource = filteredItems.ToList();
+                using (new TextBoxStatePreserver(EditableTextBox))
+                    ItemsSource = itemsSource;
 
-               if (currentFilterDelegate(item))
-               {
-                  results.Add(item);
-                  if (results.Count >= maxSuggestionCount)
-                     break;
-               }
+                if (filteredItems != null && itemsSource.Count > 0 && EditableTextBox.IsFocused)
+                    IsDropDownOpen = true;
+                else
+                {
+                    _ignoreDropDownCloseReset = true;
+                    IsDropDownOpen = false;
+                    _ignoreDropDownCloseReset = false;
+                    ItemsSource = _fullItemsSource;
+                }
+
+                Unselect();
+            });
+            return;
+
+            IEnumerable<object> GetFilteredItems(IEnumerable fullItems)
+            {
+                var results = new List<object>();
+                foreach (var item in fullItems)
+                {
+                    if (token.IsCancellationRequested)
+                        return [];
+
+                    if (currentFilterDelegate(item))
+                    {
+                        results.Add(item);
+                        if (results.Count >= maxSuggestionCount)
+                            break;
+                    }
+                }
+
+                return results;
+            }
+        }
+
+        private void Unselect()
+        {
+            if (!EditableTextBox.IsKeyboardFocusWithin)
+                return;
+
+            var textBox = EditableTextBox;
+            if (textBox != null!)
+                textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
+        }
+
+        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        {
+            // When our flag is set, it means we are in the middle of typing.
+            // We should NOT let the base ComboBox logic run, as it will
+            // overwrite the user's text with an empty string (from the null SelectedItem).
+            if (_isUpdatingText)
+                return;
+
+            // Use a flag to signal that the following TextChanged event is from a selection, not typing.
+            _isUpdatingText = true;
+            base.OnSelectionChanged(e); // This will update the Text property
+            _isUpdatingText = false;
+
+            if (SelectedItem != null)
+                _lastSelectedItem = SelectedItem;
+        }
+
+        /// <summary>
+        /// Programmatically sets the selected item and explicitly sets the display text,
+        /// ignoring the item's default text representation. Useful for clearing the box
+        /// while setting a non-null "Empty" object.
+        /// </summary>
+        /// <param name="item">The item to select.</param>
+        /// <param name="displayText">The exact text to display in the text box.</param>
+        public void SetSelectedItem(object item, string displayText)
+        {
+            _isUpdatingText = true;
+
+            ItemsSource = _fullItemsSource;
+
+            SelectedItem = item;
+
+            if (EditableTextBox.Text != displayText)
+                EditableTextBox.Text = displayText;
+
+            _isUpdatingText = false;
+        }
+
+        private void OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isInitialized)
+                return;
+
+            if (IsDropdownOnly)
+            {
+                Unselect();
+                return;
             }
 
-            return results;
-         }
-      }
+            if (_isUpdatingText)
+                return;
 
-      private void Unselect()
-      {
-         if (!EditableTextBox.IsKeyboardFocusWithin)
-            return;
+            // Set SelectedItem to null to indicate that the text no longer matches a selected item.
+            // Use the flag to prevent the OnSelectionChanged handler from clearing the text.
+            _isUpdatingText = true;
+            SelectedItem = null;
+            _isUpdatingText = false;
 
-         var textBox = EditableTextBox;
-         if (textBox != null!)
-            textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
-      }
+            var id = unchecked(++_revisionId);
+            var setting = SettingOrDefault;
+            var currentText = Text.Trim();
 
-      protected override void OnSelectionChanged(SelectionChangedEventArgs e)
-      {
-         // When our flag is set, it means we are in the middle of typing.
-         // We should NOT let the base ComboBox logic run, as it will
-         // overwrite the user's text with an empty string (from the null SelectedItem).
-         if (_isUpdatingText)
-            return;
+            if (string.Equals(currentText, _previousText, StringComparison.Ordinal) &&
+                IsDropDownOpen)
+                return;
 
-         // Use a flag to signal that the subsequent TextChanged event is from a selection, not typing.
-         _isUpdatingText = true;
-         base.OnSelectionChanged(e); // This will update the Text property
-         _isUpdatingText = false;
-         
-         if(SelectedItem != null)
-            _lastSelectedItem = SelectedItem;
-      }
+            _previousText = currentText;
 
-      /// <summary>
-      /// Programmatically sets the selected item and explicitly sets the display text,
-      /// ignoring the item's default text representation. Useful for clearing the box
-      /// while setting a non-null "Empty" object.
-      /// </summary>
-      /// <param name="item">The item to select.</param>
-      /// <param name="displayText">The exact text to display in the text box.</param>
-      public void SetSelectedItem(object item, string displayText)
-      {
-         _isUpdatingText = true;
-         
-         SelectedItem = item;
+            if (setting.Delay <= TimeSpan.Zero)
+            {
+                _ = ApplyFilter(currentText);
+                return;
+            }
 
-         if (EditableTextBox.Text != displayText)
-            EditableTextBox.Text = displayText;
-
-         _isUpdatingText = false;
-      }
-
-      private void OnTextChanged(object sender, TextChangedEventArgs e)
-      {
-         if (!_isInitialized)
-            return;
-
-         if (IsDropdownOnly)
-         {
-            Unselect();
-            return;
-         }
-
-         if (_isUpdatingText)
-            return;
-
-         // Set SelectedItem to null to indicate that the text no longer matches a selected item.
-         // Use the flag to prevent the OnSelectionChanged handler from clearing the text.
-         _isUpdatingText = true;
-         SelectedItem = null;
-         _isUpdatingText = false;
-
-         var id = unchecked(++_revisionId);
-         var setting = SettingOrDefault;
-         var currentText = Text.Trim();
-
-         if (string.Equals(currentText, _previousText, StringComparison.Ordinal) &&
-             IsDropDownOpen)
-            return;
-
-         _previousText = currentText;
-
-         if (setting.Delay <= TimeSpan.Zero)
-         {
-            ApplyFilter(currentText);
-            return;
-         }
-
-         _disposable.Content =
-            new Timer(_ =>
-                      {
-                         Dispatcher.InvokeAsync(() =>
-                         {
+            _disposable.Content =
+                new Timer(o =>
+                    {
+                        Dispatcher.InvokeAsync(() =>
+                        {
                             if (_revisionId != id)
-                               return;
+                                return;
 
-                            ApplyFilter(currentText);
-                         });
-                      },
-                      null,
-                      setting.Delay,
-                      Timeout.InfiniteTimeSpan);
-      }
+                            _ = ApplyFilter(currentText);
+                        });
+                    },
+                    null,
+                    setting.Delay,
+                    Timeout.InfiniteTimeSpan);
+        }
 
-      #endregion
+        #endregion
 
-      #region Focus Handling
+        #region Focus Handling
 
-      protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
-      {
-         base.OnGotKeyboardFocus(e);
-         if (IsDropdownOnly && Equals(e.OriginalSource, this))
-         {
-            IsDropDownOpen = true;
-            Unselect();
-         }
-      }
+        protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        {
+            base.OnGotKeyboardFocus(e);
+            if (IsDropdownOnly && Equals(e.OriginalSource, this))
+            {
+                IsDropDownOpen = true;
+                Unselect();
+            }
+        }
 
-      protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
-      {
-         base.OnLostKeyboardFocus(e);
-         if (IsDropdownOnly)
-         {
-            IsDropDownOpen = false;
-            Unselect();
-         }
-      }
+        protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        {
+            base.OnLostKeyboardFocus(e);
+            if (IsDropdownOnly)
+            {
+                IsDropDownOpen = false;
+                Unselect();
+            }
+        }
 
-      #endregion
-   }
+        #endregion
+    }
 }
