@@ -9,7 +9,7 @@ using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
 
 public class PropertyEditorViewModel
-   : INotifyPropertyChanged
+   : INotifyPropertyChanged, IDisposable
 {
    private bool _isExpanded;
    private bool _isInline;
@@ -70,6 +70,8 @@ public class PropertyEditorViewModel
 
    public void RefreshContent()
    {
+      _expandableContentGrid?.Children.Clear();
+
       var newGrid = new Grid
       {
          Margin = new(4, 4, 0, 4),
@@ -96,6 +98,13 @@ public class PropertyEditorViewModel
 
       ExpandableContentGrid = newGrid;
       _hasRefreshedContent = true;
+   }
+   
+   public void Dispose()
+   {
+      if (_expandableContentGrid == null) return;
+      _expandableContentGrid.Children.Clear();
+      _expandableContentGrid = null;
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
