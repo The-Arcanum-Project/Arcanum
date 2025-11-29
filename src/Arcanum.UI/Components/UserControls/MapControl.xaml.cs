@@ -199,6 +199,10 @@ public partial class MapControl
       UpdateRenderer();
    }
 
+   public void PanToWithView(float x, float y)
+   {
+   }
+
    public void EnsureVisible(RectangleF area)
    {
       var areaAspectRatio = area.Width / area.Height;
