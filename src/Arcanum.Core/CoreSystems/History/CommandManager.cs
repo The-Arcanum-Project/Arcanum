@@ -40,7 +40,7 @@ public static class CommandManager
 
    public static bool SetValueCommand(IEu5Object[] eu5Objects, Enum attribute, object value)
    {
-      return HandleCommand(_ => false,
+      return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Objects, attribute, value),
                            () => new SetValueCommand(eu5Objects, attribute, value));
    }
 
