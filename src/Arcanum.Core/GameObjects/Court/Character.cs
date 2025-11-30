@@ -91,7 +91,7 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
    [Description("The real father of this character.")]
    public Character PregnancyRealFather { get; set; } = null!;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("religious_school")]
    [DefaultValue(null)]
    [Description("The religious school of this character.")]
@@ -221,7 +221,7 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
    [Description("The character's death date.")]
    public JominiDate DeathDate { get; set; } = JominiDate.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("birth")]
    [Description("The location where this character was born.")]

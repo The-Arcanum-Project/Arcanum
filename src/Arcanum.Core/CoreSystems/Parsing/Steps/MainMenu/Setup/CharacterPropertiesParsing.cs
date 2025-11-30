@@ -15,18 +15,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 public partial class CharacterParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : SetupFileLoadingService(dependencies)
 {
-   public override List<Type> ParsedObjects
-   {
-      get
-      {
-         List<Type> types = [typeof(Character)];
-         var empty = Character.Empty;
-         foreach (var prop in empty.GetAllProperties())
-            if (empty.GetNxPropType(prop) is { } t && typeof(IEu5Object).IsAssignableFrom(t))
-               types.Add(t);
-         return types;
-      }
-   }
+   public override List<Type> ParsedObjects => SetupParsingManager.NestedSubTypes(Character.Empty).ToList();
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject,

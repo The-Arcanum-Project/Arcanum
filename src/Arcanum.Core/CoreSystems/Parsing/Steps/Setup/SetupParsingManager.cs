@@ -69,6 +69,21 @@ public static class SetupParsingManager
 
    public static bool IsSetupObject(IEu5Object obj) => PartDefinitions.ContainsKey(obj.GetType());
 
+   public static Type[] NestedSubTypes(IEu5Object eu5Obj)
+   {
+      List<Type> types = [eu5Obj.GetType()];
+      foreach (var prop in eu5Obj.GetAllProperties())
+         if (eu5Obj.GetNxPropType(prop) is { } t && typeof(IEu5Object).IsAssignableFrom(t))
+         {
+            var value = eu5Obj._getValue(prop);
+            if (value is IEu5Object &&
+                eu5Obj.SaveableProps.First(p => Equals(p.NxProp, prop)).ValueType != SavingValueType.Identifier)
+               types.Add(t);
+         }
+
+      return types.ToArray();
+   }
+
    public static Type[] GetSetupTypesToProcess(List<IEu5Object> objects)
    {
       HashSet<Type> typesToProcess = [];
