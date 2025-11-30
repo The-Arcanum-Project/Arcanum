@@ -30,6 +30,10 @@ namespace Arcanum.UI.Components.UserControls;
 // - click with alt for upper scope and alt shift for lower scope
 public partial class MapControl
 {
+   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
+   private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
+   private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
+   
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
 
@@ -130,6 +134,7 @@ public partial class MapControl
       HwndHostContainer.Child = _d3dHost;
 
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
+      SelectionManager.PreviewChanged += RefreshAndRenderSelectionColors;
 
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
@@ -138,10 +143,7 @@ public partial class MapControl
    private void SelectionManager_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
    {
       if (e.PropertyName != nameof(SelectionManager.ObjectSelectionMode)) return;
-      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
-      RefreshSelectionColors();
-      LocationRenderer.UpdateColors(_selectionColor);
-      _d3dHost.Invalidate();
+      RefreshAndRenderSelectionColors();
    }
    
 
@@ -155,12 +157,19 @@ public partial class MapControl
       Selection.LocationDeselected += LocationDeselectedAddHandler;
    }
 
-   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
-   private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
+   
    private void LocationSelectedAddHandler(List<Location> locations)
    {
       RefreshSelectionColors();
 
+      LocationRenderer.UpdateColors(_selectionColor);
+      _d3dHost.Invalidate();
+   }
+   
+   public void RefreshAndRenderSelectionColors()
+   {
+      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
+      RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }
@@ -175,6 +184,10 @@ public partial class MapControl
       foreach (var loc in Selection.GetSelectedLocations)
       {
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
+      }
+      foreach (var loc in SelectionManager.PreviewedLocations)
+      {
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + PreviewColor;
       }
    }
 

@@ -109,9 +109,7 @@ public static class GridManager
          header.TextDecorations = TextDecorations.Underline;
          header.Cursor = Cursors.Hand;
 
-         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
-         if (locations?.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, true, false);
+         SelectionManager.Preview([currentPrimary]);
       };
 
       MouseEventHandler onMouseLeave = (sender, _) =>
@@ -120,17 +118,22 @@ public static class GridManager
             return;
 
          header.TextDecorations = null;
-         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
-         if (locations?.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, false, false);
+         header.Cursor = Cursors.Arrow;
+         
+         SelectionManager.UnPreview([currentPrimary]);
       };
 
       header.MouseEnter += onMouseEnter;
       header.MouseLeave += onMouseLeave;
-      header.Unloaded += (_, _) =>
+
+      header.Unloaded += OnHeaderOnUnloaded;
+      return;
+
+      void OnHeaderOnUnloaded(object o, RoutedEventArgs routedEventArgs)
       {
          header.MouseEnter -= onMouseEnter;
          header.MouseLeave -= onMouseLeave;
-      };
+         header.Unloaded -= OnHeaderOnUnloaded;
+      }
    }
 }

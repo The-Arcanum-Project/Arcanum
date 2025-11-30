@@ -28,6 +28,17 @@ public class ObservableRangeCollection<T> : ObservableCollection<T>
       // Raise a single "Reset" event to tell the UI to refresh itself completely.
       OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
    }
+   
+   public void RemoveRange(IEnumerable<T> range)
+   {
+      var removedAny = false;
+      foreach (var item in range)
+         if (Items.Remove(item))
+            removedAny = true;
+
+      if (removedAny)
+         OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+   }
 
    /// <summary>
    /// Clears the collection and adds a new collection of items, raising a single notification.
