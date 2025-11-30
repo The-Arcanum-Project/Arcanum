@@ -13,6 +13,7 @@
 
     <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
     <converters:RectConverter x:Key = "RectConverter" />
+    <converters:NullToVisibilityConverter x:Key = "NullToVisibilityConverter" />
 
     <Style TargetType = "{x:Type base:BaseWindow}">
 
@@ -105,12 +106,25 @@
                                         <TextBlock Text = "{TemplateBinding Title}"
                                                    VerticalAlignment = "Center"
                                                    HorizontalAlignment = "Left"
-                                                   Margin = "10,0,0,2"
+                                                   Margin = "8,0,0,2"
                                                    FontSize = "16"
                                                    FontWeight = "Bold"
                                                    Foreground = "{StaticResource DefaultForeColorBrush}"
                                                    DockPanel.Dock = "Left"
                                                    Padding = "0" />
+
+                                        <TextBlock Text = "{TemplateBinding VersionNumber}"
+                                                   VerticalAlignment = "Bottom"
+                                                   HorizontalAlignment = "Left"
+                                                   Margin = "4,0,0,6"
+                                                   FontSize = "10"
+                                                   FontWeight = "SemiBold"
+                                                   Foreground = "{StaticResource DefaultForeColorBrush}"
+                                                   DockPanel.Dock = "Left"
+                                                   Padding = "0"
+                                                   Visibility = "{Binding HeaderContent,
+                                                       RelativeSource={RelativeSource AncestorType=base:BaseWindow},
+                                                       Converter={StaticResource NullToVisibilityConverter}}" />
 
                                         <Rectangle x:Name = "HeaderSeparator"
                                                    Width = "1"

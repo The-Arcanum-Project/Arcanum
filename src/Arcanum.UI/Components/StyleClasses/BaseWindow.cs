@@ -65,6 +65,18 @@ public class BaseWindow : Window
                                   typeof(BaseWindow),
                                   new(null));
 
+   public static readonly DependencyProperty VersionNumberProperty =
+      DependencyProperty.Register(nameof(VersionNumber),
+                                  typeof(string),
+                                  typeof(BaseWindow),
+                                  new(default(string?)));
+
+   public string? VersionNumber
+   {
+      get => (string?)GetValue(VersionNumberProperty);
+      set => SetValue(VersionNumberProperty, value);
+   }
+
    // Create a CLR wrapper for the HeaderContent property
    public object HeaderContent
    {
