@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
+using BuildingDefinition = Arcanum.Core.GameObjects.MainMenu.States.BuildingDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 

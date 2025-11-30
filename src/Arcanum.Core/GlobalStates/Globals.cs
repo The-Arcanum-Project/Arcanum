@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
-using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GameObjects.CountryLevel;
@@ -30,6 +29,7 @@ using ReligiousFocus = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousFo
 using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 using Road = Arcanum.Core.GameObjects.Map.Road;
 using ArtistType = Arcanum.Core.GameObjects.Cultural.ArtistType;
+using BuildingsManager = Arcanum.Core.GameObjects.MainMenu.States.BuildingsManager;
 
 namespace Arcanum.Core.GlobalStates;
 

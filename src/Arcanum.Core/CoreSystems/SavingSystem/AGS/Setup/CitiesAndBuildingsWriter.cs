@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
-using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.GameObjects.LocationCollections;
+using BuildingDefinition = Arcanum.Core.GameObjects.MainMenu.States.BuildingDefinition;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

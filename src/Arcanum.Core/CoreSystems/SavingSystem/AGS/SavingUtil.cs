@@ -155,6 +155,9 @@ public static class SavingUtil
             Debug.Assert(psm != null, "PropertySavingMetadata must be provided for double formatting.");
             return ((double)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Identifier:
+            if (value is IEu5Object eu5Obj)
+               return eu5Obj.UniqueId;
+
             return $"{value}";
          case SavingValueType.Color:
             return ((JominiColor)value).ToString();

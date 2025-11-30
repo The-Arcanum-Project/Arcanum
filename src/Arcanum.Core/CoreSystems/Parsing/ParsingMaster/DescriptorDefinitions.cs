@@ -4,7 +4,6 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
-using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common.UI;
@@ -183,8 +182,6 @@ public static class DescriptorDefinitions
                                                                       new("age_x_institutions", "txt", "#"),
                                                                       [new InstitutionParsing([])],
                                                                       false);
-
-   private static readonly FileLoadingService CharacterDiscovery = new CharacterDiscovererParsing([]);
 
    public static readonly FileDescriptor CultureDescriptor = new(["in_game", "common", "cultures"],
                                                                  new("cultures", "txt", "#"),

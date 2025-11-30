@@ -11,7 +11,7 @@ using Arcanum.Core.GameObjects.Economy;
 using Common.UI;
 using Nexus.Core.Attributes;
 
-namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
+namespace Arcanum.Core.GameObjects.MainMenu.States;
 
 [ObjectSaveAs]
 [NexusConfig]

@@ -111,4 +111,10 @@ public interface IEu5Object : ISearchable, INUI, IAgs
 
       return nonDefaultProps[..index];
    }
+
+   public void ResetToDefault()
+   {
+      foreach (var prop in GetAllProperties())
+         _setValue(prop, GetDefaultValue(prop));
+   }
 }

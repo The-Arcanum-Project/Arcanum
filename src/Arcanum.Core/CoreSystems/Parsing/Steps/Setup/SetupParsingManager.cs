@@ -43,6 +43,19 @@ public static class SetupParsingManager
       }
    }
 
+   public static List<SetupFileLoadingService> RegisteredServices => SetupFileLoaders.Values.ToList();
+
+   static SetupParsingManager()
+   {
+      // All dependencies can be empty here as this is enforced to be last.
+      SetupFileLoaders = new Dictionary<string, SetupFileLoadingService>
+      {
+         { "locations", new LocationSetupParsing([]) },
+         { "building_manager", new BuildingManagerParsing([]) },
+         { "character_db", new CharacterParsing([]) },
+      }.ToFrozenDictionary();
+   }
+
    public static Eu5FileObj[] LoadedFiles
    {
       get
@@ -133,17 +146,6 @@ public static class SetupParsingManager
       Debug.Assert(processedTypes.Count == processedTypes.Distinct().Count(), "Processed types should be distinct.");
 
       return (files, processedTypes);
-   }
-
-   public static List<SetupFileLoadingService> RegisteredServices => SetupFileLoaders.Values.ToList();
-
-   static SetupParsingManager()
-   {
-      // All dependencies can be empty here as this is enforced to be last.
-      SetupFileLoaders = new Dictionary<string, SetupFileLoadingService>
-      {
-         { "locations", new LocationSetupParsing([]) }, { "building_manager", new BuildingManagerParsing([]) },
-      }.ToFrozenDictionary();
    }
 
    public static bool LoadFile(Eu5FileObj fo, object? lockObject)

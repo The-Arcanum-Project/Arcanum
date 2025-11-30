@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Arcanum.Core.AgsRegistry;
+﻿using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -117,8 +116,7 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("ModValInstanceSaving can only be used with ModValInstance instances.");
 
-      Debug.Assert(metadata.Count == 1, "ModValInstanceSaving requires exactly one metadata entry.");
-      sb.AppendLine(FormatValue(SavingValueType.Modifier, mvi, metadata.First()));
+      sb.AppendLine(FormatValue(SavingValueType.Modifier, (object)mvi, null));
    }
 
    public static void SoundTollsSaving(IAgs target,

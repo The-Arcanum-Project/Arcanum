@@ -14,13 +14,14 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Religious;
+using Arcanum.Core.Utils.Sorting;
 using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
 using ArtistType = Arcanum.Core.GameObjects.Cultural.ArtistType;
 
 namespace Arcanum.Core.GameObjects.Court;
 
 [ObjectSaveAs]
-public partial class Character : IEu5Object<Character>
+public partial class Character : IEu5Object<Character>, IDependencyNode<string>
 {
    public Character()
    {
@@ -280,4 +281,18 @@ public partial class Character : IEu5Object<Character>
    public static Character RandomCharacter => RandomInstance.Value;
 
    #endregion
+
+   public string Id => UniqueId;
+   public IEnumerable<IDependencyNode<string>> Dependencies
+   {
+      get
+      {
+         if (Mother != Empty)
+            yield return Mother;
+         if (Father != Empty)
+            yield return Father;
+         if (PregnancyRealFather != Empty)
+            yield return PregnancyRealFather;
+      }
+   }
 }
