@@ -93,6 +93,8 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
          if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var skn))
             continue;
 
+         continent.FileLocation = contBn.GetFileLocation();
+
          LUtil.TryAddToGlobals(ctx,
                                skn.KeyToken,
                                continentKey,
@@ -111,6 +113,8 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
             var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
             if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var srkn))
                continue;
+
+            superRegion.FileLocation = srBn.GetFileLocation();
 
             LUtil.TryAddToGlobals(ctx,
                                   srkn.KeyToken,
@@ -133,6 +137,8 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
                   continue;
 
+               region.FileLocation = rBn.GetFileLocation();
+
                LUtil.TryAddToGlobals(ctx, skn.KeyToken, regionKey, actionStack, ref validation, region, regionGlobals);
                superRegion.LocationChildren.Add(region);
                region.Parents.Add(superRegion);
@@ -148,6 +154,8 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                   if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
                      continue;
 
+                  area.FileLocation = aBn.GetFileLocation();
+
                   LUtil.TryAddToGlobals(ctx, skn.KeyToken, areaKey, actionStack, ref validation, area, areaGlobals);
                   region.LocationChildren.Add(area);
                   area.Parents.Add(region);
@@ -162,6 +170,8 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                      var province = IEu5Object<Province>.CreateInstance(provinceKey, fileObj);
                      if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
                         continue;
+
+                     province.FileLocation = pBn.GetFileLocation();
 
                      LUtil.TryAddToGlobals(ctx,
                                            skn.KeyToken,

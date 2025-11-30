@@ -16,6 +16,7 @@ using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
@@ -193,10 +194,11 @@ public static class Eu5UiGen
                                            Enum nxProp,
                                            int startRow)
    {
+      var inlineProp = primary._getValue(nxProp);
+
       // Instead of standard embedded view we generate a nice header, then just add type specific grid elements
       // and at the end we add another border to mark that it ends there.
       var inlineGrid = ControlFactory.GetMainGrid();
-      var inlineProp = primary._getValue(nxProp);
       Debug.Assert(inlineProp != null, "inlineProp != null");
       Debug.Assert(inlineProp is IEu5Object, "inlineProp is IEu5Object");
       var inlineObj = (IEu5Object)inlineProp;
@@ -208,7 +210,33 @@ public static class Eu5UiGen
 
       // TODO @Minnator: https://github.com/users/Minnator/projects/2/views/2?pane=issue&itemId=135643593&issue=Minnator%7CArcanum%7C61
       var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root, true);
-      GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
+
+      // If we have an empty inlined objects, we only add a + button to create a new one.
+      // When this button is pressed we then generate the full inlined view.
+      var empty = EmptyRegistry.Empties[primary.GetNxPropType(nxProp)];
+      if (inlineProp == empty)
+      {
+         var createButton = NEF.GetCreateNewButton();
+         createButton.HorizontalAlignment = HorizontalAlignment.Center;
+
+         RoutedEventHandler createClick = (_, _) =>
+         {
+            var newObj = (IEu5Object)Activator.CreateInstance(inlineObj.GetType())!;
+            newObj.Source = Eu5FileObj.Empty;
+            newObj.UniqueId = primary.UniqueId;
+            primary._setValue(nxProp, newObj);
+
+            NUINavigation.Instance.InvalidateUi(primary);
+         };
+         createButton.Click += createClick;
+         createButton.Unloaded += (_, _) => createButton.Click -= createClick;
+
+         GridManager.AddToGrid(inlineGrid, createButton, 1, 0, columnSpan: 2);
+      }
+      else
+      {
+         GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
+      }
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
       bottomBorderMarker.Margin = new(0, 0, 0, 6);
@@ -231,6 +259,13 @@ public static class Eu5UiGen
       {
          MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
       };
+      
+      ebv.Unloaded += (_, _) =>
+      {
+         mspvm.Dispose();
+         pevm.Dispose();
+      };
+      
       GridManager.AddToGrid(mainGrid, ebv, rowIndex, 0, 2, ControlFactory.EMBEDDED_VIEW_HEIGHT);
       if (IsExpandedCache.TryGetValue(nxProp, out var isExpanded) && isExpanded)
          ebv.ViewModel.IsExpanded = true;
@@ -285,7 +320,12 @@ public static class Eu5UiGen
 
       RoutedEventHandler setClick = (_, _) =>
       {
-         var inferred = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
+         if (mspvm.Targets.Length < 1)
+            return;
+
+         var inferred =
+            SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations,
+                                                            mspvm.Targets[0].GetNxPropType(nxProp));
 
          if (inferred == null || inferred.Count < 1)
             return;
@@ -509,24 +549,32 @@ public static class Eu5UiGen
 
          RoutedEventHandler addClick = (_, _) =>
          {
-            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
-            Debug.Assert(enumerable != null, "enumerable != null");
-            if (mspvm.Value == null)
+            if (mspvm.Value == null || mspvm.Targets.Length < 1)
                return;
 
+            var itemType = mspvm.Targets[0].GetNxItemType(nxProp)!;
+
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
+
+            Debug.Assert(enumerable != null, "enumerable != null");
             foreach (var obj in enumerable)
-               Nx.AddToCollection((IEu5Object)mspvm.Value, nxProp, obj);
+               foreach (var target in mspvm.Targets)
+                  Nx.AddToCollection(target, nxProp, obj);
          };
 
          RoutedEventHandler removeClick = (_, _) =>
          {
-            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations);
-            Debug.Assert(enumerable != null, "enumerable != null");
-            if (mspvm.Value == null)
+            if (mspvm.Value == null || mspvm.Targets.Length < 1)
                return;
 
+            var itemType = mspvm.Targets[0].GetNxItemType(nxProp)!;
+
+            var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
+            Debug.Assert(enumerable != null, "enumerable != null");
+
             foreach (var obj in enumerable)
-               Nx.RemoveFromCollection((IEu5Object)mspvm.Value, nxProp, obj);
+               foreach (var target in mspvm.Targets)
+                  Nx.RemoveFromCollection(target, nxProp, obj);
          };
 
          panel.Children.Add(addButton);

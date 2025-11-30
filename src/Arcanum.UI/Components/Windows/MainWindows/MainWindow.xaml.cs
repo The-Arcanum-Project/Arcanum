@@ -595,4 +595,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       PerformanceCountersHelper.Shutdown();
       Application.Current.Dispatcher.InvokeShutdown();
    }
+
+   private void FreezeSelection_Command(object sender, ExecutedRoutedEventArgs e)
+   {
+      SelectionManager.ToggleFreeze();
+   }
 }

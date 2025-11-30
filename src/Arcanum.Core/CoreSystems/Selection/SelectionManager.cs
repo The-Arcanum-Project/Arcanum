@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
+using Application = System.Windows.Application;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -18,6 +20,7 @@ namespace Arcanum.Core.CoreSystems.Selection;
 public static class SelectionManager
 {
    private static ObjectSelectionMode _objectSelectionMode = ObjectSelectionMode.LocationSelection;
+   private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
    /// <summary>
    /// This is the collection of objects that are currently editable in the UI. <br/>
    /// This is what the UI listens to.
@@ -35,7 +38,7 @@ public static class SelectionManager
 
          _objectSelectionMode = value;
          OnPropertyChanged(nameof(ObjectSelectionMode));
-         System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
+         Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
       }
    }
 
@@ -52,6 +55,11 @@ public static class SelectionManager
 
    public static List<Location> GetActiveSelectionLocations()
    {
+      //If frozen, return nothing
+      // TODO: @Minnator we need a method to get all the locations which are selected which are not in the frozen state
+      // or we continue to ignore new selected locations while frozen
+      if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
+         return [];
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
@@ -69,7 +77,11 @@ public static class SelectionManager
    /// </summary>
    private static void InvalidateSelection()
    {
-      var sw = System.Diagnostics.Stopwatch.StartNew();
+      // If we are frozen, do nothing
+      if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
+         return;
+
+      var sw = Stopwatch.StartNew();
       IncrementalInvalidateSelection(Selection.GetSelectedLocations);
       sw.Stop();
       ArcLog.WriteLine("SMN", LogLevel.DBG, $"InvalidateSelection took {sw.ElapsedMilliseconds}ms");
@@ -107,11 +119,20 @@ public static class SelectionManager
       }
    }
 
-   public static List<IEu5Object>? GetInferredObjectsForLocations(List<Location> cLocs)
+   public static void ToggleFreeze()
    {
-      var mapMode = MapModeManager.GetCurrent();
+      if (ObjectSelectionMode != ObjectSelectionMode.Frozen)
+      {
+         _previousObjectSelectionMode = ObjectSelectionMode;
+         ObjectSelectionMode = ObjectSelectionMode.Frozen;
+      }
+      else
+         ObjectSelectionMode = _previousObjectSelectionMode;
+   }
 
-      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
+   public static List<IEu5Object>? GetInferredObjectsForLocations(List<Location> cLocs, Type type)
+   {
+      if (!EmptyRegistry.TryGet(type, out var empty) || empty is not IMapInferable inferable)
          return null;
 
       return inferable.GetInferredList(cLocs);
@@ -165,6 +186,10 @@ public static class SelectionManager
       else
       {
          // otherwise, set selection to only this object
+         // but if we are frozen, do not change the selection
+         if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
+            return;
+
          SetSearchSelectedObjects([obj]);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)

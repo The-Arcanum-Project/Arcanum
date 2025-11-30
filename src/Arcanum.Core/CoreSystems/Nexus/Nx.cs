@@ -113,7 +113,6 @@ public static class Nx
    {
       Debug.Assert(value != null, nameof(value) + " != null");
       CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
-      target._addToCollection(e, value);
    }
 
    public static void RemoveFromCollection<T>(
@@ -123,7 +122,6 @@ public static class Nx
    {
       Debug.Assert(value != null, nameof(value) + " != null");
       CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
-      target._removeFromCollection(e, value);
    }
 
    /// <summary>

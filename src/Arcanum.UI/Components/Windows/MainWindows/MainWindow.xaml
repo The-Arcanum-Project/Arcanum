@@ -172,6 +172,10 @@
                         Executed = "ViewINUIObjectsCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
 
+        <CommandBinding Command = "mainWindow:MwCommands.FreezeSelectionCommand"
+                        Executed = "FreezeSelection_Command"
+                        CanExecute = "CommandCanAlwaysExecute" />
+
 
         <!-- Command Bindings for Debug Loading Triggers -->
         <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer"
@@ -502,6 +506,23 @@
                             </ToolTip>
                         </ComboBox.ToolTip>
                     </ComboBox>
+                    <styleClasses:BaseButton Content = "Freeze Selection"
+                                             Margin = "5,0"
+                                             VerticalAlignment = "Center"
+                                             Height = "23"
+                                             Command = "mainWindow:MwCommands.FreezeSelectionCommand">
+                        <styleClasses:BaseButton.ToolTip>
+                            <TextBlock>
+                                <Run> Freeze the current selection, preventing it from changing until unfrozen. </Run>
+                                <LineBreak />
+                                <Run>
+                                    This can be used the lock an object in selection, select e.g. locations on the map
+                                    to
+                                    add to it then.
+                                </Run>
+                            </TextBlock>
+                        </styleClasses:BaseButton.ToolTip>
+                    </styleClasses:BaseButton>
                 </StackPanel>
             </Grid>
 
