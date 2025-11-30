@@ -24,6 +24,7 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Nui2.Nui2Gen;
+using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
 using Common.UI;
 using Application = System.Windows.Application;
@@ -150,6 +151,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 #endif
 
       PerformanceCountersHelper.Initialize(this);
+      UIHandle.Instance.MapInterface = new MapInterfaceImpl { MapControl = MainMap };
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)

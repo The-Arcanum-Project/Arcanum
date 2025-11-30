@@ -50,13 +50,16 @@ public class SimpleKeyNode(Token keyToken) : KeyNodeBase(keyToken.Start, keyToke
 /// <summary>
 /// Represents a scoped key (e.g., 'religion:shinto').
 /// </summary>
-public class ScopedKeyNode(Token scope, Token name) : KeyNodeBase(scope.Start, name.End - scope.Start)
+public class ScopedKeyNode(List<Token> segments)
+   : KeyNodeBase(segments[0].Start, segments[^1].End - segments[0].Start)
 {
-   public Token Scope { get; } = scope;
-   public Token Name { get; } = name;
-   public override (int, int) GetLocation() => (Scope.Line, Scope.Column);
-   public override (int line, int charPos) GetEndLocation() => GetTokenEnd(Name);
-   public override string GetKeyText(string source) => $"{Name.GetLexeme(source)}";
+   public List<Token> Segments { get; } = segments;
+
+   public override (int, int) GetLocation() => (Segments[0].Line, Segments[0].Column);
+
+   public override (int line, int charPos) GetEndLocation() => GetTokenEnd(Segments[^1]);
+
+   public override string GetKeyText(string source) => string.Join(":", Segments.Select(t => t.GetLexeme(source)));
 }
 
 /// <summary>
@@ -156,13 +159,16 @@ public class LiteralValueNode(Token value) : ValueNode(value.Start, value.Length
 /// <summary>
 /// Represents a scoped identifier when used as a value, e.g. societal_value:centralization_vs_decentralization
 /// </summary>
-public class ScopedIdentifierNode(Token scope, Token name) : ValueNode(scope.Start, name.End - scope.Start)
+public class ScopedIdentifierNode(List<Token> segments)
+   : ValueNode(segments[0].Start, segments[^1].End - segments[0].Start)
 {
-   public Token Scope { get; } = scope;
-   public Token Name { get; } = name;
-   public override (int, int) GetLocation() => (Scope.Line, Scope.Column);
-   public override (int line, int charPos) GetEndLocation() => GetTokenEnd(Name);
-   public override string GetKeyText(string source) => $"{Scope.GetLexeme(source)}:{Name.GetLexeme(source)}";
+   public List<Token> Segments { get; } = segments;
+
+   public override (int, int) GetLocation() => (Segments[0].Line, Segments[0].Column);
+
+   public override (int line, int charPos) GetEndLocation() => GetTokenEnd(Segments[^1]);
+
+   public override string GetKeyText(string source) => string.Join(":", Segments.Select(t => t.GetLexeme(source)));
 }
 
 /// <summary>

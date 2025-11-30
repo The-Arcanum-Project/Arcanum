@@ -41,10 +41,6 @@ public static class AgsHelper
 
       var saveAsProps = new List<SaveAsMetadata>();
 
-      if (classSymbol.Name.Contains("Area"))
-      {
-      }
-
       GetValidProperties(context, nexusProperties, saveAsProps, classSymbol);
       var (saverHintName, saverSource) =
          GenerateSaverClass(classSymbol, objectSaveAsAttr, saveAsProps, context);
@@ -242,7 +238,8 @@ public static class AgsHelper
       sb.AppendLine($"                    CollectionSeparator = {prop.CollectionSeparator},");
       sb.AppendLine($"                    SaveEmbeddedAsIdentifier = {prop.SaveEmbeddedAsIdentifier.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    CollectionAsPureIdentifierList = {prop.CollectionAsPureIdentifierList.ToString().ToLowerInvariant()},");
-      sb.AppendLine($"                    IsEmbeddedObject = {prop.IsEmbeddedObject.ToString().ToLowerInvariant()}");
+      sb.AppendLine($"                    IsEmbeddedObject = {prop.IsEmbeddedObject.ToString().ToLowerInvariant()},");
+      sb.AppendLine($"                    NumOfDecimalPlaces = {prop.NumOfDecimalPlaces.ToString()},");
       sb.AppendLine("                },");
    }
 

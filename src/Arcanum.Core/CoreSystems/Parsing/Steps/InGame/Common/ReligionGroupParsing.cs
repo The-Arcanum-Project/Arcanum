@@ -12,13 +12,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 public partial class ReligionGroupParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<ReligionGroup>(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,

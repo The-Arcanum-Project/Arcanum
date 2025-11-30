@@ -103,6 +103,33 @@ public static class LUtil
 
    public static bool TryGetFromGlobalsAndLog<T>(
       LocationContext ctx,
+      ContentNode node,
+      string source,
+      string actionStack,
+      ref bool validation,
+      Dictionary<string, T> globals,
+      [MaybeNullWhen(false)] out T value) where T : IEu5Object
+   {
+      if (SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                            TokenType.Equals,
+                                            ctx,
+                                            $"{actionStack}.{nameof(TryGetFromGlobalsAndLog)}") &&
+          node.Value.IsLiteralValueNode(ctx, actionStack, ref validation, out var lvn))
+         return TryGetFromGlobalsAndLog(ctx,
+                                        lvn.Value,
+                                        source,
+                                        actionStack,
+                                        ref validation,
+                                        globals,
+                                        out value);
+
+      validation = false;
+      value = default;
+      return false;
+   }
+
+   public static bool TryGetFromGlobalsAndLog<T>(
+      LocationContext ctx,
       KeyNodeBase node,
       string source,
       string actionStack,

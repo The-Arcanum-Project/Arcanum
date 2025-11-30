@@ -14,13 +14,13 @@ public partial class DynastyManagerParsing(IEnumerable<IDependencyNode<string>> 
 {
    public override string[] GroupingNodeNames => ["dynasty_manager"];
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       if (!ParsingMaster.ParsingMaster.RemoveAllGroupingNodes(rn,
                                                               ctx,

@@ -66,13 +66,13 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
                                      currentAgeKey);
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       foreach (var rootStatement in rn.Statements)
          switch (rootStatement)

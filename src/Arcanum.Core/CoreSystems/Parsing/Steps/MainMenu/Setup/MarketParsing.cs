@@ -27,13 +27,13 @@ public class MarketManagerParsing(IEnumerable<IDependencyNode<string>> dependenc
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("MarketManagerParsing does not support parsing properties to object.");
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       if (rn.Statements.Count != 1)
       {

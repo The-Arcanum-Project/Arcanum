@@ -1,13 +1,17 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.Registry;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -20,6 +24,8 @@ public static class SaveMaster
 
    public static HistoryNode? LastSavedHistoryNode;
 
+   public static readonly FrozenDictionary<Type, List<SetupFileWriter>> SetupFileWritersByType;
+
    public static Enum[] GetChangesForObject(IEu5Object obj)
    {
       return !NeedsToBeSaved.TryGetValue(obj, out var list)
@@ -29,6 +35,31 @@ public static class SaveMaster
 
    static SaveMaster()
    {
+      var dict = new Dictionary<Type, List<SetupFileWriter>>();
+      AddIntoDict(dict, new ArtWriter());
+      AddIntoDict(dict, new CharacterWriter());
+      AddIntoDict(dict, new CitiesAndBuildingsWriter());
+      AddIntoDict(dict, new ColoniesWriter());
+      AddIntoDict(dict, new CoreWriter());
+      AddIntoDict(dict, new CountriesWriter());
+      AddIntoDict(dict, new DevelopmentWriter());
+      AddIntoDict(dict, new DiplomacyWriter());
+      AddIntoDict(dict, new DiseasesWriter());
+      AddIntoDict(dict, new DynastyWriter());
+      AddIntoDict(dict, new ExplorationPreferenceWriter());
+      AddIntoDict(dict, new InstitutionWriter());
+      AddIntoDict(dict, new InternationalOrganizationsWriter());
+      AddIntoDict(dict, new LocationsWriter());
+      AddIntoDict(dict, new MarketWriter());
+      AddIntoDict(dict, new OpinionsWriter());
+      AddIntoDict(dict, new PopsWriter());
+      AddIntoDict(dict, new ReligionWriter());
+      AddIntoDict(dict, new RivalsWriter());
+      AddIntoDict(dict, new RoadsWriter());
+      AddIntoDict(dict, new SituationsWriter());
+      AddIntoDict(dict, new WarsWriter());
+
+      SetupFileWritersByType = dict.ToFrozenDictionary();
    }
 
    public static int GetModifiedCount => ModificationCache.Values.Sum();
@@ -36,6 +67,16 @@ public static class SaveMaster
 
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
    public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewObjects;
+
+   private static void AddIntoDict(Dictionary<Type, List<SetupFileWriter>> dict, SetupFileWriter writer)
+   {
+      foreach (var type in writer.ContainedTypes)
+      {
+         if (!dict.TryGetValue(type, out var list))
+            dict[type] = list = [];
+         list.Add(writer);
+      }
+   }
 
    public static void AddNewObject(IEu5Object obj)
    {
@@ -197,6 +238,8 @@ public static class SaveMaster
          if (typesToSave.Contains(obj.GetType()))
             objsToSave.Add(obj);
 
+      SaveSetupFolder(objsToSave);
+
       if (objsToSave.Count == 0)
          return;
 
@@ -245,6 +288,64 @@ public static class SaveMaster
          return;
 
       WriteFile(sb.InnerBuilder, fileObj, true);
+   }
+
+   /// <summary>
+   /// Extracts all setup objects from the list and removes them as they are already handled.
+   /// </summary>
+   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects)
+   {
+      var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
+      // we have 2 modes to save:
+      // - Vanilla Split: pops / ranks / institutions are in separate files
+      // - Combined: all pops / ranks / institutions are in a single file (I prefer this one)
+
+      if (Config.Settings.SavingConfig.CompactSetupFolder)
+         SaveSetupCompacted(types);
+      else
+         SaveSetupSplit(types);
+
+      return true;
+   }
+
+   private static void SaveSetupSplit(Type[] types)
+   {
+      Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
+      Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
+                   "All types must have a corresponding SetupFileWriter.");
+      Debug.Assert(types.Length == types.Distinct().Count(), "Types list must not contain duplicates.");
+
+      foreach (var type in types)
+      {
+         var writers = SetupFileWritersByType[type];
+         foreach (var writer in writers)
+            WriteFile(writer.WriteFile().InnerBuilder, writer.FullPath);
+      }
+   }
+
+   private static void SaveSetupCompacted(Type[] types)
+   {
+      Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
+
+      // Create the dummy files:
+      var emptySb = new StringBuilder(0);
+      foreach (var t in types)
+      {
+         var writers = SetupFileWritersByType[t];
+         foreach (var writer in writers)
+            WriteFile(emptySb, writer.FullPath);
+      }
+
+      // Now save all objects into a single new file.
+      foreach (var type in types)
+      {
+         var empty = (IEu5Object)EmptyRegistry.Empties[type];
+         var isb = new IndentedStringBuilder();
+         foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
+            ((IEu5Object)obj).ToAgsContext().BuildContext(isb);
+         var newfo = FileStateManager.CreateEu5FileObject(empty);
+         WriteFile(isb.InnerBuilder, newfo, true);
+      }
    }
 
    public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
@@ -635,9 +736,14 @@ public static class SaveMaster
       if (!fileObj.IsModded && Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
          fileObj.Path.MoveToMod();
 
-      IO.IO.WriteAllTextUtf8WithBom(fileObj.Path.FullPath, sb.ToString());
+      WriteFile(sb, fileObj.Path.FullPath);
       if (register)
          FileStateManager.RegisterPath(fileObj.Path);
+   }
+
+   private static void WriteFile(StringBuilder sb, string path)
+   {
+      IO.IO.WriteAllTextUtf8WithBom(path, sb.ToString());
    }
 
    public static void RemoveObjectsFromFiles(List<IEu5Object> objs)

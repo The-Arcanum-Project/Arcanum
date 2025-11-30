@@ -70,7 +70,12 @@ public class PropertySavingMetadata
    /// If this list is shattered into multiple parts when saved. <br/>
    /// Only relevant if IsCollection is true. Default is false.
    /// </summary>
-   public required bool IsShattered { get; init; } = false;
+   public required bool IsShattered { get; init; }
+   /// <summary>
+   /// Number of decimal places to use when saving float or double values. <br/>
+   /// Default is 2.
+   /// </summary>
+   public required int NumOfDecimalPlaces { get; init; }
 
    #region Equality operations
 
@@ -142,7 +147,7 @@ public class PropertySavingMetadata
          }
          else
          {
-            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value)}");
+            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value, this)}");
          }
       }
       else
@@ -280,7 +285,7 @@ public class PropertySavingMetadata
             if (itemType == SavingValueType.IAgs && item is IAgs ia)
                sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ia.SavingKey}");
             else
-               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(itemType, item)}");
+               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(itemType, item, this)}");
          }
       }
    }
@@ -361,7 +366,7 @@ public class PropertySavingMetadata
             {
                var value = CollectionItemKeyProvider != null
                               ? CollectionItemKeyProvider(item)
-                              : SavingUtil.FormatValue(ValueType, item);
+                              : SavingUtil.FormatValue(ValueType, item, this);
                if (value.Length > maxLength)
                   maxLength = value.Length;
             }
@@ -382,7 +387,7 @@ public class PropertySavingMetadata
       {
          var valueToAppend = CollectionItemKeyProvider != null
                                 ? CollectionItemKeyProvider(item)
-                                : SavingUtil.FormatValue(ValueType, item);
+                                : SavingUtil.FormatValue(ValueType, item, this);
 
          var needsLineBreak = !isFirstItem &&
                               (sb.InnerBuilder.Length -
