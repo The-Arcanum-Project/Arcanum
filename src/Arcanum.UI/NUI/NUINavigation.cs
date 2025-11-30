@@ -21,8 +21,20 @@ public class NUINavigation(int capacity)
 
    public void Navigate(NavH item)
    {
-      if (_current != null && _current.Value.Equals(item))
-         return;
+      if (_current != null)
+         if (_current.Value.Targets.Count == item.Targets.Count)
+         {
+            var allMatch = true;
+            for (var i = 0; i < _current.Value.Targets.Count; i++)
+               if (!ReferenceEquals(_current.Value.Targets[i], item.Targets[i]))
+               {
+                  allMatch = false;
+                  break;
+               }
+
+            if (allMatch)
+               return;
+         }
 
       while (_current?.Next != null)
          _items.Remove(_current.Next);
@@ -43,7 +55,7 @@ public class NUINavigation(int capacity)
          return;
 
       _current = _current!.Previous;
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      GenerateUi(_current!.Value);
    }
 
    public void Forward()
@@ -52,7 +64,7 @@ public class NUINavigation(int capacity)
          return;
 
       _current = _current!.Next;
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      GenerateUi(_current!.Value);
    }
 
    public void InvalidateUi()
@@ -60,7 +72,14 @@ public class NUINavigation(int capacity)
       if (_current == null)
          return;
 
-      Eu5UiGen.GenerateAndSetView(_current!.Value);
+      GenerateUi(_current.Value);
+   }
+
+   private static void GenerateUi(NavH navH)
+   {
+      if (navH.Root.Content is IDisposable oldView)
+         oldView.Dispose();
+      Eu5UiGen.GenerateAndSetView(navH);
    }
 
    public void InvalidateUi(IEu5Object target)

@@ -5,18 +5,22 @@ using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
+using Arcanum.UI.NUI.UserControls.BaseControls;
 
 namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
 
-public class PropertyEditorViewModel
+public sealed class PropertyEditorViewModel
    : INotifyPropertyChanged, IDisposable
 {
    private bool _isExpanded;
-   private bool _isInline;
+   private readonly bool _isInline;
    private Grid? _expandableContentGrid;
+   private readonly BaseView _view;
 
-   public PropertyEditorViewModel(Enum nxProp, NavH navH, IEu5Object target, bool isInline)
+   public PropertyEditorViewModel(BaseView view, Enum nxProp, NavH navH, IEu5Object target, bool isInline)
    {
+      _view = view;
+      view.RegisterDisposable(this);
       _isInline = isInline;
       NxProp = nxProp;
       NavH = navH;
@@ -28,10 +32,6 @@ public class PropertyEditorViewModel
       var type = target.GetNxPropType(nxProp);
       Debug.Assert(type != null, "type != null");
       IsExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
-
-      if (_isInline)
-      {
-      }
    }
 
    public Enum NxProp { get; }
@@ -90,7 +90,8 @@ public class PropertyEditorViewModel
             targets.Add(t._getValue(NxProp) as IEu5Object ?? throw new InvalidOperationException());
       }
 
-      Eu5UiGen.PopulateEmbeddedGrid(newGrid,
+      Eu5UiGen.PopulateEmbeddedGrid(_view,
+                                    newGrid,
                                     NavH,
                                     _isInline ? targets : targets.Select(x => (IEu5Object)x._getValue(NxProp)).ToList(),
                                     (IEu5Object)Target._getValue(NxProp),
@@ -99,14 +100,16 @@ public class PropertyEditorViewModel
       ExpandableContentGrid = newGrid;
       _hasRefreshedContent = true;
    }
-   
+
    public void Dispose()
    {
-      if (_expandableContentGrid == null) return;
+      if (_expandableContentGrid == null)
+         return;
+
       _expandableContentGrid.Children.Clear();
       _expandableContentGrid = null;
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
-   protected virtual void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new(propertyName));
+   private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new(propertyName));
 }
