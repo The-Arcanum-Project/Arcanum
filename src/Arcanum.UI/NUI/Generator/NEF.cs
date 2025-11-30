@@ -20,6 +20,39 @@ namespace Arcanum.UI.NUI.Generator;
 // ReSharper disable once InconsistentNaming
 public static class NEF
 {
+   private const string UI_ASSEMBLY_NAME = "Arcanum_UI";
+   private const string UI_PACK_PATH = $"pack://application:,,,/{UI_ASSEMBLY_NAME};component/";
+   private const string ICONS_PATH = $"{UI_PACK_PATH}Assets/Icons/";
+   private static readonly BitmapImage EyeIcon = LoadBitmap($"{ICONS_PATH}20x20/Eye20x20.png");
+   private static readonly BitmapImage AddIcon = LoadBitmap($"{ICONS_PATH}20x20/Add20x20.png");
+   private static readonly BitmapImage SubtractIcon = LoadBitmap($"{ICONS_PATH}20x20/Minimize20x20.png");
+   private static readonly BitmapImage InferMapIcon = LoadBitmap($"{ICONS_PATH}20x20/InferMap20x20.png");
+
+   private static readonly Brush DefaultBorderBrush = GetFrozenBrush("DefaultBorderColorBrush");
+   private static readonly Brush SelectedBackBrush = GetFrozenBrush("SelectedBackColorBrush");
+
+   private static readonly FontFamily MonospacedFont =
+      (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!;
+
+   private static BitmapImage LoadBitmap(string path)
+   {
+      var bmp = new BitmapImage();
+      bmp.BeginInit();
+      bmp.UriSource = new(path, UriKind.Absolute);
+      bmp.CacheOption = BitmapCacheOption.OnLoad;
+      bmp.EndInit();
+      bmp.Freeze();
+      return bmp;
+   }
+
+   private static Brush GetFrozenBrush(string key)
+   {
+      var brush = (Brush)Application.Current.FindResource(key)!;
+      if (brush.CanFreeze)
+         brush.Freeze(); // Makes rendering faster and thread-safe
+      return brush;
+   }
+
    public static DockPanel PropertyTitlePanel(int leftMargin)
    {
       return new()
@@ -94,9 +127,7 @@ public static class NEF
          BorderThickness = new(1),
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Eye20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = EyeIcon, Stretch = Stretch.UniformToFill,
          },
       };
    }
@@ -111,9 +142,7 @@ public static class NEF
          BorderThickness = new(1),
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Link20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = AddIcon, Stretch = Stretch.UniformToFill,
          },
       };
    }
@@ -129,9 +158,7 @@ public static class NEF
          BorderThickness = new(1),
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = AddIcon, Stretch = Stretch.UniformToFill,
          },
       };
    }
@@ -142,9 +169,7 @@ public static class NEF
       {
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Minimize20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = SubtractIcon, Stretch = Stretch.UniformToFill,
          },
          ToolTip = "Remove inferred items from map selection",
          Margin = new(1),
@@ -161,9 +186,7 @@ public static class NEF
       {
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/InferMap20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = InferMapIcon, Stretch = Stretch.UniformToFill,
          },
          ToolTip = "Set item from inferred list (chooses first)",
          Margin = new(1),
@@ -180,9 +203,7 @@ public static class NEF
       {
          Content = new Image
          {
-            Source = new BitmapImage(new("/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png",
-                                         UriKind.RelativeOrAbsolute)),
-            Stretch = Stretch.UniformToFill,
+            Source = AddIcon, Stretch = Stretch.UniformToFill,
          },
          ToolTip = "Add inferred items from map selection",
          Margin = new(1),
@@ -199,7 +220,7 @@ public static class NEF
       {
          Name = "EmbedMarker",
          Background = Brushes.Transparent,
-         BorderBrush = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+         BorderBrush = SelectedBackBrush,
          BorderThickness = new(1, 1, 0, 1),
          CornerRadius = new(3, 0, 0, 3),
          Margin = new(0, 0, 2, 0),
@@ -224,7 +245,7 @@ public static class NEF
    {
       Height = 1,
       Fill = Brushes.Transparent,
-      Stroke = (Brush)Application.Current.FindResource("SelectedBackColorBrush")!,
+      Stroke = SelectedBackBrush,
       StrokeThickness = 1,
       StrokeDashArray = new([4, 6]),
       StrokeDashCap = PenLineCap.Flat,
@@ -242,12 +263,12 @@ public static class NEF
          FontSize = fontSize,
          Margin = new(0),
          InnerBorderThickness = new(1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         InnerBorderBrush = DefaultBorderBrush,
          MinValue = float.MinValue,
          MaxValue = float.MaxValue,
          Value = value,
          StepSize = 0.1f,
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
       };
       numericUpDown.SetBinding(FloatNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -261,7 +282,7 @@ public static class NEF
          FontSize = fontSize,
          Margin = new(0),
          BorderThickness = new(1, 1, 1, 1),
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
          VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
          TextWrapping = TextWrapping.NoWrap,
          UseDebouncing = true,
@@ -294,7 +315,7 @@ public static class NEF
       {
          Margin = new(0),
          BorderThickness = new(1, 1, 1, 1),
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
          VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
          TextWrapping = TextWrapping.NoWrap,
       };
@@ -323,7 +344,7 @@ public static class NEF
          Margin = new(0),
          VerticalAlignment = VerticalAlignment.Center,
          IsThreeState = true,
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
       };
       checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
       return checkBox;
@@ -342,7 +363,7 @@ public static class NEF
          FullItemsSource = Enum.GetValues(enumType),
          IsDropdownOnly = true,
          IsReadOnly = true,
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
       };
       comboBox.SetBinding(Selector.SelectedItemProperty, binding);
       return comboBox;
@@ -357,10 +378,10 @@ public static class NEF
          Value = value,
          Margin = new(0),
          InnerBorderThickness = new(1, 1, 1, 1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         InnerBorderBrush = DefaultBorderBrush,
          MinValue = int.MinValue,
          MaxValue = int.MaxValue,
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
       };
       numericUpDown.SetBinding(BaseNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -379,11 +400,11 @@ public static class NEF
          Value = value,
          Margin = new(0),
          InnerBorderThickness = new(1, 1, 1, 1),
-         InnerBorderBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!,
+         InnerBorderBrush = DefaultBorderBrush,
          MinValue = decimal.MinValue,
          MaxValue = decimal.MaxValue,
          StepSize = new(0.1),
-         FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+         FontFamily = MonospacedFont,
       };
       numericUpDown.SetBinding(DecimalBaseNumericUpDown.ValueProperty, binding);
       return numericUpDown;
@@ -398,7 +419,7 @@ public static class NEF
       {
          ColorTextBlock =
          {
-            FontSize = fontSize, FontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!,
+            FontSize = fontSize, FontFamily = MonospacedFont,
          },
          Height = height,
          Margin = new(0),
