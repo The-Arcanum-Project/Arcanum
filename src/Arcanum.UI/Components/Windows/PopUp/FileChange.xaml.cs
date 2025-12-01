@@ -14,7 +14,6 @@ namespace Arcanum.UI.Components.Windows.PopUp;
 public class FileChangeInfo(WatcherChangeTypes action, string filePath) : DependencyObject, INotifyPropertyChanged
 {
    private WatcherChangeTypes _typeAction = action;
-   private string _filePath = filePath;
 
    public WatcherChangeTypes TypeAction
    {
@@ -69,16 +68,16 @@ public class FileChangeInfo(WatcherChangeTypes action, string filePath) : Depend
 
    public string FilePath
    {
-      get => _filePath;
+      get;
       set
       {
-         if (value == _filePath)
+         if (value == field)
             return;
 
-         _filePath = value;
+         field = value;
          OnPropertyChanged(nameof(FilePath));
       }
-   }
+   } = filePath;
 
    public SolidColorBrush ActionColor
    {

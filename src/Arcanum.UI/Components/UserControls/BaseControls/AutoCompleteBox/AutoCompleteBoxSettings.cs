@@ -39,14 +39,12 @@ public class AutoCompleteComboBoxSetting
    /// </summary>
    public virtual TimeSpan Delay => TimeSpan.FromMilliseconds(300.0);
 
-   private static AutoCompleteComboBoxSetting _default = new();
-
    /// <summary>
    /// Gets the default setting.
    /// </summary>
    public static AutoCompleteComboBoxSetting Default
    {
-      get => _default;
-      set => _default = value ?? throw new ArgumentNullException(nameof(value));
-   }
+      get;
+      set => field = value ?? throw new ArgumentNullException(nameof(value));
+   } = new();
 }

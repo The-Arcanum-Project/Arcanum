@@ -15,25 +15,23 @@ namespace Arcanum.Core.Utils.DataStructures;
 [NexusConfig]
 public partial class Test1 : IEu5Object<Test1>
 {
-    private Test2 _parentRef = Test2.Empty;
-    
     [DefaultValue(null)]
     public Test2 ParentRef
     {
-        get => _parentRef;
+        get;
         set
         {
-            if (!_parentRef.Child.Lock && !value.Child.Lock)
+            if (!field.Child.Lock && !value.Child.Lock)
             {
-                if (_parentRef != Test2.Empty)
-                    _parentRef.Child._removeFromChild(this);
-                if (_parentRef != Test2.Empty)
-                    _parentRef.Child._addFromChild(this);
+                if (field != Test2.Empty)
+                    field.Child._removeFromChild(this);
+                if (field != Test2.Empty)
+                    field.Child._addFromChild(this);
             }
 
-            _parentRef = value;
+            field = value;
         }
-    }
+    } = Test2.Empty;
 
 #pragma warning disable AGS004
     [Description("Unique key of this Test1. Must be unique among all objects of this type.")]

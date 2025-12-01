@@ -48,17 +48,16 @@ public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
 public class LogViewModel : INotifyPropertyChanged
 {
    private readonly StringBuilder _logContent = new();
-   private string _logText = "";
 
    public string LogText
    {
-      get => _logText;
+      get;
       set
       {
-         _logText = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "";
 
    public StreamWriter LogWriter { get; }
 

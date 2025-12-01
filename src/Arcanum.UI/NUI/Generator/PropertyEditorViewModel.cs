@@ -10,7 +10,6 @@ namespace Arcanum.UI.NUI.Generator;
 public class PropertyEditorViewModel
    : INotifyPropertyChanged, IDisposable
 {
-   private bool _isExpanded;
    private bool _isInline;
    private Grid? _expandableContentGrid;
 
@@ -41,19 +40,19 @@ public class PropertyEditorViewModel
 
    public bool IsExpanded
    {
-      get => _isExpanded;
+      get;
       set
       {
-         if (_isExpanded == value)
+         if (field == value)
             return;
 
-         _isExpanded = value;
+         field = value;
          OnPropertyChanged(nameof(IsExpanded));
 
-         if (_isExpanded && !_hasRefreshedContent)
+         if (field && !_hasRefreshedContent)
             RefreshContent();
 
-         Eu5UiGen.IsExpandedCache[NxProp] = _isExpanded;
+         Eu5UiGen.IsExpandedCache[NxProp] = field;
       }
    }
 

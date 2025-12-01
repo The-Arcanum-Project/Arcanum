@@ -91,16 +91,15 @@ public partial class PropertyGrid
       PropertyList.Items.Refresh();
    }
 
-   private bool _showGridEmbedded;
    public bool ShowGridEmbedded
    {
-      get => _showGridEmbedded;
+      get;
       set
       {
-         if (_showGridEmbedded == value)
+         if (field == value)
             return;
 
-         _showGridEmbedded = value;
+         field = value;
          GridEmbeddedBorder.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
       }
    }

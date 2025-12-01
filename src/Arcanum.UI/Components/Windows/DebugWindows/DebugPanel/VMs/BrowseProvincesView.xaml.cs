@@ -10,16 +10,15 @@ public partial class BrowseProvincesView
 {
    public ICollectionView ItemsView { get; }
 
-   private string _filterText = string.Empty;
    public string FilterText
    {
-      get => _filterText;
+      get;
       set
       {
-         _filterText = value;
+         field = value;
          ItemsView.Refresh();
       }
-   }
+   } = string.Empty;
 
    public BrowseProvincesView()
    {

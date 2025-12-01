@@ -30,20 +30,19 @@ public partial class ExportFileWindow : INotifyPropertyChanged
    private List<string> _allObjectsInFile = [];
 
    private readonly Dictionary<Eu5FileObj, List<IEu5Object>> _filesDict = [];
-   private string _previewText = string.Empty;
 
    public string PreviewText
    {
-      get => _previewText;
+      get;
       set
       {
-         if (value == _previewText)
+         if (value == field)
             return;
 
-         _previewText = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = string.Empty;
 
    public ExportFileWindow()
    {
