@@ -3,6 +3,7 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
@@ -23,7 +24,7 @@ public partial class Continent
 {
    public Continent()
    {
-      SuperRegions = new(SuperRegion.Field.Continent, this);
+      SuperRegions = GetEmptyAggregateLink_Continent_SuperRegion();
    }
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
@@ -37,7 +38,13 @@ public partial class Continent
    [SuppressAgs]
    [SaveAs(isEmbeddedObject: true)]
    [ParseAs("null", ignore: true)]
+   [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Continent_SuperRegion")]
    public AggregateLink<SuperRegion> SuperRegions { get; set; }
+
+   public AggregateLink<SuperRegion> GetEmptyAggregateLink_Continent_SuperRegion()
+   {
+      return new(SuperRegion.Field.Continent, this);
+   }
 
    public List<Location> GetRelevantLocations(IEu5Object[] items)
    {
