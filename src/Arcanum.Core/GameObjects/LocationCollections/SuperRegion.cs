@@ -43,8 +43,8 @@ public partial class SuperRegion
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                             .GetFirstParentOfType(LocationCollectionType
-                                                                                .SuperRegion)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .SuperRegion)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -57,8 +57,7 @@ public partial class SuperRegion
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode
-      => MapModeManager.MapModeType.Locations; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations; // TODO: @Minnator Create MapMode
    public string GetNamespace => "Map.Superregion";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
@@ -78,6 +77,25 @@ public partial class SuperRegion
    public List<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+
+   [DefaultValue(null)]
+   public Continent Continent
+   {
+      get => field;
+
+      set
+      {
+         if (!field.SuperRegions.Lock && !value.SuperRegions.Lock)
+         {
+            if (field != Continent.Empty)
+               field.SuperRegions._removeFromChild(this);
+            if (field != Continent.Empty)
+               field.SuperRegions._addFromChild(this);
+         }
+
+         field = value;
+      }
+   } = Continent.Empty;
 
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Region> LocationChildren { get; set; } = [];

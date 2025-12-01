@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 
 namespace Arcanum.Core.Utils.Pools;
 
@@ -36,6 +37,14 @@ public static class ListPool<T>
    public static PooledListHandle Get(out List<T> list)
    {
       list = Get();
+      return new(list);
+   }
+
+   public static PooledListHandle EnumerateTo(IEnumerable enumerable, out List<T> list)
+   {
+      list = Get();
+      foreach (T item in enumerable)
+         list.Add(item);
       return new(list);
    }
 

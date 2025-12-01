@@ -15,8 +15,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Continent>(dependencies)
 {
-   public override List<Type> ParsedObjects
-      => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province)];
+   public override List<Type> ParsedObjects => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province)];
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
@@ -123,8 +122,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                   ref validation,
                                   superRegion,
                                   superRegionGlobals);
-            continent.LocationChildren.Add(superRegion);
-            superRegion.Parents.Add(continent);
+            continent.SuperRegions.Add(superRegion);
 
             foreach (var regionSn in srBn.Children)
             {

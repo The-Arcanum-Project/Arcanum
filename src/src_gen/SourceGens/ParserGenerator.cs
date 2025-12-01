@@ -114,6 +114,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                        SourceProductionContext context,
                                                                        ParserClassMetadata? classMetadata)
    {
+      properties.RemoveAll(x => x.Ignore);
+
       var hintName = $"{parserSymbol.ContainingNamespace}.{parserSymbol.Name}.g.cs";
       var targetTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
@@ -264,8 +266,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}{IsContentNodeListSuffix(prop)}";
    }
 
-   private static string IsContentNodeListSuffix(PropertyMetadata prop)
-      => prop.IsShatteredList ? "_PartList" : string.Empty;
+   private static string IsContentNodeListSuffix(PropertyMetadata prop) => prop.IsShatteredList ? "_PartList" : string.Empty;
 
    private static string FlagsPrefix(PropertyMetadata prop) => IsFlagsEnum(prop) ? "Flags" : string.Empty;
 
@@ -1081,6 +1082,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       public bool IsCollection { get; }
       public bool IsHashSet { get; }
       public INamedTypeSymbol? CustomGlobalsSource { get; }
+      public bool Ignore { get; }
 
       public NodeType ItemNodeType { get; }
 
@@ -1098,6 +1100,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
             AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
          CustomGlobalsSource =
             AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
+         Ignore = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 8, "ignore");
+
          IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
          IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
                      "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";

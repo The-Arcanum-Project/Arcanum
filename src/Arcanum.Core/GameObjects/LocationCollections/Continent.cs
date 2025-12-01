@@ -1,7 +1,9 @@
-﻿using Arcanum.API.UtilServices.Search;
+﻿using System.ComponentModel;
+using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -9,6 +11,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
@@ -16,29 +19,39 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 [NexusConfig]
 [ObjectSaveAs]
 public partial class Continent
-   : IMapInferable, IEu5Object<Continent>, ILocation, ILocationCollection<SuperRegion>, IIndexRandomColor
+   : IMapInferable, IEu5Object<Continent>, IIndexRandomColor
 {
+   public Continent()
+   {
+      SuperRegions = new(SuperRegion.Field.Continent, this);
+   }
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+                                                                          .Select(IEu5Object (loc) => loc
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .Continent)!)
+                                                                          .Distinct()
+                                                                          .ToList();
+
+   [SaveAs(isEmbeddedObject: true)]
+   [DefaultValue(null)]
+   [ParseAs("null", ignore: true)]
+   public AggregateLink<SuperRegion> SuperRegions { get; set; }
+
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
+   {
+      List<Location> locations = [];
+
+      foreach (var item in items)
+         if (item is Continent cn && cn.SuperRegions.Count > 0)
+            locations.AddRange(cn.SuperRegions[0].GetRelevantLocations(cn.SuperRegions.Cast<IEu5Object>().ToArray()));
+      return locations;
+   }
+
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Continent> GetGlobalItems() => Globals.Continents;
-
-   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                          .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Continent)!)
-                                                                          .Distinct()
-                                                                          .ToList();
-
-   public List<Location> GetRelevantLocations(IEu5Object[] items)
-   {
-      var typedItems = items.Cast<Continent>();
-      List<Location> locations = [];
-      foreach (var item in typedItems)
-         locations.AddRange(item.GetLocations());
-      return locations.Distinct().ToList();
-   }
-
    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
    public string GetNamespace => $"Map.{nameof(Continent)}";
    public InjRepType InjRepType { get; set; } = InjRepType.None;
@@ -53,11 +66,6 @@ public partial class Continent
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Continent Empty => new() { UniqueId = "Arcanum_Empty_Continent" };
-   public List<Location> GetLocations() => LocationChildren.SelectMany(sr => sr.GetLocations()).ToList();
-   public LocationCollectionType LcType => LocationCollectionType.Continent;
-   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
-   [SaveAs(isEmbeddedObject: true)]
-   public ObservableRangeCollection<SuperRegion> LocationChildren { get; set; } = [];
 
    // IIndexRandomColor Implementation
    public int Index { get; set; }

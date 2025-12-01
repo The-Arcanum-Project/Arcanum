@@ -19,7 +19,7 @@ public partial class Test2 : IEu5Object<Test2>
 
    [SuppressAgs]
    [DefaultValue(null)]
-   public AggregateParentLink<Test1> Child { get; set; }
+   public AggregateLink<Test1> Child { get; set; }
 
    public Test2()
    {

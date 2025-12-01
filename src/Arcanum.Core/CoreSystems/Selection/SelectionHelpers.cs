@@ -36,12 +36,11 @@ public static class SelectionHelpers
       return bp == null ? null : GetChildContainingLocation(bp, location);
    }
 
+   // TODO: Make this use the new system with aggregate links and such
    private static ILocation? GetChildContainingLocation(ILocation loc, Location child)
    {
       return loc.LcType switch
       {
-         LocationCollectionType.Continent => ((Continent)loc).LocationChildren
-                                                             .FirstOrDefault(sr => sr.GetLocations().Contains(child)),
          LocationCollectionType.SuperRegion => ((SuperRegion)loc).LocationChildren
                                                                  .FirstOrDefault(r => r.GetLocations().Contains(child)),
          LocationCollectionType.Region => ((Region)loc).LocationChildren
