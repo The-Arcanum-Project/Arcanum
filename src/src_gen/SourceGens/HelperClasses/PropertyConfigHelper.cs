@@ -202,13 +202,18 @@ public static class PropertyConfigHelper
                return $"EmptyRegistry.Empties[typeof({typeName})]";
             }
 
-            if (propertyType.)
+            if (SymbolEqualityComparer.Default.Equals(propertyType.OriginalDefinition,
+                                                      NexusHelpers.AggregateLinkSymbol))
+               return $"""
+                       {propertySymbol.Name}.Clear();
+                                       return {propertySymbol.Name};
+                       """;
 
-               if (Helpers.IsGenericCollection(propertyType, out _))
-               {
-                  var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                  return $"new {fullCollectionTypeName}()";
-               }
+            if (Helpers.IsGenericCollection(propertyType, out _))
+            {
+               var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               return $"new {fullCollectionTypeName}()";
+            }
             // Check if we have a JominiColor
 
             return propertyType.ToDisplayString() == JOMINI_COLOR_TYPE

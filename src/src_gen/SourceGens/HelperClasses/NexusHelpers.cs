@@ -800,7 +800,10 @@ public static class NexusHelpers
          var defaultValue = defaultValues[i];
          builder.AppendLine($"            case Field.{member.Name}:");
          if (defaultValue != "CAN_NOT_DETERMINE_DEFAULT_VALUE")
-            builder.AppendLine($"                return {defaultValue};");
+            if (defaultValue.Contains("return"))
+               builder.AppendLine($"                {defaultValue}");
+            else
+               builder.AppendLine($"                return {defaultValue};");
          else
             builder.AppendLine("                return ; // Default value could not be determined");
       }
