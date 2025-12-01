@@ -132,13 +132,13 @@ public static class ParsingToolBox
 
       if (node.Value is LiteralValueNode lvn)
       {
-         var lexeme = lvn.Value.GetLexeme(source);
+         var lexeme = pc.SliceString(lvn);
+         ;
          if (!int.TryParse(lexeme, out value))
          {
-            ctx.SetPosition(lvn.Value);
+            pc.SetContext(lvn);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidIntegerValue,
-                                           pc.BuildStackTrace(),
                                            lexeme);
             value = 0;
             return pc.Fail();
@@ -148,11 +148,10 @@ public static class ParsingToolBox
       {
          if (un.Operator.Type != TokenType.Minus)
          {
-            ctx.SetPosition(un.Operator);
+            pc.SetContext(un.Operator);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatOperator,
-                                           pc.BuildStackTrace(),
-                                           un.Operator.GetLexeme(source),
+                                           pc.SliceString(un),
                                            nameof(TokenType.Minus));
             value = 0;
             return false;
@@ -160,24 +159,22 @@ public static class ParsingToolBox
 
          if (un.Value is not LiteralValueNode lvn2)
          {
-            ctx.SetPosition(un.Value);
+            pc.SetContext(un.Value);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,
-                                           pc.BuildStackTrace(),
                                            un.Value.GetType().Name,
                                            nameof(LiteralValueNode),
-                                           node.KeyNode.GetLexeme(source));
+                                           pc.SliceString(node));
             value = 0;
             return pc.Fail();
          }
 
-         var lexeme = lvn2.Value.GetLexeme(source);
+         var lexeme = pc.SliceString(lvn2);
          if (!int.TryParse(lexeme, out value))
          {
-            ctx.SetPosition(lvn2.Value);
+            pc.SetContext(lvn2);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidIntegerValue,
-                                           pc.BuildStackTrace(),
                                            lexeme);
             value = 0;
             return false;
@@ -190,10 +187,9 @@ public static class ParsingToolBox
          pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        pc.BuildStackTrace(),
                                         node.Value.GetType().Name,
                                         $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
-                                        node.KeyNode.GetLexeme(source));
+                                        pc.SliceString(node));
          value = 0;
          pc.Fail();
          return false;
@@ -207,13 +203,6 @@ public static class ParsingToolBox
    /// Validates that the ContentNode's separator is an equals sign.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="pc.BuildStackTrace()"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Boolean(ContentNode node,
                                           ref ParsingContext pc,
                                           out bool value)
@@ -230,8 +219,9 @@ public static class ParsingToolBox
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
-      if (!NumberParsing.TryParseBool(lexeme, ctx, out value))
+      var lexeme = pc.SliceString(lvn);
+      ;
+      if (!NumberParsing.TryParseBool(lexeme, ref pc, out value))
       {
          value = false;
          pc.Fail();
@@ -247,8 +237,7 @@ public static class ParsingToolBox
    {
       using var scope = pc.PushScope();
       if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
-                                                   ctx,
-                                                   pc.BuildStackTrace(),
+                                                   ref pc,
                                                    TokenType.Equals,
                                                    TokenType.GreaterOrEqual,
                                                    TokenType.LessOrEqual,
@@ -265,16 +254,16 @@ public static class ParsingToolBox
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!double.TryParse(lexeme.Replace(',', '.'),
                            NumberStyles.Float,
                            CultureInfo.InvariantCulture,
                            out value))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidDoubleValue,
-                                        pc.BuildStackTrace(),
                                         lexeme);
          value = 0;
          return false;
@@ -289,8 +278,7 @@ public static class ParsingToolBox
    {
       using var scope = pc.PushScope();
       if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
-                                                   ctx,
-                                                   pc.BuildStackTrace(),
+                                                   ref pc,
                                                    TokenType.Equals,
                                                    TokenType.GreaterOrEqual,
                                                    TokenType.LessOrEqual,
@@ -303,13 +291,13 @@ public static class ParsingToolBox
 
       if (node.Value is LiteralValueNode lvn)
       {
-         var lexeme = lvn.Value.GetLexeme(source);
-         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         var lexeme = pc.SliceString(lvn);
+         ;
+         if (!NumberParsing.TryParseFloat(lexeme, ref pc, out value))
          {
-            ctx.SetPosition(lvn.Value);
+            pc.SetContext(lvn);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatValue,
-                                           pc.BuildStackTrace(),
                                            lexeme);
             value = 0;
             return pc.Fail();
@@ -319,11 +307,10 @@ public static class ParsingToolBox
       {
          if (un.Operator.Type != TokenType.Minus)
          {
-            ctx.SetPosition(un.Operator);
+            pc.SetContext(un.Operator);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatOperator,
-                                           pc.BuildStackTrace(),
-                                           un.Operator.GetLexeme(source),
+                                           pc.SliceString(un),
                                            nameof(TokenType.Minus));
             value = 0;
             return false;
@@ -331,24 +318,22 @@ public static class ParsingToolBox
 
          if (un.Value is not LiteralValueNode lvn2)
          {
-            ctx.SetPosition(un.Value);
+            pc.SetContext(un.Value);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,
-                                           pc.BuildStackTrace(),
                                            un.Value.GetType().Name,
                                            nameof(LiteralValueNode),
-                                           node.KeyNode.GetLexeme(source));
+                                           pc.SliceString(node));
             value = 0;
             return pc.Fail();
          }
 
-         var lexeme = lvn2.Value.GetLexeme(source);
-         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         var lexeme = pc.SliceString(lvn2);
+         if (!NumberParsing.TryParseFloat(lexeme, ref pc, out value))
          {
-            ctx.SetPosition(lvn2.Value);
+            pc.SetContext(lvn2);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatValue,
-                                           pc.BuildStackTrace(),
                                            lexeme);
             value = 0;
             return false;
@@ -361,10 +346,9 @@ public static class ParsingToolBox
          pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        pc.BuildStackTrace(),
                                         node.Value.GetType().Name,
                                         $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
-                                        node.KeyNode.GetLexeme(source));
+                                        pc.SliceString(node));
          value = 0;
          pc.Fail();
          return false;
@@ -389,17 +373,17 @@ public static class ParsingToolBox
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
 
       if (!EnumAgsRegistry.TryParse(lexeme, out value))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         typeof(TEnum).Name,
-                                        Enum.GetNames(typeof(TEnum)));
+                                        Enum.GetNames<TEnum>());
          value = default;
          pc.Fail();
          return false;
@@ -424,16 +408,16 @@ public static class ParsingToolBox
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!Enum.TryParse(lexeme, true, out value))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         typeof(TEnum).Name,
-                                        Enum.GetNames(typeof(TEnum)));
+                                        Enum.GetNames<TEnum>());
          value = default;
          pc.Fail();
          return false;
@@ -447,13 +431,6 @@ public static class ParsingToolBox
    /// Utilizes the LocationContext to resolve the location.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="pc.BuildStackTrace()"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(ContentNode node,
                                            ref ParsingContext pc,
                                            [MaybeNullWhen(false)] out Location value)
@@ -467,13 +444,6 @@ public static class ParsingToolBox
    /// Utilizes the LocationContext to resolve the location.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="pc.BuildStackTrace()"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(KeyOnlyNode node,
                                            ref ParsingContext pc,
                                            [MaybeNullWhen(false)] out Location value)
@@ -560,7 +530,7 @@ public static class ParsingToolBox
                                          [MaybeNullWhen(false)] out string value)
    {
       using var scope = pc.PushScope();
-      value = node.KeyNode.GetLexeme(source);
+      value = pc.SliceString(node);
       return true;
    }
 
@@ -569,26 +539,18 @@ public static class ParsingToolBox
    /// Utilizes the global ReligiousSchools dictionary to resolve the identifier.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="pc.BuildStackTrace()"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_ReligiousSchool(ContentNode node,
                                                   ref ParsingContext pc,
                                                   [MaybeNullWhen(false)] out ReligiousSchool value)
    {
       using var scope = pc.PushScope();
-      if (node.TryGetIdentifierNode(ctx, pc.BuildStackTrace(), source, out var rsName))
+      if (node.TryGetIdentifierNode(ref pc, out var rsName))
       {
          if (!Globals.ReligiousSchools.TryGetValue(rsName, out var rs))
          {
             pc.SetContext(node);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.UnknownObjectKey,
-                                           pc.BuildStackTrace(),
                                            rsName,
                                            nameof(ReligiousSchool));
             value = null;
@@ -609,19 +571,12 @@ public static class ParsingToolBox
    /// Utilizes the global CountryRanks list to resolve the identifier.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="cn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="pc.BuildStackTrace()"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_CountryRank(ContentNode cn,
                                               ref ParsingContext pc,
                                               [MaybeNullWhen(false)] out CountryRank value)
    {
       using var scope = pc.PushScope();
-      if (!cn.TryGetIdentifierNode(ctx, pc.BuildStackTrace(), source, out var crlName))
+      if (!cn.TryGetIdentifierNode(ref pc, out var crlName))
       {
          value = null;
          pc.Fail();
@@ -633,10 +588,9 @@ public static class ParsingToolBox
          return true;
 
       {
-         ctx.SetPosition(cn.Value);
+         pc.SetContext(cn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidCountryRankKey,
-                                        pc.BuildStackTrace(),
                                         crlName,
                                         Globals.CountryRanks.Keys);
          value = null;
@@ -692,7 +646,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -717,7 +671,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -761,13 +715,13 @@ public static class ParsingToolBox
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!Globals.Languages.TryGetValue(lexeme, out value) && !Globals.Dialects.TryGetValue(lexeme, out value))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         nameof(Language));
          value = null;
@@ -799,29 +753,28 @@ public static class ParsingToolBox
          return false;
       }
 
-      if (!Globals.Cultures.TryGetValue(node.KeyNode.GetLexeme(source), out var culture))
+      if (!Globals.Cultures.TryGetValue(pc.SliceString(node), out var culture))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        pc.BuildStackTrace(),
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(Culture));
          value = null;
          pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
          pc.Fail();
          return false;
@@ -852,29 +805,28 @@ public static class ParsingToolBox
          return false;
       }
 
-      if (!Globals.Religions.TryGetValue(node.KeyNode.GetLexeme(source), out var religion))
+      if (!Globals.Religions.TryGetValue(pc.SliceString(node), out var religion))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        pc.BuildStackTrace(),
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(Religion));
          value = null;
          pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
          pc.Fail();
          return false;
@@ -905,29 +857,28 @@ public static class ParsingToolBox
          return false;
       }
 
-      if (!Globals.ReligiousSchools.TryGetValue(node.KeyNode.GetLexeme(source), out var rs))
+      if (!Globals.ReligiousSchools.TryGetValue(pc.SliceString(node), out var rs))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        pc.BuildStackTrace(),
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(ReligiousSchoolOpinionValue));
          value = null;
          pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
+         pc.SetContext(lvn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        pc.BuildStackTrace(),
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
          pc.Fail();
          return false;
@@ -982,11 +933,12 @@ public static class ParsingToolBox
          return false;
       }
 
-      var name = lvn.Value.GetLexeme(source);
+      var name = pc.SliceString(lvn);
+      ;
 
       value = new()
       {
-         SavingKey = node.KeyNode.GetLexeme(source),
+         SavingKey = pc.SliceString(node),
          Name = name,
          IsRandom = true,
       };
@@ -998,14 +950,13 @@ public static class ParsingToolBox
                                                            [MaybeNullWhen(false)] out CharacterNameDeclaration value)
    {
       using var scope = pc.PushScope();
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
 
       if (node.Children.Count != 1)
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        pc.BuildStackTrace(),
                                         $"Expected exactly one child node in block for CharacterNameDeclaration with key '{key}', found {node.Children.Count}.",
                                         nameof(ContentNode),
                                         key);
@@ -1016,10 +967,9 @@ public static class ParsingToolBox
 
       if (node.Children[0] is not ContentNode cn)
       {
-         ctx.SetPosition(node.Children[0].KeyNode);
+         pc.SetContext(node.Children[0].KeyNode);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        pc.BuildStackTrace(),
                                         $"Expected child node in block for CharacterNameDeclaration with key '{key}' to be a {nameof(ContentNode)}, found {node.Children[0].GetType().Name}.",
                                         nameof(ContentNode),
                                         key);
@@ -1044,7 +994,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { SavingKey = key, Name = lvn.Value.GetLexeme(source) };
+      value = new() { SavingKey = key, Name = pc.SliceString(lvn) };
       return true;
    }
 
@@ -1054,9 +1004,9 @@ public static class ParsingToolBox
    {
       using var scope = pc.PushScope();
       if (node is BlockNode bn)
-         return ArcTryParse_CharacterNameDeclaration(bn, ctx, pc.BuildStackTrace(), source, out value, ref validation);
+         return ArcTryParse_CharacterNameDeclaration(bn, ref pc, out value);
       if (node.IsContentNode(ref pc, out var cn))
-         return ArcTryParse_CharacterNameDeclaration(cn, ctx, pc.BuildStackTrace(), source, out value, ref validation);
+         return ArcTryParse_CharacterNameDeclaration(cn, ref pc, out value);
 
       value = null;
       pc.Fail();
@@ -1152,8 +1102,7 @@ public static class ParsingToolBox
       value = null;
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ref pc,
-                                             ref validation))
+                                             ref pc))
          return false;
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
@@ -1162,7 +1111,7 @@ public static class ParsingToolBox
       if (!lvn.TryParseLocationFromLvn(ref pc, out var loc))
          return false;
 
-      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, pc.BuildStackTrace(), out var skn))
+      if (!node.KeyNode.IsSimpleKeyNode(ref pc, out var skn))
          return false;
 
       if (!skn.KeyToken.TryGetLocationFromToken(ref pc, out var from))
@@ -1305,7 +1254,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       value = Eu5Activator.CreateEmbeddedInstance<DemandData>(null, node);
 
       switch (key)
@@ -1331,10 +1280,9 @@ public static class ParsingToolBox
          default:
             if (!Globals.PopTypes.TryGetValue(key, out var popType))
             {
-               ctx.SetPosition(node.KeyNode);
+               pc.SetContext(node);
                DiagnosticException.LogWarning(ref pc,
                                               ParsingError.Instance.UnknownObjectKey,
-                                              pc.BuildStackTrace(),
                                               key,
                                               nameof(PopType));
                value = null;
@@ -1370,13 +1318,12 @@ public static class ParsingToolBox
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Estates.TryGetValue(key, out var estate))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        pc.BuildStackTrace(),
                                         key,
                                         nameof(Estate));
          value = null;
@@ -1410,10 +1357,8 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Topography,
                                            out value);
    }
@@ -1434,10 +1379,8 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Vegetation,
                                            out value);
    }
@@ -1458,10 +1401,8 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Climates,
                                            out value);
    }
@@ -1482,15 +1423,14 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.RawMaterials,
                                            out value);
    }
 
    public static bool ArcTryParse_StaticModifier(ContentNode node,
+                                                 ref ParsingContext pc,
                                                  [MaybeNullWhen(false)] out StaticModifier value)
    {
       using var scope = pc.PushScope();
@@ -1505,10 +1445,8 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.StaticModifiers,
                                            out value);
    }
@@ -1534,10 +1472,8 @@ public static class ParsingToolBox
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Dynasties,
                                            out value);
    }
@@ -1547,10 +1483,8 @@ public static class ParsingToolBox
                                                [MaybeNullWhen(false)] out CultureGroup value)
    {
       using var scope = pc.PushScope();
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node.KeyNode,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
                                            Globals.CultureGroups,
                                            out value);
    }
@@ -1560,10 +1494,8 @@ public static class ParsingToolBox
                                              [MaybeNullWhen(false)] out ArtistType value)
    {
       using var scope = pc.PushScope();
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node.KeyNode,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
                                            Globals.ArtistTypes,
                                            out value);
    }
@@ -1573,10 +1505,8 @@ public static class ParsingToolBox
                                             [MaybeNullWhen(false)] out TownSetup value)
    {
       using var scope = pc.PushScope();
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(node,
+                                           ref pc,
                                            Globals.TownSetups,
                                            out value);
    }
@@ -1586,10 +1516,8 @@ public static class ParsingToolBox
                                                [MaybeNullWhen(false)] out LocationRank value)
    {
       using var scope = pc.PushScope();
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node,
-                                           source,
-                                           pc.BuildStackTrace(),
+      return LUtil.TryGetFromGlobalsAndLog(node,
+                                           ref pc,
                                            Globals.LocationRanks,
                                            out value);
    }
@@ -1610,13 +1538,12 @@ public static class ParsingToolBox
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Institutions.TryGetValue(key, out var institution))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        pc.BuildStackTrace(),
                                         key,
                                         nameof(Institution));
          value = null;
@@ -1671,13 +1598,12 @@ public static class ParsingToolBox
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Buildings.TryGetValue(key, out var building))
       {
-         ctx.SetPosition(node.KeyNode);
+         pc.SetContext(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        pc.BuildStackTrace(),
                                         key,
                                         nameof(Building));
          value = null;

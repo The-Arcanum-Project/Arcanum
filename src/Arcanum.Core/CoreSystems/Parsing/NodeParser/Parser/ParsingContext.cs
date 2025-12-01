@@ -157,6 +157,9 @@ public ref struct ParsingContext
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public string SliceString(KeyNodeBase start) => SliceSource(start.Start, start.Length).ToString();
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(UnaryNode un) => SliceSource(un.Start, un.Length).ToString();
 }
 
 public static class ParsingContextExtensions
