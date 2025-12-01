@@ -23,10 +23,17 @@ public sealed class AggregateParentLink<T> : ObservableRangeCollection<T> where 
 
    private void AggregateCollection_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
    {
-      Debug.Assert(e.NewItems is IList<T>,
-                   "NewItems is not of the expected type IList<T>.");
-      Debug.Assert(e.OldItems is IList<T>,
-                   "OldItems is not of the expected type IList<T>.");
+      if (e.NewItems == null && e.OldItems == null)
+         return;
+#if DEBUG
+      if (e.NewItems != null)
+         Debug.Assert(e.NewItems is IList<T>,
+                      "NewItems is not of the expected type IList<T>.");
+      if (e.OldItems != null)
+         Debug.Assert(e.OldItems is IList<T>,
+                      "OldItems is not of the expected type IList<T>.");
+#endif
+
       switch (e.Action)
       {
          case NotifyCollectionChangedAction.Add:
