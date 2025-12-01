@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -34,9 +33,7 @@ public abstract class
    public override List<Type> ParsedObjects => [typeof(T)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
       if (!CanBeReloaded)
          return;
@@ -48,25 +45,24 @@ public abstract class
          ResetObjectProperties(obj);
 
       var rn = Parser.Parse(fileObj, out var source, out var ctx);
+      var validation = true;
+      var pc = new ParsingContext(ctx, source.AsSpan(), nameof(ParserValidationLoadingService<>), ref validation);
 
       if (!ParsingMaster.RemoveAllGroupingNodes(rn,
-                                                ctx,
-                                                actionStack,
-                                                source,
-                                                ref validation,
+                                                ref pc,
                                                 GroupingNodeNames,
                                                 out var sns))
          return;
 
       foreach (var sn in sns)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var key = bn.KeyNode.GetLexeme(source);
+         var key = pc.SliceString(bn);
          if (!globals.TryGetValue(key, out var target))
          {
-            var instance = Eu5Activator.CreateInstance<T>(bn.KeyNode.GetLexeme(source), fileObj, bn);
+            var instance = Eu5Activator.CreateInstance<T>(key, fileObj, bn);
             Debug.Assert(instance.Source != null, "instance.Source != null");
 
             if (lockObject != null)
@@ -77,24 +73,21 @@ public abstract class
          }
          else
          {
-            ParsePropertiesToObject(bn, target, ctx, source, ref validation, allowUnknownNodes: false);
+            ParsePropertiesToObject(bn, target, ref pc, allowUnknownNodes: false);
             objectsInFile.Remove(target);
          }
       }
 
       // We check if all objects we had before are still present if not we throw an error as this can cause corruption.
       foreach (var obj in objectsInFile)
-         De.Warning(ctx,
+         De.Warning(ref pc,
                     ParsingError.Instance.MissingObjectAfterReload,
-                    actionStack,
                     obj.UniqueId,
                     typeof(T).Name);
    }
 
    protected abstract void ParsePropertiesToObject(BlockNode block,
                                                    T target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes);
 }

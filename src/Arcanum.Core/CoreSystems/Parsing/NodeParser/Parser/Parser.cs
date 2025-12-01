@@ -442,7 +442,7 @@ public class Parser(LexerResult lexerResult)
 
    #region Utility Methods
 
-   public static bool VerifyNodeTypes(List<AstNode> node, Type[] allowedTypes, LocationContext ctx, string actionName)
+   public static bool VerifyNodeTypes(List<AstNode> node, Type[] allowedTypes, ref ParsingContext pc)
    {
       var allValid = true;
       foreach (var n in node)
@@ -451,9 +451,8 @@ public class Parser(LexerResult lexerResult)
          if (allowedTypes.Contains(type))
             continue;
 
-         DiagnosticException.LogWarning(ctx,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBlockType,
-                                        actionName,
                                         n.GetLocation().Item1,
                                         n.GetLocation().Item2,
                                         type.Name,
@@ -511,8 +510,7 @@ public class Parser(LexerResult lexerResult)
 
    public static bool EnforceNodeCountOfType<T>(List<StatementNode> nodes,
                                                 int expectedCount,
-                                                LocationContext ctx,
-                                                string actionName,
+                                                ref ParsingContext pc,
                                                 out List<T> results)
       where T : AstNode
    {
@@ -522,9 +520,8 @@ public class Parser(LexerResult lexerResult)
       var actualCount = results.Count;
       if (actualCount != expectedCount)
       {
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeCountOfType,
-                                        actionName,
                                         typeof(T).Name,
                                         expectedCount,
                                         actualCount);
@@ -535,9 +532,7 @@ public class Parser(LexerResult lexerResult)
    }
 
    public static bool GetIdentifierKvp(StatementNode node,
-                                       LocationContext ctx,
-                                       string actionName,
-                                       string source,
+                                       ref ParsingContext pc,
                                        out string key,
                                        out string value)
    {
@@ -545,12 +540,9 @@ public class Parser(LexerResult lexerResult)
       {
          key = string.Empty;
          value = string.Empty;
-         var location = node.GetLocation();
-         ctx.LineNumber = location.Item1;
-         ctx.ColumnNumber = location.Item2;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionName,
                                         node.GetType(),
                                         "a content node");
          return false;
@@ -560,19 +552,16 @@ public class Parser(LexerResult lexerResult)
       {
          key = string.Empty;
          value = string.Empty;
-         var (line, column) = cn.Value.GetLocation();
-         ctx.LineNumber = line;
-         ctx.ColumnNumber = column;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionName,
-                                        cn.KeyNode.GetKeyText(source),
+                                        pc.SliceString(cn),
                                         "a string value and key");
          return false;
       }
 
-      key = cn.KeyNode.GetKeyText(source);
-      value = lvn.Value.GetLexeme(source);
+      key = pc.SliceString(cn.KeyNode);
+      value = pc.SliceString(lvn.Value);
       return true;
    }
 

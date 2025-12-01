@@ -26,9 +26,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    }
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 

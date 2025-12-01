@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -16,19 +15,13 @@ public partial class CountryDefinitionParsing(IEnumerable<IDependencyNode<string
    : ParserValidationLoadingService<CountryDefinition>(dependencies)
 {
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -69,26 +62,20 @@ public partial class CountryDefinitionParsing(IEnumerable<IDependencyNode<string
    }
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
-      base.ReloadSingleFile(fileObj, lockObject, actionStack, ref validation);
+      base.ReloadSingleFile(fileObj, lockObject);
       foreach (var obj in fileObj.ObjectsInFile)
          if (Globals.Countries.TryGetValue(obj.UniqueId, out var country) &&
              country.Definition == CountryDefinition.Empty)
          {
             // Re-linking the country definition failed. Abort.
-            validation = false;
             return;
          }
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    CountryDefinition target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

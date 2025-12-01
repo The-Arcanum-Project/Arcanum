@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -27,19 +26,13 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
    }
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -62,9 +55,7 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
 
    private static bool MapMovementAssistParsing(BlockNode node,
                                                 LocationTemplateData target,
-                                                LocationContext ctx,
-                                                string source,
-                                                ref bool validation)
+                                                ref ParsingContext pc)
    {
       target.MovementAssistance = Eu5Activator.CreateEmbeddedInstance<MapMovementAssist>(null, node);
       var index = 0;
@@ -73,7 +64,7 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
          float value;
          if (sn is KeyOnlyNode kon)
          {
-            if (!kon.TryParseFloatValue(ctx, source, nameof(LocationTemplateParsing), ref validation, out value))
+            if (!kon.TryParseFloatValue(ref pc, out value))
             {
                index++;
                continue;
@@ -81,10 +72,10 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
          }
          else
          {
-            if (!sn.IsUnaryStatementNode(ctx, source, nameof(LocationTemplateParsing), ref validation, out var usn))
+            if (!sn.IsUnaryStatementNode(ref pc, out var usn))
                continue;
 
-            if (!usn.TryParseFloatValue(ctx, source, nameof(LocationTemplateParsing), ref validation, out value))
+            if (!usn.TryParseFloatValue(ref pc, out value))
             {
                index++;
                continue;
@@ -100,13 +91,12 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
                target.MovementAssistance.Y = value;
                break;
             default:
-               ctx.SetPosition(node.KeyNode);
-               De.Warning(ctx,
+               pc.SetContext(node);
+               De.Warning(ref pc,
                           ParsingError.Instance.UnexpectedTokenCount,
-                          nameof(LocationTemplateParsing),
                           2,
                           index + 1);
-               validation = false;
+               pc.Fail();
                break;
          }
 
@@ -118,9 +108,6 @@ public partial class LocationTemplateParsing(IEnumerable<IDependencyNode<string>
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    LocationTemplateData target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

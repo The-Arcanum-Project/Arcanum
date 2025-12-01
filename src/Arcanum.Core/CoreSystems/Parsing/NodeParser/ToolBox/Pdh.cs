@@ -125,7 +125,7 @@ public static class Pdh
             DispatchBlockNode(bn, target, ref pc, blockParsers);
             break;
          default:
-            pc.Validation = false;
+            pc.Fail();
             pc.SetContext(sn);
             DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,

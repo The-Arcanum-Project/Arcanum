@@ -17,20 +17,15 @@ public static class De
    /// <param name="actionName"></param>
    /// <param name="expected"></param>
    /// <param name="validation"></param>
-   public static void LogInvalidContentKeyOrNode(LocationContext ctx,
+   public static void LogInvalidContentKeyOrNode(ref ParsingContext pc,
                                                  Token key,
-                                                 string source,
-                                                 string actionName,
-                                                 object expected,
-                                                 ref bool validation)
+                                                 object expected)
    {
-      ctx.SetPosition(key);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(key);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidContentKeyOrType,
-                                     actionName,
-                                     key.GetLexeme(source),
+                                     pc.SliceString(key),
                                      expected);
-      validation = false;
    }
 
    /// <summary>
@@ -44,20 +39,16 @@ public static class De
    /// <param name="actionName"></param>
    /// <param name="expected"></param>
    /// <param name="validation"></param>
-   public static void LogInvalidBlockName(LocationContext ctx,
+   public static void LogInvalidBlockName(ref ParsingContext pc,
                                           Token key,
-                                          string source,
-                                          string actionName,
-                                          object expected,
-                                          ref bool validation)
+                                          object expected)
    {
-      ctx.SetPosition(key);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(key);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidBlockName,
-                                     actionName,
-                                     key.GetLexeme(source),
+                                     pc.SliceString(key),
                                      expected);
-      validation = false;
+      pc.Fail();
    }
 
    public static void Warning(ref ParsingContext pc,

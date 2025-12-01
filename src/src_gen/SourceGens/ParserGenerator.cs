@@ -265,8 +265,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       return $"{ARC_PARSE_PREFIX}{FlagsPrefix(prop)}{prop.PropertyName}{IsContentNodeListSuffix(prop)}";
    }
 
-   private static string IsContentNodeListSuffix(PropertyMetadata prop)
-      => prop.IsShatteredList ? "_PartList" : string.Empty;
+   private static string IsContentNodeListSuffix(PropertyMetadata prop) => prop.IsShatteredList ? "_PartList" : string.Empty;
 
    private static string FlagsPrefix(PropertyMetadata prop) => IsFlagsEnum(prop) ? "Flags" : string.Empty;
 
@@ -558,7 +557,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (!pmc.ContainsOnlyChildObjects)
       {
          sb.AppendLine($"        var newInstance = ({itemTypeName})Activator.CreateInstance(typeof({itemTypeName}))!;");
-         sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ref pc, {pmc.AllowUnknownNodes.ToString().ToLower()});");
          sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
       }
 
@@ -698,7 +697,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (!pmc.ContainsOnlyChildObjects)
       {
          sb.AppendLine($"        target.{prop.PropertyName} = new {propTypeName2}();");
-         sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ref pc, {pmc.AllowUnknownNodes.ToString().ToLower()});");
       }
 
       sb.AppendLine("        return true;");
@@ -840,7 +839,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    {");
       if (!classMetadata.ContainsOnlyChildObjects)
       {
-         sb.AppendLine($"        Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _statementParsers, _dynamicBlockParsers, _dynamicContentParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
+         sb.AppendLine($"        Pdh.ParseProperties(block, target, ref pc, _contentParsers, _blockParsers, _statementParsers, _dynamicBlockParsers, _dynamicContentParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
       }
       // The entire objects only consists of a list of subobjects, instead of looking into our dictionaries we have to directly parse all child blocks as subobjects.
       else
@@ -848,7 +847,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
          if (prop == null)
          {
             sb.AppendLine("        // ERROR: No properties found for parser marked with [ContainsOnlyChildObjects].");
-            sb.AppendLine("        validation = false;");
+            sb.AppendLine("        pc.Fail();");
             sb.AppendLine("        return;");
             sb.AppendLine("    }");
             sb.AppendLine();

@@ -141,9 +141,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    /// Reloads a single file
    /// </summary>
    public abstract void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation);
+                                         object? lockObject);
 
    /// <summary>
    /// This step is called once all files of this step have been loaded.

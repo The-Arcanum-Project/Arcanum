@@ -33,7 +33,7 @@ public abstract class KeyNodeBase(int start, int length) : AstNode(start, length
 {
    public int Column => GetLocation().Item2;
    public int Line => GetLocation().Item1;
-   public string GetLexeme(Span<string> source) => source.Slice(start, source.Length - start).ToString();
+   public string GetLexeme(Span<string> source) => source[start..].ToString();
 }
 
 /// <summary>
