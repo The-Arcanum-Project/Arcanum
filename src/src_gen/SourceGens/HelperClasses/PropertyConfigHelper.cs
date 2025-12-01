@@ -209,6 +209,14 @@ public static class PropertyConfigHelper
                                        return {propertySymbol.Name};
                        """;
 
+            if (propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Contains("AggregateLink"))
+            {
+               return $"""
+                       {propertySymbol.Name}.Clear();
+                                       return {propertySymbol.Name};
+                       """;
+            }
+
             if (Helpers.IsGenericCollection(propertyType, out _))
             {
                var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);

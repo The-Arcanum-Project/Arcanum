@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0-windows</TargetFramework>
-        <LangVersion>latest</LangVersion>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <LangVersion>14</LangVersion>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
@@ -31,7 +31,7 @@
     <!--            <InputEffects>$(MSBuildProjectDirectory)/Data/effects.log</InputEffects>-->
     <!--            <OutputEffects>$(SolutionDir)/Arcanum.Core/CoreSystems/Jomini/Effects/EffectRegistry.cs</OutputEffects>-->
 
-    <!--            <CodeGeneratorExe>$(SolutionDir)/BuildTimeCodeGeneration/bin/Debug/net8.0-windows/BuildTimeCodeGeneration.exe</CodeGeneratorExe>-->
+    <!--            <CodeGeneratorExe>$(SolutionDir)/BuildTimeCodeGeneration/bin/Debug/net10.0-windows/BuildTimeCodeGeneration.exe</CodeGeneratorExe>-->
     <!--        </PropertyGroup>-->
 
     <!--        <Message Text="-&#45;&#45; Generating event target C# code from documentation -&#45;&#45;" Importance="high"/>-->

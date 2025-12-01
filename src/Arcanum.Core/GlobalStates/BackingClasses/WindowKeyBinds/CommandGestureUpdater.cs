@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.Utils.UiUtils;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
 
