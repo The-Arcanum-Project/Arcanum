@@ -60,6 +60,10 @@ public static class De
       validation = false;
    }
 
+   public static void Warning(ref ParsingContext pc,
+                              DiagnosticDescriptor descriptor,
+                              params object[] args) => Warning(pc.Context.GetInstance(), descriptor, pc.BuildStackTrace(), args);
+
    public static void Warning(LocationContext ctx,
                               DiagnosticDescriptor descriptor,
                               string action,

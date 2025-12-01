@@ -36,13 +36,68 @@ public ref struct ParsingContext
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void SetContext(LiteralValueNode lvn)
+   {
+      var loc = lvn.GetLocation();
+      Context.LineNumber = loc.Item1;
+      Context.ColumnNumber = loc.Item2;
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void SetContext(FunctionCallNode fcn)
+   {
+      var loc = fcn.GetLocation();
+      Context.LineNumber = loc.Item1;
+      Context.ColumnNumber = loc.Item2;
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void SetContext(ValueNode vn)
+   {
+      var loc = vn.GetLocation();
+      Context.LineNumber = loc.Item1;
+      Context.ColumnNumber = loc.Item2;
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public void SetContext(StatementNode cn) => SetContext(cn.KeyNode);
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void SetContext(Token token)
+   {
+      Context.LineNumber = token.Line;
+      Context.ColumnNumber = token.Column;
+   }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public bool Fail()
    {
       Validation = false;
       return false;
+   }
+
+   public string BuildStackTrace()
+   {
+      Span<char> buffer = stackalloc char[256];
+      var pos = 0;
+      for (var i = 0; i < ActionStackPtr; i++)
+      {
+         var action = ActionStack[i];
+         if (action is null)
+            continue;
+
+         var actionSpan = action.AsSpan();
+         if (pos + actionSpan.Length + 1 > buffer.Length)
+            break;
+
+         if (i > 0)
+            buffer[pos++] = '.';
+
+         actionSpan.CopyTo(buffer[pos..]);
+         pos += actionSpan.Length;
+      }
+
+      return buffer[..pos].ToString();
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,9 +141,22 @@ public ref struct ParsingContext
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   public string GetSourceSlice(int start, int length) => SliceSource(start, length).ToString();
+   public string SliceString(int start, int length) => SliceSource(start, length).ToString();
 
-   public string GetSourceSlice(StatementNode sn) => SliceSource(sn.KeyNode.Start, sn.KeyNode.Length).ToString();
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(StatementNode sn) => SliceSource(sn.KeyNode.Start, sn.KeyNode.Length).ToString();
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(LiteralValueNode lvn) => SliceSource(lvn.Start, lvn.Length).ToString();
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(FunctionCallNode fcn) => SliceSource(fcn.FunctionName.Start, fcn.FunctionName.Length).ToString();
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(Token token) => SliceSource(token.Start, token.Length).ToString();
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public string SliceString(KeyNodeBase start) => SliceSource(start.Start, start.Length).ToString();
 }
 
 public static class ParsingContextExtensions

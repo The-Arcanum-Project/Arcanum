@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
@@ -14,41 +13,29 @@ public static class Pdh
 {
    public delegate bool ContentParser<in TTarget>(ContentNode cn,
                                                   TTarget target,
-                                                  LocationContext ctx,
-                                                  string source,
-                                                  ref bool validation)
+                                                  ref ParsingContext pc)
       where TTarget : INexus;
 
    public delegate bool ContentItemParser<TItem>(
       ContentNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      out TItem value,
-      ref bool validation);
+      ref ParsingContext pc,
+      out TItem value);
 
    public delegate bool KeyOnlyItemParser<TItem>(
       KeyOnlyNode node,
-      LocationContext ctx,
-      string actionName,
-      string source,
-      out TItem value,
-      ref bool validation);
+      ref ParsingContext pc,
+      out TItem value);
 
    public delegate bool BlockItemParser<in TTarget>(
       BlockNode block,
       TTarget target,
-      LocationContext ctx,
-      string source,
-      ref bool validation)
+      ref ParsingContext pc)
       where TTarget : INexus;
 
    public delegate void EmbeddedItemParser<in TTarget>(
       BlockNode block,
       TTarget target,
-      LocationContext ctx,
-      string source,
-      ref bool validation,
+      ref ParsingContext pc,
       bool allowUnknownNodes)
       where TTarget : INexus;
 
@@ -56,57 +43,40 @@ public static class Pdh
 
    public delegate bool BlockParser<in TTarget>(BlockNode bn,
                                                 TTarget target,
-                                                LocationContext ctx,
-                                                string source,
-                                                ref bool validation)
+                                                ref ParsingContext pc)
       where TTarget : INexus;
 
    public delegate bool StatementParser<in TTarget>(StatementNode bn,
                                                     TTarget target,
-                                                    LocationContext ctx,
-                                                    string source,
-                                                    ref bool validation)
+                                                    ref ParsingContext pc)
       where TTarget : INexus;
 
    public delegate void PropertyParser<in TTarget>(BlockNode block,
                                                    TTarget target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool complainOnUnknownNodes)
       where TTarget : INexus;
 
    /// <summary>
    /// Dispatches the content node to the appropriate parser based on the key.
    /// </summary>
-   /// <param name="cn"></param>
-   /// <param name="target"></param>
-   /// <param name="ctx"></param>
-   /// <param name="source"></param>
-   /// <param name="actionStack"></param>
-   /// <param name="validation"></param>
-   /// <param name="parsers"></param>
-   /// <typeparam name="TTarget"></typeparam>
    public static void DispatchContentNode<TTarget>(
       ContentNode cn,
       TTarget target,
-      LocationContext ctx,
-      string source,
-      string actionStack,
-      Dictionary<string, ContentParser<TTarget>> parsers,
-      ref bool validation) where TTarget : INexus
+      ref ParsingContext pc,
+      Dictionary<string, ContentParser<TTarget>> parsers) where TTarget : INexus
    {
-      var key = cn.KeyNode.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var key = pc.SliceString(cn);
       if (parsers.TryGetValue(key, out var parser))
       {
-         parser(cn, target, ctx, source, ref validation);
+         parser(cn, target, ref pc);
       }
       else
       {
-         ctx.SetPosition(cn.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(cn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionStack,
                                         key,
                                         string.Join(", ", parsers.Keys));
       }
@@ -115,34 +85,24 @@ public static class Pdh
    /// <summary>
    /// Dispatches the block node to the appropriate parser based on the key.
    /// </summary>
-   /// <param name="bn"></param>
-   /// <param name="target"></param>
-   /// <param name="ctx"></param>
-   /// <param name="source"></param>
-   /// <param name="actionStack"></param>
-   /// <param name="validation"></param>
-   /// <param name="parsers"></param>
-   /// <typeparam name="TTarget"></typeparam>
+   /// 
    public static void DispatchBlockNode<TTarget>(
       BlockNode bn,
       TTarget target,
-      LocationContext ctx,
-      string source,
-      string actionStack,
-      Dictionary<string, BlockParser<TTarget>> parsers,
-      ref bool validation) where TTarget : INexus
+      ref ParsingContext pc,
+      Dictionary<string, BlockParser<TTarget>> parsers) where TTarget : INexus
    {
-      var key = bn.KeyNode.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var key = pc.SliceString(bn);
       if (parsers.TryGetValue(key, out var parser))
       {
-         parser(bn, target, ctx, source, ref validation);
+         parser(bn, target, ref pc);
       }
       else
       {
-         ctx.SetPosition(bn.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(bn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBlockName,
-                                        actionStack,
                                         key,
                                         string.Join(", ", parsers.Keys));
       }
@@ -151,27 +111,28 @@ public static class Pdh
    public static void DispatchStatementNode<TTarget>(
       StatementNode sn,
       TTarget target,
-      LocationContext ctx,
-      string source,
-      string actionStack,
+      ref ParsingContext pc,
       Dictionary<string, ContentParser<TTarget>> contentParsers,
-      Dictionary<string, BlockParser<TTarget>> blockParsers,
-      ref bool validation) where TTarget : INexus
+      Dictionary<string, BlockParser<TTarget>> blockParsers) where TTarget : INexus
    {
-      if (sn is ContentNode cn)
-         DispatchContentNode(cn, target, ctx, source, actionStack, contentParsers, ref validation);
-      else if (sn is BlockNode bn)
-         DispatchBlockNode(bn, target, ctx, source, actionStack, blockParsers, ref validation);
-      else
+      using var scope = pc.PushScope();
+      switch (sn)
       {
-         validation = false;
-         ctx.SetPosition(sn.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidNodeType,
-                                        actionStack,
-                                        sn.GetType().Name,
-                                        "ContentNode or BlockNode",
-                                        sn.KeyNode.GetLexeme(source));
+         case ContentNode cn:
+            DispatchContentNode(cn, target, ref pc, contentParsers);
+            break;
+         case BlockNode bn:
+            DispatchBlockNode(bn, target, ref pc, blockParsers);
+            break;
+         default:
+            pc.Validation = false;
+            pc.SetContext(sn);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.InvalidNodeType,
+                                           sn.GetType().Name,
+                                           "ContentNode or BlockNode",
+                                           pc.SliceString(sn));
+            break;
       }
    }
 
@@ -179,54 +140,36 @@ public static class Pdh
    /// Parses all properties of a target object by iterating through the children of a BlockNode
    /// and dispatching them to the appropriate parsers.
    /// </summary>
-   /// <typeparam name="TTarget">The type of the object being populated.</typeparam>
-   /// <param name="block">The BlockNode containing the properties to parse.</param>
-   /// <param name="target">The target object instance to populate.</param>
-   /// <param name="ctx">The location context for error reporting.</param>
-   /// <param name="source">The source code string.</param>
-   /// <param name="validation">A reference to the overall validation flag.</param>
-   /// <param name="contentParsers">The dictionary of parsers for ContentNodes.</param>
-   /// <param name="blockParsers">The dictionary of parsers for BlockNodes.</param>
-   /// <param name="statementParsers"></param>
-   /// <param name="dynamicBlockParsers"></param>
-   /// <param name="dynamicContentParsers"></param>
-   /// <param name="ignoredBlockKeys"></param>
-   /// <param name="ignoredContentKeys"></param>
-   /// <param name="allowUnknownNodes"></param>
    /// <returns>A list of all child StatementNodes that were not handled by any parser.</returns>
    public static void ParseProperties<TTarget>(BlockNode block,
                                                TTarget target,
-                                               LocationContext ctx,
-                                               string source,
-                                               ref bool validation,
-                                               IReadOnlyDictionary<string, ContentParser<TTarget>>
-                                                  contentParsers,
-                                               IReadOnlyDictionary<string, BlockParser<TTarget>>
-                                                  blockParsers,
-                                               IReadOnlyDictionary<string, StatementParser<TTarget>>
-                                                  statementParsers,
+                                               ref ParsingContext pc,
+                                               IReadOnlyDictionary<string, ContentParser<TTarget>> contentParsers,
+                                               IReadOnlyDictionary<string, BlockParser<TTarget>> blockParsers,
+                                               IReadOnlyDictionary<string, StatementParser<TTarget>> statementParsers,
                                                List<BlockParser<TTarget>> dynamicBlockParsers,
                                                List<ContentParser<TTarget>> dynamicContentParsers,
                                                HashSet<string> ignoredBlockKeys,
                                                HashSet<string> ignoredContentKeys,
                                                bool allowUnknownNodes = false) where TTarget : INexus
    {
+      using var scope = pc.PushScope();
       foreach (var sn in block.Children)
       {
-         var key = sn.KeyNode.GetLexeme(source);
+         var key = pc.SliceString(sn);
          var wasHandled = false;
          if (sn is ContentNode cn)
          {
             if (contentParsers.TryGetValue(key, out var parser))
             {
-               parser(cn, target, ctx, source, ref validation);
+               parser(cn, target, ref pc);
                wasHandled = true;
             }
             else
             {
                foreach (var dcParser in dynamicContentParsers)
                {
-                  if (!dcParser(cn, target, ctx, source, ref validation))
+                  if (!dcParser(cn, target, ref pc))
                      continue;
 
                   wasHandled = true;
@@ -238,14 +181,14 @@ public static class Pdh
          {
             if (blockParsers.TryGetValue(key, out var parser))
             {
-               parser(bn, target, ctx, source, ref validation);
+               parser(bn, target, ref pc);
                wasHandled = true;
             }
             else
             {
                foreach (var dbParser in dynamicBlockParsers)
                {
-                  if (!dbParser(bn, target, ctx, source, ref validation))
+                  if (!dbParser(bn, target, ref pc))
                      continue;
 
                   wasHandled = true;
@@ -257,47 +200,44 @@ public static class Pdh
          if (wasHandled)
             continue;
 
-         if (statementParsers.TryGetValue(sn.KeyNode.GetLexeme(source), out var snParser))
+         if (statementParsers.TryGetValue(pc.SliceString(sn), out var snParser))
          {
-            snParser(sn, target, ctx, source, ref validation);
+            snParser(sn, target, ref pc);
             continue;
          }
 
          if (allowUnknownNodes)
             continue;
 
-         if (sn is ContentNode cNode && ignoredContentKeys.Contains(cNode.KeyNode.GetLexeme(source)))
+         if (sn is ContentNode cNode && ignoredContentKeys.Contains(pc.SliceString(cNode)))
             continue;
-         if (sn is BlockNode bNode && ignoredBlockKeys.Contains(bNode.KeyNode.GetLexeme(source)))
+         if (sn is BlockNode bNode && ignoredBlockKeys.Contains(pc.SliceString(bNode)))
             continue;
 
-         ctx.SetPosition(sn.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(sn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        $"Parsing.{typeof(TTarget).Name}.{nameof(ParseProperties)}.{key}",
                                         sn.GetType().Name,
                                         "ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.",
-                                        sn.KeyNode.GetLexeme(source));
+                                        pc.SliceString(sn));
       }
    }
 
    public static ObservableRangeCollection<T> ParseContentCollection<T>(BlockNode node,
-                                                                        LocationContext ctx,
-                                                                        string source,
-                                                                        string actionStack,
-                                                                        ref bool validation,
+                                                                        ref ParsingContext pc,
                                                                         ContentItemParser<T> itemParser)
    {
+      using var scope = pc.PushScope();
       var results = new ObservableRangeCollection<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
+         if (!sn.IsContentNode(ref pc, out var cn))
             continue;
 
-         if (itemParser(cn, ctx, actionStack, source, out var item, ref validation))
+         if (itemParser(cn, ref pc, out var item))
             results.Add(item);
       }
 
@@ -305,22 +245,20 @@ public static class Pdh
    }
 
    public static ObservableRangeCollection<T> ParseKeyOnlyCollection<T>(BlockNode node,
-                                                                        LocationContext ctx,
-                                                                        string source,
-                                                                        string actionStack,
-                                                                        ref bool validation,
+                                                                        ref ParsingContext pc,
                                                                         KeyOnlyItemParser<T> itemParser)
    {
+      using var scope = pc.PushScope();
       var results = new ObservableRangeCollection<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsKeyOnlyNode(ctx, source, actionStack, ref validation, out var kon))
+         if (!sn.IsKeyOnlyNode(ref pc, out var kon))
             continue;
 
-         if (itemParser(kon, ctx, actionStack, source, out var item, ref validation))
+         if (itemParser(kon, ref pc, out var item))
             results.Add(item);
       }
 
@@ -328,25 +266,23 @@ public static class Pdh
    }
 
    public static ObservableRangeCollection<T> ParseBlockCollection<T>(BlockNode node,
-                                                                      LocationContext ctx,
-                                                                      string source,
-                                                                      string actionStack,
-                                                                      ref bool validation,
-                                                                      BlockItemParser<T> itemParser) where T : INexus
+                                                                      ref ParsingContext pc,
+                                                                      BlockItemParser<T> itemParser) where T : INexus, new()
    {
+      using var scope = pc.PushScope();
       var results = new ObservableRangeCollection<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
+         var newInstance = new T();
          Debug.Assert(newInstance != null, "newInstance != null");
 
-         if (itemParser(bn, newInstance, ctx, source, ref validation))
+         if (itemParser(bn, newInstance, ref pc))
             results.Add(newInstance);
       }
 
@@ -354,27 +290,24 @@ public static class Pdh
    }
 
    public static ObservableRangeCollection<T> ParseEmbeddedCollection<T>(BlockNode node,
-                                                                         LocationContext ctx,
-                                                                         string source,
-                                                                         string actionStack,
-                                                                         ref bool validation,
+                                                                         ref ParsingContext pc,
                                                                          EmbeddedItemParser<T> itemParser,
                                                                          bool allowUnknownNodes)
       where T : INexus, IEu5Object<T>, new()
    {
+      using var scope = pc.PushScope();
       var results = new ObservableRangeCollection<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
-         newInstance.UniqueId = bn.KeyNode.GetLexeme(source);
+         var newInstance = new T { UniqueId = pc.SliceString(sn) };
          Debug.Assert(newInstance != null, "newInstance != null");
-         itemParser(bn, newInstance, ctx, source, ref validation, allowUnknownNodes);
+         itemParser(bn, newInstance, ref pc, allowUnknownNodes);
          results.Add(newInstance);
       }
 
@@ -382,30 +315,27 @@ public static class Pdh
    }
 
    public static ObservableHashSet<T> ParseKeyOnlyObservableHashSet<T>(BlockNode node,
-                                                                       LocationContext ctx,
-                                                                       string source,
-                                                                       string actionStack,
-                                                                       ref bool validation,
+                                                                       ref ParsingContext pc,
                                                                        KeyOnlyItemParser<T> itemParser)
    {
+      using var scope = pc.PushScope();
       var results = new ObservableHashSet<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsKeyOnlyNode(ctx, source, actionStack, ref validation, out var kon))
+         if (!sn.IsKeyOnlyNode(ref pc, out var kon))
             continue;
 
-         if (itemParser(kon, ctx, actionStack, source, out var item, ref validation))
+         if (itemParser(kon, ref pc, out var item))
             if (!results.Add(item))
             {
-               ctx.SetPosition(kon.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
+               pc.SetContext(kon);
+               DiagnosticException.LogWarning(ref pc,
                                               ParsingError.Instance.DuplicateItemInCollection,
-                                              actionStack,
-                                              kon.KeyNode.GetLexeme(source),
-                                              node.KeyNode.GetLexeme(source));
+                                              pc.SliceString(kon),
+                                              pc.SliceString(node));
             }
       }
 
@@ -413,35 +343,31 @@ public static class Pdh
    }
 
    public static ObservableHashSet<T> ParseEmbeddedObservableHashSet<T>(BlockNode node,
-                                                                        LocationContext ctx,
-                                                                        string source,
-                                                                        string actionStack,
-                                                                        ref bool validation,
+                                                                        ref ParsingContext pc,
                                                                         EmbeddedItemParser<T> itemParser,
                                                                         bool allowUnknownNodes)
       where T : INexus, IEu5Object<T>, new()
    {
+      using var scope = pc.PushScope();
       var results = new ObservableHashSet<T>();
       if (node.Children.Count == 0)
          return results;
 
       foreach (var sn in node.Children)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var newInstance = (T)Activator.CreateInstance(typeof(T))!;
-         newInstance.UniqueId = bn.KeyNode.GetLexeme(source);
+         var newInstance = new T { UniqueId = pc.SliceString(sn) };
          Debug.Assert(newInstance != null, "newInstance != null");
-         itemParser(bn, newInstance, ctx, source, ref validation, allowUnknownNodes);
+         itemParser(bn, newInstance, ref pc, allowUnknownNodes);
          if (!results.Add(newInstance))
          {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.DuplicateItemInCollection,
-                                           actionStack,
-                                           bn.KeyNode.GetLexeme(source),
-                                           node.KeyNode.GetLexeme(source));
+                                           pc.SliceString(bn),
+                                           pc.SliceString(node));
          }
       }
 
@@ -450,13 +376,11 @@ public static class Pdh
 
    public static IEu5Object ParseDynamicObject<TObject>(string key,
                                                         BlockNode bn,
-                                                        string source,
-                                                        LocationContext ctx,
-                                                        PropertyParser<TObject> propsParser,
-                                                        ref bool validation) where TObject : IEu5Object, new()
+                                                        ref ParsingContext pc,
+                                                        PropertyParser<TObject> propsParser) where TObject : IEu5Object, new()
    {
       var instance = new TObject { UniqueId = key };
-      propsParser(bn, instance, ctx, source, ref validation, false);
+      propsParser(bn, instance, ref pc, false);
       return instance;
    }
 }
