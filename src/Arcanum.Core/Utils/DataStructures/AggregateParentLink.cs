@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Reflection;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
@@ -11,12 +12,13 @@ public sealed class AggregateParentLink<T> : ObservableRangeCollection<T> where 
    public readonly Enum NxOwnerProp;
    public readonly IEu5Object Owner;
 
+   public bool Lock = false;
+
    public AggregateParentLink(Enum nxOwnerProp, IEu5Object owner)
    {
       NxOwnerProp = nxOwnerProp;
       Owner = owner;
-
-      Debug.Assert(((IEu5Object)EmptyRegistry.Empties[typeof(T)]).GetAllProperties().Contains(NxOwnerProp),
+      Debug.Assert(typeof(T).GetProperty(NxOwnerProp.ToString()) != null,
                    $"The items being added do not contain the owner property {NxOwnerProp}.");
       CollectionChanged += AggregateCollection_CollectionChanged;
    }
@@ -65,10 +67,29 @@ public sealed class AggregateParentLink<T> : ObservableRangeCollection<T> where 
          return;
 
       var empty = EmptyRegistry.Empties[Owner.GetType()];
+      if(Lock) return;
+      Lock = true;
       foreach (var item in oldItems)
       {
          Debug.Assert(!Equals(item._getValue(NxOwnerProp), empty));
          item._setValue(NxOwnerProp, empty);
       }
+      Lock = false;
+   }
+
+   public void _removeFromChild(T child)
+   {
+      if (Lock) return;
+      Lock = true;
+      Remove(child);
+      Lock = false;
+   }
+
+   public void _addFromChild(T child)
+   {
+      if (Lock) return;
+      Lock = true;
+      Add(child);
+      Lock = false;
    }
 }
