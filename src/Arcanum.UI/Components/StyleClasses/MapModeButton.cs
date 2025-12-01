@@ -7,14 +7,14 @@ namespace Arcanum.UI.Components.StyleClasses;
 
 public class MapModeButton : BaseButton
 {
-   private MapModeManager.MapModeType _mapModeType;
    public int ButtonIndex { get; set; }
+
    public MapModeManager.MapModeType MapModeType
    {
-      get => _mapModeType;
+      get;
       set
       {
-         _mapModeType = value;
+         field = value;
          Content = value.ToString();
          InvalidateVisual();
       }

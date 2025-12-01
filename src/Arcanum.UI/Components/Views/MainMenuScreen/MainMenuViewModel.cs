@@ -32,8 +32,6 @@ public class MainMenuViewModel : ObservableObject
    public ArcanumViewModel ArcanumVm { get; set; }
    public AboutUsViewModel AboutUsVm { get; set; }
    public AttributionsViewModel AttributionsVm { get; set; }
-   private object _currentView = null!;
-   private Visibility _isWindowVisible = Visibility.Visible;
 
    public string LaunchButtonText => CurrentView switch
    {
@@ -49,28 +47,29 @@ public class MainMenuViewModel : ObservableObject
 
    public Visibility IsWindowVisible
    {
-      get => _isWindowVisible;
+      get;
       set
       {
-         if (value == _isWindowVisible)
+         if (value == field)
             return;
 
-         _isWindowVisible = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = Visibility.Visible;
 
    public object CurrentView
    {
-      get => _currentView;
+      get;
       private set
       {
-         _currentView = value;
+         field = value;
          OnPropertyChanged();
          OnPropertyChanged(nameof(LaunchButtonText));
          OnPropertyChanged(nameof(IsNewProjectButtonVisible));
       }
-   }
+   } = null!;
+
    public required Windows.MainWindows.MainMenuScreen MenuWindow { get; set; }
 
    public MainMenuViewModel()

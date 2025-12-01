@@ -36,142 +36,132 @@ public partial class ErrorLog : INotifyPropertyChanged
       Resolution,
    }
 
-   private string _errorName = "Error Name";
    public string ErrorName
    {
-      get => _errorName;
+      get;
       set
       {
-         if (_errorName == value)
+         if (field == value)
             return;
 
-         _errorName = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "Error Name";
 
-   private string _errorMessage = "Error Message";
    public string ErrorMessage
    {
-      get => _errorMessage;
+      get;
       set
       {
-         if (_errorMessage == value)
+         if (field == value)
             return;
 
-         _errorMessage = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "Error Message";
 
-   private string _errorDescription = "Error Description";
    public string ErrorDescription
    {
-      get => _errorDescription;
+      get;
       set
       {
-         if (_errorDescription == value)
+         if (field == value)
             return;
 
-         _errorDescription = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "Error Description";
 
-   private string _fileProbe = string.Empty;
    public string FileProbe
    {
-      get => _fileProbe;
+      get;
       set
       {
-         if (_fileProbe == value)
+         if (field == value)
             return;
 
-         _fileProbe = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = string.Empty;
 
-   private DiagnosticSeverity _selectedSeverity = DiagnosticSeverity.Error;
    public DiagnosticSeverity SelectedSeverity
    {
-      get => _selectedSeverity;
+      get;
       set
       {
-         if (_selectedSeverity == value)
+         if (field == value)
             return;
 
-         _selectedSeverity = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = DiagnosticSeverity.Error;
 
-   private string _selectedPath = string.Empty;
    public string SelectedPath
    {
-      get => _selectedPath;
+      get;
       set
       {
-         if (_selectedPath == value)
+         if (field == value)
             return;
 
-         _selectedPath = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = string.Empty;
 
-   private bool _dontProbeFiles;
    public bool DontProbeForFiles
    {
-      get => _dontProbeFiles;
+      get;
       set
       {
-         if (_dontProbeFiles == value)
+         if (field == value)
             return;
 
-         _dontProbeFiles = value;
+         field = value;
          OnPropertyChanged();
       }
    }
 
-   private int _modErrorCount;
    public int ModErrorCount
    {
-      get => _modErrorCount;
+      get;
       set
       {
-         if (_modErrorCount == value)
+         if (field == value)
             return;
 
-         _modErrorCount = value;
+         field = value;
          OnPropertyChanged();
       }
    }
 
-   private int _vanillaErrorCount;
    public int VanillaErrorCount
    {
-      get => _vanillaErrorCount;
+      get;
       set
       {
-         if (_vanillaErrorCount == value)
+         if (field == value)
             return;
 
-         _vanillaErrorCount = value;
+         field = value;
          OnPropertyChanged();
       }
    }
 
-   private int _baseModErrorCount;
    public int BaseModErrorCount
    {
-      get => _baseModErrorCount;
+      get;
       set
       {
-         if (_baseModErrorCount == value)
+         if (field == value)
             return;
 
-         _baseModErrorCount = value;
+         field = value;
          OnPropertyChanged();
       }
    }

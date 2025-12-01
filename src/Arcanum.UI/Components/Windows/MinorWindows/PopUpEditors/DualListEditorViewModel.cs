@@ -27,33 +27,35 @@ public class DualListEditorViewModel<T> : ViewModelBase, ICollectionEditorViewMo
    private readonly ObservableCollection<ListItemViewModel<T>> _availableItemsInternal;
    public ICollectionView AppliedItems { get; }
    public ICollectionView AvailableItems { get; }
+
    public string AppliedFilterText
    {
-      get => _appliedFilterText;
+      get;
       set
       {
-         if (SetProperty(ref _appliedFilterText, value))
+         if (SetProperty(ref field, value))
             AppliedItems.Refresh();
       }
-   }
-   private string _appliedFilterText = string.Empty;
+   } = string.Empty;
+
    public string AvailableFilterText
    {
-      get => _availableFilterText;
+      get;
       set
       {
-         if (SetProperty(ref _availableFilterText, value))
+         if (SetProperty(ref field, value))
             AvailableItems.Refresh();
       }
-   }
-   private string _availableFilterText = string.Empty;
+   } = string.Empty;
+
    public bool CanCreatePrimitives { get; }
+
    public string NewPrimitiveValue
    {
-      get => _newPrimitiveValue;
-      set => SetProperty(ref _newPrimitiveValue, value);
-   }
-   private string _newPrimitiveValue = string.Empty;
+      get;
+      set => SetProperty(ref field, value);
+   } = string.Empty;
+
    private readonly HashSet<T> _itemsToAddToAll = [];
    private readonly HashSet<T> _itemsToRemoveFromAll = [];
    public List<ICollection<T>> Collections { get; }

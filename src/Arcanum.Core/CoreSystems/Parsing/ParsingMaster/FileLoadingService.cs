@@ -19,11 +19,12 @@ public abstract class FileLoadingService : IDependencyNode<string>
 {
    public IEnumerable<IDependencyNode<string>> Dependencies
    {
-      get => _dependencies;
-      set => _dependencies = SuccessfullyLoaded
-                                ? throw new InvalidOperationException("Cannot change dependencies after loading.")
-                                : value;
-   }
+      get;
+      set => field = SuccessfullyLoaded
+         ? throw new InvalidOperationException("Cannot change dependencies after loading.")
+         : value;
+   } = null!;
+
    /// <summary>
    /// If this step is a heavy step, it will be executed on a thread that is only used for heavy steps and not in parallel with light steps.
    /// Heavy steps are usually CPU-bound and take a long time to execute.
@@ -31,7 +32,6 @@ public abstract class FileLoadingService : IDependencyNode<string>
    public virtual bool IsHeavyStep => false;
    public string Name { get; }
    private readonly Stopwatch _stopwatch = new();
-   private IEnumerable<IDependencyNode<string>> _dependencies = null!;
 
    public FileDescriptor Descriptor = null!;
 

@@ -12,16 +12,15 @@ public partial class UIElementsBrowser
       InitializeComponent();
    }
 #if DEBUG
-   private object _selectedObject = new AllOptionsTestObject();
 #else
     private object _selectedObject = new YourDataType("Test");
 #endif
 
    public object SelectedObject
    {
-      get => _selectedObject;
-      set => _selectedObject = value;
-   }
+      get;
+      set => field = value;
+   } = new AllOptionsTestObject();
 
    public int IntValue { get; set; } = 42;
    public decimal DecimalValue { get; set; } = 3.14m;

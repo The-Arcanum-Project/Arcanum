@@ -36,107 +36,100 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    public const int DEFAULT_WIDTH = 1920;
    public const int DEFAULT_HEIGHT = 1080;
 
-   private string _ramUsage = "RAM: [0 MB]";
-   private string _cpuUsage = "CPU: [0%]";
-   private string _gpuUsage = "GPU: [0%]";
-   private string _vramUsage = "VRAM: [0 MB]";
-   private string _fps = "FPS: [0]";
-   private string _hoveredLocation = null!;
-   private string _rectangleBounds = null!;
-
    private readonly ToolTipManager _toolTipManager = new();
 
    #region Properties
 
    public string RamUsage
    {
-      get => _ramUsage;
+      get;
       private set
       {
-         if (value == _ramUsage)
+         if (value == field)
             return;
 
-         _ramUsage = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "RAM: [0 MB]";
+
    public string CpuUsage
    {
-      get => _cpuUsage;
+      get;
       private set
       {
-         if (value == _cpuUsage)
+         if (value == field)
             return;
 
-         _cpuUsage = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "CPU: [0%]";
 
    public string GpuUsage
    {
-      get => _gpuUsage;
+      get;
       private set
       {
-         if (value == _gpuUsage)
+         if (value == field)
             return;
 
-         _gpuUsage = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "GPU: [0%]";
 
    public string VramUsage
    {
-      get => _vramUsage;
+      get;
       private set
       {
-         if (value == _vramUsage)
+         if (value == field)
             return;
 
-         _vramUsage = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "VRAM: [0 MB]";
 
    public string Fps
    {
-      get => _fps;
+      get;
       private set
       {
-         if (value == _fps)
+         if (value == field)
             return;
 
-         _fps = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "FPS: [0]";
 
    public string HoveredLocation
    {
-      get => _hoveredLocation;
+      get;
       private set
       {
-         if (value == _hoveredLocation)
+         if (value == field)
             return;
 
-         _hoveredLocation = value.PadLeft(30);
+         field = value.PadLeft(30);
          OnPropertyChanged();
       }
-   }
+   } = null!;
 
    public string RectangleBounds
    {
-      get => _rectangleBounds;
+      get;
       set
       {
-         if (value == _rectangleBounds)
+         if (value == field)
             return;
 
-         _rectangleBounds = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = null!;
 
    #endregion
 

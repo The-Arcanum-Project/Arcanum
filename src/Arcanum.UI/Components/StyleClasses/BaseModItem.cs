@@ -11,19 +11,18 @@ namespace Arcanum.UI.Components.StyleClasses;
 
 public class BaseModItem : INotifyPropertyChanged
 {
-   private DataSpace _dataSpace = DataSpace.Empty;
    public DataSpace DataSpace
    {
-      get => _dataSpace;
+      get;
       set
       {
-         if (_dataSpace == value)
+         if (field == value)
             return;
 
-         _dataSpace = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = DataSpace.Empty;
 
    public ICommand SelectFolderCommand { get; }
    public ICommand RemoveCommand { get; }

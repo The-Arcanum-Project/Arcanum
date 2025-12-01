@@ -19,7 +19,6 @@ namespace Arcanum.Core.CoreSystems.Selection;
 /// </summary>
 public static class SelectionManager
 {
-   private static ObjectSelectionMode _objectSelectionMode = ObjectSelectionMode.LocationSelection;
    private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
    /// <summary>
    /// This is the collection of objects that are currently editable in the UI. <br/>
@@ -34,17 +33,17 @@ public static class SelectionManager
 
    public static ObjectSelectionMode ObjectSelectionMode
    {
-      get => _objectSelectionMode;
+      get;
       set
       {
-         if (_objectSelectionMode == value)
+         if (field == value)
             return;
 
-         _objectSelectionMode = value;
+         field = value;
          OnPropertyChanged(nameof(ObjectSelectionMode));
          Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
       }
-   }
+   } = ObjectSelectionMode.LocationSelection;
 
    /// <summary>
    /// Is Called after the selection has already updated the editable objects
