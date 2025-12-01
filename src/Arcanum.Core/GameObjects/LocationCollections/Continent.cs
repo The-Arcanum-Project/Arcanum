@@ -33,8 +33,9 @@ public partial class Continent
                                                                           .Distinct()
                                                                           .ToList();
 
-   [SaveAs(isEmbeddedObject: true)]
    [DefaultValue(null)]
+   [SuppressAgs]
+   [SaveAs(isEmbeddedObject: true)]
    [ParseAs("null", ignore: true)]
    public AggregateLink<SuperRegion> SuperRegions { get; set; }
 
@@ -65,7 +66,7 @@ public partial class Continent
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Continent Empty => new() { UniqueId = "Arcanum_Empty_Continent" };
+   public static Continent Empty { get; } = new() { UniqueId = "Arcanum_Empty_Continent" };
 
    // IIndexRandomColor Implementation
    public int Index { get; set; }

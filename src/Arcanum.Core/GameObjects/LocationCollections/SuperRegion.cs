@@ -89,8 +89,8 @@ public partial class SuperRegion
          {
             if (field != Continent.Empty)
                field.SuperRegions._removeFromChild(this);
-            if (field != Continent.Empty)
-               field.SuperRegions._addFromChild(this);
+            if (value != Continent.Empty)
+               value.SuperRegions._addFromChild(this);
          }
 
          field = value;

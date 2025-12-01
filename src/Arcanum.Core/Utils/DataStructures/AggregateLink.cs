@@ -60,25 +60,27 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
 
    private void ItemsAdded(List<T> newItems)
    {
-      if (newItems.Count == 0)
+      if (newItems.Count == 0 || Lock)
          return;
 
       var empty = EmptyRegistry.Empties[Owner.GetType()];
+
+      Lock = true;
       foreach (var item in newItems)
       {
-         Debug.Assert(!Equals(item._getValue(NxOwnerProp), empty));
+         Debug.Assert(Equals(item._getValue(NxOwnerProp), empty));
          item._setValue(NxOwnerProp, Owner);
       }
+
+      Lock = false;
    }
 
    private void ItemsRemoved(List<T> oldItems)
    {
-      if (oldItems.Count == 0)
+      if (oldItems.Count == 0 || Lock)
          return;
 
       var empty = EmptyRegistry.Empties[Owner.GetType()];
-      if (Lock)
-         return;
 
       Lock = true;
       foreach (var item in oldItems)
