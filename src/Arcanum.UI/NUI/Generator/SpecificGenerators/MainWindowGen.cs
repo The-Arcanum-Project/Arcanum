@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows.Controls;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
 using Arcanum.UI.SpecializedEditors.Editors;
@@ -42,7 +43,8 @@ public static class MainWindowGen
             return;
          }
       }
-
+      //TODO: @Melco temporary fix for preview not clearing properly
+      SelectionManager.ClearPreview();
       navh.Root.Content = Eu5UiGen.GenerateView(navh, markedProps ?? [], hasHeader);
 
       SetSpecializedEditors(navh);
