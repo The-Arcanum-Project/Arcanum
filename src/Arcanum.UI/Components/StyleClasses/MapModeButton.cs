@@ -1,12 +1,16 @@
 ﻿using System.Windows.Controls;
+using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Windows.MainWindows;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.StyleClasses;
 
 public class MapModeButton : BaseButton
 {
+   public static Dictionary<ICommand, MapModeManager.MapModeType> CommandToMapModeType = new();
+   
    public int ButtonIndex { get; set; }
 
    public MapModeManager.MapModeType MapModeType
@@ -40,6 +44,11 @@ public class MapModeButton : BaseButton
                else
                   Config.Settings.MapModeConfig.QuickAccessMapModes
                         .Add(enumValue); // Weird fallback but will do for now.
+               if (!CommandToMapModeType.TryAdd(Command, enumValue))
+               {
+                  CommandToMapModeType[Command] = enumValue;
+               }
+
             }),
          };
          contextMenu.Items.Add(menuItem);

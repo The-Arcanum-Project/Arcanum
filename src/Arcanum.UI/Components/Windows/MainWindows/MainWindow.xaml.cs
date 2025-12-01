@@ -324,8 +324,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       Fps = fps;
    }
 
-   private readonly Dictionary<ICommand, MapModeManager.MapModeType> _commandToMapModeType = new();
-
    public event PropertyChangedEventHandler? PropertyChanged;
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -482,11 +480,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       MapModeButtonGrid.Children.Clear();
       MapModeButtonGrid.ColumnDefinitions.Clear();
-      _commandToMapModeType.Clear();
+      MapModeButton.CommandToMapModeType.Clear();
       for (var i = CommandBindings.Count; i-- > 0;)
       {
          var binding = CommandBindings[i];
-         if (_commandToMapModeType.ContainsKey(binding.Command))
+         if (MapModeButton.CommandToMapModeType.ContainsKey(binding.Command))
             CommandBindings.RemoveAt(i);
       }
 
@@ -497,7 +495,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          var routedCommand = GetMapModeButtonCommand(i);
          if (routedCommand != null && mapMode != null)
          {
-            _commandToMapModeType[routedCommand] = mapMode.Type;
+            MapModeButton.CommandToMapModeType[routedCommand] = mapMode.Type;
             var commandBinding =
                new CommandBinding(routedCommand, OnMapModeCommandExecuted, OnMapModeCommandCanExecute);
             CommandBindings.Add(commandBinding);
@@ -526,13 +524,13 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void OnMapModeCommandExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      if (_commandToMapModeType.TryGetValue(e.Command, out var mapModeType))
+      if (MapModeButton.CommandToMapModeType.TryGetValue(e.Command, out var mapModeType))
          MapModeManager.Activate(mapModeType);
    }
 
    private void OnMapModeCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
    {
-      e.CanExecute = _commandToMapModeType.ContainsKey(e.Command);
+      e.CanExecute = MapModeButton.CommandToMapModeType.ContainsKey(e.Command);
    }
 
    private RoutedCommand? GetMapModeButtonCommand(int index)
