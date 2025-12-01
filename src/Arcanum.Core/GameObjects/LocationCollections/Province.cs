@@ -16,7 +16,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 [NexusConfig]
 [ObjectSaveAs]
 public partial class Province
-   : IMapInferable, IEu5Object<Province>, ILocation, ILocationCollection<Location>, IIndexRandomColor
+   : IMapInferable, IEu5Object<Province>, ILocationCollection<Location>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ProvinceSettings;

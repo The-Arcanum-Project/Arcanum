@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Immutable;
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -66,7 +67,7 @@ public static class PropertyConfigHelper
       else
       {
          var constructorParams = pcad.AttributeConstructor?.Parameters ??
-                                 System.Collections.Immutable.ImmutableArray<IParameterSymbol>.Empty;
+                                 ImmutableArray<IParameterSymbol>.Empty;
          var minValueIndex = constructorParams.IndexOf(constructorParams.FirstOrDefault(p => p.Name == "minValue")!);
          var maxValueIndex = constructorParams.IndexOf(constructorParams.FirstOrDefault(p => p.Name == "maxValue")!);
 
@@ -201,11 +202,13 @@ public static class PropertyConfigHelper
                return $"EmptyRegistry.Empties[typeof({typeName})]";
             }
 
-            if (Helpers.IsGenericCollection(propertyType, out _))
-            {
-               var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-               return $"new {fullCollectionTypeName}()";
-            }
+            if (propertyType.)
+
+               if (Helpers.IsGenericCollection(propertyType, out _))
+               {
+                  var fullCollectionTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                  return $"new {fullCollectionTypeName}()";
+               }
             // Check if we have a JominiColor
 
             return propertyType.ToDisplayString() == JOMINI_COLOR_TYPE

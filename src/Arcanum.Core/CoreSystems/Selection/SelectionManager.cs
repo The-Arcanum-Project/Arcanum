@@ -119,7 +119,7 @@ public static class SelectionManager
       {
          case ObjectSelectionMode.LocationSelection:
          {
-            EditableObjects.ReplaceRange(cLocs);
+            EditableObjects.ClearAndAdd(cLocs);
             _searchSelectedObjects.Clear();
             break;
          }
@@ -130,12 +130,12 @@ public static class SelectionManager
             if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
                return;
 
-            EditableObjects.ReplaceRange(inferable.GetInferredList(cLocs));
+            EditableObjects.ClearAndAdd(inferable.GetInferredList(cLocs));
             _searchSelectedObjects.Clear();
             break;
          }
          case ObjectSelectionMode.FromSearch:
-            EditableObjects.ReplaceRange(_searchSelectedObjects);
+            EditableObjects.ClearAndAdd(_searchSelectedObjects);
             break;
          default:
             throw new ArgumentOutOfRangeException(nameof(ObjectSelectionMode), ObjectSelectionMode, null);
@@ -194,7 +194,7 @@ public static class SelectionManager
    }
 
    public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
-      => _searchSelectedObjects.ReplaceRange(objects);
+      => _searchSelectedObjects.ClearAndAdd(objects);
 
    public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
 
@@ -232,7 +232,7 @@ public static class SelectionManager
          SetSearchSelectedObjects([obj]);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)
-               EditableObjects.ReplaceRange(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
+               EditableObjects.ClearAndAdd(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
       }
    }
 }

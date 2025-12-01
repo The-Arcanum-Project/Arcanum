@@ -1,0 +1,74 @@
+﻿using System.Collections.Specialized;
+using System.Diagnostics;
+using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
+
+namespace Arcanum.Core.Utils.DataStructures;
+
+public sealed class AggregateParentLink<T> : ObservableRangeCollection<T> where T : IEu5Object
+{
+   public readonly Enum NxOwnerProp;
+   public readonly IEu5Object Owner;
+
+   public AggregateParentLink(Enum nxOwnerProp, IEu5Object owner)
+   {
+      NxOwnerProp = nxOwnerProp;
+      Owner = owner;
+
+      Debug.Assert(((IEu5Object)EmptyRegistry.Empties[typeof(T)]).GetAllProperties().Contains(NxOwnerProp),
+                   $"The items being added do not contain the owner property {NxOwnerProp}.");
+      CollectionChanged += AggregateCollection_CollectionChanged;
+   }
+
+   private void AggregateCollection_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+   {
+      Debug.Assert(e.NewItems is IList<T>,
+                   "NewItems is not of the expected type IList<T>.");
+      Debug.Assert(e.OldItems is IList<T>,
+                   "OldItems is not of the expected type IList<T>.");
+      switch (e.Action)
+      {
+         case NotifyCollectionChangedAction.Add:
+            ItemsAdded((List<T>)e.NewItems!);
+            break;
+
+         case NotifyCollectionChangedAction.Remove:
+            ItemsRemoved((List<T>)e.OldItems!);
+            break;
+         case NotifyCollectionChangedAction.Replace:
+            ItemsRemoved((List<T>)e.OldItems!);
+            ItemsAdded((List<T>)e.NewItems!);
+            break;
+         case NotifyCollectionChangedAction.Reset:
+            ItemsRemoved((List<T>)Items);
+            break;
+      }
+   }
+
+   private void ItemsAdded(List<T> newItems)
+   {
+      if (newItems.Count == 0)
+         return;
+
+      var empty = EmptyRegistry.Empties[Owner.GetType()];
+      foreach (var item in newItems)
+      {
+         Debug.Assert(!Equals(item._getValue(NxOwnerProp), empty));
+         item._setValue(NxOwnerProp, Owner);
+      }
+   }
+
+   private void ItemsRemoved(List<T> oldItems)
+   {
+      if (oldItems.Count == 0)
+         return;
+
+      var empty = EmptyRegistry.Empties[Owner.GetType()];
+      foreach (var item in oldItems)
+      {
+         Debug.Assert(!Equals(item._getValue(NxOwnerProp), empty));
+         item._setValue(NxOwnerProp, empty);
+      }
+   }
+}
