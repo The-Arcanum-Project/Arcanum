@@ -1,9 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ParserGenerator.HelperClasses;
+using ParserGenerator.ParserGen;
 using ParserGenerator.SubClasses;
 
 namespace ParserGenerator;
@@ -159,12 +158,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     dynamicContentNodeProps);
 
          // --- ParseProperties Method ---
-         GenerateParsePropertiesMethod(targetTypeSymbol,
-                                       sb,
-                                       targetTypeName,
-                                       classMetadata,
-                                       properties.FirstOrDefault(),
-                                       parsers);
+         // GenerateParsePropertiesMethod(targetTypeSymbol,
+         //                               sb,
+         //                               targetTypeName,
+         //                               classMetadata,
+         //                               properties.FirstOrDefault(),
+         //                               parsers);
 
          // --- Wrapper Methods (partial signatures) ---
          GenerateParserMethodSignatures(properties, sb, targetTypeName);
@@ -179,7 +178,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                            targetTypeName,
                                            parsers,
                                            context,
-                                           classMetadata);
+                                           classMetadata,
+                                           targetTypeSymbol);
       }
       catch (Exception e)
       {
@@ -302,12 +302,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                       string targetTypeName,
                                                       ImmutableArray<INamedTypeSymbol> parsers,
                                                       SourceProductionContext context,
-                                                      ParserClassMetadata classMetadata)
+                                                      ParserClassMetadata classMetadata,
+                                                      INamedTypeSymbol targetTypeSymbol)
    {
       sb.AppendLine("    #region Auto-Implemented Parsers");
+      List<PropertyData> propDataList = new(properties.Count);
 
       foreach (var prop in properties)
       {
+         var propData = new PropertyData() { PropertyMetadata = prop };
+         propDataList.Add(propData);
+
          if (GatherMethodCreationData(parserSymbol,
                                       toolboxSymbol,
                                       sb,
@@ -323,6 +328,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       out var hasEmbeddedParser,
                                       out var customParserName))
             continue;
+
+         propData.MethodCall = wrapperMethodName;
 
          if (AddDynamicBlockParser(prop, sb, targetTypeName, customParserName, toolMethodCall))
             continue;
@@ -381,6 +388,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
       }
 
       sb.AppendLine("    #endregion");
+      DispatchGenerator.GenerateMainDispatcher(sb, propDataList, targetTypeSymbol);
+      DispatchGenerator.AppendIsIgnoredCheck(sb, classMetadata.IgnoredBlockKeys, classMetadata.IgnoredContentKeys);
       sb.AppendLine("}");
    }
 
@@ -1080,101 +1089,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("}");
 
       return (hintName, sb.ToString());
-   }
-
-   private record PropertyMetadata
-   {
-      public IPropertySymbol Symbol { get; }
-      public string PropertyName => Symbol.Name;
-      public ITypeSymbol PropertyType => Symbol.Type;
-      public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
-                                        ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
-                                        : Symbol.Type;
-      public string Keyword { get; }
-      public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
-      public NodeType AstNodeType { get; }
-      public string? CustomParserMethodName { get; }
-      public INamedTypeSymbol? IEu5KeyType { get; }
-      public bool IsEmbedded { get; }
-      public bool IsShatteredList { get; }
-      public bool IsCollection { get; }
-      public bool IsHashSet { get; }
-      public INamedTypeSymbol? CustomGlobalsSource { get; }
-
-      public NodeType ItemNodeType { get; }
-
-      public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
-      {
-         Symbol = symbol;
-
-         IsShatteredList = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 3, "isShatteredList");
-         CustomParserMethodName =
-            AttributeHelper.SimpleGetAttrArgValue<string?>(attribute, 2, "customParser");
-         ItemNodeType =
-            AttributeHelper.SimpleGetAttrArgValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
-         IsEmbedded = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 5, "isEmbedded");
-         IEu5KeyType =
-            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
-         CustomGlobalsSource =
-            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
-         IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
-         IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
-                     "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";
-         if (IsHashSet)
-            IsCollection = true;
-
-         if (IsEmbedded || ((IsHashSet || IsCollection) && !IsShatteredList))
-         {
-            AstNodeType = NodeType.BlockNode;
-         }
-         else
-         {
-            // For non-embedded types, we need to parse the enum from the attribute.
-            var constructor = attribute.AttributeConstructor;
-            var nodeTypeParameter = constructor?.Parameters.FirstOrDefault(p => p.Name == "nodeType");
-
-            var astNodeTypeEnumValue = attribute.ConstructorArguments.Length > 1
-                                          ? attribute.ConstructorArguments[1].Value
-                                          : nodeTypeParameter?.ExplicitDefaultValue;
-
-            if (astNodeTypeEnumValue != null)
-            {
-               var enumTypeSymbol = nodeTypeParameter?.Type;
-               var enumMemberSymbol = enumTypeSymbol?.GetMembers()
-                                                     .OfType<IFieldSymbol>()
-                                                     .FirstOrDefault(f => f.ConstantValue != null &&
-                                                                          f.ConstantValue.Equals(astNodeTypeEnumValue));
-
-               AstNodeType = Enum.TryParse(enumMemberSymbol?.Name, out NodeType nt) ? nt : NodeType.ContentNode;
-            }
-         }
-
-         Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
-      }
-
-      private static string ToSnakeCase(string text)
-      {
-         if (string.IsNullOrEmpty(text))
-            return string.Empty;
-
-         return string.Concat(text.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x : x.ToString()))
-                      .ToLower();
-      }
-
-      // Simple sanitizer to create a valid C# identifier from a keyword string.
-      // For example, "my-key" -> "MY_KEY"
-      private static string SanitizeToIdentifier(string text)
-      {
-         if (string.IsNullOrEmpty(text))
-            return "_";
-
-         var sanitized = Regex.Replace(text, "[^a-zA-Z0-9_]", "_");
-
-         if (char.IsDigit(sanitized[0]))
-            sanitized = "_" + sanitized;
-
-         return sanitized;
-      }
    }
 
    private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
