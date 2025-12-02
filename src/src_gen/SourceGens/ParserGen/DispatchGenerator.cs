@@ -140,10 +140,12 @@ public static class DispatchGenerator
       var cnGroups = ignoredCns.GroupBy(k => k.Length);
       foreach (var g in cnGroups)
       {
-         sb.AppendLine($"                    case {g.Key}:");
+         sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
          foreach (var key in g)
          {
-            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key)}) return true;");
+            sb.AppendLine($"                        // {key}");
+            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
+            sb.AppendLine("                             return true;");
          }
 
          sb.AppendLine("                        break;");
@@ -158,10 +160,12 @@ public static class DispatchGenerator
       var bnGroups = ignoredBns.GroupBy(k => k.Length);
       foreach (var g in bnGroups)
       {
-         sb.AppendLine($"                    case {g.Key}:");
+         sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
          foreach (var key in g)
          {
-            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key)}) return true;");
+            sb.AppendLine($"                        // {key}");
+            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
+            sb.AppendLine("                             return true;");
          }
 
          sb.AppendLine("                        break;");
@@ -188,14 +192,15 @@ public static class DispatchGenerator
       foreach (var group in groups)
       {
          var propertyKeys = group.Properties.Select(p => p.PropertyMetadata.Keyword);
-         sb.AppendLine($"            case {group.Length}: // [{group.Properties.Count,2}] {string.Join(", ", propertyKeys)}");
+         sb.AppendLine($"            case {group.Length}: // [{group.Properties.Count,2}]");
          sb.AppendLine("            {");
 
          foreach (var prop in group.Properties)
          {
             var md = prop.PropertyMetadata;
-            var integerCheck = IntegerCheckGenerator.Generate(md.Keyword);
+            var integerCheck = IntegerCheckGenerator.Generate(md.Keyword, "                 ");
 
+            sb.AppendLine($"                // {md.Keyword}");
             sb.AppendLine($"                if ({integerCheck})");
             sb.AppendLine("                {");
             sb.AppendLine($"                    if (node is {md.AstNodeType} {md.Keyword}_node)");

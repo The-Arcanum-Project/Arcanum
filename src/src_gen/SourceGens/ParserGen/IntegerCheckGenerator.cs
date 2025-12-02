@@ -4,7 +4,7 @@ namespace ParserGenerator.ParserGen;
 
 public static class IntegerCheckGenerator
 {
-   public static string Generate(string keyword)
+   public static string Generate(string keyword, string padding)
    {
       var sb = new StringBuilder();
       var bytes = Encoding.Unicode.GetBytes(keyword);
@@ -39,7 +39,7 @@ public static class IntegerCheckGenerator
       void AppendCheck(string type, string suffix, int size, object hexValue)
       {
          if (!isFirst)
-            sb.Append(" && ");
+            sb.Append($"\n{padding}&& ");
 
          if (offset == 0)
             sb.Append($"*({type}*)ptr == 0x{hexValue}{suffix}");
