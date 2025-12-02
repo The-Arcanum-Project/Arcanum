@@ -42,8 +42,8 @@ public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocatio
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Area)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .Area)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -56,7 +56,7 @@ public partial class Area : IMapInferable, IEu5Object<Area>, ILocation, ILocatio
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Areas;
    public string GetNamespace => $"Map.{nameof(Area)}";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);

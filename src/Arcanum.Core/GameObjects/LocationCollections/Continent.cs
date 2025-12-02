@@ -60,7 +60,7 @@ public partial class Continent
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.ContinentSettings;
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Continent> GetGlobalItems() => Globals.Continents;
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Continents;
    public string GetNamespace => $"Map.{nameof(Continent)}";
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 

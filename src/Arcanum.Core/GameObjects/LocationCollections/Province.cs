@@ -42,8 +42,8 @@ public partial class Province
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Province)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .Province)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -56,7 +56,7 @@ public partial class Province
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Provinces;
    public static Province Empty { get; } = new() { UniqueId = "Empty Province" };
    public string GetNamespace => "Map.Province";
 
