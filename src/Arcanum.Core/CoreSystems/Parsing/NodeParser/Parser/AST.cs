@@ -33,7 +33,7 @@ public abstract class KeyNodeBase(int start, int length) : AstNode(start, length
 {
    public int Column => GetLocation().Item2;
    public int Line => GetLocation().Item1;
-   public string GetLexeme(Span<string> source) => source[start..].ToString();
+   public string GetLexeme(Span<string> source) => source[Start..].ToString();
 }
 
 /// <summary>
@@ -79,7 +79,7 @@ public class RootNode(int start, int length) : AstNode(start, length)
 public abstract class StatementNode(int start, int length) : AstNode(start, length)
 {
    // Changed from Token KeyNode to KeyNodeBase Key
-   public KeyNodeBase KeyNode { get; init; } = null!;
+   public KeyNodeBase KeyNode { get; protected init; } = null!;
 }
 
 /// <summary>

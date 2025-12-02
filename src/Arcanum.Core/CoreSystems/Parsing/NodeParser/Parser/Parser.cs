@@ -6,7 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
-public class Parser(LexerResult lexerResult)
+public sealed class Parser(LexerResult lexerResult)
 {
    private readonly string _source = lexerResult.Source;
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
@@ -77,11 +77,13 @@ public class Parser(LexerResult lexerResult)
       return new ScopedKeyNode(segments);
    }
 
+   private bool CheckTokenText(Token token, string text)
+   {
+      return _source.AsSpan(token.Start, token.Length).SequenceEqual(text);
+   }
+
    private StatementNode ParseStatement()
    {
-      const string scriptedTrigger = "scripted_trigger";
-      const string scriptedEffect = "scripted_effect";
-
       if (Check(TokenType.LeftBrace))
          return ParseAnonymousBlock();
 
@@ -101,8 +103,7 @@ public class Parser(LexerResult lexerResult)
          // Check for scripted_trigger/effect pattern...
          if (Check(TokenType.Identifier) && CheckNext(TokenType.Identifier) && CheckAt(2, TokenType.Equals))
          {
-            var keyword = Peek().GetValue(_source);
-            if (keyword is scriptedTrigger or scriptedEffect)
+            if (CheckTokenText(Peek(), "scripted_trigger") || CheckTokenText(Peek(), "scripted_effect"))
                return ParseScriptedStatement();
          }
 
