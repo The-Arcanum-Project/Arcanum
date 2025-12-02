@@ -157,4 +157,21 @@ public static class LUtil
                                      "UniqueId");
       return pc.Fail();
    }
+
+   public static bool TryAddToGlobals<T>(string kue,
+                                         ref ParsingContext pc,
+                                         T value,
+                                         Dictionary<string, T> globals) where T : IEu5Object
+   {
+      using var scope = pc.PushScope();
+      if (globals.TryAdd(kue, value))
+         return true;
+
+      DiagnosticException.LogWarning(ref pc,
+                                     ParsingError.Instance.DuplicateObjectDefinition,
+                                     kue,
+                                     typeof(T).Name,
+                                     "UniqueId");
+      return pc.Fail();
+   }
 }

@@ -108,7 +108,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
             superRegion.FileLocation = srBn.GetFileLocation();
 
-            LUtil.TryAddToGlobals(srkn.KeyToken,
+            LUtil.TryAddToGlobals(superRegionKey,
                                   ref pc,
                                   superRegion,
                                   superRegionGlobals);
@@ -127,7 +127,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                region.FileLocation = rBn.GetFileLocation();
 
-               LUtil.TryAddToGlobals(skn.KeyToken, ref pc, region, regionGlobals);
+               LUtil.TryAddToGlobals(regionKey, ref pc, region, regionGlobals);
                superRegion.LocationChildren.Add(region);
                region.Parents.Add(superRegion);
 
@@ -144,7 +144,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                   area.FileLocation = aBn.GetFileLocation();
 
-                  LUtil.TryAddToGlobals(skn.KeyToken, ref pc, area, areaGlobals);
+                  LUtil.TryAddToGlobals(areaKey, ref pc, area, areaGlobals);
                   region.LocationChildren.Add(area);
                   area.Parents.Add(region);
 
@@ -161,7 +161,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                      province.FileLocation = pBn.GetFileLocation();
 
-                     LUtil.TryAddToGlobals(skn.KeyToken,
+                     LUtil.TryAddToGlobals(provinceKey,
                                            ref pc,
                                            province,
                                            provinceGlobals);
