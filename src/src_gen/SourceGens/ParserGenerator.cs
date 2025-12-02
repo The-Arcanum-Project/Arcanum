@@ -312,6 +312,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       {
          var propData = new PropertyData() { PropertyMetadata = prop };
          propDataList.Add(propData);
+         propData.MethodCall = propData.PropertyMetadata.CustomParserMethodName ?? string.Empty;
 
          if (GatherMethodCreationData(parserSymbol,
                                       toolboxSymbol,
@@ -329,7 +330,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       out var customParserName))
             continue;
 
-         propData.MethodCall = wrapperMethodName;
+         propData.MethodCall = propData.MethodCall == string.Empty ? wrapperMethodName : propData.MethodCall;
 
          if (AddDynamicBlockParser(prop, sb, targetTypeName, customParserName, toolMethodCall))
             continue;

@@ -10,6 +10,7 @@ public static class DispatchGenerator
                                              List<PropertyData> data,
                                              ITypeSymbol targetType)
    {
+      data.RemoveAll(x => x.PropertyMetadata.IEu5KeyType != null || x.PropertyMetadata.Ignore);
       GenerateInlineParsingLoop(sb, targetType);
 
       sb.Append("    #region Dispatcher");
@@ -30,7 +31,7 @@ public static class DispatchGenerator
    {
       sb.AppendLine("    #region Inline Parsing Loop");
       sb.AppendLine();
-      sb.AppendLine("    private static void ParseProperties(");
+      sb.AppendLine("    internal static void ParseProperties(");
       sb.AppendLine("        BlockNode blockNode,");
       sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
       sb.AppendLine("        ref ParsingContext pc,");
