@@ -366,7 +366,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                          toolMethodCall,
                                          genericType,
                                          targetTypeName,
-                                         actionName,
                                          classMetadata);
             continue;
          }
@@ -378,7 +377,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       propTypeName,
                                       wrapperMethodName,
                                       toolMethodCall,
-                                      actionName,
                                       classMetadata);
       }
 
@@ -404,15 +402,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       sb.AppendLine($"// ### Dynamic {prop.AstNodeType} Parser ###");
 
-      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       sb.AppendLine($"        var globals = ((IEu5Object)EmptyRegistry.Empties[typeof({globalsType})]).GetGlobalItemsNonGeneric();");
-      sb.AppendLine($"        var key = node.KeyNode.GetLexeme(source);");
+      sb.AppendLine($"        var key = pc.SliceString(node);");
       sb.AppendLine($"        if (!globals.Contains(key))");
       sb.AppendLine("            return false;");
       sb.AppendLine(prop.AstNodeType == NodeType.ContentNode
-                       ? $"        {toolBoxClass}(node, ctx, \"{PropCustomParserMethodName(prop)}\", source, out var value, ref validation);"
-                       : $"        var value = Pdh.ParseDynamicObject<{objStr}>(key, node, source, ctx, {customParserName}.ParseProperties, ref validation);");
+                       ? $"        {toolBoxClass}(node, ref pc, out var value);"
+                       : $"        var value = Pdh.ParseDynamicObject<{objStr}>(key, node, ref pc, {customParserName}.ParseProperties);");
       sb.AppendLine($"        if (value == null)");
       sb.AppendLine("            return false;");
 
@@ -502,18 +500,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string propTypeName,
                                                     string wrapperMethodName,
                                                     string toolMethodCall,
-                                                    string actionName,
                                                     ParserClassMetadata pmc)
    {
       var outvalue = prop.IsCollection ? genericType?.ToDisplayString() ?? "object" : propTypeName;
 
       sb.AppendLine($"// ### Property Parser ###");
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
       {
-         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
+         sb.AppendLine($"        if ({toolMethodCall}(node, ref pc, out {outvalue} value))");
          sb.AppendLine("        {");
          if (IsFlagsEnum(prop))
             sb.AppendLine($"            target.{prop.PropertyName} |= value;");
@@ -551,7 +548,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("// ### Embedded Shattered Collection Property Parser ###");
       var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
@@ -594,10 +591,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                 NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
                                 _ => throw new ArgumentOutOfRangeException(),
                              };
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       if (!pmc.ContainsOnlyChildObjects)
-         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {customParserName}.ParseProperties, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ref pc, {customParserName}.ParseProperties, {pmc.AllowUnknownNodes.ToString().ToLower()});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
    }
@@ -608,7 +605,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string toolMethodCall,
                                                     ITypeSymbol? genericType,
                                                     string targetTypeName,
-                                                    string actionName,
                                                     ParserClassMetadata pmc)
    {
       sb.AppendLine("// ### Collection Property Parser ###");
@@ -631,11 +627,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
          _ => throw new ArgumentOutOfRangeException(),
       };
 
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
-         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {toolMethodCall});");
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ref pc, {toolMethodCall});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
    }
@@ -692,7 +688,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
    {
       sb.AppendLine("// ### Embedded Property Parser ###");
       var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       if (!pmc.ContainsOnlyChildObjects)
       {
@@ -809,7 +805,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
             continue;
          }
 
-         sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
+         sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc);");
       }
 
       sb.AppendLine("    #endregion");
@@ -835,7 +831,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// This is a facade that calls the centralized logic in the Pdh helper class.");
       sb.AppendLine("    /// </summary>");
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
-      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
+      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, ref ParsingContext pc, bool allowUnknownNodes)");
       sb.AppendLine("    {");
       if (!classMetadata.ContainsOnlyChildObjects)
       {
@@ -913,20 +909,38 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
          var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
 
+         // message +=
+         //    $"\n//Expected method signature: static bool {genericToolName}<{propertyType.Name}>({prop.AstNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+         // message += $"Possible candidates:";
+
          foreach (var member in methods)
          {
+            // message += $"\n//- {member.ToDisplayString()}";
             // A valid tool must be static, generic, and have the right number of parameters.
-            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length < 5)
+            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length != 3)
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must be static, generic, and have 3 parameters.";
                continue;
+            }
 
             if (member.Parameters[0].Type.Name != prop.AstNodeType.ToString())
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - first parameter type '{member.Parameters[0].Type.Name}' does not match AST node type '{prop.AstNodeType}'.";
                continue;
+            }
 
             var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
             if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must have an 'out' parameter of the generic type.";
                continue;
+            }
 
             genericType = member.TypeArguments.FirstOrDefault();
+            // message += $"\n//Found matching generic tool method '{member.Name}' for enum property '{prop.PropertyName}'.";
             return member;
          }
 
@@ -960,12 +974,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       message +=
          $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
+
+      // Expected signature details
+      message +=
+         $"\n//Expected method signature: static bool {toolName}({astNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+
       message +=
          $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
 
       foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
       {
-         if (!member.IsStatic || member.Parameters.Length < 4)
+         if (!member.IsStatic || member.Parameters.Length != 3)
             continue;
 
          if (member.Parameters[0].Type.Name == astNodeType.ToString())
