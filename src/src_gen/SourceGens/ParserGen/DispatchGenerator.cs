@@ -23,6 +23,27 @@ public static class DispatchGenerator
       sb.AppendLine("    }");
       sb.AppendLine();
 
+      DispatchSimpleOverload(sb, targetType);
+      sb.AppendLine();
+
+      sb.AppendLine("    #endregion");
+   }
+
+   public static void DispatchSimpleOverload(StringBuilder sb, ITypeSymbol targetType)
+   {
+      sb.AppendLine("    #region Simple Dispatch Overload");
+      sb.AppendLine();
+      sb.AppendLine("    internal unsafe static bool Dispatch(");
+      sb.AppendLine("        StatementNode node,");
+      sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
+      sb.AppendLine("        ref ParsingContext pc)");
+      sb.AppendLine("    {");
+      sb.AppendLine("        fixed (char* rawSource = pc.Source)");
+      sb.AppendLine("        {");
+      sb.AppendLine("            return Dispatch(node, target, ref pc, rawSource);");
+      sb.AppendLine("        }");
+      sb.AppendLine("    }");
+      sb.AppendLine();
       sb.AppendLine("    #endregion");
    }
 
@@ -30,7 +51,7 @@ public static class DispatchGenerator
    {
       sb.AppendLine("    #region Inline Parsing Loop");
       sb.AppendLine();
-      sb.AppendLine("    internal static void ParseProperties(");
+      sb.AppendLine("    internal unsafe static void ParseProperties(");
       sb.AppendLine("        BlockNode blockNode,");
       sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
       sb.AppendLine("        ref ParsingContext pc,");
@@ -39,59 +60,63 @@ public static class DispatchGenerator
 
       sb.AppendLine("        using var scope = pc.PushScope();");
 
-      sb.AppendLine("        foreach (var node in blockNode.Children)");
+      sb.AppendLine("        fixed (char* rawSource = pc.Source)");
       sb.AppendLine("        {");
 
+      sb.AppendLine("            foreach (var node in blockNode.Children)");
+      sb.AppendLine("            {");
+
       // Static Parsers (Dispatch)
-      sb.AppendLine("            // Dispatch the node to the appropriate parser");
-      sb.AppendLine("            if (Dispatch(node, target, ref pc))");
-      sb.AppendLine("                continue;");
+      sb.AppendLine("                // Dispatch the node to the appropriate parser");
+      sb.AppendLine("                if (Dispatch(node, target, ref pc, rawSource))");
+      sb.AppendLine("                    continue;");
       sb.AppendLine();
 
       // Dynamic Parsers
-      sb.AppendLine("            // Dynamic parsers");
-      sb.AppendLine("            var wasHandled = false;");
-      sb.AppendLine("            switch (node)");
+      sb.AppendLine("                // Dynamic parsers");
+      sb.AppendLine("                var wasHandled = false;");
+      sb.AppendLine("                switch (node)");
       ;
-      sb.AppendLine("            {");
-      sb.AppendLine("                case ContentNode:");
-      sb.AppendLine("                    foreach (var dcp in _dynamicContentParsers)");
-      sb.AppendLine("                        if (dcp((ContentNode)node, target, ref pc))");
-      sb.AppendLine("                        {");
-      sb.AppendLine("                            wasHandled = true;");
-      sb.AppendLine("                            break;");
-      sb.AppendLine("                        }");
-      sb.AppendLine("                    break;");
+      sb.AppendLine("                {");
+      sb.AppendLine("                    case ContentNode:");
+      sb.AppendLine("                        foreach (var dcp in _dynamicContentParsers)");
+      sb.AppendLine("                            if (dcp((ContentNode)node, target, ref pc))");
+      sb.AppendLine("                            {");
+      sb.AppendLine("                                wasHandled = true;");
+      sb.AppendLine("                                break;");
+      sb.AppendLine("                            }");
+      sb.AppendLine("                        break;");
       sb.AppendLine();
-      sb.AppendLine("                case BlockNode:");
-      sb.AppendLine("                    foreach (var dbp in _dynamicBlockParsers)");
-      sb.AppendLine("                        if (dbp((BlockNode)node, target, ref pc))");
-      sb.AppendLine("                        {");
-      sb.AppendLine("                            wasHandled = true;");
-      sb.AppendLine("                            break;");
-      sb.AppendLine("                        }");
-      sb.AppendLine("                    break;");
-      sb.AppendLine("            }");
+      sb.AppendLine("                    case BlockNode:");
+      sb.AppendLine("                        foreach (var dbp in _dynamicBlockParsers)");
+      sb.AppendLine("                            if (dbp((BlockNode)node, target, ref pc))");
+      sb.AppendLine("                            {");
+      sb.AppendLine("                                wasHandled = true;");
+      sb.AppendLine("                                break;");
+      sb.AppendLine("                            }");
+      sb.AppendLine("                        break;");
+      sb.AppendLine("                }");
       sb.AppendLine();
       sb.AppendLine("            if (wasHandled)");
       sb.AppendLine("                continue;");
       sb.AppendLine();
 
       // Ignored Nodes Check
-      sb.AppendLine("            // Check if the node is ignored");
-      sb.AppendLine("            if (IsIgnoredNode(node, ref pc))");
-      sb.AppendLine("                continue;");
+      sb.AppendLine("                // Check if the node is ignored");
+      sb.AppendLine("                if (IsIgnoredNode(node, ref pc))");
+      sb.AppendLine("                    continue;");
       sb.AppendLine();
-      sb.AppendLine("            // Handle unknown nodes");
-      sb.AppendLine("            if (!allowUnknownNodes)");
-      sb.AppendLine("            {");
-      sb.AppendLine("                pc.Fail();");
-      sb.AppendLine("                pc.SetContext(node);");
-      sb.AppendLine("                 DiagnosticException.LogWarning(ref pc,");
-      sb.AppendLine("                    ParsingError.Instance.InvalidNodeType,");
-      sb.AppendLine("                    node.GetType().Name,");
-      sb.AppendLine("                    \"ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.\",");
-      sb.AppendLine("                    pc.SliceString(node.KeyNode));");
+      sb.AppendLine("                // Handle unknown nodes");
+      sb.AppendLine("                if (!allowUnknownNodes)");
+      sb.AppendLine("                {");
+      sb.AppendLine("                    pc.Fail();");
+      sb.AppendLine("                    pc.SetContext(node);");
+      sb.AppendLine("                     DiagnosticException.LogWarning(ref pc,");
+      sb.AppendLine("                        ParsingError.Instance.InvalidNodeType,");
+      sb.AppendLine("                        node.GetType().Name,");
+      sb.AppendLine("                        \"ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.\",");
+      sb.AppendLine("                        pc.SliceString(node.KeyNode));");
+      sb.AppendLine("                }");
       sb.AppendLine("            }");
       sb.AppendLine("        }");
       sb.AppendLine("    }");
@@ -102,7 +127,7 @@ public static class DispatchGenerator
    public static void AppendIsIgnoredCheck(StringBuilder sb, string[] ignoredCns, string[] ignoredBns)
    {
       sb.AppendLine("    #region IsIgnoredCheck");
-      sb.AppendLine("    private static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc)");
+      sb.AppendLine("    private unsafe static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc)");
       sb.AppendLine("    {");
       sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
       sb.AppendLine("        switch (node)");
@@ -154,6 +179,8 @@ public static class DispatchGenerator
    {
       var groups = DispatchDataHandler.GroupByLength(data);
 
+      sb.AppendLine("        byte* ptr = (byte*)(rawSource + node.KeyNode.Start);");
+      sb.AppendLine();
       sb.AppendLine($"        // Length-based dispatch for {data.Count} properties");
       sb.AppendLine("        switch (node.KeyNode.Length)");
       sb.AppendLine("        {");
@@ -185,13 +212,12 @@ public static class DispatchGenerator
 
    private static void AppendDispatcherHeader(StringBuilder sb, ITypeSymbol targetType)
    {
-      sb.AppendLine("    internal static bool Dispatch(");
+      sb.AppendLine("    internal unsafe static bool Dispatch(");
       sb.AppendLine("        StatementNode node,");
       sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
-      sb.AppendLine("        ref ParsingContext pc)");
+      sb.AppendLine("        ref ParsingContext pc,");
+      sb.AppendLine("        char* rawSource)");
+      ;
       sb.AppendLine("    {");
-
-      sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
-      sb.AppendLine();
    }
 }
