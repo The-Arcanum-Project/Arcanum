@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -18,9 +17,7 @@ public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependency
    public override bool CanBeReloaded => false;
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 
@@ -35,25 +32,21 @@ public class InstitutionStateReligiousSchoolStateParsing(IEnumerable<IDependency
    }
 
    protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
+                                          ref ParsingContext pc,
                                           Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
                                           object? lockObject)
    {
       if (rn.Statements.Count != 2)
       {
-         DiagnosticException.LogWarning(ctx,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeCountOfType,
-                                        actionStack,
                                         "null",
                                         2,
                                         rn.Statements.Count);
          return;
       }
 
-      InstitutionStateManager.ParseCreateObject(rn.Statements[0], ctx, fileObj, source, actionStack, ref validation);
+      InstitutionStateManager.ParseCreateObject(rn.Statements[0], ref pc, fileObj);
       // TODO: Talk to @Melco for ideas, but ultimately custom parser?
       // ReligiousSchoolRelationsParsing.ParseCreateObject(rn.Statements[1], ctx, fileObj, source, actionStack, ref validation);
    }
@@ -64,18 +57,12 @@ public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNod
    : ParserValidationLoadingService<InstitutionManager>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
-                                        LocationContext ctx,
-                                        Eu5FileObj fileObj,
-                                        string source,
-                                        string actionStack,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        Eu5FileObj fileObj)
    {
       if (!SimpleObjectParser.Parse(fileObj,
                                     sn,
-                                    ctx,
-                                    actionStack,
-                                    source,
-                                    ref validation,
+                                    ref pc,
                                     ParseProperties,
                                     out InstitutionManager? im))
          return;
@@ -84,11 +71,8 @@ public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNod
    }
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
    }
@@ -102,29 +86,20 @@ public partial class ReligiousSchoolRelationsParsing(IEnumerable<IDependencyNode
    : ParserValidationLoadingService<ReligiousSchoolRelations>(dependencies)
 {
    public static void ParseCreateObject(StatementNode sn,
-                                        LocationContext ctx,
-                                        Eu5FileObj fileObj,
-                                        string source,
-                                        string actionStack,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        Eu5FileObj fileObj)
    {
       SimpleObjectParser.Parse(fileObj,
                                ((BlockNode)sn).Children,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                ReligiousSchoolRelations.GetGlobalItems(),
                                null);
    }
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
    }
@@ -133,9 +108,6 @@ public partial class ReligiousSchoolRelationsParsing(IEnumerable<IDependencyNode
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    ReligiousSchoolRelations target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

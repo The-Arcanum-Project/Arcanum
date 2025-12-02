@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Windows;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -168,9 +167,9 @@ public class ParsingMaster
                                                                           StepDurations.Add(wrapper.Duration);
                                                                           ParsingStepsChanged?.Invoke(this, step);
                                                                           TotalProgressChanged?.Invoke(this,
-                                                                              ParsingStepsDone /
-                                                                              (double)ParsingSteps *
-                                                                              100.0);
+                                                                                                       ParsingStepsDone /
+                                                                                                       (double)ParsingSteps *
+                                                                                                       100.0);
                                                                        }
 
                                                                     step.LastTotalLoadingDuration = startNew.Elapsed;
@@ -180,12 +179,12 @@ public class ParsingMaster
                                                                  {
                                                                     UIHandle.Instance.PopUpHandle
                                                                             .ShowMBox("An Exception occured during heavy parsing step: " +
-                                                                                    $"{step.Name}\n\n" +
-                                                                                    $"Exception Message: {e.Message}\n\n" +
-                                                                                    "Please check the log for more details.",
-                                                                                 "Parsing Error",
-                                                                                 MBoxButton.OK,
-                                                                                 MessageBoxImage.Error);
+                                                                                      $"{step.Name}\n\n" +
+                                                                                      $"Exception Message: {e.Message}\n\n" +
+                                                                                      "Please check the log for more details.",
+                                                                                      "Parsing Error",
+                                                                                      MBoxButton.OK,
+                                                                                      MessageBoxImage.Error);
                                                                     throw
                                                                        new($"Exception occurred while executing heavy parsing step '{step.Name}': {e.Message}",
                                                                            e);
@@ -207,12 +206,12 @@ public class ParsingMaster
                                                                                        StepDurations
                                                                                          .Add(wrapper.Duration);
                                                                                        ParsingStepsChanged?.Invoke(this,
-                                                                                           step);
+                                                                                              step);
                                                                                        TotalProgressChanged
                                                                                         ?.Invoke(this,
-                                                                                              ParsingStepsDone /
-                                                                                              (double)ParsingSteps *
-                                                                                              100.0);
+                                                                                                 ParsingStepsDone /
+                                                                                                 (double)ParsingSteps *
+                                                                                                 100.0);
                                                                                     }
 
                                                                                  step.LastTotalLoadingDuration =
@@ -222,13 +221,13 @@ public class ParsingMaster
                                                                               catch (Exception e)
                                                                               {
                                                                                  UIHandle.Instance.PopUpHandle
-                                                                                   .ShowMBox("An Exception occured during parsing step: " +
-                                                                                           $"{step.Name}\n\n" +
-                                                                                           $"Exception Message: {e.Message}\n\n" +
-                                                                                           "Please check the log for more details.",
-                                                                                        "Parsing Error",
-                                                                                        MBoxButton.OK,
-                                                                                        MessageBoxImage.Error);
+                                                                                         .ShowMBox("An Exception occured during parsing step: " +
+                                                                                                   $"{step.Name}\n\n" +
+                                                                                                   $"Exception Message: {e.Message}\n\n" +
+                                                                                                   "Please check the log for more details.",
+                                                                                                   "Parsing Error",
+                                                                                                   MBoxButton.OK,
+                                                                                                   MessageBoxImage.Error);
                                                                                  throw
                                                                                     new($"Exception occurred while executing parsing step '{step.Name}': {e.Message}",
                                                                                         e);
@@ -294,10 +293,7 @@ public class ParsingMaster
    }
 
    public static bool RemoveAllGroupingNodes(RootNode rn,
-                                             LocationContext ctx,
-                                             string actionStack,
-                                             string source,
-                                             ref bool validation,
+                                             ref ParsingContext pc,
                                              string[] groupingNodeNames,
                                              out List<StatementNode> sns)
    {
@@ -308,24 +304,18 @@ public class ParsingMaster
       }
 
       if (!SimpleObjectParser.StripGroupingNodes(rn,
-                                                 ctx,
-                                                 actionStack,
-                                                 source,
-                                                 ref validation,
+                                                 ref pc,
                                                  groupingNodeNames[0],
                                                  out sns))
          return false;
 
       for (var i = 1; i < groupingNodeNames.Length; i++)
       {
-         if (sns.Count != 1 || !sns[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (sns.Count != 1 || !sns[0].IsBlockNode(ref pc, out var bn))
             continue;
 
          if (!SimpleObjectParser.StripGroupingNodes(bn,
-                                                    ctx,
-                                                    actionStack,
-                                                    source,
-                                                    ref validation,
+                                                    ref pc,
                                                     groupingNodeNames[i],
                                                     out sns))
             return false;

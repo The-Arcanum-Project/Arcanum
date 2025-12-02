@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -15,28 +14,19 @@ public partial class DynastyManagerParsing(IEnumerable<IDependencyNode<string>> 
    public override string[] GroupingNodeNames => ["dynasty_manager"];
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       if (!ParsingMaster.ParsingMaster.RemoveAllGroupingNodes(rn,
-                                                              ctx,
-                                                              actionStack,
-                                                              source,
-                                                              ref validation,
+                                                              ref pc,
                                                               GroupingNodeNames,
                                                               out var sns))
          return;
 
       SimpleObjectParser.Parse(fileObj,
                                sns,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -44,9 +34,6 @@ public partial class DynastyManagerParsing(IEnumerable<IDependencyNode<string>> 
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Dynasty target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

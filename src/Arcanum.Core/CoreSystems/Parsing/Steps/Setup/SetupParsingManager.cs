@@ -167,47 +167,44 @@ public static class SetupParsingManager
    {
       var rn = Parser.Parse(fo, out var source, out var ctx);
       var validation = true;
+      var pc = new ParsingContext(ctx, source.AsSpan(), nameof(SetupParsingManager), ref validation);
 
       foreach (var sn in rn.Statements)
          if (sn is ContentNode or BlockNode)
          {
-            var key = sn.KeyNode.GetLexeme(source);
+            var key = pc.SliceString(sn);
             if (!SetupFileLoaders.TryGetValue(key, out var service))
             {
-               ctx.SetPosition(sn.KeyNode);
-               De.Warning(ctx,
+               pc.SetContext(sn);
+               De.Warning(ref pc,
                           ParsingError.Instance.InvalidContentKeyOrType,
-                          SETUP_START_NODE_PARSING,
                           key,
                           SetupFileLoaders.Keys.ToArray());
-               validation = false;
+               pc.Fail();
                continue;
             }
 
-            service.LoadSetupFile(sn, ctx, fo, SETUP_START_NODE_PARSING, source, ref validation, lockObject);
+            service.LoadSetupFile(sn, ref pc, fo, lockObject);
             foreach (var tt in service.ParsedObjects)
                if (!PartDefinitions.TryAdd(tt, [fo]))
                   PartDefinitions[tt].Add(fo);
          }
          else
          {
-            ctx.SetPosition(sn.KeyNode);
-            De.Warning(ctx,
+            pc.SetContext(sn);
+            De.Warning(ref pc,
                        ParsingError.Instance.InvalidNodeType,
-                       SETUP_START_NODE_PARSING,
                        sn.GetType(),
                        new[] { typeof(ContentNode), typeof(BlockNode) },
-                       sn.KeyNode.GetLexeme(source));
-            validation = false;
+                       pc.SliceString(sn));
+            pc.Fail();
          }
 
       return validation;
    }
 
    public static void ReloadFileByService<T>(Eu5FileObj fileObj,
-                                             object? lockObject,
-                                             string actionStack,
-                                             ref bool validation)
+                                             object? lockObject)
    {
       SetupFileLoadingService service = null!;
 

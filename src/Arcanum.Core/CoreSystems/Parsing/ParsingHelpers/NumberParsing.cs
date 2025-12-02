@@ -1,34 +1,33 @@
 ﻿using System.Globalization;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 
 public static class NumberParsing
 {
    public static bool TryParseInt(string? input,
-                                  LocationContext context,
+                                  ref ParsingContext pc,
                                   out int result,
                                   int minValue = -2_147_483_648,
                                   int maxValue = 2_147_483_647,
                                   int fallback = 0)
    {
+      using var context = pc.PushScope();
       if (string.IsNullOrWhiteSpace(input) || !int.TryParse(input, out result))
       {
          result = fallback;
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidIntMarkup,
-                                        nameof(TryParseInt).GetType().FullName!,
                                         input ?? "null");
          return false;
       }
 
       if (result < minValue || result > maxValue)
       {
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.IntOutOfRange,
-                                        nameof(TryParseInt).GetType().FullName!,
                                         input,
                                         minValue,
                                         maxValue);
@@ -40,29 +39,28 @@ public static class NumberParsing
    }
 
    public static bool TryParseFloat(string? input,
-                                    LocationContext context,
+                                    ref ParsingContext pc,
                                     out float result,
                                     float minValue = float.MinValue,
                                     float maxValue = float.MaxValue,
                                     float fallback = 0f,
                                     int precision = 2)
    {
+      using var scope = pc.PushScope();
       if (string.IsNullOrWhiteSpace(input) ||
           !float.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
       {
          result = fallback;
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidFloatMarkup,
-                                        nameof(TryParseFloat).GetType().FullName!,
                                         input ?? "null");
          return false;
       }
 
       if (result < minValue || result > maxValue)
       {
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.FloatOutOfRange,
-                                        nameof(TryParseFloat).GetType().FullName!,
                                         input,
                                         minValue,
                                         maxValue);
@@ -75,16 +73,16 @@ public static class NumberParsing
    }
 
    public static bool TryParseBool(string? input,
-                                   LocationContext context,
+                                   ref ParsingContext pc,
                                    out bool result,
                                    bool fallback = false)
    {
+      using var scope = pc.PushScope();
       if (string.IsNullOrWhiteSpace(input))
       {
          result = fallback;
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBoolMarkup,
-                                        nameof(TryParseBool).GetType().FullName!,
                                         input ?? "null");
          return false;
       }
@@ -96,9 +94,8 @@ public static class NumberParsing
       else
       {
          result = fallback;
-         DiagnosticException.LogWarning(context,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBoolMarkup,
-                                        nameof(TryParseBool).GetType().FullName!,
                                         input);
          return false;
       }

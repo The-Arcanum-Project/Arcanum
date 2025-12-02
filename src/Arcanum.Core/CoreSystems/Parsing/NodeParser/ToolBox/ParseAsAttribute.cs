@@ -65,5 +65,5 @@ public class ParseAsAttribute(string? key,
    /// <summary>
    /// If true, the property will be ignored during parsing.
    /// </summary>
-   public bool? Ignore { get; set; } = ignore;
+   public bool Ignore { get; set; } = ignore;
 }

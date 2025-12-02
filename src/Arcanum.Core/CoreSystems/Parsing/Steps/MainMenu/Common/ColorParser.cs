@@ -18,47 +18,48 @@ public class ColorParser(IEnumerable<IDependencyNode<string>> dependencies) : Fi
    {
       const string colorKey = "colors";
       const string actionStack = nameof(ColorParser);
-      var rn = Parser.Parse(fileObj, out var source, out var ctx);
+      var rn = Parser.Parse(fileObj, out var source, out var lctx);
       var validation = true;
+      var pc = new ParsingContext(lctx, source.AsSpan(), actionStack, ref validation);
+      using var ctx = pc.PushScope();
 
-      rn.HasXStatements(ctx, 1, ref validation);
+      rn.HasXStatements(ref pc, 1);
       foreach (var sn in rn.Statements)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         if (!bn.KeyNode.GetLexeme(source).Equals(colorKey, StringComparison.Ordinal))
+         var key = pc.SliceString(bn);
+         if (!key.Equals(colorKey, StringComparison.Ordinal))
          {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidBlockName,
-                                           actionStack,
-                                           bn.KeyNode.GetLexeme(source),
+                                           key,
                                            colorKey);
-            validation = false;
+            pc.Fail();
             continue;
          }
 
          foreach (var scn in bn.Children)
          {
-            if (!scn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
+            if (!scn.IsContentNode(ref pc, out var cn))
                continue;
-            if (!cn.HasFunctionNode(ctx, source, actionStack, ref validation, out var fn))
+            if (!cn.HasFunctionNode(ref pc, out var fn))
                continue;
-            if (!fn.GetColorDefinition(ctx, source, actionStack, ref validation, out var color))
+            if (!fn.GetColorDefinition(ref pc, out var color))
                continue;
 
-            var colorName = scn.KeyNode.GetLexeme(source);
+            var colorName = pc.SliceString(scn);
             if (ColorResolver.Instance.TryAddColor(colorName, color))
                continue;
 
-            ctx.SetPosition(scn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(scn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.DuplicateColorDefinition,
-                                           actionStack,
                                            colorName,
                                            nameof(JominiColor));
-            validation = false;
+            pc.Fail();
          }
       }
 
@@ -73,9 +74,7 @@ public class ColorParser(IEnumerable<IDependencyNode<string>> dependencies) : Fi
    public override bool CanBeReloaded => false;
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 }

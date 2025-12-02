@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
 
@@ -9,21 +8,15 @@ public abstract class SetupFileLoadingService(IEnumerable<IDependencyNode<string
    : GeneralFileLoadingService(dependencies)
 {
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       throw new NotSupportedException("Setup files are not loaded via this method.");
    }
 
    public abstract void LoadSetupFile(StatementNode sn,
-                                      LocationContext ctx,
+                                      ref ParsingContext pc,
                                       Eu5FileObj fileObj,
-                                      string actionStack,
-                                      string source,
-                                      ref bool validation,
                                       object? lockObject);
 }

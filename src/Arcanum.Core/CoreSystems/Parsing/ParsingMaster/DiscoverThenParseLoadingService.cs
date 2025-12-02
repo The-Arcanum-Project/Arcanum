@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -15,17 +14,14 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase,
    private bool IsDiscoveryPhase { get; } = isDiscoveryPhase;
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       if (IsDiscoveryPhase)
-         DiscoverObjects(rn, ctx, fileObj, actionStack, source, ref validation, lockObject);
+         DiscoverObjects(rn, ref pc, fileObj, lockObject);
       else
-         LoadSingleFileProperties(rn, ctx, fileObj, actionStack, source, ref validation, lockObject);
+         LoadSingleFileProperties(rn, ref pc, fileObj, lockObject);
    }
 
    /// <summary>
@@ -33,28 +29,19 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase,
    /// The actual parsing of the properties is done in <see cref="LoadSingleFileProperties"/>.
    /// </summary>
    protected virtual void DiscoverObjects(RootNode rn,
-                                          LocationContext ctx,
+                                          ref ParsingContext pc,
                                           Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
                                           object? lockObject)
    {
       if (!ParsingMaster.RemoveAllGroupingNodes(rn,
-                                                ctx,
-                                                actionStack,
-                                                source,
-                                                ref validation,
+                                                ref pc,
                                                 GroupingNodeNames,
                                                 out var sns))
          return;
 
       SimpleObjectParser.DiscoverObjectDeclarations(sns,
-                                                    ctx,
                                                     fileObj,
-                                                    actionStack,
-                                                    source,
-                                                    ref validation,
+                                                    ref pc,
                                                     GetGlobals(),
                                                     lockObject);
    }
@@ -63,11 +50,8 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase,
    /// Do not create new objects here, only parse the properties of the objects discovered in <see cref="DiscoverObjects"/>.
    /// </summary>
    protected virtual void LoadSingleFileProperties(RootNode rn,
-                                                   LocationContext ctx,
+                                                   ref ParsingContext pc,
                                                    Eu5FileObj fileObj,
-                                                   string actionStack,
-                                                   string source,
-                                                   ref bool validation,
                                                    object? lockObject)
    {
    }

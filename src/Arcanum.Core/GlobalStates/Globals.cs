@@ -11,7 +11,6 @@ using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GlobalStates.BackingClasses;
 using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
 using Country = Arcanum.Core.GameObjects.LocationCollections.Country;
 using Culture = Arcanum.Core.GameObjects.Cultural.Culture;
@@ -131,7 +130,4 @@ public static class Globals
    #endregion
 
    public static Dictionary<string, Age> Ages { get; set; } = [];
-#if DEBUG
-   public static Dictionary<string, TestINUI> TestNUIObjects { get; } = [];
-#endif
 }

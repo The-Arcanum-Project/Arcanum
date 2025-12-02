@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -10,22 +9,18 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 public static class TkHelper
 {
    public static bool TryGetLocationFromToken(this Token token,
-                                              LocationContext ctx,
-                                              string source,
-                                              string actionStack,
-                                              ref bool validation,
+                                              ref ParsingContext pc,
                                               [MaybeNullWhen(false)] out Location location)
    {
+      using var scope = pc.PushScope();
       location = null;
-      if (!Globals.Locations.TryGetValue(token.GetLexeme(source), out location))
+      if (!Globals.Locations.TryGetValue(pc.SliceString(token), out location))
       {
-         ctx.SetPosition(token);
-         De.Warning(ctx,
+         pc.SetContext(token);
+         De.Warning(ref pc,
                     ParsingError.Instance.InvalidLocationKey,
-                    actionStack,
-                    token.GetLexeme(source));
-         validation = false;
-         return false;
+                    pc.SliceString(token));
+         return pc.Fail();
       }
 
       return true;
