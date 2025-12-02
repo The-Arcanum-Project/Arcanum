@@ -23,15 +23,15 @@ public readonly struct Token
    /// Gets the actual string lexeme by slicing the source text on demand.
    /// This performs a string allocation.
    /// </summary>
-   public string GetLexeme(string source)
+   public string GetLexeme(ReadOnlySpan<char> source)
    {
       if (Length == 0 || Start + Length > source.Length)
          return "";
 
-      return source.Substring(Start, Length);
+      return source.Slice(Start, Length).ToString();
    }
 
-   public string GetLexeme(string source, int startColumn)
+   public string GetLexeme(ReadOnlySpan<char> source, int startColumn)
    {
       var offset = Column - startColumn;
       var newLength = Length + offset;
@@ -39,13 +39,13 @@ public readonly struct Token
       if (newLength == 0 || newStart + newLength > source.Length)
          return "";
 
-      return source.Substring(newStart, newLength);
+      return source.Slice(newStart, newLength).ToString();
    }
 
    /// <summary>
    /// Returns a string representation for debugging purposes.
    /// </summary>
-   public string ToString(string source)
+   public string ToString(ReadOnlySpan<char> source)
    {
       return $"[Line {Line,3}, Col {Column,3}] {Type,-15} | '{GetLexeme(source)}'";
    }

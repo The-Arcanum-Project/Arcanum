@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -13,9 +12,7 @@ public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies
 {
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    PopType target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("PopTypeDiscoverer should only be used in discovery phase.");
 }
@@ -24,28 +21,19 @@ public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies
 public partial class PopTypesParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : DiscoverThenParseLoadingService<PopType>(false, dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       SimpleObjectParser.ParseDiscoveredObjectProperties(rn,
-                                                         ctx,
-                                                         actionStack,
-                                                         source,
-                                                         ref validation,
+                                                         ref pc,
                                                          ParseProperties,
                                                          GetGlobals());
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    PopType target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

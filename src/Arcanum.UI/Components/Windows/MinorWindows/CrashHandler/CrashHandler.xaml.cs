@@ -36,7 +36,7 @@ public partial class CrashHandler
       sb.WriteLine("=====================");
       sb.WriteLine($"Timestamp: {DateTime.Now}");
       sb.WriteLine();
-      sb.WriteLine($"Application Version: {AppData.APP_NAME} {AppData.APP_VERSION}");
+      sb.WriteLine($"Application Version: {AppData.ProductName} {AppData.AppVersion}");
       sb.WriteLine();
       sb.WriteLine("Exception Details:");
       sb.WriteLine(_exception.ToString());

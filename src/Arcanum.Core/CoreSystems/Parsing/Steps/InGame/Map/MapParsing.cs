@@ -26,13 +26,11 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    }
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       using (var bitmap =
              new Bitmap(fileObj.Path.FullPath))

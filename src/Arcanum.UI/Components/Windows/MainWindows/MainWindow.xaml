@@ -9,7 +9,6 @@
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
                          xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
-                         Title = "Arcanum"
                          Height = "1080"
                          Width = "1920"
                          FooterHeight = "26"

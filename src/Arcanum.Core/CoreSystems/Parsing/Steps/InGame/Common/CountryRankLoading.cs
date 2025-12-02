@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -14,20 +13,14 @@ public partial class CountryRankLoading(IEnumerable<IDependencyNode<string>> dep
 {
    public override bool IsFullyParsed => false;
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -35,9 +28,6 @@ public partial class CountryRankLoading(IEnumerable<IDependencyNode<string>> dep
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    CountryRank target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

@@ -17,9 +17,7 @@ public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    public override bool CanBeReloaded => false;
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 
@@ -39,15 +37,16 @@ public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
       return true;
    }
 
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       var rn = Parser.Parse(fileObj, out var source);
       var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
+      var validation = true;
+      var pc = new ParsingContext(ctx, source.AsSpan(), nameof(RoadsParsing), ref validation);
 
       Parser.VerifyNodeTypes([..rn.Statements],
                              [typeof(BlockNode), typeof(ContentNode)],
-                             ctx,
-                             GetActionName());
+                             ref pc);
       foreach (var rootStatement in rn.Statements)
       {
          if (rootStatement is not BlockNode rootBn)
@@ -55,37 +54,40 @@ public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
 
          const string roadNetworkKey = "road_network";
          const string countriesKey = "countries";
-         if (rootBn.KeyNode.GetLexeme(source).Equals(roadNetworkKey))
-            ProcessRoadNode(rootBn, ctx, source, new(fileObj.Path, fileObj.Descriptor));
+         if (pc.IsSliceEqual(rootBn.KeyNode, roadNetworkKey))
+            ProcessRoadNode(rootBn, ref pc, new(fileObj.Path, fileObj.Descriptor));
          else
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+         {
+            pc.SetContext(rootBn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidBlockNames,
-                                           GetActionName(),
-                                           rootBn.KeyNode.GetLexeme(source),
+                                           pc.SliceString(rootBn),
                                            new[] { roadNetworkKey, countriesKey });
+         }
       }
 
       return true;
    }
 
-   private void ProcessRoadNode(BlockNode rootBn, LocationContext ctx, string source, Eu5FileObj fileObj)
+   private void ProcessRoadNode(BlockNode rootBn, ref ParsingContext pc, Eu5FileObj fileObj)
    {
+      using var scope = pc.PushScope();
       foreach (var rdNode in rootBn.Children)
       {
          var create = true;
-         if (!Parser.GetIdentifierKvp(rdNode, ctx, GetActionName(), source, out var key, out var value))
+         if (!Parser.GetIdentifierKvp(rdNode, ref pc, out var key, out var value))
             continue;
 
-         if (!ValuesParsing.ParseLocation(key, ctx, GetActionName(), out var start))
+         if (!ValuesParsing.ParseLocation(key, ref pc, out var start))
             create = false;
-         if (!ValuesParsing.ParseLocation(value, ctx, GetActionName(), out var end))
+         if (!ValuesParsing.ParseLocation(value, ref pc, out var end))
             create = false;
 
          if (start == end)
          {
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(rdNode);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidRoadSameLocation,
-                                           GetActionName(),
                                            start.UniqueId);
             create = false;
          }

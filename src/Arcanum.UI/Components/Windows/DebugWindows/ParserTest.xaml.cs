@@ -10,6 +10,11 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class ParserTest : INotifyPropertyChanged
 {
+   private FilesToTest _selectedFile = FilesToTest.BlockWithContent;
+   private string _outputText = string.Empty;
+   private string _inputText = string.Empty;
+   private string _time = "0 ms";
+
    public IEnumerable<FilesToTest> FilesToTestValues => Enum.GetValues<FilesToTest>();
 
    public FilesToTest SelectedFile

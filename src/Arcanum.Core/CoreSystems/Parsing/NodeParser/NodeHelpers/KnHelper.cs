@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -9,9 +8,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 public static class KnHelper
 {
    public static bool IsSimpleKeyNode(this KeyNodeBase node,
-                                      LocationContext ctx,
-                                      string source,
-                                      string actionName,
+                                      ref ParsingContext pc,
                                       [MaybeNullWhen(false)] out SimpleKeyNode value)
    {
       if (node is SimpleKeyNode skn)
@@ -20,13 +17,13 @@ public static class KnHelper
          return true;
       }
 
-      ctx.SetPosition(node);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(node);
+      var key = pc.SliceString(node);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidNodeType,
-                                     actionName,
-                                     $"{node.GetType().Name}({node.GetLexeme(source)})",
+                                     $"{node.GetType().Name}({key})",
                                      $"{nameof(BlockNode)}",
-                                     node.GetLexeme(source));
+                                     key);
       value = null!;
       return false;
    }

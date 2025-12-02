@@ -8,7 +8,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
-        <AssemblyName>Arcanum Alpha 0.9.4</AssemblyName>
+    </PropertyGroup>
+
+
+    <PropertyGroup>
+        <!-- STABLE IDENTIFIER: Used for Pack URIs and filename (Arcanum.exe) -->
+        <AssemblyName>Arcanum</AssemblyName>
+        <!-- DISPLAY NAMES: Used for UI and Window Titles -->
+        <Product>Arcanum Alpha</Product>
+        <!-- VERSIONING: The single place to change the number -->
+        <Version>0.9.5</Version>
     </PropertyGroup>
 
     <ItemGroup>

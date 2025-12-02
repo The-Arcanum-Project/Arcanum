@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
@@ -10,14 +8,13 @@ namespace Arcanum.Core.CoreSystems.Jomini.AiTags;
 
 public class AiTagManager
 {
-   public static bool TryCreateAiTagInstance(LocationContext ctx,
+   public static bool TryCreateAiTagInstance(ref ParsingContext pc,
                                              Token nodeKeyNode,
-                                             string source,
                                              string value,
-                                             ref bool validation,
                                              [MaybeNullWhen(false)] out AiTag instance)
    {
-      var key = nodeKeyNode.GetLexeme(source);
+      using var ctx = pc.PushScope();
+      var key = pc.SliceString(nodeKeyNode);
 
       if (ModifierManager.TryConvertValueToType(value, ModifierType.Integer, out var convertedValue))
       {
@@ -39,16 +36,14 @@ public class AiTagManager
       }
       else
       {
-         ctx.SetPosition(nodeKeyNode);
-         DiagnosticException.LogWarning(ctx,
+         pc.SetContext(nodeKeyNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidTagTypeOrValue,
-                                        $"{nameof(AudioTagsManager)}.{nameof(TryCreateAiTagInstance)}",
                                         value,
                                         typeof(AiTag),
                                         key);
          instance = null;
-         validation = false;
-         return false;
+         return pc.Fail();
       }
 
       return true;

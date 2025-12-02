@@ -61,6 +61,8 @@ public static class Eu5UiGen
          if (navh.Targets.Any(t => t.Equals(empty)))
          {
             // We do not want to show empties
+            if (navh.Root.Content is BaseView bv)
+               bv.Dispose();
             navh.Root.Content = null;
             return;
          }
@@ -89,7 +91,8 @@ public static class Eu5UiGen
          GridManager.SetPureHeader(mainGrid, primary, navh.Targets.Count, 0, 0, 3);
       }
 
-      GenerateViewElements(navh,
+      GenerateViewElements(view,
+                           navh,
                            navh.Targets,
                            mainGrid,
                            primary,
@@ -134,7 +137,8 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, ellipse, row, column, columnSpan, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static void GenerateViewElements(NavH navH,
+   private static void GenerateViewElements(BaseView view,
+                                            NavH navH,
                                             List<IEu5Object> targets,
                                             Grid mainGrid,
                                             IEu5Object primary,
@@ -155,13 +159,22 @@ public static class Eu5UiGen
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
             if (navH.GenerateSubViews)
                if (primary.IsPropertyInlined(nxProp))
-                  GenerateInlinedView(navH, primary, mainGrid, nxProp, i + startRow);
+                  GenerateInlinedView(view, navH, primary, mainGrid, nxProp, i + startRow);
                else
-                  GenerateEmbeddedView(navH, targets, primary, mainGrid, nxProp, i + startRow, isMarked, isInlineCall);
+                  GenerateEmbeddedView(view,
+                                       navH,
+                                       targets,
+                                       primary,
+                                       mainGrid,
+                                       nxProp,
+                                       i + startRow,
+                                       isMarked,
+                                       isInlineCall);
             else
                GenerateShortInfo(navH, primary, nxProp, mainGrid, isMarked);
          else
-            BuildCollectionViewOrDefault(navH,
+            BuildCollectionViewOrDefault(view,
+                                         navH,
                                          targets,
                                          primary,
                                          mainGrid,
@@ -187,7 +200,8 @@ public static class Eu5UiGen
       return viewFields.ToArray();
    }
 
-   private static void GenerateInlinedView(NavH navH,
+   private static void GenerateInlinedView(BaseView view,
+                                           NavH navH,
                                            IEu5Object primary,
                                            Grid mainGrid,
                                            Enum nxProp,
@@ -207,8 +221,7 @@ public static class Eu5UiGen
 
       var inlineTargets = navH.Targets.Select(target => (IEu5Object)target._getValue(nxProp)).ToList();
 
-      // TODO @Minnator: https://github.com/users/Minnator/projects/2/views/2?pane=issue&itemId=135643593&issue=Minnator%7CArcanum%7C61
-      var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root, true);
+      var inlineNavH = new NavH(inlineTargets, navH.GenerateSubViews, navH.Root, false);
 
       // If we have an empty inlined objects, we only add a + button to create a new one.
       // When this button is pressed we then generate the full inlined view.
@@ -234,7 +247,7 @@ public static class Eu5UiGen
       }
       else
       {
-         GenerateViewElements(inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
+         GenerateViewElements(view, inlineNavH, inlineTargets, inlineGrid, inlineObj, [], false, true);
       }
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
@@ -243,7 +256,8 @@ public static class Eu5UiGen
       GridManager.AddToGrid(mainGrid, inlineGrid, startRow, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
 
-   private static void GenerateEmbeddedView(NavH navH,
+   private static void GenerateEmbeddedView(BaseView view,
+                                            NavH navH,
                                             List<IEu5Object> targets,
                                             IEu5Object primary,
                                             Grid mainGrid,
@@ -252,19 +266,13 @@ public static class Eu5UiGen
                                             bool isMarked,
                                             bool isInline)
    {
-      var pevm = new PropertyEditorViewModel(nxProp, navH, primary, isInline);
-      var mspvm = new MultiSelectPropertyViewModel(targets, nxProp);
+      var pevm = new PropertyEditorViewModel(view, nxProp, navH, primary, isInline);
+      var mspvm = new MultiSelectPropertyViewModel(view, targets, nxProp);
       var ebv = new EmbeddedView(pevm, mspvm)
       {
          MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
       };
-      
-      ebv.Unloaded += (_, _) =>
-      {
-         mspvm.Dispose();
-         pevm.Dispose();
-      };
-      
+
       GridManager.AddToGrid(mainGrid, ebv, rowIndex, 0, 2, ControlFactory.EMBEDDED_VIEW_HEIGHT);
       if (IsExpandedCache.TryGetValue(nxProp, out var isExpanded) && isExpanded)
          ebv.ViewModel.IsExpanded = true;
@@ -337,10 +345,19 @@ public static class Eu5UiGen
       };
 
       setButton.Click += setClick;
-      setButton.Unloaded += (_, _) => setButton.Click -= setClick;
+
+      setButton.Unloaded += OnSetButtonOnUnloaded;
+      return;
+
+      void OnSetButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         setButton.Click -= setClick;
+         setButton.Unloaded -= OnSetButtonOnUnloaded;
+      }
    }
 
-   public static void PopulateEmbeddedGrid(Grid grid,
+   public static void PopulateEmbeddedGrid(BaseView view,
+                                           Grid grid,
                                            NavH navH,
                                            List<IEu5Object> targets,
                                            IEu5Object embedded,
@@ -367,7 +384,8 @@ public static class Eu5UiGen
             continue;
          }
 
-         BuildCollectionViewOrDefault(navH,
+         BuildCollectionViewOrDefault(view,
+                                      navH,
                                       targets,
                                       embedded,
                                       grid,
@@ -378,7 +396,8 @@ public static class Eu5UiGen
       }
    }
 
-   private static void BuildCollectionViewOrDefault(NavH navH,
+   private static void BuildCollectionViewOrDefault(BaseView view,
+                                                    NavH navH,
                                                     List<IEu5Object> targets,
                                                     IEu5Object primary,
                                                     Grid mainGrid,
@@ -389,18 +408,19 @@ public static class Eu5UiGen
                                                     Enum? parentProp = null)
    {
       var itemType = primary.GetNxItemType(nxProp);
-      var propertyViewModel = new MultiSelectPropertyViewModel(targets, nxProp, allowReadOnlyEditing);
+      var mspvm = new MultiSelectPropertyViewModel(view, targets, nxProp, allowReadOnlyEditing);
 
       if (itemType == null)
       {
          // We have a default property, not a collection.
-         GetTypeSpecificUI(navH,
+         GetTypeSpecificUI(view,
+                           navH,
                            primary,
                            nxProp,
                            mainGrid,
                            rowIndex,
                            isMarked,
-                           propertyViewModel,
+                           mspvm,
                            parentProp,
                            17,
                            allowReadOnlyEditing);
@@ -412,12 +432,13 @@ public static class Eu5UiGen
       {
          // We have a collection property, but it's not a list we can iterate with our current implementation.
          // List and HashSet are supported.
-         GetTypeSpecificUI(navH,
+         GetTypeSpecificUI(view,
+                           navH,
                            primary,
                            nxProp,
                            mainGrid,
                            rowIndex,
-                           mspvm: propertyViewModel,
+                           mspvm: mspvm,
                            isMarked: isMarked,
                            embeddedPropertyTargets: parentProp,
                            allowReadOnlyEditing: allowReadOnlyEditing);
@@ -435,10 +456,10 @@ public static class Eu5UiGen
                                margin,
                                isMarked,
                                navH,
-                               propertyViewModel);
+                               mspvm);
 
       Action rebuildPreview;
-      if (propertyViewModel.Value is ICollection modifiableList)
+      if (mspvm.Value is ICollection modifiableList)
       {
          rebuildPreview = () =>
          {
@@ -458,15 +479,19 @@ public static class Eu5UiGen
 
       EventHandler collectionChangedHandler = (_, _) => { Application.Current.Dispatcher.Invoke(rebuildPreview); };
 
-      propertyViewModel.CollectionContentChanged += collectionChangedHandler;
+      mspvm.CollectionContentChanged += collectionChangedHandler;
 
-      collectionGrid.Unloaded += (_, _) =>
-      {
-         propertyViewModel.CollectionContentChanged -= collectionChangedHandler;
-         propertyViewModel.Dispose();
-      };
+      collectionGrid.Unloaded += OnCollectionGridOnUnloaded;
 
       GridManager.AddToGrid(mainGrid, collectionGrid, rowIndex, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      return;
+
+      void OnCollectionGridOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         mspvm.CollectionContentChanged -= collectionChangedHandler;
+         mspvm.Dispose();
+         collectionGrid.Unloaded -= OnCollectionGridOnUnloaded;
+      }
    }
 
    private static void ClearCollectionPreview(Grid grid)
@@ -571,14 +596,27 @@ public static class Eu5UiGen
 
          addButton.Click += addClick;
          removeButton.Click += removeClick;
-         addButton.Unloaded += (_, _) => addButton.Click -= addClick;
-         removeButton.Unloaded += (_, _) => removeButton.Click -= removeClick;
+
+         addButton.Unloaded += OnAddButtonOnUnloaded;
+         removeButton.Unloaded += OnRemoveButtonOnUnloaded;
 
          if (CustomItemTypeButtons.TryGetValue(nxItemType, out var customButtonFunc))
          {
             var customButton = customButtonFunc(mspvm, nxProp);
             panel.Children.Add(customButton);
             DockPanel.SetDock(customButton, Dock.Right);
+         }
+
+         void OnAddButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            addButton.Click -= addClick;
+            addButton.Unloaded -= OnAddButtonOnUnloaded;
+         }
+
+         void OnRemoveButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            removeButton.Click -= removeClick;
+            removeButton.Unloaded -= OnRemoveButtonOnUnloaded;
          }
       }
 
@@ -653,12 +691,20 @@ public static class Eu5UiGen
       };
 
       createNewButton.Click += createNewClick;
-      createNewButton.Unloaded += (_, _) => createNewButton.Click -= createNewClick;
+
+      createNewButton.Unloaded += OnCreateNewButtonOnUnloaded;
       createNewButton.ToolTip =
          $"Create a new {primary.GetNxItemType(nxProp)?.Name ?? primary.GetNxPropType(nxProp).Name} and set it to the '{nxProp}' property.";
 
       panel.Children.Add(createNewButton);
       DockPanel.SetDock(createNewButton, dock);
+      return;
+
+      void OnCreateNewButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         createNewButton.Click -= createNewClick;
+         createNewButton.Unloaded -= OnCreateNewButtonOnUnloaded;
+      }
    }
 
    private static void AddMapModeButtonToPanel(IEu5Object primary, DockPanel panel, Type targetType, Dock dock)
@@ -685,8 +731,15 @@ public static class Eu5UiGen
       };
       RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.Activate(mmType); };
       mapModeButton.Click += mapModeButtonClick;
-      mapModeButton.Unloaded += (_, _) => mapModeButton.Click -= mapModeButtonClick;
+
+      mapModeButton.Unloaded += OnMapModeButtonOnUnloaded;
       return mapModeButton;
+
+      void OnMapModeButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         mapModeButton.Click -= mapModeButtonClick;
+         mapModeButton.Unloaded -= OnMapModeButtonOnUnloaded;
+      }
    }
 
    private static void GetCollectionEditorButton(NavH navh,
@@ -745,10 +798,18 @@ public static class Eu5UiGen
       };
 
       eyeButton.Click += clickHandler;
-      eyeButton.Unloaded += (_, _) => eyeButton.Click -= clickHandler;
+
+      eyeButton.Unloaded += OnEyeButtonOnUnloaded;
       eyeButton.ToolTip = $"Open collection editor for {property}";
 
       panel.Children.Add(eyeButton);
+      return;
+
+      void OnEyeButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         eyeButton.Click -= clickHandler;
+         eyeButton.Unloaded -= OnEyeButtonOnUnloaded;
+      }
    }
 
    private static void GetCollectionLiner(Grid grid, int margin)
@@ -828,7 +889,8 @@ public static class Eu5UiGen
       };
 
       moreText.MouseLeftButtonUp += clickHandler;
-      moreText.Unloaded += (_, _) => moreText.MouseLeftButtonUp -= clickHandler;
+
+      moreText.Unloaded += OnMoreTextOnUnloaded;
 
       GridManager.AddToGrid(grid,
                             moreText,
@@ -837,6 +899,13 @@ public static class Eu5UiGen
                             0,
                             ControlFactory.SHORT_INFO_ROW_HEIGHT,
                             leftMargin: margin + 4);
+      return;
+
+      void OnMoreTextOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         moreText.MouseLeftButtonUp -= clickHandler;
+         moreText.Unloaded -= OnMoreTextOnUnloaded;
+      }
    }
 
    private static void ClearCollectionPreview(Grid grid, int startingRow)
@@ -952,7 +1021,8 @@ public static class Eu5UiGen
       tb.ToolTip = toolTip;
    }
 
-   private static void GetTypeSpecificUI(NavH navH,
+   private static void GetTypeSpecificUI(BaseView view,
+                                         NavH navH,
                                          IEu5Object primary,
                                          Enum nxProp,
                                          Grid mainGrid,
@@ -976,7 +1046,7 @@ public static class Eu5UiGen
             targets.Add((IEu5Object)value);
          }
 
-         mspvm = new(targets, nxProp, allowReadOnlyEditing);
+         mspvm = new(view, targets, nxProp, allowReadOnlyEditing);
       }
 
       var binding = new Binding(nameof(mspvm.Value))
@@ -1000,7 +1070,7 @@ public static class Eu5UiGen
       else if (type == typeof(int) || type == typeof(long) || type == typeof(short))
          element = NEF.GetIntUI(binding, (int)val);
       else if (type == typeof(double) || type == typeof(decimal))
-         element = NEF.GetDoubleUI(binding, (decimal)val);
+         element = NEF.GetDoubleUI(binding, Convert.ToDecimal(val));
       else if (type == typeof(JominiColor))
          element = NEF.GetJominiColorUI(binding, primary.IsPropertyReadOnly(nxProp));
       else if (type == typeof(JominiDate))
@@ -1044,7 +1114,7 @@ public static class Eu5UiGen
       var dockPanel = NEF.PropertyTitlePanel(leftMargin);
       dockPanel.Children.Add(desc);
 
-      dockPanel.Unloaded += (_, _) => { mspvm.Dispose(); };
+      dockPanel.Unloaded += OnDockPanelOnUnloaded;
 
       var propertyMarker = GetPropertyMarker(mspvm);
 
@@ -1058,6 +1128,13 @@ public static class Eu5UiGen
                             leftMargin: leftMargin);
       GridManager.AddToGrid(mainGrid, element, rowIndex, 1, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
       GridManager.AddToGrid(mainGrid, propertyMarker, rowIndex, 0, 1, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+      return;
+
+      void OnDockPanelOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         mspvm.Dispose();
+         dockPanel.Unloaded -= OnDockPanelOnUnloaded;
+      }
    }
 
    private static void SetUpPropertyContextMenu(IEu5Object primary,
@@ -1103,16 +1180,32 @@ public static class Eu5UiGen
                propertyViewModel.Value = defaultValue;
          };
          resetItem.Click += clickEvent;
-         resetItem.Unloaded += (_, _) => resetItem.Click -= clickEvent;
+
+         resetItem.Unloaded += OnResetItemOnUnloaded;
 
          if (uiTarget.ContextMenu.Items.Count > 0 && uiTarget.ContextMenu.Items[^1] is not Separator)
             uiTarget.ContextMenu.Items.Add(new Separator());
 
          uiTarget.ContextMenu.Items.Add(resetItem);
+         return;
+
+         void OnResetItemOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            resetItem.Click -= clickEvent;
+            resetItem.Unloaded -= OnResetItemOnUnloaded;
+         }
       };
 
       uiTarget.MouseRightButtonUp += mouseUpHandler;
-      uiTarget.Unloaded += (_, _) => uiTarget.MouseRightButtonUp -= mouseUpHandler;
+
+      uiTarget.Unloaded += OnUITargetOnUnloaded;
+      return;
+
+      void OnUITargetOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         uiTarget.MouseRightButtonUp -= mouseUpHandler;
+         uiTarget.Unloaded -= OnUITargetOnUnloaded;
+      }
    }
 
    private static Image GetPropertyMarker(MultiSelectPropertyViewModel vm)
@@ -1189,10 +1282,17 @@ public static class Eu5UiGen
       };
 
       graphButton.Click += graphClick;
-      graphButton.Unloaded += (_, _) => graphButton.Click -= graphClick;
+
+      graphButton.Unloaded += OnGraphButtonOnUnloaded;
 
       panel.Children.Add(graphButton);
       DockPanel.SetDock(graphButton, Dock.Right);
       return graphButton;
+
+      void OnGraphButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         graphButton.Click -= graphClick;
+         graphButton.Unloaded -= OnGraphButtonOnUnloaded;
+      }
    }
 }

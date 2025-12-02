@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.Utils.Sorting;
@@ -13,9 +12,7 @@ public partial class ReligiousSchoolsParsing(IEnumerable<IDependencyNode<string>
 {
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    ReligiousSchool target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("ReligiousSchoolsParsing should only be used in discovery phase.");
 }

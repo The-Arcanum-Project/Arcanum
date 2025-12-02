@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -17,25 +16,19 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
    public override bool IsHeavyStep => true;
 
    private static void ValidateAndParseCountries(BlockNode rootBn,
-                                                 LocationContext ctx,
-                                                 string source,
-                                                 Eu5FileObj fileObj,
-                                                 ref bool validation)
+                                                 ref ParsingContext pc,
+                                                 Eu5FileObj fileObj)
    {
       if (!Parser.EnforceNodeCountOfType(rootBn.Children,
                                          1,
-                                         ctx,
-                                         nameof(ValidateAndParseCountries),
+                                         ref pc,
                                          out List<BlockNode> cn2S))
          return;
 
       Dictionary<string, Country> tagCheck = new();
       SimpleObjectParser.Parse(fileObj,
                                cn2S[0].Children,
-                               ctx,
-                               nameof(CountryParsing),
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                tagCheck,
                                false);
@@ -44,55 +37,49 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
          Globals.Countries[country.UniqueId] = country;
    }
 
-   private static void HandleCurrentAgeParsing(ContentNode rootCn, string source, LocationContext ctx)
+   private static void HandleCurrentAgeParsing(ContentNode rootCn, ref ParsingContext pc)
    {
       // TODO: Use the currentAge variable in custom saving
       // ReSharper disable once NotAccessedVariable
       string currentAge;
       const string currentAgeKey = "current_age";
-      if (rootCn.KeyNode.GetLexeme(source).Equals(currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
+      if (pc.IsSliceEqual(rootCn, currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
       {
          // ReSharper disable once RedundantAssignment
-         currentAge = lvn.Value.GetLexeme(source);
+         currentAge = pc.SliceString(lvn);
          return;
       }
 
-      ctx.LineNumber = rootCn.KeyNode.Line;
-      ctx.ColumnNumber = rootCn.KeyNode.Column;
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(rootCn);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidContentKeyOrType,
-                                     nameof(CountryParsing),
-                                     rootCn.KeyNode.GetLexeme(source),
+                                     pc.SliceString(rootCn),
                                      currentAgeKey);
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       foreach (var rootStatement in rn.Statements)
          switch (rootStatement)
          {
             case ContentNode rootCn:
             {
-               HandleCurrentAgeParsing(rootCn, source, ctx);
+               HandleCurrentAgeParsing(rootCn, ref pc);
                continue;
             }
 
             case BlockNode rootBn:
             {
                const string countriesKey = "countries";
-               if (rootBn.KeyNode.GetLexeme(source).Equals(countriesKey))
-                  ValidateAndParseCountries(rootBn, ctx, source, fileObj, ref validation);
+               if (pc.IsSliceEqual(rootBn, countriesKey))
+                  ValidateAndParseCountries(rootBn, ref pc, fileObj);
                else
-                  DiagnosticException.LogWarning(ctx.GetInstance(),
+                  DiagnosticException.LogWarning(ref pc,
                                                  ParsingError.Instance.InvalidBlockNames,
-                                                 actionStack,
-                                                 rootBn.KeyNode.GetLexeme(source),
+                                                 pc.SliceString(rootBn),
                                                  new[] { countriesKey });
 
                break;
@@ -102,9 +89,6 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Country target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

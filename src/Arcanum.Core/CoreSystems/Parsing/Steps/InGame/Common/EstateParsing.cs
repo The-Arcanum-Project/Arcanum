@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -12,20 +11,14 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 public partial class EstateParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Estate>(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -33,9 +26,6 @@ public partial class EstateParsing(IEnumerable<IDependencyNode<string>> dependen
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Estate target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

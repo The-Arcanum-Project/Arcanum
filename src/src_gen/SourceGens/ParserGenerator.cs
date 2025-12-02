@@ -1,9 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ParserGenerator.HelperClasses;
+using ParserGenerator.ParserGen;
 using ParserGenerator.SubClasses;
 
 namespace ParserGenerator;
@@ -13,6 +12,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 {
    private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParserForAttribute";
    private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
+   private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.SaveAsAttribute";
    private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParsingToolBox";
 
    public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -160,12 +160,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                     dynamicContentNodeProps);
 
          // --- ParseProperties Method ---
-         GenerateParsePropertiesMethod(targetTypeSymbol,
-                                       sb,
-                                       targetTypeName,
-                                       classMetadata,
-                                       properties.FirstOrDefault(),
-                                       parsers);
+         // GenerateParsePropertiesMethod(targetTypeSymbol,
+         //                               sb,
+         //                               targetTypeName,
+         //                               classMetadata,
+         //                               properties.FirstOrDefault(),
+         //                               parsers);
 
          // --- Wrapper Methods (partial signatures) ---
          GenerateParserMethodSignatures(properties, sb, targetTypeName);
@@ -180,7 +180,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                            targetTypeName,
                                            parsers,
                                            context,
-                                           classMetadata);
+                                           classMetadata,
+                                           targetTypeSymbol);
       }
       catch (Exception e)
       {
@@ -303,12 +304,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                       string targetTypeName,
                                                       ImmutableArray<INamedTypeSymbol> parsers,
                                                       SourceProductionContext context,
-                                                      ParserClassMetadata classMetadata)
+                                                      ParserClassMetadata classMetadata,
+                                                      INamedTypeSymbol targetTypeSymbol)
    {
       sb.AppendLine("    #region Auto-Implemented Parsers");
+      List<PropertyData> propDataList = new(properties.Count);
 
       foreach (var prop in properties)
       {
+         var propData = new PropertyData() { PropertyMetadata = prop };
+         propDataList.Add(propData);
+
          if (GatherMethodCreationData(parserSymbol,
                                       toolboxSymbol,
                                       sb,
@@ -324,6 +330,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       out var hasEmbeddedParser,
                                       out var customParserName))
             continue;
+
+         propData.MethodCall = wrapperMethodName;
 
          if (AddDynamicBlockParser(prop, sb, targetTypeName, customParserName, toolMethodCall))
             continue;
@@ -367,7 +375,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                          toolMethodCall,
                                          genericType,
                                          targetTypeName,
-                                         actionName,
                                          classMetadata);
             continue;
          }
@@ -379,11 +386,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       propTypeName,
                                       wrapperMethodName,
                                       toolMethodCall,
-                                      actionName,
                                       classMetadata);
       }
 
       sb.AppendLine("    #endregion");
+      DispatchGenerator.GenerateMainDispatcher(sb, propDataList, targetTypeSymbol);
+      DispatchGenerator.AppendIsIgnoredCheck(sb, classMetadata.IgnoredBlockKeys, classMetadata.IgnoredContentKeys);
       sb.AppendLine("}");
    }
 
@@ -405,15 +413,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       sb.AppendLine($"// ### Dynamic {prop.AstNodeType} Parser ###");
 
-      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       sb.AppendLine($"        var globals = ((IEu5Object)EmptyRegistry.Empties[typeof({globalsType})]).GetGlobalItemsNonGeneric();");
-      sb.AppendLine($"        var key = node.KeyNode.GetLexeme(source);");
+      sb.AppendLine($"        var key = pc.SliceString(node);");
       sb.AppendLine($"        if (!globals.Contains(key))");
       sb.AppendLine("            return false;");
       sb.AppendLine(prop.AstNodeType == NodeType.ContentNode
-                       ? $"        {toolBoxClass}(node, ctx, \"{PropCustomParserMethodName(prop)}\", source, out var value, ref validation);"
-                       : $"        var value = Pdh.ParseDynamicObject<{objStr}>(key, node, source, ctx, {customParserName}.ParseProperties, ref validation);");
+                       ? $"        {toolBoxClass}(node, ref pc, out var value);"
+                       : $"        var value = Pdh.ParseDynamicObject<{objStr}>(key, node, ref pc, {customParserName}.ParseProperties);");
       sb.AppendLine($"        if (value == null)");
       sb.AppendLine("            return false;");
 
@@ -503,18 +511,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string propTypeName,
                                                     string wrapperMethodName,
                                                     string toolMethodCall,
-                                                    string actionName,
                                                     ParserClassMetadata pmc)
    {
       var outvalue = prop.IsCollection ? genericType?.ToDisplayString() ?? "object" : propTypeName;
 
       sb.AppendLine($"// ### Property Parser ###");
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
       {
-         sb.AppendLine($"        if ({toolMethodCall}(node, ctx, {actionName}, source, out {outvalue} value, ref validation))");
+         sb.AppendLine($"        if ({toolMethodCall}(node, ref pc, out {outvalue} value))");
          sb.AppendLine("        {");
          if (IsFlagsEnum(prop))
             sb.AppendLine($"            target.{prop.PropertyName} |= value;");
@@ -552,13 +559,13 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("// ### Embedded Shattered Collection Property Parser ###");
       var itemTypeName = genericType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
       {
          sb.AppendLine($"        var newInstance = ({itemTypeName})Activator.CreateInstance(typeof({itemTypeName}))!;");
-         sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, newInstance, ref pc, {pmc.AllowUnknownNodes.ToString().ToLower()});");
          sb.AppendLine($"        target.{prop.PropertyName}.Add(newInstance);");
       }
 
@@ -595,10 +602,10 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                 NodeType.StatementNode => $"ParseStatement{collectionKeyName}",
                                 _ => throw new ArgumentOutOfRangeException(),
                              };
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       if (!pmc.ContainsOnlyChildObjects)
-         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {customParserName}.ParseProperties, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ref pc, {customParserName}.ParseProperties, {pmc.AllowUnknownNodes.ToString().ToLower()});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
    }
@@ -609,7 +616,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string toolMethodCall,
                                                     ITypeSymbol? genericType,
                                                     string targetTypeName,
-                                                    string actionName,
                                                     ParserClassMetadata pmc)
    {
       sb.AppendLine("// ### Collection Property Parser ###");
@@ -632,11 +638,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
          _ => throw new ArgumentOutOfRangeException(),
       };
 
-      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {wrapperMethodName}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
 
       if (!pmc.ContainsOnlyChildObjects)
-         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ctx, source, {actionName}, ref validation, {toolMethodCall});");
+         sb.AppendLine($"        target.{prop.PropertyName} = Pdh.{pdhMethodName}<{itemTypeName}>(node, ref pc, {toolMethodCall});");
       sb.AppendLine("        return true;");
       sb.AppendLine("    }");
    }
@@ -677,7 +683,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                         isEnabledByDefault: true),
                                                     Location.None));
 
-         sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}'.");
+         sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}', after looking for {nestedParserSymbol}");
          return true;
       }
 
@@ -693,12 +699,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
    {
       sb.AppendLine("// ### Embedded Property Parser ###");
       var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation)");
+      sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}(BlockNode node, {targetTypeName} target, ref ParsingContext pc)");
       sb.AppendLine("    {");
       if (!pmc.ContainsOnlyChildObjects)
       {
          sb.AppendLine($"        target.{prop.PropertyName} = new {propTypeName2}();");
-         sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ctx, source, ref validation, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+         sb.AppendLine($"        {customParserName}.ParseProperties(node, target.{prop.PropertyName}, ref pc, {pmc.AllowUnknownNodes.ToString().ToLower()});");
       }
 
       sb.AppendLine("        return true;");
@@ -810,7 +816,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
             continue;
          }
 
-         sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, LocationContext ctx, string source, ref bool validation);");
+         sb.AppendLine($"    private static partial bool {PropCustomParserMethodName(prop)}({prop.AstNodeType} node, {targetTypeName} target, ref ParsingContext pc);");
       }
 
       sb.AppendLine("    #endregion");
@@ -836,11 +842,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    /// This is a facade that calls the centralized logic in the Pdh helper class.");
       sb.AppendLine("    /// </summary>");
       sb.AppendLine("    /// <returns>A list of all child nodes that were not handled automatically.</returns>");
-      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, LocationContext ctx, string source, ref bool validation, bool allowUnknownNodes)");
+      sb.AppendLine($"    public static void ParseProperties(BlockNode block, {targetTypeName} target, ref ParsingContext pc, bool allowUnknownNodes)");
       sb.AppendLine("    {");
       if (!classMetadata.ContainsOnlyChildObjects)
       {
-         sb.AppendLine($"        Pdh.ParseProperties(block, target, ctx, source, ref validation, _contentParsers, _blockParsers, _statementParsers, _dynamicBlockParsers, _dynamicContentParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
+         sb.AppendLine($"        Pdh.ParseProperties(block, target, ref pc, _contentParsers, _blockParsers, _statementParsers, _dynamicBlockParsers, _dynamicContentParsers, _ignoredBlockTypes, _ignoredContentTypes, allowUnknownNodes);");
       }
       // The entire objects only consists of a list of subobjects, instead of looking into our dictionaries we have to directly parse all child blocks as subobjects.
       else
@@ -848,7 +854,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
          if (prop == null)
          {
             sb.AppendLine("        // ERROR: No properties found for parser marked with [ContainsOnlyChildObjects].");
-            sb.AppendLine("        validation = false;");
+            sb.AppendLine("        pc.Fail();");
             sb.AppendLine("        return;");
             sb.AppendLine("    }");
             sb.AppendLine();
@@ -914,20 +920,38 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
          var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
 
+         // message +=
+         //    $"\n//Expected method signature: static bool {genericToolName}<{propertyType.Name}>({prop.AstNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+         // message += $"Possible candidates:";
+
          foreach (var member in methods)
          {
+            // message += $"\n//- {member.ToDisplayString()}";
             // A valid tool must be static, generic, and have the right number of parameters.
-            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length < 5)
+            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length != 3)
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must be static, generic, and have 3 parameters.";
                continue;
+            }
 
             if (member.Parameters[0].Type.Name != prop.AstNodeType.ToString())
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - first parameter type '{member.Parameters[0].Type.Name}' does not match AST node type '{prop.AstNodeType}'.";
                continue;
+            }
 
             var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
             if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
+            {
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must have an 'out' parameter of the generic type.";
                continue;
+            }
 
             genericType = member.TypeArguments.FirstOrDefault();
+            // message += $"\n//Found matching generic tool method '{member.Name}' for enum property '{prop.PropertyName}'.";
             return member;
          }
 
@@ -961,12 +985,17 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       message +=
          $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
+
+      // Expected signature details
+      message +=
+         $"\n//Expected method signature: static bool {toolName}({astNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+
       message +=
          $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
 
       foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
       {
-         if (!member.IsStatic || member.Parameters.Length < 4)
+         if (!member.IsStatic || member.Parameters.Length != 3)
             continue;
 
          if (member.Parameters[0].Type.Name == astNodeType.ToString())
@@ -1064,104 +1093,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       return (hintName, sb.ToString());
    }
 
-   private record PropertyMetadata
-   {
-      public IPropertySymbol Symbol { get; }
-      public string PropertyName => Symbol.Name;
-      public ITypeSymbol PropertyType => Symbol.Type;
-      public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
-                                        ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
-                                        : Symbol.Type;
-      public string Keyword { get; }
-      public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
-      public NodeType AstNodeType { get; }
-      public string? CustomParserMethodName { get; }
-      public INamedTypeSymbol? IEu5KeyType { get; }
-      public bool IsEmbedded { get; }
-      public bool IsShatteredList { get; }
-      public bool IsCollection { get; }
-      public bool IsHashSet { get; }
-      public INamedTypeSymbol? CustomGlobalsSource { get; }
-      public bool Ignore { get; }
-
-      public NodeType ItemNodeType { get; }
-
-      public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
-      {
-         Symbol = symbol;
-
-         IsShatteredList = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 3, "isShatteredList");
-         CustomParserMethodName =
-            AttributeHelper.SimpleGetAttrArgValue<string?>(attribute, 2, "customParser");
-         ItemNodeType =
-            AttributeHelper.SimpleGetAttrArgValue(attribute, 4, "itemNodeType", NodeType.KeyOnlyNode);
-         IsEmbedded = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 5, "isEmbedded");
-         IEu5KeyType =
-            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
-         CustomGlobalsSource =
-            AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
-         Ignore = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 8, "ignore");
-
-         IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
-         IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
-                     "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";
-         if (IsHashSet)
-            IsCollection = true;
-
-         if (IsEmbedded || ((IsHashSet || IsCollection) && !IsShatteredList))
-         {
-            AstNodeType = NodeType.BlockNode;
-         }
-         else
-         {
-            // For non-embedded types, we need to parse the enum from the attribute.
-            var constructor = attribute.AttributeConstructor;
-            var nodeTypeParameter = constructor?.Parameters.FirstOrDefault(p => p.Name == "nodeType");
-
-            var astNodeTypeEnumValue = attribute.ConstructorArguments.Length > 1
-                                          ? attribute.ConstructorArguments[1].Value
-                                          : nodeTypeParameter?.ExplicitDefaultValue;
-
-            if (astNodeTypeEnumValue != null)
-            {
-               var enumTypeSymbol = nodeTypeParameter?.Type;
-               var enumMemberSymbol = enumTypeSymbol?.GetMembers()
-                                                     .OfType<IFieldSymbol>()
-                                                     .FirstOrDefault(f => f.ConstantValue != null &&
-                                                                          f.ConstantValue.Equals(astNodeTypeEnumValue));
-
-               AstNodeType = Enum.TryParse(enumMemberSymbol?.Name, out NodeType nt) ? nt : NodeType.ContentNode;
-            }
-         }
-
-         Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
-      }
-
-      private static string ToSnakeCase(string text)
-      {
-         if (string.IsNullOrEmpty(text))
-            return string.Empty;
-
-         return string.Concat(text.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x : x.ToString()))
-                      .ToLower();
-      }
-
-      // Simple sanitizer to create a valid C# identifier from a keyword string.
-      // For example, "my-key" -> "MY_KEY"
-      private static string SanitizeToIdentifier(string text)
-      {
-         if (string.IsNullOrEmpty(text))
-            return "_";
-
-         var sanitized = Regex.Replace(text, "[^a-zA-Z0-9_]", "_");
-
-         if (char.IsDigit(sanitized[0]))
-            sanitized = "_" + sanitized;
-
-         return sanitized;
-      }
-   }
-
    private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
                                        List<PropertyMetadata> propertiesToParse,
                                        SourceProductionContext context)
@@ -1173,7 +1104,9 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                  .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
          if (parseAsAttr != null)
             propertiesToParse.Add(new(member, parseAsAttr));
-         else
+         else if (member.GetAttributes()
+                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE) !=
+                  null)
             // Report warning
             context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
                                                            title: "Missing [ParseAs] Attribute",

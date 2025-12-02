@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
@@ -10,14 +8,12 @@ namespace Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 
 public class CurrencyDataManager
 {
-   public static bool TryCreateCurrencyInstance(LocationContext ctx,
-                                                Token nodeKeyNode,
-                                                string source,
+   public static bool TryCreateCurrencyInstance(ref ParsingContext pc,
                                                 string value,
-                                                ref bool validation,
+                                                Token nodeKeyNode,
                                                 [MaybeNullWhen(false)] out CurrencyData instance)
    {
-      var key = nodeKeyNode.GetLexeme(source);
+      var key = pc.SliceString(nodeKeyNode);
 
       if (ModifierManager.TryConvertValueToType(value, ModifierType.Integer, out var convertedValue))
       {
@@ -39,13 +35,12 @@ public class CurrencyDataManager
       }
       else
       {
-         ctx.SetPosition(nodeKeyNode);
-         DiagnosticException.LogWarning(ctx,
+         pc.SetContext(nodeKeyNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidCurrencyValue,
-                                        $"{nameof(AudioTagsManager)}.{nameof(TryCreateCurrencyInstance)}",
                                         value);
          instance = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 

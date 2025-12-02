@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Nexus;
@@ -12,25 +11,21 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 public static class BnHelpers
 {
    public static bool HasOnlyXBlocksAsChildren(this BlockNode bn,
-                                               LocationContext ctx,
-                                               string source,
                                                int count,
-                                               string callStack,
-                                               ref bool validationResult,
+                                               ref ParsingContext pc,
                                                [MaybeNullWhen(false)] out List<BlockNode> blocks)
    {
+      using var scope = pc.PushScope();
       if (bn.Children.Count != count)
       {
-         ctx.SetPosition(bn.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(bn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBlockCount,
-                                        "Parsing BlockNode",
-                                        bn.KeyNode.GetLexeme(source),
+                                        pc.SliceString(bn),
                                         count,
                                         bn.Children.Count);
-         validationResult = false;
          blocks = null;
-         return false;
+         return pc.Fail();
       }
 
       blocks = new(count);
@@ -38,16 +33,14 @@ public static class BnHelpers
       {
          if (child is not BlockNode block)
          {
-            ctx.SetPosition(child.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,
-                                           $"{callStack}.HasOnlyXBlocksAsChildren",
                                            child.GetType().Name,
                                            nameof(BlockNode),
-                                           child.KeyNode.GetLexeme(source));
-            validationResult = false;
+                                           pc.SliceString(bn));
             blocks = null;
-            return false;
+            return pc.Fail();
          }
 
          blocks.Add(block);
@@ -61,27 +54,18 @@ public static class BnHelpers
    /// This is a placeholder for which validates the given content. <br/>
    /// Only use if the objects needed to validate are not yet parsed! 
    /// </summary>
-   /// <param name="bn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="validation"></param>
-   /// <param name="target"></param>
-   /// <param name="nxProp"></param>
    public static void SetIdentifierList(this BlockNode bn,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        ref bool validation,
+                                        ref ParsingContext pc,
                                         INexus target,
                                         Enum nxProp)
    {
+      using var scope = pc.PushScope();
       foreach (var sn in bn.Children)
       {
-         if (!sn.IsKeyOnlyNode(ctx, source, actionName, ref validation, out var kn))
+         if (!sn.IsKeyOnlyNode(ref pc, out var kn))
             continue;
 
-         var identifier = kn.KeyNode.GetLexeme(source);
+         var identifier = pc.SliceString(kn);
          Nx.AddToCollection(target, nxProp, identifier);
       }
    }

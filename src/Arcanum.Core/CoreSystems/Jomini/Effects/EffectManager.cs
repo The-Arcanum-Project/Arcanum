@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -12,15 +11,13 @@ public static class EffectManager
 {
    public static Dictionary<string, EffectDefinition> DefinedTypes { get; } = [];
 
-   public static bool TryCreateEffectInstance(LocationContext ctx,
+   public static bool TryCreateEffectInstance(ref ParsingContext pc,
                                               Token token,
-                                              string source,
                                               string value,
-                                              ref bool validationResult,
                                               [MaybeNullWhen(false)] out EffectInstance instance)
    {
       ModifierType type;
-      var key = token.GetLexeme(source);
+      var key = pc.SliceString(token);
       if (!DefinedTypes.TryGetValue(key, out var existingDefinition))
       {
          type = InferEffectTypeFromValue(value);
@@ -32,13 +29,11 @@ public static class EffectManager
          else
          {
             instance = null;
-            ctx.SetPosition(token);
-            DiagnosticException.LogWarning(ctx,
+            pc.SetContext(token);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.UndefinedEffectKey,
-                                           "Creating EffectInstance",
                                            key);
-            validationResult = false;
-            return false;
+            return pc.Fail();
          }
       }
       else
@@ -46,18 +41,17 @@ public static class EffectManager
          type = existingDefinition.ModifierType;
       }
 
-      return CreateInstance(ctx, token, value, ref validationResult, type, existingDefinition, out instance);
+      return CreateInstance(ref pc, token, value, type, existingDefinition, out instance);
    }
 
-   private static bool CreateInstance(LocationContext ctx,
+   private static bool CreateInstance(ref ParsingContext pc,
                                       Token token,
                                       string value,
-                                      ref bool validationResult,
                                       ModifierType type,
                                       EffectDefinition existingDefinition,
                                       [MaybeNullWhen(false)] out EffectInstance instance)
    {
-      if (!TryConvertValue(ctx, token, ref validationResult, value, type, out var convertedValue))
+      if (!TryConvertValue(ref pc, token, value, type, out var convertedValue))
       {
          instance = null;
          return false;
@@ -69,9 +63,8 @@ public static class EffectManager
       return true;
    }
 
-   internal static bool TryConvertValue(LocationContext ctx,
+   internal static bool TryConvertValue(ref ParsingContext pc,
                                         Token token,
-                                        ref bool validationResult,
                                         string value,
                                         ModifierType type,
                                         [MaybeNullWhen(false)] out object convertedValue,
@@ -87,7 +80,7 @@ public static class EffectManager
                return true;
             }
 
-            return LogConversionError(out validationResult, out convertedValue);
+            return LogConversionError(ref pc, out convertedValue);
          }
 
          case ModifierType.Float:
@@ -99,7 +92,7 @@ public static class EffectManager
                return true;
             }
 
-            return LogConversionError(out validationResult, out convertedValue);
+            return LogConversionError(ref pc, out convertedValue);
          }
 
          case ModifierType.Boolean:
@@ -116,7 +109,7 @@ public static class EffectManager
                return true;
             }
 
-            return LogConversionError(out validationResult, out convertedValue);
+            return LogConversionError(ref pc, out convertedValue);
          }
 
          case ModifierType.ScriptedValue:
@@ -126,27 +119,24 @@ public static class EffectManager
          }
 
          default:
-            return LogConversionError(out validationResult, out convertedValue);
+            return LogConversionError(ref pc, out convertedValue);
       }
 
-      bool LogConversionError(out bool validationResult, out object? convertedValue)
+      bool LogConversionError(ref ParsingContext pc, out object? convertedValue)
       {
          if (defaultToScriptedValue)
          {
             convertedValue = value;
-            validationResult = true;
             return true;
          }
 
-         ctx.SetPosition(token);
-         DiagnosticException.LogWarning(ctx,
+         pc.SetContext(token);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnableToConvertValueToModifierType,
-                                        "Converting EffectInstance value",
                                         value,
                                         type);
-         validationResult = false;
          convertedValue = null;
-         return false;
+         return pc.Fail();
       }
    }
 

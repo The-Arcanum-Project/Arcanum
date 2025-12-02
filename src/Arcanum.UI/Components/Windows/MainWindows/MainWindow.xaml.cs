@@ -148,6 +148,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       MainWindowGen.Initialize(SpecializedEditorPresenter);
 
       PerformanceCountersHelper.Initialize(this);
+      UIHandle.Instance.MapInterface = new MapInterfaceImpl { MapControl = MainMap };
+
+      Title = AppData.ProductName;
+      VersionNumber = $"v{AppData.AppVersion}";
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)

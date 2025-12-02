@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
@@ -44,13 +45,13 @@ public static class ValuesParsing
       return false;
    }
 
-   public static bool ParseLocation(string key, LocationContext ctx, string actionName, out Location location)
+   public static bool ParseLocation(string key, ref ParsingContext pc, out Location location)
    {
+      using var scope = pc.PushScope();
       if (!Globals.Locations.TryGetValue(key, out location!))
       {
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidLocationKey,
-                                        actionName,
                                         key);
          location = Location.Empty;
          return false;

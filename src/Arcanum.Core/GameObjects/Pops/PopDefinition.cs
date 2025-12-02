@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.Religious;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.Pops;
@@ -25,30 +26,30 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    [Description("The type of population this PopDefinition represents.")]
    public PopType PopType { get; set; } = PopType.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("culture")]
    [DefaultValue(null)]
    [Description("The culture associated with this PopDefinition.")]
    public Culture Culture { get; set; } = Culture.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("religion")]
    [DefaultValue("")]
    [Description("The religion associated with this PopDefinition.")]
-   public string Religion { get; set; } = string.Empty;
+   public Religion Religion { get; set; } = Religion.Empty;
 
-   [SaveAs]
+   [SaveAs(numOfDecimalPlaces: 3)]
    [ParseAs("size")]
-   [DefaultValue(0f)]
+   [DefaultValue(0)]
    [Description("The size of the population.")]
-   public float Size { get; set; }
+   public double Size { get; set; }
 
    #endregion
 
 #pragma warning disable AGS004
    [Description("Unique key of this PopDefinition. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueId { get; set; } = null!;
+   public string UniqueId { get; set; } = string.Empty;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
@@ -61,7 +62,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => true;
+   public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopDefinitionSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopDefinitionAgsSettings;

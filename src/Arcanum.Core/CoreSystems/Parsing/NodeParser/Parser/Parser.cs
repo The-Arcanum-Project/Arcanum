@@ -56,13 +56,25 @@ public class Parser(LexerResult lexerResult)
 
    private KeyNodeBase ParseKey()
    {
-      if (!Check(TokenType.Identifier) || !CheckNext(TokenType.ScopeSeparator))
+      // Return simple key (handles quoted strings, etc).
+      if (!Check(TokenType.Identifier))
          return new SimpleKeyNode(Advance());
 
-      var scope = Advance(); // Consume scope identifier
-      Advance(); // Consume ':'
-      var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
-      return new ScopedKeyNode(scope, name);
+      // If the next token IS NOT a ':', it is a simple identifier key.
+      if (!CheckNext(TokenType.ScopeSeparator))
+         return new SimpleKeyNode(Advance());
+
+      // It is a scoped key. Consume the chain.
+      var segments = new List<Token> { Advance() };
+
+      while (Check(TokenType.ScopeSeparator))
+      {
+         Advance();
+         var nextPart = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+         segments.Add(nextPart);
+      }
+
+      return new ScopedKeyNode(segments);
    }
 
    private StatementNode ParseStatement()
@@ -114,14 +126,16 @@ public class Parser(LexerResult lexerResult)
       if (Check(TokenType.AtIdentifier))
          return ParseContentStatement(ParseKey());
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
+      // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+      var current = Current();
+      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj?.Path?.FullPath ?? "N/A"),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
                                           DiagnosticReportSeverity.PopupError,
-                                          Current().Line,
+                                          current.Line,
                                           _tokens[0].Column,
-                                          Current().GetValue(_source),
+                                          current.GetValue(_source),
                                           "a block or content definition");
 
       throw
@@ -171,23 +185,33 @@ public class Parser(LexerResult lexerResult)
          return new UnaryNode(op, right);
       }
 
-      // Check for scoped identifier first
-      if (Check(TokenType.Identifier) && CheckNext(TokenType.ScopeSeparator))
+      // Check for Identifier driven values
+      if (Check(TokenType.Identifier))
       {
-         var scope = Advance();
-         Advance(); // Consume ':'
-         var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
-         return new ScopedIdentifierNode(scope, name);
-      }
+         // Function Call: identifier followed by {
+         if (CheckNext(TokenType.LeftBrace))
+            return ParseFunctionCallNode();
 
-      // An Identifier followed by a LeftBrace is a function call.
-      if (Check(TokenType.Identifier) && CheckNext(TokenType.LeftBrace))
-         return ParseFunctionCallNode();
+         // Scoped Identifier: identifier followed by :
+         if (CheckNext(TokenType.ScopeSeparator))
+         {
+            var segments = new List<Token> { Advance() };
+
+            while (Check(TokenType.ScopeSeparator))
+            {
+               Advance();
+               var nextPart = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+               segments.Add(nextPart);
+            }
+
+            return new ScopedIdentifierNode(segments);
+         }
+      }
 
       // A block used as a value, e.g., OR = { ... }
       if (Match(TokenType.LeftBrace))
       {
-         var brace = Previous(); // Get the opening brace token
+         var brace = Previous();
          var blockValue = new BlockValueNode(brace);
          while (!Check(TokenType.RightBrace) && !IsAtEnd())
             blockValue.Children.Add(ParseStatement());
@@ -377,6 +401,10 @@ public class Parser(LexerResult lexerResult)
             sb.Append($"{indent}Content: '{key}' {sep} ");
             PrintValue(content.Value, source, sb);
             break;
+
+         case ScopedIdentifierNode scoped:
+            sb.AppendLine($"ScopedIdentifier: '{scoped.GetKeyText(source)}'");
+            break;
       }
    }
 
@@ -414,7 +442,7 @@ public class Parser(LexerResult lexerResult)
 
    #region Utility Methods
 
-   public static bool VerifyNodeTypes(List<AstNode> node, Type[] allowedTypes, LocationContext ctx, string actionName)
+   public static bool VerifyNodeTypes(List<AstNode> node, Type[] allowedTypes, ref ParsingContext pc)
    {
       var allValid = true;
       foreach (var n in node)
@@ -423,9 +451,8 @@ public class Parser(LexerResult lexerResult)
          if (allowedTypes.Contains(type))
             continue;
 
-         DiagnosticException.LogWarning(ctx,
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidBlockType,
-                                        actionName,
                                         n.GetLocation().Item1,
                                         n.GetLocation().Item2,
                                         type.Name,
@@ -483,8 +510,7 @@ public class Parser(LexerResult lexerResult)
 
    public static bool EnforceNodeCountOfType<T>(List<StatementNode> nodes,
                                                 int expectedCount,
-                                                LocationContext ctx,
-                                                string actionName,
+                                                ref ParsingContext pc,
                                                 out List<T> results)
       where T : AstNode
    {
@@ -494,9 +520,8 @@ public class Parser(LexerResult lexerResult)
       var actualCount = results.Count;
       if (actualCount != expectedCount)
       {
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeCountOfType,
-                                        actionName,
                                         typeof(T).Name,
                                         expectedCount,
                                         actualCount);
@@ -507,9 +532,7 @@ public class Parser(LexerResult lexerResult)
    }
 
    public static bool GetIdentifierKvp(StatementNode node,
-                                       LocationContext ctx,
-                                       string actionName,
-                                       string source,
+                                       ref ParsingContext pc,
                                        out string key,
                                        out string value)
    {
@@ -517,12 +540,9 @@ public class Parser(LexerResult lexerResult)
       {
          key = string.Empty;
          value = string.Empty;
-         var location = node.GetLocation();
-         ctx.LineNumber = location.Item1;
-         ctx.ColumnNumber = location.Item2;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionName,
                                         node.GetType(),
                                         "a content node");
          return false;
@@ -532,19 +552,16 @@ public class Parser(LexerResult lexerResult)
       {
          key = string.Empty;
          value = string.Empty;
-         var (line, column) = cn.Value.GetLocation();
-         ctx.LineNumber = line;
-         ctx.ColumnNumber = column;
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidContentKeyOrType,
-                                        actionName,
-                                        cn.KeyNode.GetKeyText(source),
+                                        pc.SliceString(cn),
                                         "a string value and key");
          return false;
       }
 
-      key = cn.KeyNode.GetKeyText(source);
-      value = lvn.Value.GetLexeme(source);
+      key = pc.SliceString(cn.KeyNode);
+      value = pc.SliceString(lvn.Value);
       return true;
    }
 

@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -67,13 +66,10 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       return true;
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       var continentGlobals = Continent.GetGlobalItems();
       var superRegionGlobals = SuperRegion.GetGlobalItems();
@@ -84,42 +80,36 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       foreach (var sn in rn.Statements)
       {
          // Continent level locations
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var contBn))
+         if (!sn.IsBlockNode(ref pc, out var contBn))
             continue;
 
-         var continentKey = contBn.KeyNode.GetLexeme(source);
+         var continentKey = pc.SliceString(contBn);
          var continent = IEu5Object<Continent>.CreateInstance(continentKey, fileObj);
-         if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var skn))
+         if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out var skn))
             continue;
 
          continent.FileLocation = contBn.GetFileLocation();
 
-         LUtil.TryAddToGlobals(ctx,
-                               skn.KeyToken,
-                               continentKey,
-                               actionStack,
-                               ref validation,
+         LUtil.TryAddToGlobals(skn.KeyToken,
+                               ref pc,
                                continent,
                                continentGlobals);
 
          foreach (var superRegionSn in contBn.Children)
          {
             // SuperRegion level locations
-            if (!superRegionSn.IsBlockNode(ctx, source, actionStack, ref validation, out var srBn))
+            if (!superRegionSn.IsBlockNode(ref pc, out var srBn))
                continue;
 
-            var superRegionKey = srBn.KeyNode.GetLexeme(source);
+            var superRegionKey = pc.SliceString(srBn);
             var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
-            if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out var srkn))
+            if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out var srkn))
                continue;
 
             superRegion.FileLocation = srBn.GetFileLocation();
 
-            LUtil.TryAddToGlobals(ctx,
-                                  srkn.KeyToken,
-                                  superRegionKey,
-                                  actionStack,
-                                  ref validation,
+            LUtil.TryAddToGlobals(srkn.KeyToken,
+                                  ref pc,
                                   superRegion,
                                   superRegionGlobals);
             continent.SuperRegions.Add(superRegion);
@@ -127,55 +117,52 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
             foreach (var regionSn in srBn.Children)
             {
                // Region level locations
-               if (!regionSn.IsBlockNode(ctx, source, actionStack, ref validation, out var rBn))
+               if (!regionSn.IsBlockNode(ref pc, out var rBn))
                   continue;
 
-               var regionKey = rBn.KeyNode.GetLexeme(source);
+               var regionKey = pc.SliceString(rBn);
                var region = IEu5Object<Region>.CreateInstance(regionKey, fileObj);
-               if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+               if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
                   continue;
 
                region.FileLocation = rBn.GetFileLocation();
 
-               LUtil.TryAddToGlobals(ctx, skn.KeyToken, regionKey, actionStack, ref validation, region, regionGlobals);
+               LUtil.TryAddToGlobals(skn.KeyToken, ref pc, region, regionGlobals);
                superRegion.LocationChildren.Add(region);
                region.Parents.Add(superRegion);
 
                foreach (var areaSn in rBn.Children)
                {
                   // Area level locations
-                  if (!areaSn.IsBlockNode(ctx, source, actionStack, ref validation, out var aBn))
+                  if (!areaSn.IsBlockNode(ref pc, out var aBn))
                      continue;
 
-                  var areaKey = aBn.KeyNode.GetLexeme(source);
+                  var areaKey = pc.SliceString(aBn);
                   var area = IEu5Object<Area>.CreateInstance(areaKey, fileObj);
-                  if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+                  if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
                      continue;
 
                   area.FileLocation = aBn.GetFileLocation();
 
-                  LUtil.TryAddToGlobals(ctx, skn.KeyToken, areaKey, actionStack, ref validation, area, areaGlobals);
+                  LUtil.TryAddToGlobals(skn.KeyToken, ref pc, area, areaGlobals);
                   region.LocationChildren.Add(area);
                   area.Parents.Add(region);
 
                   foreach (var provinceSn in aBn.Children)
                   {
                      // Province level locations
-                     if (!provinceSn.IsBlockNode(ctx, source, actionStack, ref validation, out var pBn))
+                     if (!provinceSn.IsBlockNode(ref pc, out var pBn))
                         continue;
 
-                     var provinceKey = pBn.KeyNode.GetLexeme(source);
+                     var provinceKey = pc.SliceString(pBn);
                      var province = IEu5Object<Province>.CreateInstance(provinceKey, fileObj);
-                     if (!contBn.KeyNode.IsSimpleKeyNode(ctx, source, actionStack, out skn))
+                     if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
                         continue;
 
                      province.FileLocation = pBn.GetFileLocation();
 
-                     LUtil.TryAddToGlobals(ctx,
-                                           skn.KeyToken,
-                                           provinceKey,
-                                           actionStack,
-                                           ref validation,
+                     LUtil.TryAddToGlobals(skn.KeyToken,
+                                           ref pc,
                                            province,
                                            provinceGlobals);
                      area.LocationChildren.Add(province);
@@ -184,10 +171,10 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                      foreach (var locationSn in pBn.Children)
                      {
                         // Actual locations
-                        if (!locationSn.IsKeyOnlyNode(ctx, source, actionStack, ref validation, out var kNode))
+                        if (!locationSn.IsKeyOnlyNode(ref pc, out var kNode))
                            continue;
 
-                        if (!LUtil.ParseLocation(kNode, ctx, actionStack, source, out var location))
+                        if (!LUtil.ParseLocation(kNode, ref pc, out var location))
                            continue;
 
                         province.LocationChildren.Add(location);
@@ -202,9 +189,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Continent target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       //TODO implement reloading of the definitions without destroying any references
       => throw new NotSupportedException("DefinitionsParsing should only be used in loading phase.");

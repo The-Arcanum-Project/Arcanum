@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -12,7 +11,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 public partial class ModifierParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<ModifierDefinition>(dependencies)
 {
-   protected override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
       foreach (var obj in fileObj.ObjectsInFile)
          Globals.ModifierDefinitions.Remove(obj.UniqueId);
@@ -20,20 +19,14 @@ public partial class ModifierParsing(IEnumerable<IDependencyNode<string>> depend
       return true;
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       ref ParsingContext pc,
+                                       Eu5FileObj fileObj,
+                                       object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                Globals.ModifierDefinitions,
                                lockObject);
@@ -41,9 +34,6 @@ public partial class ModifierParsing(IEnumerable<IDependencyNode<string>> depend
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    ModifierDefinition target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

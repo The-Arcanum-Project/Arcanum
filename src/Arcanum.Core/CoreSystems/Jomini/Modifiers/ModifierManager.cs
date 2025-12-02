@@ -19,49 +19,35 @@ public static class ModifierManager
    /// the value is validated against that type, and instance is created and returned. <br/>
    /// If any of these steps fail, a diagnostic warning is logged and false is returned.
    /// </summary>
-   /// <param name="ctx"></param>
-   /// <param name="nodeKeyNode"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <param name="instance"></param>
-   /// <returns></returns>
-   public static bool TryCreateModifierInstance(LocationContext ctx,
+   public static bool TryCreateModifierInstance(ref ParsingContext pc,
                                                 Token nodeKeyNode,
-                                                string source,
                                                 string value,
-                                                ref bool validation,
                                                 [MaybeNullWhen(false)] out ModValInstance instance)
    {
-      var key = nodeKeyNode.GetLexeme(source);
+      var key = pc.SliceString(nodeKeyNode);
       instance = null;
       if (!Globals.ModifierDefinitions.TryGetValue(key, out var definition))
       {
-         ctx.SetPosition(nodeKeyNode);
-         DiagnosticException.LogWarning(ctx,
+         pc.SetContext(nodeKeyNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UndefinedModifierKey,
-                                        nameof(ModifierManager),
                                         key,
                                         value);
-         validation = false;
-         return false;
+         return pc.Fail();
       }
 
       if (!InferModifierType(definition, out var inferredType) && inferredType is null)
       {
-         ctx.SetPosition(nodeKeyNode);
-         DiagnosticException.LogWarning(ctx,
+         pc.SetContext(nodeKeyNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.ImpossibleModifierTypeInferring,
-                                        nameof(ModifierManager),
                                         key,
                                         "Could not infer modifier type from definition.");
-         validation = false;
-         return false;
+         return pc.Fail();
       }
 
-      if (!EffectManager.TryConvertValue(ctx,
+      if (!EffectManager.TryConvertValue(ref pc,
                                          nodeKeyNode,
-                                         ref validation,
                                          value,
                                          inferredType!.Value,
                                          out var convertedValue))
