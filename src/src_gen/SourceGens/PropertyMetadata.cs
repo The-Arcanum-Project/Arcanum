@@ -22,6 +22,7 @@ public record PropertyMetadata
    public bool IsCollection { get; }
    public bool IsHashSet { get; }
    public INamedTypeSymbol? CustomGlobalsSource { get; }
+   public bool Ignore { get; }
 
    public ParserSourceGenerator.NodeType ItemNodeType { get; }
 
@@ -39,6 +40,9 @@ public record PropertyMetadata
          AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 6, "iEu5KeyType");
       CustomGlobalsSource =
          AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
+
+      Ignore = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 8, "ignore");
+
       IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
       IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
                   "Arcanum.Core.CoreSystems.NUI.ObservableHashSet<T>";

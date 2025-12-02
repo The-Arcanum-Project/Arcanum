@@ -20,7 +20,7 @@ public partial class DemandData : IEmbeddedEu5Object<DemandData>
    public float Demand { get; set; }
 
    [SaveAs]
-   [ParseAs("-", iEu5KeyType: typeof(PopType))]
+   [ParseAs("-", ignore: true, iEu5KeyType: typeof(PopType))]
    [DefaultValue(null)]
    [Description("The estate this demand data applies to.")]
    public PopType PopType { get; set; } = PopType.Empty;

@@ -22,7 +22,7 @@ public partial class TownSetup : IEu5Object<TownSetup>
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("-", isShatteredList: true, iEu5KeyType: typeof(Building), itemNodeType: AstNodeType.ContentNode)]
+   [ParseAs("-", ignore: true, isShatteredList: true, iEu5KeyType: typeof(Building), itemNodeType: AstNodeType.ContentNode)]
    [Description("Collection of building levels associated with this TownSetup.")]
    public ObservableRangeCollection<BuildingLevel> BuildingLevels { get; set; } = [];
 

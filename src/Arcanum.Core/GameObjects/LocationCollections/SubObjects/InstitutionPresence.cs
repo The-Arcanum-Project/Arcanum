@@ -15,7 +15,7 @@ public partial class InstitutionPresence : IEmbeddedEu5Object<InstitutionPresenc
 {
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("-", iEu5KeyType: typeof(Institution))]
+   [ParseAs("-", ignore: true, iEu5KeyType: typeof(Institution))]
    [Description("The institution this presence applies to.")]
    public Institution Institution { get; set; } = Institution.Empty;
 

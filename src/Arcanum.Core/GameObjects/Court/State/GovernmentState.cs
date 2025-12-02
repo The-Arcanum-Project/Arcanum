@@ -124,7 +124,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
 
    [SaveAs]
-   [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
+   [ParseAs("-", ignore: true, itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [DefaultValue(null)]
    [Description("List of estate attribute definitions associated with this pop type.")]
    public ObservableRangeCollection<EstateSatisfactionDefinition> EstateAttributes { get; set; } = [];

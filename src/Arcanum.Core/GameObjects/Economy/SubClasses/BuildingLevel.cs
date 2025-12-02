@@ -20,13 +20,13 @@ public partial class BuildingLevel : IEu5Object<BuildingLevel>
 
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("-", iEu5KeyType: typeof(Building))]
+   [ParseAs("-", ignore: true, iEu5KeyType: typeof(Building))]
    [Description("The estate this definition applies to.")]
    public Building Building { get; set; } = Building.Empty;
 
    [SaveAs]
    [DefaultValue(0)]
-   [ParseAs("-")]
+   [ParseAs("-", ignore: true)]
    [Description("The building level of this building.")]
    public int Level { get; set; }
 

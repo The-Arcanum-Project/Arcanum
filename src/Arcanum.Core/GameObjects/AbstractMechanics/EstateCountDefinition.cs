@@ -15,7 +15,7 @@ public partial class EstateCountDefinition : IEmbeddedEu5Object<EstateCountDefin
 {
    [SaveAs]
    [DefaultValue(null)]
-   [ParseAs("-", iEu5KeyType: typeof(Estate))]
+   [ParseAs("-", ignore: true, iEu5KeyType: typeof(Estate))]
    [Description("The estate this definition applies to.")]
    public Estate Estate { get; set; } = Estate.Empty;
 

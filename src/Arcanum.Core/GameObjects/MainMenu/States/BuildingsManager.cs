@@ -20,7 +20,7 @@ public partial class BuildingsManager : IEu5Object<BuildingsManager>
    #region Nexus Properties
 
    [SaveAs(isEmbeddedObject: true)]
-   [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Building))]
+   [ParseAs("-", ignore: true, itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Building))]
    [DefaultValue(null)]
    [Description("List of building definitions managed by this BuildingsManager.")]
    public ObservableRangeCollection<BuildingDefinition> BuildingDefinitions { get; set; } = [];
@@ -47,10 +47,7 @@ public partial class BuildingsManager : IEu5Object<BuildingsManager>
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManagerAgsSettings;
 
-   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new()
-   {
-      { "BuildingsManager", Globals.BuildingsManager },
-   };
+   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new() { { "BuildingsManager", Globals.BuildingsManager }, };
 
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

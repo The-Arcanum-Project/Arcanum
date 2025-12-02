@@ -27,11 +27,12 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
 
    // This is a very special case where we want to trigger a dynamic parser of an inlines object list.
    [ParseAs("-",
-              iEu5KeyType: typeof(ModValInstance),
-              isShatteredList: true,
-              nodeType: AstNodeType.ContentNode,
-              itemNodeType: AstNodeType.ContentNode,
-              customGlobalsSource: typeof(ModifierDefinition))]
+            ignore: true,
+            iEu5KeyType: typeof(ModValInstance),
+            isShatteredList: true,
+            nodeType: AstNodeType.ContentNode,
+            itemNodeType: AstNodeType.ContentNode,
+            customGlobalsSource: typeof(ModifierDefinition))]
    [Description("Collection of modifiers applied by this StaticModifier.")]
    [SaveAs(isEmbeddedObject: true)]
    [DefaultValue(null)]
