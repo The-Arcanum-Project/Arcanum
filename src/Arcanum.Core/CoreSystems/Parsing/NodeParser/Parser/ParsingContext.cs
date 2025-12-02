@@ -70,6 +70,14 @@ public ref struct ParsingContext
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public ref byte GetKeyStartReference(StatementNode node)
+   {
+      ref var sourceRef = ref MemoryMarshal.GetReference(Source);
+      ref var keyStart = ref Unsafe.Add(ref sourceRef, node.KeyNode.Start);
+      return ref Unsafe.As<char, byte>(ref keyStart);
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public bool Fail()
    {
       Validation = false;

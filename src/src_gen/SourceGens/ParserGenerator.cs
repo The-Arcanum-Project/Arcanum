@@ -150,10 +150,6 @@ public class ParserSourceGenerator : IIncrementalGenerator
       {
          GenerateParserDictionaries(sb,
                                     targetTypeName,
-                                    contentNodeProps,
-                                    standardBlockProps,
-                                    embeddedBlockProps,
-                                    statementNodeProps,
                                     dynamicBlockNodeProps,
                                     dynamicContentNodeProps);
 
@@ -201,60 +197,24 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
    private static void GenerateParserDictionaries(StringBuilder sb,
                                                   string targetTypeName,
-                                                  List<PropertyMetadata> contentNodeProps,
-                                                  List<PropertyMetadata> blockNodeProps,
-                                                  List<PropertyMetadata> embeddedBlockNodeProps,
-                                                  List<PropertyMetadata> statementNodeProps,
                                                   List<PropertyMetadata> dynamicBlockNodeProps,
                                                   List<PropertyMetadata> dynamicContentParsers)
    {
-      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.ContentParser<{targetTypeName}>> _contentParsers = new()");
-      sb.AppendLine("    {");
-
-      foreach (var prop in contentNodeProps)
-         AppendParserMethodMapping(sb, prop);
-
-      sb.AppendLine("    };");
-      sb.AppendLine();
-      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.BlockParser<{targetTypeName}>> _blockParsers = new()");
-      sb.AppendLine("    {");
-
-      foreach (var prop in blockNodeProps)
-         AppendParserMethodMapping(sb, prop);
-      foreach (var prop in embeddedBlockNodeProps)
-         sb.AppendLine($"        {{ \"{prop.Keyword}\", {PropCustomParserMethodName(prop)} }},");
-
-      sb.AppendLine("    };");
-
-      sb.AppendLine();
-      sb.AppendLine($"    internal static readonly Dictionary<string, Pdh.StatementParser<{targetTypeName}>> _statementParsers = new()");
-      sb.AppendLine("    {");
-
-      foreach (var prop in statementNodeProps)
-         AppendParserMethodMapping(sb, prop);
-
-      sb.AppendLine("    };");
       sb.AppendLine();
 
-      sb.AppendLine($"    internal static readonly List<Pdh.BlockParser<{targetTypeName}>> _dynamicBlockParsers = ");
+      sb.AppendLine($"    internal static readonly Pdh.BlockParser<{targetTypeName}>[] _dynamicBlockParsers = ");
       sb.AppendLine("    [");
       foreach (var prop in dynamicBlockNodeProps)
          sb.AppendLine($"        {PropCustomParserMethodName(prop)},");
       sb.AppendLine("    ];");
       sb.AppendLine();
 
-      sb.AppendLine($"    internal static readonly List<Pdh.ContentParser<{targetTypeName}>> _dynamicContentParsers = ");
+      sb.AppendLine($"    internal static readonly Pdh.ContentParser<{targetTypeName}>[] _dynamicContentParsers = ");
       sb.AppendLine("    [");
       foreach (var prop in dynamicContentParsers)
          sb.AppendLine($"        {PropCustomParserMethodName(prop)},");
       sb.AppendLine("    ];");
       sb.AppendLine();
-   }
-
-   private static void AppendParserMethodMapping(StringBuilder sb,
-                                                 PropertyMetadata prop)
-   {
-      sb.AppendLine($"        {{ \"{prop.Keyword}\", {PropCustomParserMethodName(prop)} }},");
    }
 
    private static string PropCustomParserMethodName(PropertyMetadata prop)
@@ -288,6 +248,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;");
       sb.AppendLine("using System.Collections.ObjectModel;");
       sb.AppendLine("using Arcanum.Core.Registry;");
+      sb.AppendLine("using System.Runtime.CompilerServices;");
       sb.AppendLine("using Arcanum.Core.GameObjects.BaseTypes;");
       sb.AppendLine($"using {targetTypeSymbol.ContainingNamespace.ToDisplayString()};");
       sb.AppendLine($"using static {toolboxSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)};");

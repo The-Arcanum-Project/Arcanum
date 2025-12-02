@@ -17,11 +17,7 @@ public partial class DefaultMapParsing(IEnumerable<IDependencyNode<string>> depe
                                        object? lockObject)
    {
       foreach (var sn in rn.Statements)
-         if (sn is BlockNode bn)
-            Pdh.DispatchBlockNode(bn,
-                                  Globals.DefaultMapDefinition,
-                                  ref pc,
-                                  _blockParsers);
+         Dispatch(sn, Globals.DefaultMapDefinition, ref pc);
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,

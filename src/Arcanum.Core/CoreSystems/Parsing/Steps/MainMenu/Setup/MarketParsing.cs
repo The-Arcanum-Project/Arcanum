@@ -48,7 +48,7 @@ public class MarketManagerParsing(IEnumerable<IDependencyNode<string>> dependenc
             continue;
 
          var market = new Market();
-         Pdh.DispatchContentNode(cn, market, ref pc, MarketParsing._contentParsers);
+         MarketParsing.Dispatch(cn, market, ref pc);
          Globals.Markets[market.UniqueId] = market;
       }
    }

@@ -1,5 +1,4 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -43,11 +42,7 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
       FileStateManager.RegisterPath(fileObj.Path);
 
       foreach (var sn in rn.Statements)
-         if (sn is ContentNode cn)
-            Pdh.DispatchContentNode(cn,
-                                    dmd,
-                                    ref pc,
-                                    DefaultMapParsing._contentParsers);
+         DefaultMapParsing.Dispatch(sn, dmd, ref pc);
 
       // Set the values for the file names to the matching DescriptorDefinitions
       //DescriptorDefinitions.MapDescriptor.LocalPath[^1] = dmd.ProvinceFileName.TrimQuotes();

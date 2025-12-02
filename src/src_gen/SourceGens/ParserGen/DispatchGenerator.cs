@@ -16,7 +16,6 @@ public static class DispatchGenerator
       sb.Append("    #region Dispatcher");
       sb.AppendLine();
       AppendDispatcherHeader(sb, targetType);
-      sb.AppendLine("    {");
 
       AppendMainSwitchBody(sb, data);
 
@@ -105,26 +104,45 @@ public static class DispatchGenerator
       sb.AppendLine("    #region IsIgnoredCheck");
       sb.AppendLine("    private static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc)");
       sb.AppendLine("    {");
+      sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
       sb.AppendLine("        switch (node)");
-      ;
+
       sb.AppendLine("        {");
       // Content Nodes
       sb.AppendLine("            case ContentNode:");
-      foreach (var cn in ignoredCns)
+      sb.AppendLine("                switch (node.KeyNode.Length) {");
+
+      var cnGroups = ignoredCns.GroupBy(k => k.Length);
+      foreach (var g in cnGroups)
       {
-         sb.AppendLine($"                if (pc.IsSliceEqual(node.KeyNode, \"{cn}\"))");
-         sb.AppendLine("                    return true;");
+         sb.AppendLine($"                    case {g.Key}:");
+         foreach (var key in g)
+         {
+            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key)}) return true;");
+         }
+
+         sb.AppendLine("                        break;");
       }
 
+      sb.AppendLine("                }");
       sb.AppendLine("                break;");
+
       // Block Nodes
       sb.AppendLine("            case BlockNode:");
-      foreach (var bn in ignoredBns)
+      sb.AppendLine("                switch (node.KeyNode.Length) {");
+      var bnGroups = ignoredBns.GroupBy(k => k.Length);
+      foreach (var g in bnGroups)
       {
-         sb.AppendLine($"                if (pc.IsSliceEqual(node.KeyNode, \"{bn}\"))");
-         sb.AppendLine("                    return true;");
+         sb.AppendLine($"                    case {g.Key}:");
+         foreach (var key in g)
+         {
+            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key)}) return true;");
+         }
+
+         sb.AppendLine("                        break;");
       }
 
+      sb.AppendLine("                }");
       sb.AppendLine("                break;");
       sb.AppendLine("        }");
       sb.AppendLine("        return false;");
@@ -149,8 +167,13 @@ public static class DispatchGenerator
          foreach (var prop in group.Properties)
          {
             var md = prop.PropertyMetadata;
-            sb.AppendLine($"                if (pc.IsSliceEqual(node.KeyNode, \"{md.Keyword}\") && node is {md.AstNodeType} {md.Keyword}_node)");
-            sb.AppendLine($"                    return {prop.MethodCall}({md.Keyword}_node, target, ref pc);");
+            var integerCheck = IntegerCheckGenerator.Generate(md.Keyword);
+
+            sb.AppendLine($"                if ({integerCheck})");
+            sb.AppendLine("                {");
+            sb.AppendLine($"                    if (node is {md.AstNodeType} {md.Keyword}_node)");
+            sb.AppendLine($"                        return {prop.MethodCall}({md.Keyword}_node, target, ref pc);");
+            sb.AppendLine("                }");
          }
 
          sb.AppendLine("                break;");
@@ -162,9 +185,13 @@ public static class DispatchGenerator
 
    private static void AppendDispatcherHeader(StringBuilder sb, ITypeSymbol targetType)
    {
-      sb.AppendLine("    private static bool Dispatch(");
+      sb.AppendLine("    internal static bool Dispatch(");
       sb.AppendLine("        StatementNode node,");
       sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
       sb.AppendLine("        ref ParsingContext pc)");
+      sb.AppendLine("    {");
+
+      sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
+      sb.AppendLine();
    }
 }
