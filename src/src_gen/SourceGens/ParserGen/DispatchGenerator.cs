@@ -10,7 +10,7 @@ public static class DispatchGenerator
                                              List<PropertyData> data,
                                              ITypeSymbol targetType)
    {
-      data.RemoveAll(x => x.PropertyMetadata.IEu5KeyType != null || x.PropertyMetadata.Ignore);
+      data.RemoveAll(x => x.PropertyMetadata.IEu5KeyType != null);
       GenerateInlineParsingLoop(sb, targetType);
 
       sb.Append("    #region Dispatcher");
