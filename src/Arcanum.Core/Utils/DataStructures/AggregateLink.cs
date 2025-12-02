@@ -68,7 +68,6 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
       Lock = true;
       foreach (var item in newItems)
       {
-         Debug.Assert(Equals(item._getValue(NxOwnerProp), empty));
          item._setValue(NxOwnerProp, Owner);
       }
 

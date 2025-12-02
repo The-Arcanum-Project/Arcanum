@@ -3,6 +3,7 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -78,21 +79,21 @@ public partial class SuperRegion
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
-   [DefaultValue(null)]
+    [ParseAs("null", ignore: true)]
+    [Description("The Continent this SuperRegion belongs to.")]
+    [DefaultValue(null)]
+    [SuppressAgs]
    public Continent Continent
    {
       get => field;
 
       set
       {
-         if (!field.SuperRegions.Lock && !value.SuperRegions.Lock)
-         {
-            if (field != Continent.Empty)
-               field.SuperRegions._removeFromChild(this);
-            if (value != Continent.Empty)
-               value.SuperRegions._addFromChild(this);
-         }
-
+         if (field != Continent.Empty)
+            field.SuperRegions._removeFromChild(this);
+         if (value != Continent.Empty)
+            value.SuperRegions._addFromChild(this);
+         
          field = value;
       }
    } = Continent.Empty;

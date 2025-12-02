@@ -37,6 +37,7 @@ public partial class Continent
    [DefaultValue(null)]
    [SuppressAgs]
    [SaveAs(isEmbeddedObject: true)]
+   [Description("The SuperRegions that are part of this Continent.")]
    [ParseAs("null", ignore: true)]
    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Continent_SuperRegion")]
    public AggregateLink<SuperRegion> SuperRegions { get; set; }
