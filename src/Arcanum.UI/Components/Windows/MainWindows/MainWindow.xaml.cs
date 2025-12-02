@@ -23,6 +23,7 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
+using Arcanum.UI.Themes;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Util;
 using Common.UI;
@@ -148,6 +149,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       MainWindowGen.Initialize(SpecializedEditorPresenter);
 
       PerformanceCountersHelper.Initialize(this);
+      UIHandle.Instance.MapInterface = new MapInterfaceImpl { MapControl = MainMap };
+
+      Title = AppData.ProductName;
+      VersionNumber = $"v{AppData.AppVersion}";
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)

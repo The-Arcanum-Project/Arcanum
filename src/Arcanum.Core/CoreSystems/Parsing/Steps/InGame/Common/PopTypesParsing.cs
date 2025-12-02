@@ -24,13 +24,13 @@ public class PopTypeDiscoverer(IEnumerable<IDependencyNode<string>> dependencies
 public partial class PopTypesParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : DiscoverThenParseLoadingService<PopType>(false, dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       SimpleObjectParser.ParseDiscoveredObjectProperties(rn,
                                                          ctx,

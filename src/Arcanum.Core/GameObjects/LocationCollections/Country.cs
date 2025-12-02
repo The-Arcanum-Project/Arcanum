@@ -4,8 +4,8 @@ using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -14,6 +14,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Nexus.Core.Attributes;
 using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
 
@@ -52,12 +53,6 @@ public partial class Country : IEu5Object<Country>
    [DefaultValue(CountryType.Location)]
    [Description("The type of this country.\nValid types: Location, Army, Pop, Building")]
    public CountryType CountryType { get; set; } = CountryType.Location;
-
-   [SaveAs]
-   [ParseAs("color")]
-   [DefaultValue(null)]
-   [Description("The color key of this country")]
-   public JominiColor Color { get; set; } = JominiColor.Empty;
 
    [SaveAs]
    [ParseAs("religious_school")]
@@ -243,6 +238,12 @@ public partial class Country : IEu5Object<Country>
    [DefaultValue(null)]
    [Description("The government state of this country.")]
    public GovernmentState GovernmentState { get; set; } = GovernmentState.Empty;
+
+   [PropertyConfig(isInlined: true)]
+   [SuppressAgs]
+   [DefaultValue(null)]
+   [Description("The country definition associated with this country.")]
+   public CountryDefinition Definition { get; set; } = CountryDefinition.Empty;
 
    #endregion
 

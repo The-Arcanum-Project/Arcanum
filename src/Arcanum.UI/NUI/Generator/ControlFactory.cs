@@ -97,8 +97,16 @@ public static class ControlFactory
          // TODO: @Minnator remove this once we are using this new gen and have changed the interface 
          RoutedEventHandler navigationHandler = (_, _) => navH.NavigateTo((IEu5Object)nav.Target!);
          menuItem.Click += navigationHandler;
-         menuItem.Unloaded += (_, _) => menuItem.Click -= navigationHandler;
+
+         menuItem.Unloaded += OnMenuItemOnUnloaded;
          contextMenu.Items.Add(menuItem);
+         continue;
+
+         void OnMenuItemOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            menuItem.Click -= navigationHandler;
+            menuItem.Unloaded -= OnMenuItemOnUnloaded;
+         }
       }
 
       return contextMenu;

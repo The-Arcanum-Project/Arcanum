@@ -12,13 +12,13 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public partial class DefaultMapParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<DefaultMapDefinition>(dependencies)
 {
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       foreach (var sn in rn.Statements)
          if (sn is BlockNode bn)

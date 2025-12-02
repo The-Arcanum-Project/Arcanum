@@ -56,13 +56,25 @@ public class Parser(LexerResult lexerResult)
 
    private KeyNodeBase ParseKey()
    {
-      if (!Check(TokenType.Identifier) || !CheckNext(TokenType.ScopeSeparator))
+      // Return simple key (handles quoted strings, etc).
+      if (!Check(TokenType.Identifier))
          return new SimpleKeyNode(Advance());
 
-      var scope = Advance(); // Consume scope identifier
-      Advance(); // Consume ':'
-      var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
-      return new ScopedKeyNode(scope, name);
+      // If the next token IS NOT a ':', it is a simple identifier key.
+      if (!CheckNext(TokenType.ScopeSeparator))
+         return new SimpleKeyNode(Advance());
+
+      // It is a scoped key. Consume the chain.
+      var segments = new List<Token> { Advance() };
+
+      while (Check(TokenType.ScopeSeparator))
+      {
+         Advance();
+         var nextPart = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+         segments.Add(nextPart);
+      }
+
+      return new ScopedKeyNode(segments);
    }
 
    private StatementNode ParseStatement()
@@ -114,14 +126,16 @@ public class Parser(LexerResult lexerResult)
       if (Check(TokenType.AtIdentifier))
          return ParseContentStatement(ParseKey());
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
+      // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+      var current = Current();
+      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj?.Path?.FullPath ?? "N/A"),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
                                           DiagnosticReportSeverity.PopupError,
-                                          Current().Line,
+                                          current.Line,
                                           _tokens[0].Column,
-                                          Current().GetValue(_source),
+                                          current.GetValue(_source),
                                           "a block or content definition");
 
       throw
@@ -171,23 +185,33 @@ public class Parser(LexerResult lexerResult)
          return new UnaryNode(op, right);
       }
 
-      // Check for scoped identifier first
-      if (Check(TokenType.Identifier) && CheckNext(TokenType.ScopeSeparator))
+      // Check for Identifier driven values
+      if (Check(TokenType.Identifier))
       {
-         var scope = Advance();
-         Advance(); // Consume ':'
-         var name = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
-         return new ScopedIdentifierNode(scope, name);
-      }
+         // Function Call: identifier followed by {
+         if (CheckNext(TokenType.LeftBrace))
+            return ParseFunctionCallNode();
 
-      // An Identifier followed by a LeftBrace is a function call.
-      if (Check(TokenType.Identifier) && CheckNext(TokenType.LeftBrace))
-         return ParseFunctionCallNode();
+         // Scoped Identifier: identifier followed by :
+         if (CheckNext(TokenType.ScopeSeparator))
+         {
+            var segments = new List<Token> { Advance() };
+
+            while (Check(TokenType.ScopeSeparator))
+            {
+               Advance();
+               var nextPart = Expect(TokenType.Identifier, "identifier after scope separator ':'.");
+               segments.Add(nextPart);
+            }
+
+            return new ScopedIdentifierNode(segments);
+         }
+      }
 
       // A block used as a value, e.g., OR = { ... }
       if (Match(TokenType.LeftBrace))
       {
-         var brace = Previous(); // Get the opening brace token
+         var brace = Previous();
          var blockValue = new BlockValueNode(brace);
          while (!Check(TokenType.RightBrace) && !IsAtEnd())
             blockValue.Children.Add(ParseStatement());
@@ -376,6 +400,10 @@ public class Parser(LexerResult lexerResult)
             var sep = content.Separator.GetValue(source);
             sb.Append($"{indent}Content: '{key}' {sep} ");
             PrintValue(content.Value, source, sb);
+            break;
+
+         case ScopedIdentifierNode scoped:
+            sb.AppendLine($"ScopedIdentifier: '{scoped.GetKeyText(source)}'");
             break;
       }
    }

@@ -40,4 +40,8 @@ public class AgsConfig
    [Description("If true, when saving objects to files, files will be moved to the modded data space.")]
    [DefaultValue(true)]
    public bool MoveFilesToModdedDataSpaceOnSaving { get; set; } = true;
+
+   [Description("If true, the setup folder will save all e.g. location specific data into a single file. If false, separate files will be used as in vanilla.")]
+   [DefaultValue(true)]
+   public bool CompactSetupFolder { get; set; } = false;
 }

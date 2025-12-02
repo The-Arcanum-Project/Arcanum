@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.UI.NUI.UserControls.BaseControls;
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -42,10 +43,12 @@ public sealed class MultiSelectPropertyViewModel : INotifyPropertyChanged, IDisp
       }
    }
 
-   public MultiSelectPropertyViewModel(IReadOnlyList<IEu5Object> targets,
+   public MultiSelectPropertyViewModel(BaseView view,
+                                       IReadOnlyList<IEu5Object> targets,
                                        Enum property,
                                        bool allowReadonlyWrite = false)
    {
+      view.RegisterDisposable(this);
       _targets = targets;
       _property = property;
       _allowReadonlyWrite = allowReadonlyWrite;

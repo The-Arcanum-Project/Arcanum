@@ -83,13 +83,13 @@ public abstract partial class InstitutionStateManager(IEnumerable<IDependencyNod
       Globals.State.InstitutionManager = im!;
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
    }
 }
@@ -119,13 +119,13 @@ public partial class ReligiousSchoolRelationsParsing(IEnumerable<IDependencyNode
                                null);
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
    }
 

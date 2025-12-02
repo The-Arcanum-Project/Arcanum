@@ -14,7 +14,7 @@ public class ColorParser(IEnumerable<IDependencyNode<string>> dependencies) : Fi
    public override List<Type> ParsedObjects { get; } = [typeof(JominiColor)];
    public override string GetFileDataDebugInfo() => $"Parsed Colors: {ColorResolver.Instance.ColorMap.Count}";
 
-   public override bool LoadSingleFile(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       const string colorKey = "colors";
       const string actionStack = nameof(ColorParser);

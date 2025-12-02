@@ -20,7 +20,8 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
                              bool saveEmbeddedAsIdentifier = true,
                              bool collectionAsPureIdentifierList = false,
                              bool isEmbeddedObject = false,
-                             bool isShattered = false
+                             bool isShattered = false,
+                             int numOfDecimalPlaces = 2
 ) : Attribute
 {
    public SavingValueType ValueType { get; } = valueType;
@@ -34,4 +35,5 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
    public bool CollectionAsPureIdentifierList { get; } = collectionAsPureIdentifierList;
    public bool IsEmbeddedObject { get; } = isEmbeddedObject;
    public bool IsShattered { get; } = isShattered;
+   public int NumOfDecimalPlaces { get; } = numOfDecimalPlaces;
 }

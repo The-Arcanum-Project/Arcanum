@@ -67,13 +67,13 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       return true;
    }
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       var continentGlobals = Continent.GetGlobalItems();
       var superRegionGlobals = SuperRegion.GetGlobalItems();

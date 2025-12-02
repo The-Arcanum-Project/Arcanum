@@ -14,13 +14,13 @@ public abstract class DiscoverThenParseLoadingService<T>(bool isDiscoveryPhase,
 {
    private bool IsDiscoveryPhase { get; } = isDiscoveryPhase;
 
-   protected override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn,
+                                       LocationContext ctx,
+                                       Eu5FileObj fileObj,
+                                       string actionStack,
+                                       string source,
+                                       ref bool validation,
+                                       object? lockObject)
    {
       if (IsDiscoveryPhase)
          DiscoverObjects(rn, ctx, fileObj, actionStack, source, ref validation, lockObject);
