@@ -85,12 +85,12 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
          var continentKey = pc.SliceString(contBn);
          var continent = IEu5Object<Continent>.CreateInstance(continentKey, fileObj);
-         if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out var skn))
+         if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
             continue;
 
          continent.FileLocation = contBn.GetFileLocation();
 
-         LUtil.TryAddToGlobals(skn.KeyToken,
+         LUtil.TryAddToGlobals(continentKey,
                                ref pc,
                                continent,
                                continentGlobals);
@@ -122,7 +122,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                var regionKey = pc.SliceString(rBn);
                var region = IEu5Object<Region>.CreateInstance(regionKey, fileObj);
-               if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
+               if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                   continue;
 
                region.FileLocation = rBn.GetFileLocation();
@@ -139,7 +139,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                   var areaKey = pc.SliceString(aBn);
                   var area = IEu5Object<Area>.CreateInstance(areaKey, fileObj);
-                  if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
+                  if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                      continue;
 
                   area.FileLocation = aBn.GetFileLocation();
@@ -156,7 +156,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
                      var provinceKey = pc.SliceString(pBn);
                      var province = IEu5Object<Province>.CreateInstance(provinceKey, fileObj);
-                     if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out skn))
+                     if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                         continue;
 
                      province.FileLocation = pBn.GetFileLocation();
