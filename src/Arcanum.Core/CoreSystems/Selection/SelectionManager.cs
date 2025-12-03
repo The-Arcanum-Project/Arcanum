@@ -60,6 +60,7 @@ public static class SelectionManager
       // or we continue to ignore new selected locations while frozen
       if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
          return [];
+
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
@@ -146,6 +147,9 @@ public static class SelectionManager
 
       var mapMode = MapModeManager.GetCurrent();
 
+      if (mapMode.DisplayType.IsPrimitiveType())
+         return [];
+
       if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) ||
           empty is not IMapInferable inferable ||
           obj.GetType() != mapMode.DisplayType)
@@ -154,8 +158,7 @@ public static class SelectionManager
       return inferable.GetRelevantLocations(obj);
    }
 
-   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
-      => _searchSelectedObjects.ReplaceRange(objects);
+   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects) => _searchSelectedObjects.ReplaceRange(objects);
 
    public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
 
@@ -186,7 +189,7 @@ public static class SelectionManager
       else
       {
          // otherwise, set selection to only this object
-         // but if we are frozen, do not change the selection
+         // but if we are frozen, do not change the selection  
          if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
             return;
 
@@ -195,5 +198,16 @@ public static class SelectionManager
             if (obj is IMapInferable inferable)
                EditableObjects.ReplaceRange(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
       }
+   }
+
+   private static bool IsPrimitiveType(this Type type)
+   {
+      return type.IsPrimitive ||
+             type == typeof(string) ||
+             type == typeof(decimal) ||
+             type == typeof(DateTime) ||
+             type == typeof(DateTimeOffset) ||
+             type == typeof(TimeSpan) ||
+             type == typeof(Guid);
    }
 }
