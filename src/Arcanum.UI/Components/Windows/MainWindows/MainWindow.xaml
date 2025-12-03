@@ -421,7 +421,7 @@
         </Border>
     </styleClasses:BaseWindow.FooterContent>
 
-    <Grid>
+    <Grid x:Name = "MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
@@ -435,6 +435,8 @@
             <ColumnDefinition Width = "Auto" />
             <ColumnDefinition Width = "20*"
                               MinWidth = "200" />
+            <ColumnDefinition Width = "Auto" />
+            <ColumnDefinition Width = "150" />
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column = "0"
@@ -540,9 +542,24 @@
 
         </GridSplitter>
 
-        <!-- <Image Grid.Column = "4" -->
-        <!--        Source = "/Arcanum_UI;component/Assets/Icons/Huge/MapInteractionFiller.png" /> -->
-        <debugPanel:DebugPanelGrid Grid.Column = "4"
+        <Border Grid.Column = "4"
+                BorderBrush = "{DynamicResource DefaultBorderColorBrush}"
+                BorderThickness = "2"
+                CornerRadius = "8"
+                Margin = "2, 0">
+            
+            <ContentPresenter x:Name = "SpecializedEditorPresenter" />
+            
+
+        </Border>
+
+        <GridSplitter Grid.Column = "5"
+                      Width = "4"
+                      ResizeBehavior = "PreviousAndNext"
+                      x:Name = "DebugPanelGridSplitter">
+        </GridSplitter>
+
+        <debugPanel:DebugPanelGrid Grid.Column = "6"
                                    x:Name = "DebugPanel"
                                    VerticalAlignment = "Stretch"
                                    HorizontalAlignment = "Stretch" />

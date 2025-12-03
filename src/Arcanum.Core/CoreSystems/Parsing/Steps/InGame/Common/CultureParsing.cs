@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -13,9 +12,7 @@ public class CultureParsing(IEnumerable<IDependencyNode<string>> dependencies)
 {
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Culture target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("CultureParsing should only be used in discovery phase.");
 }
@@ -25,27 +22,18 @@ public partial class CultureAfterParsing(IEnumerable<IDependencyNode<string>> de
    : DiscoverThenParseLoadingService<Culture>(false, dependencies)
 {
    protected override void LoadSingleFileProperties(RootNode rn,
-                                                    LocationContext ctx,
+                                                    ref ParsingContext pc,
                                                     Eu5FileObj fileObj,
-                                                    string actionStack,
-                                                    string source,
-                                                    ref bool validation,
                                                     object? lockObject)
    {
       SimpleObjectParser.ParseDiscoveredObjectProperties(rn,
-                                                         ctx,
-                                                         actionStack,
-                                                         source,
-                                                         ref validation,
+                                                         ref pc,
                                                          ParseProperties,
                                                          GetGlobals());
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Culture target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

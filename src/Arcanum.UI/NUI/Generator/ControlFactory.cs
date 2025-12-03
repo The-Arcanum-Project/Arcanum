@@ -4,10 +4,9 @@ using System.Windows.Media;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public static class ControlFactory
 {

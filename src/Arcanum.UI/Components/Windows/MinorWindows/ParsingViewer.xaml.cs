@@ -7,16 +7,15 @@ namespace Arcanum.UI.Components.Windows.MinorWindows;
 
 public partial class ParsingViewer : INotifyPropertyChanged
 {
-   private FileDescriptor? _currentDescriptor;
    public FileDescriptor? CurrentDescriptor
    {
-      get => _currentDescriptor;
+      get;
       set
       {
-         if (Equals(value, _currentDescriptor))
+         if (Equals(value, field))
             return;
 
-         _currentDescriptor = value;
+         field = value;
          OnPropertyChanged();
       }
    }

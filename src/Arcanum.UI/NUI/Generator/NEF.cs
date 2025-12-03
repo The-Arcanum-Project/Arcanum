@@ -13,7 +13,6 @@ using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
 
 namespace Arcanum.UI.NUI.Generator;
 

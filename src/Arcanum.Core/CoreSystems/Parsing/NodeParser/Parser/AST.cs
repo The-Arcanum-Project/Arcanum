@@ -33,7 +33,7 @@ public abstract class KeyNodeBase(int start, int length) : AstNode(start, length
 {
    public int Column => GetLocation().Item2;
    public int Line => GetLocation().Item1;
-   public string GetLexeme(string source) => source.Substring(Start, Length);
+   public string GetLexeme(Span<string> source) => source[Start..].ToString();
 }
 
 /// <summary>
@@ -70,8 +70,7 @@ public class RootNode(int start, int length) : AstNode(start, length)
    public List<StatementNode> Statements { get; } = [];
    public override (int, int) GetLocation() => Statements.Count > 0 ? Statements[0].GetLocation() : (0, 0);
 
-   public override (int line, int charPos) GetEndLocation()
-      => Statements.Count > 0 ? Statements.Last().GetEndLocation() : (0, 0);
+   public override (int line, int charPos) GetEndLocation() => Statements.Count > 0 ? Statements.Last().GetEndLocation() : (0, 0);
 }
 
 /// <summary>
@@ -80,7 +79,7 @@ public class RootNode(int start, int length) : AstNode(start, length)
 public abstract class StatementNode(int start, int length) : AstNode(start, length)
 {
    // Changed from Token KeyNode to KeyNodeBase Key
-   public KeyNodeBase KeyNode { get; init; } = null!;
+   public KeyNodeBase KeyNode { get; protected init; } = null!;
 }
 
 /// <summary>

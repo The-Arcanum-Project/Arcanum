@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -20,15 +19,11 @@ public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> d
    public override List<Type> ParsedObjects => [typeof(Location), typeof(PopDefinition)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
       // We reach this up to the manager to invoke us again with the correct context.
       SetupParsingManager.ReloadFileByService<LocationSetupParsing>(fileObj,
-                                                                    lockObject,
-                                                                    actionStack,
-                                                                    ref validation);
+                                                                    lockObject);
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
@@ -39,33 +34,29 @@ public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> d
    }
 
    public override void LoadSetupFile(StatementNode sn,
-                                      LocationContext ctx,
+                                      ref ParsingContext pc,
                                       Eu5FileObj fileObj,
-                                      string actionStack,
-                                      string source,
-                                      ref bool validation,
                                       object? lockObject)
    {
-      if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+      if (!sn.IsBlockNode(ref pc, out var bn))
          return;
 
       foreach (var cn in bn.Children)
       {
-         if (!cn.IsBlockNode(ctx, source, actionStack, ref validation, out var objBn))
+         if (!cn.IsBlockNode(ref pc, out var objBn))
             continue;
 
-         var locName = objBn.KeyNode.GetLexeme(source);
+         var locName = pc.SliceString(objBn);
          if (!Globals.Locations.TryGetValue(locName, out var loc))
          {
-            De.Warning(ctx,
+            De.Warning(ref pc,
                        ParsingError.Instance.InvalidLocationKey,
-                       actionStack,
                        locName);
-            validation = false;
+            pc.Fail();
             return;
          }
 
-         ParseProperties(objBn, loc, ctx, source, ref validation, false);
+         ParseProperties(objBn, loc, ref pc, false);
       }
    }
 }

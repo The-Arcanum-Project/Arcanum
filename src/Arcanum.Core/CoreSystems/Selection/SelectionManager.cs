@@ -19,7 +19,6 @@ namespace Arcanum.Core.CoreSystems.Selection;
 /// </summary>
 public static class SelectionManager
 {
-   private static ObjectSelectionMode _objectSelectionMode = ObjectSelectionMode.LocationSelection;
    private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
    /// <summary>
    /// This is the collection of objects that are currently editable in the UI. <br/>
@@ -28,19 +27,23 @@ public static class SelectionManager
    public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
    private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
 
+   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
+
+   public static event Action? PreviewChanged;
+
    public static ObjectSelectionMode ObjectSelectionMode
    {
-      get => _objectSelectionMode;
+      get;
       set
       {
-         if (_objectSelectionMode == value)
+         if (field == value)
             return;
 
-         _objectSelectionMode = value;
+         field = value;
          OnPropertyChanged(nameof(ObjectSelectionMode));
          Application.Current?.Dispatcher.BeginInvoke(new Action(InvalidateSelection));
       }
-   }
+   } = ObjectSelectionMode.LocationSelection;
 
    /// <summary>
    /// Is Called after the selection has already updated the editable objects
@@ -53,14 +56,32 @@ public static class SelectionManager
       Selection.SelectionModified += InvalidateSelection;
    }
 
+   public static void Preview(List<IEu5Object> eu5Objects)
+   {
+      PreviewedLocations.AddRange(GetRelevantLocationsForObjects(eu5Objects));
+      PreviewChanged?.Invoke();
+   }
+
+   public static void Preview(List<IEu5Object> eu5Objects, int msDuration)
+   {
+      // TODO: Implement timed preview
+      PreviewChanged?.Invoke();
+   }
+
+   public static void UnPreview(List<IEu5Object> eu5Objects)
+   {
+      PreviewedLocations.RemoveRange(GetRelevantLocationsForObjects(eu5Objects));
+      PreviewChanged?.Invoke();
+   }
+
+   public static void ClearPreview()
+   {
+      PreviewedLocations.Clear();
+      PreviewChanged?.Invoke();
+   }
+
    public static List<Location> GetActiveSelectionLocations()
    {
-      //If frozen, return nothing
-      // TODO: @Minnator we need a method to get all the locations which are selected which are not in the frozen state
-      // or we continue to ignore new selected locations while frozen
-      if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
-         return [];
-
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
@@ -97,7 +118,7 @@ public static class SelectionManager
       {
          case ObjectSelectionMode.LocationSelection:
          {
-            EditableObjects.ReplaceRange(cLocs);
+            EditableObjects.ClearAndAdd(cLocs);
             _searchSelectedObjects.Clear();
             break;
          }
@@ -108,12 +129,12 @@ public static class SelectionManager
             if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
                return;
 
-            EditableObjects.ReplaceRange(inferable.GetInferredList(cLocs));
+            EditableObjects.ClearAndAdd(inferable.GetInferredList(cLocs));
             _searchSelectedObjects.Clear();
             break;
          }
          case ObjectSelectionMode.FromSearch:
-            EditableObjects.ReplaceRange(_searchSelectedObjects);
+            EditableObjects.ClearAndAdd(_searchSelectedObjects);
             break;
          default:
             throw new ArgumentOutOfRangeException(nameof(ObjectSelectionMode), ObjectSelectionMode, null);
@@ -153,12 +174,29 @@ public static class SelectionManager
       if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) ||
           empty is not IMapInferable inferable ||
           obj.GetType() != mapMode.DisplayType)
-         return null;
+         return [];
 
       return inferable.GetRelevantLocations(obj);
    }
 
-   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects) => _searchSelectedObjects.ReplaceRange(objects);
+   public static List<Location> GetRelevantLocationsForObjects(IEnumerable<IEu5Object> objs)
+   {
+      var locations = new List<Location>();
+      foreach (var obj in objs)
+         locations.AddRange(GetRelevantLocationsForObject(obj));
+      return locations;
+   }
+
+   public static List<Location> GetRelevantLocationsForObject(IEu5Object obj)
+   {
+      if (obj is not IMapInferable inferable)
+         return [];
+
+      return inferable.GetRelevantLocations([obj]);
+   }
+
+   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
+      => _searchSelectedObjects.ClearAndAdd(objects);
 
    public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
 
@@ -189,14 +227,14 @@ public static class SelectionManager
       else
       {
          // otherwise, set selection to only this object
-         // but if we are frozen, do not change the selection  
+         // but if we are frozen, do not change the selection
          if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
             return;
 
          SetSearchSelectedObjects([obj]);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)
-               EditableObjects.ReplaceRange(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
+               EditableObjects.ClearAndAdd(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
       }
    }
 

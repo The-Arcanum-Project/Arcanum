@@ -4,7 +4,6 @@ namespace Arcanum.Core.CoreSystems.GFX;
 
 public class GFXObject(IconType iconType, string filePath)
 {
-   private Bitmap? _icon;
    public IconType IconType { get; } = iconType;
    public string FilePath { get; } = filePath;
 
@@ -12,14 +11,14 @@ public class GFXObject(IconType iconType, string filePath)
    {
       get
       {
-         if (_icon != null)
-            return _icon;
+         if (field != null)
+            return field;
 
          switch (IconType)
          {
             case IconType.DDS:
             case IconType.TGA:
-               _icon = ImageReader.ReadImage(FilePath);
+               field = ImageReader.ReadImage(FilePath);
                break;
             case IconType.PNG:
             case IconType.TIFF:
@@ -28,7 +27,7 @@ public class GFXObject(IconType iconType, string filePath)
                throw new ArgumentOutOfRangeException();
          }
 
-         return _icon;
+         return field;
       }
    }
 

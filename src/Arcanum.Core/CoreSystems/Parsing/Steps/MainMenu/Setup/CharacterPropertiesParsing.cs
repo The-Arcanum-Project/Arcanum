@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -18,15 +17,11 @@ public partial class CharacterParsing(IEnumerable<IDependencyNode<string>> depen
    public override List<Type> ParsedObjects => SetupParsingManager.NestedSubTypes(Character.Empty).ToList();
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
       // We reach this up to the manager to invoke us again with the correct context.
       SetupParsingManager.ReloadFileByService<CharacterParsing>(fileObj,
-                                                                lockObject,
-                                                                actionStack,
-                                                                ref validation);
+                                                                lockObject);
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
@@ -37,30 +32,24 @@ public partial class CharacterParsing(IEnumerable<IDependencyNode<string>> depen
    }
 
    public override void LoadSetupFile(StatementNode sn,
-                                      LocationContext ctx,
+                                      ref ParsingContext pc,
                                       Eu5FileObj fileObj,
-                                      string actionStack,
-                                      string source,
-                                      ref bool validation,
                                       object? lockObject)
    {
-      if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+      if (!sn.IsBlockNode(ref pc, out var bn))
          return;
 
       foreach (var bnsn in bn.Children)
       {
-         if (!bnsn.IsBlockNode(ctx, source, actionStack, ref validation, out var characterBlock))
+         if (!bnsn.IsBlockNode(ref pc, out var characterBlock))
             continue;
 
-         var key = characterBlock.KeyNode.GetLexeme(source);
+         var key = pc.SliceString(characterBlock);
          var eu5Obj = Eu5Activator.CreateInstance<Character>(key, fileObj, characterBlock);
-         LUtil.TryAddToGlobals(ctx,
-                               ((SimpleKeyNode)characterBlock.KeyNode).KeyToken,
-                               key,
-                               actionStack,
-                               ref validation,
+         LUtil.TryAddToGlobals(((SimpleKeyNode)characterBlock.KeyNode).KeyToken,
+                               ref pc,
                                eu5Obj);
-         ParseProperties(characterBlock, eu5Obj, ctx, source, ref validation, false);
+         ParseProperties(characterBlock, eu5Obj, ref pc, false);
       }
    }
 }

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Arcanum.Core.AgsRegistry;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
@@ -42,7 +41,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 /// The method should have the following parameters:
 /// - ContentNode node: The content node to parse. / BlockNode node: The block node to parse. / KeyOnlyNode node: The key-only node to parse.
 /// - LocationContext ctx: The context to log warnings and errors.
-/// - string actionName: The name of the action being performed, used for logging.
+/// - string pc.BuildStackTrace(): The name of the action being performed, used for logging.
 /// - string source: The original source code being parsed.
 /// - out {Type} value: The parsed value, if successful.
 /// </summary>
@@ -51,76 +50,61 @@ public static class ParsingToolBox
    private static readonly string[] Args = ["hsv", "rgb", "hsv360", "any color key"];
 
    public static bool ArcTryParse_String(ContentNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         [MaybeNullWhen(false)] out string value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         [MaybeNullWhen(false)] out string value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_String)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
       if (node.Value is not LiteralValueNode lvn)
       {
-         ctx.SetPosition(node.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
                                         node.Value.GetType().Name,
                                         nameof(LiteralValueNode),
-                                        node.KeyNode.GetLexeme(source));
+                                        pc.SliceString(node));
          value = null;
-         validation = false;
-         return false;
+         return pc.Fail();
       }
 
-      value = lvn.Value.GetLexeme(source);
+      value = pc.SliceString(lvn);
       return true;
    }
 
    public static bool ArcTryParse_JominiColor(ContentNode node,
-                                              LocationContext ctx,
-                                              string actionName,
-                                              string source,
-                                              [MaybeNullWhen(false)] out JominiColor value,
-                                              ref bool validation)
+                                              ref ParsingContext pc,
+                                              [MaybeNullWhen(false)] out JominiColor value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_JominiColor)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
       if (node.Value is LiteralValueNode lvn)
       {
-         value = new JominiColor.ColorKey(lvn.Value.GetLexeme(source));
+         value = new JominiColor.ColorKey(pc.SliceString(lvn));
          return true;
       }
 
       if (node.Value is FunctionCallNode fcn)
-         if (!fcn.GetColorDefinition(ctx,
-                                     source,
-                                     actionName,
-                                     ref validation,
+         if (!fcn.GetColorDefinition(ref pc,
                                      out value))
-         {
-            validation = false;
-            return false;
-         }
+            return pc.Fail();
          else
             return true;
 
-      ctx.SetPosition(node.Value);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(node);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidColorMarkUp,
-                                     actionName,
-                                     node.KeyNode.GetLexeme(source),
+                                     pc.SliceString(node),
                                      Args);
       value = null;
-      validation = false;
+      pc.Fail();
       return false;
    }
 
@@ -129,23 +113,13 @@ public static class ParsingToolBox
    /// Validates that the ContentNode's separator is one of the supported types for integer values.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Int32(ContentNode node,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        out int value,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        out int value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
-                                                   ctx,
-                                                   actionName,
+                                                   ref pc,
                                                    TokenType.Equals,
                                                    TokenType.GreaterOrEqual,
                                                    TokenType.LessOrEqual,
@@ -158,28 +132,26 @@ public static class ParsingToolBox
 
       if (node.Value is LiteralValueNode lvn)
       {
-         var lexeme = lvn.Value.GetLexeme(source);
+         var lexeme = pc.SliceString(lvn);
+         ;
          if (!int.TryParse(lexeme, out value))
          {
-            ctx.SetPosition(lvn.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(lvn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidIntegerValue,
-                                           actionName,
                                            lexeme);
             value = 0;
-            validation = false;
-            return false;
+            return pc.Fail();
          }
       }
       else if (node.Value is UnaryNode un)
       {
          if (un.Operator.Type != TokenType.Minus)
          {
-            ctx.SetPosition(un.Operator);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(un.Operator);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatOperator,
-                                           actionName,
-                                           un.Operator.GetLexeme(source),
+                                           pc.SliceString(un),
                                            nameof(TokenType.Minus));
             value = 0;
             return false;
@@ -187,25 +159,22 @@ public static class ParsingToolBox
 
          if (un.Value is not LiteralValueNode lvn2)
          {
-            ctx.SetPosition(un.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(un.Value);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,
-                                           actionName,
                                            un.Value.GetType().Name,
                                            nameof(LiteralValueNode),
-                                           node.KeyNode.GetLexeme(source));
+                                           pc.SliceString(node));
             value = 0;
-            validation = false;
-            return false;
+            return pc.Fail();
          }
 
-         var lexeme = lvn2.Value.GetLexeme(source);
+         var lexeme = pc.SliceString(lvn2);
          if (!int.TryParse(lexeme, out value))
          {
-            ctx.SetPosition(lvn2.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(lvn2);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidIntegerValue,
-                                           actionName,
                                            lexeme);
             value = 0;
             return false;
@@ -215,15 +184,14 @@ public static class ParsingToolBox
       }
       else
       {
-         ctx.SetPosition(node.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
                                         node.Value.GetType().Name,
                                         $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
-                                        node.KeyNode.GetLexeme(source));
+                                        pc.SliceString(node));
          value = 0;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -235,37 +203,28 @@ public static class ParsingToolBox
    /// Validates that the ContentNode's separator is an equals sign.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Boolean(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          out bool value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          out bool value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Boolean)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = false;
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
-      if (!NumberParsing.TryParseBool(lexeme, ctx, out value))
+      var lexeme = pc.SliceString(lvn);
+      ;
+      if (!NumberParsing.TryParseBool(lexeme, ref pc, out value))
       {
          value = false;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -273,15 +232,12 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_Double(ContentNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         out double value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         out double value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
-                                                   ctx,
-                                                   actionName,
+                                                   ref pc,
                                                    TokenType.Equals,
                                                    TokenType.GreaterOrEqual,
                                                    TokenType.LessOrEqual,
@@ -292,22 +248,22 @@ public static class ParsingToolBox
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = 0;
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!double.TryParse(lexeme.Replace(',', '.'),
                            NumberStyles.Float,
                            CultureInfo.InvariantCulture,
                            out value))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidDoubleValue,
-                                        actionName,
                                         lexeme);
          value = 0;
          return false;
@@ -317,15 +273,12 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_Single(ContentNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         out float value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         out float value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsAnySupportedSeparator(node.Separator,
-                                                   ctx,
-                                                   actionName,
+                                                   ref pc,
                                                    TokenType.Equals,
                                                    TokenType.GreaterOrEqual,
                                                    TokenType.LessOrEqual,
@@ -338,28 +291,26 @@ public static class ParsingToolBox
 
       if (node.Value is LiteralValueNode lvn)
       {
-         var lexeme = lvn.Value.GetLexeme(source);
-         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         var lexeme = pc.SliceString(lvn);
+         ;
+         if (!NumberParsing.TryParseFloat(lexeme, ref pc, out value))
          {
-            ctx.SetPosition(lvn.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(lvn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatValue,
-                                           actionName,
                                            lexeme);
             value = 0;
-            validation = false;
-            return false;
+            return pc.Fail();
          }
       }
       else if (node.Value is UnaryNode un)
       {
          if (un.Operator.Type != TokenType.Minus)
          {
-            ctx.SetPosition(un.Operator);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(un.Operator);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatOperator,
-                                           actionName,
-                                           un.Operator.GetLexeme(source),
+                                           pc.SliceString(un),
                                            nameof(TokenType.Minus));
             value = 0;
             return false;
@@ -367,25 +318,22 @@ public static class ParsingToolBox
 
          if (un.Value is not LiteralValueNode lvn2)
          {
-            ctx.SetPosition(un.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(un.Value);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidNodeType,
-                                           actionName,
                                            un.Value.GetType().Name,
                                            nameof(LiteralValueNode),
-                                           node.KeyNode.GetLexeme(source));
+                                           pc.SliceString(node));
             value = 0;
-            validation = false;
-            return false;
+            return pc.Fail();
          }
 
-         var lexeme = lvn2.Value.GetLexeme(source);
-         if (!NumberParsing.TryParseFloat(lexeme, ctx, out value))
+         var lexeme = pc.SliceString(lvn2);
+         if (!NumberParsing.TryParseFloat(lexeme, ref pc, out value))
          {
-            ctx.SetPosition(lvn2.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(lvn2);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFloatValue,
-                                           actionName,
                                            lexeme);
             value = 0;
             return false;
@@ -395,15 +343,14 @@ public static class ParsingToolBox
       }
       else
       {
-         ctx.SetPosition(node.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
                                         node.Value.GetType().Name,
                                         $"{nameof(LiteralValueNode)} or {nameof(UnaryNode)}",
-                                        node.KeyNode.GetLexeme(source));
+                                        pc.SliceString(node));
          value = 0;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -411,37 +358,34 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_Enum<TEnum>(ContentNode node,
-                                              LocationContext ctx,
-                                              string actionName,
-                                              string source,
-                                              out TEnum value,
-                                              ref bool validation) where TEnum : struct, Enum
+                                              ref ParsingContext pc,
+                                              out TEnum value) where TEnum : struct, Enum
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Enum)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = default;
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
 
       if (!EnumAgsRegistry.TryParse(lexeme, out value))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
                                         lexeme,
                                         typeof(TEnum).Name,
-                                        Enum.GetNames(typeof(TEnum)));
+                                        Enum.GetNames<TEnum>());
          value = default;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -449,36 +393,33 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_FlagsEnum<TEnum>(ContentNode node,
-                                                   LocationContext ctx,
-                                                   string actionName,
-                                                   string source,
-                                                   out TEnum value,
-                                                   ref bool validation) where TEnum : struct, Enum
+                                                   ref ParsingContext pc,
+                                                   out TEnum value) where TEnum : struct, Enum
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_FlagsEnum)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = default;
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!Enum.TryParse(lexeme, true, out value))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
                                         lexeme,
                                         typeof(TEnum).Name,
-                                        Enum.GetNames(typeof(TEnum)));
+                                        Enum.GetNames<TEnum>());
          value = default;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -490,21 +431,12 @@ public static class ParsingToolBox
    /// Utilizes the LocationContext to resolve the location.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(ContentNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out Location value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Location value)
    {
-      return node.TryGetLocation(ctx, actionName, source, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetLocation(ref pc, out value);
    }
 
    /// <summary>
@@ -512,122 +444,93 @@ public static class ParsingToolBox
    /// Utilizes the LocationContext to resolve the location.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_Location(KeyOnlyNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out Location value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Location value)
    {
-      return node.TryGetLocation(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetLocation(ref pc, out value);
    }
 
    public static bool ArcTryParse_ModValInstance(ContentNode node,
-                                                 LocationContext ctx,
-                                                 string actionName,
-                                                 string source,
-                                                 [MaybeNullWhen(false)] out ModValInstance value,
-                                                 ref bool validation)
+                                                 ref ParsingContext pc,
+                                                 [MaybeNullWhen(false)] out ModValInstance value)
    {
-      return node.TryParseModValInstance(ctx, actionName, source, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryParseModValInstance(ref pc, out value);
    }
 
    public static bool ArcTryParse_AudioTag(ContentNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out AudioTag value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out AudioTag value)
    {
-      return node.TryParseAudioTagInstance(ctx, actionName, source, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryParseAudioTagInstance(ref pc, out value);
    }
 
    public static bool ArcTryParse_ReligiousFaction(KeyOnlyNode node,
-                                                   LocationContext ctx,
-                                                   string actionName,
-                                                   string source,
-                                                   [MaybeNullWhen(false)] out ReligiousFaction value,
-                                                   ref bool validation)
+                                                   ref ParsingContext pc,
+                                                   [MaybeNullWhen(false)] out ReligiousFaction value)
    {
-      return node.TryGetReligiousFaction(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetReligiousFaction(ref pc, out value);
    }
 
    public static bool ArcTryParse_CurrencyData(ContentNode node,
-                                               LocationContext ctx,
-                                               string actionName,
-                                               string source,
-                                               [MaybeNullWhen(false)] out CurrencyData value,
-                                               ref bool validation)
+                                               ref ParsingContext pc,
+                                               [MaybeNullWhen(false)] out CurrencyData value)
    {
+      using var scope = pc.PushScope();
       value = null;
       return false;
    }
 
    public static bool ArcTryParse_Age(ContentNode node,
-                                      LocationContext ctx,
-                                      string actionName,
-                                      string source,
-                                      [MaybeNullWhen(false)] out Age value,
-                                      ref bool validation)
+                                      ref ParsingContext pc,
+                                      [MaybeNullWhen(false)] out Age value)
    {
-      return node.TryParseAge(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryParseAge(ref pc, out value);
    }
 
    public static bool ArcTryParse_Province(KeyOnlyNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out Province value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Province value)
    {
-      return node.TryGetProvince(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetProvince(ref pc, out value);
    }
 
    public static bool ArcTryParse_Area(KeyOnlyNode node,
-                                       LocationContext ctx,
-                                       string actionName,
-                                       string source,
-                                       [MaybeNullWhen(false)] out Area value,
-                                       ref bool validation)
+                                       ref ParsingContext pc,
+                                       [MaybeNullWhen(false)] out Area value)
    {
-      return node.TryGetArea(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetArea(ref pc, out value);
    }
 
    public static bool ArcTryParse_Region(KeyOnlyNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         [MaybeNullWhen(false)] out Region value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         [MaybeNullWhen(false)] out Region value)
    {
-      return node.TryGetRegion(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetRegion(ref pc, out value);
    }
 
    public static bool ArcTryParse_AiTag(ContentNode node,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        [MaybeNullWhen(false)] out AiTag value,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        [MaybeNullWhen(false)] out AiTag value)
    {
-      return node.TryParseAiTagInstance(ctx, actionName, source, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryParseAiTagInstance(ref pc, out value);
    }
 
    public static bool ArcTryParse_String(KeyOnlyNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         [MaybeNullWhen(false)] out string value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         [MaybeNullWhen(false)] out string value)
    {
-      value = node.KeyNode.GetLexeme(source);
+      using var scope = pc.PushScope();
+      value = pc.SliceString(node);
       return true;
    }
 
@@ -636,33 +539,22 @@ public static class ParsingToolBox
    /// Utilizes the global ReligiousSchools dictionary to resolve the identifier.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="node"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_ReligiousSchool(ContentNode node,
-                                                  LocationContext ctx,
-                                                  string actionName,
-                                                  string source,
-                                                  [MaybeNullWhen(false)] out ReligiousSchool value,
-                                                  ref bool validation)
+                                                  ref ParsingContext pc,
+                                                  [MaybeNullWhen(false)] out ReligiousSchool value)
    {
-      if (node.TryGetIdentifierNode(ctx, actionName, source, out var rsName))
+      using var scope = pc.PushScope();
+      if (node.TryGetIdentifierNode(ref pc, out var rsName))
       {
          if (!Globals.ReligiousSchools.TryGetValue(rsName, out var rs))
          {
-            ctx.SetPosition(node.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(node);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.UnknownObjectKey,
-                                           actionName,
                                            rsName,
                                            nameof(ReligiousSchool));
             value = null;
-            validation = false;
-            return false;
+            return pc.Fail();
          }
 
          value = rs;
@@ -670,7 +562,7 @@ public static class ParsingToolBox
       }
 
       value = null;
-      validation = false;
+      pc.Fail();
       return false;
    }
 
@@ -679,24 +571,15 @@ public static class ParsingToolBox
    /// Utilizes the global CountryRanks list to resolve the identifier.
    /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
-   /// <param name="cn"></param>
-   /// <param name="ctx"></param>
-   /// <param name="actionName"></param>
-   /// <param name="source"></param>
-   /// <param name="value"></param>
-   /// <param name="validation"></param>
-   /// <returns></returns>
    public static bool ArcTryParse_CountryRank(ContentNode cn,
-                                              LocationContext ctx,
-                                              string actionName,
-                                              string source,
-                                              [MaybeNullWhen(false)] out CountryRank value,
-                                              ref bool validation)
+                                              ref ParsingContext pc,
+                                              [MaybeNullWhen(false)] out CountryRank value)
    {
-      if (!cn.TryGetIdentifierNode(ctx, actionName, source, out var crlName))
+      using var scope = pc.PushScope();
+      if (!cn.TryGetIdentifierNode(ref pc, out var crlName))
       {
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -705,160 +588,144 @@ public static class ParsingToolBox
          return true;
 
       {
-         ctx.SetPosition(cn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(cn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidCountryRankKey,
-                                        actionName,
                                         crlName,
                                         Globals.CountryRanks.Keys);
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
    }
 
    public static bool ArcTryParse_JominiDate(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out JominiDate value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out JominiDate value)
    {
+      using var scope = pc.PushScope();
       value = JominiDate.Empty;
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_JominiDate)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          return false;
       }
 
-      if (!lvn.TryParseJominiDate(ctx, actionName, source, ref validation, out value))
+      if (!lvn.TryParseJominiDate(ref pc, out value))
          return false;
 
       return true;
    }
 
    public static bool ArcTryParse_EnactedLaw(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out EnactedLaw value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out EnactedLaw value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_EnactedLaw)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
    public static bool ArcTryParse_RegnalNumber(ContentNode node,
-                                               LocationContext ctx,
-                                               string actionName,
-                                               string source,
-                                               [MaybeNullWhen(false)] out RegnalNumber value,
-                                               ref bool validation)
+                                               ref ParsingContext pc,
+                                               [MaybeNullWhen(false)] out RegnalNumber value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_RegnalNumber)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      value = new() { Key = node.KeyNode.GetLexeme(source), Value = lvn.Value.GetLexeme(source) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
    public static bool ArcTryParse_Country(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          [MaybeNullWhen(false)] out Country value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Country value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_RegnalNumber)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseCountry(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseCountry(ref pc, out value);
    }
 
    public static bool ArcTryParse_Language(ContentNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out Language value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Language value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Language)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!Globals.Languages.TryGetValue(lexeme, out value) && !Globals.Dialects.TryGetValue(lexeme, out value))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        actionName,
                                         lexeme,
                                         nameof(Language));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -866,54 +733,50 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_CultureOpinionValue(ContentNode node,
-                                                      LocationContext ctx,
-                                                      string actionName,
-                                                      string source,
-                                                      [MaybeNullWhen(false)] out CultureOpinionValue value,
-                                                      ref bool validation)
+                                                      ref ParsingContext pc,
+                                                      [MaybeNullWhen(false)] out CultureOpinionValue value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_CultureOpinionValue)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!Globals.Cultures.TryGetValue(node.KeyNode.GetLexeme(source), out var culture))
+      if (!Globals.Cultures.TryGetValue(pc.SliceString(node), out var culture))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        actionName,
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(Culture));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -922,54 +785,50 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_ReligionOpinionValue(ContentNode node,
-                                                       LocationContext ctx,
-                                                       string actionName,
-                                                       string source,
-                                                       [MaybeNullWhen(false)] out ReligionOpinionValue value,
-                                                       ref bool validation)
+                                                       ref ParsingContext pc,
+                                                       [MaybeNullWhen(false)] out ReligionOpinionValue value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ReligionOpinionValue)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!Globals.Religions.TryGetValue(node.KeyNode.GetLexeme(source), out var religion))
+      if (!Globals.Religions.TryGetValue(pc.SliceString(node), out var religion))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        actionName,
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(Religion));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -978,55 +837,50 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_ReligiousSchoolOpinionValue(ContentNode node,
-                                                              LocationContext ctx,
-                                                              string actionName,
-                                                              string source,
-                                                              [MaybeNullWhen(false)]
-                                                              out ReligiousSchoolOpinionValue value,
-                                                              ref bool validation)
+                                                              ref ParsingContext pc,
+                                                              [MaybeNullWhen(false)] out ReligiousSchoolOpinionValue value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ReligiousSchoolOpinionValue)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!Globals.ReligiousSchools.TryGetValue(node.KeyNode.GetLexeme(source), out var rs))
+      if (!Globals.ReligiousSchools.TryGetValue(pc.SliceString(node), out var rs))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownObjectKey,
-                                        actionName,
-                                        node.KeyNode.GetLexeme(source),
+                                        pc.SliceString(node),
                                         nameof(ReligiousSchoolOpinionValue));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
-      var lexeme = lvn.Value.GetLexeme(source);
+      var lexeme = pc.SliceString(lvn);
+      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
-         ctx.SetPosition(lvn.Value);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidEnumValue,
-                                        actionName,
                                         lexeme,
                                         nameof(Opinion),
-                                        Enum.GetNames(typeof(Opinion)));
+                                        Enum.GetNames<Opinion>());
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -1035,61 +889,56 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_Character(ContentNode node,
-                                            LocationContext ctx,
-                                            string actionName,
-                                            string source,
-                                            [MaybeNullWhen(false)] out Character value,
-                                            ref bool validation)
+                                            ref ParsingContext pc,
+                                            [MaybeNullWhen(false)] out Character value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Character)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseCharacter(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseCharacter(ref pc, out value);
    }
 
    public static bool ArcTryParse_CharacterNameDeclaration(ContentNode node,
-                                                           LocationContext ctx,
-                                                           string actionName,
-                                                           string source,
-                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
-                                                           ref bool validation)
+                                                           ref ParsingContext pc,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_CharacterNameDeclaration)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      var name = lvn.Value.GetLexeme(source);
+      var name = pc.SliceString(lvn);
+      ;
 
       value = new()
       {
-         SavingKey = node.KeyNode.GetLexeme(source),
+         SavingKey = pc.SliceString(node),
          Name = name,
          IsRandom = true,
       };
@@ -1097,198 +946,175 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_CharacterNameDeclaration(BlockNode node,
-                                                           LocationContext ctx,
-                                                           string actionName,
-                                                           string source,
-                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
-                                                           ref bool validation)
+                                                           ref ParsingContext pc,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value)
    {
-      var key = node.KeyNode.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var key = pc.SliceString(node);
 
       if (node.Children.Count != 1)
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
                                         $"Expected exactly one child node in block for CharacterNameDeclaration with key '{key}', found {node.Children.Count}.",
                                         nameof(ContentNode),
                                         key);
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
       if (node.Children[0] is not ContentNode cn)
       {
-         ctx.SetPosition(node.Children[0].KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node.Children[0].KeyNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
-                                        actionName,
                                         $"Expected child node in block for CharacterNameDeclaration with key '{key}' to be a {nameof(ContentNode)}, found {node.Children[0].GetType().Name}.",
                                         nameof(ContentNode),
                                         key);
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
       if (!SeparatorHelper.IsSeparatorOfType(cn.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_CharacterNameDeclaration)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!cn.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!cn.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      value = new() { SavingKey = key, Name = lvn.Value.GetLexeme(source) };
+      value = new() { SavingKey = key, Name = pc.SliceString(lvn) };
       return true;
    }
 
    public static bool ArcTryParse_CharacterNameDeclaration(StatementNode node,
-                                                           LocationContext ctx,
-                                                           string actionName,
-                                                           string source,
-                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value,
-                                                           ref bool validation)
+                                                           ref ParsingContext pc,
+                                                           [MaybeNullWhen(false)] out CharacterNameDeclaration value)
    {
+      using var scope = pc.PushScope();
       if (node is BlockNode bn)
-         return ArcTryParse_CharacterNameDeclaration(bn, ctx, actionName, source, out value, ref validation);
-      if (node.IsContentNode(ctx, source, actionName, ref validation, out var cn))
-         return ArcTryParse_CharacterNameDeclaration(cn, ctx, actionName, source, out value, ref validation);
+         return ArcTryParse_CharacterNameDeclaration(bn, ref pc, out value);
+      if (node.IsContentNode(ref pc, out var cn))
+         return ArcTryParse_CharacterNameDeclaration(cn, ref pc, out value);
 
       value = null;
-      validation = false;
+      pc.Fail();
       return false;
    }
 
    public static bool ArcTryParse_PopType(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          [MaybeNullWhen(false)] out PopType value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out PopType value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_PopType)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParsePopType(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParsePopType(ref pc, out value);
    }
 
    public static bool ArcTryParse_Culture(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          [MaybeNullWhen(false)] out Culture value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Culture value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Culture)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return lvn.TryParseCulture(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseCulture(ref pc, out value);
    }
 
    public static bool ArcTryParse_ReligionGroup(ContentNode node,
-                                                LocationContext ctx,
-                                                string actionName,
-                                                string source,
-                                                [MaybeNullWhen(false)] out ReligionGroup value,
-                                                ref bool validation)
+                                                ref ParsingContext pc,
+                                                [MaybeNullWhen(false)] out ReligionGroup value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ReligionGroup)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return lvn.TryParseReligionGroup(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseReligionGroup(ref pc, out value);
    }
 
    public static bool ArcTryParse_Religion(ContentNode node,
-                                           LocationContext ctx,
-                                           string actionName,
-                                           string source,
-                                           [MaybeNullWhen(false)] out Religion value,
-                                           ref bool validation)
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Religion value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Religion)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return lvn.TryParseReligion(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseReligion(ref pc, out value);
    }
 
    public static bool ArcTryParse_SoundToll(ContentNode node,
-                                            LocationContext ctx,
-                                            string actionName,
-                                            string source,
-                                            [MaybeNullWhen(false)] out SoundToll value,
-                                            ref bool validation)
+                                            ref ParsingContext pc,
+                                            [MaybeNullWhen(false)] out SoundToll value)
    {
+      using var scope = pc.PushScope();
       value = null;
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_SoundToll)}",
-                                             ref validation))
+                                             ref pc))
          return false;
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
          return false;
 
-      if (!lvn.TryParseLocationFromLvn(ctx, actionName, source, ref validation, out var loc))
+      if (!lvn.TryParseLocationFromLvn(ref pc, out var loc))
          return false;
 
-      if (!node.KeyNode.IsSimpleKeyNode(ctx, source, actionName, out var skn))
+      if (!node.KeyNode.IsSimpleKeyNode(ref pc, out var skn))
          return false;
 
-      if (!skn.KeyToken.TryGetLocationFromToken(ctx, source, actionName, ref validation, out var from))
+      if (!skn.KeyToken.TryGetLocationFromToken(ref pc, out var from))
          return false;
 
       value = new() { StraitLocationOne = from, StraitLocationTwo = loc };
@@ -1296,164 +1122,145 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_ReligiousFocus(KeyOnlyNode node,
-                                                 LocationContext ctx,
-                                                 string actionName,
-                                                 string source,
-                                                 [MaybeNullWhen(false)] out ReligiousFocus value,
-                                                 ref bool validation)
+                                                 ref ParsingContext pc,
+                                                 [MaybeNullWhen(false)] out ReligiousFocus value)
    {
-      return node.TryGetReligiousFocus(ctx, source, actionName, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryGetReligiousFocus(ref pc, out value);
    }
 
    public static bool ArcTryParse_DesignateHeirReason(ContentNode node,
-                                                      LocationContext ctx,
-                                                      string actionName,
-                                                      string source,
-                                                      [MaybeNullWhen(false)] out DesignateHeirReason value,
-                                                      ref bool validation)
+                                                      ref ParsingContext pc,
+                                                      [MaybeNullWhen(false)] out DesignateHeirReason value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_DesignateHeirReason)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseDesignateHeirReason(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseDesignateHeirReason(ref pc, out value);
    }
 
    public static bool ArcTryParse_Estate(ContentNode node,
-                                         LocationContext ctx,
-                                         string actionName,
-                                         string source,
-                                         [MaybeNullWhen(false)] out Estate value,
-                                         ref bool validation)
+                                         ref ParsingContext pc,
+                                         [MaybeNullWhen(false)] out Estate value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Estate)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseEstate(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseEstate(ref pc, out value);
    }
 
    public static bool ArcTryParse_Trait(KeyOnlyNode node,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        [MaybeNullWhen(false)] out Trait value,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        [MaybeNullWhen(false)] out Trait value)
    {
-      return node.TryParseTrait(ctx, actionName, source, ref validation, out value);
+      using var scope = pc.PushScope();
+      return node.TryParseTrait(ref pc, out value);
    }
 
    public static bool ArcTryParse_Trait(ContentNode node,
-                                        LocationContext ctx,
-                                        string actionName,
-                                        string source,
-                                        [MaybeNullWhen(false)] out Trait value,
-                                        ref bool validation)
+                                        ref ParsingContext pc,
+                                        [MaybeNullWhen(false)] out Trait value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Trait)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseTrait(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseTrait(ref pc, out value);
    }
 
    public static bool ArcTryParse_ParliamentType(ContentNode node,
-                                                 LocationContext ctx,
-                                                 string actionName,
-                                                 string source,
-                                                 [MaybeNullWhen(false)] out ParliamentType value,
-                                                 ref bool validation)
+                                                 ref ParsingContext pc,
+                                                 [MaybeNullWhen(false)] out ParliamentType value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ParliamentType)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseParliamentType(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseParliamentType(ref pc, out value);
    }
 
    public static bool ArcTryParse_DemandData(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out DemandData value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out DemandData value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_DemandData)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       value = Eu5Activator.CreateEmbeddedInstance<DemandData>(null, node);
 
       switch (key)
       {
          case "all":
-            if (!lvn.TryParseFloat(ctx, actionName, source, ref validation, out var all))
+            if (!lvn.TryParseFloat(ref pc, out var all))
             {
                value = null;
                return false;
@@ -1462,7 +1269,7 @@ public static class ParsingToolBox
             value.TargetAll = all;
             break;
          case "upper":
-            if (!lvn.TryParseFloat(ctx, actionName, source, ref validation, out var upper))
+            if (!lvn.TryParseFloat(ref pc, out var upper))
             {
                value = null;
                return false;
@@ -1473,14 +1280,13 @@ public static class ParsingToolBox
          default:
             if (!Globals.PopTypes.TryGetValue(key, out var popType))
             {
-               ctx.SetPosition(node.KeyNode);
-               DiagnosticException.LogWarning(ctx.GetInstance(),
+               pc.SetContext(node);
+               DiagnosticException.LogWarning(ref pc,
                                               ParsingError.Instance.UnknownObjectKey,
-                                              actionName,
                                               key,
                                               nameof(PopType));
                value = null;
-               validation = false;
+               pc.Fail();
                return false;
             }
 
@@ -1492,47 +1298,43 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_EstateCountDefinition(ContentNode node,
-                                                        LocationContext ctx,
-                                                        string actionName,
-                                                        string source,
-                                                        [MaybeNullWhen(false)] out EstateCountDefinition value,
-                                                        ref bool validation)
+                                                        ref ParsingContext pc,
+                                                        [MaybeNullWhen(false)] out EstateCountDefinition value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_EstateCountDefinition)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Estates.TryGetValue(key, out var estate))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        actionName,
                                         key,
                                         nameof(Estate));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
       value = Eu5Activator.CreateEmbeddedInstance<EstateCountDefinition>(null, node);
       value.Estate = estate;
 
-      if (!lvn.TryParseInt(ctx, actionName, source, ref validation, out var count))
+      if (!lvn.TryParseInt(ref pc, out var count))
          return false;
 
       value.Count = count;
@@ -1540,272 +1342,212 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_Topography(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out Topography value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out Topography value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Topography)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Topography,
                                            out value);
    }
 
    public static bool ArcTryParse_Vegetation(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out Vegetation value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out Vegetation value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Vegetation)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Vegetation,
                                            out value);
    }
 
    public static bool ArcTryParse_Climate(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          [MaybeNullWhen(false)] out Climate value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Climate value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Climate)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Climates,
                                            out value);
    }
 
    public static bool ArcTryParse_RawMaterial(ContentNode node,
-                                              LocationContext ctx,
-                                              string actionName,
-                                              string source,
-                                              [MaybeNullWhen(false)] out RawMaterial value,
-                                              ref bool validation)
+                                              ref ParsingContext pc,
+                                              [MaybeNullWhen(false)] out RawMaterial value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_RawMaterial)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.RawMaterials,
                                            out value);
    }
 
    public static bool ArcTryParse_StaticModifier(ContentNode node,
-                                                 LocationContext ctx,
-                                                 string actionName,
-                                                 string source,
-                                                 [MaybeNullWhen(false)] out StaticModifier value,
-                                                 ref bool validation)
+                                                 ref ParsingContext pc,
+                                                 [MaybeNullWhen(false)] out StaticModifier value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_StaticModifier)}"))
-         validation = false;
+                                             ref pc))
+         pc.Fail();
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.StaticModifiers,
                                            out value);
    }
 
    public static bool ArcTryParse_Dynasty(ContentNode node,
-                                          LocationContext ctx,
-                                          string actionName,
-                                          string source,
-                                          [MaybeNullWhen(false)] out Dynasty value,
-                                          ref bool validation)
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Dynasty value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_Dynasty)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           lvn.Value,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
+                                           ref pc,
                                            Globals.Dynasties,
                                            out value);
    }
 
    public static bool ArcTryParse_CultureGroup(KeyOnlyNode node,
-                                               LocationContext ctx,
-                                               string actionName,
-                                               string source,
-                                               [MaybeNullWhen(false)] out CultureGroup value,
-                                               ref bool validation)
+                                               ref ParsingContext pc,
+                                               [MaybeNullWhen(false)] out CultureGroup value)
    {
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node.KeyNode,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
                                            Globals.CultureGroups,
                                            out value);
    }
 
    public static bool ArcTryParse_ArtistType(KeyOnlyNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out ArtistType value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out ArtistType value)
    {
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node.KeyNode,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
                                            Globals.ArtistTypes,
                                            out value);
    }
 
    public static bool ArcTryParse_TownSetup(ContentNode node,
-                                            LocationContext ctx,
-                                            string actionName,
-                                            string source,
-                                            [MaybeNullWhen(false)] out TownSetup value,
-                                            ref bool validation)
+                                            ref ParsingContext pc,
+                                            [MaybeNullWhen(false)] out TownSetup value)
    {
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node,
+                                           ref pc,
                                            Globals.TownSetups,
                                            out value);
    }
 
    public static bool ArcTryParse_LocationRank(ContentNode node,
-                                               LocationContext ctx,
-                                               string actionName,
-                                               string source,
-                                               [MaybeNullWhen(false)] out LocationRank value,
-                                               ref bool validation)
+                                               ref ParsingContext pc,
+                                               [MaybeNullWhen(false)] out LocationRank value)
    {
-      return LUtil.TryGetFromGlobalsAndLog(ctx,
-                                           node,
-                                           source,
-                                           actionName,
-                                           ref validation,
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node,
+                                           ref pc,
                                            Globals.LocationRanks,
                                            out value);
    }
 
    public static bool ArcTryParse_InstitutionPresence(ContentNode node,
-                                                      LocationContext ctx,
-                                                      string actionName,
-                                                      string source,
-                                                      [MaybeNullWhen(false)] out InstitutionPresence value,
-                                                      ref bool validation)
+                                                      ref ParsingContext pc,
+                                                      [MaybeNullWhen(false)] out InstitutionPresence value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_InstitutionPresence)}") ||
-          !node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn) ||
-          !lvn.TryParseBool(ctx, actionName, source, ref validation, out var isPresent))
+                                             ref pc) ||
+          !node.Value.IsLiteralValueNode(ref pc, out var lvn) ||
+          !lvn.TryParseBool(ref pc, out var isPresent))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Institutions.TryGetValue(key, out var institution))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        actionName,
                                         key,
                                         nameof(Institution));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 
@@ -1817,62 +1559,55 @@ public static class ParsingToolBox
    }
 
    public static bool ArcTryParse_ArtistType(ContentNode node,
-                                             LocationContext ctx,
-                                             string actionName,
-                                             string source,
-                                             [MaybeNullWhen(false)] out ArtistType value,
-                                             ref bool validation)
+                                             ref ParsingContext pc,
+                                             [MaybeNullWhen(false)] out ArtistType value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_ArtistType)}"))
+                                             ref pc))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvn))
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      return lvn.TryParseArtistType(ctx, actionName, source, ref validation, out value);
+      return lvn.TryParseArtistType(ref pc, out value);
    }
 
    public static bool ArcTryParse_BuildingLevel(ContentNode node,
-                                                LocationContext ctx,
-                                                string actionName,
-                                                string source,
-                                                [MaybeNullWhen(false)] out BuildingLevel value,
-                                                ref bool validation)
+                                                ref ParsingContext pc,
+                                                [MaybeNullWhen(false)] out BuildingLevel value)
    {
+      using var scope = pc.PushScope();
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
-                                             ctx,
-                                             $"{actionName}.{nameof(ArcTryParse_BuildingLevel)}") ||
-          !node.Value.IsLiteralValueNode(ctx, actionName, ref validation, out var lvnValue) ||
-          !lvnValue.TryParseInt(ctx, actionName, source, ref validation, out var level))
+                                             ref pc) ||
+          !node.Value.IsLiteralValueNode(ref pc, out var lvnValue) ||
+          !lvnValue.TryParseInt(ref pc, out var level))
       {
-         validation = false;
+         pc.Fail();
          value = null;
          return false;
       }
 
-      var key = node.KeyNode.GetLexeme(source);
+      var key = pc.SliceString(node);
       if (!Globals.Buildings.TryGetValue(key, out var building))
       {
-         ctx.SetPosition(node.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        actionName,
                                         key,
                                         nameof(Building));
          value = null;
-         validation = false;
+         pc.Fail();
          return false;
       }
 

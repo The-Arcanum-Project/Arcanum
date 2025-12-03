@@ -8,9 +8,8 @@ using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.UserControls.BaseControls;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public static class CustomShortInfoGenerators
 {

@@ -4,15 +4,13 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 using Arcanum.UI.NUI.UserControls.BaseControls;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public sealed class PropertyEditorViewModel
    : INotifyPropertyChanged, IDisposable
 {
-   private bool _isExpanded;
    private readonly bool _isInline;
    private Grid? _expandableContentGrid;
    private readonly BaseView _view;
@@ -42,19 +40,19 @@ public sealed class PropertyEditorViewModel
 
    public bool IsExpanded
    {
-      get => _isExpanded;
+      get;
       set
       {
-         if (_isExpanded == value)
+         if (field == value)
             return;
 
-         _isExpanded = value;
+         field = value;
          OnPropertyChanged(nameof(IsExpanded));
 
-         if (_isExpanded && !_hasRefreshedContent)
+         if (field && !_hasRefreshedContent)
             RefreshContent();
 
-         Eu5UiGen.IsExpandedCache[NxProp] = _isExpanded;
+         Eu5UiGen.IsExpandedCache[NxProp] = field;
       }
    }
 

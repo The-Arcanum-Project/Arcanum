@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.Utils.Sorting;
 using ReligiousFaction = Arcanum.Core.GameObjects.Religious.ReligiousFaction;
@@ -11,9 +10,7 @@ public class ReligiousFactionParsing(IEnumerable<IDependencyNode<string>> depend
 {
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    ReligiousFaction target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
    {
       throw new NotSupportedException("ReligiousFactionParsing should only be used in discovery phase.");

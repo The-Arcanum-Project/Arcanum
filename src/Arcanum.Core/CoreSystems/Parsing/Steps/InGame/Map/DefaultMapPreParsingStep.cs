@@ -1,6 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -21,45 +19,30 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    DefaultMapDefinition target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("DefaultMapPreParsingStep should not parse to object directly.");
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
       var dmd = new DefaultMapDefinition { Source = fileObj };
-      ParseProperties(rn, ctx, fileObj, actionStack, source, ref validation, dmd);
+      ParseProperties(rn, ref pc, fileObj, dmd);
 
       Globals.DefaultMapDefinition = dmd;
    }
 
    private static void ParseProperties(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        DefaultMapDefinition dmd)
    {
       FileStateManager.RegisterPath(fileObj.Path);
 
       foreach (var sn in rn.Statements)
-         if (sn is ContentNode cn)
-            Pdh.DispatchContentNode(cn,
-                                    dmd,
-                                    ctx,
-                                    source,
-                                    actionStack,
-                                    DefaultMapParsing._contentParsers,
-                                    ref validation);
+         DefaultMapParsing.Dispatch(sn, dmd, ref pc);
 
       // Set the values for the file names to the matching DescriptorDefinitions
       //DescriptorDefinitions.MapDescriptor.LocalPath[^1] = dmd.ProvinceFileName.TrimQuotes();

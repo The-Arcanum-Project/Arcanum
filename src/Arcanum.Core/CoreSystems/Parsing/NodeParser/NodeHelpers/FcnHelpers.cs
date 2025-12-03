@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -10,86 +9,75 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
 public static class FcnHelpers
 {
-   public static bool HasXLvnArgumentsWithTypes(this FunctionCallNode fcn,
-                                                LocationContext ctx,
-                                                TokenType[] type,
-                                                string source,
-                                                string callStack,
-                                                ref bool validationResult,
-                                                [MaybeNullWhen(false)] out List<LiteralValueNode> args)
+   extension(FunctionCallNode fcn)
    {
-      if (fcn.Arguments.Count != type.Length)
+      public bool HasXLvnArgumentsWithTypes(ref ParsingContext pc,
+                                            TokenType[] type,
+                                            [MaybeNullWhen(false)] out List<LiteralValueNode> args)
       {
-         ctx.SetPosition(fcn.FunctionName);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
-                                        ParsingError.Instance.InvalidFunctionArgumentCount,
-                                        "Parsing FunctionCallNode",
-                                        type.Length,
-                                        fcn.Arguments.Count,
-                                        fcn.FunctionName.GetLexeme(source),
-                                        fcn.Arguments);
-         validationResult = false;
-         args = null;
-         return false;
-      }
-
-      args = new(type.Length);
-
-      for (var i = 0; i < type.Length; i++)
-      {
-         if (fcn.Arguments[i] is not LiteralValueNode arg)
+         using var scope = pc.PushScope();
+         if (fcn.Arguments.Count != type.Length)
          {
-            ctx.SetPosition(fcn.Arguments[i]);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.InvalidNodeType,
-                                           callStack,
-                                           fcn.Arguments[i].GetType().Name,
-                                           nameof(LiteralValueNode),
-                                           "N/A");
-            validationResult = false;
+            pc.SetContext(fcn);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.InvalidFunctionArgumentCount,
+                                           type.Length,
+                                           fcn.Arguments.Count,
+                                           pc.SliceString(fcn.FunctionName),
+                                           fcn.Arguments);
             args = null;
-            return false;
+            return pc.Fail();
          }
 
-         if (arg.Value.Type != type[i])
+         args = new(type.Length);
+
+         for (var i = 0; i < type.Length; i++)
          {
-            ctx.SetPosition(arg.Value);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
-                                           ParsingError.Instance.InvalidFunctionArgumentType,
-                                           callStack,
-                                           type[i],
-                                           arg.Value.Type,
-                                           i + 1,
-                                           arg.Value.GetLexeme(source),
-                                           fcn.FunctionName.GetLexeme(source));
-            validationResult = false;
-            args = null;
-            return false;
+            if (fcn.Arguments[i] is not LiteralValueNode arg)
+            {
+               pc.SetContext(fcn.Arguments[i]);
+               DiagnosticException.LogWarning(ref pc,
+                                              ParsingError.Instance.InvalidNodeType,
+                                              fcn.Arguments[i].GetType().Name,
+                                              nameof(LiteralValueNode),
+                                              "N/A");
+               args = null;
+               return pc.Fail();
+            }
+
+            if (arg.Value.Type != type[i])
+            {
+               pc.SetContext(arg);
+               DiagnosticException.LogWarning(ref pc,
+                                              ParsingError.Instance.InvalidFunctionArgumentType,
+                                              type[i],
+                                              arg.Value.Type,
+                                              i + 1,
+                                              pc.SliceString(arg),
+                                              pc.SliceString(fcn.FunctionName));
+               args = null;
+               return pc.Fail();
+            }
+
+            args.Add(arg);
          }
 
-         args.Add(arg);
+         return true;
       }
-
-      return true;
    }
 
    public static bool GetColorDefinition(this FunctionCallNode fcn,
-                                         LocationContext ctx,
-                                         string source,
-                                         string callStack,
-                                         ref bool validationResult,
+                                         ref ParsingContext pc,
                                          [MaybeNullWhen(false)] out JominiColor color)
    {
+      using var scope = pc.PushScope();
       const string rgbFcn = "rgb";
       const string hsvFcn = "hsv";
       const string hsv360Fcn = "hsv360";
 
-      var fcnKey = fcn.FunctionName.GetLexeme(source);
-      if (!fcn.HasXLvnArgumentsWithTypes(ctx,
+      var fcnKey = pc.SliceString(fcn);
+      if (!fcn.HasXLvnArgumentsWithTypes(ref pc,
                                          [TokenType.Number, TokenType.Number, TokenType.Number],
-                                         source,
-                                         callStack + $".{fcnKey}",
-                                         ref validationResult,
                                          out var args))
       {
          color = null;
@@ -102,26 +90,17 @@ public static class FcnHelpers
             var rgb = new byte[3];
             for (var i = 0; i < args.Count; i++)
                if (!args[i]
-                     .TryParseByte(ctx,
-                                   callStack + $".{fcnKey}.ParseByte",
-                                   source,
-                                   ref validationResult,
+                     .TryParseByte(ref pc,
                                    out rgb[i],
                                    false))
                {
                   if (!args[i]
-                        .TryParseFloat(ctx,
-                                       callStack + $".{fcnKey}.ParseFloat",
-                                       source,
-                                       ref validationResult,
+                        .TryParseFloat(ref pc,
                                        out var f,
                                        false))
                   {
                      if (args[i]
-                        .TryParseByte(ctx,
-                                      callStack + $".{fcnKey}.ParseByte",
-                                      source,
-                                      ref validationResult,
+                        .TryParseByte(ref pc,
                                       out rgb[i]))
                         continue;
                   }
@@ -140,7 +119,7 @@ public static class FcnHelpers
          case hsvFcn:
             var hsv = new float[3];
             for (var i = 0; i < args.Count; i++)
-               if (!NumberParsing.TryParseFloat(args[i].Value.GetLexeme(source), ctx, out hsv[i]))
+               if (!NumberParsing.TryParseFloat(pc.SliceString(args[i].Value), ref pc, out hsv[i]))
                {
                   color = null;
                   return false;
@@ -151,8 +130,8 @@ public static class FcnHelpers
          case hsv360Fcn:
             var hsv360 = new int[3];
             for (var i = 0; i < args.Count; i++)
-               if (!NumberParsing.TryParseInt(args[i].Value.GetLexeme(source),
-                                              ctx,
+               if (!NumberParsing.TryParseInt(pc.SliceString(args[i].Value),
+                                              ref pc,
                                               out hsv360[i],
                                               0,
                                               360))
@@ -164,15 +143,13 @@ public static class FcnHelpers
             color = new JominiColor.Hsv360(hsv360[0], hsv360[1], hsv360[2]);
             break;
          default:
-            ctx.SetPosition(fcn.FunctionName);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(fcn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidFunctionName,
-                                           callStack,
                                            fcnKey,
                                            new object[] { rgbFcn, hsvFcn, hsv360Fcn });
-            validationResult = false;
             color = null;
-            return false;
+            return pc.Fail();
       }
 
       return true;

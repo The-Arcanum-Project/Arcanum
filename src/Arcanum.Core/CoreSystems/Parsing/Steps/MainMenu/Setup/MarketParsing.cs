@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -21,40 +20,35 @@ public class MarketManagerParsing(IEnumerable<IDependencyNode<string>> dependenc
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Market target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("MarketManagerParsing does not support parsing properties to object.");
 
    public override void LoadSingleFile(RootNode rn,
-                                       LocationContext ctx,
+                                       ref ParsingContext pc,
                                        Eu5FileObj fileObj,
-                                       string actionStack,
-                                       string source,
-                                       ref bool validation,
                                        object? lockObject)
    {
+      using var scope = pc.PushScope();
       if (rn.Statements.Count != 1)
       {
-         De.Warning(ctx,
+         De.Warning(ref pc,
                     ParsingError.Instance.InvalidBlockCount,
-                    actionStack,
                     rn.Statements.Count);
-         validation = false;
+         pc.Fail();
          return;
       }
 
-      if (!rn.Statements[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+      if (!rn.Statements[0].IsBlockNode(ref pc, out var bn))
          return;
 
       foreach (var sn in bn.Children)
       {
-         if (!sn.IsContentNode(ctx, source, actionStack, ref validation, out var cn))
+         if (!sn.IsContentNode(ref pc, out var cn))
             continue;
 
          var market = new Market();
-         Pdh.DispatchContentNode(cn, market, ctx, source, actionStack, MarketParsing._contentParsers, ref validation);
+         MarketParsing.Dispatch(cn, market, ref pc);
          Globals.Markets[market.UniqueId] = market;
       }
    }

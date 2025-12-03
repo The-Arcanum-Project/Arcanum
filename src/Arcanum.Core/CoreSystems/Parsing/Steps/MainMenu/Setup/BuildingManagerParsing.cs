@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -17,15 +16,11 @@ public partial class BuildingManagerParsing(IEnumerable<IDependencyNode<string>>
    public override List<Type> ParsedObjects => [typeof(BuildingDefinition)];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
       // We reach this up to the manager to invoke us again with the correct context.
       SetupParsingManager.ReloadFileByService<BuildingManagerParsing>(fileObj,
-                                                                      lockObject,
-                                                                      actionStack,
-                                                                      ref validation);
+                                                                      lockObject);
    }
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
@@ -36,16 +31,13 @@ public partial class BuildingManagerParsing(IEnumerable<IDependencyNode<string>>
    }
 
    public override void LoadSetupFile(StatementNode sn,
-                                      LocationContext ctx,
+                                      ref ParsingContext pc,
                                       Eu5FileObj fileObj,
-                                      string actionStack,
-                                      string source,
-                                      ref bool validation,
                                       object? lockObject)
    {
-      if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+      if (!sn.IsBlockNode(ref pc, out var bn))
          return;
 
-      ParseProperties(bn, Globals.BuildingsManager, ctx, source, ref validation, false);
+      ParseProperties(bn, Globals.BuildingsManager, ref pc, false);
    }
 }

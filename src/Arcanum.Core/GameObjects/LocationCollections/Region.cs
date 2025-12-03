@@ -41,8 +41,8 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                                 .GetFirstParentOfType(LocationCollectionType
-                                                                                        .Region)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .Region)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -56,7 +56,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    }
 
    public List<Location> GetLocations() => LocationChildren.SelectMany(x => x.GetLocations()).ToList();
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Locations;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Regions;
    public string GetNamespace => "Map.Region";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);

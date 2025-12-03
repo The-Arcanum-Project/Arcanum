@@ -26,9 +26,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    }
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
-                                         object? lockObject,
-                                         string actionStack,
-                                         ref bool validation)
+                                         object? lockObject)
    {
    }
 
@@ -48,7 +46,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       TotalPolygonsCount = _parsingPolygons.Count;
 
       _ = Tessellate();
-
+     
+      
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished loading and parsing map polygons.");
 
       return true;
@@ -59,7 +58,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
                                              i => Polygons![i] = _parsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
-
+   
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
 
       // TODO @MelCo: Make this right
@@ -95,6 +94,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       lock (this)
       {
          FinishedTesselation = true;
+         _parsingPolygons = null!;
          UIHandle.Instance.MapHandle.NotifyMapLoaded();
       }
 

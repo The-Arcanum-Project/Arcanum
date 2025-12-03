@@ -26,7 +26,8 @@ public class ParseAsAttribute(string? key,
                               AstNodeType itemNodeType = AstNodeType.KeyOnlyNode,
                               bool isEmbedded = false,
                               Type? iEu5KeyType = null,
-                              Type? customGlobalsSource = null) : Attribute
+                              Type? customGlobalsSource = null,
+                              bool ignore = false) : Attribute
 {
    public AstNodeType NodeType { get; } = nodeType;
 
@@ -60,4 +61,9 @@ public class ParseAsAttribute(string? key,
    public bool IsEmbedded { get; set; } = isEmbedded;
 
    public Type? CustomGlobalsSource { get; set; } = customGlobalsSource;
+
+   /// <summary>
+   /// If true, the property will be ignored during parsing.
+   /// </summary>
+   public bool Ignore { get; set; } = ignore;
 }

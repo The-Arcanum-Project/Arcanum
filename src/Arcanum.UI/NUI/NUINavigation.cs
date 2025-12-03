@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
+using Arcanum.UI.NUI.Generator;
+using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI;
 

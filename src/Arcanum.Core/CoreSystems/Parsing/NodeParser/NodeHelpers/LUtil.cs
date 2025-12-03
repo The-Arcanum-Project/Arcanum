@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -11,10 +10,9 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 public static class LUtil
 {
    public static List<Location> LocationsFromStatementNodes(List<StatementNode> nodes,
-                                                            LocationContext ctx,
-                                                            string actionName,
-                                                            string source)
+                                                            ref ParsingContext pc)
    {
+      using var scope = pc.PushScope();
       var locations = new List<Location>(nodes.Count);
 
       foreach (var node in nodes)
@@ -22,7 +20,7 @@ public static class LUtil
          if (node is not KeyOnlyNode kNode)
             continue;
 
-         if (!ParseLocation(kNode, ctx, actionName, source, out var location))
+         if (!ParseLocation(kNode, ref pc, out var location))
             continue;
 
          locations.Add(location);
@@ -32,18 +30,16 @@ public static class LUtil
    }
 
    public static bool ParseLocation(KeyOnlyNode kNode,
-                                    LocationContext ctx,
-                                    string actionName,
-                                    string source,
+                                    ref ParsingContext pc,
                                     out Location location)
    {
-      var key = kNode.KeyNode.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var key = pc.SliceString(kNode);
       if (!Globals.Locations.TryGetValue(key, out location!))
       {
-         ctx.SetPosition(kNode.KeyNode);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(kNode);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidLocationKey,
-                                        actionName,
                                         key);
          location = Location.Empty;
          return false;
@@ -53,22 +49,17 @@ public static class LUtil
    }
 
    public static bool ValidateNodeSeparatorAndNumberValue(ContentNode node,
-                                                          LocationContext ctx,
-                                                          string actionName,
-                                                          string source,
-                                                          ref bool validationResult,
+                                                          ref ParsingContext pc,
                                                           [MaybeNullWhen(false)] out string value)
    {
-      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ctx, actionName, ref validationResult))
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator, TokenType.Equals, ref pc))
       {
          value = null;
          return false;
       }
 
-      if (!node.Value.IsLiteralValueNodeOptionalUnary(ctx,
-                                                      actionName,
-                                                      source,
-                                                      ref validationResult,
+      if (!node.Value.IsLiteralValueNodeOptionalUnary(ref pc,
                                                       out value,
                                                       out _))
          return false;
@@ -77,117 +68,110 @@ public static class LUtil
    }
 
    public static bool TryGetFromGlobalsAndLog<T>(
-      LocationContext ctx,
       Token token,
-      string source,
-      string actionStack,
-      ref bool validationResult,
+      ref ParsingContext pc,
       Dictionary<string, T> globals,
       [MaybeNullWhen(false)] out T value) where T : IEu5Object
    {
-      var lexeme = token.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var lexeme = pc.SliceString(token);
       if (!globals.TryGetValue(lexeme, out value))
       {
-         ctx.SetPosition(token);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(token);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        $"{actionStack}.TryGetFromGlobals",
-                                        token.GetLexeme(source),
+                                        pc.SliceString(token),
                                         typeof(T).Name);
-         validationResult = false;
-         return false;
+         return pc.Fail();
       }
 
       return true;
    }
 
    public static bool TryGetFromGlobalsAndLog<T>(
-      LocationContext ctx,
       ContentNode node,
-      string source,
-      string actionStack,
-      ref bool validation,
+      ref ParsingContext pc,
       Dictionary<string, T> globals,
       [MaybeNullWhen(false)] out T value) where T : IEu5Object
    {
+      using var scope = pc.PushScope();
       if (SeparatorHelper.IsSeparatorOfType(node.Separator,
                                             TokenType.Equals,
-                                            ctx,
-                                            $"{actionStack}.{nameof(TryGetFromGlobalsAndLog)}") &&
-          node.Value.IsLiteralValueNode(ctx, actionStack, ref validation, out var lvn))
-         return TryGetFromGlobalsAndLog(ctx,
-                                        lvn.Value,
-                                        source,
-                                        actionStack,
-                                        ref validation,
+                                            ref pc) &&
+          node.Value.IsLiteralValueNode(ref pc, out var lvn))
+         return TryGetFromGlobalsAndLog(lvn.Value,
+                                        ref pc,
                                         globals,
                                         out value);
 
-      validation = false;
       value = default;
-      return false;
+      return pc.Fail();
    }
 
    public static bool TryGetFromGlobalsAndLog<T>(
-      LocationContext ctx,
       KeyNodeBase node,
-      string source,
-      string actionStack,
-      ref bool validationResult,
+      ref ParsingContext pc,
       Dictionary<string, T> globals,
       [MaybeNullWhen(false)] out T value) where T : IEu5Object
    {
-      var lexeme = node.GetLexeme(source);
+      using var scope = pc.PushScope();
+      var lexeme = pc.SliceString(node);
       if (!globals.TryGetValue(lexeme, out value))
       {
-         ctx.SetPosition(node);
-         DiagnosticException.LogWarning(ctx.GetInstance(),
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
-                                        $"{actionStack}.TryGetFromGlobals",
-                                        node.GetLexeme(source),
+                                        lexeme,
                                         typeof(T).Name);
-         validationResult = false;
-         return false;
+         return pc.Fail();
       }
 
       return true;
    }
 
-   public static bool TryAddToGlobals<T>(LocationContext ctx,
-                                         Token token,
-                                         string key,
-                                         string actionStack,
-                                         ref bool validationResult,
+   public static bool TryAddToGlobals<T>(Token token,
+                                         ref ParsingContext pc,
                                          T value) where T : IEu5Object
    {
-      return TryAddToGlobals(ctx,
-                             token,
-                             key,
-                             actionStack,
-                             ref validationResult,
+      return TryAddToGlobals(token,
+                             ref pc,
                              value,
                              (Dictionary<string, T>)value.GetGlobalItemsNonGeneric());
    }
 
-   public static bool TryAddToGlobals<T>(LocationContext ctx,
-                                         Token token,
-                                         string key,
-                                         string actionStack,
-                                         ref bool validationResult,
+   public static bool TryAddToGlobals<T>(Token token,
+                                         ref ParsingContext pc,
                                          T value,
                                          Dictionary<string, T> globals) where T : IEu5Object
    {
+      using var scope = pc.PushScope();
+      var key = pc.SliceString(token);
       if (globals.TryAdd(key, value))
          return true;
 
-      ctx.SetPosition(token);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(token);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.DuplicateObjectDefinition,
-                                     $"{actionStack}.TryAddToGlobals",
                                      key,
                                      typeof(T).Name,
                                      "UniqueId");
-      validationResult = false;
-      return false;
+      return pc.Fail();
+   }
+
+   public static bool TryAddToGlobals<T>(string kue,
+                                         ref ParsingContext pc,
+                                         T value,
+                                         Dictionary<string, T> globals) where T : IEu5Object
+   {
+      using var scope = pc.PushScope();
+      if (globals.TryAdd(kue, value))
+         return true;
+
+      DiagnosticException.LogWarning(ref pc,
+                                     ParsingError.Instance.DuplicateObjectDefinition,
+                                     kue,
+                                     typeof(T).Name,
+                                     "UniqueId");
+      return pc.Fail();
    }
 }

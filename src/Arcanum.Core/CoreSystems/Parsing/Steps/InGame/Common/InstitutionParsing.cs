@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -13,9 +12,7 @@ public class InstitutionParsing(IEnumerable<IDependencyNode<string>> dependencie
 {
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Institution target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
+                                                   ref ParsingContext pc,
                                                    bool allowUnknownNodes)
       => throw new NotSupportedException("InstitutionParsing should only be used in discovery phase.");
 }
@@ -25,19 +22,13 @@ public partial class InstitutionPropertyParsing(IEnumerable<IDependencyNode<stri
    : DiscoverThenParseLoadingService<Institution>(false, dependencies)
 {
    protected override void LoadSingleFileProperties(RootNode rn,
-                                                    LocationContext ctx,
+                                                    ref ParsingContext pc,
                                                     Eu5FileObj fileObj,
-                                                    string actionStack,
-                                                    string source,
-                                                    ref bool validation,
                                                     object? lockObject)
    {
       SimpleObjectParser.Parse(fileObj,
                                rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
+                               ref pc,
                                ParseProperties,
                                GetGlobals(),
                                lockObject);
@@ -45,9 +36,6 @@ public partial class InstitutionPropertyParsing(IEnumerable<IDependencyNode<stri
 
    protected override void ParsePropertiesToObject(BlockNode block,
                                                    Institution target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      => ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+                                                   ref ParsingContext pc,
+                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }

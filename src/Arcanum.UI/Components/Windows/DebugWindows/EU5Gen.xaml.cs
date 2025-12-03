@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
+using Arcanum.UI.NUI.Generator;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 

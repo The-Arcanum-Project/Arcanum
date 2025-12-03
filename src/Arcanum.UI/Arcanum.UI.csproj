@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>false</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>Library</OutputType>
         <UseWPF>true</UseWPF>
-        <LangVersion>latestmajor</LangVersion>
+        <LangVersion>14</LangVersion>
         <AssemblyName>Arcanum_UI</AssemblyName>
     </PropertyGroup>
 
@@ -302,6 +302,16 @@
             <SubType>Designer</SubType>
         </Page>
         <Page Update="Components\Windows\MinorWindows\CollectionEditor\MultiCollectionEditor.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Update="NUI\DefaultHeader.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Update="NUI\EmbeddedView.xaml">
             <Generator>MSBuild:Compile</Generator>
             <XamlRuntime>Wpf</XamlRuntime>
             <SubType>Designer</SubType>

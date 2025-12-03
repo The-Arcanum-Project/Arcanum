@@ -3,17 +3,15 @@
 sealed class SerialDisposable
    : IDisposable
 {
-   private IDisposable? _content;
-
    public IDisposable? Content
    {
-      get => _content;
+      get;
       set
       {
-         if (_content != null!)
-            _content.Dispose();
+         if (field != null!)
+            field.Dispose();
 
-         _content = value;
+         field = value;
       }
    }
 

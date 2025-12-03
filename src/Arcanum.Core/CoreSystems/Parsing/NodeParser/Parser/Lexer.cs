@@ -7,7 +7,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 /// is highly optimized for performance, minimizing allocations, method calls in hot loops,
 /// and branching.
 /// </summary>
-public class Lexer
+public sealed class Lexer
 {
    private readonly string _source;
    private readonly List<Token> _tokens;

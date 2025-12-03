@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
@@ -17,22 +16,17 @@ public static class SimpleObjectParser
 {
    public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      List<StatementNode> statements,
-                                     LocationContext ctx,
-                                     string actionStack,
-                                     string source,
-                                     ref bool validation,
+                                     ref ParsingContext pc,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
                                      object? lockObject,
                                      bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
+      using var scope = pc.PushScope();
       foreach (var sn in statements)
       {
          if (!ValidateAndCreateInstance(fileObj,
-                                        ctx,
-                                        actionStack,
-                                        source,
-                                        ref validation,
+                                        ref pc,
                                         sn,
                                         out var bn,
                                         out TTarget? instance,
@@ -43,7 +37,7 @@ public static class SimpleObjectParser
          // We check if we have an inject/replace and if so custom handling applies
          if (irType != InjRepType.None)
          {
-            propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
+            propsParser(bn, instance, ref pc, allowUnknownBlocks);
             // we already have a valid object created, so depending on the irType we now take action
             switch (irType)
             {
@@ -66,12 +60,11 @@ public static class SimpleObjectParser
                         break;
                      }
 
-                     ctx.SetPosition(bn.KeyNode);
-                     De.Warning(ctx,
+                     pc.SetContext(bn);
+                     De.Warning(ref pc,
                                 ParsingError.Instance.InjectReplaceTargetNotFound,
-                                actionStack,
                                 instance.UniqueId);
-                     validation = false;
+                     pc.Fail();
                      continue;
                   }
 
@@ -88,12 +81,11 @@ public static class SimpleObjectParser
                      if (irType == InjRepType.TRY_REPLACE)
                         break;
 
-                     ctx.SetPosition(bn.KeyNode);
-                     De.Warning(ctx,
+                     pc.SetContext(bn);
+                     De.Warning(ref pc,
                                 ParsingError.Instance.InjectReplaceTargetNotFound,
-                                actionStack,
                                 instance.UniqueId);
-                     validation = false;
+                     pc.Fail();
                      continue;
                   }
 
@@ -118,40 +110,35 @@ public static class SimpleObjectParser
             {
                if (!globals.TryAdd(instance.UniqueId, instance))
                {
-                  ctx.SetPosition(bn.KeyNode);
-                  DiagnosticException.LogWarning(ctx,
+                  pc.SetContext(bn);
+                  DiagnosticException.LogWarning(ref pc,
                                                  ParsingError.Instance.DuplicateObjectDefinition,
-                                                 actionStack,
                                                  instance.UniqueId,
                                                  typeof(TTarget),
                                                  "UniqueId");
-                  validation = false;
+                  pc.Fail();
                   continue;
                }
             }
          else if (!globals.TryAdd(instance.UniqueId, instance))
          {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx,
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.DuplicateObjectDefinition,
-                                           actionStack,
                                            instance.UniqueId,
                                            typeof(TTarget),
                                            "UniqueId");
-            validation = false;
+            pc.Fail();
             continue;
          }
 
-         propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
+         propsParser(bn, instance, ref pc, allowUnknownBlocks);
       }
    }
 
    public static void Parse<TTarget>(Eu5FileObj fileObj,
                                      RootNode rn,
-                                     LocationContext ctx,
-                                     string actionStack,
-                                     string source,
-                                     ref bool validation,
+                                     ref ParsingContext pc,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      Dictionary<string, TTarget> globals,
                                      object? lockObject,
@@ -159,10 +146,7 @@ public static class SimpleObjectParser
    {
       Parse(fileObj,
             rn.Statements,
-            ctx,
-            actionStack,
-            source,
-            ref validation,
+            ref pc,
             propsParser,
             globals,
             lockObject,
@@ -171,19 +155,14 @@ public static class SimpleObjectParser
 
    public static bool Parse<TTarget>(Eu5FileObj fileObj,
                                      StatementNode sn,
-                                     LocationContext ctx,
-                                     string actionStack,
-                                     string source,
-                                     ref bool validation,
+                                     ref ParsingContext pc,
                                      Pdh.PropertyParser<TTarget> propsParser,
                                      out TTarget? instance,
                                      bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
+      using var scope = pc.PushScope();
       if (!ValidateAndCreateInstance(fileObj,
-                                     ctx,
-                                     actionStack,
-                                     source,
-                                     ref validation,
+                                     ref pc,
                                      sn,
                                      out var bn,
                                      out instance,
@@ -191,29 +170,27 @@ public static class SimpleObjectParser
           instance == null)
          return false;
 
-      propsParser(bn, instance, ctx, source, ref validation, allowUnknownBlocks);
+      propsParser(bn, instance, ref pc, allowUnknownBlocks);
       return true;
    }
 
-   internal static bool ValidateAndCreateInstance<TTarget>(Eu5FileObj fileObj,
-                                                           LocationContext ctx,
-                                                           string actionStack,
-                                                           string source,
-                                                           ref bool validation,
-                                                           StatementNode sn,
-                                                           [MaybeNullWhen(false)] out BlockNode bn,
-                                                           out TTarget? eu5Obj,
-                                                           out InjRepType irType)
+   private static bool ValidateAndCreateInstance<TTarget>(Eu5FileObj fileObj,
+                                                          ref ParsingContext pc,
+                                                          StatementNode sn,
+                                                          [MaybeNullWhen(false)] out BlockNode bn,
+                                                          out TTarget? eu5Obj,
+                                                          out InjRepType irType)
       where TTarget : IEu5Object<TTarget>, new()
    {
-      if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out bn))
+      using var scope = pc.PushScope();
+      if (!sn.IsBlockNode(ref pc, out bn))
       {
          eu5Obj = default;
          irType = InjRepType.None;
          return false;
       }
 
-      UppercaseWordChecker.IsMatch(bn.KeyNode.GetLexeme(source), out irType, out var trueKey);
+      UppercaseWordChecker.IsMatch(pc.SliceString(bn), out irType, out var trueKey);
       eu5Obj = Eu5Activator.CreateInstance<TTarget>(trueKey, fileObj, bn);
       return true;
    }
@@ -223,20 +200,18 @@ public static class SimpleObjectParser
    /// This method only creates instances of the objects without parsing their properties.
    /// </summary>
    public static void DiscoverObjectDeclarations<TTarget>(List<StatementNode> statements,
-                                                          LocationContext ctx,
                                                           Eu5FileObj fileObj,
-                                                          string actionStack,
-                                                          string source,
-                                                          ref bool validation,
+                                                          ref ParsingContext pc,
                                                           Dictionary<string, TTarget> globals,
                                                           object? lockObject) where TTarget : IEu5Object<TTarget>, new()
    {
+      using var scope = pc.PushScope();
       foreach (var sn in statements)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var instance = Eu5Activator.CreateInstance<TTarget>(bn.KeyNode.GetLexeme(source), fileObj, bn);
+         var instance = Eu5Activator.CreateInstance<TTarget>(pc.SliceString(bn), fileObj, bn);
          Debug.Assert(instance.Source != null, "instance.Source != null");
 
          if (lockObject != null)
@@ -244,22 +219,20 @@ public static class SimpleObjectParser
             lock (lockObject)
                if (!globals.TryAdd(instance.UniqueId, instance))
                {
-                  ctx.SetPosition(bn.KeyNode);
-                  DiagnosticException.LogWarning(ctx,
+                  pc.SetContext(bn);
+                  DiagnosticException.LogWarning(ref pc,
                                                  ParsingError.Instance.DuplicateObjectDefinition,
-                                                 actionStack,
-                                                 bn.KeyNode.GetLexeme(source),
+                                                 pc.SliceString(bn),
                                                  typeof(TTarget),
                                                  "UniqueId");
                }
          }
          else if (!globals.TryAdd(instance.UniqueId, instance))
          {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx,
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.DuplicateObjectDefinition,
-                                           actionStack,
-                                           bn.KeyNode.GetLexeme(source),
+                                           pc.SliceString(bn),
                                            typeof(TTarget),
                                            "UniqueId");
          }
@@ -273,19 +246,13 @@ public static class SimpleObjectParser
    /// This method does NOT create new instances of objects.
    /// </summary>
    public static void ParseDiscoveredObjectProperties<TTarget>(RootNode rn,
-                                                               LocationContext ctx,
-                                                               string actionStack,
-                                                               string source,
-                                                               ref bool validation,
+                                                               ref ParsingContext pc,
                                                                Pdh.PropertyParser<TTarget> propsParser,
                                                                Dictionary<string, TTarget> globals)
       where TTarget : INexus
    {
       ParseDiscoveredObjectProperties(rn.Statements,
-                                      ctx,
-                                      actionStack,
-                                      source,
-                                      ref validation,
+                                      ref pc,
                                       propsParser,
                                       globals);
    }
@@ -297,32 +264,29 @@ public static class SimpleObjectParser
    /// This method does NOT create new instances of objects.
    /// </summary>
    public static void ParseDiscoveredObjectProperties<TTarget>(List<StatementNode> statements,
-                                                               LocationContext ctx,
-                                                               string actionStack,
-                                                               string source,
-                                                               ref bool validation,
+                                                               ref ParsingContext pc,
                                                                Pdh.PropertyParser<TTarget> propsParser,
                                                                Dictionary<string, TTarget> globals)
       where TTarget : INexus
    {
+      using var scope = pc.PushScope();
       foreach (var sn in statements)
       {
-         if (!sn.IsBlockNode(ctx, source, actionStack, ref validation, out var bn))
+         if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
-         var key = bn.KeyNode.GetLexeme(source);
+         var key = pc.SliceString(bn);
          if (!globals.TryGetValue(key, out var discoveredObj))
          {
-            ctx.SetPosition(bn.KeyNode);
-            DiagnosticException.LogWarning(ctx.GetInstance(),
+            pc.SetContext(bn);
+            DiagnosticException.LogWarning(ref pc,
                                            ParsingError.Instance.InvalidObjectKey,
-                                           actionStack,
                                            key,
                                            typeof(TTarget));
             continue;
          }
 
-         propsParser(bn, discoveredObj, ctx, source, ref validation, false);
+         propsParser(bn, discoveredObj, ref pc, false);
       }
    }
 
@@ -331,29 +295,25 @@ public static class SimpleObjectParser
    /// this method will strip that node and return its children as a list of statements.
    /// </summary>
    public static bool StripGroupingNodes(RootNode rn,
-                                         LocationContext ctx,
-                                         string actionStack,
-                                         string source,
-                                         ref bool validation,
+                                         ref ParsingContext pc,
                                          string groupingNodeKey,
                                          out List<StatementNode> statements)
    {
+      using var scope = pc.PushScope();
       statements = rn.Statements;
       if (rn.Statements.Count == 1 &&
-          rn.Statements[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn) &&
-          groupingNodeKey == bn.KeyNode.GetLexeme(source))
+          rn.Statements[0].IsBlockNode(ref pc, out var bn) &&
+          groupingNodeKey == pc.SliceString(bn))
       {
          statements = bn.Children;
          return true;
       }
 
-      ctx.SetPosition(rn.Statements[0].KeyNode);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(rn.Statements[0]);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidGroupingNode,
-                                     actionStack,
                                      groupingNodeKey);
-      validation = false;
-      return false;
+      return pc.Fail();
    }
 
    /// <summary>
@@ -361,28 +321,24 @@ public static class SimpleObjectParser
    /// this method will strip that node and return its children as a list of statements.
    /// </summary>
    public static bool StripGroupingNodes(BlockNode rn,
-                                         LocationContext ctx,
-                                         string actionStack,
-                                         string source,
-                                         ref bool validation,
+                                         ref ParsingContext pc,
                                          string groupingNodeKey,
                                          out List<StatementNode> statements)
    {
+      using var scope = pc.PushScope();
       statements = rn.Children;
       if (rn.Children.Count == 1 &&
-          rn.Children[0].IsBlockNode(ctx, source, actionStack, ref validation, out var bn) &&
-          groupingNodeKey == bn.KeyNode.GetLexeme(source))
+          rn.Children[0].IsBlockNode(ref pc, out var bn) &&
+          groupingNodeKey == pc.SliceString(bn))
       {
          statements = bn.Children;
          return true;
       }
 
-      ctx.SetPosition(rn.Children[0].KeyNode);
-      DiagnosticException.LogWarning(ctx.GetInstance(),
+      pc.SetContext(rn.Children[0]);
+      DiagnosticException.LogWarning(ref pc,
                                      ParsingError.Instance.InvalidGroupingNode,
-                                     actionStack,
                                      groupingNodeKey);
-      validation = false;
-      return false;
+      return pc.Fail();
    }
 }

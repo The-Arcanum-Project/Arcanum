@@ -53,19 +53,18 @@ public static class FileStateManager
          return;
       }
 
-      var validation = false;
       fo.Descriptor.LoadingService[0]
-        .ReloadSingleFile(fo, null, actionStack: "FileStateManager.ReloadFile", ref validation);
+        .ReloadSingleFile(fo, null);
    }
 
    private static Eu5FileObj GetEu5FileObjFromPath(string fullPath)
    {
       foreach (var fo in DescriptorDefinitions.FileDescriptors.SelectMany(descriptor
                                                                              => descriptor.Files.Where(fo => string
-                                                                               .Equals(fo.Path.FullPath,
-                                                                                 fullPath,
-                                                                                 StringComparison
-                                                                                   .OrdinalIgnoreCase))))
+                                                                                                         .Equals(fo.Path.FullPath,
+                                                                                                             fullPath,
+                                                                                                             StringComparison
+                                                                                                               .OrdinalIgnoreCase))))
          return fo;
 
       return Eu5FileObj.Empty;
@@ -101,8 +100,7 @@ public static class FileStateManager
 
          var watcher = new FileSystemWatcher(directoryToWatch)
          {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-            IncludeSubdirectories = false,
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName, IncludeSubdirectories = false,
          };
 
          watcher.Changed += OnAnyEvent;

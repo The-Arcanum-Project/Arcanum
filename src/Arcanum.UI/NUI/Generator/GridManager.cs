@@ -4,9 +4,8 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
-using Arcanum.UI.NUI.Nui2.Nui2Gen.NavHistory;
 
-namespace Arcanum.UI.NUI.Nui2.Nui2Gen;
+namespace Arcanum.UI.NUI.Generator;
 
 public static class GridManager
 {
@@ -110,9 +109,7 @@ public static class GridManager
          header.TextDecorations = TextDecorations.Underline;
          header.Cursor = Cursors.Hand;
 
-         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
-         if (locations?.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, true, false);
+         SelectionManager.Preview([currentPrimary]);
       };
 
       MouseEventHandler onMouseLeave = (sender, _) =>
@@ -121,9 +118,9 @@ public static class GridManager
             return;
 
          header.TextDecorations = null;
-         var locations = SelectionManager.GetRelevantLocationsForObjects(new[] { currentPrimary });
-         if (locations?.Count > 0)
-            Selection.Modify(SelectionTarget.Highlight, SelectionMethod.Undefined, locations, false, false);
+         header.Cursor = Cursors.Arrow;
+         
+         SelectionManager.UnPreview([currentPrimary]);
       };
 
       header.MouseEnter += onMouseEnter;

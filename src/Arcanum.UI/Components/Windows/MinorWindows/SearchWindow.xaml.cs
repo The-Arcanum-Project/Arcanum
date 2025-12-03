@@ -29,8 +29,6 @@ public partial class SearchWindow : INotifyPropertyChanged
                                   typeof(SearchWindow),
                                   new(true));
 
-   private int _searchResultCount;
-
    public bool ShowCount
    {
       get => (bool)GetValue(ShowCountProperty);
@@ -39,13 +37,13 @@ public partial class SearchWindow : INotifyPropertyChanged
 
    public int SearchResultCount
    {
-      get => _searchResultCount;
+      get;
       private set
       {
-         if (value == _searchResultCount)
+         if (value == field)
             return;
 
-         _searchResultCount = value;
+         field = value;
          OnPropertyChanged();
       }
    }

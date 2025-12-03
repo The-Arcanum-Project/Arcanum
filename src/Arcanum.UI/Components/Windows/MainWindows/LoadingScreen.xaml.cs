@@ -32,33 +32,31 @@ public partial class LoadingScreen : INotifyPropertyChanged
    private DispatcherTimer? _tipTimer;
    private readonly Random _random = new();
 
-   private string _loadingTip = "Just do it right the first time!";
    public string LoadingTip
    {
-      get => _loadingTip;
+      get;
       set
       {
-         if (_loadingTip != value)
+         if (field != value)
          {
-            _loadingTip = value;
+            field = value;
             OnPropertyChanged();
          }
       }
-   }
+   } = "Just do it right the first time!";
 
-   private string _loadingText = "Starting...";
    public string LoadingText
    {
-      get => _loadingText;
+      get;
       set
       {
-         if (_loadingText == value)
+         if (field == value)
             return;
 
-         _loadingText = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = "Starting...";
 
    private string _stepName = "Step: Initializing...";
    private double _totalProgressPercentage;

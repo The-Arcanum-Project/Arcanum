@@ -4,7 +4,6 @@ using System.Windows.Data;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.NUI.Generator;
-using Arcanum.UI.NUI.Nui2.Nui2Gen;
 
 namespace Arcanum.UI.NUI.Nui2;
 

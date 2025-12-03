@@ -3,6 +3,7 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -43,8 +44,8 @@ public partial class SuperRegion
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
-                                                                             .GetFirstParentOfType(LocationCollectionType
-                                                                                .SuperRegion)!)
+                                                                                    .GetFirstParentOfType(LocationCollectionType
+                                                                                                               .SuperRegion)!)
                                                                           .Distinct()
                                                                           .ToList();
 
@@ -57,8 +58,7 @@ public partial class SuperRegion
       return locations.Distinct().ToList();
    }
 
-   public MapModeManager.MapModeType GetMapMode
-      => MapModeManager.MapModeType.Locations; // TODO: @Minnator Create MapMode
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.SuperRegions;
    public string GetNamespace => "Map.Superregion";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
@@ -78,6 +78,25 @@ public partial class SuperRegion
    public List<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
+
+    [ParseAs("null", ignore: true)]
+    [Description("The Continent this SuperRegion belongs to.")]
+    [DefaultValue(null)]
+    [SuppressAgs]
+   public Continent Continent
+   {
+      get => field;
+
+      set
+      {
+         if (field != Continent.Empty)
+            field.SuperRegions._removeFromChild(this);
+         if (value != Continent.Empty)
+            value.SuperRegions._addFromChild(this);
+         
+         field = value;
+      }
+   } = Continent.Empty;
 
    [SaveAs(isEmbeddedObject: true)]
    public ObservableRangeCollection<Region> LocationChildren { get; set; } = [];

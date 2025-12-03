@@ -15,6 +15,9 @@ public static class NexusHelpers
    private const string NEXUS_CONFIG_ATTRIBUTE_NAME = "Nexus.Core.Attributes.NexusConfigAttribute";
 
    private const string DESCRIPTION_ATTRIBUTE_NAME = "System.ComponentModel.DescriptionAttribute";
+   private const string AGGREGATE_LINK_CLASS_NAME = "Arcanum.Core.Utils.DataStructures.AggregateLink`1";
+
+   public static INamedTypeSymbol? AggregateLinkSymbol;
 
    /// <summary>
    /// This transform finds any class that implements INexus.
@@ -32,6 +35,8 @@ public static class NexusHelpers
              classSymbol.AllInterfaces.Contains(nexusInterface, SymbolEqualityComparer.Default))
             return classSymbol;
       }
+
+      AggregateLinkSymbol ??= context.SemanticModel.Compilation.GetTypeByMetadataName(AGGREGATE_LINK_CLASS_NAME);
 
       return null;
    }
@@ -795,7 +800,10 @@ public static class NexusHelpers
          var defaultValue = defaultValues[i];
          builder.AppendLine($"            case Field.{member.Name}:");
          if (defaultValue != "CAN_NOT_DETERMINE_DEFAULT_VALUE")
-            builder.AppendLine($"                return {defaultValue};");
+            if (defaultValue.Contains("return"))
+               builder.AppendLine($"                {defaultValue}");
+            else
+               builder.AppendLine($"                return {defaultValue};");
          else
             builder.AppendLine("                return ; // Default value could not be determined");
       }

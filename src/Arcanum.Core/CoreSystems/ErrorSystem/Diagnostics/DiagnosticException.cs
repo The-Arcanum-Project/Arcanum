@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Common.UI;
 using Common.UI.MBox;
@@ -157,6 +158,10 @@ public sealed class DiagnosticException : Exception
          _ => MessageBoxImage.Question,
       };
    }
+
+   public static void LogWarning(ref ParsingContext pc,
+                                 DiagnosticDescriptor descriptor,
+                                 params object[] args) => LogWarning(pc.Context.GetInstance(), descriptor, pc.BuildStackTrace(), args);
 
    public static void LogWarning(LocationContext ctx,
                                  DiagnosticDescriptor descriptor,

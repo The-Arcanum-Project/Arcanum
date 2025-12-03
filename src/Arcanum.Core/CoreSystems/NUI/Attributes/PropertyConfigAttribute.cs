@@ -12,7 +12,8 @@ public class PropertyConfigAttribute(bool isReadonly = false,
                                      bool disableMapInferButtons = false,
                                      bool isRequired = false,
                                      double minValue = double.MinValue,
-                                     double maxValue = double.MaxValue) : Attribute
+                                     double maxValue = double.MaxValue,
+                                     string defaultValueMethod = "") : Attribute
 {
    /// <summary>
    /// Whether the property is read-only in the NUI.
@@ -49,4 +50,9 @@ public class PropertyConfigAttribute(bool isReadonly = false,
    /// The maximum value allowed for this property in the NUI.
    /// </summary>
    public double MaxValue { get; set; } = maxValue;
+
+   /// <summary>
+   /// The name of a static method that provides the default value for this property.
+   /// </summary>
+   public string DefaultValueMethod { get; set; } = defaultValueMethod;
 }
