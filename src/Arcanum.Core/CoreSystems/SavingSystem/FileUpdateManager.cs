@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
@@ -115,8 +114,6 @@ public static class FileUpdateManager
             iterator.FileLocation.CharPos += deltaChars;
             iterator.FileLocation.Line += deltaLines;
          }
-
-         File.WriteAllText(@"C:\Users\david\Dokumente\Arcanum\Config\SavingDebug.txt", sb.ToString());
       }
 
       sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
