@@ -24,9 +24,17 @@ public partial class LoadingScreen : INotifyPropertyChanged
 
    private readonly string[] _loadingTips =
    [
-      "Press `F10` to view the error log", "Press `F1` to open the settings",
-      "Press `Ctrl + F` to open the application wide search: \"Queastor\"",
+      "Press `F10` to view the error log", "Press `F1` to open the settings", "Press `Ctrl + F` to open the application wide search: \"Queastor\"",
       "Are you missing a feature? Open an issue on GitHub or join the Discord server to see if a member of the community created a plugin for it!",
+      "You can customize which properties of each element are shown in the settings.",
+      "Backing up your mod files before making changes is always a good idea!",
+      "Are teh popups of errors annoying? You can disable them in the settings individually or all at once.",
+      "Press `C` to toggle the brush tool to paint a selection on the map.",
+      "You can edit as many objects as you want at once! Just select them all and edit their properties in the sidebar.",
+      "With `RMB` on a map mode button you can change the mapmode assigned to it.",
+      "Working on several mods at once? You can access recently opened mods from the main menu!",
+      "You don't want to edit location data but climates/religions/cultures instead? Just switch the map mode and use `infer selection` mode!",
+      "You have errors in your mod? Use the Error Log (`F10`) to view and the \"navigat to file\" button on the bottom right to open the file at the errors location!",
    ];
 
    private DispatcherTimer? _tipTimer;
