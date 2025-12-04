@@ -159,6 +159,11 @@ public static class ColorGenerator
 
    #endregion
 
+   public static Color GenerateColor(int index)
+   {
+      return Generate(false, index);
+   }
+
    public static Color GetRedGreenGradient(float value)
    {
       value = Math.Clamp(value, 0, 1);

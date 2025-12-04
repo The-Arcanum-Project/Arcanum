@@ -107,6 +107,9 @@ public static class SetupParsingManager
          processedTypes.UnionWith(etTypes);
       }
 
+      if (files.Count == 0 || processedTypes.Count == 0)
+         return [];
+
       Debug.Assert(files.Count > 0, "There should be at least one file to process.");
       Debug.Assert(processedTypes.Count > 0, "There should be at least one type processed.");
 

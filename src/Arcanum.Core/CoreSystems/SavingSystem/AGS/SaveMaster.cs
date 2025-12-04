@@ -131,7 +131,7 @@ public static class SaveMaster
    }
 
    // TODO: @Melco Handle removal of all changes for an objects saved with injection as it is not saved on a on command basis.
-   private static void RemoveObjectFromChanges(IEu5Object target)
+   public static void RemoveObjectFromChanges(IEu5Object target)
    {
       if (!NeedsToBeSaved.TryGetValue(target, out var list))
          return;
@@ -238,9 +238,8 @@ public static class SaveMaster
          if (typesToSave.Contains(obj.GetType()))
             objsToSave.Add(obj);
 
-      SaveSetupFolder(objsToSave);
-
-      if (objsToSave.Count == 0)
+      // We saved setup stuff and have nothing else to save
+      if (SaveSetupFolder(objsToSave) && objsToSave.Count == 0)
          return;
 
       // We save the objects without any replace and inject logic by simply inserting them into the file they originate from
@@ -282,7 +281,7 @@ public static class SaveMaster
          throw new ArgumentException("All modified objects must belong to the same file.");
 
       var topLevelModObjs = FilterOutNestedObjects(modifiedObjects);
-      var sb = UpdateEu5ObjectsInFile(topLevelModObjs);
+      var sb = FileUpdateManager.UpdateEu5ObjectsInFile(topLevelModObjs);
 
       if (sb == null)
          return;
@@ -296,10 +295,14 @@ public static class SaveMaster
    private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects)
    {
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
+
+      // We do have nothing to handle here.
+      if (types.Length == 0)
+         return false;
+
       // we have 2 modes to save:
       // - Vanilla Split: pops / ranks / institutions are in separate files
       // - Combined: all pops / ranks / institutions are in a single file (I prefer this one)
-
       if (Config.Settings.SavingConfig.CompactSetupFolder)
          SaveSetupCompacted(types);
       else
@@ -479,10 +482,10 @@ public static class SaveMaster
       IndentedStringBuilder? sb;
 
       if (onlyModifiedObjects)
-         sb = UpdateEu5ObjectsInFile(fileObj.ObjectsInFile
-                                            .Where(obj => GetState(obj) != ObjState.Unchanged)
-                                            .OrderBy(obj => obj.FileLocation.CharPos)
-                                            .ToList());
+         sb = FileUpdateManager.UpdateEu5ObjectsInFile(fileObj.ObjectsInFile
+                                                              .Where(obj => GetState(obj) != ObjState.Unchanged)
+                                                              .OrderBy(obj => obj.FileLocation.CharPos)
+                                                              .ToList());
       else
          sb = SavingUtil.FormatFilesMultithreadedIf(fileObj.ObjectsInFile.ToList());
 
@@ -491,169 +494,6 @@ public static class SaveMaster
 
       WriteFile(sb.InnerBuilder, fileObj, true);
       return true;
-   }
-
-   /// <summary>
-   /// Takes a file and a list of modifiedObjects
-   /// and returns a formatted version of the file with the modified objects replaced. <br/>
-   /// Also updates the FileLocation of the modified objects to reflect their new position in the file.
-   /// </summary>
-   private static IndentedStringBuilder? UpdateEu5ObjectsInFile(List<IEu5Object> objs)
-   {
-      if (objs.Count == 0)
-         return null;
-
-      Debug.Assert(objs.All(o => o.Source == objs[0].Source), "All objects must belong to the same source file.");
-
-      List<IEu5Object> toUpdateObjs = [];
-      List<IEu5Object> newObjs = [];
-
-      foreach (var obj in objs)
-         if (obj.FileLocation == Eu5ObjectLocation.Empty)
-            newObjs.Add(obj);
-         else
-            toUpdateObjs.Add(obj);
-
-      // Initialize StringBuilder with estimated size to avoid multiple resizes and a bit more,
-      // in case we have to adjust indentation
-
-      var original = toUpdateObjs.Count > 0
-                        ? IO.IO.ReadAllTextUtf8(toUpdateObjs[0].Source.Path.FullPath)
-                        : newObjs.Count > 0
-                           ? IO.IO.ReadAllTextUtf8(newObjs[0].Source.Path.FullPath)
-                           : string.Empty;
-
-      if (string.IsNullOrEmpty(original))
-         if (newObjs.Count > 0 && toUpdateObjs.Count > 0)
-            throw
-               new InvalidOperationException("File is empty but contains existing objects with valid FileLocations.");
-         else
-            return WriteObjectsToNewFile(newObjs, false);
-
-      // Make sure we start with a fresh cache in case settings have changed.
-      PropertyOrderCache.Clear();
-
-      var sb = new IndentedStringBuilder(original.Length + toUpdateObjs.Count * 20);
-      var currentPos = 0;
-      var spaces = Config.Settings.SavingConfig.SpacesPerIndent;
-      var isb = new IndentedStringBuilder();
-      var sortedToUpdate = toUpdateObjs.OrderBy(o => o.FileLocation.CharPos).ToList();
-      Debug.Assert(sortedToUpdate.All(o => o.FileLocation.CharPos + o.FileLocation.Length <= original.Length),
-                   "All modified objects must have a valid FileLocation within the bounds of the file.");
-
-      var sortedOldObjects = objs[0]
-                            .Source.ObjectsInFile.Except(sortedToUpdate)
-                            .Where(o => o.FileLocation != Eu5ObjectLocation.Empty)
-                            .OrderBy(o => o.FileLocation.CharPos)
-                            .ToArray();
-
-      var oldObjIndex = 0;
-      var deltaLines = 0;
-      var deltaCharPos = 0;
-      for (var i = 0; i < sortedToUpdate.Count; i++)
-      {
-         var obj = sortedToUpdate[i];
-         isb.Clear();
-         sb.InnerBuilder.Append(original, currentPos, obj.FileLocation.CharPos - currentPos);
-         currentPos = obj.FileLocation.CharPos + obj.FileLocation.Length;
-
-         var indentLevel = Math.DivRem(obj.FileLocation.Column, spaces, out var remainder);
-
-         // We have an object defined in one line, disgusting we can not really deal with it,
-         // so we just append a new line and dump our formatted obj there :P
-         if (remainder != 0)
-            isb.InnerBuilder.AppendLine();
-
-         isb.SetIndentLevel(indentLevel);
-         if (obj.InjRepType != InjRepType.None)
-            obj.ToAgsContext().BuildContext(isb, [.. obj.SaveableProps], obj.InjRepType, true);
-         else
-            obj.ToAgsContext().BuildContext(isb);
-         var lineOffset = CountNewLinesInStringBuilder(isb.InnerBuilder);
-         var charPosOffset = isb.InnerBuilder.Length;
-         var oldLineCount = CountLinesInOriginal(original, obj.FileLocation);
-         var oldCharCount = Math.Max(0, obj.FileLocation.Length);
-
-         obj.FileLocation.CharPos = sb.InnerBuilder.Length;
-         obj.FileLocation.Length = charPosOffset;
-         obj.FileLocation.Line = indentLevel == 0
-                                    ? CountNewLinesInStringBuilder(sb.InnerBuilder) + 1
-                                    : CountNewLinesInStringBuilder(sb.InnerBuilder);
-         obj.FileLocation.Column = indentLevel * spaces;
-
-         // Any object before this one has to get it's FileLocation updated as well
-         if (sortedOldObjects.Length > 0)
-            while (oldObjIndex < sortedOldObjects.Length &&
-                   sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
-            {
-               // We can skip the first one as everything before it is just copied over from before.
-               if (i == 0)
-               {
-                  while (oldObjIndex < sortedOldObjects.Length &&
-                         sortedOldObjects[oldObjIndex].FileLocation.CharPos < obj.FileLocation.CharPos)
-                     oldObjIndex++;
-                  break;
-               }
-
-               // We only need to update objects that are not being modified right now
-               // We update the line and char pos offsets based on the changes made so far
-               var oldObj = sortedOldObjects[oldObjIndex];
-               oldObj.FileLocation.CharPos += deltaCharPos;
-               oldObj.FileLocation.Line += deltaLines;
-               oldObjIndex++;
-            }
-
-         deltaLines += lineOffset - oldLineCount;
-         deltaCharPos += charPosOffset - oldCharCount;
-         isb.Merge(sb);
-      }
-
-      sb.InnerBuilder.Append(original, currentPos, original.Length - currentPos);
-
-      while (oldObjIndex < sortedOldObjects.Length)
-      {
-         var newCp = sortedOldObjects[oldObjIndex].FileLocation.CharPos + deltaCharPos;
-         var oldObj = sortedOldObjects[oldObjIndex];
-         oldObj.FileLocation.CharPos = newCp;
-         oldObj.FileLocation.Line += deltaLines;
-         oldObjIndex++;
-      }
-
-      sb.AppendLine();
-      foreach (var obj in newObjs)
-      {
-         isb.Clear();
-         obj.ToAgsContext().BuildContext(isb);
-         obj.FileLocation = new(0,
-                                CountNewLinesInStringBuilder(isb.InnerBuilder),
-                                isb.InnerBuilder.Length,
-                                sb.InnerBuilder.Length);
-         obj.Source.ObjectsInFile.Add(obj);
-         isb.Merge(sb);
-      }
-
-#if DEBUG
-      // Verify that all modified objects have valid FileLocations within the bounds of the new file and do not overlap
-      var newFileLength = sb.InnerBuilder.Length;
-      var lastEndPos = -1;
-      foreach (var obj in objs[0].Source.ObjectsInFile)
-      {
-         Debug.Assert(obj.FileLocation is { CharPos: >= 0, Length: >= 0 } &&
-                      obj.FileLocation.CharPos + obj.FileLocation.Length <= newFileLength,
-                      "All modified objects must have a valid FileLocation within the bounds of the new file.");
-
-         if (lastEndPos != -1)
-            if (obj.FileLocation.CharPos <= lastEndPos)
-               Debug.Fail("Modified objects must not overlap in the new file.");
-
-         lastEndPos = obj.FileLocation.CharPos + obj.FileLocation.Length - 1;
-      }
-#endif
-
-      foreach (var obj in objs)
-         RemoveObjectFromChanges(obj);
-
-      return sb;
    }
 
    private static int CountLinesInOriginal(string originalText, Eu5ObjectLocation location)
