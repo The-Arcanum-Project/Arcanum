@@ -44,7 +44,11 @@ public static class FileUpdateManager
       PropertyOrderCache.Clear();
 
       // Get all objects that are already in the file. This does not contain newObjects.
-      var objectsInFile = objectsToUpdate[0].Source.ObjectsInFile.OrderBy(x => x.FileLocation.CharPos).ToArray();
+      var objectsInFile = objectsToUpdate[0]
+                         .Source.ObjectsInFile
+                         .Where(x => !newObjects.Contains(x))
+                         .OrderBy(x => x.FileLocation.CharPos)
+                         .ToArray();
 
       if (!VerifyFileIntegrity(original.Length, objectsInFile))
       {

@@ -226,22 +226,35 @@ public static class Eu5UiGen
       // If we have an empty inlined objects, we only add a + button to create a new one.
       // When this button is pressed we then generate the full inlined view.
       var empty = EmptyRegistry.Empties[primary.GetNxPropType(nxProp)];
-      if (inlineProp == empty)
+      if (navH.Targets.Any(x => x._getValue(nxProp) == empty))
       {
          var createButton = NEF.GetCreateNewButton();
          createButton.HorizontalAlignment = HorizontalAlignment.Center;
 
          RoutedEventHandler createClick = (_, _) =>
          {
-            var newObj = (IEu5Object)Activator.CreateInstance(inlineObj.GetType())!;
-            newObj.Source = Eu5FileObj.Empty;
-            newObj.UniqueId = primary.UniqueId;
-            primary._setValue(nxProp, newObj);
+            foreach (var target in navH.Targets)
+            {
+               if (target._getValue(nxProp) != empty)
+                  continue;
 
-            NUINavigation.Instance.InvalidateUi(primary);
+               var inlineNewObj = (IEu5Object)Activator.CreateInstance(inlineObj.GetType())!;
+               inlineNewObj.Source = Eu5FileObj.Empty;
+               inlineNewObj.UniqueId = target.UniqueId;
+               target._setValue(nxProp, inlineNewObj);
+            }
+
+            NUINavigation.GenerateUi(navH);
          };
+
+         void OnCreateButtonOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+         {
+            createButton.Click -= createClick;
+            createButton.Unloaded -= OnCreateButtonOnUnloaded;
+         }
+
          createButton.Click += createClick;
-         createButton.Unloaded += (_, _) => createButton.Click -= createClick;
+         createButton.Unloaded += OnCreateButtonOnUnloaded;
 
          GridManager.AddToGrid(inlineGrid, createButton, 1, 0, columnSpan: 2);
       }
@@ -997,10 +1010,7 @@ public static class Eu5UiGen
       var multiBinding = new MultiBinding { Converter = new PropertyNameAndCountConverter() };
       multiBinding.Bindings.Add(new Binding { Source = nxProp });
 
-      multiBinding.Bindings.Add(new Binding(nameof(MultiSelectPropertyViewModel.CollectionCount))
-      {
-         Source = propertyViewModel,
-      });
+      multiBinding.Bindings.Add(new Binding(nameof(MultiSelectPropertyViewModel.CollectionCount)) { Source = propertyViewModel, });
       tb.SetBinding(TextBlock.TextProperty, multiBinding);
 
       panel.Children.Add(tb);
@@ -1221,15 +1231,9 @@ public static class Eu5UiGen
          DataContext = vm,
       };
 
-      var sourceBinding = new Binding(nameof(vm.IsNonDefaultValue))
-      {
-         Converter = new IsNonDefaultToImageSourceConverter(),
-      };
+      var sourceBinding = new Binding(nameof(vm.IsNonDefaultValue)) { Converter = new IsNonDefaultToImageSourceConverter(), };
 
-      var tooltipBinding = new Binding(nameof(vm.IsNonDefaultValue))
-      {
-         Converter = new IsNonDefaultToTooltipConverter(),
-      };
+      var tooltipBinding = new Binding(nameof(vm.IsNonDefaultValue)) { Converter = new IsNonDefaultToTooltipConverter(), };
 
       image.SetBinding(Image.SourceProperty, sourceBinding);
       image.SetBinding(FrameworkElement.ToolTipProperty, tooltipBinding);

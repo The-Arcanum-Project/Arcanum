@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Generator;
-using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI;
 
@@ -75,7 +74,7 @@ public class NUINavigation(int capacity)
       GenerateUi(_current.Value);
    }
 
-   private static void GenerateUi(NavH navH)
+   internal static void GenerateUi(NavH navH)
    {
       if (navH.Root.Content is IDisposable oldView)
          oldView.Dispose();

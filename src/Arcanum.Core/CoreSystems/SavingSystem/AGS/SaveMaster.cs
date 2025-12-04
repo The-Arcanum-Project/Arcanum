@@ -454,8 +454,8 @@ public static class SaveMaster
          if (csso.Target.Source == Eu5FileObj.Empty)
          {
             // Set the source to the file we are saving to
+            // We do NOT add it to the file's object list as this is done in the saving itself to not have it interfere with the rewrite logic
             csso.Target.Source = fo;
-            fo.ObjectsInFile.Add(csso.Target);
          }
       }
 
