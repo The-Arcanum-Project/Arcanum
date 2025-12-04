@@ -20,7 +20,10 @@ public partial class UIElementsBrowser
    {
       get;
       set => field = value;
-   } = new AllOptionsTestObject();
+   }
+#if DEBUG
+      = new AllOptionsTestObject();
+#endif
 
    public int IntValue { get; set; } = 42;
    public decimal DecimalValue { get; set; } = 3.14m;

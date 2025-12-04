@@ -23,9 +23,10 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
-using Arcanum.UI.Themes;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
+using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
+using Common;
 using Common.UI;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -34,8 +35,9 @@ namespace Arcanum.UI.Components.Windows.MainWindows;
 
 public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
-   public const int DEFAULT_WIDTH = 1920;
-   public const int DEFAULT_HEIGHT = 1080;
+   private const string HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM = "https://eu5.paradoxwikis.com/Arcanum";
+   private const int DEFAULT_WIDTH = 1920;
+   private const int DEFAULT_HEIGHT = 1080;
 
    private readonly ToolTipManager _toolTipManager = new();
 
@@ -558,17 +560,13 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    #endregion
 
-   private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
-      => e.CanExecute = NUINavigation.Instance.CanBack;
+   private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = NUINavigation.Instance.CanBack;
 
-   private void GoToPreviousINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
-      => NUINavigation.Instance.Back();
+   private void GoToPreviousINUICommand_Executed(object sender, ExecutedRoutedEventArgs e) => NUINavigation.Instance.Back();
 
-   private void CanGoToNextINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
-      => e.CanExecute = NUINavigation.Instance.CanForward;
+   private void CanGoToNextINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = NUINavigation.Instance.CanForward;
 
-   private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
-      => NUINavigation.Instance.Forward();
+   private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e) => NUINavigation.Instance.Forward();
 
    private void ViewINUIObjectsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
@@ -599,5 +597,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void FreezeSelection_Command(object sender, ExecutedRoutedEventArgs e)
    {
       SelectionManager.ToggleFreeze();
+   }
+
+   private void OpenArcanumWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      ProcessHelper.OpenLink(HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM);
    }
 }
