@@ -9,7 +9,6 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Queastor;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
-using Common.UI;
 
 namespace Arcanum.Core.FlowControlServices;
 
@@ -39,7 +38,6 @@ public class LifecycleManager
    public void RunStartUpSequence(IPluginHost host)
    {
 #if DEBUG
-
       // Step 0: Initialize debug elements
       LoadDebugElements();
       if (DebugConfig.Settings.EnableDebugLogging)
@@ -67,7 +65,6 @@ public class LifecycleManager
    }
 
 #if DEBUG
-
    private void LoadDebugElements()
    {
       DebugConfig.Settings =
@@ -85,29 +82,32 @@ public class LifecycleManager
 
    public void RunShutdownSequence()
    {
-      // Step 1: Unload plugins
-      PluginManager.UnloadAll();
+      if (!AppData.IsHeadless)
+      {
+         // Step 1: Unload plugins
+         PluginManager.UnloadAll();
 
-      // Step 2: Unload core services
-      PluginManager.Host.Unload();
+         // Step 2: Unload core services
+         PluginManager.Host.Unload();
 
-      // Step 3: Perform any additional cleanup if necessary
-      // This might include saving state, closing files, etc.
+         // Step 3: Perform any additional cleanup if necessary
+         // This might include saving state, closing files, etc.
 
-      // Shutdown the core application
-      ArcanumDataHandler.SaveAllGitData();
+         // Shutdown the core application
+         ArcanumDataHandler.SaveAllGitData();
 
-      MainMenuScreenDescriptor.SaveData();
+         MainMenuScreenDescriptor.SaveData();
 
-      // Save configs
-      var conifigPath = Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME);
-      JsonProcessor.Serialize(conifigPath, Config.Settings);
-      JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, Config.DIAGNOSTIC_CONFIG_NAME),
-                              Config.Settings.ErrorDescriptors.Save());
+         // Save configs
+         var conifigPath = Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME);
+         JsonProcessor.Serialize(conifigPath, Config.Settings);
+         JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, Config.DIAGNOSTIC_CONFIG_NAME),
+                                 Config.Settings.ErrorDescriptors.Save());
 
 #if DEBUG
       SaveDebugElements();
 #endif
+      }
 
       // Step 4: Notify that the application has shut down
       OnApplicationShutDownCompleted?.Invoke(this, EventArgs.Empty);
@@ -118,7 +118,7 @@ public class LifecycleManager
       try
       {
          var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath,
-                                                                               Config.CONFIG_FILE_NAME));
+                                                                                        Config.CONFIG_FILE_NAME));
          Config.Settings = parsedObj ?? new();
       }
       catch (Exception)

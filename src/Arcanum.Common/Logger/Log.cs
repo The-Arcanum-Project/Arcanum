@@ -26,6 +26,8 @@ public enum CommonLogSource
    AGP, // Generated Parsing system files
    AGS, // Automatic saving system
    FUM, // File Update Manager
+   PRT, // Programm Root
+   PMT, // ParsingMasTer
 }
 
 public static class ArcLog
@@ -136,5 +138,10 @@ public static class ArcLog
       }
 
       return result.PadRight(3).ToUpper();
+   }
+
+   public static void WritePure(string message)
+   {
+      LogQueue.Add(message);
    }
 }

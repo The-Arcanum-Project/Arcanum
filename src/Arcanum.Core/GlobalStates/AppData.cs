@@ -8,6 +8,7 @@ namespace Arcanum.Core.GlobalStates;
 
 public static class AppData
 {
+   public static bool IsHeadless { get; set; } = false;
    private static readonly Assembly Assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 
    public static string AppVersion { get; } = Assembly.GetName().Version?.ToString()[..^2] ?? "0.0.0";
