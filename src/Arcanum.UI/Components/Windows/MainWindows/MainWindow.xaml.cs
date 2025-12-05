@@ -26,6 +26,7 @@ using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
+using Arcanum.UI.Util.WindowManagement;
 using Common;
 using Common.UI;
 using Application = System.Windows.Application;
@@ -387,12 +388,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       SearchWindow.ShowSearchWindow();
    }
 
-   private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
-   {
-      var historyWindow = new HistoryTreeView();
-      historyWindow.Show();
-   }
-
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
       AppData.HistoryManager.Redo(true);
@@ -572,6 +567,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       var nuiObjectView = new NUIObjectView();
       nuiObjectView.Show();
+   }
+
+   private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      WindowManager.OpenWindow<HistoryTreeView>();
    }
 
    private void OpenDebugPanel_OnExecuted(object sender, ExecutedRoutedEventArgs e)

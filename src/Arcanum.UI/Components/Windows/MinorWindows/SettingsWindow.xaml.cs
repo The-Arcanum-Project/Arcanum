@@ -10,6 +10,7 @@ using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings;
 using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.Util.WindowManagement;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -36,7 +37,7 @@ public partial class SettingsWindow
       settingsWindow.SettingsTabControl.SelectionChanged += settingsWindow.TabControl_SelectionChanged;
       CreateTabsLazily(settingsWindow.SettingsTabControl, Config.Settings);
 
-      settingsWindow.Show();
+      WindowManager.OpenWindow(settingsWindow);
       if (!string.IsNullOrEmpty(LastSelectedProperty))
          settingsWindow.NavigateToSetting(LastSelectedProperty.Split('/'));
       return settingsWindow;
