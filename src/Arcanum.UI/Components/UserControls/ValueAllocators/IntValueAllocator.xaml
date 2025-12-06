@@ -1,0 +1,123 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.ValueAllocators.IntValueAllocator"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators" mc:Ignorable = "d"
+             d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
+
+    <UserControl.Resources>
+        <!-- Style for the Lock Button -->
+        <Style x:Key = "LockToggleStyle" TargetType = "ToggleButton">
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType = "ToggleButton">
+                        <Border Background = "Transparent" Padding = "2">
+                            <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property = "Foreground" Value = "#AAA" />
+            <Setter Property = "Content" Value = "🔓" /> <!-- Unlocked Icon -->
+            <Setter Property = "Cursor" Value = "Hand" />
+            <Style.Triggers>
+                <Trigger Property = "IsChecked" Value = "True">
+                    <Setter Property = "Content" Value = "🔒" /> <!-- Locked Icon -->
+                    <Setter Property = "Foreground" Value = "#D9534F" /> <!-- Red when locked -->
+                </Trigger>
+                <Trigger Property = "IsMouseOver" Value = "True">
+                    <Setter Property = "Foreground" Value = "#555" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush = "#DDD" BorderThickness = "1" CornerRadius = "4" Padding = "10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row = "0" Margin = "0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "Auto" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation = "Horizontal" VerticalAlignment = "Center">
+                    <TextBlock Text = "Total Limit:" FontWeight = "SemiBold" VerticalAlignment = "Center"
+                               Margin = "0,0,10,0" />
+
+                    <!-- EDITABLE TOTAL -->
+                    <TextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
+                             local:TextBoxUtilities.UpdateDelay = "600" Width = "60" Height = "24"
+                             VerticalContentAlignment = "Center" HorizontalContentAlignment = "Center"
+                             FontWeight = "Bold" />
+                </StackPanel>
+
+                <CheckBox Grid.Column = "1" IsChecked = "{Binding IsLogarithmic}" Content = "Log Scale"
+                          HorizontalAlignment = "Right" VerticalAlignment = "Center" />
+            </Grid>
+
+            <!-- Rows -->
+            <ItemsControl Grid.Row = "1" ItemsSource = "{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin = "0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "30" />  <!-- Lock Icon -->
+                                <ColumnDefinition Width = "45" />  <!-- Percentage -->
+                                <ColumnDefinition Width = "*" />   <!-- Slider -->
+                                <ColumnDefinition Width = "60" />  <!-- Int Box -->
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 1. Lock Button -->
+                            <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
+                                          IsChecked = "{Binding IsLocked}" ToolTip = "Lock this value" />
+
+                            <!-- 2. Percentage -->
+                            <TextBlock Grid.Column = "1" Text = "{Binding PercentageDisplay}"
+                                       VerticalAlignment = "Center" Foreground = "#888" FontSize = "11"
+                                       Margin = "5,0,0,0" />
+
+                            <!-- 3. Slider -->
+                            <!-- IsEnabled bound to IsNotLocked -->
+                            <Grid Grid.Column = "2" Margin = "10,0,10,0">
+                                <Slider Minimum = "0"
+                                        Maximum = "{Binding DataContext.TotalLimit, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Value = "{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
+                                        TickFrequency = "1" IsSnapToTickEnabled = "False" />
+
+                                <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
+                                           Margin = "2,-14,0,0" FontSize = "10" FontWeight = "Bold" Foreground = "#444" />
+                            </Grid>
+
+                            <!-- 4. Integer Input -->
+                            <!-- IsEnabled bound to IsNotLocked -->
+                            <TextBox Grid.Column = "3" Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
+                                     local:TextBoxUtilities.UpdateDelay = "600" VerticalContentAlignment = "Center"
+                                     HorizontalContentAlignment = "Center" Height = "24">
+                                <!-- Optional: Visual cue that it's locked but editable -->
+                                <TextBox.Style>
+                                    <Style TargetType = "TextBox">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding = "{Binding IsLocked}" Value = "True">
+                                                <!-- Make text Bold/Red to indicate it drives the total -->
+                                                <Setter Property = "FontWeight" Value = "Bold" />
+                                                <Setter Property = "Foreground" Value = "#D9534F" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Border>
+</UserControl>

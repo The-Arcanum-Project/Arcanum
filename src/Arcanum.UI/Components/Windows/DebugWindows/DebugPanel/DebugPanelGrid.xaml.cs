@@ -3,6 +3,8 @@ using System.Windows;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
@@ -116,5 +118,18 @@ public partial class DebugPanelGrid
    private void InsertLogSpacerButton_Click(object sender, RoutedEventArgs e)
    {
       ArcLog.WriteLine("DBP", LogLevel.INF, "----------------------------------------");
+   }
+
+   private void PopsEditorTestButton_Click(object sender, RoutedEventArgs e)
+   {
+      var bwindow = new BaseWindow { Title = "Pops Editor Test" };
+      var allocator = new IntValueAllocator();
+      var pops = Globals.Locations["stockholm"].Pops;
+      var allocatroVM = new AllocatorViewModel((int)pops.Sum(x => x.Size * 1000));
+      foreach (var pop in pops)
+         allocatroVM.AddItem($"{pop.PopType}_{pop.Culture}", (int)(pop.Size * 1000));
+      allocator.DataContext = allocatroVM;
+      bwindow.Content = allocator;
+      bwindow.Show();
    }
 }
