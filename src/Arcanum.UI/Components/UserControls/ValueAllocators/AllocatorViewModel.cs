@@ -241,28 +241,36 @@ public class AllocatorViewModel : ViewModelBase
    /// </summary>
    public void UpdateItem(AllocationItem source, int newValue)
    {
-      // 1. Calculate the Maximum this item is allowed to be.
-      // Max = Total - (Sum of ALL other Locked items)
-      // It cannot grow so large that it forces a locked item to shrink.
+      // 1. Clamp to Global Total limits
+      // Calculate max allowed based on Total - Locked items
       int lockedSumOther = Items.Where(x => x != source && x.IsLocked).Sum(x => x.Value);
-      int maxAllowed = TotalLimit - lockedSumOther;
+      int globalMaxAllowed = TotalLimit - lockedSumOther;
 
-      if (newValue > maxAllowed)
-         newValue = maxAllowed;
-      if (newValue < 0)
-         newValue = 0;
+      // 2. Clamp to Item Specific Limits
+      // The stricter limit wins.
+      int actualMax = Math.Min(globalMaxAllowed, source.MaxLimit);
+      int actualMin = source.MinLimit;
 
-      // 2. Set Value
+      // Ensure Min doesn't exceed Max (sanity check)
+      if (actualMin > actualMax)
+         actualMin = actualMax;
+
+      if (newValue > actualMax)
+         newValue = actualMax;
+      if (newValue < actualMin)
+         newValue = actualMin;
+
+      // 3. Set Value
       source.SetValueInternal(newValue);
 
-      // 3. Balance others
+      // 4. Balance others
       BalanceToTotal(source, ignoreLocks: false);
    }
 
    private void BalanceToTotal(AllocationItem sourceToIgnore, bool ignoreLocks)
    {
       int currentSum = Items.Sum(x => x.Value);
-      int error = TotalLimit - currentSum; // + means we need to add, - means subtract
+      int error = TotalLimit - currentSum;
 
       if (error == 0)
          return;
@@ -279,61 +287,101 @@ public class AllocatorViewModel : ViewModelBase
 
       if (candidates.Count == 0)
       {
-         // Deadlock: Source moved, but nothing else can move to compensate.
-         // Revert source.
+         // Revert source
          if (sourceToIgnore != null)
             sourceToIgnore.SetValueInternal(sourceToIgnore.Value + error);
          return;
       }
 
-      DistributeError(error, candidates);
+      // We need to know if DistributeError fully succeeded
+      int remainingError = DistributeError(error, candidates);
+
+      // If there is still error left, it means everyone else hit a wall.
+      // The Source item MUST take back the change.
+      if (remainingError != 0 && sourceToIgnore != null)
+      {
+         // e.g. User added +10, but others could only give -8. 
+         // We must give back +2 to the others (conceptually) -> actually just add +2 to source?
+         // No, if error was + (Need to add to others), it means Source shrunk.
+         // If we couldn't add to others, Source must grow back.
+         // Logic: Just apply the remaining error to Source.
+         sourceToIgnore.SetValueInternal(sourceToIgnore.Value + remainingError);
+      }
    }
 
-   private void DistributeError(int error, List<AllocationItem> targets)
+   private int DistributeError(int error, List<AllocationItem> targets)
    {
-      int sumTargets = targets.Sum(x => x.Value);
-      var changes = targets.ToDictionary(x => x, x => 0);
+      // Safety break
+      int maxLoops = targets.Count * 2 + 5;
+      int loop = 0;
 
-      // 1. Proportional Distribution
-      if (sumTargets > 0)
+      while (error != 0 && loop < maxLoops)
       {
-         foreach (var item in targets)
+         loop++;
+
+         // Filter candidates based on direction of error
+         // If error > 0 (We need to ADD to others): Only take items not at Max
+         // If error < 0 (We need to SUBTRACT from others): Only take items not at Min
+         var validCandidates = targets.Where(x =>
+                                                (error > 0 && x.Value < x.MaxLimit) ||
+                                                (error < 0 && x.Value > x.MinLimit))
+                                      .ToList();
+
+         if (validCandidates.Count == 0)
          {
-            double ratio = (double)item.Value / sumTargets;
-            int change = (int)Math.Round(error * ratio);
-            changes[item] = change;
-         }
-      }
-      else
-      {
-         // If all targets are 0, split evenly
-         int split = error / targets.Count;
-         foreach (var item in targets)
-            changes[item] = split;
-      }
-
-      // Apply provisional changes
-      foreach (var kvp in changes)
-         kvp.Key.SetValueInternal(kvp.Key.Value + kvp.Value);
-
-      // 2. Fix Off-By-One rounding errors
-      int finalError = TotalLimit - Items.Sum(x => x.Value);
-      while (finalError != 0)
-      {
-         // Give/Take from largest target to hide jitter
-         var target = targets.OrderByDescending(x => x.Value).FirstOrDefault();
-
-         // Fallback for negative error where largest is 0
-         if (target == null || (finalError < 0 && target.Value <= 0))
-            target = targets.FirstOrDefault();
-
-         if (target == null)
+            // Deadlock: We cannot distribute the remaining error.
+            // This implies the User's change to 'Source' was invalid because 
+            // the other items cannot absorb the difference.
+            // We should revert 'Source' by the remaining error amount.
+            // Note: Since we don't have 'source' here easily, we might leave the Total unbalanced 
+            // momentarily, or we can handle this by returning the 'remainder' to the caller.
             break;
+         }
 
-         int step = Math.Sign(finalError);
-         target.SetValueInternal(target.Value + step);
-         finalError -= step;
+         // Attempt to split evenly
+         int split = error / validCandidates.Count;
+         if (split == 0)
+            split = Math.Sign(error); // Force movement for small errors
+
+         int distributedThisLoop = 0;
+
+         foreach (var item in validCandidates)
+         {
+            if (error == 0)
+               break;
+
+            int proposed = item.Value + split;
+
+            // Clamp to limits
+            if (proposed > item.MaxLimit)
+               proposed = item.MaxLimit;
+            if (proposed < item.MinLimit)
+               proposed = item.MinLimit;
+
+            int diff = proposed - item.Value;
+
+            // Don't over-correct (if split > remaining error)
+            if (Math.Abs(diff) > Math.Abs(error))
+            {
+               diff = error;
+               proposed = item.Value + diff;
+            }
+
+            if (diff != 0)
+            {
+               item.SetValueInternal(proposed);
+               error -= diff;
+               distributedThisLoop += diff;
+            }
+         }
+
+         if (distributedThisLoop == 0)
+            break; // Infinite loop protection
       }
+
+      // If error != 0 here, the Total is technically invalid. 
+      // In a robust system, we would trigger a reverse-correction on the Source item.
+      return error;
    }
 
    public void UpdateLockedItem(AllocationItem source, int newValue)

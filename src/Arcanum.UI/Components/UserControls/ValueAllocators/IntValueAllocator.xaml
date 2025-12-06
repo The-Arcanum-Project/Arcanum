@@ -69,6 +69,7 @@
 
         <!-- Converter to calculate width based on distribution -->
         <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
+        <converters:LimitToWidthConverter x:Key = "LimitToWidthConverter" />
     </UserControl.Resources>
 
     <Border BorderBrush = "#DDD" BorderThickness = "1" CornerRadius = "4" Padding = "10">
@@ -161,7 +162,7 @@
                                 <ColumnDefinition Width = "30" />  <!-- Lock Icon -->
                                 <ColumnDefinition Width = "45" />  <!-- Percentage -->
                                 <ColumnDefinition Width = "*" />   <!-- Slider -->
-                                <ColumnDefinition Width = "110" />  <!-- Int Box -->
+                                <ColumnDefinition Width = "140" />  <!-- Int Box -->
                             </Grid.ColumnDefinitions>
 
                             <!-- 1. Lock Button -->
@@ -175,7 +176,8 @@
 
                             <!-- 3. Slider -->
                             <!-- IsEnabled bound to IsNotLocked -->
-                            <Grid Grid.Column = "2" Margin = "10,0,10,0">
+                            <Grid Grid.Column = "2" Margin = "10,0,10,0" x:Name = "SliderContainer">
+
                                 <Slider Minimum = "0"
                                         Maximum = "{Binding DataContext.TotalLimit, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         Value = "{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -183,6 +185,33 @@
                                         TickFrequency = "1" IsSnapToTickEnabled = "False"
                                         Foreground = "{Binding ColorBrush}"
                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+
+                                <Rectangle HorizontalAlignment = "Left" Fill = "Red" Height = "4"
+                                           VerticalAlignment = "Center" IsHitTestVisible = "False">
+                                    <Rectangle.Width>
+                                        <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
+                                            <Binding Path = "SliderMinPosition" />
+                                            <Binding Path = "DataContext.TotalLimit"
+                                                     RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                            <!-- This works now because we named the Grid -->
+                                            <Binding ElementName = "SliderContainer" Path = "ActualWidth" />
+                                        </MultiBinding>
+                                    </Rectangle.Width>
+                                </Rectangle>
+
+                                <Rectangle HorizontalAlignment = "Right" Fill = "Red" Height = "4"
+                                           VerticalAlignment = "Center" IsHitTestVisible = "False">
+                                    <Rectangle.Width>
+                                        <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
+                                            <!-- Bind to the REMAINING space -->
+                                            <Binding Path = "SliderMaxRemaining" />
+                                            <Binding Path = "DataContext.TotalLimit"
+                                                     RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                            <Binding ElementName = "SliderContainer" Path = "ActualWidth" />
+                                        </MultiBinding>
+                                    </Rectangle.Width>
+                                </Rectangle>
 
                                 <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
                                            Margin = "2,-14,0,0" FontSize = "10" FontWeight = "Bold" Foreground = "#444" />
@@ -216,6 +245,46 @@
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
                                                          Style = "{StaticResource FineTuneButtonStyle}"
                                                          local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "20" Height = "24"
+                                              Foreground = "#AAA" Margin = "0,0,2,0" />
+
+                                <Popup IsOpen = "{Binding IsChecked, ElementName=SettingsBtn}" StaysOpen = "False"
+                                       Placement = "Bottom">
+                                    <Border Background = "White" BorderBrush = "#CCC" BorderThickness = "1"
+                                            Padding = "10" CornerRadius = "4">
+                                        <StackPanel>
+                                            <TextBlock Text = "Constraints" FontWeight = "Bold" Margin = "0,0,0,5" />
+
+                                            <Grid Margin = "0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width = "40" />
+                                                    <ColumnDefinition Width = "60" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text = "Min:" VerticalAlignment = "Center" />
+
+                                                <!-- UPDATED: Explicit Trigger + Helper -->
+                                                <TextBox Grid.Column = "1"
+                                                         Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
+                                                         local:TextBoxUtilities.UpdateDelay = "300"
+                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                            </Grid>
+
+                                            <Grid Margin = "0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width = "40" />
+                                                    <ColumnDefinition Width = "60" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text = "Max:" VerticalAlignment = "Center" />
+
+                                                <!-- UPDATED: Explicit Trigger + Helper -->
+                                                <TextBox Grid.Column = "1"
+                                                         Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
+                                                         local:TextBoxUtilities.UpdateDelay = "300"
+                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
                             </StackPanel>
                         </Grid>
                     </DataTemplate>

@@ -12,6 +12,8 @@ public class AllocationItem : ViewModelBase
    private string _name;
    private bool _isLocked;
    private Color _mediaColor;
+   private int _minLimit;
+   private int _maxLimit;
    private SolidColorBrush _colorBrush;
 
    public ICommand IncrementCommand { get; }
@@ -62,6 +64,67 @@ public class AllocationItem : ViewModelBase
 
    public bool IsNotLocked => !_isLocked;
 
+   public double SliderMinPosition => ConvertToSliderScale(_minLimit);
+
+   public double SliderMaxRemaining
+   {
+      get
+      {
+         double t = _parent.TotalLimit;
+         double maxPos = ConvertToSliderScale(_maxLimit);
+         return (ConvertToSliderScale((int)t) - maxPos);
+      }
+   }
+
+   public int MinLimit
+   {
+      get => _minLimit;
+      set
+      {
+         // If user types a Min > Current Max, do we cap it? Or reject it?
+         // Clamping is usually safer for UI binding loops.
+         if (value > _maxLimit)
+            value = _maxLimit;
+         if (value < 0)
+            value = 0;
+
+         if (_minLimit != value)
+         {
+            _minLimit = value;
+            OnPropertyChanged();
+            RefreshSlider();
+
+            // Force value compliance
+            if (Value < _minLimit)
+               Value = _minLimit;
+         }
+      }
+   }
+
+   public int MaxLimit
+   {
+      get => _maxLimit;
+      set
+      {
+         // If user types Max < Current Min
+         if (value < _minLimit)
+            value = _minLimit;
+         if (value > _parent.TotalLimit)
+            value = _parent.TotalLimit;
+
+         if (_maxLimit != value)
+         {
+            _maxLimit = value;
+            OnPropertyChanged();
+            RefreshSlider();
+
+            // Force value compliance
+            if (Value > _maxLimit)
+               Value = _maxLimit;
+         }
+      }
+   }
+
    public int Value
    {
       get => _value;
@@ -106,6 +169,11 @@ public class AllocationItem : ViewModelBase
             }
          }
 
+         if (intVal < MinLimit)
+            intVal = MinLimit;
+         if (intVal > MaxLimit)
+            intVal = MaxLimit;
+
          Value = intVal;
          OnPropertyChanged();
       }
@@ -122,12 +190,14 @@ public class AllocationItem : ViewModelBase
       }
    }
 
-   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color)
+   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color, int min = 0, int max = int.MaxValue)
    {
       _parent = parent;
       _name = name;
       _value = val;
       _isLocked = false;
+      _minLimit = min;
+      _maxLimit = max;
 
       _mediaColor = new()
       {
@@ -142,6 +212,18 @@ public class AllocationItem : ViewModelBase
       DecrementCommand = new RelayCommand(Decrement);
 
       UpdateBrush();
+   }
+
+   private double ConvertToSliderScale(int val)
+   {
+      if (!_parent.IsLogarithmic)
+         return val;
+
+      double t = _parent.TotalLimit;
+      if (t <= 0)
+         return 0;
+
+      return t * (Math.Log(1 + val) / Math.Log(1 + t));
    }
 
    private void Increment()
@@ -185,5 +267,8 @@ public class AllocationItem : ViewModelBase
       OnPropertyChanged(nameof(Value));
       OnPropertyChanged(nameof(SliderValue));
       OnPropertyChanged(nameof(PercentageDisplay));
+
+      OnPropertyChanged(nameof(SliderMinPosition));
+      OnPropertyChanged(nameof(SliderMaxRemaining));
    }
 }
