@@ -1,4 +1,5 @@
-﻿using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+﻿using System.Windows.Media;
+using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -8,6 +9,30 @@ public class AllocationItem : ViewModelBase
    private int _value;
    private string _name;
    private bool _isLocked;
+   private Color _mediaColor;
+   private SolidColorBrush _colorBrush;
+
+   public Color MediaColor
+   {
+      get => _mediaColor;
+      set
+      {
+         _mediaColor = value;
+         UpdateBrush(); // Regenerate brush if color changes
+         OnPropertyChanged();
+      }
+   }
+
+   // The UI-ready Brush (Reduces XAML complexity)
+   public SolidColorBrush ColorBrush
+   {
+      get => _colorBrush;
+      private set
+      {
+         _colorBrush = value;
+         OnPropertyChanged();
+      }
+   }
 
    public string Name
    {
@@ -92,12 +117,29 @@ public class AllocationItem : ViewModelBase
       }
    }
 
-   public AllocationItem(AllocatorViewModel parent, string name, int val)
+   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color)
    {
       _parent = parent;
       _name = name;
       _value = val;
       _isLocked = false;
+
+      _mediaColor = new()
+      {
+         A = 120,
+         R = color.R,
+         G = color.G,
+         B = color.B,
+      };
+      UpdateBrush();
+   }
+
+   private void UpdateBrush()
+   {
+      // Create a frozen brush for performance/thread-safety
+      var brush = new SolidColorBrush(_mediaColor);
+      brush.Freeze();
+      ColorBrush = brush;
    }
 
    public void SetValueInternal(int val)

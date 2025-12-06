@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
@@ -48,9 +49,9 @@ public class AllocatorViewModel : ViewModelBase
       _totalLimit = total; // Don't trigger setter logic on init
    }
 
-   public void AddItem(string name, int initialValue)
+   public void AddItem(string name, int initialValue, Color color)
    {
-      var item = new AllocationItem(this, name, initialValue);
+      var item = new AllocationItem(this, name, initialValue, color);
       Items.Add(item);
 
       // Initial balance check

@@ -3,7 +3,8 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators" mc:Ignorable = "d"
+             xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators"
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
              d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
 
     <UserControl.Resources>
@@ -31,17 +32,60 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Converter to calculate width based on distribution -->
+        <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
     </UserControl.Resources>
 
     <Border BorderBrush = "#DDD" BorderThickness = "1" CornerRadius = "4" Padding = "10">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height = "20" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
 
+            <ItemsControl Grid.Row = "0" x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation = "Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Height = "20" Background = "{Binding ColorBrush}" ToolTip = "{Binding Name}">
+                            <Border.Width>
+                                <MultiBinding Converter = "{StaticResource DistributionToWidthConverter}">
+                                    <Binding Path = "Value" />
+                                    <Binding Path = "DataContext.TotalLimit"
+                                             RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                    <!-- Bind to the Container's Width -->
+                                    <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
+                                </MultiBinding>
+                            </Border.Width>
+
+                            <!-- Optional: Show Number inside bar if wide enough -->
+                            <TextBlock Text = "{Binding Value}" Foreground = "White" FontSize = "10"
+                                       FontWeight = "Bold" HorizontalAlignment = "Center" VerticalAlignment = "Center">
+                                <TextBlock.Style>
+                                    <Style TargetType = "TextBlock">
+                                        <Setter Property = "Visibility" Value = "Visible" />
+                                        <Style.Triggers>
+                                            <!-- Hide text if value is 0 -->
+                                            <DataTrigger Binding = "{Binding Value}" Value = "0">
+                                                <Setter Property = "Visibility" Value = "Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
             <!-- Header -->
-            <Grid Grid.Row = "0" Margin = "0,0,0,15">
+            <Grid Grid.Row = "1" Margin = "0,0,0,15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "Auto" />
                     <ColumnDefinition Width = "*" />
@@ -63,7 +107,7 @@
             </Grid>
 
             <!-- Rows -->
-            <ItemsControl Grid.Row = "1" ItemsSource = "{Binding Items}">
+            <ItemsControl Grid.Row = "2" ItemsSource = "{Binding Items}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin = "0,6">
@@ -90,7 +134,8 @@
                                         Maximum = "{Binding DataContext.TotalLimit, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         Value = "{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
-                                        TickFrequency = "1" IsSnapToTickEnabled = "False" />
+                                        TickFrequency = "1" IsSnapToTickEnabled = "False"
+                                        Foreground = "{Binding HexColor}" />
 
                                 <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
                                            Margin = "2,-14,0,0" FontSize = "10" FontWeight = "Bold" Foreground = "#444" />
