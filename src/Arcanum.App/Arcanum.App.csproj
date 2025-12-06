@@ -17,7 +17,7 @@
         <!-- DISPLAY NAMES: Used for UI and Window Titles -->
         <Product>Arcanum Alpha</Product>
         <!-- VERSIONING: The single place to change the number -->
-        <Version>0.9.9</Version>
+        <Version>0.9.10</Version>
     </PropertyGroup>
 
     <ItemGroup>

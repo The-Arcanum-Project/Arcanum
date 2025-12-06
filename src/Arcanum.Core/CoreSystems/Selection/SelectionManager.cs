@@ -31,6 +31,9 @@ public static class SelectionManager
 
    public static event Action? PreviewChanged;
 
+   public static bool SelectWater { get; set; } = true;
+   public static bool SelectWasteland { get; set; } = true;
+
    public static ObjectSelectionMode ObjectSelectionMode
    {
       get;
@@ -86,12 +89,27 @@ public static class SelectionManager
       foreach (var obj in EditableObjects)
       {
          if (obj is Location loc)
-            locs.Add(loc);
+         {
+            if (IsAllowedByFilters(loc))
+               locs.Add(loc);
+         }
+
          if (obj is IMapInferable inferable)
             locs.AddRange(inferable.GetRelevantLocations([obj]));
       }
 
       return locs;
+   }
+
+   private static bool IsAllowedByFilters(Location loc)
+   {
+      if (!SelectWater && (Globals.DefaultMapDefinition.Lakes.Contains(loc) || Globals.DefaultMapDefinition.SeaZones.Contains(loc)))
+         return false;
+
+      if (!SelectWasteland && (Globals.DefaultMapDefinition.NotOwnable.Contains(loc) || Globals.DefaultMapDefinition.ImpassableMountains.Contains(loc)))
+         return false;
+
+      return true;
    }
 
    /// <summary>
@@ -118,6 +136,12 @@ public static class SelectionManager
       {
          case ObjectSelectionMode.LocationSelection:
          {
+            for (var i = cLocs.Count - 1; i >= 0; i--)
+            {
+               if (!IsAllowedByFilters(cLocs[i]))
+                  cLocs.RemoveAt(i);
+            }
+
             EditableObjects.ClearAndAdd(cLocs);
             _searchSelectedObjects.Clear();
             break;
@@ -195,8 +219,7 @@ public static class SelectionManager
       return inferable.GetRelevantLocations([obj]);
    }
 
-   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
-      => _searchSelectedObjects.ClearAndAdd(objects);
+   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects) => _searchSelectedObjects.ClearAndAdd(objects);
 
    public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
 

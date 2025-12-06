@@ -426,6 +426,15 @@
                             </TextBlock>
                         </styleClasses:BaseButton.ToolTip>
                     </styleClasses:BaseButton>
+
+                    <CheckBox VerticalAlignment = "Center" Margin = "0, 0, 4, 0" Checked = "SelectWater_CheckChanged"
+                              Unchecked = "SelectWater_CheckChanged" IsChecked = "True">
+                        Select Water
+                    </CheckBox>
+                    <CheckBox VerticalAlignment = "Center" Checked = "SelectWastelands_CheckChanged" IsChecked = "True"
+                              Unchecked = "SelectWastelands_CheckChanged">
+                        Select Wastelands
+                    </CheckBox>
                 </StackPanel>
             </Grid>
 

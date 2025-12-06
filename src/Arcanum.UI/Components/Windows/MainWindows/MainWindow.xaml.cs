@@ -603,4 +603,20 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       ProcessHelper.OpenLink(HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM);
    }
+
+   private void SelectWastelands_CheckChanged(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox selectWastelands)
+         return;
+
+      SelectionManager.SelectWasteland = selectWastelands.IsChecked ?? true;
+   }
+
+   private void SelectWater_CheckChanged(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox selectWater)
+         return;
+
+      SelectionManager.SelectWater = selectWater.IsChecked ?? true;
+   }
 }
