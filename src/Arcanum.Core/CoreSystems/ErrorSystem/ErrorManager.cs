@@ -50,6 +50,8 @@ public static class ErrorManager
       ArcLog.WritePure("############### ERRORLOG ###############");
       ArcLog.WritePure("########################################");
 
+      var sb = ExportToConsole();
+
       Dictionary<int, (Diagnostic, int)> diagnosticOccurrences = [];
       foreach (var diag in Diagnostics)
          if (!diagnosticOccurrences.TryAdd(diag.Descriptor.Id, (diag, 1)))
@@ -91,8 +93,6 @@ public static class ErrorManager
       foreach (var kvp in diagnosticOccurrences)
          ArcLog.WritePure($"#{kvp.Key,4}: {kvp.Value.Item1.Code,-40}: {kvp.Value.Item2} occurrences");
       ArcLog.WritePure("");
-
-      var sb = ExportToConsole();
       Console.WriteLine(sb.ToString());
    }
 
