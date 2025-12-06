@@ -11,9 +11,7 @@ namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 public class AllocatorViewModel : ViewModelBase
 {
    private int _totalLimit;
-   private bool _isLogarithmic;
    private bool? _areAllLocked;
-   private bool _autoDetectLogScale = true;
 
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
    private readonly Stack<int> _totalHistory = new();
@@ -22,15 +20,15 @@ public class AllocatorViewModel : ViewModelBase
 
    public bool AutoDetectLogScale
    {
-      get => _autoDetectLogScale;
+      get;
       set
       {
-         _autoDetectLogScale = value;
+         field = value;
          OnPropertyChanged();
          if (value)
             RunAutoLogScale();
       }
-   }
+   } = true;
 
    public bool? AreAllLocked
    {
@@ -44,11 +42,9 @@ public class AllocatorViewModel : ViewModelBase
             OnPropertyChanged();
 
             // If user sets to True/False, apply to all items
-            // If it becomes Null (indeterminate), we usually treat that as a transition to Unlocked or ignore
+            // If it becomes Null (indeterminate), we treat that as a transition to Unlocked or ignore
             if (value.HasValue)
-            {
                SetAllLocks(value.Value);
-            }
          }
       }
    }
@@ -59,13 +55,13 @@ public class AllocatorViewModel : ViewModelBase
       set
       {
          // Prevent Total from going below the sum of Locked items
-         int minRequired = Items.Where(i => i.IsLocked).Sum(i => i.Value);
+         var minRequired = Items.Where(i => i.IsLocked).Sum(i => i.Value);
          if (value < minRequired)
             value = minRequired;
 
          if (_totalLimit != value)
          {
-            int oldTotal = _totalLimit;
+            var oldTotal = _totalLimit;
             _totalLimit = value;
 
             foreach (var item in Items)
@@ -83,26 +79,24 @@ public class AllocatorViewModel : ViewModelBase
 
    public bool IsLogarithmic
    {
-      get => _isLogarithmic;
+      get;
       set
       {
-         _isLogarithmic = value;
+         field = value;
          OnPropertyChanged();
          foreach (var item in Items)
             item.RefreshSlider();
       }
    }
 
-   public ObservableCollection<AllocationItem> Items { get; } = new ObservableCollection<AllocationItem>();
+   public ObservableCollection<AllocationItem> Items { get; } = [];
 
    public AllocatorViewModel(int total)
    {
       _totalLimit = total;
 
-      // Listen for new items to hook up events
       Items.CollectionChanged += Items_CollectionChanged;
 
-      // Initial state check
       UpdateMasterLockState();
       UndoCommand = new RelayCommand(Undo);
    }
@@ -110,33 +104,26 @@ public class AllocatorViewModel : ViewModelBase
    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
    {
       if (e.NewItems != null)
-      {
          foreach (AllocationItem item in e.NewItems)
             item.PropertyChanged += Item_PropertyChanged;
-      }
 
       if (e.OldItems != null)
-      {
          foreach (AllocationItem item in e.OldItems)
             item.PropertyChanged -= Item_PropertyChanged;
-      }
 
       UpdateMasterLockState();
    }
 
    public void SnapshotState()
    {
-      // Capture current values of all items
       var snapshot = Items.Select(x => new AllocationMemento(x)).ToList();
       _undoStack.Push(snapshot);
       _totalHistory.Push(TotalLimit);
 
-      // Optional: Limit stack size
       if (_undoStack.Count > 50)
       {
          var temp = _undoStack.ToList();
-         temp.RemoveAt(temp.Count - 1); // Remove oldest
-         // ... (requires rebuilding stack, inefficient but safe for simple lists)
+         temp.RemoveAt(temp.Count - 1);
       }
    }
 
@@ -148,17 +135,12 @@ public class AllocatorViewModel : ViewModelBase
       var oldState = _undoStack.Pop();
       var oldTotal = _totalHistory.Pop();
 
-      // Restore Total first (quietly)
       _totalLimit = oldTotal;
       OnPropertyChanged(nameof(TotalLimit));
 
-      // Restore Items
       foreach (var memento in oldState)
-      {
          memento.Restore();
-      }
 
-      // Refresh UI
       foreach (var item in Items)
          item.RefreshSlider();
       UpdateMasterLockState();
@@ -168,9 +150,7 @@ public class AllocatorViewModel : ViewModelBase
    {
       // If an item locks/unlocks, check if we need to update the Master Toggle
       if (e.PropertyName == nameof(AllocationItem.IsLocked))
-      {
          UpdateMasterLockState();
-      }
    }
 
    private bool _isUpdatingLocks = false;
@@ -186,15 +166,15 @@ public class AllocatorViewModel : ViewModelBase
       }
       else
       {
-         bool allLocked = Items.All(x => x.IsLocked);
-         bool allUnlocked = Items.All(x => !x.IsLocked);
+         var allLocked = Items.All(x => x.IsLocked);
+         var allUnlocked = Items.All(x => !x.IsLocked);
 
          if (allLocked)
             _areAllLocked = true;
          else if (allUnlocked)
             _areAllLocked = false;
          else
-            _areAllLocked = null; // Mixed state
+            _areAllLocked = null;
       }
 
       OnPropertyChanged(nameof(AreAllLocked));
@@ -204,13 +184,10 @@ public class AllocatorViewModel : ViewModelBase
    {
       _isUpdatingLocks = true;
       foreach (var item in Items)
-      {
          item.IsLocked = isLocked;
-      }
 
       _isUpdatingLocks = false;
 
-      // Refresh visuals just in case
       UpdateMasterLockState();
    }
 
@@ -240,8 +217,8 @@ public class AllocatorViewModel : ViewModelBase
          return;
       }
 
-      int minVal = nonZeroItems.Min(x => x.Value);
-      int maxVal = nonZeroItems.Max(x => x.Value);
+      var minVal = nonZeroItems.Min(x => x.Value);
+      var maxVal = nonZeroItems.Max(x => x.Value);
 
       if (maxVal >= 10 * minVal)
          IsLogarithmic = true;
@@ -260,9 +237,6 @@ public class AllocatorViewModel : ViewModelBase
 
       if (unlockedItems.Count == 0)
       {
-         // If everything is locked, we can't really resize the Total cleanly 
-         // without violating locks. In this implementation, we force the 
-         // last item to take the hit/gain to maintain mathematical validity.
          if (Items.Count > 0)
          {
             var last = Items.Last();
@@ -275,7 +249,6 @@ public class AllocatorViewModel : ViewModelBase
       // Reuse the Distribute logic, treating 'delta' as the error to fix
       DistributeError(delta, unlockedItems);
 
-      // Refresh visuals for everyone (percentages change even if value doesn't)
       foreach (var item in Items)
          item.RefreshSlider();
    }
@@ -285,17 +258,14 @@ public class AllocatorViewModel : ViewModelBase
    /// </summary>
    public void UpdateItem(AllocationItem source, int newValue)
    {
-      // 1. Clamp to Global Total limits
       // Calculate max allowed based on Total - Locked items
-      int lockedSumOther = Items.Where(x => x != source && x.IsLocked).Sum(x => x.Value);
-      int globalMaxAllowed = TotalLimit - lockedSumOther;
+      var lockedSumOther = Items.Where(x => x != source && x.IsLocked).Sum(x => x.Value);
+      var globalMaxAllowed = TotalLimit - lockedSumOther;
 
-      // 2. Clamp to Item Specific Limits
       // The stricter limit wins.
-      int actualMax = Math.Min(globalMaxAllowed, source.MaxLimit);
-      int actualMin = source.MinLimit;
+      var actualMax = Math.Min(globalMaxAllowed, source.MaxLimit);
+      var actualMin = source.MinLimit;
 
-      // Ensure Min doesn't exceed Max (sanity check)
       if (actualMin > actualMax)
          actualMin = actualMax;
 
@@ -304,66 +274,53 @@ public class AllocatorViewModel : ViewModelBase
       if (newValue < actualMin)
          newValue = actualMin;
 
-      // 3. Set Value
       source.SetValueInternal(newValue);
 
-      // 4. Balance others
       BalanceToTotal(source, ignoreLocks: false);
    }
 
-   private void BalanceToTotal(AllocationItem sourceToIgnore, bool ignoreLocks)
+   private void BalanceToTotal(AllocationItem? sourceToIgnore, bool ignoreLocks)
    {
-      int currentSum = Items.Sum(x => x.Value);
-      int error = TotalLimit - currentSum;
+      var currentSum = Items.Sum(x => x.Value);
+      var error = TotalLimit - currentSum;
 
       if (error == 0)
          return;
 
-      // Which items are allowed to move?
       var candidates = Items.Where(x => x != sourceToIgnore).ToList();
 
       if (!ignoreLocks)
          candidates = candidates.Where(x => !x.IsLocked).ToList();
 
-      // Edge case: If we need to Subtract, we can only take from items > 0
       if (error < 0)
          candidates = candidates.Where(x => x.Value > 0).ToList();
 
       if (candidates.Count == 0)
       {
-         // Revert source
-         if (sourceToIgnore != null)
-            sourceToIgnore.SetValueInternal(sourceToIgnore.Value + error);
+         sourceToIgnore?.SetValueInternal(sourceToIgnore.Value + error);
          return;
       }
 
-      // We need to know if DistributeError fully succeeded
-      int remainingError = DistributeError(error, candidates);
+      var remainingError = DistributeError(error, candidates);
 
       // If there is still error left, it means everyone else hit a wall.
       // The Source item MUST take back the change.
       if (remainingError != 0 && sourceToIgnore != null)
-      {
          // e.g. User added +10, but others could only give -8. 
-         // We must give back +2 to the others (conceptually) -> actually just add +2 to source?
-         // No, if error was + (Need to add to others), it means Source shrunk.
-         // If we couldn't add to others, Source must grow back.
+         // We must give back +2 to the others 
          // Logic: Just apply the remaining error to Source.
          sourceToIgnore.SetValueInternal(sourceToIgnore.Value + remainingError);
-      }
    }
 
-   private int DistributeError(int error, List<AllocationItem> targets)
+   private static int DistributeError(int error, List<AllocationItem> targets)
    {
-      // Safety break to prevent infinite loops
-      int maxLoops = 20;
-      int currentLoop = 0;
+      const int maxLoops = 20;
+      var currentLoop = 0;
 
       while (error != 0 && currentLoop < maxLoops)
       {
          currentLoop++;
 
-         // 1. Identify valid candidates (those not at their limit)
          // If Adding (error > 0): Must be below Max
          // If Subtracting (error < 0): Must be above Min
          var validCandidates = targets.Where(t =>
@@ -374,37 +331,25 @@ public class AllocatorViewModel : ViewModelBase
          if (validCandidates.Count == 0)
             break; // Deadlock: Cannot distribute further
 
-         // 2. Calculate Weights (Sum of values of VALID candidates)
-         // We use Long to prevent overflows during intermediate math
-         long sumValues = validCandidates.Sum(t => (long)t.Value);
+         var sumValues = validCandidates.Sum(t => (long)t.Value);
 
-         // Edge Case: If all items are 0, we can't divide by value. Fallback to even split.
-         bool useEvenSplit = sumValues == 0;
+         var useEvenSplit = sumValues == 0;
 
-         // We store planned changes to apply them fairly all at once
          var plannedChanges = new Dictionary<AllocationItem, int>();
-         int distributedThisPass = 0;
+         var distributedThisPass = 0;
 
-         // 3. Plan the distribution (Proportional)
          foreach (var item in validCandidates)
          {
             int share;
             if (useEvenSplit)
-            {
-               // Simple even split
                share = error / validCandidates.Count;
-            }
             else
-            {
                // Proportional: (ItemValue / Sum) * Error
-               double ratio = (double)item.Value / sumValues;
-               share = (int)Math.Round(error * ratio);
-            }
+               share = (int)Math.Round(error * (double)item.Value / sumValues);
 
             plannedChanges[item] = share;
          }
 
-         // 4. Apply Changes (Respecting Limits)
          foreach (var kvp in plannedChanges)
          {
             // If error is resolved by previous iterations in this loop, stop
@@ -412,7 +357,7 @@ public class AllocatorViewModel : ViewModelBase
                break;
 
             var item = kvp.Key;
-            int change = kvp.Value;
+            var change = kvp.Value;
 
             if (change == 0)
                continue;
@@ -421,7 +366,7 @@ public class AllocatorViewModel : ViewModelBase
             if (Math.Abs(change) > Math.Abs(error))
                change = error;
 
-            int proposed = item.Value + change;
+            var proposed = item.Value + change;
 
             // Clamp to Item Limits
             if (proposed > item.MaxLimit)
@@ -429,7 +374,7 @@ public class AllocatorViewModel : ViewModelBase
             if (proposed < item.MinLimit)
                proposed = item.MinLimit;
 
-            int actualChange = proposed - item.Value;
+            var actualChange = proposed - item.Value;
 
             if (actualChange != 0)
             {
@@ -439,7 +384,7 @@ public class AllocatorViewModel : ViewModelBase
             }
          }
 
-         // 5. Anti-Stagnation (Fixing the "Off-By-One" rounding errors)
+         // Anti-Stagnation (Fixing the "Off-By-One" rounding errors)
          // If we still have error but the proportional math resulted in 0 changes 
          // (common with small errors like 1 or -1), force a single unit move.
          if (error != 0 && distributedThisPass == 0)
@@ -449,10 +394,9 @@ public class AllocatorViewModel : ViewModelBase
 
             if (target != null)
             {
-               int step = Math.Sign(error); // +1 or -1
+               var step = Math.Sign(error); // +1 or -1
 
-               // Double check limits
-               int proposed = target.Value + step;
+               var proposed = target.Value + step;
                if (proposed >= target.MinLimit && proposed <= target.MaxLimit)
                {
                   target.SetValueInternal(proposed);
@@ -472,26 +416,19 @@ public class AllocatorViewModel : ViewModelBase
 
    public void UpdateLockedItem(AllocationItem source, int newValue)
    {
-      // 1. Clamp to 0 (cannot be negative)
       if (newValue < 0)
          newValue = 0;
 
-      // 2. Calculate the difference
-      int delta = newValue - source.Value;
+      var delta = newValue - source.Value;
       if (delta == 0)
          return;
 
-      // 3. Update the Item directly
       source.SetValueInternal(newValue);
 
-      // 4. Update the Total directly (BYPASSING the Setter logic)
-      // We modify the backing field to avoid triggering 'ResizeUnlockedItems'
       _totalLimit += delta;
 
-      // Notify UI that Total changed
       OnPropertyChanged(nameof(TotalLimit));
 
-      // 5. Because Total changed, ALL percentages are now wrong. Refresh everyone.
       foreach (var item in Items)
          item.RefreshSlider();
    }

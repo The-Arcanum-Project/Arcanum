@@ -46,7 +46,7 @@ public static class TextBoxUtilities
    private static void TextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
       var textBox = (CorneredTextBox)sender;
-      int delay = GetUpdateDelay(textBox);
+      var delay = GetUpdateDelay(textBox);
 
       // Get or Create the Timer associated with this TextBox
       var timer = (DispatcherTimer)textBox.GetValue(TimerProperty);

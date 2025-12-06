@@ -1,23 +1,16 @@
 ﻿namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
-public struct AllocationMemento
+public struct AllocationMemento(AllocationItem item)
 {
-   public AllocationItem Item;
-   public int Value;
-   public bool IsLocked;
-
-   public AllocationMemento(AllocationItem item)
-   {
-      Item = item;
-      Value = item.Value;
-      IsLocked = item.IsLocked;
-   }
+   private readonly AllocationItem _item = item;
+   private readonly int _value = item.Value;
+   private readonly bool _isLocked = item.IsLocked;
 
    public void Restore()
    {
       // Restore lock state first to allow value changes
-      Item.IsLocked = IsLocked;
+      _item.IsLocked = _isLocked;
       // Use SetValueInternal to bypass logic loops
-      Item.SetValueInternal(Value);
+      _item.SetValueInternal(_value);
    }
 }

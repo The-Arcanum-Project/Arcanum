@@ -13,35 +13,22 @@ public class AllocationItem : ViewModelBase
    private int _value;
    private string _name;
    private bool _isLocked;
-   private Color _mediaColor;
+   private readonly Color _mediaColor;
    private int _minLimit;
    private int _maxLimit;
-   private SolidColorBrush _colorBrush;
 
    public ICommand IncrementCommand { get; }
    public ICommand DecrementCommand { get; }
 
-   public Color MediaColor
-   {
-      get => _mediaColor;
-      set
-      {
-         _mediaColor = value;
-         UpdateBrush(); // Regenerate brush if color changes
-         OnPropertyChanged();
-      }
-   }
-
-   // The UI-ready Brush (Reduces XAML complexity)
    public SolidColorBrush ColorBrush
    {
-      get => _colorBrush;
+      get;
       private set
       {
-         _colorBrush = value;
+         field = value;
          OnPropertyChanged();
       }
-   }
+   } = null!;
 
    public string Name
    {
@@ -60,7 +47,7 @@ public class AllocationItem : ViewModelBase
       {
          _isLocked = value;
          OnPropertyChanged();
-         OnPropertyChanged(nameof(IsNotLocked)); // Helper for XAML binding
+         OnPropertyChanged(nameof(IsNotLocked));
       }
    }
 
@@ -73,7 +60,7 @@ public class AllocationItem : ViewModelBase
       get
       {
          double t = _parent.TotalLimit;
-         double maxPos = ConvertToSliderScale(_maxLimit);
+         var maxPos = ConvertToSliderScale(_maxLimit);
          return (ConvertToSliderScale((int)t) - maxPos);
       }
    }
@@ -83,8 +70,6 @@ public class AllocationItem : ViewModelBase
       get => _minLimit;
       set
       {
-         // If user types a Min > Current Max, do we cap it? Or reject it?
-         // Clamping is usually safer for UI binding loops.
          if (value > _maxLimit)
             value = _maxLimit;
          if (value < 0)
@@ -108,7 +93,6 @@ public class AllocationItem : ViewModelBase
       get => _maxLimit;
       set
       {
-         // If user types Max < Current Min
          if (value < _minLimit)
             value = _minLimit;
          if (value > _parent.TotalLimit)
@@ -160,13 +144,13 @@ public class AllocationItem : ViewModelBase
          if (IsLocked)
             return;
 
-         int intVal = (int)Math.Round(value);
+         var intVal = (int)Math.Round(value);
          if (_parent.IsLogarithmic)
          {
             double t = _parent.TotalLimit;
             if (t > 0)
             {
-               double computed = Math.Pow(1 + t, value / t) - 1;
+               var computed = Math.Pow(1 + t, value / t) - 1;
                intVal = (int)Math.Round(computed);
             }
          }
@@ -250,7 +234,6 @@ public class AllocationItem : ViewModelBase
 
    private void UpdateBrush()
    {
-      // Create a frozen brush for performance/thread-safety
       var brush = new SolidColorBrush(_mediaColor);
       brush.Freeze();
       ColorBrush = brush;

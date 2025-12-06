@@ -281,7 +281,7 @@
 
                     <StackPanel Grid.Column = "0" Orientation = "Horizontal" VerticalAlignment = "Center">
                         <TextBlock Text = "Total Limit:" FontWeight = "SemiBold" VerticalAlignment = "Center"
-                                   Margin = "5,0,10,0" local:InteractionMonitor.AllocatorVM = "{Binding}" />
+                                   Margin = "5,0,10,0" local:InteractionMonitor.AllocatorVm = "{Binding}" />
                         <styleClasses:CorneredTextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
                                                       local:TextBoxUtilities.UpdateDelay = "600" Width = "60"
                                                       Height = "24" VerticalContentAlignment = "Center"
@@ -335,7 +335,7 @@
                                         IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
                                         TickFrequency = "1" IsSnapToTickEnabled = "False"
                                         Foreground = "{Binding ColorBrush}"
-                                        local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         Style = "{StaticResource SlimColorSliderStyle}" />
 
 
@@ -371,14 +371,14 @@
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">
                                 <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
                                                          Style = "{StaticResource ThinBaseButtonStyle}"
-                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <styleClasses:CorneredTextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
                                                               local:TextBoxUtilities.UpdateDelay = "600"
                                                               VerticalContentAlignment = "Center"
                                                               HorizontalContentAlignment = "Center" Height = "24"
                                                               Width = "50" Margin = "2,0"
-                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <styleClasses:CorneredTextBox.Style>
                                         <Style TargetType = "styleClasses:CorneredTextBox"
                                                BasedOn = "{StaticResource {x:Type styleClasses:CorneredTextBox}}">
@@ -395,7 +395,7 @@
 
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
                                                          Style = "{StaticResource ThinBaseButtonStyle}"
-                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "24" Height = "24"
                                               Style = "{StaticResource BlueToggleButtonStyle}" Margin = "2,0,0,0" />
@@ -418,7 +418,7 @@
                                                 <styleClasses:CorneredTextBox Grid.Column = "1"
                                                                               Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
                                                                               local:TextBoxUtilities.UpdateDelay = "300"
-                                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                             </Grid>
 
                                             <Grid Margin = "0,2">
@@ -431,7 +431,7 @@
                                                 <styleClasses:CorneredTextBox Grid.Column = "1"
                                                                               Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
                                                                               local:TextBoxUtilities.UpdateDelay = "300"
-                                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                             </Grid>
                                         </StackPanel>
                                     </Border>

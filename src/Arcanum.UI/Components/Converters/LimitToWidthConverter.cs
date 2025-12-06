@@ -22,9 +22,9 @@ public class LimitToWidthConverter : IMultiValueConverter
 
       // Simple linear mapping because the ViewModel already handled the Log transformation
       // for the 'limitVal' input.
-      double result = (limitVal / total) * width;
+      var result = (limitVal / total) * width;
       return result > 0 ? result : 0.0;
    }
 
-   public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => null;
+   public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => [];
 }

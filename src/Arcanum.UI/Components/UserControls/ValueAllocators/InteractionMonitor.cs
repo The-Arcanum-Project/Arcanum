@@ -8,47 +8,38 @@ namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 public static class InteractionMonitor
 {
    // Bind this to the AllocatorViewModel
-   public static readonly DependencyProperty AllocatorVMProperty =
-      DependencyProperty.RegisterAttached("AllocatorVM",
+   public static readonly DependencyProperty AllocatorVmProperty =
+      DependencyProperty.RegisterAttached("AllocatorVm",
                                           typeof(AllocatorViewModel),
                                           typeof(InteractionMonitor),
                                           new(null, OnVMChanged));
 
-   public static void SetAllocatorVM(DependencyObject element, AllocatorViewModel value) => element.SetValue(AllocatorVMProperty, value);
+   public static void SetAllocatorVm(DependencyObject element, AllocatorViewModel value) => element.SetValue(AllocatorVmProperty, value);
 
-   public static AllocatorViewModel GetAllocatorVM(DependencyObject element) => (AllocatorViewModel)element.GetValue(AllocatorVMProperty);
+   public static AllocatorViewModel GetAllocatorVm(DependencyObject element) => (AllocatorViewModel)element.GetValue(AllocatorVmProperty);
 
    private static void OnVMChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       if (d is not UIElement element)
          return;
 
-      // 1. Unsubscribe everything to be safe
       element.PreviewMouseDown -= Element_PreviewMouseDown;
       element.GotFocus -= Element_GotFocus;
 
       if (e.NewValue == null)
          return;
 
-      // 2. Subscribe based on Type
       if (element is Selector ||
           element is RangeBase || // Slider
           element is Button ||
           element is ToggleButton)
-      {
-         // For buttons/sliders, MouseDown is the start of action
          element.PreviewMouseDown += Element_PreviewMouseDown;
-      }
       else if (element is TextBox)
-      {
          // For TextBox, Focus is the start of interaction (handles click AND tab)
          element.GotFocus += Element_GotFocus;
-      }
       else
-      {
          // Fallback for generic containers (like Border) -> MouseDown
          element.PreviewMouseDown += Element_PreviewMouseDown;
-      }
    }
 
    private static void Element_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -65,9 +56,9 @@ public static class InteractionMonitor
    {
       if (sender is DependencyObject d)
       {
-         var vm = GetAllocatorVM(d);
+         var vm = GetAllocatorVm(d);
          // Snapshot state!
-         vm?.SnapshotState();
+         vm.SnapshotState();
       }
    }
 }
