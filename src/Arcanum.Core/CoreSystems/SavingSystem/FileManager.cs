@@ -70,6 +70,7 @@ public static class FileManager
 
       CoreData.ModMetadata = ExistingModsLoader.ParseModMetadata(modPath)!;
 
+      FileDescriptorCache.Clear();
       foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
       {
          foreach (var type in descriptor.LoadingService[0]
