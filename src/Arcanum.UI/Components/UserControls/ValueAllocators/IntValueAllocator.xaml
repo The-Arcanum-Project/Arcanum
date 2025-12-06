@@ -36,7 +36,7 @@
                 <Setter Property = "Cursor" Value = "Hand" />
                 <Style.Triggers>
                     <Trigger Property = "IsChecked" Value = "True">
-                        <Setter Property = "Content" Value = "🔒" /> <!-- Locked Icon -->
+                        <Setter Property = "Content" Value = "🔒" />
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -58,7 +58,6 @@
                 <Setter Property = "Padding" Value = "2" />
                 <Setter Property = "Cursor" Value = "Hand" />
 
-                <!-- Overwrite the template for rounded corners -->
                 <Setter Property = "Template">
                     <Setter.Value>
                         <ControlTemplate TargetType = "ToggleButton">
@@ -93,7 +92,105 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Converter to calculate width based on distribution -->
+            <Style x:Key = "SliderRepeatButtonStyle" TargetType = "RepeatButton">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "IsTabStop" Value = "false" />
+                <Setter Property = "Focusable" Value = "false" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "RepeatButton">
+                            <Border Background = "{TemplateBinding Background}" Height = "4" CornerRadius = "2" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimSliderThumbStyle" TargetType = "Thumb">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Thumb">
+                            <Grid Background = "Transparent">
+                                <!-- 
+                                   THE INVISIBLE GRIP (Hit Box):
+                                   We make this wider than the visual thumb (e.g. 24px).
+                                   We use Negative Margins to center it over the 6px root.
+                                   Background="Transparent" captures the mouse clicks.
+                                -->
+                                <Border Width = "24" Height = "24" Margin = "-9,0,-9,0" Background = "Transparent" />
+
+                                <!-- THE VISUAL HANDLE -->
+                                <Border x:Name = "VisualThumb" Background = "#E0E0E0" BorderBrush = "#111"
+                                        BorderThickness = "1" CornerRadius = "3" Width = "6" Height = "14"
+                                        VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsMouseOver" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                </Trigger>
+                                <Trigger Property = "IsDragging" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#666" />
+                                </Trigger>
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "#555" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#333" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimColorSliderStyle" TargetType = "Slider">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Focusable" Value = "False" /> <!-- Prevents dotted focus rect -->
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Slider">
+                            <Grid>
+                                <!-- Background Rail (Dark Grey) -->
+                                <Border x:Name = "TrackBackground" Background = "#333333" Height = "4"
+                                        CornerRadius = "2" VerticalAlignment = "Center" />
+
+                                <!-- The Track logic -->
+                                <Track x:Name = "PART_Track">
+
+                                    <!-- Left Side (Filled) -->
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "{TemplateBinding Foreground}" />
+                                    </Track.DecreaseRepeatButton>
+
+                                    <!-- The Thumb -->
+                                    <Track.Thumb>
+                                        <Thumb Style = "{StaticResource SlimSliderThumbStyle}" />
+                                    </Track.Thumb>
+
+                                    <!-- Right Side (Unfilled) -->
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "Transparent" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <!-- Dim the filled track when disabled/locked -->
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter Property = "Foreground" Value = "#555" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Converters -->
             <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
             <converters:LimitToWidthConverter x:Key = "LimitToWidthConverter" />
             <converters:BorderClipConverter x:Key = "BorderClipConverter" />
@@ -166,9 +263,8 @@
 
             <!-- Header -->
             <Grid Grid.Row = "1" Margin = "0,4,0,15">
-                <!-- Define columns to align Master Lock with Row Locks -->
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width = "30" /> <!-- Lock Column -->
+                    <ColumnDefinition Width = "30" />
                     <ColumnDefinition Width = "*" />
                 </Grid.ColumnDefinitions>
 
@@ -219,23 +315,18 @@
                     <DataTemplate>
                         <Grid Margin = "0,6">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width = "30" />  <!-- Lock Icon -->
-                                <ColumnDefinition Width = "45" />  <!-- Percentage -->
-                                <ColumnDefinition Width = "*" />   <!-- Slider -->
-                                <ColumnDefinition Width = "120" />  <!-- Int Box -->
+                                <ColumnDefinition Width = "30" />
+                                <ColumnDefinition Width = "45" />
+                                <ColumnDefinition Width = "*" />
+                                <ColumnDefinition Width = "120" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- 1. Lock Button -->
                             <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
                                           IsChecked = "{Binding IsLocked}" ToolTip = "Lock this value" />
 
-                            <!-- 2. Percentage -->
                             <TextBlock Grid.Column = "1" Text = "{Binding PercentageDisplay}"
-                                       VerticalAlignment = "Center" Foreground = "#888" FontSize = "11"
-                                       Margin = "5,0,0,0" />
+                                       VerticalAlignment = "Center" FontSize = "12" Opacity = "0.8" Margin = "5,0,0,0" />
 
-                            <!-- 3. Slider -->
-                            <!-- IsEnabled bound to IsNotLocked -->
                             <Grid Grid.Column = "2" Margin = "10,0,10,0" x:Name = "SliderContainer">
 
                                 <Slider Minimum = "0"
@@ -244,27 +335,27 @@
                                         IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
                                         TickFrequency = "1" IsSnapToTickEnabled = "False"
                                         Foreground = "{Binding ColorBrush}"
-                                        local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                        local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Style = "{StaticResource SlimColorSliderStyle}" />
 
 
-                                <Rectangle HorizontalAlignment = "Left" Fill = "Red" Height = "4"
-                                           VerticalAlignment = "Center" IsHitTestVisible = "False">
+                                <Rectangle HorizontalAlignment = "Left" Fill = "{StaticResource DimErrorRedColorBrush}"
+                                           Height = "4" VerticalAlignment = "Center" IsHitTestVisible = "False">
                                     <Rectangle.Width>
                                         <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
                                             <Binding Path = "SliderMinPosition" />
                                             <Binding Path = "DataContext.TotalLimit"
                                                      RelativeSource = "{RelativeSource AncestorType=UserControl}" />
-                                            <!-- This works now because we named the Grid -->
                                             <Binding ElementName = "SliderContainer" Path = "ActualWidth" />
                                         </MultiBinding>
                                     </Rectangle.Width>
                                 </Rectangle>
 
-                                <Rectangle HorizontalAlignment = "Right" Fill = "Red" Height = "4"
+                                <Rectangle HorizontalAlignment = "Right"
+                                           Fill = "{StaticResource DimErrorRedColorBrush}" Height = "4"
                                            VerticalAlignment = "Center" IsHitTestVisible = "False">
                                     <Rectangle.Width>
                                         <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
-                                            <!-- Bind to the REMAINING space -->
                                             <Binding Path = "SliderMaxRemaining" />
                                             <Binding Path = "DataContext.TotalLimit"
                                                      RelativeSource = "{RelativeSource AncestorType=UserControl}" />
@@ -274,16 +365,14 @@
                                 </Rectangle>
 
                                 <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
-                                           Margin = "2,-14,0,0" FontSize = "10" FontWeight = "Bold" Foreground = "#444" />
+                                           Margin = "2,-14,0,0" FontSize = "11" FontWeight = "Bold" Opacity = "0.8" />
                             </Grid>
 
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">
-                                <!-- Decrement -->
                                 <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
                                                          Style = "{StaticResource ThinBaseButtonStyle}"
                                                          local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
-                                <!-- TextBox -->
                                 <styleClasses:CorneredTextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
                                                               local:TextBoxUtilities.UpdateDelay = "600"
                                                               VerticalContentAlignment = "Center"
@@ -304,7 +393,6 @@
                                     </styleClasses:CorneredTextBox.Style>
                                 </styleClasses:CorneredTextBox>
 
-                                <!-- Increment -->
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
                                                          Style = "{StaticResource ThinBaseButtonStyle}"
                                                          local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
@@ -327,7 +415,6 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text = "Min:" VerticalAlignment = "Center" />
 
-                                                <!-- UPDATED: Explicit Trigger + Helper -->
                                                 <styleClasses:CorneredTextBox Grid.Column = "1"
                                                                               Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
                                                                               local:TextBoxUtilities.UpdateDelay = "300"
@@ -341,7 +428,6 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text = "Max:" VerticalAlignment = "Center" />
 
-                                                <!-- UPDATED: Explicit Trigger + Helper -->
                                                 <styleClasses:CorneredTextBox Grid.Column = "1"
                                                                               Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
                                                                               local:TextBoxUtilities.UpdateDelay = "300"

@@ -67,6 +67,11 @@ public class AllocatorViewModel : ViewModelBase
          {
             int oldTotal = _totalLimit;
             _totalLimit = value;
+
+            foreach (var item in Items)
+               if (item.MaxLimit == oldTotal)
+                  item.MaxLimit = value;
+
             OnPropertyChanged();
             // When Total changes, we must resize unlocked items to fit
             ResizeUnlockedItems(value - oldTotal);
@@ -350,76 +355,118 @@ public class AllocatorViewModel : ViewModelBase
 
    private int DistributeError(int error, List<AllocationItem> targets)
    {
-      // Safety break
-      int maxLoops = targets.Count * 2 + 5;
-      int loop = 0;
+      // Safety break to prevent infinite loops
+      int maxLoops = 20;
+      int currentLoop = 0;
 
-      while (error != 0 && loop < maxLoops)
+      while (error != 0 && currentLoop < maxLoops)
       {
-         loop++;
+         currentLoop++;
 
-         // Filter candidates based on direction of error
-         // If error > 0 (We need to ADD to others): Only take items not at Max
-         // If error < 0 (We need to SUBTRACT from others): Only take items not at Min
-         var validCandidates = targets.Where(x =>
-                                                (error > 0 && x.Value < x.MaxLimit) ||
-                                                (error < 0 && x.Value > x.MinLimit))
+         // 1. Identify valid candidates (those not at their limit)
+         // If Adding (error > 0): Must be below Max
+         // If Subtracting (error < 0): Must be above Min
+         var validCandidates = targets.Where(t =>
+                                                (error > 0 && t.Value < t.MaxLimit) ||
+                                                (error < 0 && t.Value > t.MinLimit))
                                       .ToList();
 
          if (validCandidates.Count == 0)
-         {
-            // Deadlock: We cannot distribute the remaining error.
-            // This implies the User's change to 'Source' was invalid because 
-            // the other items cannot absorb the difference.
-            // We should revert 'Source' by the remaining error amount.
-            // Note: Since we don't have 'source' here easily, we might leave the Total unbalanced 
-            // momentarily, or we can handle this by returning the 'remainder' to the caller.
-            break;
-         }
+            break; // Deadlock: Cannot distribute further
 
-         // Attempt to split evenly
-         int split = error / validCandidates.Count;
-         if (split == 0)
-            split = Math.Sign(error); // Force movement for small errors
+         // 2. Calculate Weights (Sum of values of VALID candidates)
+         // We use Long to prevent overflows during intermediate math
+         long sumValues = validCandidates.Sum(t => (long)t.Value);
 
-         int distributedThisLoop = 0;
+         // Edge Case: If all items are 0, we can't divide by value. Fallback to even split.
+         bool useEvenSplit = sumValues == 0;
 
+         // We store planned changes to apply them fairly all at once
+         var plannedChanges = new Dictionary<AllocationItem, int>();
+         int distributedThisPass = 0;
+
+         // 3. Plan the distribution (Proportional)
          foreach (var item in validCandidates)
          {
+            int share;
+            if (useEvenSplit)
+            {
+               // Simple even split
+               share = error / validCandidates.Count;
+            }
+            else
+            {
+               // Proportional: (ItemValue / Sum) * Error
+               double ratio = (double)item.Value / sumValues;
+               share = (int)Math.Round(error * ratio);
+            }
+
+            plannedChanges[item] = share;
+         }
+
+         // 4. Apply Changes (Respecting Limits)
+         foreach (var kvp in plannedChanges)
+         {
+            // If error is resolved by previous iterations in this loop, stop
             if (error == 0)
                break;
 
-            int proposed = item.Value + split;
+            var item = kvp.Key;
+            int change = kvp.Value;
 
-            // Clamp to limits
+            if (change == 0)
+               continue;
+
+            // Cap change to the remaining error (fixes rounding overshoots)
+            if (Math.Abs(change) > Math.Abs(error))
+               change = error;
+
+            int proposed = item.Value + change;
+
+            // Clamp to Item Limits
             if (proposed > item.MaxLimit)
                proposed = item.MaxLimit;
             if (proposed < item.MinLimit)
                proposed = item.MinLimit;
 
-            int diff = proposed - item.Value;
+            int actualChange = proposed - item.Value;
 
-            // Don't over-correct (if split > remaining error)
-            if (Math.Abs(diff) > Math.Abs(error))
-            {
-               diff = error;
-               proposed = item.Value + diff;
-            }
-
-            if (diff != 0)
+            if (actualChange != 0)
             {
                item.SetValueInternal(proposed);
-               error -= diff;
-               distributedThisLoop += diff;
+               error -= actualChange;
+               distributedThisPass += actualChange;
             }
          }
 
-         if (distributedThisLoop == 0)
-            break; // Infinite loop protection
+         // 5. Anti-Stagnation (Fixing the "Off-By-One" rounding errors)
+         // If we still have error but the proportional math resulted in 0 changes 
+         // (common with small errors like 1 or -1), force a single unit move.
+         if (error != 0 && distributedThisPass == 0)
+         {
+            // Pick the largest candidate to absorb the remainder (least visual impact)
+            var target = validCandidates.OrderByDescending(x => x.Value).FirstOrDefault();
+
+            if (target != null)
+            {
+               int step = Math.Sign(error); // +1 or -1
+
+               // Double check limits
+               int proposed = target.Value + step;
+               if (proposed >= target.MinLimit && proposed <= target.MaxLimit)
+               {
+                  target.SetValueInternal(proposed);
+                  error -= step;
+               }
+               else
+               {
+                  // If the largest candidate is stuck, this loop is dead. 
+                  break;
+               }
+            }
+         }
       }
 
-      // If error != 0 here, the Total is technically invalid. 
-      // In a robust system, we would trigger a reverse-correction on the Source item.
       return error;
    }
 
