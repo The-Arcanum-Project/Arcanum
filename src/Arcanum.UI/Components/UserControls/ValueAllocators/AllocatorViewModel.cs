@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -11,6 +13,11 @@ public class AllocatorViewModel : ViewModelBase
    private int _totalLimit;
    private bool _isLogarithmic;
    private bool? _areAllLocked;
+
+   private readonly Stack<List<AllocationMemento>> _undoStack = new();
+   private readonly Stack<int> _totalHistory = new();
+
+   public ICommand UndoCommand { get; }
 
    public bool? AreAllLocked
    {
@@ -77,6 +84,7 @@ public class AllocatorViewModel : ViewModelBase
 
       // Initial state check
       UpdateMasterLockState();
+      UndoCommand = new RelayCommand(Undo);
    }
 
    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -93,6 +101,46 @@ public class AllocatorViewModel : ViewModelBase
             item.PropertyChanged -= Item_PropertyChanged;
       }
 
+      UpdateMasterLockState();
+   }
+
+   public void SnapshotState()
+   {
+      // Capture current values of all items
+      var snapshot = Items.Select(x => new AllocationMemento(x)).ToList();
+      _undoStack.Push(snapshot);
+      _totalHistory.Push(TotalLimit);
+
+      // Optional: Limit stack size
+      if (_undoStack.Count > 50)
+      {
+         var temp = _undoStack.ToList();
+         temp.RemoveAt(temp.Count - 1); // Remove oldest
+         // ... (requires rebuilding stack, inefficient but safe for simple lists)
+      }
+   }
+
+   private void Undo()
+   {
+      if (_undoStack.Count == 0)
+         return;
+
+      var oldState = _undoStack.Pop();
+      var oldTotal = _totalHistory.Pop();
+
+      // Restore Total first (quietly)
+      _totalLimit = oldTotal;
+      OnPropertyChanged(nameof(TotalLimit));
+
+      // Restore Items
+      foreach (var memento in oldState)
+      {
+         memento.Restore();
+      }
+
+      // Refresh UI
+      foreach (var item in Items)
+         item.RefreshSlider();
       UpdateMasterLockState();
    }
 

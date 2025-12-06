@@ -8,6 +8,11 @@
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
              d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
 
+    <UserControl.InputBindings>
+        <!-- Alt+Z Undo -->
+        <KeyBinding Modifiers = "Alt" Key = "Z" Command = "{Binding UndoCommand}" />
+    </UserControl.InputBindings>
+
     <UserControl.Resources>
         <!-- Style for the Lock Button -->
         <Style x:Key = "LockToggleStyle" TargetType = "ToggleButton">
@@ -135,7 +140,7 @@
 
                     <StackPanel Grid.Column = "0" Orientation = "Horizontal" VerticalAlignment = "Center">
                         <TextBlock Text = "Total Limit:" FontWeight = "SemiBold" VerticalAlignment = "Center"
-                                   Margin = "5,0,10,0" />
+                                   Margin = "5,0,10,0" local:InteractionMonitor.AllocatorVM = "{Binding}" />
                         <TextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
                                  local:TextBoxUtilities.UpdateDelay = "600" Width = "60" Height = "24"
                                  VerticalContentAlignment = "Center" HorizontalContentAlignment = "Center"
@@ -176,7 +181,8 @@
                                         Value = "{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
                                         TickFrequency = "1" IsSnapToTickEnabled = "False"
-                                        Foreground = "{Binding HexColor}" />
+                                        Foreground = "{Binding ColorBrush}"
+                                        local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
                                            Margin = "2,-14,0,0" FontSize = "10" FontWeight = "Bold" Foreground = "#444" />
@@ -185,13 +191,15 @@
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">
                                 <!-- Decrement -->
                                 <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
-                                                         Style = "{StaticResource FineTuneButtonStyle}" />
+                                                         Style = "{StaticResource FineTuneButtonStyle}"
+                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <!-- TextBox -->
                                 <TextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
                                          local:TextBoxUtilities.UpdateDelay = "600" VerticalContentAlignment = "Center"
                                          HorizontalContentAlignment = "Center" Height = "24" Width = "60"
-                                         Margin = "2,0">
+                                         Margin = "2,0"
+                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <TextBox.Style>
                                         <Style TargetType = "TextBox">
                                             <Style.Triggers>
@@ -206,7 +214,8 @@
 
                                 <!-- Increment -->
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
-                                                         Style = "{StaticResource FineTuneButtonStyle}" />
+                                                         Style = "{StaticResource FineTuneButtonStyle}"
+                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
