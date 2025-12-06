@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.vdfParser;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using static Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen;
@@ -38,7 +39,7 @@ public class MainMenuViewModel : ObservableObject
       ArcanumViewModel => "Launch project:",
       _ => "Last Project:",
    };
-   
+
    public Visibility IsNewProjectButtonVisible => CurrentView switch
    {
       ArcanumViewModel => Visibility.Collapsed,
@@ -91,7 +92,7 @@ public class MainMenuViewModel : ObservableObject
          SetCurrentView(MainMenuScreenView.Arcanum);
          if (string.IsNullOrEmpty(ArcanumVm.ModFolderTextBox.Text))
             ArcanumVm.VanillaFolderTextBox.Text =
-               AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? string.Empty;
+               AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? VdfParser.GetEu5Path();
       });
       AboutUsVc = new(() => { SetCurrentView(MainMenuScreenView.AboutUs); });
       AttributionsVc = new(() => { SetCurrentView(MainMenuScreenView.Attributions); });
@@ -183,7 +184,7 @@ public class MainMenuViewModel : ObservableObject
       if (AppData.MainMenuScreenDescriptor.ProjectFiles
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                     StringComparison.OrdinalIgnoreCase));
+                                                                                       StringComparison.OrdinalIgnoreCase));
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 

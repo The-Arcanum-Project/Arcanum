@@ -29,6 +29,7 @@ public class DefaultMapPreParsingStep(IEnumerable<IDependencyNode<string>> depen
                                        object? lockObject)
    {
       var dmd = new DefaultMapDefinition { Source = fileObj };
+      rn.Statements.RemoveAll(x => x is BlockNode);
       ParseProperties(rn, ref pc, fileObj, dmd);
 
       Globals.DefaultMapDefinition = dmd;

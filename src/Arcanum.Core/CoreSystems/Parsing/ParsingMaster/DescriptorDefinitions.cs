@@ -57,11 +57,7 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor TraitDescriptor = new(["in_game", "common", "traits"],
                                                                new("traits", "txt", "#"),
-                                                               [
-                                                                  new TraitParsing([
-                                                                     ModifierDefinitionDescriptor.LoadingService[0],
-                                                                  ]),
-                                                               ],
+                                                               [new TraitParsing([ModifierDefinitionDescriptor.LoadingService[0],]),],
                                                                false);
 
    public static readonly FileDescriptor ParliamentTypeParsingDescriptor =
@@ -74,40 +70,26 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor LocationDescriptor = new(["in_game", "map_data", "named_locations"],
                                                                   new("LocationsDefinition", "txt", "#"),
-                                                                  [
-                                                                     new LocationFileLoading([
-                                                                        DefaultMapPreParsing,
-                                                                        ColorParser.LoadingService[0],
-                                                                     ]),
-                                                                  ],
+                                                                  [new LocationFileLoading([DefaultMapPreParsing, ColorParser.LoadingService[0],]),],
                                                                   false);
 
    public static readonly FileDescriptor DefaultMapPreDescriptor = new(["in_game", "map_data", "default.map"],
                                                                        new("default.map", "map", "#"),
                                                                        ConsequentialLoadingSteps([
-                                                                          DefaultMapPreParsing,
-                                                                          new DefaultMapParsing([
-                                                                             LocationDescriptor.LoadingService[0],
-                                                                          ]),
+                                                                          DefaultMapPreParsing, new DefaultMapParsing([LocationDescriptor.LoadingService[0],]),
                                                                        ]),
                                                                        false);
 
    public static readonly FileDescriptor MapTracingDescriptor = new(["in_game", "map_data", "provinces.png"],
                                                                     new("LocationMap", "png", ""),
-                                                                    [
-                                                                       new LocationMapTracing([
-                                                                          DefaultMapPreParsing,
-                                                                          LocationDescriptor.LoadingService[0],
-                                                                       ])
-                                                                    ],
+                                                                    [new LocationMapTracing([DefaultMapPreParsing, LocationDescriptor.LoadingService[0],])],
                                                                     false);
 
    public static readonly FileDescriptor DefinitionsDescriptor = new(["in_game", "map_data", "definitions.txt"],
                                                                      new("definitions", "txt", "#"),
                                                                      [
                                                                         new DefinitionsParsing([
-                                                                           LocationDescriptor.LoadingService[0],
-                                                                           DefaultMapPreDescriptor.LoadingService[0],
+                                                                           LocationDescriptor.LoadingService[0], DefaultMapPreDescriptor.LoadingService[0],
                                                                         ]),
                                                                      ],
                                                                      false);
@@ -119,11 +101,7 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor EstateDescriptor = new(["in_game", "common", "estates"],
                                                                 new("estates", "txt", "#"),
-                                                                [
-                                                                   new EstateParsing([
-                                                                      ModifierDefinitionDescriptor.LoadingService[0]
-                                                                   ])
-                                                                ],
+                                                                [new EstateParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
                                                                 false);
 
    public static readonly FileDescriptor PopTypeDescriptor = new(["in_game", "common", "pop_types"],
@@ -131,8 +109,7 @@ public static class DescriptorDefinitions
                                                                  ConsequentialLoadingSteps([
                                                                     new PopTypeDiscoverer([]),
                                                                     new PopTypesParsing([
-                                                                       ColorParser.LoadingService[0],
-                                                                       ModifierDefinitionDescriptor.LoadingService[0],
+                                                                       ColorParser.LoadingService[0], ModifierDefinitionDescriptor.LoadingService[0],
                                                                        EstateDescriptor.LoadingService[0],
                                                                     ]),
                                                                  ]),
@@ -140,11 +117,7 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor LanguageDescriptor = new(["in_game", "common", "languages"],
                                                                   new("languages", "txt", "#"),
-                                                                  [
-                                                                     new LanguageParsing([
-                                                                        ColorParser.LoadingService[0],
-                                                                     ]),
-                                                                  ],
+                                                                  [new LanguageParsing([ColorParser.LoadingService[0],]),],
                                                                   false);
 
    private static readonly CultureParsing CultureDiscovery =
@@ -154,8 +127,7 @@ public static class DescriptorDefinitions
                                                                       new("location_ranks", "txt", "#"),
                                                                       [
                                                                          new LocationRankParsing([
-                                                                            ColorParser.LoadingService[0],
-                                                                            ModifierDefinitionDescriptor
+                                                                            ColorParser.LoadingService[0], ModifierDefinitionDescriptor
                                                                               .LoadingService[0],
                                                                          ]),
                                                                       ],
@@ -165,8 +137,7 @@ public static class DescriptorDefinitions
                                                                      new("country_ranks", "txt", "#"),
                                                                      [
                                                                         new CountryRankLoading([
-                                                                           ColorParser.LoadingService[0],
-                                                                           ModifierDefinitionDescriptor
+                                                                           ColorParser.LoadingService[0], ModifierDefinitionDescriptor
                                                                              .LoadingService[0],
                                                                         ]),
                                                                      ],
@@ -188,8 +159,7 @@ public static class DescriptorDefinitions
                                                                  ConsequentialLoadingSteps([
                                                                     CultureDiscovery,
                                                                     new CultureAfterParsing([
-                                                                       ColorParser.LoadingService[0],
-                                                                       LanguageDescriptor.LoadingService[0],
+                                                                       ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0],
                                                                     ]),
                                                                  ]),
                                                                  false);
@@ -209,46 +179,29 @@ public static class DescriptorDefinitions
                                                              new("ages", "txt", "#"),
                                                              [
                                                                 new AgeParsing([
-                                                                   ModifierDefinitionDescriptor.LoadingService[0],
-                                                                   EstateDescriptor.LoadingService[0],
+                                                                   ModifierDefinitionDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
                                                                 ]),
                                                              ],
                                                              false);
 
    public static readonly FileDescriptor ClimateDescriptor = new(["in_game", "common", "climates"],
                                                                  new("climates", "txt", "#"),
-                                                                 [
-                                                                    new ClimateParsing([
-                                                                       ModifierDefinitionDescriptor.LoadingService[0]
-                                                                    ])
-                                                                 ],
+                                                                 [new ClimateParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
                                                                  false);
 
    public static readonly FileDescriptor VegetationDescriptor = new(["in_game", "common", "vegetation"],
                                                                     new("vegetation", "txt", "#"),
-                                                                    [
-                                                                       new VegetationParsing([
-                                                                          ModifierDefinitionDescriptor.LoadingService[0]
-                                                                       ])
-                                                                    ],
+                                                                    [new VegetationParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
                                                                     false);
 
    public static readonly FileDescriptor TopographyDescriptor = new(["in_game", "common", "topography"],
                                                                     new("topography", "txt", "#"),
-                                                                    [
-                                                                       new TopographyParsing([
-                                                                          ModifierDefinitionDescriptor.LoadingService[0]
-                                                                       ])
-                                                                    ],
+                                                                    [new TopographyParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
                                                                     false);
 
    public static readonly FileDescriptor RegenciesDescriptor = new(["in_game", "common", "regencies"],
                                                                    new("regencies", "txt", "#"),
-                                                                   [
-                                                                      new RegencyParsing([
-                                                                         ModifierDefinitionDescriptor.LoadingService[0],
-                                                                      ]),
-                                                                   ],
+                                                                   [new RegencyParsing([ModifierDefinitionDescriptor.LoadingService[0],]),],
                                                                    true);
 
    public static readonly FileDescriptor ReligiousFactionParsing = new(["in_game", "common", "religious_factions"],
@@ -275,13 +228,10 @@ public static class DescriptorDefinitions
    public static readonly FileDescriptor ReligionDescriptor = new(["in_game", "common", "religions"],
                                                                   new("religions", "txt", "#"),
                                                                   [
-                                                                     new ReligionDiscovererParsing([]),
-                                                                     new ReligionParsing([
-                                                                        ReligiousGroupDescriptor.LoadingService[0],
-                                                                        ModifierDefinitionDescriptor
+                                                                     new ReligionDiscovererParsing([]), new ReligionParsing([
+                                                                        ReligiousGroupDescriptor.LoadingService[0], ModifierDefinitionDescriptor
                                                                           .LoadingService[0],
-                                                                        ColorParser.LoadingService[0],
-                                                                        LanguageDescriptor.LoadingService[0],
+                                                                        ColorParser.LoadingService[0], LanguageDescriptor.LoadingService[0],
                                                                         ReligiousFactionParsing.LoadingService[0],
                                                                         // TODO: CountriesDescriptor.LoadingService[0],
                                                                         ReligiousFocusParsing.LoadingService[0],
@@ -291,11 +241,7 @@ public static class DescriptorDefinitions
 
    public static readonly FileDescriptor RawMaterialDescriptor = new(["in_game", "common", "goods"],
                                                                      new("raw_materials", "txt", "#"),
-                                                                     [
-                                                                        new RawMaterialParsing([
-                                                                           PopTypeDescriptor.LoadingService[0],
-                                                                        ]),
-                                                                     ],
+                                                                     [new RawMaterialParsing([PopTypeDescriptor.LoadingService[0],]),],
                                                                      false);
 
    public static readonly FileDescriptor StaticModifiersDescriptor =
@@ -309,9 +255,8 @@ public static class DescriptorDefinitions
           new("location_templates", "txt", "#"),
           [
              new LocationTemplateParsing([
-                LocationDescriptor.LoadingService[0], ClimateDescriptor.LoadingService[0],
-                VegetationDescriptor.LoadingService[0], TopographyDescriptor.LoadingService[0],
-                ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0],
+                LocationDescriptor.LoadingService[0], ClimateDescriptor.LoadingService[0], VegetationDescriptor.LoadingService[0],
+                TopographyDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0],
                 RawMaterialDescriptor.LoadingService[0], StaticModifiersDescriptor.LoadingService[0],
              ]),
           ],
@@ -339,18 +284,11 @@ public static class DescriptorDefinitions
           new("main_menu_setup", "txt", "#"),
           [
              new SetupParsingStep([
-                CountryDefinitionDescriptor.LoadingService[0],
-                // CharacterDiscovery.LoadingService[0],
-                LocationDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
-                // CountriesDescriptor.LoadingService[0],
-                TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0],
-                CultureDescriptor.LoadingService[0], ArtistTypeDescriptor.LoadingService[0],
-                PopTypeDescriptor.LoadingService[0], ColorParser.LoadingService[0],
-                ReligiousSchoolsDescriptor.LoadingService[0],
-                InstitutionsDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
-                LanguageDescriptor.LoadingService[0],
-                DesignateHeirReasonDescriptor.LoadingService[0],
-                ParliamentTypeParsingDescriptor.LoadingService[0],
+                CountryDefinitionDescriptor.LoadingService[0], LocationDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
+                TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0],
+                ArtistTypeDescriptor.LoadingService[0], PopTypeDescriptor.LoadingService[0], ColorParser.LoadingService[0],
+                ReligiousSchoolsDescriptor.LoadingService[0], InstitutionsDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
+                LanguageDescriptor.LoadingService[0], DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
                 InstitutionsDescriptor.LoadingService[0],
              ]),
           ],
@@ -361,14 +299,12 @@ public static class DescriptorDefinitions
    {
       FileDescriptors =
       [
-         DefaultMapPreDescriptor, LocationDescriptor, MapTracingDescriptor, DefinitionsDescriptor,
-         AdjacenciesDescriptor, PopTypeDescriptor, LocationRankDescriptor, CountryRankDescriptor,
-         ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser, LanguageDescriptor,
-         AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor,
-         RegenciesDescriptor, EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor, TownSetupDescriptor,
-         ReligiousFactionParsing, ReligiousFocusParsing, DesignateHeirReasonDescriptor, TraitDescriptor,
-         ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor, BuildingDescriptor,
-         StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
+         DefaultMapPreDescriptor, LocationDescriptor, MapTracingDescriptor, DefinitionsDescriptor, AdjacenciesDescriptor, PopTypeDescriptor,
+         LocationRankDescriptor, CountryRankDescriptor, ReligiousSchoolsDescriptor, InstitutionsDescriptor, CultureDescriptor, ColorParser,
+         LanguageDescriptor, AgeDescriptor, ClimateDescriptor, VegetationDescriptor, ModifierDefinitionDescriptor, TopographyDescriptor, RegenciesDescriptor,
+         EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor, TownSetupDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
+         DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor,
+         BuildingDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
          MainMenuSetupParsingDescriptor,
       ];
 

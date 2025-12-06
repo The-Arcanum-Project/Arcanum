@@ -5,8 +5,7 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
 public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
 {
-   [Description(
-      "'*,' = Export this column, 'x' = Do not export this column\nThere are 4 columns in the error log: Severity, Message, Action, Description")]
+   [Description("'*,' = Export this column, 'x' = Do not export this column\nThere are 4 columns in the error log: Severity, Message, Action, Description")]
    [DefaultValue("*,*,*,*,")]
    public string ColumnsToExport
    {
@@ -22,8 +21,7 @@ public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
       set => SetNotifyProperty(ref field, value);
    } = "ErrorLogExport.csv";
 
-   [Description(
-      "The path where the exported file will be saved. Default is the ArcanumData directory via `string.Empty`.")]
+   [Description("The path where the exported file will be saved. Default is the ArcanumData directory via `string.Empty`.")]
    [DefaultValue("")]
    public string ExportFilePath
    {
@@ -50,6 +48,14 @@ public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
    [Description("If true, all error popups will be suppressed.")]
    [DefaultValue(false)]
    public bool SuppressAllErrors
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   }
+
+   [Description("If true, only vanilla errors will be suppressed.")]
+   [DefaultValue(false)]
+   public bool SuppressVanillaErrors
    {
       get;
       set => SetNotifyProperty(ref field, value);
