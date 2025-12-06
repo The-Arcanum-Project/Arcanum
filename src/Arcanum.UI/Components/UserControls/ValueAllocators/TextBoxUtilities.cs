@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Arcanum.UI.Components.StyleClasses;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -12,7 +13,7 @@ public static class TextBoxUtilities
       DependencyProperty.RegisterAttached("UpdateDelay",
                                           typeof(int),
                                           typeof(TextBoxUtilities),
-                                          new PropertyMetadata(0, OnUpdateDelayChanged));
+                                          new(0, OnUpdateDelayChanged));
 
    public static int GetUpdateDelay(DependencyObject obj) => (int)obj.GetValue(UpdateDelayProperty);
    public static void SetUpdateDelay(DependencyObject obj, int value) => obj.SetValue(UpdateDelayProperty, value);
@@ -22,11 +23,11 @@ public static class TextBoxUtilities
       DependencyProperty.RegisterAttached("Timer",
                                           typeof(DispatcherTimer),
                                           typeof(TextBoxUtilities),
-                                          new PropertyMetadata(null));
+                                          new(null));
 
    private static void OnUpdateDelayChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
-      if (d is not TextBox textBox)
+      if (d is not CorneredTextBox textBox)
          return;
 
       // Hook up events
@@ -44,14 +45,14 @@ public static class TextBoxUtilities
 
    private static void TextBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      var textBox = (TextBox)sender;
+      var textBox = (CorneredTextBox)sender;
       int delay = GetUpdateDelay(textBox);
 
       // Get or Create the Timer associated with this TextBox
       var timer = (DispatcherTimer)textBox.GetValue(TimerProperty);
       if (timer == null)
       {
-         timer = new DispatcherTimer();
+         timer = new();
          timer.Tick += (s, args) =>
          {
             var t = (DispatcherTimer)s;
@@ -72,7 +73,7 @@ public static class TextBoxUtilities
    {
       if (e.Key == Key.Enter)
       {
-         var textBox = (TextBox)sender;
+         var textBox = (CorneredTextBox)sender;
          StopTimer(textBox);
          TriggerUpdate(textBox);
 
@@ -83,18 +84,18 @@ public static class TextBoxUtilities
 
    private static void TextBox_LostFocus(object sender, RoutedEventArgs e)
    {
-      var textBox = (TextBox)sender;
+      var textBox = (CorneredTextBox)sender;
       StopTimer(textBox);
       TriggerUpdate(textBox);
    }
 
-   private static void StopTimer(TextBox textBox)
+   private static void StopTimer(CorneredTextBox textBox)
    {
       var timer = (DispatcherTimer)textBox.GetValue(TimerProperty);
       timer?.Stop();
    }
 
-   private static void TriggerUpdate(TextBox textBox)
+   private static void TriggerUpdate(CorneredTextBox textBox)
    {
       // This manually fires the binding update to the ViewModel
       var binding = textBox.GetBindingExpression(TextBox.TextProperty);

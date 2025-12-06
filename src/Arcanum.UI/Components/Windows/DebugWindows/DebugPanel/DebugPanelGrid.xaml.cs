@@ -127,9 +127,12 @@ public partial class DebugPanelGrid
       var pops = Globals.Locations["stockholm"].Pops;
       var allocatroVM = new AllocatorViewModel((int)pops.Sum(x => x.Size * 1000));
       foreach (var pop in pops)
-         allocatroVM.AddItem($"{pop.PopType}_{pop.Culture}", (int)(pop.Size * 1000), pop.PopType.Color.ToMediaColor());
+         allocatroVM.AddItem($"{pop.PopType}_{pop.Culture}", (int)(pop.Size * 1000), pop.PopType.Color.ToMediaColor(), false);
       allocator.DataContext = allocatroVM;
       bwindow.Content = allocator;
+      bwindow.Width = 500;
+      bwindow.Height = 700;
+      bwindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
       bwindow.Show();
    }
 }

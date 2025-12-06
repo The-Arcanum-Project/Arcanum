@@ -14,62 +14,90 @@
     </UserControl.InputBindings>
 
     <UserControl.Resources>
-        <!-- Style for the Lock Button -->
-        <Style x:Key = "LockToggleStyle" TargetType = "ToggleButton">
-            <Setter Property = "Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType = "ToggleButton">
-                        <Border Background = "Transparent" Padding = "2">
-                            <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property = "Foreground" Value = "#AAA" />
-            <Setter Property = "Content" Value = "🔓" /> <!-- Unlocked Icon -->
-            <Setter Property = "Cursor" Value = "Hand" />
-            <Style.Triggers>
-                <Trigger Property = "IsChecked" Value = "True">
-                    <Setter Property = "Content" Value = "🔒" /> <!-- Locked Icon -->
-                    <Setter Property = "Foreground" Value = "#D9534F" /> <!-- Red when locked -->
-                </Trigger>
-                <Trigger Property = "IsMouseOver" Value = "True">
-                    <Setter Property = "Foreground" Value = "#555" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTextBoxStyle.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <Style x:Key = "FineTuneButtonStyle" TargetType = "styleClasses:BaseButton">
-            <Setter Property = "Width" Value = "20" />
-            <Setter Property = "Height" Value = "24" />
-            <Setter Property = "Background" Value = "Transparent" />
-            <Setter Property = "BorderThickness" Value = "0" />
-            <Setter Property = "FontWeight" Value = "Bold" />
-            <Setter Property = "Foreground" Value = "#777" />
-            <Setter Property = "Cursor" Value = "Hand" />
-            <Setter Property = "Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType = "Button">
-                        <Border Background = "{TemplateBinding Background}" CornerRadius = "3">
-                            <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property = "IsMouseOver" Value = "True">
-                                <Setter Property = "Background" Value = "#EEE" />
-                                <Setter Property = "Foreground" Value = "#000" />
-                            </Trigger>
-                            <Trigger Property = "IsPressed" Value = "True">
-                                <Setter Property = "Background" Value = "#DDD" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Style for the Lock Button -->
+            <Style x:Key = "LockToggleStyle" TargetType = "ToggleButton">
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border Background = "Transparent" Padding = "2">
+                                <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property = "Foreground" Value = "#AAA" />
+                <Setter Property = "Content" Value = "🔓" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Style.Triggers>
+                    <Trigger Property = "IsChecked" Value = "True">
+                        <Setter Property = "Content" Value = "🔒" /> <!-- Locked Icon -->
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
 
-        <!-- Converter to calculate width based on distribution -->
-        <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
-        <converters:LimitToWidthConverter x:Key = "LimitToWidthConverter" />
+            <Style x:Key = "ThinBaseButtonStyle" TargetType = "styleClasses:BaseButton"
+                   BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+                <Setter Property = "Background" Value = "Transparent" />
+                <Setter Property = "BorderThickness" Value = "1" />
+                <Setter Property = "FontWeight" Value = "Bold" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Setter Property = "Width" Value = "20" />
+            </Style>
+
+            <Style x:Key = "BlueToggleButtonStyle" TargetType = "ToggleButton">
+                <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
+                <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+                <Setter Property = "BorderBrush" Value = "{StaticResource DefaultBorderColorBrush}" />
+                <Setter Property = "BorderThickness" Value = "1" />
+                <Setter Property = "Padding" Value = "2" />
+                <Setter Property = "Cursor" Value = "Hand" />
+
+                <!-- Overwrite the template for rounded corners -->
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border x:Name = "border" Background = "{TemplateBinding Background}"
+                                    BorderBrush = "{TemplateBinding BorderBrush}"
+                                    BorderThickness = "{TemplateBinding BorderThickness}" CornerRadius = "3"
+                                    Padding = "{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsMouseOver" Value = "True">
+                                    <Setter TargetName = "border" Property = "Background"
+                                            Value = "{StaticResource LightBackColorBrush}" />
+                                </Trigger>
+                                <Trigger Property = "IsPressed" Value = "True">
+                                    <Setter TargetName = "border" Property = "Background"
+                                            Value = "{StaticResource DarkerSelectedBackColorBrush}" />
+                                </Trigger>
+                                <Trigger Property = "IsChecked" Value = "True">
+                                    <Setter TargetName = "border" Property = "Background"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+
+                <Style.Triggers>
+                    <Trigger Property = "IsChecked" Value = "False">
+                        <Setter Property = "Foreground" Value = "{StaticResource BlueAccentColorBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Converter to calculate width based on distribution -->
+            <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
+            <converters:LimitToWidthConverter x:Key = "LimitToWidthConverter" />
+            <converters:BorderClipConverter x:Key = "BorderClipConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Border BorderBrush = "#DDD" BorderThickness = "1" CornerRadius = "4" Padding = "10">
@@ -80,48 +108,64 @@
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
 
-            <ItemsControl Grid.Row = "0" x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation = "Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Height = "20" Background = "{Binding ColorBrush}" ToolTip = "{Binding Name}">
-                            <Border.Width>
-                                <MultiBinding Converter = "{StaticResource DistributionToWidthConverter}">
-                                    <Binding Path = "Value" />
-                                    <Binding Path = "DataContext.TotalLimit"
-                                             RelativeSource = "{RelativeSource AncestorType=UserControl}" />
-                                    <!-- Bind to the Container's Width -->
-                                    <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
-                                </MultiBinding>
-                            </Border.Width>
+            <Border x:Name = "OuterBorder" Grid.Row = "0" CornerRadius = "4" BorderThickness = "1"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "Transparent"
+                    VerticalAlignment = "Stretch" HorizontalAlignment = "Stretch">
 
-                            <!-- Optional: Show Number inside bar if wide enough -->
-                            <TextBlock Text = "{Binding Value}" Foreground = "White" FontSize = "10"
-                                       FontWeight = "Bold" HorizontalAlignment = "Center" VerticalAlignment = "Center">
-                                <TextBlock.Style>
-                                    <Style TargetType = "TextBlock">
-                                        <Setter Property = "Visibility" Value = "Visible" />
-                                        <Style.Triggers>
-                                            <!-- Hide text if value is 0 -->
-                                            <DataTrigger Binding = "{Binding Value}" Value = "0">
-                                                <Setter Property = "Visibility" Value = "Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                <ItemsControl Grid.Row = "0" x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation = "Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Clip>
+                        <MultiBinding Converter = "{StaticResource BorderClipConverter}">
+                            <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
+                            <Binding ElementName = "CompositionBar" Path = "ActualHeight" />
+                            <Binding ElementName = "OuterBorder" Path = "CornerRadius" />
+                        </MultiBinding>
+                    </ItemsControl.Clip>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Height = "20" Background = "{Binding ColorBrush}" ToolTip = "{Binding Name}">
+                                <Border.Width>
+                                    <MultiBinding Converter = "{StaticResource DistributionToWidthConverter}">
+                                        <Binding Path = "Value" />
+                                        <Binding Path = "DataContext.TotalLimit"
+                                                 RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                        <!-- Bind to the Container's Width -->
+                                        <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
+                                    </MultiBinding>
+                                </Border.Width>
+
+                                <!-- Optional: Show Number inside bar if wide enough -->
+                                <TextBlock Text = "{Binding Value}" Foreground = "White" FontSize = "10"
+                                           FontWeight = "Bold" HorizontalAlignment = "Center"
+                                           VerticalAlignment = "Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType = "TextBlock">
+                                            <Setter Property = "Visibility" Value = "Visible" />
+                                            <Style.Triggers>
+                                                <!-- Hide text if value is 0 -->
+                                                <DataTrigger Binding = "{Binding Value}" Value = "0">
+                                                    <Setter Property = "Visibility" Value = "Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
 
             <!-- Header -->
-            <Grid Grid.Row = "1" Margin = "0,0,0,15">
+            <Grid Grid.Row = "1" Margin = "0,4,0,15">
                 <!-- Define columns to align Master Lock with Row Locks -->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "30" /> <!-- Lock Column -->
@@ -142,14 +186,30 @@
                     <StackPanel Grid.Column = "0" Orientation = "Horizontal" VerticalAlignment = "Center">
                         <TextBlock Text = "Total Limit:" FontWeight = "SemiBold" VerticalAlignment = "Center"
                                    Margin = "5,0,10,0" local:InteractionMonitor.AllocatorVM = "{Binding}" />
-                        <TextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
-                                 local:TextBoxUtilities.UpdateDelay = "600" Width = "60" Height = "24"
-                                 VerticalContentAlignment = "Center" HorizontalContentAlignment = "Center"
-                                 FontWeight = "Bold" />
+                        <styleClasses:CorneredTextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
+                                                      local:TextBoxUtilities.UpdateDelay = "600" Width = "60"
+                                                      Height = "24" VerticalContentAlignment = "Center"
+                                                      HorizontalContentAlignment = "Center" FontWeight = "Bold" />
                     </StackPanel>
 
+
                     <CheckBox Grid.Column = "1" IsChecked = "{Binding IsLogarithmic}" Content = "Log Scale"
-                              HorizontalAlignment = "Right" VerticalAlignment = "Center" />
+                              HorizontalAlignment = "Right" VerticalAlignment = "Center">
+                        <CheckBox.Style>
+                            <Style TargetType = "CheckBox" BasedOn = "{StaticResource {x:Type CheckBox}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding = "{Binding AutoDetectLogScale}" Value = "True">
+                                        <Setter Property = "ToolTip">
+                                            <Setter.Value>
+                                                Scale is currently managed automatically based on data distribution.
+                                                This can be changed in the UI Settings.
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </CheckBox.Style>
+                    </CheckBox>
                 </Grid>
             </Grid>
 
@@ -162,7 +222,7 @@
                                 <ColumnDefinition Width = "30" />  <!-- Lock Icon -->
                                 <ColumnDefinition Width = "45" />  <!-- Percentage -->
                                 <ColumnDefinition Width = "*" />   <!-- Slider -->
-                                <ColumnDefinition Width = "140" />  <!-- Int Box -->
+                                <ColumnDefinition Width = "120" />  <!-- Int Box -->
                             </Grid.ColumnDefinitions>
 
                             <!-- 1. Lock Button -->
@@ -220,17 +280,20 @@
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">
                                 <!-- Decrement -->
                                 <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
-                                                         Style = "{StaticResource FineTuneButtonStyle}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}"
                                                          local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <!-- TextBox -->
-                                <TextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
-                                         local:TextBoxUtilities.UpdateDelay = "600" VerticalContentAlignment = "Center"
-                                         HorizontalContentAlignment = "Center" Height = "24" Width = "60"
-                                         Margin = "2,0"
-                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                    <TextBox.Style>
-                                        <Style TargetType = "TextBox">
+                                <styleClasses:CorneredTextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
+                                                              local:TextBoxUtilities.UpdateDelay = "600"
+                                                              VerticalContentAlignment = "Center"
+                                                              HorizontalContentAlignment = "Center" Height = "24"
+                                                              Width = "50" Margin = "2,0"
+                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <styleClasses:CorneredTextBox.Style>
+                                        <Style TargetType = "styleClasses:CorneredTextBox"
+                                               BasedOn = "{StaticResource {x:Type styleClasses:CorneredTextBox}}">
+
                                             <Style.Triggers>
                                                 <DataTrigger Binding = "{Binding IsLocked}" Value = "True">
                                                     <Setter Property = "FontWeight" Value = "Bold" />
@@ -238,20 +301,22 @@
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </TextBox.Style>
-                                </TextBox>
+                                    </styleClasses:CorneredTextBox.Style>
+                                </styleClasses:CorneredTextBox>
 
                                 <!-- Increment -->
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
-                                                         Style = "{StaticResource FineTuneButtonStyle}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}"
                                                          local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "20" Height = "24"
-                                              Foreground = "#AAA" Margin = "0,0,2,0" />
+
+                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "24" Height = "24"
+                                              Style = "{StaticResource BlueToggleButtonStyle}" Margin = "2,0,0,0" />
 
                                 <Popup IsOpen = "{Binding IsChecked, ElementName=SettingsBtn}" StaysOpen = "False"
-                                       Placement = "Bottom">
-                                    <Border Background = "White" BorderBrush = "#CCC" BorderThickness = "1"
-                                            Padding = "10" CornerRadius = "4">
+                                       Placement = "Bottom" AllowsTransparency = "True">
+                                    <Border BorderThickness = "2" Padding = "10" CornerRadius = "4"
+                                            Background = "{StaticResource DefaultBackColorBrush}"
+                                            BorderBrush = "{StaticResource DefaultBorderColorBrush}">
                                         <StackPanel>
                                             <TextBlock Text = "Constraints" FontWeight = "Bold" Margin = "0,0,0,5" />
 
@@ -263,10 +328,10 @@
                                                 <TextBlock Text = "Min:" VerticalAlignment = "Center" />
 
                                                 <!-- UPDATED: Explicit Trigger + Helper -->
-                                                <TextBox Grid.Column = "1"
-                                                         Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
-                                                         local:TextBoxUtilities.UpdateDelay = "300"
-                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <styleClasses:CorneredTextBox Grid.Column = "1"
+                                                                              Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
+                                                                              local:TextBoxUtilities.UpdateDelay = "300"
+                                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                             </Grid>
 
                                             <Grid Margin = "0,2">
@@ -277,10 +342,10 @@
                                                 <TextBlock Text = "Max:" VerticalAlignment = "Center" />
 
                                                 <!-- UPDATED: Explicit Trigger + Helper -->
-                                                <TextBox Grid.Column = "1"
-                                                         Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
-                                                         local:TextBoxUtilities.UpdateDelay = "300"
-                                                         local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <styleClasses:CorneredTextBox Grid.Column = "1"
+                                                                              Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
+                                                                              local:TextBoxUtilities.UpdateDelay = "300"
+                                                                              local:InteractionMonitor.AllocatorVM = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                             </Grid>
                                         </StackPanel>
                                     </Border>

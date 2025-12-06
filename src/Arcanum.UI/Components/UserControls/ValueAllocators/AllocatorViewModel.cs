@@ -13,11 +13,24 @@ public class AllocatorViewModel : ViewModelBase
    private int _totalLimit;
    private bool _isLogarithmic;
    private bool? _areAllLocked;
+   private bool _autoDetectLogScale = true;
 
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
    private readonly Stack<int> _totalHistory = new();
 
    public ICommand UndoCommand { get; }
+
+   public bool AutoDetectLogScale
+   {
+      get => _autoDetectLogScale;
+      set
+      {
+         _autoDetectLogScale = value;
+         OnPropertyChanged();
+         if (value)
+            RunAutoLogScale();
+      }
+   }
 
    public bool? AreAllLocked
    {
@@ -57,6 +70,8 @@ public class AllocatorViewModel : ViewModelBase
             OnPropertyChanged();
             // When Total changes, we must resize unlocked items to fit
             ResizeUnlockedItems(value - oldTotal);
+
+            RunAutoLogScale();
          }
       }
    }
@@ -194,15 +209,39 @@ public class AllocatorViewModel : ViewModelBase
       UpdateMasterLockState();
    }
 
-   public void AddItem(string name, int initialValue, Color color)
+   public void AddItem(string name, int initialValue, Color color, bool balanceToTotal)
    {
       var item = new AllocationItem(this, name, initialValue, color);
       Items.Add(item);
 
       // Initial balance check
-      if (Items.Sum(x => x.Value) != TotalLimit)
+      if (balanceToTotal && Items.Sum(x => x.Value) != TotalLimit)
          // Force balance to total (ignoring locks for initial setup)
          BalanceToTotal(null, ignoreLocks: true);
+
+      RunAutoLogScale();
+   }
+
+   private void RunAutoLogScale()
+   {
+      if (!AutoDetectLogScale)
+         return;
+
+      // Simple heuristic: If any item has value > 10x the smallest non-zero item, use log scale
+      var nonZeroItems = Items.Where(x => x.Value > 0).ToList();
+      if (nonZeroItems.Count < 2)
+      {
+         IsLogarithmic = false;
+         return;
+      }
+
+      int minVal = nonZeroItems.Min(x => x.Value);
+      int maxVal = nonZeroItems.Max(x => x.Value);
+
+      if (maxVal >= 10 * minVal)
+         IsLogarithmic = true;
+      else
+         IsLogarithmic = false;
    }
 
    /// <summary>

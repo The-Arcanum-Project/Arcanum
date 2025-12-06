@@ -1,10 +1,12 @@
-﻿using System.Windows.Input;
+﻿using System.Diagnostics;
+using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
+[DebuggerDisplay("{Name}: {Value} (Min:{MinLimit} Max:{MaxLimit})")]
 public class AllocationItem : ViewModelBase
 {
    private readonly AllocatorViewModel _parent;
@@ -190,7 +192,7 @@ public class AllocationItem : ViewModelBase
       }
    }
 
-   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color, int min = 0, int max = int.MaxValue)
+   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color, int min = 0, int max = 100_000)
    {
       _parent = parent;
       _name = name;
