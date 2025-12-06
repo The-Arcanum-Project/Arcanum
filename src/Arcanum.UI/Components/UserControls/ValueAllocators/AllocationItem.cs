@@ -1,5 +1,7 @@
-﻿using System.Windows.Media;
+﻿using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -11,6 +13,9 @@ public class AllocationItem : ViewModelBase
    private bool _isLocked;
    private Color _mediaColor;
    private SolidColorBrush _colorBrush;
+
+   public ICommand IncrementCommand { get; }
+   public ICommand DecrementCommand { get; }
 
    public Color MediaColor
    {
@@ -131,7 +136,32 @@ public class AllocationItem : ViewModelBase
          G = color.G,
          B = color.B,
       };
+
+      // Init Commands
+      IncrementCommand = new RelayCommand(Increment);
+      DecrementCommand = new RelayCommand(Decrement);
+
       UpdateBrush();
+   }
+
+   private void Increment()
+   {
+      // If Locked: Just add 1 (Total grows)
+      // If Unlocked: Add 1 (Others shrink), but cap at TotalLimit
+      // The Value setter handles logic, we just check bounds here.
+
+      if (!IsLocked && Value >= _parent.TotalLimit)
+         return;
+
+      Value++;
+   }
+
+   private void Decrement()
+   {
+      if (Value <= 0)
+         return;
+
+      Value--;
    }
 
    private void UpdateBrush()

@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Media;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 
@@ -8,6 +10,28 @@ public class AllocatorViewModel : ViewModelBase
 {
    private int _totalLimit;
    private bool _isLogarithmic;
+   private bool? _areAllLocked;
+
+   public bool? AreAllLocked
+   {
+      get => _areAllLocked;
+      set
+      {
+         // Only react if the USER clicked the toggle (value is distinct)
+         if (_areAllLocked != value)
+         {
+            _areAllLocked = value;
+            OnPropertyChanged();
+
+            // If user sets to True/False, apply to all items
+            // If it becomes Null (indeterminate), we usually treat that as a transition to Unlocked or ignore
+            if (value.HasValue)
+            {
+               SetAllLocks(value.Value);
+            }
+         }
+      }
+   }
 
    public int TotalLimit
    {
@@ -46,7 +70,80 @@ public class AllocatorViewModel : ViewModelBase
 
    public AllocatorViewModel(int total)
    {
-      _totalLimit = total; // Don't trigger setter logic on init
+      _totalLimit = total;
+
+      // Listen for new items to hook up events
+      Items.CollectionChanged += Items_CollectionChanged;
+
+      // Initial state check
+      UpdateMasterLockState();
+   }
+
+   private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+   {
+      if (e.NewItems != null)
+      {
+         foreach (AllocationItem item in e.NewItems)
+            item.PropertyChanged += Item_PropertyChanged;
+      }
+
+      if (e.OldItems != null)
+      {
+         foreach (AllocationItem item in e.OldItems)
+            item.PropertyChanged -= Item_PropertyChanged;
+      }
+
+      UpdateMasterLockState();
+   }
+
+   private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+   {
+      // If an item locks/unlocks, check if we need to update the Master Toggle
+      if (e.PropertyName == nameof(AllocationItem.IsLocked))
+      {
+         UpdateMasterLockState();
+      }
+   }
+
+   private bool _isUpdatingLocks = false;
+
+   private void UpdateMasterLockState()
+   {
+      if (_isUpdatingLocks)
+         return; // Prevent loops
+
+      if (Items.Count == 0)
+      {
+         _areAllLocked = false;
+      }
+      else
+      {
+         bool allLocked = Items.All(x => x.IsLocked);
+         bool allUnlocked = Items.All(x => !x.IsLocked);
+
+         if (allLocked)
+            _areAllLocked = true;
+         else if (allUnlocked)
+            _areAllLocked = false;
+         else
+            _areAllLocked = null; // Mixed state
+      }
+
+      OnPropertyChanged(nameof(AreAllLocked));
+   }
+
+   private void SetAllLocks(bool isLocked)
+   {
+      _isUpdatingLocks = true;
+      foreach (var item in Items)
+      {
+         item.IsLocked = isLocked;
+      }
+
+      _isUpdatingLocks = false;
+
+      // Refresh visuals just in case
+      UpdateMasterLockState();
    }
 
    public void AddItem(string name, int initialValue, Color color)
