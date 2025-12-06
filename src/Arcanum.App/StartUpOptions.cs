@@ -2,7 +2,8 @@
 
 public class StartupOptions
 {
-   public bool IsHeadless { get; set; } = false;
+   public bool IsHeadless { get; set; }
+   public bool Clean { get; set; }
    public string? ModPath { get; set; }
    public List<string> BaseMods { get; set; } = [];
 

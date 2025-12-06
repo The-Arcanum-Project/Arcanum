@@ -36,11 +36,61 @@ public static class ErrorManager
          Diagnostics.Add(diagnostic);
    }
 
-   public static void PrintDiagnosticsToConsole()
+   public static void PrintDiagnosticsToConsole(bool clean)
    {
+      if (clean)
+         Console.Clear();
+      else
+      {
+         ArcLog.WritePure("");
+         ArcLog.WritePure("");
+      }
+
       ArcLog.WritePure("########################################");
       ArcLog.WritePure("############### ERRORLOG ###############");
       ArcLog.WritePure("########################################");
+
+      Dictionary<int, (Diagnostic, int)> diagnosticOccurrences = [];
+      foreach (var diag in Diagnostics)
+         if (!diagnosticOccurrences.TryAdd(diag.Descriptor.Id, (diag, 1)))
+            diagnosticOccurrences[diag.Descriptor.Id] =
+               (diagnosticOccurrences[diag.Descriptor.Id].Item1,
+                diagnosticOccurrences[diag.Descriptor.Id].Item2 + 1);
+
+      int error,
+          warning,
+          info;
+
+      error = warning = info = 0;
+
+      foreach (var diag in Diagnostics)
+         switch (diag.Severity)
+         {
+            case DiagnosticSeverity.Error:
+               error++;
+               break;
+            case DiagnosticSeverity.Warning:
+               warning++;
+               break;
+            case DiagnosticSeverity.Information:
+               info++;
+               break;
+            default:
+               throw new ArgumentOutOfRangeException();
+         }
+
+      ArcLog.WritePure("");
+      ArcLog.WritePure("");
+      ArcLog.WritePure("# Total Diagnostics: " + Diagnostics.Count);
+      ArcLog.WritePure("# Errors: " + error);
+      ArcLog.WritePure("# Warnings: " + warning);
+      ArcLog.WritePure("# Info: " + info);
+
+      ArcLog.WritePure("");
+      ArcLog.WritePure("# ID | Name                                    | Occurrences");
+      foreach (var kvp in diagnosticOccurrences)
+         ArcLog.WritePure($"#{kvp.Key,4}: {kvp.Value.Item1.Code,-40}: {kvp.Value.Item2} occurrences");
+      ArcLog.WritePure("");
 
       var sb = ExportToConsole();
       Console.WriteLine(sb.ToString());

@@ -55,6 +55,7 @@ internal static class Program
       var pluginHost = new PluginHost.PluginHost();
       UiHandlesInjector.InjectUiHandles();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
+      var clean = false;
 
       if (args.Contains("--headless") || args.Contains("-h"))
       {
@@ -77,7 +78,8 @@ internal static class Program
 
             ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Logic executed successfully.");
 
-            ErrorManager.PrintDiagnosticsToConsole();
+            ErrorManager.PrintDiagnosticsToConsole(config.Clean);
+            clean = config.Clean;
          }
          catch (Exception ex)
          {
@@ -86,7 +88,8 @@ internal static class Program
          }
          finally
          {
-            ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Shutting down...");
+            if (!clean)
+               ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Shutting down...");
             LifecycleManager.Instance.RunShutdownSequence();
             ConsoleHelper.ReleaseConsole();
             app.Shutdown(Environment.ExitCode);

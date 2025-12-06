@@ -41,7 +41,7 @@ public class LifecycleManager
       // Step 0: Initialize debug elements
       LoadDebugElements();
       if (DebugConfig.Settings.EnableDebugLogging)
-         UIHandle.Instance.LogWindowHandle.ShowWindow();
+         Arcanum.UI.Components.UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
 
       InitializeApplicationCore();

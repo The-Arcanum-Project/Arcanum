@@ -6,6 +6,12 @@ public static class ArgumentParser
 {
    internal static StartupOptions ParseArguments(string[] args)
    {
+      // Supported Options and how to use them:
+      // --headless / -h               : Run in headless mode (no UI)
+      // --clean / -c                  : Clean temporary files on startup
+      // --mod / -m <path>             : Specify the directory to load
+      // --vanilla / -v <path>         : Specify a vanilla directory to include
+
       var options = new StartupOptions();
       string? currentCommand = null;
 
@@ -18,6 +24,8 @@ public static class ArgumentParser
             // Handle Boolean Flags immediately
             if (currentCommand is "--headless" or "-h" or "-batch")
                options.IsHeadless = true;
+            else if (currentCommand is "--clean" or "-c")
+               options.Clean = true;
 
             continue; // Move to next arg, which might be a value
          }
