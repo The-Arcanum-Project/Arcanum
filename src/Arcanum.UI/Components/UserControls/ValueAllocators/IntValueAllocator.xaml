@@ -201,8 +201,9 @@
     <Border BorderThickness = "1" CornerRadius = "4" Padding = "10">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height = "30" />
+                <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "20" />
+                <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" MaxHeight = "800" />
                 <RowDefinition Height = "Auto" />
@@ -213,7 +214,8 @@
             <TextBlock Grid.Row = "0"
                        Text = "{Binding LoadedLocation.UniqueId,
                           StringFormat=Pops of {0}:}"
-                       FontSize = "16" FontWeight = "Bold" VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                       Margin = "0,0,0,3" FontSize = "16" FontWeight = "Bold" VerticalAlignment = "Center"
+                       HorizontalAlignment = "Center" />
 
 
             <Border x:Name = "OuterBorder" Grid.Row = "1" CornerRadius = "4" BorderThickness = "1"
@@ -272,7 +274,7 @@
 
 
             <!-- Header -->
-            <Grid Grid.Row = "2" Margin = "0,4,0,15">
+            <Grid Grid.Row = "2" Margin = "-5,4,0,5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "30" />
                     <ColumnDefinition Width = "*" />
@@ -285,16 +287,15 @@
                 <!-- Total and Settings -->
                 <Grid Grid.Column = "1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width = "80" /> <!-- Label -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Label -->
                         <ColumnDefinition Width = "*" />  <!-- Slider -->
                         <ColumnDefinition Width = "70" /> <!-- TextBox -->
                         <ColumnDefinition Width = "Auto" /> <!-- Log Toggle -->
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column = "0" Text = "Total Limit:" FontWeight = "SemiBold"
-                               VerticalAlignment = "Center" />
+                    <TextBlock Grid.Column = "0" Text = "Total:" FontWeight = "SemiBold" VerticalAlignment = "Center" />
 
-                    <Grid Grid.Column = "1" Margin = "5,0,10,0">
+                    <Grid Grid.Column = "1" Margin = "6,0,4,0">
                         <Slider Minimum = "0" Maximum = "{Binding MaxTotalLimit}"
                                 Value = "{Binding TotalLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 VerticalAlignment = "Center" TickFrequency = "100" IsSnapToTickEnabled = "False"
@@ -331,8 +332,12 @@
                 </Grid>
             </Grid>
 
+            <!-- Separator Line -->
+            <Rectangle Grid.Row = "3" Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}"
+                       Margin = "0,-2,0,10" />
+
             <!-- Rows -->
-            <ItemsControl Grid.Row = "3" ItemsSource = "{Binding Items}">
+            <ItemsControl Grid.Row = "4" ItemsSource = "{Binding Items}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin = "0,6">
@@ -473,7 +478,7 @@
             </ItemsControl>
 
             <!-- Calculated Values Info -->
-            <Grid Grid.Row = "4">
+            <Grid Grid.Row = "5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height = "Auto" />
                     <RowDefinition Height = "Auto" />
