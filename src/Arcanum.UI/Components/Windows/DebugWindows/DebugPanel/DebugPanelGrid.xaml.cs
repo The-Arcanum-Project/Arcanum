@@ -124,10 +124,10 @@ public partial class DebugPanelGrid
    {
       var bwindow = new BaseWindow { Title = "Pops Editor Test" };
       var allocator = new IntValueAllocator();
-      var pops = Globals.Locations["stockholm"].Pops;
-      var allocatroVM = new AllocatorViewModel((int)pops.Sum(x => x.Size * 1000));
-      foreach (var pop in pops)
-         allocatroVM.AddItem($"{pop.PopType}_{pop.Culture}", (int)(pop.Size * 1000), pop.PopType.Color.ToMediaColor(), false);
+      var locs = Globals.Locations.Values.ToArray();
+      var loc = locs[0]; //Random.Shared.Next(0, locs.Length)
+      var allocatroVM = new AllocatorViewModel((int)loc.Pops.Sum(x => x.Size * 1000));
+      allocatroVM.LoadLocation(loc);
       allocator.DataContext = allocatroVM;
       bwindow.Content = allocator;
       bwindow.Width = 500;

@@ -2,7 +2,11 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
-using System.Windows.Media;
+using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.GameObjects.Cultural;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.GameObjects.Religious;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 
@@ -17,6 +21,20 @@ public class AllocatorViewModel : ViewModelBase
    private readonly Stack<int> _totalHistory = new();
 
    public ICommand UndoCommand { get; }
+   public ICommand DeleteCommand { get; }
+
+   public Location LoadedLocation
+   {
+      get;
+      private set
+      {
+         if (Equals(value, field))
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   } = Location.Empty;
 
    public bool AutoDetectLogScale
    {
@@ -91,14 +109,87 @@ public class AllocatorViewModel : ViewModelBase
 
    public ObservableCollection<AllocationItem> Items { get; } = [];
 
+   public Religion CalculatedReligion
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = Religion.Empty;
+
+   public Culture CalculatedCulture
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = Culture.Empty;
+
+   public int CalculatedPopulation
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public string CalculatedPopulationToolTip
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = string.Empty;
+
    public AllocatorViewModel(int total)
    {
       _totalLimit = total;
 
       Items.CollectionChanged += Items_CollectionChanged;
+      PropertyChanged += UpdateCalculatedInfo;
 
       UpdateMasterLockState();
       UndoCommand = new RelayCommand(Undo);
+      DeleteCommand = new RelayCommand<AllocationItem>(Delete);
+   }
+
+   private void UpdateCalculatedInfo(object? sender, PropertyChangedEventArgs propertyChangedEventArgs)
+   {
+      if (propertyChangedEventArgs.PropertyName != nameof(Items) &&
+          propertyChangedEventArgs.PropertyName != nameof(TotalLimit))
+         return;
+
+      Dictionary<Religion, long> religionCounts = new();
+      Dictionary<Culture, long> cultureCounts = new();
+      long totalPop = 0;
+
+      foreach (var item in Items)
+      {
+         var pop = item.PopDefinition;
+
+         long size = item.Value;
+         totalPop += size;
+
+         religionCounts.TryAdd(pop.Religion, 0);
+         religionCounts[pop.Religion] += size;
+
+         cultureCounts.TryAdd(pop.Culture, 0);
+         cultureCounts[pop.Culture] += size;
+      }
+
+      CalculatedReligion = religionCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
+      CalculatedCulture = cultureCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
+
+      CalculatedPopulation = (int)totalPop;
+      CalculatedPopulationToolTip = $"Total: {totalPop:N0}";
    }
 
    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -127,6 +218,18 @@ public class AllocatorViewModel : ViewModelBase
       }
    }
 
+   private void Delete(AllocationItem? allocationItem)
+   {
+      if (LoadedLocation == Location.Empty)
+         return;
+
+      if (allocationItem != null)
+      {
+         Nx.RemoveFromCollection(LoadedLocation, Location.Field.Pops, allocationItem.PopDefinition);
+         Items.Remove(allocationItem);
+      }
+   }
+
    private void Undo()
    {
       if (_undoStack.Count == 0)
@@ -151,6 +254,10 @@ public class AllocatorViewModel : ViewModelBase
       // If an item locks/unlocks, check if we need to update the Master Toggle
       if (e.PropertyName == nameof(AllocationItem.IsLocked))
          UpdateMasterLockState();
+
+      if (e.PropertyName == nameof(AllocationItem.Value))
+         // We pass null or dummy args because UpdateCalculatedInfo logic is generic
+         UpdateCalculatedInfo(this, new(nameof(Items)));
    }
 
    private bool _isUpdatingLocks = false;
@@ -191,14 +298,25 @@ public class AllocatorViewModel : ViewModelBase
       UpdateMasterLockState();
    }
 
-   public void AddItem(string name, int initialValue, Color color, bool balanceToTotal)
+   public void LoadLocation(Location location)
    {
-      var item = new AllocationItem(this, name, initialValue, color);
+      Items.Clear();
+
+      foreach (var pop in location.Pops)
+         Items.Add(new(this, pop));
+
+      LoadedLocation = location;
+
+      RunAutoLogScale();
+   }
+
+   internal void AddItem(PopDefinition pop, bool balanceToTotal)
+   {
+      var item = new AllocationItem(this, pop);
       Items.Add(item);
 
-      // Initial balance check
+      // Force balance to total (ignoring locks for initial setup)
       if (balanceToTotal && Items.Sum(x => x.Value) != TotalLimit)
-         // Force balance to total (ignoring locks for initial setup)
          BalanceToTotal(null, ignoreLocks: true);
 
       RunAutoLogScale();
@@ -220,10 +338,7 @@ public class AllocatorViewModel : ViewModelBase
       var minVal = nonZeroItems.Min(x => x.Value);
       var maxVal = nonZeroItems.Max(x => x.Value);
 
-      if (maxVal >= 10 * minVal)
-         IsLogarithmic = true;
-      else
-         IsLogarithmic = false;
+      IsLogarithmic = maxVal >= 10 * minVal;
    }
 
    /// <summary>

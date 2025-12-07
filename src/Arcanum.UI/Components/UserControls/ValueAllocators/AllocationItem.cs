@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arcanum.Core.GameObjects.Pops;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 
@@ -165,6 +166,8 @@ public class AllocationItem : ViewModelBase
       }
    }
 
+   public PopDefinition PopDefinition { get; }
+
    public string PercentageDisplay
    {
       get
@@ -176,22 +179,17 @@ public class AllocationItem : ViewModelBase
       }
    }
 
-   public AllocationItem(AllocatorViewModel parent, string name, int val, Color color, int min = 0, int max = 100_000)
+   public AllocationItem(AllocatorViewModel parent, PopDefinition pop, int min = 0, int max = 100_000)
    {
+      PopDefinition = pop;
       _parent = parent;
-      _name = name;
-      _value = val;
+      _name = $"{pop.PopType.UniqueId}: {pop.Culture} {pop.Religion}";
+      _value = (int)(pop.Size * 1_000);
       _isLocked = false;
       _minLimit = min;
       _maxLimit = max;
 
-      _mediaColor = new()
-      {
-         A = 120,
-         R = color.R,
-         G = color.G,
-         B = color.B,
-      };
+      _mediaColor = pop.PopType.Color.ToMediaColor() with { A = 140 };
 
       // Init Commands
       IncrementCommand = new RelayCommand(Increment);

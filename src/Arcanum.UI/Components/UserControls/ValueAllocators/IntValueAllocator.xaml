@@ -197,16 +197,25 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border BorderBrush = "#DDD" BorderThickness = "1" CornerRadius = "4" Padding = "10">
+    <Border BorderThickness = "1" CornerRadius = "4" Padding = "10">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height = "30" />
                 <RowDefinition Height = "20" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" MaxHeight = "800" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
 
+            <!-- Location Name Title Bar -->
+            <TextBlock Grid.Row = "0"
+                       Text = "{Binding LoadedLocation.UniqueId,
+                          StringFormat=Pops of {0}:}"
+                       FontSize = "16" FontWeight = "Bold" VerticalAlignment = "Center" HorizontalAlignment = "Center" />
 
-            <Border x:Name = "OuterBorder" Grid.Row = "0" CornerRadius = "4" BorderThickness = "1"
+
+            <Border x:Name = "OuterBorder" Grid.Row = "1" CornerRadius = "4" BorderThickness = "1"
                     BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "Transparent"
                     VerticalAlignment = "Stretch" HorizontalAlignment = "Stretch">
 
@@ -262,7 +271,7 @@
 
 
             <!-- Header -->
-            <Grid Grid.Row = "1" Margin = "0,4,0,15">
+            <Grid Grid.Row = "2" Margin = "0,4,0,15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "30" />
                     <ColumnDefinition Width = "*" />
@@ -310,15 +319,15 @@
             </Grid>
 
             <!-- Rows -->
-            <ItemsControl Grid.Row = "2" ItemsSource = "{Binding Items}">
+            <ItemsControl Grid.Row = "3" ItemsSource = "{Binding Items}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin = "0,6">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "20" />
                                 <ColumnDefinition Width = "30" />
-                                <ColumnDefinition Width = "45" />
                                 <ColumnDefinition Width = "*" />
-                                <ColumnDefinition Width = "120" />
+                                <ColumnDefinition Width = "150" />
                             </Grid.ColumnDefinitions>
 
                             <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
@@ -370,7 +379,7 @@
 
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">
                                 <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
-                                                         Style = "{StaticResource ThinBaseButtonStyle}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "15"
                                                          local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
                                 <styleClasses:CorneredTextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
@@ -394,10 +403,18 @@
                                 </styleClasses:CorneredTextBox>
 
                                 <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
-                                                         Style = "{StaticResource ThinBaseButtonStyle}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "15"
                                                          local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
 
-                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "24" Height = "24"
+                                <styleClasses:BaseButton Content = "X"
+                                                         Command = "{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         CommandParameter = "{Binding}" Margin = "2,0,0,0"
+                                                         IsEnabled = "{Binding IsNotLocked}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "25"
+                                                         ToolTip = "Delete this Popdefinition from the location"
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "25" Height = "24"
                                               Style = "{StaticResource BlueToggleButtonStyle}" Margin = "2,0,0,0" />
 
                                 <Popup IsOpen = "{Binding IsChecked, ElementName=SettingsBtn}" StaysOpen = "False"
@@ -441,6 +458,37 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <!-- Calculated Values Info -->
+            <Grid Grid.Row = "4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Separator Line -->
+                <Rectangle Grid.Column = "0" Grid.Row = "0" Grid.ColumnSpan = "3" Height = "1"
+                           Fill = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Center"
+                           Margin = "10,0,10,5" />
+
+                <TextBlock Grid.Row = "1" Grid.Column = "0"
+                           Text = "{Binding CalculatedPopulation, StringFormat=Total Pops: {0}}"
+                           ToolTip = "{Binding CalculatedPopulationToolTip}" HorizontalAlignment = "Center"
+                           VerticalAlignment = "Top" />
+
+                <TextBlock Grid.Row = "1" Grid.Column = "1"
+                           Text = "{Binding CalculatedReligion.UniqueId, StringFormat=Religion: {0}}"
+                           HorizontalAlignment = "Center" VerticalAlignment = "Top" />
+                <TextBlock Grid.Row = "1" Grid.Column = "2"
+                           Text = "{Binding CalculatedCulture.UniqueId, StringFormat=Culture: {0}}"
+                           HorizontalAlignment = "Center" VerticalAlignment = "Top" />
+            </Grid>
         </Grid>
     </Border>
 </UserControl>
