@@ -13,8 +13,9 @@ public class AddToCollectionCommand
       target._addToCollection(attribute, value);
    }
 
-   protected override string ActionDescription => "Add";
-
+   public override string GetDescription => Targets.Count > 1
+      ? $"Add {Value} to {Attribute} in {Targets.Count} objects of type {Type}"
+      : $"Add {Value} to {Attribute} in {Targets.First()}";
    public override void Undo()
    {
       base.Undo();

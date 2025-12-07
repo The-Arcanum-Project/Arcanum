@@ -11,8 +11,9 @@ public class RemoveFromCollectionCommand
       target._removeFromCollection(attribute, value);
    }
 
-   protected override string ActionDescription => "Remove";
-
+   public override string GetDescription => Targets.Count > 1
+      ? $"Remove {Value} from {Attribute} in {Targets.Count} objects of type {Type}"
+      : $"Remove {Value} from {Attribute} in {Targets.First()}";
    public override void Undo()
    {
       base.Undo();

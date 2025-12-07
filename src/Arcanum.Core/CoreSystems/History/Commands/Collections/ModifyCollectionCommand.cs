@@ -7,12 +7,7 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
 {
    protected IList<IEu5Object> Targets = new List<IEu5Object>();
    protected readonly object Value;
-
-   public override string GetDescription => Targets.Count > 1
-                                               ? $"{ActionDescription} {Value} to {Attribute} in {Targets.Count} objects of type {Type}"
-                                               : $"{ActionDescription} {Value} to {Attribute} in {Targets.First()}";
-
-   protected abstract string ActionDescription { get; }
+   
 
    protected ModifyCollectionCommand(IEu5Object target, Enum attribute, object value)
       : base(target, attribute)
