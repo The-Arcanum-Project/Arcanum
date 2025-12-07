@@ -5,7 +5,8 @@
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
-             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:charts = "clr-namespace:Arcanum.UI.Components.Charts.DonutChart" mc:Ignorable = "d"
              d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
 
     <UserControl.InputBindings>
@@ -464,30 +465,35 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height = "Auto" />
                     <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "Auto" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "*" />
                     <ColumnDefinition Width = "*" />
-                    <ColumnDefinition Width = "*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Separator Line -->
-                <Rectangle Grid.Column = "0" Grid.Row = "0" Grid.ColumnSpan = "3" Height = "1"
-                           Fill = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Center"
-                           Margin = "10,0,10,5" />
+                <Rectangle Grid.Row = "0" Grid.ColumnSpan = "2" Height = "1"
+                           Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,0,0,10" />
 
                 <TextBlock Grid.Row = "1" Grid.Column = "0"
-                           Text = "{Binding CalculatedPopulation, StringFormat=Total Pops: {0}}"
-                           ToolTip = "{Binding CalculatedPopulationToolTip}" HorizontalAlignment = "Center"
-                           VerticalAlignment = "Top" />
-
-                <TextBlock Grid.Row = "1" Grid.Column = "1"
                            Text = "{Binding CalculatedReligion.UniqueId, StringFormat=Religion: {0}}"
                            HorizontalAlignment = "Center" VerticalAlignment = "Top" />
-                <TextBlock Grid.Row = "1" Grid.Column = "2"
+                <TextBlock Grid.Row = "1" Grid.Column = "1"
                            Text = "{Binding CalculatedCulture.UniqueId, StringFormat=Culture: {0}}"
                            HorizontalAlignment = "Center" VerticalAlignment = "Top" />
+
+                <!-- Donut Charts for religion and culture distribution -->
+                <!-- Religion Chart -->
+                <charts:DonutChart Grid.Row = "2" Grid.Column = "0" ItemsSource = "{Binding ReligionStats}"
+                                   CenterText = "Religions" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
+
+                <!-- Culture Chart -->
+                <charts:DonutChart Grid.Row = "2" Grid.Column = "1" ItemsSource = "{Binding CultureStats}"
+                                   CenterText = "Cultures" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
             </Grid>
         </Grid>
     </Border>

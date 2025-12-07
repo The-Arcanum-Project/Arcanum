@@ -2,11 +2,15 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religious;
+using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 
@@ -22,6 +26,9 @@ public class AllocatorViewModel : ViewModelBase
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
+
+   public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
+   public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
 
    public Location LoadedLocation
    {
@@ -190,6 +197,46 @@ public class AllocatorViewModel : ViewModelBase
 
       CalculatedPopulation = (int)totalPop;
       CalculatedPopulationToolTip = $"Total: {totalPop:N0}";
+
+      UpdateChartData(CultureStats, cultureCounts);
+      UpdateChartData(ReligionStats, religionCounts);
+   }
+
+   private static void UpdateChartData<TKey>(ObservableCollection<BasicChartItem> collection, Dictionary<TKey, long> counts) where TKey : IEu5Object
+   {
+      collection.Clear();
+      // Assign colors dynamically if needed, or use a fixed palette
+      var colorIndex = 0;
+      foreach (var kvp in counts.OrderByDescending(x => x.Value))
+      {
+         BasicChartItem chartItem = new()
+         {
+            Name = kvp.Key.UniqueId, Value = kvp.Value,
+         };
+         var colorEnum = kvp.Key.GetAllProperties().FirstOrDefault(x => x.ToString() == "Color");
+         if (colorEnum != null)
+         {
+            var color = ((JominiColor)kvp.Key._getValue(colorEnum)).ToMediaColor();
+            var brush = new SolidColorBrush(color) { Opacity = 0.7 };
+            brush.Freeze();
+            chartItem.ColorBrush = brush;
+         }
+         else
+            chartItem.ColorBrush = GetColorForIndex(colorIndex++);
+
+         collection.Add(chartItem);
+      }
+   }
+
+   private static readonly SolidColorBrush[] PredefinedBrushes =
+   [
+      Brushes.CornflowerBlue, Brushes.IndianRed, Brushes.MediumSeaGreen, Brushes.Orange, Brushes.MediumPurple, Brushes.Goldenrod, Brushes.Teal,
+      Brushes.SlateBlue, Brushes.Crimson, Brushes.DarkCyan,
+   ];
+
+   private static SolidColorBrush GetColorForIndex(int index)
+   {
+      return PredefinedBrushes[index % PredefinedBrushes.Length];
    }
 
    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
