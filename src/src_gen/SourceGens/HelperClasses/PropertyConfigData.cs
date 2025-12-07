@@ -32,7 +32,7 @@ public class PropertyConfigData
       DisableMapInferButtons = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 3, "disableMapInferButtons");
       IsRequired = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 4, "isRequired");
       DefaultValueMethod = AttributeHelper.SimpleGetAttrArgValue<string>(attributeData, 7, "defaultValueMethod") ?? "";
-
+      IgnoreCommand = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 8, "ignoreCommand");
       // Use the constructor arguments we just found.
       MinValue = PropertyConfigHelper.FormatTypedConstant(minValueArg);
       MaxValue = PropertyConfigHelper.FormatTypedConstant(maxValueArg);
@@ -51,4 +51,6 @@ public class PropertyConfigData
    public string MinValue { get; set; }
    public string MaxValue { get; set; }
    public string DefaultValueMethod { get; set; }
+
+   public bool IgnoreCommand { get; set; }
 }

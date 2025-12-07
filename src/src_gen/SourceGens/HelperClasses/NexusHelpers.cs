@@ -660,6 +660,7 @@ public static class NexusHelpers
          bitArrays[i] |= data.AllowEmpty ? 1 << 2 : 0;
          bitArrays[i] |= data.DisableMapInferButtons ? 1 << 3 : 0;
          bitArrays[i] |= data.IsRequired ? 1 << 4 : 0;
+         bitArrays[i] |= data.IgnoreCommand ? 1 << 5 : 0;
       }
 
       sb.AppendLine($"    /// <summary>");
@@ -669,6 +670,7 @@ public static class NexusHelpers
       sb.AppendLine($"    /// Bit 2: AllowEmpty <br/>");
       sb.AppendLine($"    /// Bit 3: DisableMapInferButtons <br/>");
       sb.AppendLine($"    /// Bit 4: IsRequired <br/>");
+      sb.AppendLine($"    /// Bit 5: IgnoreCommand <br/>");
       sb.AppendLine($"    /// </summary>");
       // the int[] in binary format for easier debugging
       var arrayInitializer = string.Join(", ",
@@ -682,6 +684,7 @@ public static class NexusHelpers
       sb.AppendLine("    private const int ALLOW_EMPTY = 1 << 2;");
       sb.AppendLine("    private const int DISABLE_MAP_INFER_BUTTONS = 1 << 3;");
       sb.AppendLine("    private const int IS_REQUIRED = 1 << 4;");
+      sb.AppendLine("    private const int IGNORE_COMMAND = 1 << 5;");
 
       sb.AppendLine();
 
@@ -719,6 +722,13 @@ public static class NexusHelpers
       sb.AppendLine("    /// </summary>");
       sb.AppendLine("    public bool IsRequired(Enum property)");
       sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IS_REQUIRED) != 0;");
+      sb.AppendLine();
+      
+      sb.AppendLine("    /// <summary>");
+      sb.AppendLine("    /// Checks if the property should ignore command behavior.");
+      sb.AppendLine("    /// </summary>");
+      sb.AppendLine("    public bool IgnoreCommand(Enum property)");
+      sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IGNORE_COMMAND) != 0;");
       sb.AppendLine();
    }
 

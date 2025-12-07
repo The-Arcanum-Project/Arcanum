@@ -127,6 +127,8 @@ public interface INexus : INotifyPropertyChanged
    /// Returns whether the "Map Infer" buttons for the given property are disabled.
    /// </summary>
    bool IsMapInferButtonsDisabled(Enum property);
+   
+   bool IgnoreCommand(Enum property);
 
    #endregion
 
