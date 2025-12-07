@@ -305,12 +305,12 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
          // This tells the driver you are replacing the entire contents, which avoids GPU stalls.
          var mapped = _context.Map(_colorLookupBuffer, MapMode.WriteDiscard);
 
-         // 2. Copy the new color data from the C# list into the GPU memory.
-         var colorsArray = newColors.ToArray();
-         fixed (void* pColors = colorsArray)
+         fixed (void* pColors = newColors)
+         {
             Unsafe.CopyBlockUnaligned(mapped.DataPointer.ToPointer(),
-                                      pColors,
-                                      (uint)(newColors.Length * Unsafe.SizeOf<Color4>()));
+               pColors,
+               (uint)(newColors.Length * Unsafe.SizeOf<Color4>()));
+         }
 
          // 3. Unmap the buffer to commit the changes.
          _context.Unmap(_colorLookupBuffer);
@@ -340,27 +340,32 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       if (_context == null || _outlineVertexBuffer == null)
          return;
 
-      var vertexList = new List<Vector2>(newOutlineVertices);
-      if (closeLoop && vertexList.Count > 1)
-         vertexList.Add(vertexList[0]);
-
-      var finalVertices = vertexList.ToArray();
-      _outlineVertexCount = (uint)finalVertices.Length;
-
-      if (_outlineVertexCount is 0 or > MAX_OUTLINE_VERTICES)
+      var count = newOutlineVertices.Length;
+      var totalCount = closeLoop && count > 1 ? count + 1 : count;
+    
+      if (totalCount is 0 or > MAX_OUTLINE_VERTICES)
       {
          _outlineVertexCount = 0;
          return;
       }
 
-      // Use WriteDiscard as we are replacing the entire buffer's contents
+      _outlineVertexCount = (uint)totalCount;
       var mapped = _context.Map(_outlineVertexBuffer, MapMode.WriteDiscard);
-      fixed (void* pVertices = finalVertices)
-         Unsafe.CopyBlockUnaligned(mapped.DataPointer.ToPointer(),
-                                   pVertices,
-                                   (uint)(_outlineVertexCount * sizeof(Vector2)));
+    
+      fixed (Vector2* pVertices = newOutlineVertices)
+      {
+         Unsafe.CopyBlockUnaligned(mapped. DataPointer. ToPointer(), pVertices, (uint)(count * sizeof(Vector2)));
+      }
+    
+      // Close loop by copying first vertex to end
+      if (closeLoop && count > 1)
+      {
+         Unsafe.Write((byte*)mapped.DataPointer.ToPointer() + count * sizeof(Vector2), newOutlineVertices[0]);
+      }
+    
       _context.Unmap(_outlineVertexBuffer);
    }
+
 
    public unsafe void AddPointToLasso(Vector2 newPoint)
    {
