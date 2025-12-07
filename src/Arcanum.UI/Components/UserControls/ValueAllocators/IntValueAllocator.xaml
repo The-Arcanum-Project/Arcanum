@@ -285,21 +285,33 @@
                 <!-- Total and Settings -->
                 <Grid Grid.Column = "1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width = "Auto" />
-                        <ColumnDefinition Width = "*" />
+                        <ColumnDefinition Width = "80" /> <!-- Label -->
+                        <ColumnDefinition Width = "*" />  <!-- Slider -->
+                        <ColumnDefinition Width = "70" /> <!-- TextBox -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Log Toggle -->
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column = "0" Orientation = "Horizontal" VerticalAlignment = "Center">
-                        <TextBlock Text = "Total Limit:" FontWeight = "SemiBold" VerticalAlignment = "Center"
-                                   Margin = "5,0,10,0" local:InteractionMonitor.AllocatorVm = "{Binding}" />
-                        <styleClasses:CorneredTextBox Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
-                                                      local:TextBoxUtilities.UpdateDelay = "600" Width = "60"
-                                                      Height = "24" VerticalContentAlignment = "Center"
-                                                      HorizontalContentAlignment = "Center" FontWeight = "Bold" />
-                    </StackPanel>
+                    <TextBlock Grid.Column = "0" Text = "Total Limit:" FontWeight = "SemiBold"
+                               VerticalAlignment = "Center" />
+
+                    <Grid Grid.Column = "1" Margin = "5,0,10,0">
+                        <Slider Minimum = "0" Maximum = "{Binding MaxTotalLimit}"
+                                Value = "{Binding TotalLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                VerticalAlignment = "Center" TickFrequency = "100" IsSnapToTickEnabled = "False"
+                                Style = "{StaticResource SlimColorSliderStyle}"
+                                Foreground = "{StaticResource BlueAccentColorBrush}"
+                                local:InteractionMonitor.AllocatorVm = "{Binding}" />
+                    </Grid>
+
+                    <styleClasses:CorneredTextBox Grid.Column = "2"
+                                                  Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
+                                                  local:TextBoxUtilities.UpdateDelay = "600" Width = "60" Height = "24"
+                                                  VerticalContentAlignment = "Center"
+                                                  HorizontalContentAlignment = "Center" FontWeight = "Bold"
+                                                  local:InteractionMonitor.AllocatorVm = "{Binding}" />
 
 
-                    <CheckBox Grid.Column = "1" IsChecked = "{Binding IsLogarithmic}" Content = "Log Scale"
+                    <CheckBox Grid.Column = "3" IsChecked = "{Binding IsLogarithmic}" Content = "Log Scale"
                               HorizontalAlignment = "Right" VerticalAlignment = "Center">
                         <CheckBox.Style>
                             <Style TargetType = "CheckBox" BasedOn = "{StaticResource {x:Type CheckBox}}">
@@ -328,7 +340,7 @@
                                 <ColumnDefinition Width = "20" />
                                 <ColumnDefinition Width = "30" />
                                 <ColumnDefinition Width = "*" />
-                                <ColumnDefinition Width = "150" />
+                                <ColumnDefinition Width = "Auto" />
                             </Grid.ColumnDefinitions>
 
                             <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
@@ -477,22 +489,20 @@
                 <Rectangle Grid.Row = "0" Grid.ColumnSpan = "2" Height = "1"
                            Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,0,0,10" />
 
-                <TextBlock Grid.Row = "1" Grid.Column = "0"
-                           Text = "{Binding CalculatedReligion.UniqueId, StringFormat=Religion: {0}}"
-                           HorizontalAlignment = "Center" VerticalAlignment = "Top" />
-                <TextBlock Grid.Row = "1" Grid.Column = "1"
-                           Text = "{Binding CalculatedCulture.UniqueId, StringFormat=Culture: {0}}"
-                           HorizontalAlignment = "Center" VerticalAlignment = "Top" />
-
                 <!-- Donut Charts for religion and culture distribution -->
                 <!-- Religion Chart -->
-                <charts:DonutChart Grid.Row = "2" Grid.Column = "0" ItemsSource = "{Binding ReligionStats}"
+                <charts:DonutChart Grid.Row = "1" Grid.Column = "0" ItemsSource = "{Binding ReligionStats}"
                                    CenterText = "Religions" ChartSize = "110" StrokeThickness = "15"
                                    ShowLegendValues = "False" />
 
                 <!-- Culture Chart -->
-                <charts:DonutChart Grid.Row = "2" Grid.Column = "1" ItemsSource = "{Binding CultureStats}"
+                <charts:DonutChart Grid.Row = "1" Grid.Column = "1" ItemsSource = "{Binding CultureStats}"
                                    CenterText = "Cultures" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
+
+                <!-- PopType Chart -->
+                <charts:DonutChart Grid.Row = "2" Grid.Column = "0" ItemsSource = "{Binding PopTypeStats}"
+                                   CenterText = "Pop Types" ChartSize = "110" StrokeThickness = "15"
                                    ShowLegendValues = "False" />
             </Grid>
         </Grid>

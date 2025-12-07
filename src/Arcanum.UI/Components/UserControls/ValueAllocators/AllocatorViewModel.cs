@@ -19,6 +19,7 @@ namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 public class AllocatorViewModel : ViewModelBase
 {
    private int _totalLimit;
+   private int _maxTotalLimit;
    private bool? _areAllLocked;
 
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
@@ -29,6 +30,17 @@ public class AllocatorViewModel : ViewModelBase
 
    public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
    public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
+   public ObservableCollection<BasicChartItem> PopTypeStats { get; } = [];
+
+   public int MaxTotalLimit
+   {
+      get => _maxTotalLimit;
+      set
+      {
+         _maxTotalLimit = value;
+         OnPropertyChanged();
+      }
+   }
 
    public Location LoadedLocation
    {
@@ -86,6 +98,9 @@ public class AllocatorViewModel : ViewModelBase
 
          if (_totalLimit != value)
          {
+            if (value > MaxTotalLimit)
+               MaxTotalLimit = value;
+
             var oldTotal = _totalLimit;
             _totalLimit = value;
 
@@ -136,6 +151,16 @@ public class AllocatorViewModel : ViewModelBase
       }
    } = Culture.Empty;
 
+   public PopType CalculatedPopTypes
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = PopType.Empty;
+
    public int CalculatedPopulation
    {
       get;
@@ -159,6 +184,8 @@ public class AllocatorViewModel : ViewModelBase
    public AllocatorViewModel(int total)
    {
       _totalLimit = total;
+      const int maxMultiplicator = 3; //TODO: Make this a setting
+      MaxTotalLimit = total > 0 ? total * maxMultiplicator : 1000;
 
       Items.CollectionChanged += Items_CollectionChanged;
       PropertyChanged += UpdateCalculatedInfo;
@@ -176,6 +203,7 @@ public class AllocatorViewModel : ViewModelBase
 
       Dictionary<Religion, long> religionCounts = new();
       Dictionary<Culture, long> cultureCounts = new();
+      Dictionary<PopType, long> popTypeCounts = new();
       long totalPop = 0;
 
       foreach (var item in Items)
@@ -190,16 +218,21 @@ public class AllocatorViewModel : ViewModelBase
 
          cultureCounts.TryAdd(pop.Culture, 0);
          cultureCounts[pop.Culture] += size;
+
+         popTypeCounts.TryAdd(pop.PopType, 0);
+         popTypeCounts[pop.PopType] += size;
       }
 
       CalculatedReligion = religionCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
       CalculatedCulture = cultureCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
+      CalculatedPopTypes = popTypeCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
 
       CalculatedPopulation = (int)totalPop;
       CalculatedPopulationToolTip = $"Total: {totalPop:N0}";
 
       UpdateChartData(CultureStats, cultureCounts);
       UpdateChartData(ReligionStats, religionCounts);
+      UpdateChartData(PopTypeStats, popTypeCounts);
    }
 
    private static void UpdateChartData<TKey>(ObservableCollection<BasicChartItem> collection, Dictionary<TKey, long> counts) where TKey : IEu5Object

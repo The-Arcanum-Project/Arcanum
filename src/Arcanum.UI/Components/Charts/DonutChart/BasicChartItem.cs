@@ -6,16 +6,15 @@ namespace Arcanum.UI.Components.Charts.DonutChart;
 
 public class BasicChartItem : IDonutChartItem
 {
-   private double _value;
    public string Name { get; set; } = string.Empty;
    public Brush ColorBrush { get; set; } = Brushes.Gray;
 
    public double Value
    {
-      get => _value;
+      get;
       set
       {
-         _value = value;
+         field = value;
          OnPropertyChanged();
       }
    }
