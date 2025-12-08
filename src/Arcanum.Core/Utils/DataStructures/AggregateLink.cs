@@ -81,6 +81,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
    {
       if (oldItems.Count == 0 || Lock)
          return;
+      
 
       var empty = EmptyRegistry.Empties[Owner.GetType()];
 
@@ -100,7 +101,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
          return;
 
       Lock = true;
-      Nx.RemoveFromCollection(Owner, NxChildsProp, child);
+      Remove(child);
       Lock = false;
    }
 
@@ -110,7 +111,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
          return;
 
       Lock = true;
-      Nx.AddToCollection(Owner, NxChildsProp, child);
+      Add(child);
       Lock = false;
    }
 }

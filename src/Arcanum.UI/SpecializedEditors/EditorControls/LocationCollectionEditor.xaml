@@ -77,7 +77,7 @@
                  ItemsSource="{Binding LocationCollection, RelativeSource={RelativeSource AncestorType=UserControl}}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding UniqueId}" HorizontalAlignment="Left" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding UniqueId}" HorizontalAlignment="Stretch" Margin="5,0,0,0" MouseRightButtonUp="Location_OnMouseRightButtonUp"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

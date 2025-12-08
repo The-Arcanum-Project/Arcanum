@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.Registry;
 using Arcanum.UI.SpecializedEditors.Editors;
@@ -44,6 +45,7 @@ public partial class LocationCollectionEditor
       }
 
       SelectLocation(locationCollection, true);
+        LocationSelector.FullItemsSource = ((T)EmptyRegistry.Empties[typeof(T)]).GetGlobalItemsNonGeneric().Values;
 
       // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
       LocationCollection?.Dispose();
@@ -70,4 +72,12 @@ public partial class LocationCollectionEditor
 
       _editor.ResetFor([selectedLocation]);
    }
+
+    private void Location_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        // Get the location and remove it from the collection
+        if (sender is not FrameworkElement { DataContext: ILocation location }) return;
+        
+        LocationCollection.TryRemove(location);
+    }
 }
