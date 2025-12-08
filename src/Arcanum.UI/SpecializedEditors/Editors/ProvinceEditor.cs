@@ -13,76 +13,79 @@ using Common.UI;
 
 namespace Arcanum.UI.SpecializedEditors.Editors;
 
-public abstract class LocationCollectionSpecializedEditor :
-    ISpecializedEditor
+public abstract class LocationCollectionSpecializedEditor : ISpecializedEditor
 {
-    public abstract string DisplayName { get; }
-    public abstract string? IconResource { get; }
-    public abstract int Priority { get; }
-    public abstract bool SupportsMultipleTargets { get; }
-    public abstract bool CanEdit(object[] targets, Enum? prop);
-    public abstract void Reset();
-    public abstract void ResetFor(object[] targets);
-    public abstract FrameworkElement GetEditorControl();
-    public abstract IEnumerable<MenuItem> GetContextMenuActions();
+   public abstract bool Enabled { get; set; }
+   public abstract string DisplayName { get; }
+   public abstract string? IconResource { get; }
+   public abstract int Priority { get; }
+   public abstract bool SupportsMultipleTargets { get; }
+   public abstract bool CanEdit(object[] targets, Enum? prop);
+   public abstract void Reset();
+   public abstract void ResetFor(object[] targets);
+   public abstract FrameworkElement GetEditorControl();
+   public abstract IEnumerable<MenuItem> GetContextMenuActions();
 }
 
 public class ProvinceEditor : LocationCollectionSpecializedEditor
 {
-    private bool _wasValidated;
-    public override string DisplayName => "Province Children Editor";
-    public override string? IconResource => null;
-    public override int Priority => 10;
-    public override bool SupportsMultipleTargets => false;
+   private bool _wasValidated;
+   public override bool Enabled { get; set; } = true;
+   public override string DisplayName => "Province Children Editor";
+   public override string? IconResource => null;
+   public override int Priority => 10;
+   public override bool SupportsMultipleTargets => false;
 
+   public ProvinceEditor()
+   {
+      FileStateManager.FileChanged += OnFileStateManagerOnFileChanged;
+   }
 
-    public ProvinceEditor()
-    {
-        FileStateManager.FileChanged += OnFileStateManagerOnFileChanged;
-    }
-
-    ~ProvinceEditor()
-    {
-        FileStateManager.FileChanged -= OnFileStateManagerOnFileChanged;
-    }
+   ~ProvinceEditor()
+   {
+      FileStateManager.FileChanged -= OnFileStateManagerOnFileChanged;
+   }
 
    public override bool CanEdit(object[] targets, Enum? prop)
    {
-       if (_wasValidated) return targets.All(t => t is Province);
-       _wasValidated = AnalyzeLocationCollections.VerifyUniquenessOfChildren(Globals.Provinces.Values
-              .Cast<ILocationCollection<Location>>()
-              .ToArray(),
-          out var messages);
+      if (_wasValidated)
+         return targets.All(t => t is Province);
 
-       if (_wasValidated) return targets.All(t => t is Province);
-       var errorString = "Province Children Editor cannot be opened due to the following errors:\n" +
-                         string.Join("\n", messages.Select(m => $"- {m}"));
+      _wasValidated = AnalyzeLocationCollections.VerifyUniquenessOfChildren(Globals.Provinces.Values
+                                                                                   .Cast<ILocationCollection<Location>>()
+                                                                                   .ToArray(),
+                                                                            out var messages);
+
+      if (_wasValidated)
+         return targets.All(t => t is Province);
+
+      var errorString = "Province Children Editor cannot be opened due to the following errors:\n" +
+                        string.Join("\n", messages.Select(m => $"- {m}"));
       UIHandle.Instance.PopUpHandle.ShowMBox(errorString, "Cannot Open Province Children Editor");
       return false;
-
    }
 
-    private void OnFileStateManagerOnFileChanged(object? _, FileChangedEventArgs args)
-    {
-        if (args.FullPath.EndsWith("definitions.txt"))
-            _wasValidated = false;
-    }
+   private void OnFileStateManagerOnFileChanged(object? _, FileChangedEventArgs args)
+   {
+      if (args.FullPath.EndsWith("definitions.txt"))
+         _wasValidated = false;
+   }
 
-    public override void Reset()
-    {
-    }
+   public override void Reset()
+   {
+   }
 
-    public override void ResetFor(object[] targets)
-    {
-        Debug.Assert(targets.Length == 1);
-        Debug.Assert(targets[0].GetType() == typeof(Province));
-        LocationCollectionEditor.Instance.SetLocationCollection((Province)targets[0], this);
-    }
+   public override void ResetFor(object[] targets)
+   {
+      Debug.Assert(targets.Length == 1);
+      Debug.Assert(targets[0].GetType() == typeof(Province));
+      LocationCollectionEditor.Instance.SetLocationCollection((Province)targets[0], this);
+   }
 
-    public override FrameworkElement GetEditorControl()
-    {
-        return LocationCollectionEditor.Instance;
-    }
+   public override FrameworkElement GetEditorControl()
+   {
+      return LocationCollectionEditor.Instance;
+   }
 
-    public override IEnumerable<MenuItem> GetContextMenuActions() => [];
+   public override IEnumerable<MenuItem> GetContextMenuActions() => [];
 }

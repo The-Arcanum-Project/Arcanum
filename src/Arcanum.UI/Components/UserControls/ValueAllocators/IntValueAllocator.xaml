@@ -22,6 +22,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTextBoxStyle.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Style for the Lock Button -->
@@ -54,47 +55,6 @@
                 <Setter Property = "Width" Value = "20" />
             </Style>
 
-            <Style x:Key = "BlueToggleButtonStyle" TargetType = "ToggleButton">
-                <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
-                <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
-                <Setter Property = "BorderBrush" Value = "{StaticResource DefaultBorderColorBrush}" />
-                <Setter Property = "BorderThickness" Value = "1" />
-                <Setter Property = "Padding" Value = "2" />
-                <Setter Property = "Cursor" Value = "Hand" />
-
-                <Setter Property = "Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType = "ToggleButton">
-                            <Border x:Name = "border" Background = "{TemplateBinding Background}"
-                                    BorderBrush = "{TemplateBinding BorderBrush}"
-                                    BorderThickness = "{TemplateBinding BorderThickness}" CornerRadius = "3"
-                                    Padding = "{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property = "IsMouseOver" Value = "True">
-                                    <Setter TargetName = "border" Property = "Background"
-                                            Value = "{StaticResource LightBackColorBrush}" />
-                                </Trigger>
-                                <Trigger Property = "IsPressed" Value = "True">
-                                    <Setter TargetName = "border" Property = "Background"
-                                            Value = "{StaticResource DarkerSelectedBackColorBrush}" />
-                                </Trigger>
-                                <Trigger Property = "IsChecked" Value = "True">
-                                    <Setter TargetName = "border" Property = "Background"
-                                            Value = "{StaticResource BlueAccentColorBrush}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-
-                <Style.Triggers>
-                    <Trigger Property = "IsChecked" Value = "False">
-                        <Setter Property = "Foreground" Value = "{StaticResource BlueAccentColorBrush}" />
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
 
             <Style x:Key = "SliderRepeatButtonStyle" TargetType = "RepeatButton">
                 <Setter Property = "OverridesDefaultStyle" Value = "true" />
@@ -201,7 +161,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border BorderThickness = "1" CornerRadius = "4" Padding = "10">
+    <ScrollViewer HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height = "Auto" />
@@ -209,6 +169,7 @@
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" MaxHeight = "800" />
+                <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
@@ -227,7 +188,7 @@
                     BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "Transparent"
                     VerticalAlignment = "Stretch" HorizontalAlignment = "Stretch">
 
-                <ItemsControl Grid.Row = "0" x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
+                <ItemsControl x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation = "Horizontal" />
@@ -256,7 +217,8 @@
                                 </Border.Width>
 
                                 <!-- Optional: Show Number inside bar if wide enough -->
-                                <TextBlock Text = "{Binding Value}" Foreground = "White" FontSize = "10"
+                                <TextBlock Text = "{Binding Value}"
+                                           Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "10"
                                            FontWeight = "Bold" HorizontalAlignment = "Center"
                                            VerticalAlignment = "Center">
                                     <TextBlock.Style>
@@ -691,6 +653,12 @@
                                    CenterText = "Pop Types" ChartSize = "110" StrokeThickness = "15"
                                    ShowLegendValues = "False" />
             </Grid>
+
+            <!-- Apply Changes Button -->
+            <styleClasses:BaseButton Grid.Row = "8" Content = "Apply Changes" Command = "{Binding ApplyChangesCommand}"
+                                     HorizontalAlignment = "Right" Width = "100" Margin = "0,10,0,0"
+                                     local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                     Style = "{StaticResource ThinBaseButtonStyle}" />
         </Grid>
-    </Border>
+    </ScrollViewer>
 </UserControl>

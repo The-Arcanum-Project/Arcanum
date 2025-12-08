@@ -76,8 +76,7 @@ public class SpecializedEditorsManager
       _propertyEditors[propertyType] = editor;
    }
 
-   public bool TryGetTypeEditor(Type targetType, [MaybeNullWhen(false)] out ISpecializedEditor editor)
-      => _typeEditors.TryGetValue(targetType, out editor);
+   public bool TryGetTypeEditor(Type targetType, [MaybeNullWhen(false)] out ISpecializedEditor editor) => _typeEditors.TryGetValue(targetType, out editor);
 
    public bool TryGetPropertyEditor(Type propertyType, [MaybeNullWhen(false)] out ISpecializedEditor editor)
       => _propertyEditors.TryGetValue(propertyType, out editor);
@@ -97,21 +96,34 @@ public class SpecializedEditorsManager
 
       foreach (var prop in targetObject.GetAllProperties())
       {
-         var nxPropType = targetObject.GetNxPropType(prop);
-         if (TryGetPropertyEditor(nxPropType, out var propEditor))
+         if (targetObject.IsCollection(prop))
          {
-            // Check if we already have this editor registered (can happen if multiple properties are of the same type)
-            var existingEntry = editors.FirstOrDefault(e => e.Key == propEditor);
-            if (existingEntry.Key != null)
-               existingEntry.Value.Add(prop);
-            else
-               editors.Add(new(propEditor, [prop]));
+            var itemType = targetObject.GetNxItemType(prop)!;
+            RegisterEditorForProperty(itemType, editors, prop);
+         }
+         else
+         {
+            var nxPropType = targetObject.GetNxPropType(prop);
+            RegisterEditorForProperty(nxPropType, editors, prop);
          }
       }
 
       editors.Sort((a, b) => b.Key.Priority.CompareTo(a.Key.Priority));
 
       return editors;
+   }
+
+   private void RegisterEditorForProperty(Type nxPropType, List<KeyValuePair<ISpecializedEditor, List<Enum?>>> editors, Enum prop)
+   {
+      if (TryGetPropertyEditor(nxPropType, out var propEditor))
+      {
+         // Check if we already have this editor registered (can happen if multiple properties are of the same type)
+         var existingEntry = editors.FirstOrDefault(e => e.Key == propEditor);
+         if (existingEntry.Key != null)
+            existingEntry.Value.Add(prop);
+         else
+            editors.Add(new(propEditor, [prop]));
+      }
    }
 
    public FrameworkElement ConstructEditorViewForObject(List<IEu5Object> targets)

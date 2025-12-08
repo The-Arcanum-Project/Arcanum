@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Nexus;
@@ -28,6 +29,7 @@ public class AllocatorViewModel : ViewModelBase
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
+   public ICommand ApplyChangesCommand { get; }
 
    public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
    public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
@@ -44,7 +46,7 @@ public class AllocatorViewModel : ViewModelBase
          field = value;
          OnPropertyChanged();
       }
-   }
+   } = null!;
 
    public int MaxTotalLimit
    {
@@ -197,6 +199,18 @@ public class AllocatorViewModel : ViewModelBase
 
    public AllocatorViewModel(Location location)
    {
+      InitializeLocationData(location);
+
+      Items.CollectionChanged += Items_CollectionChanged;
+      PropertyChanged += UpdateCalculatedInfo;
+
+      UndoCommand = new RelayCommand(Undo);
+      DeleteCommand = new RelayCommand<AllocationItem>(Delete);
+      ApplyChangesCommand = new RelayCommand(ApplyChanges);
+   }
+
+   private void InitializeLocationData(Location location)
+   {
       foreach (var pop in location.Pops)
          Items.Add(new(this, pop));
 
@@ -206,14 +220,54 @@ public class AllocatorViewModel : ViewModelBase
       _totalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
-      Items.CollectionChanged += Items_CollectionChanged;
-      PropertyChanged += UpdateCalculatedInfo;
-
       UpdateMasterLockState();
       RunAutoLogScale();
       UpdateCalculatedInfo(null, new(nameof(Items)));
-      UndoCommand = new RelayCommand(Undo);
-      DeleteCommand = new RelayCommand<AllocationItem>(Delete);
+   }
+
+   public void ResetFor(Location target)
+   {
+      Reset();
+      InitializeLocationData(target);
+   }
+
+   // Cleares all instance data.
+   public void Reset()
+   {
+      Items.Clear();
+      LoadedLocation = Location.Empty;
+      _totalLimit = 0;
+      _maxTotalLimit = 0;
+      _undoStack.Clear();
+      _totalHistory.Clear();
+      CalculatedPopulation = 0;
+      CalculatedPopulationToolTip = string.Empty;
+      CalculatedReligion = Religion.Empty;
+      CalculatedCulture = Culture.Empty;
+      CalculatedPopTypes = PopType.Empty;
+      ReligionStats.Clear();
+      CultureStats.Clear();
+      PopTypeStats.Clear();
+   }
+
+   private void ApplyChanges()
+   {
+      if (LoadedLocation == Location.Empty)
+         return;
+
+      // All pops must already exist in the location
+      Debug.Assert(Items.All(i => LoadedLocation.Pops.Contains(i.PopDefinition)));
+      Debug.Assert(Items.Count == LoadedLocation.Pops.Count);
+
+      Enum field = PopDefinition.Field.Size;
+      foreach (var item in Items)
+      {
+         var value = item.Value / 1000d;
+         if (Math.Abs((double)item.PopDefinition._getValue(field) - value) < 0.0001)
+            continue;
+
+         Nx.ForceSet(value, item.PopDefinition, field);
+      }
    }
 
    private void UpdateCalculatedInfo(object? sender, PropertyChangedEventArgs propertyChangedEventArgs)

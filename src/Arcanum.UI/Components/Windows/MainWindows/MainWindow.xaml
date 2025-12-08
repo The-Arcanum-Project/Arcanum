@@ -8,18 +8,11 @@
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
-                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
-                         Height = "1080"
-                         Width = "1920"
-                         FooterHeight = "26"
-                         HeaderHeight = "35"
-                         Loaded = "MainWindow_OnLoaded"
-                         PreviewMouseDown = "Window_PreviewMouseDown"
-                         Closing = "MainWindow_OnClosing"
-                         WindowStartupLocation = "CenterScreen"
-                         Background = "{DynamicResource DefaultBackColorBrush}"
-                         HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}"
-                         HeaderBorder = "0, 0, 0, 2"
+                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime" Height = "1080" Width = "1920"
+                         FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
+                         PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
+                         WindowStartupLocation = "CenterScreen" Background = "{DynamicResource DefaultBackColorBrush}"
+                         HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}" HeaderBorder = "0, 0, 0, 2"
                          HeaderMargin = "0, 0, 0, 3">
 
     <styleClasses:BaseWindow.Resources>
@@ -30,31 +23,24 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <ObjectDataProvider MethodName = "GetValues"
-                                ObjectType = "{x:Type sys:Enum}"
+            <ObjectDataProvider MethodName = "GetValues" ObjectType = "{x:Type sys:Enum}"
                                 x:Key = "SelectionModeEnumValues">
                 <ObjectDataProvider.MethodParameters>
                     <x:Type TypeName = "local:ObjectSelectionMode" />
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
-            <Style x:Key = "HeaderButtonStyle"
-                   TargetType = "styleClasses:BaseButton"
+            <Style x:Key = "HeaderButtonStyle" TargetType = "styleClasses:BaseButton"
                    BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
                 <Style.Setters>
-                    <Setter Property = "Background"
-                            Value = "Transparent">
+                    <Setter Property = "Background" Value = "Transparent">
                     </Setter>
-                    <Setter Property = "Height"
-                            Value = "20">
+                    <Setter Property = "Height" Value = "20">
                     </Setter>
-                    <Setter Property = "Width"
-                            Value = "20">
+                    <Setter Property = "Width" Value = "20">
                     </Setter>
-                    <Setter Property = "VerticalAlignment"
-                            Value = "Center">
+                    <Setter Property = "VerticalAlignment" Value = "Center">
                     </Setter>
-                    <Setter Property = "BorderThickness"
-                            Value = "0">
+                    <Setter Property = "BorderThickness" Value = "0">
                     </Setter>
                 </Style.Setters>
             </Style>
@@ -69,124 +55,92 @@
     <Window.CommandBindings>
         <!-- Command Bindings for File MenuItem -->
         <CommandBinding Command = "mainWindow:MwCommands.CloseProjectFileCommand"
-                        Executed = "GoToArcanumMenuScreenCommand_Executed"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "GoToArcanumMenuScreenCommand_Executed" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenProjectFileCommand"
-                        Executed = "GoToArcanumMenuScreenCommand_Executed"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "GoToArcanumMenuScreenCommand_Executed" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.NewProjectFileCommand"
-                        Executed = "GoToArcanumMenuScreenCommand_Executed"
-                        CanExecute = "CommandCanAlwaysExecute" />
-        <CommandBinding Command = "mainWindow:MwCommands.ExitArcanumCommand"
-                        Executed = "ExitArcanum_OnExecuted"
+                        Executed = "GoToArcanumMenuScreenCommand_Executed" CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.ExitArcanumCommand" Executed = "ExitArcanum_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenSaveSelectorCommand"
-                        Executed = "OpenSaveSelector_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenSaveSelector_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.SaveAllModifiedObjectsCommand"
-                        Executed = "SaveAllModified_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "SaveAllModified_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenSettingsCommand"
-                        Executed = "OpenSettingsWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenSettingsWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenPluginSettingsCommand"
-                        Executed = "OpenPluginSettingsWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenPluginSettingsWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenReloadFileWindowCommand"
-                        Executed = "OpenReloadFileWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenReloadFileWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenReloadFolderWindowCommand"
-                        Executed = "OpenReloadFolderWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
-        <CommandBinding Command = "mainWindow:MwCommands.OpenConsoleCommand"
-                        Executed = "OpenConsoleCommand_OnExecuted"
+                        Executed = "OpenReloadFolderWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenConsoleCommand" Executed = "OpenConsoleCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenEffectWikiCommand"
-                        Executed = "OpenEffectWikiCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenEffectWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenTriggerWikiCommand"
-                        Executed = "OpenTriggerWikiCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenTriggerWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenModifierWikiCommand"
-                        Executed = "OpenModifierWikiCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenModifierWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenSearchWindowCommand"
-                        Executed = "OpenSearchWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenSearchWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for History MenuItems -->
-        <CommandBinding Command = "mainWindow:MwCommands.UndoCommand"
-                        Executed = "UndoCommand_Executed"
+        <CommandBinding Command = "mainWindow:MwCommands.UndoCommand" Executed = "UndoCommand_Executed"
                         CanExecute = "CommandCanAlwaysExecute" />
-        <CommandBinding Command = "mainWindow:MwCommands.RedoCommand"
-                        Executed = "RedoCommand_Executed"
+        <CommandBinding Command = "mainWindow:MwCommands.RedoCommand" Executed = "RedoCommand_Executed"
                         CanExecute = "CommandCanAlwaysExecute" />
-        <CommandBinding Command = "mainWindow:MwCommands.StepUndoCommand"
-                        Executed = "StepUndoCommand_Executed"
+        <CommandBinding Command = "mainWindow:MwCommands.StepUndoCommand" Executed = "StepUndoCommand_Executed"
                         CanExecute = "CommandCanStepUndoExecute" />
-        <CommandBinding Command = "mainWindow:MwCommands.StepRedoCommand"
-                        Executed = "StepRedoCommand_Executed"
+        <CommandBinding Command = "mainWindow:MwCommands.StepRedoCommand" Executed = "StepRedoCommand_Executed"
                         CanExecute = "CommandCanStrepRedoExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenHistoryWindowCommand"
-                        Executed = "OpenHistoryWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenHistoryWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for Error Log MenuItems -->
         <CommandBinding Command = "mainWindow:MwCommands.OpenErrorLogWindowCommand"
-                        Executed = "OpenErrorLogWindow_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenErrorLogWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
 
         <!-- Command Bindings for Debug MenuItems -->
         <CommandBinding Command = "mainWindow:MwCommands.LoadingStepRunnerCommand"
-                        Executed = "LoadingStepRunnerCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "LoadingStepRunnerCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
-        <CommandBinding Command = "mainWindow:MwCommands.OpenDebugPanel"
-                        Executed = "OpenDebugPanel_OnExecuted"
+        <CommandBinding Command = "mainWindow:MwCommands.OpenDebugPanel" Executed = "OpenDebugPanel_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenUIElementsBrowserCommand"
-                        Executed = "UIElementsBrowserCommandCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "UIElementsBrowserCommandCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand"
-                        Executed = "GlobalsBrowserCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "GlobalsBrowserCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
-        <CommandBinding Command = "mainWindow:MwCommands.GCCommand"
-                        Executed = "GCCommand_OnExecuted"
+        <CommandBinding Command = "mainWindow:MwCommands.GCCommand" Executed = "GCCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand"
-                        Executed = "OpenParsingStepBrowserCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "OpenParsingStepBrowserCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
-        <CommandBinding Command = "mainWindow:MwCommands.TempTestingCommand"
-                        Executed = "TempTestingCommand_OnExecuted"
+        <CommandBinding Command = "mainWindow:MwCommands.TempTestingCommand" Executed = "TempTestingCommand_OnExecuted"
                         CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.ViewINUIObjectsCommand"
-                        Executed = "ViewINUIObjectsCommand_OnExecuted"
-                        CanExecute = "CommandCanAlwaysExecute" />
+                        Executed = "ViewINUIObjectsCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
-        <CommandBinding Command = "mainWindow:MwCommands.FreezeSelectionCommand"
-                        Executed = "FreezeSelection_Command"
+        <CommandBinding Command = "mainWindow:MwCommands.FreezeSelectionCommand" Executed = "FreezeSelection_Command"
                         CanExecute = "CommandCanAlwaysExecute" />
 
 
         <!-- Command Bindings for Debug Loading Triggers -->
-        <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer"
-                        Executed = "ExecuteLexer"
+        <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer" Executed = "ExecuteLexer"
                         CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for Navigation Buttons -->
         <CommandBinding Command = "mainWindow:MwCommands.GoToPreviousINUICommand"
                         Executed = "GoToPreviousINUICommand_Executed"
                         CanExecute = "CanGoToPreviousINUICommand_Executed" />
-        <CommandBinding Command = "mainWindow:MwCommands.GoToNextINUICommand"
-                        Executed = "GoToNextINUICommand_Executed"
+        <CommandBinding Command = "mainWindow:MwCommands.GoToNextINUICommand" Executed = "GoToNextINUICommand_Executed"
                         CanExecute = "CanGoToNextINUICommand_Executed" />
 
     </Window.CommandBindings>
@@ -254,8 +208,7 @@
                     <!--     </uc:SearchableMenuItem.Icon> -->
                     <!-- </uc:SearchableMenuItem> -->
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Settings"
-                                           Command = "mainWindow:MwCommands.OpenSettingsCommand">
+                    <uc:SearchableMenuItem Header = "Settings" Command = "mainWindow:MwCommands.OpenSettingsCommand">
                         <uc:SearchableMenuItem.Icon>
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Settings16x16.png" />
                         </uc:SearchableMenuItem.Icon>
@@ -267,18 +220,15 @@
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Console"
-                                           Command = "mainWindow:MwCommands.OpenConsoleCommand">
+                    <uc:SearchableMenuItem Header = "Console" Command = "mainWindow:MwCommands.OpenConsoleCommand">
                     </uc:SearchableMenuItem>
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Exit"
-                                           Command = "mainWindow:MwCommands.ExitArcanumCommand">
+                    <uc:SearchableMenuItem Header = "Exit" Command = "mainWindow:MwCommands.ExitArcanumCommand">
                     </uc:SearchableMenuItem>
                 </uc:SearchableMenuItem>
 
                 <uc:SearchableMenuItem Header = "Edit">
-                    <uc:SearchableMenuItem Header = "Undo: 'description'"
-                                           Command = "mainWindow:MwCommands.UndoCommand">
+                    <uc:SearchableMenuItem Header = "Undo: 'description'" Command = "mainWindow:MwCommands.UndoCommand">
                         <uc:SearchableMenuItem.Icon>
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Undo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
@@ -289,8 +239,7 @@
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Undo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
-                    <uc:SearchableMenuItem Header = "Redo: 'description'"
-                                           Command = "mainWindow:MwCommands.RedoCommand">
+                    <uc:SearchableMenuItem Header = "Redo: 'description'" Command = "mainWindow:MwCommands.RedoCommand">
                         <uc:SearchableMenuItem.Icon>
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Redo16x16.png" />
                         </uc:SearchableMenuItem.Icon>
@@ -341,14 +290,12 @@
                 </uc:SearchableMenuItem>
 
                 <uc:SearchableMenuItem Header = "Debug">
-                    <uc:SearchableMenuItem Header = "Garbage Collector"
-                                           Command = "mainWindow:MwCommands.GCCommand" />
+                    <uc:SearchableMenuItem Header = "Garbage Collector" Command = "mainWindow:MwCommands.GCCommand" />
                     <uc:SearchableMenuItem Header = "Globals Browser"
                                            Command = "mainWindow:MwCommands.OpenGlobalsBrowserCommand" />
                     <uc:SearchableMenuItem Header = "Loading Strep Runner"
                                            Command = "mainWindow:MwCommands.LoadingStepRunnerCommand" />
-                    <uc:SearchableMenuItem Header = "Debug Panel"
-                                           Command = "mainWindow:MwCommands.OpenDebugPanel" />
+                    <uc:SearchableMenuItem Header = "Debug Panel" Command = "mainWindow:MwCommands.OpenDebugPanel" />
                     <uc:SearchableMenuItem Header = "ParsingStepBrowser"
                                            Command = "mainWindow:MwCommands.OpenParsingStepBrowserCommand" />
                     <uc:SearchableMenuItem Header = "UI Elements Browser"
@@ -360,63 +307,40 @@
                     <uc:SearchableMenuItem Header = "View INUI Objects"
                                            Command = "mainWindow:MwCommands.ViewINUIObjectsCommand" />
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Parser Test"
-                                           Command = "mainWindow:MwCommands.ExecuteLexer" />
+                    <uc:SearchableMenuItem Header = "Parser Test" Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
             </Menu>
         </StackPanel>
     </styleClasses:BaseWindow.HeaderContent>
 
     <styleClasses:BaseWindow.FooterContent>
-        <Border BorderBrush = "{DynamicResource DefaultBorderColorBrush}"
-                BorderThickness = "0, 1, 0, 0"
-                CornerRadius = "0"
-                Margin = "0"
-                Padding = "0">
-            <StackPanel Orientation = "Horizontal"
-                        Height = "19"
-                        Margin = "0"
-                        VerticalAlignment = "Bottom">
+        <Border BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "0, 1, 0, 0"
+                CornerRadius = "0" Margin = "0" Padding = "0">
+            <StackPanel Orientation = "Horizontal" Height = "19" Margin = "0" VerticalAlignment = "Bottom">
                 <TextBlock
                     Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding CpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding GpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding VramUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
                 <TextBlock
                     Text = "{Binding Path=RectangleBounds, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0"
-                    FontFamily = "{StaticResource DefaultMonospacedFont}"
-                    VerticalAlignment = "Center" />
+                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
             </StackPanel>
         </Border>
     </styleClasses:BaseWindow.FooterContent>
@@ -427,79 +351,56 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "30*"
-                              MinWidth = "200" />
+            <ColumnDefinition Width = "30*" MinWidth = "200" />
             <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "50*"
-                              MinWidth = "400" />
+            <ColumnDefinition Width = "50*" MinWidth = "400" />
             <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "20*"
-                              MinWidth = "200" />
+            <ColumnDefinition Width = "30*" MinWidth = "200" />
             <ColumnDefinition Width = "Auto" />
             <ColumnDefinition Width = "150" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column = "0"
-                BorderBrush = "{DynamicResource DefaultBorderColorBrush}"
-                BorderThickness = "2"
-                CornerRadius = "8"
-                Margin = "0, 0, 2, 0">
+        <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "2"
+                CornerRadius = "8" Margin = "0, 0, 2, 0">
             <ScrollViewer>
                 <ContentPresenter x:Name = "UiPresenter" />
             </ScrollViewer>
 
         </Border>
 
-        <GridSplitter Grid.Column = "1"
-                      Width = "4"
-                      ResizeBehavior = "PreviousAndNext">
+        <GridSplitter Grid.Column = "1" Width = "4" ResizeBehavior = "PreviousAndNext">
 
         </GridSplitter>
 
-        <DockPanel Grid.Column = "2"
-                   LastChildFill = "True">
-            <Grid x:Name = "MapModeButtonGrid"
-                  DockPanel.Dock = "Bottom" />
+        <DockPanel Grid.Column = "2" LastChildFill = "True">
+            <Grid x:Name = "MapModeButtonGrid" DockPanel.Dock = "Bottom" />
 
-            <Grid x:Name = "SelectionTopBar"
-                  DockPanel.Dock = "Top"
-                  Height = "30">
+            <Grid x:Name = "SelectionTopBar" DockPanel.Dock = "Top" Height = "30">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "Auto" />
                     <ColumnDefinition Width = "*" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column = "0"
-                            Orientation = "Horizontal">
-                    <TextBlock Text = "Selection Mode: "
-                               VerticalAlignment = "Center"
-                               Margin = "5,0" />
-                    <ComboBox x:Name = "SelectionModeBox"
-                              IsReadOnly = "True"
-                              Margin = "5,0"
-                              Height = "25"
-                              Width = "180"
-                              ItemsSource = "{Binding Source={StaticResource SelectionModeEnumValues}}"
+                <StackPanel Grid.Column = "0" Orientation = "Horizontal">
+                    <TextBlock Text = "Selection Mode: " VerticalAlignment = "Center" Margin = "5,0" />
+                    <ComboBox x:Name = "SelectionModeBox" IsReadOnly = "True" Margin = "5,0" Height = "25"
+                              Width = "180" ItemsSource = "{Binding Source={StaticResource SelectionModeEnumValues}}"
                               SelectedItem = "{Binding Path=(local:SelectionManager.ObjectSelectionMode), Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <ComboBox.ToolTip>
                             <ToolTip>
                                 <TextBlock>
-                                    <Run Text = "Infer Selection Mode"
-                                         FontWeight = "Bold" />
+                                    <Run Text = "Infer Selection Mode" FontWeight = "Bold" />
                                     <LineBreak />
                                     <Run Text = "Selects an object base on the map mode currently active." />
                                     <LineBreak />
-                                    <Run Text = "   -> Culture map mode -> Cultures are selected"
-                                         FontStyle = "Italic" />
+                                    <Run Text = "   -> Culture map mode -> Cultures are selected" FontStyle = "Italic" />
                                     <LineBreak />
                                     <LineBreak />
-                                    <Run Text = "Normal Selection Mode"
-                                         FontWeight = "Bold" />
+                                    <Run Text = "Normal Selection Mode" FontWeight = "Bold" />
                                     <LineBreak />
                                     <Run Text = "Selects clicked locations, regardless of map mode." />
                                     <LineBreak />
-                                    <Run Text = "Search Result Mode"
-                                         FontWeight = "Bold" />
+                                    <Run Text = "Search Result Mode" FontWeight = "Bold" />
                                     <LineBreak />
                                     <Run
                                         Text = "Searched objects will be shown in UI until a new search is queried or the mode changed." />
@@ -507,11 +408,8 @@
                             </ToolTip>
                         </ComboBox.ToolTip>
                     </ComboBox>
-                    <styleClasses:BaseButton Content = "Freeze Selection"
-                                             Margin = "5,0"
-                                             VerticalAlignment = "Center"
-                                             Height = "23"
-                                             Command = "mainWindow:MwCommands.FreezeSelectionCommand">
+                    <styleClasses:BaseButton Content = "Freeze Selection" Margin = "5,0" VerticalAlignment = "Center"
+                                             Height = "23" Command = "mainWindow:MwCommands.FreezeSelectionCommand">
                         <styleClasses:BaseButton.ToolTip>
                             <TextBlock>
                                 <Run> Freeze the current selection, preventing it from changing until unfrozen. </Run>
@@ -527,41 +425,29 @@
                 </StackPanel>
             </Grid>
 
-            <uc:MapControl x:Name = "MainMap"
-                           Margin = "5"
-                           BorderThickness = "2"
-                           BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                           VerticalAlignment = "Stretch"
+            <uc:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
+                           BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
                            HorizontalAlignment = "Stretch">
             </uc:MapControl>
         </DockPanel>
 
-        <GridSplitter Grid.Column = "3"
-                      Width = "4"
-                      ResizeBehavior = "PreviousAndNext">
+        <GridSplitter Grid.Column = "3" Width = "4" ResizeBehavior = "PreviousAndNext">
 
         </GridSplitter>
 
-        <Border Grid.Column = "4"
-                BorderBrush = "{DynamicResource DefaultBorderColorBrush}"
-                BorderThickness = "2"
-                CornerRadius = "8"
-                Margin = "2, 0">
-            
+        <Border Grid.Column = "4" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "2"
+                CornerRadius = "8" Margin = "2, 0">
+
             <ContentPresenter x:Name = "SpecializedEditorPresenter" />
-            
+
 
         </Border>
 
-        <GridSplitter Grid.Column = "5"
-                      Width = "4"
-                      ResizeBehavior = "PreviousAndNext"
+        <GridSplitter Grid.Column = "5" Width = "4" ResizeBehavior = "PreviousAndNext"
                       x:Name = "DebugPanelGridSplitter">
         </GridSplitter>
 
-        <debugPanel:DebugPanelGrid Grid.Column = "6"
-                                   x:Name = "DebugPanel"
-                                   VerticalAlignment = "Stretch"
+        <debugPanel:DebugPanelGrid Grid.Column = "6" x:Name = "DebugPanel" VerticalAlignment = "Stretch"
                                    HorizontalAlignment = "Stretch" />
     </Grid>
 
