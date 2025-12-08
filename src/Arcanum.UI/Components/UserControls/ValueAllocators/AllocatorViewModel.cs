@@ -23,7 +23,8 @@ public class AllocatorViewModel : ViewModelBase
    private int _totalLimit;
    private int _maxTotalLimit;
    private bool? _areAllLocked;
-
+   private bool _suppressCalculation; 
+   
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
    private readonly Stack<int> _totalHistory = new();
 
@@ -123,11 +124,12 @@ public class AllocatorViewModel : ViewModelBase
             foreach (var item in Items)
                if (item.MaxLimit == oldTotal)
                   item.MaxLimit = value;
-
+            
             OnPropertyChanged();
+            _suppressCalculation = true;
             // When Total changes, we must resize unlocked items to fit
             ResizeUnlockedItems(value - oldTotal);
-
+            _suppressCalculation = false;
             RunAutoLogScale();
          }
       }
@@ -140,8 +142,7 @@ public class AllocatorViewModel : ViewModelBase
       {
          field = value;
          OnPropertyChanged();
-         foreach (var item in Items)
-            item.RefreshSlider();
+         RefreshAllSliders();
       }
    }
 
@@ -211,17 +212,17 @@ public class AllocatorViewModel : ViewModelBase
 
    private void InitializeLocationData(Location location)
    {
-      foreach (var pop in location.Pops)
-         Items.Add(new(this, pop));
 
       LoadedLocation = location;
       PopDefinitionCreatorVm = new(location, this);
 
-      _totalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
+      TotalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
+      foreach (var pop in location.Pops)
+         Items.Add(new(this, pop));
+      
       UpdateMasterLockState();
-      RunAutoLogScale();
       UpdateCalculatedInfo(null, new(nameof(Items)));
    }
 
@@ -272,7 +273,7 @@ public class AllocatorViewModel : ViewModelBase
 
    private void UpdateCalculatedInfo(object? sender, PropertyChangedEventArgs propertyChangedEventArgs)
    {
-      if (propertyChangedEventArgs.PropertyName != nameof(Items) &&
+      if (_suppressCalculation || propertyChangedEventArgs.PropertyName != nameof(Items) &&
           propertyChangedEventArgs.PropertyName != nameof(TotalLimit))
          return;
 
@@ -410,13 +411,15 @@ public class AllocatorViewModel : ViewModelBase
       foreach (var memento in oldState)
          memento.Restore();
 
-      foreach (var item in Items)
-         item.RefreshSlider();
+      RefreshAllSliders();
       UpdateMasterLockState();
    }
 
    private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
    {
+      if(_suppressCalculation)
+         return;
+      
       // If an item locks/unlocks, check if we need to update the Master Toggle
       if (e.PropertyName == nameof(AllocationItem.IsLocked))
          UpdateMasterLockState();
@@ -518,8 +521,7 @@ public class AllocatorViewModel : ViewModelBase
       // Reuse the Distribute logic, treating 'delta' as the error to fix
       DistributeError(delta, unlockedItems);
 
-      foreach (var item in Items)
-         item.RefreshSlider();
+      RefreshAllSliders();
    }
 
    /// <summary>
@@ -570,8 +572,9 @@ public class AllocatorViewModel : ViewModelBase
          return;
       }
 
+      _suppressCalculation = true;
       var remainingError = DistributeError(error, candidates);
-
+      _suppressCalculation = false;
       // If there is still error left, it means everyone else hit a wall.
       // The Source item MUST take back the change.
       if (remainingError != 0 && sourceToIgnore != null)
@@ -698,7 +701,14 @@ public class AllocatorViewModel : ViewModelBase
 
       OnPropertyChanged(nameof(TotalLimit));
 
+      RefreshAllSliders();
+   }
+
+   private void RefreshAllSliders()
+   {
+      _suppressCalculation = true;
       foreach (var item in Items)
          item.RefreshSlider();
+      _suppressCalculation = false;
    }
 }

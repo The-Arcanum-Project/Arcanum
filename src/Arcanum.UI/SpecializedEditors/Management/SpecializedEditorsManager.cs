@@ -135,6 +135,42 @@ public class SpecializedEditorsManager
       var editors = GetAllEditorsForType(targets[0]);
       if (editors.Count == 0)
          return _noEditorsTextBlock;
+   
+      // Check if current tabs are still valid for the new targets
+      foreach (var (editor, props) in editors)
+      {
+         if (_editorsTabControl.Items.OfType<TabItem>().FirstOrDefault(ti => (string)ti.Header == editor.DisplayName) is not { } tabItem)
+            continue;
+
+         var existingEditorView = tabItem.Content as SpecializedEditor;
+         if (existingEditorView == null)
+            continue;
+
+         // Check if the existing editor view can handle the new targets
+         if (editor.SupportsMultipleTargets)
+            existingEditorView.UpdateForNewTargets(props, targets);
+         else
+            existingEditorView.UpdateForNewTarget(props, targets[0]);
+      }
+      
+      if (_editorsTabControl.Items.Count == editors.Count)
+      {
+         var allMatch = true;
+
+         for (var i = 0; i < editors.Count; i++)
+         {
+            var (editor, _) = editors[i];
+
+            if (_editorsTabControl.Items[i] is TabItem tabItem &&
+                Equals(tabItem.Header, editor.DisplayName)) continue;
+            
+            allMatch = false;
+            break;
+         }
+
+         if (allMatch)
+            return _editorsTabControl;
+      }
 
       _editorsTabControl.Items.Clear();
       foreach (var (editor, props) in editors)
