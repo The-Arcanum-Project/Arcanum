@@ -39,7 +39,7 @@ public partial class FloatNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderThickness),
                                   typeof(Thickness),
                                   typeof(FloatNumericUpDown),
-                                  new(default(Thickness)));
+                                  new FrameworkPropertyMetadata(new Thickness(1)));
 
    public Thickness InnerBorderThickness
    {
@@ -51,14 +51,13 @@ public partial class FloatNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderBrush),
                                   typeof(Brush),
                                   typeof(FloatNumericUpDown),
-                                  new(default(Brush)));
+                                  new FrameworkPropertyMetadata(null));
 
    public Brush InnerBorderBrush
    {
       get => (Brush)GetValue(InnerBorderBrushProperty);
       set => SetValue(InnerBorderBrushProperty, value);
    }
-
    public float MinValue
    {
       get => (float)GetValue(MinValueProperty);

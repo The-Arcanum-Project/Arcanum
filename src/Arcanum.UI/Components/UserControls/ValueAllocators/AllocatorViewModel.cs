@@ -10,6 +10,7 @@ using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religious;
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
@@ -31,6 +32,19 @@ public class AllocatorViewModel : ViewModelBase
    public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
    public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
    public ObservableCollection<BasicChartItem> PopTypeStats { get; } = [];
+
+   public PopDefinitionCreatorVm PopDefinitionCreatorVm
+   {
+      get;
+      set
+      {
+         if (Equals(value, field))
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   }
 
    public int MaxTotalLimit
    {
@@ -181,16 +195,23 @@ public class AllocatorViewModel : ViewModelBase
       }
    } = string.Empty;
 
-   public AllocatorViewModel(int total)
+   public AllocatorViewModel(Location location)
    {
-      _totalLimit = total;
-      const int maxMultiplicator = 3; //TODO: Make this a setting
-      MaxTotalLimit = total > 0 ? total * maxMultiplicator : 1000;
+      foreach (var pop in location.Pops)
+         Items.Add(new(this, pop));
+
+      LoadedLocation = location;
+      PopDefinitionCreatorVm = new(location, this);
+
+      _totalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
+      MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
       Items.CollectionChanged += Items_CollectionChanged;
       PropertyChanged += UpdateCalculatedInfo;
 
       UpdateMasterLockState();
+      RunAutoLogScale();
+      UpdateCalculatedInfo(null, new(nameof(Items)));
       UndoCommand = new RelayCommand(Undo);
       DeleteCommand = new RelayCommand<AllocationItem>(Delete);
    }
@@ -233,6 +254,17 @@ public class AllocatorViewModel : ViewModelBase
       UpdateChartData(CultureStats, cultureCounts);
       UpdateChartData(ReligionStats, religionCounts);
       UpdateChartData(PopTypeStats, popTypeCounts);
+   }
+
+   public void AddAllocationItemForPopDefinition(PopDefinition popDefinition)
+   {
+      var item = new AllocationItem(this, popDefinition);
+      Items.Add(item);
+
+      TotalLimit += item.Value;
+      // Force balance to total (ignoring locks for initial setup)
+      if (Items.Sum(x => x.Value) != TotalLimit)
+         BalanceToTotal(null, ignoreLocks: true);
    }
 
    private static void UpdateChartData<TKey>(ObservableCollection<BasicChartItem> collection, Dictionary<TKey, long> counts) where TKey : IEu5Object
@@ -376,18 +408,6 @@ public class AllocatorViewModel : ViewModelBase
       _isUpdatingLocks = false;
 
       UpdateMasterLockState();
-   }
-
-   public void LoadLocation(Location location)
-   {
-      Items.Clear();
-
-      foreach (var pop in location.Pops)
-         Items.Add(new(this, pop));
-
-      LoadedLocation = location;
-
-      RunAutoLogScale();
    }
 
    internal void AddItem(PopDefinition pop, bool balanceToTotal)

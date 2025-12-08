@@ -126,12 +126,11 @@ public partial class DebugPanelGrid
       var allocator = new IntValueAllocator();
       var locs = Globals.Locations.Values.ToArray();
       var loc = locs[0]; //Random.Shared.Next(0, locs.Length)
-      var allocatroVM = new AllocatorViewModel((int)loc.Pops.Sum(x => x.Size * 1000));
-      allocatroVM.LoadLocation(loc);
+      var allocatroVM = new AllocatorViewModel(loc);
       allocator.DataContext = allocatroVM;
       bwindow.Content = allocator;
       bwindow.Width = 500;
-      bwindow.Height = 700;
+      bwindow.Height = 1000;
       bwindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
       bwindow.Show();
    }

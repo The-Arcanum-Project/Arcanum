@@ -6,7 +6,10 @@
              xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-             xmlns:charts = "clr-namespace:Arcanum.UI.Components.Charts.DonutChart" mc:Ignorable = "d"
+             xmlns:charts = "clr-namespace:Arcanum.UI.Components.Charts.DonutChart"
+             xmlns:acb = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
+             xmlns:g = "clr-namespace:Arcanum.Core.GlobalStates;assembly=Arcanum.Core"
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls" mc:Ignorable = "d"
              d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
 
     <UserControl.InputBindings>
@@ -206,6 +209,8 @@
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" MaxHeight = "800" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "*" />
             </Grid.RowDefinitions>
@@ -477,8 +482,184 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <!-- Separator Line -->
+            <Rectangle Grid.Row = "5" Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}"
+                       Margin = "0, 2, 0, 0" />
+
+            <!-- Pop defition creator -->
+            <Grid Grid.Row = "6">
+                <StackPanel Orientation = "Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                            <ColumnDefinition Width = "Auto" />
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height = "Auto" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row = "0" Grid.ColumnSpan = "5" HorizontalAlignment = "Center"
+                                   VerticalAlignment = "Center" Text = "Create new Pop" />
+
+                        <!-- Create new Popdefinition Button -->
+                        <styleClasses:BaseButton Grid.Row = "0" Grid.Column = "4" Width = "24" Height = "24"
+                                                 Command = "{Binding PopDefinitionCreatorVm.CreatePopDefCommand}"
+                                                 HorizontalAlignment = "Right" Margin = "0,6,0,0"
+                                                 local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                                 Style = "{StaticResource ThinBaseButtonStyle}">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" Stretch = "Uniform"
+                                   ToolTip = "Create a new Pop Definition from the specified values">
+                            </Image>
+                        </styleClasses:BaseButton>
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "PopType" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.PopTypes}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.PopType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "3" Text = "Culture" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "4"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Cultures}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Culture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <!-- Vertical Spacer -->
+                        <Rectangle Grid.Row = "1" Grid.Column = "2" Grid.RowSpan = "2" Width = "1" Margin = "4, 3"
+                                   VerticalAlignment = "Stretch" Fill = "{StaticResource DefaultBorderColorBrush}" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Religion" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "1"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Religions}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Religion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "3" Text = "Size" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <baseControls:BaseNumericUpDown Grid.Row = "2" Grid.Column = "4"
+                                                        Value = "{Binding PopDefinitionCreatorVm.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        local:TextBoxUtilities.UpdateDelay = "600"
+                                                        HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                        local:InteractionMonitor.AllocatorVm = "{Binding}" />
+
+                    </Grid>
+
+                    <!-- Separator Line -->
+                    <Rectangle Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,3" />
+
+                    <!-- Random Creation and infering Elements -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height = "Auto" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                            <ColumnDefinition Width = "Auto" />
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row = "0" Grid.Column = "0" Grid.ColumnSpan = "5" Text = "Sample Data"
+                                   HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                   ToolTipService.InitialShowDelay = "50">
+                            <TextBlock.ToolTip>
+                                <TextBlock>
+                                    <Run Text = "Sampling:" FontWeight = "Bold" />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "You can create new Pop Definitions by sampling existing Pops in the world." />
+                                    <LineBreak />
+                                    <Run Text = "Each location meeting the " />
+                                    <Run Text = "two" FontWeight = "Bold" />
+                                    <Run Text = " defined conditions will be considered for sampling." />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "The new Pop Definition will inherit the two conditions and the third will be set randomly." />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "The size will be the average modified by a random offset in the range of" />
+                                    <Run Text = "+-0 - 'Random %'" FontWeight = "Bold" />
+                                </TextBlock>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- Create new Popdefinition Button -->
+                        <styleClasses:BaseButton Grid.Row = "0" Grid.Column = "4" Width = "24" Height = "24"
+                                                 Command = "{Binding PopDefinitionCreatorVm.CreatePopDefFromSampeCommand}"
+                                                 HorizontalAlignment = "Right" Margin = "0,6,0,0"
+                                                 local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                                 Style = "{StaticResource ThinBaseButtonStyle}">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" Stretch = "Uniform"
+                                   ToolTip = "Create a new Pop Definition from the sampled values with the defined random offset.">
+                            </Image>
+                        </styleClasses:BaseButton>
+
+                        <!-- Two condition drop downs -->
+                        <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "Condition 1" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.SamplePopDefinitionSources}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                  IsDropdownOnly = "True" />
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "3" Text = "Value 1" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "4"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.Condition1PossibleValues}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition1Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "3" Text = "Value 2" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "4"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.Condition2PossibleValues}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition2Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Condition 2" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.SamplePopDefinitionSources}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                  IsDropdownOnly = "True" />
+
+
+                        <!-- Vertical Spacer -->
+                        <Rectangle Grid.Row = "1" Grid.Column = "2" Width = "1" Margin = "3"
+                                   VerticalAlignment = "Stretch" Grid.RowSpan = "3"
+                                   Fill = "{StaticResource DefaultBorderColorBrush}" />
+
+                        <TextBlock Grid.Row = "3" Grid.Column = "0" Text = "Random %" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+
+                        <baseControls:FloatNumericUpDown Grid.Row = "3" Grid.Column = "1"
+                                                         Value = "{Binding PopDefinitionCreatorVm.RandomOffsetPercentage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                         BorderThickness = "0" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
             <!-- Calculated Values Info -->
-            <Grid Grid.Row = "5">
+            <Grid Grid.Row = "7">
                 <Grid.RowDefinitions>
                     <RowDefinition Height = "Auto" />
                     <RowDefinition Height = "Auto" />
@@ -492,7 +673,7 @@
 
                 <!-- Separator Line -->
                 <Rectangle Grid.Row = "0" Grid.ColumnSpan = "2" Height = "1"
-                           Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,0,0,10" />
+                           Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,2,0,10" />
 
                 <!-- Donut Charts for religion and culture distribution -->
                 <!-- Religion Chart -->
