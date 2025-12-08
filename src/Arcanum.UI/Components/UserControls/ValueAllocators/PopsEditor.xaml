@@ -312,7 +312,7 @@
                                 <ColumnDefinition Width = "20" />
                                 <ColumnDefinition Width = "30" />
                                 <ColumnDefinition Width = "*" />
-                                <ColumnDefinition Width = "Auto" />
+                                <ColumnDefinition Width = "140" />
                             </Grid.ColumnDefinitions>
 
                             <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
