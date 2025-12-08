@@ -57,7 +57,8 @@ public static class MainWindowGen
    private static void SetSpecializedEditors(NavH navh)
    {
       var content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
-      _specialEditorsHost.Content = content;
+      if(!Equals(_specialEditorsHost.Content, content))
+         _specialEditorsHost.Content = content;
       if (content is TabControl tc)
          tc.SelectedIndex = 0;
    }
