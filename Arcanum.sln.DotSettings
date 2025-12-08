@@ -335,6 +335,30 @@ DiagnosticReportSeverity.$ReoprtSeverity$</s:String>
 [Description("The $ChildType$s that are part of this $ParentType$.")]
 [ParseAs("null", ignore: true)]
 public AggregateLink&lt;$ChildType$&gt; $ChildType$s { get; set; }</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Applicability/=Live/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Applicability/=Surround/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Description/@EntryValue">Inserts a timer around the code</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Field/=end/@KeyIndexDefined">False</s:Boolean>
+	
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Field/=msg/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Field/=msg/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Field/=selected/@KeyIndexDefined">False</s:Boolean>
+	
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Shortcut/@EntryValue">time</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=9EE241295288DD4B8C796A9CD4DA2F78/Text/@EntryValue">#if DEBUG
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+#endif
+    $SELECTION$$END$
+#if DEBUG
+    sw.Stop();
+    ArcLog.WriteLine("DBT", LogLevel.INF, $"$msg$ in {sw.ElapsedMilliseconds} ms");
+#endif</s:String>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/@KeyIndexDefined">True</s:Boolean>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/Field/=type/@KeyIndexDefined">True</s:Boolean>
