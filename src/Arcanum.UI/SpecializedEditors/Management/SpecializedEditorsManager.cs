@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Generator;
+using Common.Logger;
 
 namespace Arcanum.UI.SpecializedEditors.Management;
 
@@ -157,7 +158,18 @@ public class SpecializedEditorsManager
       {
          if (!_createdTypeEditors.TryGetValue(editor.GetType(), out specializedEditor))
          {
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
             specializedEditor = new(editor);
+#if DEBUG
+            sw.Stop();
+            ArcLog.WriteLine("SEM",
+                             LogLevel.INF,
+                             "Created specialized editor of type {0} in {1} ms",
+                             editor.GetType().Name,
+                             sw.ElapsedMilliseconds);
+#endif
             _createdTypeEditors[editor.GetType()] = specializedEditor;
          }
       }
@@ -166,7 +178,18 @@ public class SpecializedEditorsManager
       {
          if (!_createdPropertyEditors.TryGetValue(editor.GetType(), out specializedEditor))
          {
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
             specializedEditor = new(editor);
+#if DEBUG
+            sw.Stop();
+            ArcLog.WriteLine("SEM",
+                             LogLevel.INF,
+                             "Created specialized editor of type {0} in {1} ms",
+                             editor.GetType().Name,
+                             sw.ElapsedMilliseconds);
+#endif
             _createdPropertyEditors[editor.GetType()] = specializedEditor;
          }
       }

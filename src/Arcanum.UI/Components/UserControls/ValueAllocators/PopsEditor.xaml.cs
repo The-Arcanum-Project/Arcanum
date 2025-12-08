@@ -6,9 +6,9 @@ using Arcanum.UI.SpecializedEditors.Management;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
-public partial class IntValueAllocator : ISpecializedEditor
+public partial class PopsEditor : ISpecializedEditor
 {
-   public IntValueAllocator()
+   public PopsEditor()
    {
       InitializeComponent();
       DataContext = new AllocatorViewModel(Location.Empty);

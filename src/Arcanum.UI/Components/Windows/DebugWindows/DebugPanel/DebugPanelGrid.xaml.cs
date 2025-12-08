@@ -123,7 +123,7 @@ public partial class DebugPanelGrid
    private void PopsEditorTestButton_Click(object sender, RoutedEventArgs e)
    {
       var bwindow = new BaseWindow { Title = "Pops Editor Test" };
-      var allocator = new IntValueAllocator();
+      var allocator = new PopsEditor();
       var locs = Globals.Locations.Values.ToArray();
       var loc = locs[0]; //Random.Shared.Next(0, locs.Length)
       var allocatroVM = new AllocatorViewModel(loc);

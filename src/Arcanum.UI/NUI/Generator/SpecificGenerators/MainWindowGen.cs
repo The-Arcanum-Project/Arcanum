@@ -21,7 +21,7 @@ public static class MainWindowGen
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
       // TODO: Initialize all the Editors to the manager
       SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new ProvinceEditor());
-      SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new IntValueAllocator());
+      SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new PopsEditor());
 
       _specialEditorsHost = specialEditorsHost;
       _isInitialized = true;
