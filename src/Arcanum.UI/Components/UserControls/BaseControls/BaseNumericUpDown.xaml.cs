@@ -21,7 +21,7 @@ public partial class BaseNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderThickness),
                                   typeof(Thickness),
                                   typeof(BaseNumericUpDown),
-                                  new(new Thickness(1, 1, 1, 1)));
+                                  new FrameworkPropertyMetadata(new Thickness(1)));
 
    public Thickness InnerBorderThickness
    {
@@ -33,7 +33,7 @@ public partial class BaseNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderBrush),
                                   typeof(Brush),
                                   typeof(BaseNumericUpDown),
-                                  new(default(Brush)));
+                                  new FrameworkPropertyMetadata(null));
 
    public Brush InnerBorderBrush
    {

@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.SpecializedEditors.Management;
 using CommunityToolkit.Mvvm.Input;
 
@@ -73,8 +75,7 @@ public partial class SpecializedEditor
          RequirementsStatusTextBlock.Foreground = Brushes.Green;
       else
          RequirementsStatusTextBlock.Foreground = Brushes.Red;
-      if (EditorContent != null)
-         EditorContent.IsEnabled = canEdit;
+      EditorContent?.IsEnabled = canEdit && _specializedEditor.Enabled;
    }
 
    /// <summary>
@@ -82,6 +83,12 @@ public partial class SpecializedEditor
    /// </summary>
    public void UpdateForNewTarget(List<Enum?> props, IEu5Object target)
    {
+      if (!_specializedEditor.Enabled)
+      {
+         EditorContent = null;
+         return;
+      }
+
       Debug.Assert(_specializedEditor != null, "Specialized editor instance must be provided.");
       Debug.Assert(props.Count > 0, "At least one targetable property must be provided.");
       Debug.Assert(!_specializedEditor.SupportsMultipleTargets,
@@ -118,5 +125,14 @@ public partial class SpecializedEditor
          return;
 
       UpdateRequirementsStatus();
+   }
+
+   private void ToggleButton_Update(object sender, RoutedEventArgs e)
+   {
+      if (sender is not ToggleButton tb)
+         return;
+
+      _specializedEditor.Enabled = tb.IsChecked == true;
+      MainWindowGen.UpdateSpecializedEditors();
    }
 }

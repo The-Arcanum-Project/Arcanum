@@ -1,7 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Generator;
-using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI;
 
@@ -13,6 +12,8 @@ public class NUINavigation(int capacity)
 
    private readonly LinkedList<NavH> _items = [];
    private LinkedListNode<NavH>? _current;
+
+   public NavH? Current => _current?.Value;
 
    static NUINavigation()
    {

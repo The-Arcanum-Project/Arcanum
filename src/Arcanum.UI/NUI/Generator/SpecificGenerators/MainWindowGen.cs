@@ -2,7 +2,9 @@
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Registry;
+using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.SpecializedEditors.Editors;
 using Arcanum.UI.SpecializedEditors.Management;
 
@@ -19,6 +21,7 @@ public static class MainWindowGen
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
       // TODO: Initialize all the Editors to the manager
       SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new ProvinceEditor());
+      SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new PopsEditor());
 
       _specialEditorsHost = specialEditorsHost;
       _isInitialized = true;
@@ -43,6 +46,7 @@ public static class MainWindowGen
             return;
          }
       }
+
       //TODO: @Melco temporary fix for preview not clearing properly
       SelectionManager.ClearPreview();
       navh.Root.Content = Eu5UiGen.GenerateView(navh, markedProps ?? [], hasHeader);
@@ -56,5 +60,12 @@ public static class MainWindowGen
       _specialEditorsHost.Content = content;
       if (content is TabControl tc)
          tc.SelectedIndex = 0;
+   }
+
+   public static void UpdateSpecializedEditors()
+   {
+      var currNavh = NUINavigation.Instance.Current;
+      if (currNavh != null)
+         SetSpecializedEditors(currNavh);
    }
 }

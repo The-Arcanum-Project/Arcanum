@@ -9,6 +9,11 @@ namespace Arcanum.UI.SpecializedEditors.Management;
 public interface ISpecializedEditor
 {
    /// <summary>
+   /// Only if true, the editor will be rendered. Otherwise only the header
+   /// </summary>
+   public bool Enabled { get; set; }
+
+   /// <summary>
    /// The display name of the editor tab.
    /// </summary>
    public string DisplayName { get; }

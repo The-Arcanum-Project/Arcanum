@@ -1,12 +1,18 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.GameObjects.Religious;
+using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,6 +21,7 @@ namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 public class AllocatorViewModel : ViewModelBase
 {
    private int _totalLimit;
+   private int _maxTotalLimit;
    private bool? _areAllLocked;
 
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
@@ -22,6 +29,34 @@ public class AllocatorViewModel : ViewModelBase
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
+   public ICommand ApplyChangesCommand { get; }
+
+   public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
+   public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
+   public ObservableCollection<BasicChartItem> PopTypeStats { get; } = [];
+
+   public PopDefinitionCreatorVm PopDefinitionCreatorVm
+   {
+      get;
+      set
+      {
+         if (Equals(value, field))
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null!;
+
+   public int MaxTotalLimit
+   {
+      get => _maxTotalLimit;
+      set
+      {
+         _maxTotalLimit = value;
+         OnPropertyChanged();
+      }
+   }
 
    public Location LoadedLocation
    {
@@ -79,6 +114,9 @@ public class AllocatorViewModel : ViewModelBase
 
          if (_totalLimit != value)
          {
+            if (value > MaxTotalLimit)
+               MaxTotalLimit = value;
+
             var oldTotal = _totalLimit;
             _totalLimit = value;
 
@@ -129,6 +167,16 @@ public class AllocatorViewModel : ViewModelBase
       }
    } = Culture.Empty;
 
+   public PopType CalculatedPopTypes
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = PopType.Empty;
+
    public int CalculatedPopulation
    {
       get;
@@ -149,16 +197,77 @@ public class AllocatorViewModel : ViewModelBase
       }
    } = string.Empty;
 
-   public AllocatorViewModel(int total)
+   public AllocatorViewModel(Location location)
    {
-      _totalLimit = total;
+      InitializeLocationData(location);
 
       Items.CollectionChanged += Items_CollectionChanged;
       PropertyChanged += UpdateCalculatedInfo;
 
-      UpdateMasterLockState();
       UndoCommand = new RelayCommand(Undo);
       DeleteCommand = new RelayCommand<AllocationItem>(Delete);
+      ApplyChangesCommand = new RelayCommand(ApplyChanges);
+   }
+
+   private void InitializeLocationData(Location location)
+   {
+      foreach (var pop in location.Pops)
+         Items.Add(new(this, pop));
+
+      LoadedLocation = location;
+      PopDefinitionCreatorVm = new(location, this);
+
+      _totalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
+      MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
+
+      UpdateMasterLockState();
+      RunAutoLogScale();
+      UpdateCalculatedInfo(null, new(nameof(Items)));
+   }
+
+   public void ResetFor(Location target)
+   {
+      Reset();
+      InitializeLocationData(target);
+   }
+
+   // Cleares all instance data.
+   public void Reset()
+   {
+      Items.Clear();
+      LoadedLocation = Location.Empty;
+      _totalLimit = 0;
+      _maxTotalLimit = 0;
+      _undoStack.Clear();
+      _totalHistory.Clear();
+      CalculatedPopulation = 0;
+      CalculatedPopulationToolTip = string.Empty;
+      CalculatedReligion = Religion.Empty;
+      CalculatedCulture = Culture.Empty;
+      CalculatedPopTypes = PopType.Empty;
+      ReligionStats.Clear();
+      CultureStats.Clear();
+      PopTypeStats.Clear();
+   }
+
+   private void ApplyChanges()
+   {
+      if (LoadedLocation == Location.Empty)
+         return;
+
+      // All pops must already exist in the location
+      Debug.Assert(Items.All(i => LoadedLocation.Pops.Contains(i.PopDefinition)));
+      Debug.Assert(Items.Count == LoadedLocation.Pops.Count);
+
+      Enum field = PopDefinition.Field.Size;
+      foreach (var item in Items)
+      {
+         var value = item.Value / 1000d;
+         if (Math.Abs((double)item.PopDefinition._getValue(field) - value) < 0.0001)
+            continue;
+
+         Nx.ForceSet(value, item.PopDefinition, field);
+      }
    }
 
    private void UpdateCalculatedInfo(object? sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -169,6 +278,7 @@ public class AllocatorViewModel : ViewModelBase
 
       Dictionary<Religion, long> religionCounts = new();
       Dictionary<Culture, long> cultureCounts = new();
+      Dictionary<PopType, long> popTypeCounts = new();
       long totalPop = 0;
 
       foreach (var item in Items)
@@ -183,13 +293,69 @@ public class AllocatorViewModel : ViewModelBase
 
          cultureCounts.TryAdd(pop.Culture, 0);
          cultureCounts[pop.Culture] += size;
+
+         popTypeCounts.TryAdd(pop.PopType, 0);
+         popTypeCounts[pop.PopType] += size;
       }
 
       CalculatedReligion = religionCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
       CalculatedCulture = cultureCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
+      CalculatedPopTypes = popTypeCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
 
       CalculatedPopulation = (int)totalPop;
       CalculatedPopulationToolTip = $"Total: {totalPop:N0}";
+
+      UpdateChartData(CultureStats, cultureCounts);
+      UpdateChartData(ReligionStats, religionCounts);
+      UpdateChartData(PopTypeStats, popTypeCounts);
+   }
+
+   public void AddAllocationItemForPopDefinition(PopDefinition popDefinition)
+   {
+      var item = new AllocationItem(this, popDefinition);
+      Items.Add(item);
+
+      TotalLimit += item.Value;
+      // Force balance to total (ignoring locks for initial setup)
+      if (Items.Sum(x => x.Value) != TotalLimit)
+         BalanceToTotal(null, ignoreLocks: true);
+   }
+
+   private static void UpdateChartData<TKey>(ObservableCollection<BasicChartItem> collection, Dictionary<TKey, long> counts) where TKey : IEu5Object
+   {
+      collection.Clear();
+      // Assign colors dynamically if needed, or use a fixed palette
+      var colorIndex = 0;
+      foreach (var kvp in counts.OrderByDescending(x => x.Value))
+      {
+         BasicChartItem chartItem = new()
+         {
+            Name = kvp.Key.UniqueId, Value = kvp.Value,
+         };
+         var colorEnum = kvp.Key.GetAllProperties().FirstOrDefault(x => x.ToString() == "Color");
+         if (colorEnum != null)
+         {
+            var color = ((JominiColor)kvp.Key._getValue(colorEnum)).ToMediaColor();
+            var brush = new SolidColorBrush(color) { Opacity = 0.7 };
+            brush.Freeze();
+            chartItem.ColorBrush = brush;
+         }
+         else
+            chartItem.ColorBrush = GetColorForIndex(colorIndex++);
+
+         collection.Add(chartItem);
+      }
+   }
+
+   private static readonly SolidColorBrush[] PredefinedBrushes =
+   [
+      Brushes.CornflowerBlue, Brushes.IndianRed, Brushes.MediumSeaGreen, Brushes.Orange, Brushes.MediumPurple, Brushes.Goldenrod, Brushes.Teal,
+      Brushes.SlateBlue, Brushes.Crimson, Brushes.DarkCyan,
+   ];
+
+   private static SolidColorBrush GetColorForIndex(int index)
+   {
+      return PredefinedBrushes[index % PredefinedBrushes.Length];
    }
 
    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -296,18 +462,6 @@ public class AllocatorViewModel : ViewModelBase
       _isUpdatingLocks = false;
 
       UpdateMasterLockState();
-   }
-
-   public void LoadLocation(Location location)
-   {
-      Items.Clear();
-
-      foreach (var pop in location.Pops)
-         Items.Add(new(this, pop));
-
-      LoadedLocation = location;
-
-      RunAutoLogScale();
    }
 
    internal void AddItem(PopDefinition pop, bool balanceToTotal)

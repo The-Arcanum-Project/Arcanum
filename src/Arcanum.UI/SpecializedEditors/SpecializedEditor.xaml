@@ -3,54 +3,41 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-             mc:Ignorable = "d"
-             d:DesignHeight = "600"
-             d:DesignWidth = "400">
-    
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+             d:DesignHeight = "600" d:DesignWidth = "400">
+
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
 
-    
+
     <Grid Margin = "3">
         <Grid.RowDefinitions>
+            <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row = "0"
-                   Margin = "2"
-                   LastChildFill = "False">
-            <TextBlock DockPanel.Dock = "Left"
-                       Text = "Target Property:"
-                       VerticalAlignment = "Center" />
-            <ComboBox DockPanel.Dock = "Right"
-                      MinWidth = "200"
-                      Height="23"
-                      x:Name = "PropertySelector"
+        <DockPanel Grid.Row = "0" Margin = "2" LastChildFill = "False">
+            <TextBlock DockPanel.Dock = "Left" Text = "Target Property:" VerticalAlignment = "Center" />
+            <ComboBox DockPanel.Dock = "Right" MinWidth = "200" Height = "23" x:Name = "PropertySelector"
                       ItemsSource = "{Binding TargetableProperties, RelativeSource={RelativeSource AncestorType= UserControl}}"
                       SelectionChanged = "Selector_OnSelectionChanged" />
         </DockPanel>
 
-        <DockPanel Grid.Row = "1"
-                   Margin = "2"
-                   LastChildFill = "False">
-            <TextBlock DockPanel.Dock = "Left"
-                       Text = "Fulfills Requirements:"
-                       VerticalAlignment = "Center" />
+        <DockPanel Grid.Row = "1" Margin = "2" LastChildFill = "False">
+            <TextBlock DockPanel.Dock = "Left" Text = "Fulfills Requirements:" VerticalAlignment = "Center" />
 
-            <styleClasses:BaseButton DockPanel.Dock = "Right"
-                                     Content = "Verify"
-                                     Width = "50"
+            <styleClasses:BaseButton DockPanel.Dock = "Right" Content = "Verify" Width = "50"
                                      Command = "{Binding CheckRequirementsCommand, RelativeSource={RelativeSource AncestorType= UserControl}}"
                                      BorderThickness = "1">
                 <styleClasses:BaseButton.ToolTip>
@@ -59,18 +46,29 @@
                 </styleClasses:BaseButton.ToolTip>
             </styleClasses:BaseButton>
 
-            <TextBlock DockPanel.Dock = "Right"
-                       x:Name = "RequirementsStatusTextBlock"
+            <TextBlock DockPanel.Dock = "Right" x:Name = "RequirementsStatusTextBlock"
                        Text = "{Binding RequirementsStatusText, RelativeSource={RelativeSource AncestorType= UserControl}}"
-                       Margin = "0, 1, 15, 0"
-                       HorizontalAlignment = "Center"
-                       VerticalAlignment = "Center" />
+                       Margin = "0, 1, 15, 0" HorizontalAlignment = "Center" VerticalAlignment = "Center" />
         </DockPanel>
-        <Border Grid.Row="2" Height="4" Margin="5" CornerRadius="2" Background="{StaticResource DefaultBorderColorBrush}"/>
-        <ContentControl Grid.Row = "3"
-                        Margin = "2"
-                        VerticalContentAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
+
+        <ToggleButton Grid.Row = "2" Height = "22" Checked = "ToggleButton_Update" Unchecked = "ToggleButton_Update">
+            <!-- Add to the style by changing the content when toggled -->
+            <ToggleButton.Style>
+                <Style TargetType = "ToggleButton" BasedOn = "{StaticResource BlueToggleButtonStyle}">
+                    <Setter Property = "Content" Value = "Disabled" />
+                    <Style.Triggers>
+                        <Trigger Property = "IsChecked" Value = "True">
+                            <Setter Property = "Content" Value = "Enabled" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ToggleButton.Style>
+        </ToggleButton>
+
+        <Border Grid.Row = "3" Height = "4" Margin = "5" CornerRadius = "2"
+                Background = "{StaticResource DefaultBorderColorBrush}" />
+        <ContentControl Grid.Row = "4" Margin = "2" VerticalContentAlignment = "Stretch"
+                        HorizontalContentAlignment = "Stretch"
                         Content = "{Binding EditorContent, RelativeSource={RelativeSource AncestorType= UserControl}}" />
     </Grid>
 </UserControl>
