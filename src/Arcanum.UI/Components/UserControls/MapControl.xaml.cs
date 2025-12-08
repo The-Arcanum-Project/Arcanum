@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.Numerics;
 using System.Windows;
@@ -33,7 +33,7 @@ public partial class MapControl
    private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
    private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
    private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
-   
+
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
 
@@ -46,6 +46,9 @@ public partial class MapControl
    public event Action<Vector2>? OnAbsolutePositionChanged;
 
    public static event Action? OnMapLoaded;
+
+   // Get to pass this into the color generation
+   public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
 
    public static readonly DependencyProperty CurrentPosProperty =
       DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
@@ -92,13 +95,9 @@ public partial class MapControl
       });
    }
 
-   public void SetColors(Color4[] colors)
+   public void UpdateColors()
    {
-      Debug.Assert(colors.Length == _currentBackgroundColor.Length,
-         "Color array length does not match the number of locations.");
-
-      _currentBackgroundColor = colors;
-      _selectionColor = (colors.Clone() as Color4[])!;
+      _selectionColor = (_currentBackgroundColor.Clone() as Color4[])!;
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
@@ -139,13 +138,14 @@ public partial class MapControl
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
    }
-   
-   private void SelectionManager_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+
+   private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
    {
-      if (e.PropertyName != nameof(SelectionManager.ObjectSelectionMode)) return;
+      if (e.PropertyName != nameof(SelectionManager.ObjectSelectionMode))
+         return;
+
       RefreshAndRenderSelectionColors();
    }
-   
 
    private void OnRendererLoaded(object? sender, ID3DRenderer e)
    {
@@ -157,7 +157,6 @@ public partial class MapControl
       Selection.LocationDeselected += LocationDeselectedAddHandler;
    }
 
-   
    private void LocationSelectedAddHandler(List<Location> locations)
    {
       RefreshSelectionColors();
@@ -165,7 +164,7 @@ public partial class MapControl
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }
-   
+
    public void RefreshAndRenderSelectionColors()
    {
       Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
@@ -176,15 +175,17 @@ public partial class MapControl
 
    private void RefreshSelectionColors()
    {
-      if( SelectionManager.ObjectSelectionMode == ObjectSelectionMode.Frozen)
+      if (SelectionManager.ObjectSelectionMode == ObjectSelectionMode.Frozen)
          foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
          {
             _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + FreezeSelectionColor;
          }
+
       foreach (var loc in Selection.GetSelectedLocations)
       {
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
       }
+
       foreach (var loc in SelectionManager.PreviewedLocations)
       {
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + PreviewColor;
@@ -195,9 +196,9 @@ public partial class MapControl
    {
       foreach (var loc in locations)
          _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex];
-      
+
       RefreshSelectionColors();
-      
+
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
    }

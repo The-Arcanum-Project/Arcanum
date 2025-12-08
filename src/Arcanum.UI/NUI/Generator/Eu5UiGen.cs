@@ -729,7 +729,7 @@ public static class Eu5UiGen
          Height = 20,
          BorderThickness = new(1),
       };
-      RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.Activate(mmType); };
+      RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.SetMapMode(mmType); };
       mapModeButton.Click += mapModeButtonClick;
 
       mapModeButton.Unloaded += OnMapModeButtonOnUnloaded;
@@ -997,10 +997,7 @@ public static class Eu5UiGen
       var multiBinding = new MultiBinding { Converter = new PropertyNameAndCountConverter() };
       multiBinding.Bindings.Add(new Binding { Source = nxProp });
 
-      multiBinding.Bindings.Add(new Binding(nameof(MultiSelectPropertyViewModel.CollectionCount))
-      {
-         Source = propertyViewModel,
-      });
+      multiBinding.Bindings.Add(new Binding(nameof(MultiSelectPropertyViewModel.CollectionCount)) { Source = propertyViewModel, });
       tb.SetBinding(TextBlock.TextProperty, multiBinding);
 
       panel.Children.Add(tb);
@@ -1221,15 +1218,9 @@ public static class Eu5UiGen
          DataContext = vm,
       };
 
-      var sourceBinding = new Binding(nameof(vm.IsNonDefaultValue))
-      {
-         Converter = new IsNonDefaultToImageSourceConverter(),
-      };
+      var sourceBinding = new Binding(nameof(vm.IsNonDefaultValue)) { Converter = new IsNonDefaultToImageSourceConverter(), };
 
-      var tooltipBinding = new Binding(nameof(vm.IsNonDefaultValue))
-      {
-         Converter = new IsNonDefaultToTooltipConverter(),
-      };
+      var tooltipBinding = new Binding(nameof(vm.IsNonDefaultValue)) { Converter = new IsNonDefaultToTooltipConverter(), };
 
       image.SetBinding(Image.SourceProperty, sourceBinding);
       image.SetBinding(FrameworkElement.ToolTipProperty, tooltipBinding);

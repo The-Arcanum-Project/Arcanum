@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Vortice.Mathematics;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -46,11 +47,10 @@ public interface IMapMode
    public Type DisplayType { get; }
 
    /// <summary>
-   /// Returns a color for the given location on the map.
+   /// Renders the map mode
    /// </summary>
-   /// <param name="location"></param>
    /// <returns></returns>
-   public int GetColorForLocation(Location location);
+   public void Render(Color4[] colorBuffer);
 
    /// <summary>
    /// Returns a tooltip string for the given location on the map. <br/>

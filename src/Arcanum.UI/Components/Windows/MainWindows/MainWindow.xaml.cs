@@ -23,8 +23,8 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI;
-using Arcanum.UI.Themes;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
+using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
 using Common.UI;
 using Application = System.Windows.Application;
@@ -233,6 +233,21 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          SetUpToolTip(MainMap);
 
       SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
+
+      SetupMapModeLogic();
+   }
+
+   private void SetupMapModeLogic()
+   {
+      MapModeManager.OnMapModeChanged += MapModeManagerOnOnMapModeChanged;
+   }
+
+   private void MapModeManagerOnOnMapModeChanged(MapModeManager.MapModeType _)
+   {
+      Debug.Assert(MainMap != null, "MainMap is null in MapModeManagerOnOnMapModeChanged");
+      // ReSharper disable twice InconsistentlySynchronizedField
+      MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
+      MainMap.UpdateColors();
    }
 
    private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -530,7 +545,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void OnMapModeCommandExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       if (MapModeButton.CommandToMapModeType.TryGetValue(e.Command, out var mapModeType))
-         MapModeManager.Activate(mapModeType);
+         MapModeManager.SetMapMode(mapModeType);
    }
 
    private void OnMapModeCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -558,17 +573,13 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    #endregion
 
-   private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
-      => e.CanExecute = NUINavigation.Instance.CanBack;
+   private void CanGoToPreviousINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = NUINavigation.Instance.CanBack;
 
-   private void GoToPreviousINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
-      => NUINavigation.Instance.Back();
+   private void GoToPreviousINUICommand_Executed(object sender, ExecutedRoutedEventArgs e) => NUINavigation.Instance.Back();
 
-   private void CanGoToNextINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e)
-      => e.CanExecute = NUINavigation.Instance.CanForward;
+   private void CanGoToNextINUICommand_Executed(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = NUINavigation.Instance.CanForward;
 
-   private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e)
-      => NUINavigation.Instance.Forward();
+   private void GoToNextINUICommand_Executed(object sender, ExecutedRoutedEventArgs e) => NUINavigation.Instance.Forward();
 
    private void ViewINUIObjectsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {

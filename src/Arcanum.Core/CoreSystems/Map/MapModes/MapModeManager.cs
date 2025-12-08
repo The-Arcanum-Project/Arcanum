@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.CoreSystems.EventDistribution;
-using Arcanum.Core.CoreSystems.Map.MapModes.Cache;
-using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GameObjects.BaseTypes;
-using Common.UI;
+using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Utils.Colors;
+using Vortice.Mathematics;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -14,6 +12,8 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes;
 /// </summary>
 public static partial class MapModeManager
 {
+   private static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
+
    #region Plugin MapModes
 
    /// <summary>
@@ -52,68 +52,37 @@ public static partial class MapModeManager
 
    #endregion
 
-   private static readonly LruCacheManager LruCache = new();
-   public static MapModeType CurrentMode { get; private set; } = MapModeType.Locations;
-   public static List<MapModeType> RecentModes { get; } = new(25);
+   private static MapModeType CurrentMode { get; set; } = MapModeType.Locations;
    private const int MAX_RECENT_MODES = 25;
    public static bool IsInitialized = false;
+   public static IMapMode GetCurrent() => Get(CurrentMode);
 
    // Event to notify that the mapmode has been changed.
    public static event Action<MapModeType>? OnMapModeChanged;
 
    private static void InitializeMapModeManager()
    {
-      EventDistributor.ObjectOfTypeModified += DataChanged;
    }
 
-   public static void Activate(MapModeType type)
+   public static void SetMapMode(MapModeType type)
    {
-      if (!IsInitialized)
-      {
-         UIHandle.Instance.PopUpHandle
-                 .ShowMBox("Please wait for the map to finish initializing before changing map modes.",
-                           "Map Initializing");
-         return;
-      }
-
-      if (type == CurrentMode)
-         return;
-
-      var sw = RenderMapMode(type);
-      ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {type} in {sw.ElapsedMilliseconds} ms");
       CurrentMode = type;
       OnMapModeChanged?.Invoke(type);
-      AddToRecentHistory(type);
    }
 
-   private static Stopwatch RenderMapMode(MapModeType type)
+   public static void RenderCurrent(Color4[] colors)
    {
+      if (!IsInitialized)
+         return;
+
+#if DEBUG
       var sw = Stopwatch.StartNew();
-      GPUContracts.SetColors(LruCache.GetOrCreateColors(type));
+#endif
+      UpdateColors(colors, CurrentMode);
+#if DEBUG
       sw.Stop();
-      return sw;
-   }
-
-   private static void AddToRecentHistory(MapModeType type)
-   {
-      if (RecentModes.Count > MAX_RECENT_MODES)
-         RecentModes.RemoveAt(RecentModes.Count - 1);
-      RecentModes.Insert(0, type);
-   }
-
-   public static void DataChanged(Type type, Enum nxProp, IEu5Object[] objects)
-   {
-      if (objects.Length == 0)
-         return;
-
-      if (objects[0] is not IMapInferable mapInferable)
-         return;
-
-      var locs = mapInferable.GetRelevantLocations(objects);
-      LruCache.MarkInvalid(locs);
-
-      if (CurrentMode == mapInferable.GetMapMode)
-         RenderMapMode(CurrentMode);
+      ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {CurrentMode} in {sw.ElapsedMilliseconds} ms");
+#endif
    }
 
    public static IMapMode? GetMapModeForButtonIndex(int i)
@@ -130,5 +99,47 @@ public static partial class MapModeManager
       return i < Enum.GetNames<MapModeType>().Length ? Get((MapModeType)i) : null;
    }
 
-   public static IMapMode GetCurrent() => Get(CurrentMode);
+   private static void UpdateColors(Color4[] colors, MapModeType type)
+   {
+      var mode = Get(type);
+      var count = LocationsArray.Length;
+
+      if (mode is LocationBasedMapMode lbm)
+         GenerateLocationbaseMapMode(colors, lbm, count);
+      else
+         mode.Render(colors);
+   }
+
+   private static void GenerateLocationbaseMapMode(Color4[] colors, LocationBasedMapMode mode, int count)
+   {
+      if (((IMapMode)mode).IsLandOnly)
+      {
+         var waterProvinces = new HashSet<Location>(Globals.DefaultMapDefinition.SeaZones);
+         waterProvinces.UnionWith(Globals.DefaultMapDefinition.Lakes);
+         var blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
+         var useLocWater = Config.Settings.MapSettings.UseShadeOfColorOnWater;
+         Parallel.For(0, count, ProcessLocation);
+         waterProvinces.Clear();
+
+         void ProcessLocation(int i)
+         {
+            var location = LocationsArray[i];
+            if (waterProvinces.Contains(location))
+            {
+               if (useLocWater)
+                  colors[i] = new(blueColors[Random.Shared.Next(blueColors.Count)].AsAbgrInt());
+               else
+                  colors[i] = new(location.Color.AsInt());
+            }
+            else
+               colors[i] = new(mode.GetColorForLocation(location));
+         }
+      }
+      else
+      {
+         Parallel.For(0,
+                      count,
+                      i => { colors[i] = new(mode.GetColorForLocation(LocationsArray[i])); });
+      }
+   }
 }
