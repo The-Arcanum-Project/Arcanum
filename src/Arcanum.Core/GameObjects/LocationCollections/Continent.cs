@@ -44,7 +44,7 @@ public partial class Continent
 
    public AggregateLink<SuperRegion> GetEmptyAggregateLink_Continent_SuperRegion()
    {
-      return new(SuperRegion.Field.Continent, this);
+      return new(SuperRegion.Field.Continent, Field.SuperRegions, this);
    }
 
    public List<Location> GetRelevantLocations(IEu5Object[] items)

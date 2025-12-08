@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
@@ -11,11 +12,13 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
 {
    public readonly Enum NxOwnerProp;
    public readonly IEu5Object Owner;
+   public readonly Enum NxChildsProp;
 
    public bool Lock = false;
 
-   public AggregateLink(Enum nxOwnerProp, IEu5Object owner)
+   public AggregateLink(Enum nxOwnerProp, Enum nxChildsProp, IEu5Object owner)
    {
+      NxChildsProp = nxChildsProp;
       NxOwnerProp = nxOwnerProp;
       Owner = owner;
       Debug.Assert(typeof(T).GetProperty(NxOwnerProp.ToString()) != null,
@@ -97,7 +100,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
          return;
 
       Lock = true;
-      Remove(child);
+      Nx.RemoveFromCollection(Owner, NxChildsProp, child);
       Lock = false;
    }
 
@@ -107,7 +110,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
          return;
 
       Lock = true;
-      Add(child);
+      Nx.AddToCollection(Owner, NxChildsProp, child);
       Lock = false;
    }
 }
