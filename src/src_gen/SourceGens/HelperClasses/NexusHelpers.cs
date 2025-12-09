@@ -280,6 +280,9 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
       builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
@@ -346,7 +349,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -371,7 +377,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -395,7 +404,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -423,7 +435,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed insertion.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -447,7 +462,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' does not support indexed removal.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -473,7 +491,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
-      builder.AppendLine("                throw new InvalidOperationException($\"Property '{property}' is not a collection.\");");
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
+      builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");
       builder.AppendLine();
@@ -723,7 +744,7 @@ public static class NexusHelpers
       sb.AppendLine("    public bool IsRequired(Enum property)");
       sb.AppendLine("        => (_nuiConfigBits[(int)((Field)property)] & IS_REQUIRED) != 0;");
       sb.AppendLine();
-      
+
       sb.AppendLine("    /// <summary>");
       sb.AppendLine("    /// Checks if the property should ignore command behavior.");
       sb.AppendLine("    /// </summary>");
@@ -819,6 +840,10 @@ public static class NexusHelpers
       }
 
       builder.AppendLine("            default:");
+
+      builder.AppendLine("#if DEBUG");
+      builder.AppendLine("                Debug.Assert(false, \"Invalid property enum value\");");
+      builder.AppendLine("#endif");
       builder.AppendLine("                throw new ArgumentOutOfRangeException(nameof(property));");
       builder.AppendLine("        }");
       builder.AppendLine("    }");

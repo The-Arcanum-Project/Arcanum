@@ -76,6 +76,8 @@ public class NUINavigation(int capacity)
       GenerateUi(_current.Value);
    }
 
+   public void ForceInvalidateUi() => GenerateUi(_current!.Value);
+
    private static void GenerateUi(NavH navH)
    {
       if (navH.Root.Content is IDisposable oldView)

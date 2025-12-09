@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
@@ -78,7 +79,7 @@ public static class ControlFactory
       };
    }
 
-   public static ContextMenu GetContextMenu(INUINavigation?[] navs, NavH navH)
+   public static ContextMenu GetContextMenu(INUINavigation?[] navs, NavH navH, Enum nxProp)
    {
       var contextMenu = new ContextMenu();
 
@@ -109,7 +110,51 @@ public static class ControlFactory
          }
       }
 
+      // We add the copy and paste options here as well
+      contextMenu.Items.Add(new Separator());
+      var copyItem = new MenuItem { Header = "Copy", };
+      RoutedEventHandler copyHandler = (_, _) =>
+      {
+         if (navH.Targets is [{ } eu5Object])
+            ArcClipboard.Copy(eu5Object, nxProp);
+      };
+
+      var pasteItem = new MenuItem
+      {
+         Header = "Paste", IsEnabled = navH.Targets is [{ } target] && ArcClipboard.CanPaste(target),
+      };
+      RoutedEventHandler pasteHandler = (_, _) =>
+      {
+         foreach (var iEu5Object in navH.Targets)
+         {
+            if (ArcClipboard.CanPaste(iEu5Object, nxProp))
+            {
+               ArcClipboard.Paste(iEu5Object, nxProp);
+               NUINavigation.Instance.ForceInvalidateUi();
+            }
+         }
+      };
+
+      copyItem.Click += copyHandler;
+      pasteItem.Click += pasteHandler;
+      copyItem.Unloaded += OnCopyItemOnUnloaded;
+      pasteItem.Unloaded += OnPasteItemOnUnloaded;
+      contextMenu.Items.Add(copyItem);
+      contextMenu.Items.Add(pasteItem);
+
       return contextMenu;
+
+      void OnCopyItemOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         copyItem.Click -= copyHandler;
+         copyItem.Unloaded -= OnCopyItemOnUnloaded;
+      }
+
+      void OnPasteItemOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         pasteItem.Click -= pasteHandler;
+         pasteItem.Unloaded -= OnPasteItemOnUnloaded;
+      }
    }
 
    public static Grid GetCollectionPreviewGrid()

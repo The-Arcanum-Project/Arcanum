@@ -69,6 +69,7 @@ public static class GridManager
    }
 
    public static TextBlock GetNavigationHeader(NavH navH,
+                                               Enum nxProp,
                                                string headerText,
                                                int fontSize,
                                                int height,
@@ -92,7 +93,7 @@ public static class GridManager
                                                           alignment: alignment);
       if (isNavigation)
       {
-         EventHandlers.SetOnMouseUpHandler(header, navH);
+         EventHandlers.SetOnMouseUpHandler(header, navH, nxProp);
          SetUpHeaderHover(header);
       }
 
@@ -119,7 +120,7 @@ public static class GridManager
 
          header.TextDecorations = null;
          header.Cursor = Cursors.Arrow;
-         
+
          SelectionManager.UnPreview([currentPrimary]);
       };
 

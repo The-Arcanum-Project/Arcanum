@@ -281,6 +281,7 @@ public static class Eu5UiGen
       var embeddedObjectBinding = new Binding(nameof(MultiSelectPropertyViewModel.Value)) { Source = mspvm };
 
       var header = GridManager.GetNavigationHeader(navH,
+                                                   nxProp,
                                                    nxProp.ToString(),
                                                    ControlFactory.SHORT_INFO_FONT_SIZE + 2,
                                                    ControlFactory.SHORT_INFO_ROW_HEIGHT,
@@ -370,8 +371,7 @@ public static class Eu5UiGen
 
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
          {
-            object embeddedValue = null!;
-            Nx.ForceGet(embedded, nxProp, ref embeddedValue);
+            var embeddedValue = embedded._getValue(nxProp);
             var ui = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root, true),
                                                                               (IEu5Object)embeddedValue,
                                                                               nxProp,
