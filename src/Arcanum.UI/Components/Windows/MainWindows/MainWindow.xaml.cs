@@ -6,12 +6,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
@@ -22,13 +25,13 @@ using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
-using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
 using Common.UI;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using NUINavigation = Arcanum.UI.NUI.NUINavigation;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -240,6 +243,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void SetupMapModeLogic()
    {
       MapModeManager.OnMapModeChanged += MapModeManagerOnOnMapModeChanged;
+      EventDistributor.ObjectOfTypeModified += UpdateMap;
    }
 
    private void MapModeManagerOnOnMapModeChanged(MapModeManager.MapModeType _)
@@ -248,6 +252,18 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       // ReSharper disable twice InconsistentlySynchronizedField
       MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
       MainMap.UpdateColors();
+   }
+
+   private void UpdateMap(Type arg1, Enum arg2, IEu5Object[] objects)
+   {
+      if (objects.Length == 0)
+         return;
+
+      if (objects[0] is not IMapInferable mapInferable)
+         return;
+
+      if (mapInferable.GetMapMode == MapModeManager.GetCurrent().Type)
+         MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
    }
 
    private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
