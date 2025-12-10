@@ -42,7 +42,7 @@ public partial class Continent
    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Continent_SuperRegion")]
    public AggregateLink<SuperRegion> SuperRegions { get; set; }
 
-   public AggregateLink<SuperRegion> GetEmptyAggregateLink_Continent_SuperRegion()
+   private AggregateLink<SuperRegion> GetEmptyAggregateLink_Continent_SuperRegion()
    {
       return new(SuperRegion.Field.Continent, Field.SuperRegions, this);
    }
@@ -52,7 +52,7 @@ public partial class Continent
       List<Location> locations = [];
 
       foreach (var item in items)
-         if (item is Continent cn && cn.SuperRegions.Count > 0)
+         if (item is Continent { SuperRegions.Count: > 0 } cn)
             locations.AddRange(cn.SuperRegions[0].GetRelevantLocations(cn.SuperRegions.Cast<IEu5Object>().ToArray()));
       return locations;
    }

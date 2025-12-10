@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
@@ -6,10 +7,10 @@ namespace Arcanum.Core.CoreSystems.Selection;
 
 public static class SelectionHelpers
 {
-   public static ILocation? FindBiggestFullySelectedParent(Location location)
+   public static IEu5Object? FindBiggestFullySelectedParent(Location location)
    {
       var selected = Selection.GetSelectedLocations;
-      ILocation current = location;
+      IEu5Object current = location;
 
       while (current.Parents.Count > 0)
       {
@@ -41,14 +42,7 @@ public static class SelectionHelpers
    {
       return loc.LcType switch
       {
-         LocationCollectionType.SuperRegion => ((SuperRegion)loc).LocationChildren
-                                                                 .FirstOrDefault(r => r.GetLocations().Contains(child)),
-         LocationCollectionType.Region => ((Region)loc).LocationChildren
-                                                       .FirstOrDefault(a => a.GetLocations().Contains(child)),
-         LocationCollectionType.Area => ((Area)loc).LocationChildren
-                                                   .FirstOrDefault(p => p.GetLocations().Contains(child)),
-         LocationCollectionType.Province => ((Province)loc).LocationChildren
-                                                           .FirstOrDefault(l => l == child),
+         
          _ => null,
       };
    }
@@ -57,11 +51,6 @@ public static class SelectionHelpers
    {
       return loc.LcType switch
       {
-         LocationCollectionType.Location => loc.GetFirstParentOfType(LocationCollectionType.Province),
-         LocationCollectionType.Province => loc.GetFirstParentOfType(LocationCollectionType.Area),
-         LocationCollectionType.Area => loc.GetFirstParentOfType(LocationCollectionType.Region),
-         LocationCollectionType.Region => loc.GetFirstParentOfType(LocationCollectionType.SuperRegion),
-         LocationCollectionType.SuperRegion => loc.GetFirstParentOfType(LocationCollectionType.Continent),
          _ => null,
       };
    }

@@ -26,7 +26,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 [NexusConfig]
 [ObjectSaveAs]
 public partial class Location
-   : IMapInferable, IEu5Object<Location>, ILocation
+   : IMapInferable, IEu5Object<Location>
 {
    #region game/in_game/map_data/named_locations.txt
 
@@ -89,7 +89,6 @@ public partial class Location
    public List<Location> GetLocations() => throw new NotImplementedException();
 
    public LocationCollectionType LcType => LocationCollectionType.Location;
-   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
    public static Dictionary<string, Location> GetGlobalItems() => Globals.Locations;
 
@@ -101,22 +100,7 @@ public partial class Location
 
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationSettings;
-   public INUINavigation[] Navigations
-   {
-      get
-      {
-         List<INUINavigation?> navigations = [];
-         var parent = this.GetFirstParentOfType(LocationCollectionType.Province);
-         if (parent != null)
-            navigations.Add(new NUINavigation(parent, $"Province: {parent.UniqueId}"));
-
-         navigations.Add(null);
-         navigations.AddRange(Pops.Select(pop => new NUINavigation(pop,
-                                                                   $"Pop: {pop.PopType} ({pop.Culture}, {pop.Religion})")));
-
-         return navigations.ToArray()!;
-      }
-   }
+   public INUINavigation[] Navigations { get; } = [];
    public string GetNamespace => "Map.Location";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
@@ -130,6 +114,29 @@ public partial class Location
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" + Guid.NewGuid() };
 
+   [SaveAs(isEmbeddedObject: true)]
+   [ParseAs("null", ignore: true)]
+   [Description("The Province this Location belongs to.")]
+   [DefaultValue(null)]
+   [SuppressAgs]
+   public Province Province
+   {
+       get;
+       set
+       {
+           if (!field.Locations.Lock && !value.Locations.Lock)
+           {
+               if (field != Province.Empty)
+                   field.Locations.
+               _removeFromChild(this);
+               if (value != Province.Empty)
+                   value.Locations.
+               _addFromChild(this);
+           }
+           field = value;
+       }
+   } = Province.Empty;
+   
    #region Map Management
 
    [SuppressAgs]

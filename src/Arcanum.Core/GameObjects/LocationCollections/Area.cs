@@ -3,6 +3,8 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -10,75 +12,100 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [NexusConfig]
 [ObjectSaveAs]
-public partial class Area : IMapInferable, IEu5Object<Area>, ILocationCollection<Province>, IIndexRandomColor
+public partial class Area : IMapInferable, IEu5Object<Area>, IIndexRandomColor
 {
-   public bool IsReadonly { get; } = false;
-   public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
-   public INUINavigation[] Navigations
-   {
-      get
-      {
-         List<INUINavigation?> navigations = [];
-         var parent = this.GetFirstParentOfType(LocationCollectionType.Region);
-         if (parent != null)
-            navigations.Add(new NUINavigation(parent, $"Region: {parent.UniqueId}"));
+    public Area()
+    {
+        Provinces = GetEmptyAggregateLink_Area_Province();
+    }
 
-         if (LocationChildren.Count > 0)
-            navigations.Add(null);
+    public bool IsReadonly { get; } = false;
+    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AreaSettings;
+    public INUINavigation[] Navigations { get; } = [];
+    public static Dictionary<string, Area> GetGlobalItems() => Globals.Areas;
 
-         foreach (var location in LocationChildren)
-            navigations.Add(new NUINavigation(location, $"Areas: {location.UniqueId}"));
+    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
+        .Select(IEu5Object (loc) => loc
+            .GetFirstParentOfType(LocationCollectionType
+                .Area)!)
+        .Distinct()
+        .ToList();
 
-         return navigations.ToArray()!;
-      }
-   }
-   public static Dictionary<string, Area> GetGlobalItems() => Globals.Areas;
+    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Areas;
+    public string GetNamespace => $"Map.{nameof(Area)}";
 
-   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
-                                                                          .Select(IEu5Object (loc) => loc
-                                                                                    .GetFirstParentOfType(LocationCollectionType
-                                                                                                               .Area)!)
-                                                                          .Distinct()
-                                                                          .ToList();
+    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
-   public List<Location> GetRelevantLocations(IEu5Object[] items)
-   {
-      var typedItems = items.Cast<Area>();
-      List<Location> locations = [];
-      foreach (var item in typedItems)
-         locations.AddRange(item.GetLocations());
-      return locations.Distinct().ToList();
-   }
+    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Areas;
-   public string GetNamespace => $"Map.{nameof(Area)}";
+    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
+                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
 
-   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
+    public AgsSettings AgsSettings => Config.Settings.AgsSettings.AreaAgsSettings;
 
-   public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
-   public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
-                                 IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.AreaAgsSettings;
+    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
+    [DefaultValue("")]
+    public string UniqueId { get; set; } = string.Empty;
 
-   [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
-   [DefaultValue("")]
-   public string UniqueId { get; set; } = string.Empty;
-   public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
-   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Area Empty { get; } = new () { UniqueId = "Arcanum_Empty_Area" };
-   public List<Location> GetLocations() => LocationChildren.SelectMany(p => p.GetLocations()).ToList();
+    public InjRepType InjRepType { get; set; } = InjRepType.None;
+    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+    public static Area Empty { get; } = new () { UniqueId = "Arcanum_Empty_Area" };
 
-   public LocationCollectionType LcType => LocationCollectionType.Area;
-   public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
-   [SaveAs(isEmbeddedObject: true)]
-   public ObservableRangeCollection<Province> LocationChildren { get; set; } = [];
-   // IIndexRandomColor Implementation
-   public int Index { get; set; }
+    [SaveAs(isEmbeddedObject: true)]
+    [ParseAs("null", ignore: true)]
+    [Description("The Region this Area belongs to.")]
+    [DefaultValue(null)]
+    [SuppressAgs]
+    public Region Region
+    {
+        get;
+        set
+        {
+            if (!field.Areas.Lock && !value.Areas.Lock)
+            {
+                if (field != Region.Empty)
+                    field.Areas._removeFromChild(this);
+                if (value != Region.Empty)
+                    value.Areas._addFromChild(this);
+            }
+
+            field = value;
+        }
+    } = Region.Empty;
+
+    [DefaultValue(null)]
+    [SuppressAgs]
+    [SaveAs(isEmbeddedObject: true)]
+    [Description("The Provinces that are part of this Area.")]
+    [ParseAs("-", ignore: true)]
+    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Area_Province")]
+    public AggregateLink<Province> Provinces { get; set; }
+
+    protected AggregateLink<Province> GetEmptyAggregateLink_Area_Province()
+    {
+        return new (Province.Field.Area, Field.Provinces, this);
+    }
+
+    public List<Location> GetRelevantLocations(IEu5Object[] items)
+    {
+        List<Location> locations = [];
+
+        foreach (var item in items)
+            if (item is Area { Provinces.Count: > 0 } cn)
+                locations.AddRange(cn.Provinces[0].GetRelevantLocations(cn.Provinces.Cast<IEu5Object>().ToArray()));
+        return locations;
+    }
+
+    public LocationCollectionType LcType => LocationCollectionType.Area;
+
+    // IIndexRandomColor Implementation
+    public int Index { get; set; }
 }

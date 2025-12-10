@@ -1,38 +1,44 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Vortice.Mathematics;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ContinentLocationBasedMapMode : LocationBasedMapMode
+public class ContinentLocationBasedMapMode : IMapMode
 {
-   public override string Name => "Continents";
-   public override string Description => "Displays the Continents the locations are situated in.";
-   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
-   public override Type DisplayType => typeof(Continent);
+   public string Name => "Continents";
+   public string Description => "Displays the Continents the locations are situated in.";
+   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
+   public Type DisplayType => typeof(Continent);
 
-   public override int GetColorForLocation(Location location)
+
+   public void Render(Color4[] colorBuffer)
    {
-      var parent = location.GetFirstParentOfType(LocationCollectionType.Continent);
-      if (parent == null)
-         return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
-
-      return ((IIndexRandomColor)parent).Color;
+      throw new NotImplementedException();
    }
 
-   public override string[] GetTooltip(Location location) =>
-   [
-      "Continent: " + (location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId ?? "None")
-   ];
-
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId;
-
-   public override object?[]? GetVisualObject(Location location) => null;
-
-   public override void OnActivateMode()
+   public string[] GetTooltip(Location location)
    {
+      throw new NotImplementedException();
    }
 
-   public override void OnDeactivateMode()
+   public string? GetLocationText(Location location)
    {
+      throw new NotImplementedException();
+   }
+
+   public object?[]? GetVisualObject(Location location)
+   {
+      throw new NotImplementedException();
+   }
+
+   public void OnActivateMode()
+   {
+      throw new NotImplementedException();
+   }
+
+   public void OnDeactivateMode()
+   {
+      throw new NotImplementedException();
    }
 }

@@ -104,15 +104,7 @@ public partial class DebugPanelGrid
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      var targets = Globals.Provinces.Values.Take(2);
-      var ownerWindow = Window.GetWindow(this);
-
-      var result = MultiCollectionEditor.ShowDialogN(ownerWindow!,
-                                                     "TestEditing",
-                                                     typeof(Location),
-                                                     targets.Select(x => x.LocationChildren),
-                                                     Globals.Locations.Values);
-      Debug.WriteLine($"Result: {result}");
+      
    }
 
    private void InsertLogSpacerButton_Click(object sender, RoutedEventArgs e)

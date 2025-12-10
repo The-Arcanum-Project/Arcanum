@@ -571,7 +571,8 @@ public $type$ $name$ {get; set;} = $defaultValue$;</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EB5F38CA568DB240BFAED233FD4175EE/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EB5F38CA568DB240BFAED233FD4175EE/Shortcut/@EntryValue">aggregateLinkChild</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EB5F38CA568DB240BFAED233FD4175EE/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EB5F38CA568DB240BFAED233FD4175EE/Text/@EntryValue">[ParseAs("null", ignore: true)]
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EB5F38CA568DB240BFAED233FD4175EE/Text/@EntryValue">[SaveAs(isEmbeddedObject: true)]
+[ParseAs("null", ignore: true)]
 [Description("The $ParentType$ this $ChildType$ belongs to.")]
 [DefaultValue(null)]
 [SuppressAgs]
@@ -580,13 +581,10 @@ public $ParentType$ $ParentType$
   get;
   set
   {
-     if (!field.$ChildType$s.Lock &amp;&amp; !value.$ChildType$s.Lock)
-     {
-        if (field != $ParentType$.Empty)
-           field.$ChildType$s._removeFromChild(this);
-        if (field != $ParentType$.Empty)
-           field.$ChildType$s._addFromChild(this);
-     }
+    if (field != $ParentType$.Empty)
+       field.$ChildType$s._removeFromChild(this);
+    if (value != $ParentType$.Empty)
+       value.$ChildType$s._addFromChild(this);
      field = value;
   }
 } = $ParentType$.Empty;</s:String>
