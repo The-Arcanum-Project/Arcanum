@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Geometry;
 using Timer = System.Threading.Timer;
@@ -526,7 +527,7 @@ public static class Selection
       if (bp == null)
          return;
 
-      Set(SelectionTarget.Selection, SelectionMethod.Expand, bp.GetLocations());
+      Set(SelectionTarget.Selection, SelectionMethod.Expand, ((IMapInferable)bp).GetRelevantLocations([bp]));
    }
 
    public static void ShrinkSelection(Location location)
@@ -535,7 +536,7 @@ public static class Selection
       if (ptst == null)
          return;
 
-      Set(SelectionTarget.Selection, SelectionMethod.Expand, ptst.GetLocations());
+      Set(SelectionTarget.Selection, SelectionMethod.Expand, ((IMapInferable)ptst).GetRelevantLocations([ptst]));
    }
 
    #endregion

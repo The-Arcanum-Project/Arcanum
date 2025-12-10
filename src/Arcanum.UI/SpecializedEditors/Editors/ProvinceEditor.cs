@@ -48,21 +48,7 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
 
    public override bool CanEdit(object[] targets, Enum? prop)
    {
-      if (_wasValidated)
-         return targets.All(t => t is Province);
-
-      _wasValidated = AnalyzeLocationCollections.VerifyUniquenessOfChildren(Globals.Provinces.Values
-                                                                                   .Cast<ILocationCollection<Location>>()
-                                                                                   .ToArray(),
-                                                                            out var messages);
-
-      if (_wasValidated)
-         return targets.All(t => t is Province);
-
-      var errorString = "Province Children Editor cannot be opened due to the following errors:\n" +
-                        string.Join("\n", messages.Select(m => $"- {m}"));
-      UIHandle.Instance.PopUpHandle.ShowMBox(errorString, "Cannot Open Province Children Editor");
-      return false;
+      return targets.All(t => t is Province);
    }
 
    private void OnFileStateManagerOnFileChanged(object? _, FileChangedEventArgs args)
@@ -79,7 +65,8 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
    {
       Debug.Assert(targets.Length == 1);
       Debug.Assert(targets[0].GetType() == typeof(Province));
-      LocationCollectionEditor.Instance.SetLocationCollection((Province)targets[0], this);
+      var target = (Province)targets[0];
+      LocationCollectionEditor.Instance.SetLocationCollection(target, target.Locations ,this);
    }
 
    public override FrameworkElement GetEditorControl()
