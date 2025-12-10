@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -23,14 +24,15 @@ public class AllocatorViewModel : ViewModelBase
    private int _totalLimit;
    private int _maxTotalLimit;
    private bool? _areAllLocked;
-   private bool _suppressCalculation; 
-   
+   private bool _suppressCalculation;
+
    private readonly Stack<List<AllocationMemento>> _undoStack = new();
    private readonly Stack<int> _totalHistory = new();
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
    public ICommand ApplyChangesCommand { get; }
+   public ICommand PasteFromLocationCommand { get; }
 
    public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
    public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
@@ -124,7 +126,7 @@ public class AllocatorViewModel : ViewModelBase
             foreach (var item in Items)
                if (item.MaxLimit == oldTotal)
                   item.MaxLimit = value;
-            
+
             OnPropertyChanged();
             _suppressCalculation = true;
             // When Total changes, we must resize unlocked items to fit
@@ -208,11 +210,30 @@ public class AllocatorViewModel : ViewModelBase
       UndoCommand = new RelayCommand(Undo);
       DeleteCommand = new RelayCommand<AllocationItem>(Delete);
       ApplyChangesCommand = new RelayCommand(ApplyChanges);
+      PasteFromLocationCommand = new RelayCommand<Location>(PastePopsFromLocation);
+   }
+
+   private void PastePopsFromLocation(Location? obj)
+   {
+      if (ArcClipboard.CurrentPayload != null && ArcClipboard.CurrentPayload.Value is Location cl)
+      {
+         var diff = 0d;
+         foreach (var pop in cl.Pops)
+         {
+            Nx.AddToCollection(LoadedLocation, Location.Field.Pops, pop);
+            AddItem(pop, balanceToTotal: false);
+            diff += pop.Size;
+         }
+
+         _totalLimit += (int)(diff * 1000);
+
+         RunAutoLogScale();
+         OnPropertyChanged(nameof(TotalLimit));
+      }
    }
 
    private void InitializeLocationData(Location location)
    {
-
       LoadedLocation = location;
       PopDefinitionCreatorVm = new(location, this);
 
@@ -221,7 +242,7 @@ public class AllocatorViewModel : ViewModelBase
 
       foreach (var pop in location.Pops)
          Items.Add(new(this, pop));
-      
+
       UpdateMasterLockState();
       UpdateCalculatedInfo(null, new(nameof(Items)));
    }
@@ -273,7 +294,8 @@ public class AllocatorViewModel : ViewModelBase
 
    private void UpdateCalculatedInfo(object? sender, PropertyChangedEventArgs propertyChangedEventArgs)
    {
-      if (_suppressCalculation || propertyChangedEventArgs.PropertyName != nameof(Items) &&
+      if (_suppressCalculation ||
+          propertyChangedEventArgs.PropertyName != nameof(Items) &&
           propertyChangedEventArgs.PropertyName != nameof(TotalLimit))
          return;
 
@@ -417,9 +439,9 @@ public class AllocatorViewModel : ViewModelBase
 
    private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
    {
-      if(_suppressCalculation)
+      if (_suppressCalculation)
          return;
-      
+
       // If an item locks/unlocks, check if we need to update the Master Toggle
       if (e.PropertyName == nameof(AllocationItem.IsLocked))
          UpdateMasterLockState();
