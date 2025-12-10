@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
@@ -15,20 +16,23 @@ public static class SelectionHelpers
       var selected = Selection.GetSelectedLocations;
       IEu5Object current = location;
 
-      while (current.Parents.Count > 0)
+      while (current is IMapInferable and not Continent)
       {
-         var nextParent = GetNextParentType(current);
-         if (nextParent == null)
+         var parent = GetNextBiggestParentObj(current);
+         Debug.Assert(parent is IMapInferable);
+         var allChildren = ((IMapInferable)parent).GetRelevantLocations([location]);
+         var allSelected = true;
+         foreach (var child in allChildren)
+            if (!selected.Contains(child))
+            {
+               allSelected = false;
+               break;
+            }
+
+         if (!allSelected)
             break;
 
-         var selectionCopy = selected.ToList();
-         foreach (var loc in nextParent.GetLocations())
-            selectionCopy.Remove(loc);
-
-         if (selectionCopy.Count == 0)
-            current = current.Parents.First();
-         else
-            return null;
+         current = parent;
       }
 
       return current;
@@ -123,19 +127,33 @@ public static class SelectionHelpers
       throw new ArgumentException("eu5Object is not a valid type in the hierarchy");
    }
 
-   public static ILocation? FindParentToShrinkTo(Location location)
+   public static IEu5Object? ShrintToNextChild(IEu5Object bp)
    {
-      var bp = FindBiggestFullySelectedParent(location);
-      return bp == null ? null : GetChildContainingLocation(bp, location);
-   }
+      if (bp is Location loca)
+         return loca;
 
-   // TODO: Make this use the new system with aggregate links and such
-   private static ILocation? GetChildContainingLocation(ILocation loc, Location child)
-   {
-      return loc.LcType switch
-      {
-         _ => null,
-      };
+      var selection = Selection.GetSelectedLocations;
+      if (bp is Province prov)
+         foreach (var loc in prov.Locations)
+            if (selection.Contains(loc))
+               return loc;
+
+      if (bp is Area area)
+         foreach (var province in area.Provinces)
+            if (((IMapInferable)province).GetRelevantLocations([province]).All(x => selection.Contains(x)))
+               return province;
+
+      if (bp is Region region)
+         foreach (var areaa in region.Areas)
+            if (((IMapInferable)areaa).GetRelevantLocations([areaa]).All(x => selection.Contains(x)))
+               return areaa;
+
+      if (bp is SuperRegion sRegion)
+         foreach (var regionn in sRegion.Regions)
+            if (((IMapInferable)regionn).GetRelevantLocations([regionn]).All(x => selection.Contains(x)))
+               return regionn;
+
+      return null;
    }
 
    private static ILocation? GetNextParentType(ILocation loc)
