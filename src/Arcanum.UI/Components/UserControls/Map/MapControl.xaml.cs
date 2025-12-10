@@ -181,17 +181,18 @@ public partial class MapControl
       if (SelectionManager.ObjectSelectionMode == ObjectSelectionMode.Frozen)
          foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
          {
-            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + FreezeSelectionColor;
+            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.FrozenSelectionColorOpacity) +
+                                              FreezeSelectionColor;
          }
 
       foreach (var loc in Selection.GetSelectedLocations)
       {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.SelectionColorOpacity) + SelectionColor;
       }
 
       foreach (var loc in SelectionManager.PreviewedLocations)
       {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + PreviewColor;
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.PrviewOpacityFactor) + PreviewColor;
       }
    }
 

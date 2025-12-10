@@ -17,6 +17,8 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Settings.BaseClasses;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.Core.Utils.ScreenManagement;
@@ -220,6 +222,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
                                                               .LoadingService[0]).MapSize;
          Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
          MapModeManager.IsInitialized = true;
+
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.FrozenSelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.SelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.PrviewOpacityFactor), (_, _) => MainMap.RefreshAndRenderSelectionColors());
       };
 
       Selection.RectangleSelectionUpdated += _ =>
