@@ -48,9 +48,9 @@ public class PropertyConfigData
    public bool AllowEmpty { get; set; }
    public bool DisableMapInferButtons { get; set; }
    public bool IsRequired { get; set; }
-   public string MinValue { get; set; }
-   public string MaxValue { get; set; }
-   public string DefaultValueMethod { get; set; }
+   public string MinValue { get; set; } = null!;
+   public string MaxValue { get; set; } = null!;
+   public string DefaultValueMethod { get; set; } = null!;
 
    public bool IgnoreCommand { get; set; }
 }

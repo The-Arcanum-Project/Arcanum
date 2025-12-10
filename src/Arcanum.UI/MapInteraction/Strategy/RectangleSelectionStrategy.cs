@@ -8,7 +8,7 @@ using Point = System.Windows.Point;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
 
-public class RectangleSelectionStrategy(MapInteractionManager mapInteractionManager) : IMapInteractionStrategy
+public class RectangleSelectionStrategy : IMapInteractionStrategy
 {
    private MapControl _map = null!;
    private bool _hasMoved;
@@ -18,7 +18,7 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
    {
       _map = map;
       _hasMoved = false;
-      _lastMousePosition = new();
+      _lastMousePosition = new ();
    }
 
    public void Exit(MapControl map)
@@ -108,13 +108,13 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
       var lowerRight = Selection.DragPath.Last();
 
       //TODO: @Melco Optimize this to cache the data and do not instantiate new arrays every frame
-      var topLeftNdc = _map.Coords.MapToNdc(new(upperLeft.X, upperLeft.Y));
-      var bottomRightNdc = _map.Coords.MapToNdc(new(lowerRight.X, lowerRight.Y));
+      var topLeftNdc = _map.Coords.MapToNdc(new (upperLeft.X, upperLeft.Y));
+      var bottomRightNdc = _map.Coords.MapToNdc(new (lowerRight.X, lowerRight.Y));
 
       Vector2[] rectangleNdc =
       [
-         new(topLeftNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, bottomRightNdc.Y), new(topLeftNdc.X, bottomRightNdc.Y),
-         new(topLeftNdc.X, topLeftNdc.Y)
+         new (topLeftNdc.X, topLeftNdc.Y), new (bottomRightNdc.X, topLeftNdc.Y), new (bottomRightNdc.X, bottomRightNdc.Y),
+         new (topLeftNdc.X, bottomRightNdc.Y), new (topLeftNdc.X, topLeftNdc.Y)
       ];
 
       _map.LocationRenderer.UpdateSelectionOutline(rectangleNdc, false);

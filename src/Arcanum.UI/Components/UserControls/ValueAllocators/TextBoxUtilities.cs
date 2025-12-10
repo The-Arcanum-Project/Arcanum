@@ -13,7 +13,7 @@ public static class TextBoxUtilities
       DependencyProperty.RegisterAttached("UpdateDelay",
                                           typeof(int),
                                           typeof(TextBoxUtilities),
-                                          new(0, OnUpdateDelayChanged));
+                                          new (0, OnUpdateDelayChanged));
 
    public static int GetUpdateDelay(DependencyObject obj) => (int)obj.GetValue(UpdateDelayProperty);
    public static void SetUpdateDelay(DependencyObject obj, int value) => obj.SetValue(UpdateDelayProperty, value);
@@ -23,7 +23,7 @@ public static class TextBoxUtilities
       DependencyProperty.RegisterAttached("Timer",
                                           typeof(DispatcherTimer),
                                           typeof(TextBoxUtilities),
-                                          new(null));
+                                          new (null));
 
    private static void OnUpdateDelayChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
@@ -52,10 +52,10 @@ public static class TextBoxUtilities
       var timer = (DispatcherTimer)textBox.GetValue(TimerProperty);
       if (timer == null)
       {
-         timer = new();
-         timer.Tick += (s, args) =>
+         timer = new ();
+         timer.Tick += (s, _) =>
          {
-            var t = (DispatcherTimer)s;
+            var t = (DispatcherTimer)s!;
             t.Stop();
             // TRIGGER THE UPDATE
             TriggerUpdate(textBox);

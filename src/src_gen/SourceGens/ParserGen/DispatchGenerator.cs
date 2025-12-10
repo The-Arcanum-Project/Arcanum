@@ -1,8 +1,7 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
-using ParserGenerator.ParserGen;
 
-namespace ParserGenerator;
+namespace ParserGenerator.ParserGen;
 
 public static class DispatchGenerator
 {
@@ -76,7 +75,6 @@ public static class DispatchGenerator
       sb.AppendLine("                // Dynamic parsers");
       sb.AppendLine("                var wasHandled = false;");
       sb.AppendLine("                switch (node)");
-      ;
       sb.AppendLine("                {");
       sb.AppendLine("                    case ContentNode:");
       sb.AppendLine("                        foreach (var dcp in _dynamicContentParsers)");
@@ -129,51 +127,64 @@ public static class DispatchGenerator
       sb.AppendLine("    #region IsIgnoredCheck");
       sb.AppendLine("    private unsafe static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc)");
       sb.AppendLine("    {");
-      sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
-      sb.AppendLine("        switch (node)");
 
-      sb.AppendLine("        {");
-      // Content Nodes
-      sb.AppendLine("            case ContentNode:");
-      sb.AppendLine("                switch (node.KeyNode.Length) {");
-
-      var cnGroups = ignoredCns.GroupBy(k => k.Length);
-      foreach (var g in cnGroups)
+      var hasIgnored = ignoredCns.Length > 0 || ignoredBns.Length > 0;
+      if (hasIgnored)
       {
-         sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
-         foreach (var key in g)
+         sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
+         sb.AppendLine("        switch (node)");
+
+         sb.AppendLine("        {");
+         // Content Nodes
+         if (ignoredCns.Length > 0)
          {
-            sb.AppendLine($"                        // {key}");
-            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
-            sb.AppendLine("                             return true;");
+            sb.AppendLine("            case ContentNode:");
+            sb.AppendLine("                switch (node.KeyNode.Length) {");
+
+            var cnGroups = ignoredCns.GroupBy(k => k.Length);
+            foreach (var g in cnGroups)
+            {
+               sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
+               foreach (var key in g)
+               {
+                  sb.AppendLine($"                        // {key}");
+                  sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
+                  sb.AppendLine("                             return true;");
+               }
+
+               sb.AppendLine("                        break;");
+            }
+
+            sb.AppendLine("                }");
+            sb.AppendLine("                break;");
          }
 
-         sb.AppendLine("                        break;");
-      }
-
-      sb.AppendLine("                }");
-      sb.AppendLine("                break;");
-
-      // Block Nodes
-      sb.AppendLine("            case BlockNode:");
-      sb.AppendLine("                switch (node.KeyNode.Length) {");
-      var bnGroups = ignoredBns.GroupBy(k => k.Length);
-      foreach (var g in bnGroups)
-      {
-         sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
-         foreach (var key in g)
+         if (ignoredBns.Length > 0)
          {
-            sb.AppendLine($"                        // {key}");
-            sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
-            sb.AppendLine("                             return true;");
+            // Block Nodes
+            sb.AppendLine("            case BlockNode:");
+            sb.AppendLine("                switch (node.KeyNode.Length) {");
+            var bnGroups = ignoredBns.GroupBy(k => k.Length);
+            foreach (var g in bnGroups)
+            {
+               sb.AppendLine($"                    case {g.Key}: // [{g.Count(),2}]");
+               foreach (var key in g)
+               {
+                  sb.AppendLine($"                        // {key}");
+                  sb.AppendLine($"                        if ({IntegerCheckGenerator.Generate(key, "                          ")})");
+                  sb.AppendLine("                             return true;");
+               }
+
+               sb.AppendLine("                        break;");
+            }
+
+            sb.AppendLine("                }");
+            sb.AppendLine("                break;");
          }
 
-         sb.AppendLine("                        break;");
+         sb.AppendLine("        }");
       }
 
-      sb.AppendLine("                }");
-      sb.AppendLine("                break;");
-      sb.AppendLine("        }");
       sb.AppendLine("        return false;");
       sb.AppendLine("    }");
       sb.AppendLine("    #endregion");
@@ -182,6 +193,12 @@ public static class DispatchGenerator
    private static void AppendMainSwitchBody(StringBuilder sb, List<PropertyData> data)
    {
       var groups = DispatchDataHandler.GroupByLength(data);
+
+      if (groups.Count == 0)
+      {
+         sb.AppendLine("        // No properties to dispatch");
+         return;
+      }
 
       sb.AppendLine("        byte* ptr = (byte*)(rawSource + node.KeyNode.Start);");
       sb.AppendLine();
@@ -222,7 +239,6 @@ public static class DispatchGenerator
       sb.AppendLine($"        {targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} target,");
       sb.AppendLine("        ref ParsingContext pc,");
       sb.AppendLine("        char* rawSource)");
-      ;
       sb.AppendLine("    {");
    }
 }

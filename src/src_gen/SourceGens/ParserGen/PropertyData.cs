@@ -2,6 +2,6 @@
 
 public class PropertyData
 {
-   public string MethodCall { get; set; }
-   public PropertyMetadata PropertyMetadata { get; set; }
+   public string MethodCall { get; set; } = null!;
+   public PropertyMetadata PropertyMetadata { get; set; } = null!;
 }

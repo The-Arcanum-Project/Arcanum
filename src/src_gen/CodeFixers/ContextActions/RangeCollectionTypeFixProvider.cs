@@ -14,10 +14,7 @@ public class RangeCollectionTypeFixProvider : CodeFixProvider
 {
    public sealed override ImmutableArray<string> FixableDiagnosticIds => [Diagnostics.IncorrectCollectionType.Id];
 
-   public sealed override FixAllProvider GetFixAllProvider()
-   {
-      return WellKnownFixAllProviders.BatchFixer;
-   }
+   public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
    {
@@ -36,8 +33,8 @@ public class RangeCollectionTypeFixProvider : CodeFixProvider
       context.RegisterCodeFix(CodeAction.Create(title: "Change to ObservableRangeCollection<T>",
                                                 createChangedDocument: c
                                                    => ChangeToObservableRangeCollectionAsync(context.Document,
-                                                       declaration,
-                                                       c),
+                                                                                             declaration,
+                                                                                             c),
                                                 equivalenceKey:
                                                 "ChangeToObservableRangeCollection"), // A unique key for the fix
                               diagnostic);
@@ -69,15 +66,15 @@ public class RangeCollectionTypeFixProvider : CodeFixProvider
 
       var newTypeSyntax = SyntaxFactory.GenericName(observableRangeCollectionName.Identifier,
                                                     SyntaxFactory.TypeArgumentList(SyntaxFactory
-                                                          .SingletonSeparatedList(itemTypeName)));
+                                                                                     .SingletonSeparatedList(itemTypeName)));
 
       // Replace the old node with the new one in the syntax tree.
       var oldRoot = await document.GetSyntaxRootAsync(cancellationToken);
-      var newRoot = oldRoot.ReplaceNode(typeSyntax, newTypeSyntax.WithTriviaFrom(typeSyntax));
+      var newRoot = oldRoot?.ReplaceNode(typeSyntax, newTypeSyntax.WithTriviaFrom(typeSyntax));
 
       // (Optional but Recommended) Add the 'using' statement if needed.
       const string requiredUsing = "Arcanum.Core.CoreSystems.NUI"; // Or your namespace for ObservableRangeCollection
-      if (newRoot.DescendantNodes().OfType<UsingDirectiveSyntax>().All(u => u.Name?.ToString() != requiredUsing))
+      if (newRoot != null && newRoot.DescendantNodes().OfType<UsingDirectiveSyntax>().All(u => u.Name?.ToString() != requiredUsing))
       {
          var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(requiredUsing));
          var compilationUnit = (CompilationUnitSyntax)newRoot;
@@ -85,6 +82,6 @@ public class RangeCollectionTypeFixProvider : CodeFixProvider
       }
 
       // Return a new document with the transformed tree.
-      return document.WithSyntaxRoot(newRoot);
+      return document.WithSyntaxRoot(newRoot!);
    }
 }

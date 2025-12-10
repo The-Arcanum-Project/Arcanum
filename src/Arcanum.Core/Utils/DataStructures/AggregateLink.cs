@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
-using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
@@ -14,7 +13,7 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
    public readonly IEu5Object Owner;
    public readonly Enum NxChildsProp;
 
-   public bool Lock = false;
+   public bool Lock;
 
    public AggregateLink(Enum nxOwnerProp, Enum nxChildsProp, IEu5Object owner)
    {
@@ -66,8 +65,6 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
       if (newItems.Count == 0 || Lock)
          return;
 
-      var empty = EmptyRegistry.Empties[Owner.GetType()];
-
       Lock = true;
       foreach (var item in newItems)
       {
@@ -81,7 +78,6 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
    {
       if (oldItems.Count == 0 || Lock)
          return;
-      
 
       var empty = EmptyRegistry.Empties[Owner.GetType()];
 

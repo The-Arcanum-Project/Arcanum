@@ -17,7 +17,7 @@ public class MapHandleImpl : IMapHandle
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
          throw new ApplicationException("MapHandleImpl.NotifyMapLoaded");
 
-      Debug.Assert(tracing.Polygons is not null, "tracing.Polygons is not null");
+      Debug.Assert(tracing.Polygons is not null);
       _ = mainWindow.MainMap.SetupRenderer(tracing.Polygons!, tracing.MapSize);
    }
 

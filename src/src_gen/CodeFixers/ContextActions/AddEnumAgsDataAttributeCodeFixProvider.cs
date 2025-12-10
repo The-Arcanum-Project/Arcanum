@@ -13,8 +13,7 @@ namespace CodeFixers.ContextActions;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AddEnumAgsDataAttributeCodeFixProvider)), Shared]
 public class AddEnumAgsDataAttributeCodeFixProvider : CodeFixProvider
 {
-   public sealed override ImmutableArray<string> FixableDiagnosticIds
-      => [DefinedDiagnostics.MissingEnumAgsDataAttribute.Id];
+   public sealed override ImmutableArray<string> FixableDiagnosticIds => [DefinedDiagnostics.MissingEnumAgsDataAttribute.Id];
 
    public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -39,8 +38,8 @@ public class AddEnumAgsDataAttributeCodeFixProvider : CodeFixProvider
       context.RegisterCodeFix(CodeAction.Create(title: $"Add [EnumAgsData] attribute to '{enumMemberName}'",
                                                 createChangedDocument: c
                                                    => AddEnumAgsDataAttributeAsync(context.Document,
-                                                    enumMemberDeclaration,
-                                                    c),
+                                                                                   enumMemberDeclaration,
+                                                                                   c),
                                                 equivalenceKey: "AddEnumAgsDataAttribute"),
                               diagnostic);
    }
@@ -54,10 +53,10 @@ public class AddEnumAgsDataAttributeCodeFixProvider : CodeFixProvider
       var attributeArgument =
          SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
                                                                          SyntaxFactory.Literal(enumMemberName
-                                                                           .ToSnakeCase())));
+                                                                                                 .ToSnakeCase())));
       var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("EnumAgsData"))
                                    .WithArgumentList(SyntaxFactory.AttributeArgumentList(SyntaxFactory
-                                                       .SingletonSeparatedList(attributeArgument)));
+                                                                                           .SingletonSeparatedList(attributeArgument)));
 
       var newAttributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute))
                                           .WithLeadingTrivia(enumMemberDecl.GetLeadingTrivia());
@@ -67,7 +66,7 @@ public class AddEnumAgsDataAttributeCodeFixProvider : CodeFixProvider
                                     .AddAttributeLists(newAttributeList);
 
       var oldRoot = await document.GetSyntaxRootAsync(cancellationToken);
-      var newRoot = oldRoot.ReplaceNode(enumMemberDecl, newEnumMemberDeclaration);
+      var newRoot = oldRoot?.ReplaceNode(enumMemberDecl, newEnumMemberDeclaration);
 
       const string requiredUsing = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes";
       if (newRoot is CompilationUnitSyntax compilationUnit &&
@@ -77,6 +76,6 @@ public class AddEnumAgsDataAttributeCodeFixProvider : CodeFixProvider
          newRoot = compilationUnit.AddUsings(usingDirective.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
       }
 
-      return document.WithSyntaxRoot(newRoot);
+      return document.WithSyntaxRoot(newRoot!);
    }
 }

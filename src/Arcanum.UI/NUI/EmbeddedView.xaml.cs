@@ -5,7 +5,7 @@ using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
 using Arcanum.UI.NUI.Generator;
 
-namespace Arcanum.UI.NUI.Nui2;
+namespace Arcanum.UI.NUI;
 
 public partial class EmbeddedView
 {

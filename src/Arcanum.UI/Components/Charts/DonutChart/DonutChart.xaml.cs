@@ -2,38 +2,37 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Arcanum.UI.Components.Charts.DonutChart;
 
-public partial class DonutChart : UserControl
+public partial class DonutChart
 {
    public DonutChart() => InitializeComponent();
 
    public static readonly DependencyProperty ShowLegendValuesProperty =
-      DependencyProperty.Register(nameof(ShowLegendValues), typeof(bool), typeof(DonutChart), new(true));
+      DependencyProperty.Register(nameof(ShowLegendValues), typeof(bool), typeof(DonutChart), new (true));
 
    public static readonly DependencyProperty ShowLegendPercentageProperty =
-      DependencyProperty.Register(nameof(ShowLegendPercentage), typeof(bool), typeof(DonutChart), new(false));
+      DependencyProperty.Register(nameof(ShowLegendPercentage), typeof(bool), typeof(DonutChart), new (false));
 
    private static readonly DependencyPropertyKey CurrentTotalPropertyKey =
-      DependencyProperty.RegisterReadOnly(nameof(CurrentTotal), typeof(double), typeof(DonutChart), new(0.0));
+      DependencyProperty.RegisterReadOnly(nameof(CurrentTotal), typeof(double), typeof(DonutChart), new (0.0));
 
    public static readonly DependencyProperty CurrentTotalProperty = CurrentTotalPropertyKey.DependencyProperty;
 
    public static readonly DependencyProperty ItemsSourceProperty =
-      DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(DonutChart), new(null, OnDataChanged));
+      DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(DonutChart), new (null, OnDataChanged));
 
    public static readonly DependencyProperty CenterTextProperty =
-      DependencyProperty.Register(nameof(CenterText), typeof(string), typeof(DonutChart), new(string.Empty));
+      DependencyProperty.Register(nameof(CenterText), typeof(string), typeof(DonutChart), new (string.Empty));
 
    public static readonly DependencyProperty ChartSizeProperty =
-      DependencyProperty.Register(nameof(ChartSize), typeof(double), typeof(DonutChart), new(160.0, OnVisualChanged));
+      DependencyProperty.Register(nameof(ChartSize), typeof(double), typeof(DonutChart), new (160.0, OnVisualChanged));
 
    public static readonly DependencyProperty StrokeThicknessProperty =
-      DependencyProperty.Register(nameof(StrokeThickness), typeof(double), typeof(DonutChart), new(20.0, OnVisualChanged));
+      DependencyProperty.Register(nameof(StrokeThickness), typeof(double), typeof(DonutChart), new (20.0, OnVisualChanged));
 
    public bool ShowLegendValues
    {
@@ -157,7 +156,7 @@ public partial class DonutChart : UserControl
       var isLarge = (endAngle - startAngle) > 180.0;
 
       var fig = new PathFigure { StartPoint = p1, IsClosed = false };
-      fig.Segments.Add(new ArcSegment(p2, new(radius, radius), 0, isLarge, SweepDirection.Clockwise, true));
+      fig.Segments.Add(new ArcSegment(p2, new (radius, radius), 0, isLarge, SweepDirection.Clockwise, true));
 
       var geo = new PathGeometry();
       geo.Figures.Add(fig);
@@ -167,6 +166,6 @@ public partial class DonutChart : UserControl
    private static Point PolarToCartesian(Point center, double radius, double angleInDegrees)
    {
       var radians = (angleInDegrees - 90) * (Math.PI / 180.0);
-      return new(center.X + radius * Math.Cos(radians), center.Y + radius * Math.Sin(radians));
+      return new (center.X + radius * Math.Cos(radians), center.Y + radius * Math.Sin(radians));
    }
 }

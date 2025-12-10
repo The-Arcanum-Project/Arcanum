@@ -21,9 +21,9 @@ public abstract class FileLoadingService : IDependencyNode<string>
    {
       get;
       set => field = SuccessfullyLoaded
-         ? throw new InvalidOperationException("Cannot change dependencies after loading.")
-         : value;
-   } = null!;
+                        ? throw new InvalidOperationException("Cannot change dependencies after loading.")
+                        : value;
+   }
 
    /// <summary>
    /// If this step is a heavy step, it will be executed on a thread that is only used for heavy steps and not in parallel with light steps.
@@ -31,7 +31,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    /// </summary>
    public virtual bool IsHeavyStep => false;
    public string Name { get; }
-   private readonly Stopwatch _stopwatch = new();
+   private readonly Stopwatch _stopwatch = new ();
 
    public FileDescriptor Descriptor = null!;
 
@@ -62,7 +62,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
 
    public virtual DefaultParsingStep GetParsingStep()
    {
-      return new(this, Descriptor.IsMultithreadable);
+      return new (this, Descriptor.IsMultithreadable);
    }
 
    /// <summary>

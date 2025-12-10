@@ -35,11 +35,11 @@ public partial class Adjacency() : INUI, ICollectionProvider<Adjacency>, IEmpty<
 
    [Description("The location this adjacency starts from.")]
    [DefaultValue(null)]
-   public Location From { get; set; }
+   public Location From { get; set; } = null!;
 
    [Description("The location this adjacency goes to.")]
    [DefaultValue(null)]
-   public Location To { get; set; }
+   public Location To { get; set; } = null!;
 
    [Description("The type of adjacency.\nValid types: Sea, ")]
    [DefaultValue(AdjacencyType.Sea)]
@@ -47,11 +47,11 @@ public partial class Adjacency() : INUI, ICollectionProvider<Adjacency>, IEmpty<
 
    [Description("The unique name of this adjacency.")]
    [DefaultValue("")]
-   public string Name { get; set; }
+   public string Name { get; set; } = null!;
 
    [Description("A comment about this adjacency.")]
    [DefaultValue("")]
-   public string Comment { get; set; }
+   public string Comment { get; set; } = null!;
 
    [Description("The starting X coordinate of this adjacency on the map.")]
    [DefaultValue(0)]
@@ -99,13 +99,13 @@ public partial class Adjacency() : INUI, ICollectionProvider<Adjacency>, IEmpty<
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
    public INUINavigation[] Navigations => [new NUINavigation(From, $"From {From.UniqueId}"), new NUINavigation(To, $"To {To.UniqueId}")];
-   public static Adjacency Empty { get; } = new(Location.Empty,
-                                                Location.Empty,
-                                                AdjacencyType.Sea,
-                                                "Empty_Adjacency",
-                                                string.Empty,
-                                                0,
-                                                0,
-                                                0,
-                                                0);
+   public static Adjacency Empty { get; } = new (Location.Empty,
+                                                 Location.Empty,
+                                                 AdjacencyType.Sea,
+                                                 "Empty_Adjacency",
+                                                 string.Empty,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 0);
 }

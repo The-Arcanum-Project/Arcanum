@@ -3,11 +3,11 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.UI.SpecializedEditors.EditorControls.ViewModels;
 
-public class LocationCollectionVM<T> where T : ILocation
+public class LocationCollectionVm<T> where T : ILocation
 {
    public ILocationCollection<T> LocationCollection { get; }
 
-   public LocationCollectionVM(ILocationCollection<T> locationCollection)
+   public LocationCollectionVm(ILocationCollection<T> locationCollection)
    {
       LocationCollection = locationCollection;
    }

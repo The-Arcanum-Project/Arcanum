@@ -20,26 +20,24 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 /// </summary>
 public static class SetupParsingManager
 {
-   private const string SETUP_START_NODE_PARSING = "Setup.Start.NodeParsing";
    private static readonly FrozenDictionary<string, SetupFileLoadingService> SetupFileLoaders;
 
    // Each file which edits the given object will be listed here if it originates from the setup folder.
    private static readonly Dictionary<Type, List<Eu5FileObj>> PartDefinitions = [];
 
-   private static Type[]? _parsedTypes;
    public static Type[] ParsedTypes
    {
       get
       {
-         if (_parsedTypes == null)
+         if (field == null)
          {
             List<Type> types = [];
             foreach (var service in RegisteredServices)
                types.AddRange(service.ParsedObjects);
-            _parsedTypes = [.. types];
+            field = [.. types];
          }
 
-         return _parsedTypes;
+         return field;
       }
    }
 

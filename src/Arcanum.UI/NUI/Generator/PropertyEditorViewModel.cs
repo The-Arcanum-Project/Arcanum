@@ -28,7 +28,7 @@ public sealed class PropertyEditorViewModel
       Embedded = (IEu5Object)embedded;
 
       var type = target.GetNxPropType(nxProp);
-      Debug.Assert(type != null, "type != null");
+      Debug.Assert(type != null);
       IsExpanded = !Config.Settings.NUIConfig.StartEmbeddedFieldsCollapsed;
    }
 
@@ -72,10 +72,10 @@ public sealed class PropertyEditorViewModel
 
       var newGrid = new Grid
       {
-         Margin = new(4, 4, 0, 4),
+         Margin = new (4, 4, 0, 4),
          ColumnDefinitions =
          {
-            new() { Width = new(2, GridUnitType.Star) }, new() { Width = new(3, GridUnitType.Star) },
+            new () { Width = new (2, GridUnitType.Star) }, new () { Width = new (3, GridUnitType.Star) },
          },
       };
 
@@ -109,5 +109,5 @@ public sealed class PropertyEditorViewModel
    }
 
    public event PropertyChangedEventHandler? PropertyChanged;
-   private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new(propertyName));
+   private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new (propertyName));
 }

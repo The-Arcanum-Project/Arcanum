@@ -49,6 +49,7 @@ public class PluginManager : ISubroutineLogger
    // 4. We rebuild the dependency graph for all plugins.
    // 5. Initialize each plugin in the sorted order.
 
+   // ReSharper disable once UnusedMember.Local
    private void InitializeWithDependencies()
    {
       // We only pass in the plugins that are in the Created state or already initialized.
@@ -126,28 +127,27 @@ public class PluginManager : ISubroutineLogger
    /// </summary>
    public void LoadAndInitializePlugins()
    {
-      return;
-
-      Log("Loading plugins from folder...");
-
-      var loadedPlugins = LoadPluginsFromFolder();
-      if (loadedPlugins.Count == 0)
-      {
-         Log("No plugins found in the plugin folder.");
-         return;
-      }
-
-      InitializeWithDependencies();
-      foreach (var plugin in loadedPlugins.Where(plugin => plugin.Status == PluginStatus.Initialized))
-      {
-         plugin.OnEnable();
-         plugin.Status = PluginStatus.Enabled;
-      }
+      // Log("Loading plugins from folder...");
+      //
+      // var loadedPlugins = LoadPluginsFromFolder();
+      // if (loadedPlugins.Count == 0)
+      // {
+      //    Log("No plugins found in the plugin folder.");
+      //    return;
+      // }
+      //
+      // InitializeWithDependencies();
+      // foreach (var plugin in loadedPlugins.Where(plugin => plugin.Status == PluginStatus.Initialized))
+      // {
+      //    plugin.OnEnable();
+      //    plugin.Status = PluginStatus.Enabled;
+      // }
    }
 
    /// <summary>
    /// Gathers all plugins from the specified folder and creates an instance of each plugin.
    /// </summary>
+   // ReSharper disable once UnusedMember.Local
    private List<IPlugin> LoadPluginsFromFolder()
    {
       if (!Directory.Exists(_pluginFolder))
@@ -252,7 +252,7 @@ public class PluginManager : ISubroutineLogger
          // if the plugin returns false, it will be marked as unloaded and inactive.;
          plugin.IsActive = plugin.Initialize(Host);
          sw.Stop();
-         plugin.RuntimeInfo = new(plugin.IsActive, sw.Elapsed);
+         plugin.RuntimeInfo = new (plugin.IsActive, sw.Elapsed);
          plugin.Status = !plugin.IsActive ? PluginStatus.Error : PluginStatus.Initialized;
       }
       catch (Exception ex)
@@ -278,7 +278,7 @@ public class PluginManager : ISubroutineLogger
    {
       var plugin = (IPlugin)Activator.CreateInstance(pluginType)!;
       if (plugin.RequiredHostVersion > HostInfo.Version)
-         throw new($"Plugin {pluginType.FullName} requires a newer version of the host: {plugin.RequiredHostVersion}");
+         throw new ($"Plugin {pluginType.FullName} requires a newer version of the host: {plugin.RequiredHostVersion}");
 
       return plugin;
    }
@@ -350,8 +350,7 @@ public class PluginManager : ISubroutineLogger
       plugin.Status = PluginStatus.Unloaded;
    }
 
-   public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info)
-      => Host.Log(PM_LOG_PREFIX, message, verbosity);
+   public void Log(string message, LoggingVerbosity verbosity = LoggingVerbosity.Info) => Host.Log(PM_LOG_PREFIX, message, verbosity);
 
    private string AppPath => AppDomain.CurrentDomain.BaseDirectory;
 

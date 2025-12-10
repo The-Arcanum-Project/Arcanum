@@ -23,10 +23,10 @@ public class IEmptyCodeFixProvider : CodeFixProvider
       var diagnosticSpan = diagnostic.Location.SourceSpan;
 
       // Find the class declaration that triggered the diagnostic.
-      var classDeclaration = root.FindToken(diagnosticSpan.Start)
-                                 .Parent?.AncestorsAndSelf()
-                                 .OfType<ClassDeclarationSyntax>()
-                                 .First();
+      var classDeclaration = root?.FindToken(diagnosticSpan.Start)
+                                  .Parent?.AncestorsAndSelf()
+                                  .OfType<ClassDeclarationSyntax>()
+                                  .First();
 
       // Register a code action that will invoke our fix.
       context.RegisterCodeFix(CodeAction.Create(title: "Implement IEmpty<T>",
@@ -47,8 +47,8 @@ public class IEmptyCodeFixProvider : CodeFixProvider
       // This creates the syntax for: IEmpty<ClassName>
       var iemptyInterface = SyntaxFactory.GenericName(SyntaxFactory.Identifier("IEmpty"))
                                          .WithTypeArgumentList(SyntaxFactory.TypeArgumentList(SyntaxFactory
-                                                                     .SingletonSeparatedList<TypeSyntax>(SyntaxFactory
-                                                                            .IdentifierName(className))));
+                                                                                                .SingletonSeparatedList<TypeSyntax>(SyntaxFactory
+                                                                                                          .IdentifierName(className))));
 
       // Use DocumentEditor, a high-level API for syntax tree modifications
       var editor = await DocumentEditor.CreateAsync(document, cancellationToken);

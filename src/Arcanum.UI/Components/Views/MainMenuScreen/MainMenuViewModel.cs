@@ -38,7 +38,7 @@ public class MainMenuViewModel : ObservableObject
       ArcanumViewModel => "Launch project:",
       _ => "Last Project:",
    };
-   
+
    public Visibility IsNewProjectButtonVisible => CurrentView switch
    {
       ArcanumViewModel => Visibility.Collapsed,
@@ -68,33 +68,33 @@ public class MainMenuViewModel : ObservableObject
          OnPropertyChanged(nameof(LaunchButtonText));
          OnPropertyChanged(nameof(IsNewProjectButtonVisible));
       }
-   } = null!;
+   }
 
    public required Windows.MainWindows.MainMenuScreen MenuWindow { get; set; }
 
    public MainMenuViewModel()
    {
-      HomeVm = new();
-      ModforgeVm = new();
-      FeatureFm = new();
-      ArcanumVm = new(AppData.MainMenuScreenDescriptor.ProjectFiles, this);
-      AboutUsVm = new();
-      AttributionsVm = new();
+      HomeVm = new ();
+      ModforgeVm = new ();
+      FeatureFm = new ();
+      ArcanumVm = new (AppData.MainMenuScreenDescriptor.ProjectFiles, this);
+      AboutUsVm = new ();
+      AttributionsVm = new ();
 
       CurrentView = HomeVm;
 
-      HomeVc = new(() => { SetCurrentView(MainMenuScreenView.Home); });
-      FeatureVc = new(() => { SetCurrentView(MainMenuScreenView.Feature); });
-      ModforgeVc = new(() => { SetCurrentView(MainMenuScreenView.Modforge); });
-      ArcanumVc = new(() =>
+      HomeVc = new (() => { SetCurrentView(MainMenuScreenView.Home); });
+      FeatureVc = new (() => { SetCurrentView(MainMenuScreenView.Feature); });
+      ModforgeVc = new (() => { SetCurrentView(MainMenuScreenView.Modforge); });
+      ArcanumVc = new (() =>
       {
          SetCurrentView(MainMenuScreenView.Arcanum);
          if (string.IsNullOrEmpty(ArcanumVm.ModFolderTextBox.Text))
             ArcanumVm.VanillaFolderTextBox.Text =
                AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? string.Empty;
       });
-      AboutUsVc = new(() => { SetCurrentView(MainMenuScreenView.AboutUs); });
-      AttributionsVc = new(() => { SetCurrentView(MainMenuScreenView.Attributions); });
+      AboutUsVc = new (() => { SetCurrentView(MainMenuScreenView.AboutUs); });
+      AttributionsVc = new (() => { SetCurrentView(MainMenuScreenView.Attributions); });
    }
 
    internal void SetCurrentView(MainMenuScreenView view)
@@ -149,10 +149,10 @@ public class MainMenuViewModel : ObservableObject
                                            vanillaPath,
                                            DataSpace.AccessType.ReadOnly);
 
-      descriptor = new(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
-                       modDataSpace,
-                       ArcanumVm.BaseMods.Select(mod => mod.DataSpace).ToList(),
-                       vanillaDataSpace);
+      descriptor = new (Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
+                        modDataSpace,
+                        ArcanumVm.BaseMods.Select(mod => mod.DataSpace).ToList(),
+                        vanillaDataSpace);
 
       return descriptor.IsValid();
    }
@@ -183,7 +183,7 @@ public class MainMenuViewModel : ObservableObject
       if (AppData.MainMenuScreenDescriptor.ProjectFiles
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                     StringComparison.OrdinalIgnoreCase));
+                                                                                       StringComparison.OrdinalIgnoreCase));
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 

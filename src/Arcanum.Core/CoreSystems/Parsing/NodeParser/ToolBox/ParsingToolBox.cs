@@ -133,7 +133,6 @@ public static class ParsingToolBox
       if (node.Value is LiteralValueNode lvn)
       {
          var lexeme = pc.SliceString(lvn);
-         ;
          if (!int.TryParse(lexeme, out value))
          {
             pc.SetContext(lvn);
@@ -220,7 +219,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!NumberParsing.TryParseBool(lexeme, ref pc, out value))
       {
          value = false;
@@ -255,7 +253,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!double.TryParse(lexeme.Replace(',', '.'),
                            NumberStyles.Float,
                            CultureInfo.InvariantCulture,
@@ -292,7 +289,6 @@ public static class ParsingToolBox
       if (node.Value is LiteralValueNode lvn)
       {
          var lexeme = pc.SliceString(lvn);
-         ;
          if (!NumberParsing.TryParseFloat(lexeme, ref pc, out value))
          {
             pc.SetContext(lvn);
@@ -374,7 +370,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
 
       if (!EnumAgsRegistry.TryParse(lexeme, out value))
       {
@@ -409,7 +404,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!Enum.TryParse(lexeme, true, out value))
       {
          pc.SetContext(lvn);
@@ -646,7 +640,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
+      value = new () { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -671,7 +665,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
+      value = new () { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -716,7 +710,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!Globals.Languages.TryGetValue(lexeme, out value) && !Globals.Dialects.TryGetValue(lexeme, out value))
       {
          pc.SetContext(lvn);
@@ -766,7 +759,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
          pc.SetContext(lvn);
@@ -780,7 +772,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = culture, Value = opinion };
+      value = new () { Key = culture, Value = opinion };
       return true;
    }
 
@@ -818,7 +810,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
          pc.SetContext(lvn);
@@ -832,7 +823,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = religion, Value = opinion };
+      value = new () { Key = religion, Value = opinion };
       return true;
    }
 
@@ -870,7 +861,6 @@ public static class ParsingToolBox
       }
 
       var lexeme = pc.SliceString(lvn);
-      ;
       if (!EnumAgsRegistry.TryParse<Opinion>(lexeme, out var opinion))
       {
          pc.SetContext(lvn);
@@ -884,7 +874,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { Key = rs, Value = opinion };
+      value = new () { Key = rs, Value = opinion };
       return true;
    }
 
@@ -934,9 +924,8 @@ public static class ParsingToolBox
       }
 
       var name = pc.SliceString(lvn);
-      ;
 
-      value = new()
+      value = new ()
       {
          SavingKey = pc.SliceString(node),
          Name = name,
@@ -994,7 +983,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new() { SavingKey = key, Name = pc.SliceString(lvn) };
+      value = new () { SavingKey = key, Name = pc.SliceString(lvn) };
       return true;
    }
 
@@ -1117,7 +1106,7 @@ public static class ParsingToolBox
       if (!skn.KeyToken.TryGetLocationFromToken(ref pc, out var from))
          return false;
 
-      value = new() { StraitLocationOne = from, StraitLocationTwo = loc };
+      value = new () { StraitLocationOne = from, StraitLocationTwo = loc };
       return true;
    }
 
@@ -1551,7 +1540,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new()
+      value = new ()
       {
          Institution = institution, IsPresent = isPresent,
       };
@@ -1611,7 +1600,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new()
+      value = new ()
       {
          Building = building, Level = level,
       };

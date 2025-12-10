@@ -186,7 +186,7 @@ public static class SavingUtil
       PropertySavingMetadata? psm = null;
       if (!nxProp.ToString().EndsWith("UniqueId"))
       {
-         psm = target.SaveableProps.FirstOrDefault(psm => psm.NxProp.Equals(nxProp));
+         psm = target.SaveableProps.FirstOrDefault(propertySavingMetadata => propertySavingMetadata.NxProp.Equals(nxProp));
          Debug.Assert(psm != null,
                       $"PropertySavingMetadata for property {nxProp} not found in {target.GetType().Name}.");
       }

@@ -28,32 +28,6 @@ public sealed class Polygon
       Bounds = CalculateBounds_SIMD();
    }
 
-   private RectangleF CalculateBounds()
-   {
-      if (Vertices.Length == 0)
-         return RectangleF.Empty;
-
-      float minX = Vertices[0].X,
-            maxX = Vertices[0].X;
-      float minY = Vertices[0].Y,
-            maxY = Vertices[0].Y;
-
-      for (var i = 1; i < Vertices.Length; i++)
-      {
-         var vertex = Vertices[i];
-         if (vertex.X < minX)
-            minX = vertex.X;
-         if (vertex.X > maxX)
-            maxX = vertex.X;
-         if (vertex.Y < minY)
-            minY = vertex.Y;
-         if (vertex.Y > maxY)
-            maxY = vertex.Y;
-      }
-
-      return new(minX, minY, maxX - minX, maxY - minY);
-   }
-
    private RectangleF CalculateBounds_SIMD()
    {
       if (Vertices.Length == 0)
@@ -78,8 +52,8 @@ public sealed class Polygon
          var span = new Span<Vector2>(Vertices, i, vector2Count);
          var vector = MemoryMarshal.Cast<Vector2, float>(span);
 
-         minValues = Vector.Min(minValues, new(vector));
-         maxValues = Vector.Max(maxValues, new(vector));
+         minValues = Vector.Min(minValues, new (vector));
+         maxValues = Vector.Max(maxValues, new (vector));
       }
 
       // Process the remaining elements that didn't fit into a full vector chunk
@@ -120,7 +94,7 @@ public sealed class Polygon
                maxY = maxValues[j];
          }
 
-      return new(minX, minY, maxX - minX, maxY - minY);
+      return new (minX, minY, maxX - minX, maxY - minY);
    }
 
    /// <summary>
@@ -244,8 +218,7 @@ public sealed class Polygon
 
       var corners = new[]
       {
-         new Vector2(rect.Left, rect.Top), new Vector2(rect.Right, rect.Top), new Vector2(rect.Right, rect.Bottom),
-         new Vector2(rect.Left, rect.Bottom),
+         new Vector2(rect.Left, rect.Top), new Vector2(rect.Right, rect.Top), new Vector2(rect.Right, rect.Bottom), new Vector2(rect.Left, rect.Bottom),
       };
 
       foreach (var corner in corners)

@@ -8,14 +8,14 @@ public static class ArcClipboard
 {
    // We want to keep a history of the last N copied items in the future
    private const int MAX_HISTORY_SIZE = 10;
-   private static readonly Queue<ClipboardPayload> History = new();
+   private static readonly Queue<ClipboardPayload> History = new ();
 
    public static event Action<ClipboardPayload>? OnCopyAction;
    public static event Action<ClipboardPayload>? OnPasteAction;
 
    public static void Copy(Enum type, object data)
    {
-      AddToHistory(new(type, data));
+      AddToHistory(new (type, data));
       ArcLog.WriteLine("ACB", LogLevel.DBG, "Copied payload of type {0} with value {1}", type.GetType().Name, data.ToString() ?? "null");
    }
 
@@ -23,7 +23,7 @@ public static class ArcClipboard
    {
       Debug.Assert(property != null);
       Debug.Assert(target.GetAllProperties().Contains(property));
-      AddToHistory(new(property, target._getValue(property)));
+      AddToHistory(new (property, target._getValue(property)));
       ArcLog.WriteLine("ACB",
                        LogLevel.DBG,
                        "Copied payload of type {0} with value {1}",
@@ -33,7 +33,7 @@ public static class ArcClipboard
 
    public static void Copy(IEu5Object target)
    {
-      AddToHistory(new(null, target));
+      AddToHistory(new (null, target));
       ArcLog.WriteLine("ACB",
                        LogLevel.DBG,
                        "Copied entire object of type {0} with UniqueId {1}",
@@ -52,7 +52,7 @@ public static class ArcClipboard
       return target.GetAllProperties().Contains(CurrentPayload.Property);
    }
 
-   public static bool CanPaste(IEu5Object target, Enum? property)
+   public static bool CanPaste(IEu5Object target, Enum property)
    {
       if (CurrentPayload?.Property == null)
          return false;
@@ -77,7 +77,7 @@ public static class ArcClipboard
       OnPasteAction?.Invoke(CurrentPayload);
    }
 
-   public static void Paste(IEu5Object target, Enum? property)
+   public static void Paste(IEu5Object target, Enum property)
    {
       if (!CanPaste(target, property))
          return;

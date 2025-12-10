@@ -8,7 +8,7 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
    public event NotifyCollectionChangedEventHandler? CollectionChanged;
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   public ObservableHashSet() : base()
+   public ObservableHashSet()
    {
    }
 
@@ -30,8 +30,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (!added)
          return added;
 
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Add, item));
-      OnPropertyChanged(new(nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Add, item));
+      OnPropertyChanged(new (nameof(Count)));
 
       return added;
    }
@@ -42,8 +42,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (!removed)
          return removed;
 
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Remove, item));
-      OnPropertyChanged(new(nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Remove, item));
+      OnPropertyChanged(new (nameof(Count)));
 
       return removed;
    }
@@ -59,12 +59,12 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
          if (added)
          {
             anyAdded = true;
-            OnCollectionChanged(new(NotifyCollectionChangedAction.Add, item));
+            OnCollectionChanged(new (NotifyCollectionChangedAction.Add, item));
          }
       }
 
       if (anyAdded)
-         OnPropertyChanged(new(nameof(Count)));
+         OnPropertyChanged(new (nameof(Count)));
 
       return anyAdded;
    }
@@ -80,12 +80,12 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
          if (removed)
          {
             anyRemoved = true;
-            OnCollectionChanged(new(NotifyCollectionChangedAction.Remove, item));
+            OnCollectionChanged(new (NotifyCollectionChangedAction.Remove, item));
          }
       }
 
       if (anyRemoved)
-         OnPropertyChanged(new(nameof(Count)));
+         OnPropertyChanged(new (nameof(Count)));
 
       return anyRemoved;
    }
@@ -106,8 +106,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
          return;
 
       base.Clear();
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
-      OnPropertyChanged(new(nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Reset));
+      OnPropertyChanged(new (nameof(Count)));
    }
 
    private void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
@@ -132,8 +132,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (Count == originalCount)
          return;
 
-      OnPropertyChanged(new(nameof(Count)));
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+      OnPropertyChanged(new (nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Reset));
    }
 
    public new void IntersectWith(IEnumerable<T> other)
@@ -146,8 +146,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (Count == originalCount)
          return;
 
-      OnPropertyChanged(new(nameof(Count)));
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+      OnPropertyChanged(new (nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Reset));
    }
 
    public new void ExceptWith(IEnumerable<T> other)
@@ -160,8 +160,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (Count == originalCount)
          return;
 
-      OnPropertyChanged(new(nameof(Count)));
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+      OnPropertyChanged(new (nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Reset));
    }
 
    public new void SymmetricExceptWith(IEnumerable<T> other)
@@ -174,8 +174,8 @@ public sealed class ObservableHashSet<T> : HashSet<T>, ISet<T>, INotifyCollectio
       if (Count == originalCount)
          return;
 
-      OnPropertyChanged(new(nameof(Count)));
-      OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
+      OnPropertyChanged(new (nameof(Count)));
+      OnCollectionChanged(new (NotifyCollectionChangedAction.Reset));
    }
 
    public new bool IsSubsetOf(IEnumerable<T> other) => base.IsSubsetOf(other);

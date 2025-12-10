@@ -124,12 +124,6 @@ public static class SaveMaster
       ChangesSinceLastSave.Remove(command);
    }
 
-   private static void RemoveObjectsFromChanges(ICollection<IEu5Object> targets)
-   {
-      foreach (var target in targets)
-         RemoveObjectFromChanges(target);
-   }
-
    // TODO: @Melco Handle removal of all changes for an objects saved with injection as it is not saved on a on command basis.
    private static void RemoveObjectFromChanges(IEu5Object target)
    {
@@ -293,7 +287,7 @@ public static class SaveMaster
    /// <summary>
    /// Extracts all setup objects from the list and removes them as they are already handled.
    /// </summary>
-   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects)
+   private static void SaveSetupFolder(List<IEu5Object> modifiedObjects)
    {
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
       // we have 2 modes to save:
@@ -304,8 +298,6 @@ public static class SaveMaster
          SaveSetupCompacted(types);
       else
          SaveSetupSplit(types);
-
-      return true;
    }
 
    private static void SaveSetupSplit(Type[] types)
@@ -425,10 +417,10 @@ public static class SaveMaster
             Debug.Assert(cssoInj != InjectObj.Empty,
                          "InjectedObj should not be empty when saving with inject/replace logic.");
 
-            cssoInj.FileLocation = new(0,
-                                       CountNewLinesInStringBuilder(sb.InnerBuilder),
-                                       objSb.InnerBuilder.Length,
-                                       sb.InnerBuilder.Length);
+            cssoInj.FileLocation = new (0,
+                                        CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                        objSb.InnerBuilder.Length,
+                                        sb.InnerBuilder.Length);
 
             objSb.Merge(sb);
             RemoveObjectFromChanges(csso.Target);
@@ -624,10 +616,10 @@ public static class SaveMaster
       {
          isb.Clear();
          obj.ToAgsContext().BuildContext(isb);
-         obj.FileLocation = new(0,
-                                CountNewLinesInStringBuilder(isb.InnerBuilder),
-                                isb.InnerBuilder.Length,
-                                sb.InnerBuilder.Length);
+         obj.FileLocation = new (0,
+                                 CountNewLinesInStringBuilder(isb.InnerBuilder),
+                                 isb.InnerBuilder.Length,
+                                 sb.InnerBuilder.Length);
          obj.Source.ObjectsInFile.Add(obj);
          isb.Merge(sb);
       }
@@ -708,10 +700,10 @@ public static class SaveMaster
          {
             obj.ToAgsContext().BuildContext(objBuilder);
             if (obj.FileLocation == Eu5ObjectLocation.Empty)
-               obj.FileLocation = new(0,
-                                      CountNewLinesInStringBuilder(sb.InnerBuilder),
-                                      objBuilder.InnerBuilder.Length,
-                                      sb.InnerBuilder.Length);
+               obj.FileLocation = new (0,
+                                       CountNewLinesInStringBuilder(sb.InnerBuilder),
+                                       objBuilder.InnerBuilder.Length,
+                                       sb.InnerBuilder.Length);
             else
                obj.FileLocation.Update(objBuilder.InnerBuilder.Length,
                                        CountNewLinesInStringBuilder(sb.InnerBuilder),
@@ -841,7 +833,7 @@ public static class SaveMaster
 
          // We are after the object to be removed, so we need to update the FileLocation
          var fl = o.FileLocation;
-         o.FileLocation = new(0, fl.Line + deltaLines, fl.Length, fl.CharPos + deltaCharPos);
+         o.FileLocation = new (0, fl.Line + deltaLines, fl.Length, fl.CharPos + deltaCharPos);
       }
 
       // Write any remaining content after the last removed object

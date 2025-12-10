@@ -256,6 +256,12 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
 
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
@@ -280,6 +286,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -303,6 +316,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -326,6 +346,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -349,6 +376,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -372,6 +406,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -394,6 +435,13 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
+         if (npds.All(npd => !npd.IsCollection))
+         {
+            m.AppendLine("// No collection properties available to remove from.");
+            m.AppendLine("return;");
+            return;
+         }
+
          m.AppendLine($"switch (({NX}Field)property)");
          m.Block(sw =>
          {
@@ -483,7 +531,7 @@ public static class Generator
 
       // Getter
       builder.AppendLine();
-      builder.AppendLine($"public object? {NX}_getValue(Enum property)");
+      builder.AppendLine($"public object {NX}_getValue(Enum property)");
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");
@@ -608,7 +656,7 @@ public static class Generator
       builder.AppendLine("/// <summary>");
       builder.AppendLine("/// Gets the default value of a property.");
       builder.AppendLine("/// </summary>");
-      builder.AppendLine($"public object? {NX}GetDefaultValue(Enum property)");
+      builder.AppendLine($"public object {NX}GetDefaultValue(Enum property)");
       builder.Block(b =>
       {
          builder.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), \"Invalid property enum value\");");

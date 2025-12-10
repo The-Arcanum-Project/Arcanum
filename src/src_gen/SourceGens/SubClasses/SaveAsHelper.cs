@@ -67,7 +67,7 @@ public class SaveAsMetadata
    public bool CollectionAsPureIdentifierList { get; }
    public bool IsEmbeddedObject { get; }
    public bool IsShattered { get; }
-   public int NumOfDecimalPlaces { get; set; } = 0;
+   public int NumOfDecimalPlaces { get; set; }
    public AttributeData? DefaultValueAttribute { get; set; }
 
    private static string GetProviderString(TypedConstant value, string providerName)

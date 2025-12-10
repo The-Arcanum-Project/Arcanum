@@ -21,7 +21,7 @@ public partial class ClipboardHistory
          var typeName = item.Value.GetType().Name;
          var propName = item.Property?.ToString() ?? "<Entire Object>";
          var valueStr = item.Value.ToString() ?? "null";
-         HistoryItems.Add(new(typeName, propName, valueStr));
+         HistoryItems.Add(new (typeName, propName, valueStr));
       }
 
       HistoryList.ItemsSource = HistoryItems;
@@ -93,6 +93,7 @@ public partial class ClipboardHistory
 
    [LibraryImport("user32.dll")]
    [return: MarshalAs(UnmanagedType.Bool)]
+   // ReSharper disable once UnusedMethodReturnValue.Local
    private static partial bool GetCursorPos(out POINT lpPoint);
 }
 

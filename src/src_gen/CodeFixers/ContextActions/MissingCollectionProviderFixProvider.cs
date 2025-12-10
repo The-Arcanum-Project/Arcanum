@@ -35,8 +35,8 @@ public class MissingCollectionProviderFixProvider : CodeFixProvider
       context.RegisterCodeFix(CodeAction.Create(title: $"Implement ICollectionProvider<{declaration.Identifier.Text}>",
                                                 createChangedDocument: c
                                                    => AddCollectionProviderInterfaceAsync(context.Document,
-                                                       declaration,
-                                                       c),
+                                                                                          declaration,
+                                                                                          c),
                                                 equivalenceKey: "AddICollectionProvider"),
                               diagnostic);
    }
@@ -48,24 +48,24 @@ public class MissingCollectionProviderFixProvider : CodeFixProvider
       // Get the syntax for the new interface we want to add.
       var newInterfaceName = SyntaxFactory.GenericName(SyntaxFactory.Identifier("ICollectionProvider"),
                                                        SyntaxFactory.TypeArgumentList(SyntaxFactory
-                                                             .SingletonSeparatedList<TypeSyntax>(SyntaxFactory
-                                                                    .IdentifierName(classDecl.Identifier.Text))));
+                                                                                        .SingletonSeparatedList<TypeSyntax>(SyntaxFactory
+                                                                                                  .IdentifierName(classDecl.Identifier.Text))));
 
       // Create a new declaration with the added interface.
       var newDeclaration = classDecl.AddBaseListTypes(SyntaxFactory.SimpleBaseType(newInterfaceName));
 
       // Replace the old class declaration with the new one.
       var oldRoot = await document.GetSyntaxRootAsync(cancellationToken);
-      var newRoot = oldRoot.ReplaceNode(classDecl, newDeclaration);
+      var newRoot = oldRoot?.ReplaceNode(classDecl, newDeclaration);
 
       const string requiredUsing = "Arcanum.Core.CoreSystems.NUI";
-      if (newRoot.DescendantNodes().OfType<UsingDirectiveSyntax>().All(u => u.Name?.ToString() != requiredUsing))
+      if (newRoot != null && newRoot.DescendantNodes().OfType<UsingDirectiveSyntax>().All(u => u.Name?.ToString() != requiredUsing))
       {
          var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(requiredUsing));
          var compilationUnit = (CompilationUnitSyntax)newRoot;
          newRoot = compilationUnit.AddUsings(usingDirective);
       }
 
-      return document.WithSyntaxRoot(newRoot);
+      return newRoot != null ? document.WithSyntaxRoot(newRoot) : document;
    }
 }

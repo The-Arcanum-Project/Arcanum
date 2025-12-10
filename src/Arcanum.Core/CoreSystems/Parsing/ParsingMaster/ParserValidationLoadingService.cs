@@ -63,7 +63,7 @@ public abstract class
          if (!globals.TryGetValue(key, out var target))
          {
             var instance = Eu5Activator.CreateInstance<T>(key, fileObj, bn);
-            Debug.Assert(instance.Source != null, "instance.Source != null");
+            Debug.Assert(instance.Source != null);
 
             if (lockObject != null)
                lock (lockObject)

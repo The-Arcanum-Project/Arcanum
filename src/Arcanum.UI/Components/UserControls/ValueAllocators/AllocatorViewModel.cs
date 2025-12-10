@@ -26,8 +26,8 @@ public class AllocatorViewModel : ViewModelBase
    private bool? _areAllLocked;
    private bool _suppressCalculation;
 
-   private readonly Stack<List<AllocationMemento>> _undoStack = new();
-   private readonly Stack<int> _totalHistory = new();
+   private readonly Stack<List<AllocationMemento>> _undoStack = new ();
+   private readonly Stack<int> _totalHistory = new ();
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
@@ -235,16 +235,16 @@ public class AllocatorViewModel : ViewModelBase
    private void InitializeLocationData(Location location)
    {
       LoadedLocation = location;
-      PopDefinitionCreatorVm = new(location, this);
+      PopDefinitionCreatorVm = new (location, this);
 
       TotalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
       foreach (var pop in location.Pops)
-         Items.Add(new(this, pop));
+         Items.Add(new (this, pop));
 
       UpdateMasterLockState();
-      UpdateCalculatedInfo(null, new(nameof(Items)));
+      UpdateCalculatedInfo(null, new (nameof(Items)));
    }
 
    public void ResetFor(Location target)
@@ -299,9 +299,9 @@ public class AllocatorViewModel : ViewModelBase
           propertyChangedEventArgs.PropertyName != nameof(TotalLimit))
          return;
 
-      Dictionary<Religion, long> religionCounts = new();
-      Dictionary<Culture, long> cultureCounts = new();
-      Dictionary<PopType, long> popTypeCounts = new();
+      Dictionary<Religion, long> religionCounts = new ();
+      Dictionary<Culture, long> cultureCounts = new ();
+      Dictionary<PopType, long> popTypeCounts = new ();
       long totalPop = 0;
 
       foreach (var item in Items)
@@ -351,7 +351,7 @@ public class AllocatorViewModel : ViewModelBase
       var colorIndex = 0;
       foreach (var kvp in counts.OrderByDescending(x => x.Value))
       {
-         BasicChartItem chartItem = new()
+         BasicChartItem chartItem = new ()
          {
             Name = kvp.Key.UniqueId, Value = kvp.Value,
          };
@@ -448,10 +448,10 @@ public class AllocatorViewModel : ViewModelBase
 
       if (e.PropertyName == nameof(AllocationItem.Value))
          // We pass null or dummy args because UpdateCalculatedInfo logic is generic
-         UpdateCalculatedInfo(this, new(nameof(Items)));
+         UpdateCalculatedInfo(this, new (nameof(Items)));
    }
 
-   private bool _isUpdatingLocks = false;
+   private bool _isUpdatingLocks;
 
    private void UpdateMasterLockState()
    {

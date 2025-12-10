@@ -15,7 +15,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [NexusConfig]
 [ObjectSaveAs]
-public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILocationCollection<Area>, IIndexRandomColor
+public partial class Region : IMapInferable, IEu5Object<Region>, ILocationCollection<Area>, IIndexRandomColor
 {
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.RegionSettings;
@@ -69,7 +69,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, ILocation, ILoc
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Region Empty { get; } = new() { UniqueId = "Arcanum_Empty_Region" };
+   public static Region Empty { get; } = new () { UniqueId = "Arcanum_Empty_Region" };
 
    public LocationCollectionType LcType => LocationCollectionType.Region;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];

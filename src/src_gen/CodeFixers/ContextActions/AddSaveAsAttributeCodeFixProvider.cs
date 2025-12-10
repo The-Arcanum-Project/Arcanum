@@ -12,8 +12,7 @@ namespace CodeFixers.ContextActions;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AddSaveAsAttributeCodeFixProvider)), Shared]
 public class AddSaveAsAttributeCodeFixProvider : CodeFixProvider
 {
-   public sealed override ImmutableArray<string> FixableDiagnosticIds
-      => [DefinedDiagnostics.MissingSaveAsAttributeWarning.Id];
+   public sealed override ImmutableArray<string> FixableDiagnosticIds => [DefinedDiagnostics.MissingSaveAsAttributeWarning.Id];
 
    public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -58,7 +57,7 @@ public class AddSaveAsAttributeCodeFixProvider : CodeFixProvider
                                   .AddAttributeLists(newAttributeList);
 
       var oldRoot = await document.GetSyntaxRootAsync(cancellationToken);
-      var newRoot = oldRoot.ReplaceNode(propertyDecl, newPropertyDeclaration);
+      var newRoot = oldRoot?.ReplaceNode(propertyDecl, newPropertyDeclaration);
 
       const string requiredUsing = "Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes";
       if (newRoot is CompilationUnitSyntax compilationUnit &&
@@ -70,6 +69,6 @@ public class AddSaveAsAttributeCodeFixProvider : CodeFixProvider
                                                                           .CarriageReturnLineFeed)); // Add a new line after
       }
 
-      return document.WithSyntaxRoot(newRoot);
+      return document.WithSyntaxRoot(newRoot!);
    }
 }

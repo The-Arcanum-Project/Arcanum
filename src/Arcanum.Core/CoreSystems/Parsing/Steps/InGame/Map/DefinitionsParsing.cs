@@ -103,7 +103,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
             var superRegionKey = pc.SliceString(srBn);
             var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
-            if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out var srkn))
+            if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                continue;
 
             superRegion.FileLocation = srBn.GetFileLocation();

@@ -280,7 +280,7 @@ public static class Pdh
             continue;
 
          var newInstance = new T();
-         Debug.Assert(newInstance != null, "newInstance != null");
+         Debug.Assert(newInstance != null);
 
          if (itemParser(bn, newInstance, ref pc))
             results.Add(newInstance);
@@ -306,7 +306,7 @@ public static class Pdh
             continue;
 
          var newInstance = new T { UniqueId = pc.SliceString(sn) };
-         Debug.Assert(newInstance != null, "newInstance != null");
+         Debug.Assert(newInstance != null);
          itemParser(bn, newInstance, ref pc, allowUnknownNodes);
          results.Add(newInstance);
       }
@@ -359,7 +359,7 @@ public static class Pdh
             continue;
 
          var newInstance = new T { UniqueId = pc.SliceString(sn) };
-         Debug.Assert(newInstance != null, "newInstance != null");
+         Debug.Assert(newInstance != null);
          itemParser(bn, newInstance, ref pc, allowUnknownNodes);
          if (!results.Add(newInstance))
          {

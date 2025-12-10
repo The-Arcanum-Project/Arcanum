@@ -18,7 +18,7 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 [NexusConfig]
 [ObjectSaveAs]
 public partial class SuperRegion
-   : IMapInferable, IEu5Object<SuperRegion>, ILocation, ILocationCollection<Region>, IIndexRandomColor
+   : IMapInferable, IEu5Object<SuperRegion>, ILocationCollection<Region>, IIndexRandomColor
 {
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
@@ -74,15 +74,15 @@ public partial class SuperRegion
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static SuperRegion Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
+   public static SuperRegion Empty { get; } = new () { UniqueId = "Arcanum_Empty_SuperRegion" };
    public List<Location> GetLocations() => LocationChildren.SelectMany(r => r.GetLocations()).ToList();
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
    public ObservableRangeCollection<ILocation> Parents { get; set; } = [];
 
-    [ParseAs("null", ignore: true)]
-    [Description("The Continent this SuperRegion belongs to.")]
-    [DefaultValue(null)]
-    [SuppressAgs]
+   [ParseAs("null", ignore: true)]
+   [Description("The Continent this SuperRegion belongs to.")]
+   [DefaultValue(null)]
+   [SuppressAgs]
    public Continent Continent
    {
       get => field;
@@ -93,7 +93,7 @@ public partial class SuperRegion
             field.SuperRegions._removeFromChild(this);
          if (value != Continent.Empty)
             value.SuperRegions._addFromChild(this);
-         
+
          field = value;
       }
    } = Continent.Empty;

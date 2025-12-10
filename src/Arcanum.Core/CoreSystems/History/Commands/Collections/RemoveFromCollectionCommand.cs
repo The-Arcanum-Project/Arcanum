@@ -12,12 +12,13 @@ public class RemoveFromCollectionCommand
    }
 
    public override string GetDescription => Targets.Count > 1
-      ? $"Remove {Value} from {Attribute} in {Targets.Count} objects of type {Type}"
-      : $"Remove {Value} from {Attribute} in {Targets.First()}";
+                                               ? $"Remove {Value} from {Attribute} in {Targets.Count} objects of type {Type}"
+                                               : $"Remove {Value} from {Attribute} in {Targets.First()}";
+
    public override void Undo()
    {
       base.Undo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var target in Targets)
          target._addToCollection(Attribute, Value);
    }
@@ -25,7 +26,7 @@ public class RemoveFromCollectionCommand
    public override void Redo()
    {
       base.Redo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var target in Targets)
          target._removeFromCollection(Attribute, Value);
    }

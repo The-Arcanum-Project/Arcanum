@@ -126,8 +126,8 @@ public partial class DebugPanelGrid
       var allocator = new PopsEditor();
       var locs = Globals.Locations.Values.ToArray();
       var loc = locs[0]; //Random.Shared.Next(0, locs.Length)
-      var allocatroVM = new AllocatorViewModel(loc);
-      allocator.DataContext = allocatroVM;
+      var allocatroVm = new AllocatorViewModel(loc);
+      allocator.DataContext = allocatroVm;
       bwindow.Content = allocator;
       bwindow.Width = 500;
       bwindow.Height = 1000;

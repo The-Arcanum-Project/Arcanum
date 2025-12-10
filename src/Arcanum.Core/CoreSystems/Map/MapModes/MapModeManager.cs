@@ -20,7 +20,7 @@ public static partial class MapModeManager
    /// MapModes provided by plugins, keyed by their enum type.
    /// Each plugin provides their own enum to identify their map modes.
    /// </summary>
-   private static readonly Dictionary<Type, IReadOnlyDictionary<Enum, IMapMode>> Providers = new();
+   private static readonly Dictionary<Type, IReadOnlyDictionary<Enum, IMapMode>> Providers = new ();
 
    /// <summary>
    /// Registers a new provider of map modes, identified by its unique enum type.
@@ -53,8 +53,6 @@ public static partial class MapModeManager
    #endregion
 
    private static MapModeType CurrentMode { get; set; } = MapModeType.Locations;
-   private const int MAX_RECENT_MODES = 25;
-   public static bool IsInitialized = false;
    public static IMapMode GetCurrent() => Get(CurrentMode);
 
    // Event to notify that the mapmode has been changed.
@@ -72,9 +70,6 @@ public static partial class MapModeManager
 
    public static void RenderCurrent(Color4[] colors)
    {
-      if (!IsInitialized)
-         return;
-
 #if DEBUG
       var sw = Stopwatch.StartNew();
 #endif
@@ -127,19 +122,19 @@ public static partial class MapModeManager
             if (waterProvinces.Contains(location))
             {
                if (useLocWater)
-                  colors[i] = new(blueColors[Random.Shared.Next(blueColors.Count)].AsAbgrInt());
+                  colors[i] = new (blueColors[Random.Shared.Next(blueColors.Count)].AsAbgrInt());
                else
-                  colors[i] = new(location.Color.AsInt());
+                  colors[i] = new (location.Color.AsInt());
             }
             else
-               colors[i] = new(mode.GetColorForLocation(location));
+               colors[i] = new (mode.GetColorForLocation(location));
          }
       }
       else
       {
          Parallel.For(0,
                       count,
-                      i => { colors[i] = new(mode.GetColorForLocation(LocationsArray[i])); });
+                      i => { colors[i] = new (mode.GetColorForLocation(LocationsArray[i])); });
       }
    }
 }

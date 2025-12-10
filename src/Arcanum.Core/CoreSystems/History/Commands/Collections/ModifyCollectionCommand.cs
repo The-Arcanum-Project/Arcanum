@@ -7,7 +7,6 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
 {
    protected IList<IEu5Object> Targets = new List<IEu5Object>();
    protected readonly object Value;
-   
 
    protected ModifyCollectionCommand(IEu5Object target, Enum attribute, object value)
       : base(target, attribute)
@@ -32,7 +31,7 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
          return false;
 
       Targets.Add(target);
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       if (isAdd)
          target._addToCollection(Attribute, Value);
       else

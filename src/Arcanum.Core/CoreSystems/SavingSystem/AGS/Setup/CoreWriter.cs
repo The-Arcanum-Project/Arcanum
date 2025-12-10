@@ -13,6 +13,7 @@ public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(Religio
       {
          using (isb.BlockWithName("institutions"))
          {
+            // ReSharper disable once UnusedVariable
             foreach (var institution in Globals.Institutions.Values)
             {
                // TODO: not yet supported.
@@ -24,6 +25,7 @@ public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(Religio
       isb.AppendLine();
       using (isb.BlockWithName("religion_manager"))
       {
+         // ReSharper disable once UnusedVariable
          foreach (var school in Globals.ReligiousSchools.Values)
          {
             // TODO: not yet supported.

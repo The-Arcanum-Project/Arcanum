@@ -36,7 +36,7 @@ public static class GraphLayout
       {
          node.X = rand.NextSingle() * width;
          node.Y = rand.NextSingle() * height;
-         node.Displacement = new(0, 0);
+         node.Displacement = new (0, 0);
       }
 
       // Iterative Force Calculation
@@ -44,7 +44,7 @@ public static class GraphLayout
       {
          // Reset displacements for this iteration
          foreach (var node in nodes)
-            node.Displacement = new(0, 0);
+            node.Displacement = new (0, 0);
 
          // a. Calculate Repulsive Forces
          for (var u = 0; u < nodes.Count; u++)
@@ -59,7 +59,7 @@ public static class GraphLayout
                if (distance < 0.01) // Prevent division by zero, give a small random push
                {
                   distance = 0.01f;
-                  delta = new(rand.NextSingle() * 0.1f, rand.NextSingle() * 0.1f);
+                  delta = new (rand.NextSingle() * 0.1f, rand.NextSingle() * 0.1f);
                }
 
                var force = k * k / distance; // F_rep = k^2 / d
@@ -204,15 +204,15 @@ public static class GraphLayout
       var translateY = targetCenterY - currentCenterY;
 
       // Optional: Scale the graph to fit within the canvas if it's too large or too small
-      var scaleX = width / (graphWidth + 20); // Add padding
-      var scaleY = height / (graphHeight + 20); // Add padding
-      var scale = Math.Min(scaleX, scaleY); // Use the smaller scale to fit both dimensions
+      // var scaleX = width / (graphWidth + 20); // Add padding
+      // var scaleY = height / (graphHeight + 20); // Add padding
+      // var scale = Math.Min(scaleX, scaleY); // Use the smaller scale to fit both dimensions
 
       // Don't scale if the graph is already small enough, or if it makes it tiny
-      if (scale > 1.0)
-         scale = 1.0f; // Don't enlarge if it fits
-      if (scale < 0.5 && nodes.Count > 1)
-         scale = 0.5f; // Prevent it from becoming too small
+      // if (scale > 1.0)
+      //    scale = 1.0f; // Don't enlarge if it fits
+      // if (scale < 0.5 && nodes.Count > 1)
+      //    scale = 0.5f; // Prevent it from becoming too small
       // TODO: this value is never used. Is this intended?
 
       // If scale is applied, nodes need to be scaled relative to the graph's center
@@ -237,7 +237,7 @@ public static class GraphLayout
    private static Vector2 Normalize(this Vector2 v)
    {
       var length = v.Length();
-      return length > 0 ? v / length : new(0, 0);
+      return length > 0 ? v / length : new (0, 0);
    }
 
    private static float Magnitude(this Vector2 v)

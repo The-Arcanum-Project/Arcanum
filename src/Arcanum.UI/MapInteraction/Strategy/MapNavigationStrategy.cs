@@ -9,6 +9,7 @@ namespace Arcanum.UI.MapInteraction.Strategy;
 public class MapNavigationStrategy(MapInteractionManager mapInteractionManager) : IMapInteractionStrategy
 {
    // TODO: @MelCo is this needed
+   // ReSharper disable once UnusedMember.Local
    private readonly MapInteractionManager _mapInteractionManager = mapInteractionManager;
    private bool _isPanning;
    private bool _hasPanned;
