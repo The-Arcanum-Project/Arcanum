@@ -49,10 +49,6 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
-   public NUISetting PopSettings { get; set; } = new(Pop.Field.Type,
-                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
-                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray(),
-                                                     Enum.GetValues<Pop.Field>().Cast<Enum>().ToArray());
    public NUISetting PopTypeSettings { get; set; } = new(PopType.Field.UniqueId,
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
                                                          Enum.GetValues<PopType.Field>().Cast<Enum>().ToArray(),
@@ -382,18 +378,15 @@ public class NUISettings
                                                            Enum.GetValues<Character.Field>().Cast<Enum>().ToArray());
 
    public NUISetting CharacterNameDeclarationNUISettings { get; set; } = new(CharacterNameDeclaration.Field.Name,
-                                                                             Enum.GetValues<CharacterNameDeclaration.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray(),
-                                                                             Enum.GetValues<CharacterNameDeclaration.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray(),
-                                                                             Enum.GetValues<CharacterNameDeclaration.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray());
+                                                                             Enum.GetValues<CharacterNameDeclaration.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray(),
+                                                                             Enum.GetValues<CharacterNameDeclaration.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray(),
+                                                                             Enum.GetValues<CharacterNameDeclaration.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray());
    public NUISetting OpinionValueSettings { get; set; } = new(CultureOpinionValue.Field.Key,
                                                               Enum.GetValues<CultureOpinionValue.Field>()
                                                                   .Cast<Enum>()
@@ -428,18 +421,15 @@ public class NUISettings
                                                                         .ToArray());
 
    public NUISetting ReligiousSchoolOpinionValueSettings { get; set; } = new(ReligiousSchoolOpinionValue.Field.Key,
-                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray(),
-                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray(),
-                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.
-                                                                                   Field>()
-                                                                               .Cast<Enum>()
-                                                                               .ToArray());
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray(),
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray(),
+                                                                             Enum.GetValues<ReligiousSchoolOpinionValue.Field>()
+                                                                                 .Cast<Enum>()
+                                                                                 .ToArray());
 
    public NUISetting ReligiousSchoolRelationsSettings { get; set; } = new(ReligiousSchoolRelations.Field.UniqueId,
                                                                           Enum
@@ -494,17 +484,17 @@ public class NUISettings
 
    public NUISetting EstateAttributeDefinitionSettings { get; set; } = new(EstateAttributeDefinition.Field.UniqueId,
                                                                            Enum.GetValues<
-                                                                                 EstateAttributeDefinition.Field>()
-                                                                             .Cast<Enum>()
-                                                                             .ToArray(),
+                                                                                   EstateAttributeDefinition.Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
                                                                            Enum.GetValues<
-                                                                                 EstateAttributeDefinition.Field>()
-                                                                             .Cast<Enum>()
-                                                                             .ToArray(),
+                                                                                   EstateAttributeDefinition.Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray(),
                                                                            Enum.GetValues<
-                                                                                 EstateAttributeDefinition.Field>()
-                                                                             .Cast<Enum>()
-                                                                             .ToArray());
+                                                                                   EstateAttributeDefinition.Field>()
+                                                                               .Cast<Enum>()
+                                                                               .ToArray());
 
    public NUISetting EstateSatisfactionDefinitionSettings { get; set; } =
       new(EstateSatisfactionDefinition.Field.UniqueId,

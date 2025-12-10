@@ -16,16 +16,8 @@ public static class PropertyConfigHelper
 
    public static PropertyConfigData GeneratePropertyConfigData(IPropertySymbol propSymbol,
                                                                INamedTypeSymbol classSymbol,
-                                                               SourceProductionContext context)
+                                                               AttributeData? pcad)
    {
-      var pcad =
-         Helpers.GetEffectiveAttribute(classSymbol, propSymbol, PROPERTY_CONFIG_ATTRIBUTE_FULL_NAME) ??
-         // Check on the propDirectly
-         propSymbol.GetAttributes()
-                   .FirstOrDefault(attr =>
-                                      attr.AttributeClass?.ToDisplayString() ==
-                                      PROPERTY_CONFIG_ATTRIBUTE_FULL_NAME);
-
       PropertyConfigData pcd;
 
       if (pcad == null)

@@ -7,6 +7,10 @@ namespace Arcanum.Core.CoreSystems.Jomini.Effects;
 
 public partial class EffectDefinition(string name) : INUI, ICollectionProvider<EffectDefinition>
 {
+   public EffectDefinition() : this("Unnamed_EffectDefinition")
+   {
+   }
+
    [Description("The type of modifier this effect represents.")]
    [DefaultValue(ModifierType.ScriptedValue)]
    public ModifierType ModifierType { get; set; } = ModifierType.ScriptedValue;

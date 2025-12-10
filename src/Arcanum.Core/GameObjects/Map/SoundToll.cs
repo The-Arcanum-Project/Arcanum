@@ -59,10 +59,11 @@ public partial class SoundToll : IEu5Object<SoundToll>
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.SoundTollAgsSettings;
 
-   public static Dictionary<string, SoundToll> GetGlobalItems()
-      => Globals.DefaultMapDefinition.SoundTolls.ToDictionary(x => x.UniqueId, x => x);
+   public static Dictionary<string, SoundToll> GetGlobalItems() => Globals.DefaultMapDefinition.SoundTolls.ToDictionary(x => x.UniqueId, x => x);
 
    public static SoundToll Empty { get; } = new() { UniqueId = "Arcanum_Empty_SoundToll" };
 
    #endregion
+
+   public override string ToString() => UniqueId;
 }

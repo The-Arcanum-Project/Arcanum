@@ -39,6 +39,12 @@ public interface INexus : INotifyPropertyChanged
    void _addRangeToCollection(Enum property, IEnumerable items);
 
    /// <summary>
+   /// Removes a range of values from a collection property by its enum key. <br/>
+   /// Only to be used internally by Nexus only!
+   /// </summary>
+   void _removeRangeFromCollection(Enum property, IEnumerable items);
+
+   /// <summary>
    /// Removes a value from a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
    /// Use <see cref="Nx.RemoveFromCollection{T}(INexus, Enum, T)"/> to remove values from outside!
@@ -127,7 +133,7 @@ public interface INexus : INotifyPropertyChanged
    /// Returns whether the "Map Infer" buttons for the given property are disabled.
    /// </summary>
    bool IsMapInferButtonsDisabled(Enum property);
-   
+
    bool IgnoreCommand(Enum property);
 
    #endregion
@@ -147,4 +153,9 @@ public interface INexus : INotifyPropertyChanged
    /// <param name="property"></param>
    /// <returns></returns>
    object GetDefaultValue(Enum property);
+
+   /// <summary>
+   /// Creates a deep clone of this Nexus instance.
+   /// </summary>
+   public INexus DeepClone();
 }

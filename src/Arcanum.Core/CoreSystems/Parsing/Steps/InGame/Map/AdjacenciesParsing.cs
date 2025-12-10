@@ -128,16 +128,19 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
             if (!isValid)
                continue;
 
-            Globals.Adjacencies.Add($"{from}-{to}",
-                                    new(from!,
-                                        to!,
-                                        type,
-                                        parts[3],
-                                        parts[8],
-                                        startX,
-                                        startY,
-                                        endX,
-                                        endY));
+            var adjacency = new Adjacency
+            {
+               From = from!,
+               To = to!,
+               Type = type,
+               Name = parts[3],
+               Comment = parts[8],
+               StartX = startX,
+               StartY = startY,
+               EndX = endX,
+               EndY = endY
+            };
+            Globals.Adjacencies.Add($"{from}-{to}", adjacency);
          }
 
          lineNumber++;
