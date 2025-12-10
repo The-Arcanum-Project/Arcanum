@@ -3,6 +3,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.Registry;
+using Arcanum.Core.Utils.DataStructures;
 using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Selection;
@@ -72,36 +73,52 @@ public static class SelectionHelpers
       throw new ArgumentException("obj is not a valid type in the hierarchy");
    }
 
-   public static IEu5Object GetNextBiggestParentObj(IEu5Object current)
+   public static IEu5Object GetNextBiggestParentObj(IEu5Object eu5Object)
    {
-      if (current is Location loc)
+#if DEBUG
+      var type = eu5Object.GetType();
+      Debug.Assert(type == typeof(Location) ||
+                   type == typeof(Province) ||
+                   type == typeof(Area) ||
+                   type == typeof(Region) ||
+                   type == typeof(SuperRegion) ||
+                   type == typeof(Continent));
+#endif
+      if (eu5Object is Location loc)
          return loc.Province;
-      if (current is Province prov)
+      if (eu5Object is Province prov)
          return prov.Area;
-      if (current is Area area)
+      if (eu5Object is Area area)
          return area.Region;
-      if (current is Region region)
+      if (eu5Object is Region region)
          return region.SuperRegion;
-      if (current is SuperRegion sRegion)
+      if (eu5Object is SuperRegion sRegion)
          return sRegion.Continent;
 
       throw new ArgumentException("current is not a valid parent type");
    }
 
-   public static List<IEu5Object> GetAllChildren(IEu5Object eu5Object)
+   public static AggregateLink<T> GetAllChildren<T>(IEu5Object eu5Object) where T : IEu5Object
    {
-      if (eu5Object is Location loc)
-         return [loc];
+#if DEBUG
+      var type = eu5Object.GetType();
+      Debug.Assert(type == typeof(Province) ||
+                   type == typeof(Area) ||
+                   type == typeof(Region) ||
+                   type == typeof(SuperRegion) ||
+                   type == typeof(Continent));
+#endif
+
       if (eu5Object is Province prov)
-         return prov.Locations.Cast<IEu5Object>().ToList();
+         return (prov.Locations as AggregateLink<T>)!;
       if (eu5Object is Area area)
-         return area.Provinces.Cast<IEu5Object>().ToList();
+         return (area.Provinces as AggregateLink<T>)!;
       if (eu5Object is Region region)
-         return region.Areas.Cast<IEu5Object>().ToList();
+         return (region.Areas as AggregateLink<T>)!;
       if (eu5Object is SuperRegion sRegion)
-         return sRegion.Regions.Cast<IEu5Object>().ToList();
+         return (sRegion.Regions as AggregateLink<T>)!;
       if (eu5Object is Continent continent)
-         return continent.SuperRegions.Cast<IEu5Object>().ToList();
+         return (continent.SuperRegions as AggregateLink<T>)!;
 
       throw new ArgumentException("eu5Object is not a valid type in the hierarchy");
    }
