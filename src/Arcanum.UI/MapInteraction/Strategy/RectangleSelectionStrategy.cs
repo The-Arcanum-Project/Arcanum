@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Point = System.Windows.Point;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
@@ -113,8 +113,7 @@ public class RectangleSelectionStrategy(MapInteractionManager mapInteractionMana
 
       Vector2[] rectangleNdc =
       [
-         new(topLeftNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, topLeftNdc.Y),
-         new(bottomRightNdc.X, bottomRightNdc.Y), new(topLeftNdc.X, bottomRightNdc.Y),
+         new(topLeftNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, topLeftNdc.Y), new(bottomRightNdc.X, bottomRightNdc.Y), new(topLeftNdc.X, bottomRightNdc.Y),
          new(topLeftNdc.X, topLeftNdc.Y)
       ];
 

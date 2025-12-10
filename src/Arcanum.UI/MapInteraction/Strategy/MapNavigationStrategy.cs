@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
 

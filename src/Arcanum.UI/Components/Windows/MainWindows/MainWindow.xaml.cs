@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -20,7 +21,7 @@ using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -244,6 +245,29 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    {
       MapModeManager.OnMapModeChanged += MapModeManagerOnOnMapModeChanged;
       EventDistributor.ObjectOfTypeModified += UpdateMap;
+
+      MainMap.OnMapClick += MainMapOnOnMapClick;
+   }
+
+   private static void MainMapOnOnMapClick(MapClickEventArgs e)
+   {
+      if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+      {
+         if (e.MouseButton == MouseButton.Right)
+         {
+            if (!Selection.GetLocation(e.ClickPosition, out var location))
+               return;
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+               var objs = SelectionManager.GetInferredObjectsForLocations([location], MapModeManager.GetCurrent().DisplayType);
+               if (objs is { Count: > 0 })
+                  ArcClipboard.Copy(objs[0]);
+            }
+            else
+               ArcClipboard.Copy(location);
+         }
+      }
    }
 
    private void MapModeManagerOnOnMapModeChanged(MapModeManager.MapModeType _)

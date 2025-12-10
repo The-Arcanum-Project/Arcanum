@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.MapInteraction.Strategy;
 using Common.Logger;
 

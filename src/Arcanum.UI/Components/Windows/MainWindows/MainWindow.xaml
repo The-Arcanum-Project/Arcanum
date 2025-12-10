@@ -8,8 +8,9 @@
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
-                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime" Height = "1080" Width = "1920"
-                         FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
+                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
+                         xmlns:map = "clr-namespace:Arcanum.UI.Components.UserControls.Map" Height = "1080"
+                         Width = "1920" FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
                          WindowStartupLocation = "CenterScreen" Background = "{DynamicResource DefaultBackColorBrush}"
                          HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}" HeaderBorder = "0, 0, 0, 2"
@@ -425,10 +426,10 @@
                 </StackPanel>
             </Grid>
 
-            <uc:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
-                           BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
-                           HorizontalAlignment = "Stretch">
-            </uc:MapControl>
+            <map:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
+                            BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
+                            HorizontalAlignment = "Stretch">
+            </map:MapControl>
         </DockPanel>
 
         <GridSplitter Grid.Column = "3" Width = "4" ResizeBehavior = "PreviousAndNext">

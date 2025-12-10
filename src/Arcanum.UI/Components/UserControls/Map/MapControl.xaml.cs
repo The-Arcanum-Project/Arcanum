@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Numerics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Selection;
@@ -15,7 +16,7 @@ using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
 using Point = System.Windows.Point;
 
-namespace Arcanum.UI.Components.UserControls;
+namespace Arcanum.UI.Components.UserControls.Map;
 
 // What should the map support?
 // - Pan and Zoom with Mouse Wheel
@@ -45,6 +46,8 @@ public partial class MapControl
    private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
 
+   public event Action<MapClickEventArgs>? OnMapClick;
+
    public static event Action? OnMapLoaded;
 
    // Get to pass this into the color generation
@@ -72,7 +75,7 @@ public partial class MapControl
    {
       HwndHostContainer.MouseWheel += OnMouseWheel;
       HwndHostContainer.MouseDown += OnMouseMiddleButtonDown;
-      HwndHostContainer.PreviewMouseUp += OnPreviewMouseMiddleButtonUp;
+      HwndHostContainer.PreviewMouseUp += OnPreviewMouseUp;
       HwndHostContainer.MouseMove += OnMouseMove;
       HwndHostContainer.MouseEnter += (_, _) => Window.GetWindow(this)!.KeyDown += MapInteractionManager.HandleKeyDown;
       HwndHostContainer.MouseLeave += (_, _) => Window.GetWindow(this)!.KeyDown -= MapInteractionManager.HandleKeyDown;
@@ -281,10 +284,17 @@ public partial class MapControl
       MapInteractionManager.HandleMouseDown(e);
    }
 
-   private void OnPreviewMouseMiddleButtonUp(object sender, MouseButtonEventArgs e)
+   private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
    {
       MapInteractionManager.HandleMouseUp(e);
+      OnMapClick?.Invoke(new(CurrentPos, e.ChangedButton));
    }
 
    #endregion
+
+   private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+   {
+      if (Keyboard.Modifiers != ModifierKeys.None)
+         e.Handled = true;
+   }
 }

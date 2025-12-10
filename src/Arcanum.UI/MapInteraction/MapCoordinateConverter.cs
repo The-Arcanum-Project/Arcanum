@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using System.Windows;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 
 namespace Arcanum.UI.MapInteraction;
 
