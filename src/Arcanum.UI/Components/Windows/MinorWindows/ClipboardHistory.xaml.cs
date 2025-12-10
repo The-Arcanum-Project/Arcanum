@@ -78,7 +78,7 @@ public partial class ClipboardHistory
          // e.g., Clipboard.SetText(item.Value);
 
          Console.WriteLine($"Selected: {item.Value}");
-         Close();
+         SafeClose();
       }
    }
 
