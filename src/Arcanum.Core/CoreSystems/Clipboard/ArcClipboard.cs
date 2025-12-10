@@ -10,6 +10,9 @@ public static class ArcClipboard
    private const int MAX_HISTORY_SIZE = 10;
    private static readonly Queue<ClipboardPayload> History = new();
 
+   public static event Action<ClipboardPayload>? OnCopyAction;
+   public static event Action<ClipboardPayload>? OnPasteAction;
+
    public static void Copy(Enum type, object data)
    {
       AddToHistory(new(type, data));
@@ -71,6 +74,7 @@ public static class ArcClipboard
       Debug.Assert(CurrentPayload != null);
       Debug.Assert(CurrentPayload.Property != null);
       Nx.ForceSet(CurrentPayload.Value, target, CurrentPayload.Property);
+      OnPasteAction?.Invoke(CurrentPayload);
    }
 
    public static void Paste(IEu5Object target, Enum? property)
@@ -81,6 +85,7 @@ public static class ArcClipboard
       Debug.Assert(CurrentPayload != null);
       Debug.Assert(property != null);
       Nx.ForceSet(CurrentPayload.Value, target, property);
+      OnPasteAction?.Invoke(CurrentPayload);
    }
 
    // History management methods
@@ -90,6 +95,7 @@ public static class ArcClipboard
          History.Dequeue();
 
       History.Enqueue(payload);
+      OnCopyAction?.Invoke(payload);
    }
 
    public static ClipboardPayload? CurrentPayload => History.Count > 0 ? History.Last() : null;

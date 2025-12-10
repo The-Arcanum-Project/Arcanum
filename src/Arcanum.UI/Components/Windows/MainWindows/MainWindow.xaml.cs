@@ -136,6 +136,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    } = null!;
 
+   public string ClipboardText
+   {
+      get;
+      set
+      {
+         if (value == field)
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
    #endregion
 
    public MainWindow()
@@ -239,6 +252,17 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
 
       SetupMapModeLogic();
+      SetupClipboardLogic();
+   }
+
+   private void SetupClipboardLogic()
+   {
+      ArcClipboard.OnCopyAction += payload =>
+      {
+         ClipboardText = payload.Property == null
+                            ? $"Clipboard: {payload.Value.GetType().Name} ({((IEu5Object)payload.Value).UniqueId})"
+                            : $"Clipboard: {payload.Property} of {payload.Value.GetType().Name} ({((IEu5Object)payload.Value).UniqueId})";
+      };
    }
 
    private void SetupMapModeLogic()
@@ -650,5 +674,10 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void FreezeSelection_Command(object sender, ExecutedRoutedEventArgs e)
    {
       SelectionManager.ToggleFreeze();
+   }
+
+   private void CommandBinding_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      new ClipboardHistory().Show();
    }
 }

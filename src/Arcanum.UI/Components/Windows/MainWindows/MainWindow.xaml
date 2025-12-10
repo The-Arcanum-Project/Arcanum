@@ -132,6 +132,8 @@
         <CommandBinding Command = "mainWindow:MwCommands.FreezeSelectionCommand" Executed = "FreezeSelection_Command"
                         CanExecute = "CommandCanAlwaysExecute" />
 
+        <CommandBinding Command = "mainWindow:MwCommands.HistoryClipboardCommand"
+                        Executed = "CommandBinding_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for Debug Loading Triggers -->
         <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer" Executed = "ExecuteLexer"
@@ -317,32 +319,54 @@
     <styleClasses:BaseWindow.FooterContent>
         <Border BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "0, 1, 0, 0"
                 CornerRadius = "0" Margin = "0" Padding = "0">
-            <StackPanel Orientation = "Horizontal" Height = "19" Margin = "0" VerticalAlignment = "Bottom">
-                <TextBlock
-                    Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding CpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding GpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding VramUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Path=RectangleBounds, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-            </StackPanel>
+            <DockPanel LastChildFill = "False">
+                <StackPanel Orientation = "Horizontal" Height = "19" Margin = "0" VerticalAlignment = "Bottom"
+                            DockPanel.Dock = "Left">
+                    <TextBlock
+                        Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding CpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding GpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding VramUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Path=RectangleBounds, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock = "Right" Orientation = "Horizontal" Height = "19" Margin = "0"
+                            VerticalAlignment = "Bottom">
+
+                    <TextBlock
+                        Text = "{Binding ClipboardText, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" Width = "300"
+                        VerticalAlignment = "Center" />
+                    <styleClasses:BaseButton Content = "📋" Height = "17" Width = "19" Margin = "2,1"
+                                             VerticalAlignment = "Center" BorderThickness = "0"
+                                             Command = "mainWindow:MwCommands.HistoryClipboardCommand" />
+                </StackPanel>
+            </DockPanel>
         </Border>
     </styleClasses:BaseWindow.FooterContent>
 

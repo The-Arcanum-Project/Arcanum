@@ -42,10 +42,7 @@ public static class MwCommands
    };
 
    public static readonly RoutedCommand OpenPluginSettingsCommand =
-      new("OpenPluginSettingsCommand", typeof(MainWindowView))
-      {
-         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenPluginSettings },
-      };
+      new("OpenPluginSettingsCommand", typeof(MainWindowView)) { InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenPluginSettings }, };
 
    // File Reloading
    public static readonly RoutedCommand OpenReloadFolderWindowCommand =
@@ -55,10 +52,7 @@ public static class MwCommands
       };
 
    public static readonly RoutedCommand OpenReloadFileWindowCommand =
-      new("OpenReloadFileWindowCommand", typeof(MainWindowView))
-      {
-         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenReloadFileWindow },
-      };
+      new("OpenReloadFileWindowCommand", typeof(MainWindowView)) { InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenReloadFileWindow }, };
 
    public static readonly RoutedCommand OpenConsoleCommand = new("OpenConsoleCommand", typeof(MainWindowView))
    {
@@ -119,10 +113,7 @@ public static class MwCommands
 
    // Error Log Commands
    public static readonly RoutedCommand OpenErrorLogWindowCommand =
-      new("OpenErrorLogWindowCommand", typeof(MainWindowView))
-      {
-         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenErrorLogWindow },
-      };
+      new("OpenErrorLogWindowCommand", typeof(MainWindowView)) { InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenErrorLogWindow }, };
 
    // UIElementsBrowserCommand
    public static readonly RoutedCommand OpenUIElementsBrowserCommand =
@@ -133,10 +124,7 @@ public static class MwCommands
 
    // Debug Commands
    public static readonly RoutedCommand ExecuteLexer = new("OpenLoadingWindowCommand",
-                                                           typeof(MainWindowView))
-   {
-      InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) },
-   };
+                                                           typeof(MainWindowView)) { InputGestures = { new KeyGesture(Key.L, ModifierKeys.Control) }, };
 
    public static readonly RoutedCommand OpenDebugPanel = new("OpenDebugPanel",
                                                              typeof(MainWindowView))
@@ -151,10 +139,7 @@ public static class MwCommands
    };
 
    public static readonly RoutedCommand GCCommand = new("OpenModMetadataCommand",
-                                                        typeof(MainWindowView))
-   {
-      InputGestures = { new KeyGesture(Key.G, ModifierKeys.Control) },
-   };
+                                                        typeof(MainWindowView)) { InputGestures = { new KeyGesture(Key.G, ModifierKeys.Control) }, };
 
    public static readonly RoutedCommand OpenParsingStepBrowserCommand = new("OpenParsingStepBrowserCommand",
                                                                             typeof(MainWindowView))
@@ -230,13 +215,16 @@ public static class MwCommands
    };
 
    public static readonly RoutedCommand MapModeButton10Command =
-      new("MapModeButton_10_Command", typeof(MainWindowView))
-      {
-         InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton10 },
-      };
+      new("MapModeButton_10_Command", typeof(MainWindowView)) { InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.MapModeButton10 }, };
 
    public static readonly RoutedCommand FreezeSelectionCommand = new("FreezeSelectionCommand", typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.FreezeSelection },
+   };
+
+   // Clipboard Commands
+   public static readonly RoutedCommand HistoryClipboardCommand = new("HistoryClipboard", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenClipboardHistory },
    };
 }
