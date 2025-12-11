@@ -15,7 +15,7 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes;
 /// </summary>
 public static partial class MapModeManager
 {
-   private static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
+   internal static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
    private static Color[] _blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
    private static Random _random = new ("Arcanum".GetHashCode());
 
@@ -90,7 +90,8 @@ public static partial class MapModeManager
       UpdateColors(colors, CurrentMode);
 #if DEBUG
       sw.Stop();
-      ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {CurrentMode} in {sw.ElapsedMilliseconds} ms");
+      // Write time in nanoseconds
+      ArcLog.WriteLine("MMM", LogLevel.INF, $"Set colors for {CurrentMode} in {sw.Elapsed.TotalMilliseconds:N2} ms");
 #endif
    }
 
@@ -110,6 +111,9 @@ public static partial class MapModeManager
 
    private static void UpdateColors(Color4[] colors, MapModeType type)
    {
+      if (!IsMapReady)
+         return;
+
       var mode = Get(type);
       var count = LocationsArray.Length;
 
@@ -165,4 +169,7 @@ public static partial class MapModeManager
                       i => { colors[i] = new (mode.GetColorForLocation(LocationsArray[i])); });
       }
    }
+
+   public static Color4 GetWaterColorForLocation(Location location)
+      => new (_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
 }

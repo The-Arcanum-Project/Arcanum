@@ -49,9 +49,9 @@ public partial class Location
 
    [SaveAs]
    [ParseAs("institution_presence",
-              isShatteredList: true,
-              itemNodeType: AstNodeType.ContentNode,
-              iEu5KeyType: typeof(Institution))]
+            isShatteredList: true,
+            itemNodeType: AstNodeType.ContentNode,
+            iEu5KeyType: typeof(Institution))]
    [Description("The institution presences in this location.")]
    [DefaultValue(null)]
    public ObservableRangeCollection<InstitutionPresence> InstitutionPresences { get; set; } = [];
@@ -112,7 +112,7 @@ public partial class Location
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Location Empty => new() { UniqueId = "Empty_Arcanum_Location" + Guid.NewGuid() };
+   public static Location Empty { get; } = new () { UniqueId = "Empty_Arcanum_Location" };
 
    [SaveAs(isEmbeddedObject: true)]
    [ParseAs("null", ignore: true)]
@@ -121,20 +121,18 @@ public partial class Location
    [SuppressAgs]
    public Province Province
    {
-       get;
-       set
-       {
-           if (field != Province.Empty)
-               field.Locations.
-           _removeFromChild(this);
-           if (value != Province.Empty)
-               value.Locations.
-           _addFromChild(this);
-           
-           field = value;
-       }
+      get;
+      set
+      {
+         if (field != Province.Empty)
+            field.Locations._removeFromChild(this);
+         if (value != Province.Empty)
+            value.Locations._addFromChild(this);
+
+         field = value;
+      }
    } = Province.Empty;
-   
+
    #region Map Management
 
    [SuppressAgs]

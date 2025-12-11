@@ -15,7 +15,7 @@ namespace Arcanum.Core.FlowControlServices;
 
 public class LifecycleManager
 {
-   public static LifecycleManager Instance { get; } = new();
+   public static LifecycleManager Instance { get; } = new ();
 
    /* --- Bootup Sequence ---
     *
@@ -45,7 +45,7 @@ public class LifecycleManager
       if (DebugConfig.Settings.EnableDebugLogging)
          UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
-
+      EmptyValidation.ValidateEmptyObjects();
       InitializeApplicationCore();
       // Step 1: Initialize core services
       LoadConfig();
@@ -59,7 +59,7 @@ public class LifecycleManager
       //host.LoadConfigurationSettings();
 
       // Step 4: Discover, load and enable plugins
-      PluginManager = new(host);
+      PluginManager = new (host);
       PluginManager.LoadAndInitializePlugins();
 
       // Step 5: Show the main menu or UI
@@ -118,12 +118,12 @@ public class LifecycleManager
       try
       {
          var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath,
-                                                                               Config.CONFIG_FILE_NAME));
-         Config.Settings = parsedObj ?? new();
+                                                                                        Config.CONFIG_FILE_NAME));
+         Config.Settings = parsedObj ?? new ();
       }
       catch (Exception)
       {
-         Config.Settings = new();
+         Config.Settings = new ();
       }
 
       var edcs =
@@ -144,7 +144,7 @@ public class LifecycleManager
 
    private static void InitializeApplicationCore()
    {
-      ArcanumDataHandler.LoadDefaultDescriptor(new());
+      ArcanumDataHandler.LoadDefaultDescriptor(new ());
       MainMenuScreenDescriptor.LoadData();
    }
 

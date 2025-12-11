@@ -65,7 +65,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
 
    private Color4[] _polygonColors = initColors;
 
-   public Vector2 Pan = new(0.5f, 0.5f);
+   public Vector2 Pan = new (0.5f, 0.5f);
 
    public float Zoom = 1f;
 
@@ -75,9 +75,9 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    static LocationRenderer()
    {
       if (Application.Current.Resources["DefaultBackColor"] is Color color)
-         ClearColor = new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+         ClearColor = new (color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
       else
-         ClearColor = new(1f, 0f, 1f);
+         ClearColor = new (1f, 0f, 1f);
    }
 
    public static VertexPositionId2D[] CreateVertices(Polygon[] polygons, (int, int) imageSize)
@@ -94,12 +94,12 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
             var v0 = triangleVertices[indices[j]];
             var v1 = triangleVertices[indices[j + 1]];
             var v2 = triangleVertices[indices[j + 2]];
-            vertices.Add(new(new(v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
-                             (uint)polygon.ColorIndex));
-            vertices.Add(new(new(v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
-                             (uint)polygon.ColorIndex));
-            vertices.Add(new(new(v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
-                             (uint)polygon.ColorIndex));
+            vertices.Add(new (new (v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
+                              (uint)polygon.ColorIndex));
+            vertices.Add(new (new (v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
+                              (uint)polygon.ColorIndex));
+            vertices.Add(new (new (v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
+                              (uint)polygon.ColorIndex));
          }
       }
 
@@ -119,10 +119,10 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       var swapChainDesc = new SwapChainDescription
       {
          BufferCount = 1,
-         BufferDescription = new((uint)width, (uint)height, new(60, 1), Format.R8G8B8A8_UNorm),
+         BufferDescription = new ((uint)width, (uint)height, new (60, 1), Format.R8G8B8A8_UNorm),
          OutputWindow = hwnd,
          Windowed = true,
-         SampleDescription = new(1, 0),
+         SampleDescription = new (1, 0),
          SwapEffect = SwapEffect.Discard,
          BufferUsage = Usage.RenderTargetOutput
       };
@@ -141,10 +141,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
          _renderTargetView = _device.CreateRenderTargetView(backBuffer);
 
-      InputElementDescription[] inputElementDescs =
-      [
-         new("POSITION", 0, Format.R32G32_Float, 0, 0), new("POLYGON_ID", 0, Format.R32_UInt, 8, 0)
-      ];
+      InputElementDescription[] inputElementDescs = [new ("POSITION", 0, Format.R32G32_Float, 0, 0), new ("POLYGON_ID", 0, Format.R32_UInt, 8, 0)];
 
       var vertexShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "VSMain", "vs_5_0");
       var pixelShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "PSMain", "ps_5_0");
@@ -152,10 +149,10 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _vertexShader = _device.CreateVertexShader(vertexShaderByteCode.Span);
       _pixelShader = _device.CreatePixelShader(pixelShaderByteCode.Span);
       _inputLayout = _device.CreateInputLayout(inputElementDescs, vertexShaderByteCode.Span);
-      _constantBuffer = _device.CreateBuffer(new((uint)Unsafe.SizeOf<Constants>(),
-                                                 BindFlags.ConstantBuffer,
-                                                 ResourceUsage.Dynamic,
-                                                 CpuAccessFlags.Write));
+      _constantBuffer = _device.CreateBuffer(new ((uint)Unsafe.SizeOf<Constants>(),
+                                                  BindFlags.ConstantBuffer,
+                                                  ResourceUsage.Dynamic,
+                                                  CpuAccessFlags.Write));
       _vertexBuffer = _device.CreateBuffer(_vertices, BindFlags.VertexBuffer);
       var colorBufferDesc = new BufferDescription
       {
@@ -177,7 +174,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _polygonColors = null!;
       _vertices = null!;
 
-      _context.RSSetViewport(new(width, height));
+      _context.RSSetViewport(new (width, height));
       _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
       _context.VSSetShader(_vertexShader);
       _context.VSSetConstantBuffer(0, _constantBuffer);
@@ -191,18 +188,18 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       var outlinePsByteCode = ID3DRenderer.CompileBytecode("Overlay.hlsl", "PSMain", "ps_5_0");
       _outlineVertexShader = _device.CreateVertexShader(outlineVsByteCode.Span);
       _outlinePixelShader = _device.CreatePixelShader(outlinePsByteCode.Span);
-      InputElementDescription[] outlineInputElementDescs = [new("POSITION", 0, Format.R32G32_Float, 0, 0)];
+      InputElementDescription[] outlineInputElementDescs = [new ("POSITION", 0, Format.R32G32_Float, 0, 0)];
       _outlineInputLayout = _device.CreateInputLayout(outlineInputElementDescs, outlineVsByteCode.Span);
-      _outlineVertexBuffer = _device.CreateBuffer(new(MAX_OUTLINE_VERTICES * VertexPosition2D.SizeInBytes,
-                                                      BindFlags.VertexBuffer,
-                                                      ResourceUsage.Dynamic,
-                                                      CpuAccessFlags.Write));
+      _outlineVertexBuffer = _device.CreateBuffer(new (MAX_OUTLINE_VERTICES * VertexPosition2D.SizeInBytes,
+                                                       BindFlags.VertexBuffer,
+                                                       ResourceUsage.Dynamic,
+                                                       CpuAccessFlags.Write));
 
       var blendDesc = new BlendDescription()
       {
          RenderTarget =
          {
-            [0] = new()
+            [0] = new ()
             {
                BlendEnable = true,
                SourceBlend = Blend.SourceAlpha,
@@ -288,7 +285,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
          _renderTargetView = _device.CreateRenderTargetView(backBuffer);
 
       // 4. Set the new viewport
-      _context.RSSetViewport(new(width, height));
+      _context.RSSetViewport(new (width, height));
    }
 
    public void UpdateColors(Color4[] newColors)
@@ -307,9 +304,9 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
 
          fixed (void* pColors = newColors)
          {
-            Unsafe.CopyBlockUnaligned(mapped.DataPointer.ToPointer(),
-               pColors,
-               (uint)(newColors.Length * Unsafe.SizeOf<Color4>()));
+            Unsafe.CopyBlock(mapped.DataPointer.ToPointer(),
+                             pColors,
+                             (uint)(newColors.Length * Unsafe.SizeOf<Color4>()));
          }
 
          // 3. Unmap the buffer to commit the changes.
@@ -342,7 +339,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
 
       var count = newOutlineVertices.Length;
       var totalCount = closeLoop && count > 1 ? count + 1 : count;
-    
+
       if (totalCount is 0 or > MAX_OUTLINE_VERTICES)
       {
          _outlineVertexCount = 0;
@@ -351,21 +348,20 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
 
       _outlineVertexCount = (uint)totalCount;
       var mapped = _context.Map(_outlineVertexBuffer, MapMode.WriteDiscard);
-    
+
       fixed (Vector2* pVertices = newOutlineVertices)
       {
-         Unsafe.CopyBlockUnaligned(mapped. DataPointer. ToPointer(), pVertices, (uint)(count * sizeof(Vector2)));
+         Unsafe.CopyBlockUnaligned(mapped.DataPointer.ToPointer(), pVertices, (uint)(count * sizeof(Vector2)));
       }
-    
+
       // Close loop by copying first vertex to end
       if (closeLoop && count > 1)
       {
          Unsafe.Write((byte*)mapped.DataPointer.ToPointer() + count * sizeof(Vector2), newOutlineVertices[0]);
       }
-    
+
       _context.Unmap(_outlineVertexBuffer);
    }
-
 
    public unsafe void AddPointToLasso(Vector2 newPoint)
    {

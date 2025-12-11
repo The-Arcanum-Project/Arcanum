@@ -21,6 +21,23 @@ namespace Arcanum.Core.GameObjects.Court.State;
 [ObjectSaveAs]
 public partial class GovernmentState : IEu5Object<GovernmentState>
 {
+   public GovernmentState() : this(isEmpty: false)
+   {
+   }
+
+   private GovernmentState(bool isEmpty)
+   {
+      if (isEmpty)
+      {
+         UniqueId = "Arcanum_Empty_GovernmentState";
+         InheritRulerTerms = null!;
+      }
+      else
+      {
+         InheritRulerTerms = Country.Empty;
+      }
+   }
+
    [SaveAs]
    [DefaultValue(GovernmentType.Monarchy)]
    [Description("The type of government this state represents.")]
@@ -37,7 +54,11 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [DefaultValue("")]
    [Description("The type of a regency this government has.")]
    [ParseAs("inherit_ruler_terms")]
-   public Country InheritRulerTerms { get; set; } = Country.Empty;
+   public Country InheritRulerTerms
+   {
+      get => field ?? Country.Empty;
+      set;
+   }
 
    [SaveAs]
    [DefaultValue("")]
@@ -154,7 +175,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    }
    public static Dictionary<string, GovernmentState> GetGlobalItems() => [];
 
-   public static GovernmentState Empty { get; } = new() { UniqueId = "Arcanum_Empty_GovernmentState" };
+   public static GovernmentState Empty { get; } = new (true);
 
    #endregion
 }

@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.Utils.Colors;
+using Vortice.Mathematics;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -11,6 +12,11 @@ public static class MapModeColorHelper
    private const float COLOR_MAX_SATURATION = 1;
    private const float COLOR_MIN_VALUE = 0.7f;
    private const float COLOR_MAX_VALUE = 1.0f;
+
+   public static Color4 GetEmptyColor4 { get; } = new ((DEFAULT_EMPTY_COLOR >> 24) & 0xFF,
+                                                       (DEFAULT_EMPTY_COLOR >> 16) & 0xFF,
+                                                       (DEFAULT_EMPTY_COLOR >> 8) & 0xFF,
+                                                       DEFAULT_EMPTY_COLOR & 0xFF);
 
    public static int GetRandomColor(int seed)
    {

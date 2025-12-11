@@ -51,6 +51,7 @@ public static class SetupParsingManager
          { "locations", new LocationSetupParsing([]) },
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
+         { "countries", new CountryParsing([]) },
       }.ToFrozenDictionary();
    }
 
@@ -74,8 +75,18 @@ public static class SetupParsingManager
          if (eu5Obj.GetNxPropType(prop) is { } t && typeof(IEu5Object).IsAssignableFrom(t))
          {
             var value = eu5Obj._getValue(prop);
-            if (value is IEu5Object &&
-                eu5Obj.SaveableProps.First(p => Equals(p.NxProp, prop)).ValueType != SavingValueType.Identifier)
+            Debug.Assert(value != null);
+            PropertySavingMetadata? first = null;
+            foreach (var p in eu5Obj.SaveableProps)
+            {
+               if (Equals(p.NxProp, prop))
+               {
+                  first = p;
+                  break;
+               }
+            }
+
+            if (value is IEu5Object && first?.ValueType != SavingValueType.Identifier)
                types.Add(t);
          }
 

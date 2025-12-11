@@ -302,6 +302,9 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void MapModeManagerOnOnMapModeChanged(MapModeManager.MapModeType _)
    {
       Debug.Assert(MainMap != null, "MainMap is null in MapModeManagerOnOnMapModeChanged");
+      if (!MapModeManager.IsMapReady)
+         return;
+
       // ReSharper disable twice InconsistentlySynchronizedField
       MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
       MainMap.UpdateColors();

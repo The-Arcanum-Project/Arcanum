@@ -104,7 +104,10 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
-      _selectionColor = (_currentBackgroundColor.Clone() as Color4[])!;
+      if (_selectionColor.Length != _currentBackgroundColor.Length)
+         _selectionColor = new Color4[_currentBackgroundColor.Length];
+      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
+
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
@@ -182,22 +185,24 @@ public partial class MapControl
 
    private void RefreshSelectionColors()
    {
+      var frozenFactor = 1f - Config.Settings.MapSettings.FrozenSelectionColorOpacity;
+      var selectionFactor = 1f - Config.Settings.MapSettings.SelectionColorOpacity;
+      var previewFactor = 1f - Config.Settings.MapSettings.PrviewOpacityFactor;
+
       if (SelectionManager.ObjectSelectionMode == ObjectSelectionMode.Frozen)
-         foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
+         foreach (var loc in SelectionManager.GetActiveSelectionLocations())
          {
-            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.FrozenSelectionColorOpacity) +
-                                              FreezeSelectionColor;
+            if (loc == Location.Empty)
+               continue;
+
+            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * frozenFactor + FreezeSelectionColor;
          }
 
       foreach (var loc in Selection.GetSelectedLocations)
-      {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.SelectionColorOpacity) + SelectionColor;
-      }
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * selectionFactor + SelectionColor;
 
       foreach (var loc in SelectionManager.PreviewedLocations)
-      {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * (1f - Config.Settings.MapSettings.PrviewOpacityFactor) + PreviewColor;
-      }
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * previewFactor + PreviewColor;
    }
 
    private void LocationDeselectedAddHandler(List<Location> locations)

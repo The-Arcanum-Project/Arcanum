@@ -58,7 +58,11 @@ public static class SelectionManager
 
    public static void Preview(List<IEu5Object> eu5Objects)
    {
-      PreviewedLocations.AddRange(GetRelevantLocationsForObjects(eu5Objects));
+      var targetLocs = GetRelevantLocationsForObjects(eu5Objects);
+      for (var i = targetLocs.Count - 1; i >= 0; i--)
+         if (targetLocs[i] == Location.Empty)
+            targetLocs.RemoveAt(i);
+      PreviewedLocations.AddRange(targetLocs);
       PreviewChanged?.Invoke();
    }
 
@@ -85,10 +89,15 @@ public static class SelectionManager
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
-         if (obj is Location loc)
-            locs.Add(loc);
-         if (obj is IMapInferable inferable)
-            locs.AddRange(inferable.GetRelevantLocations([obj]));
+         switch (obj)
+         {
+            case Location loc:
+               locs.Add(loc);
+               break;
+            case IMapInferable inferable:
+               locs.AddRange(inferable.GetRelevantLocations([obj]));
+               break;
+         }
       }
 
       return locs;

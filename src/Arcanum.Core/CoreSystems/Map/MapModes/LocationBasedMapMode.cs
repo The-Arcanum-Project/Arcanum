@@ -12,9 +12,12 @@ public abstract class LocationBasedMapMode : IMapMode
 
    public void Render(Color4[] colorBuffer)
    {
-      var index = 0;
-      foreach (var location in Globals.Locations.Values)
-         colorBuffer[index++] = new (GetColorForLocation(location));
+      var array = MapModeManager.LocationsArray;
+      for (var i = 0; i < array.Length; i++)
+      {
+         var location = array[i];
+         colorBuffer[location.ColorIndex] = new (GetColorForLocation(location));
+      }
    }
 
    public abstract int GetColorForLocation(Location location);

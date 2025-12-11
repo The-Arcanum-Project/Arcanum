@@ -24,13 +24,25 @@ namespace Arcanum.Core.GameObjects.LocationCollections;
 [ObjectSaveAs]
 public partial class Country : IEu5Object<Country>
 {
+   public Country(string uniqueId)
+   {
+      UniqueId = uniqueId;
+   }
+
+   public Country()
+   {
+      Capital = Location.Empty;
+      GovernmentState = GovernmentState.Empty;
+      Definition = CountryDefinition.Empty;
+   }
+
    #region Nexus
 
    [SuppressAgs]
    [Description("The unique tag for this country.")]
    public string UniqueId { get; set; } = null!;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [ParseAs("capital")]
    [DefaultValue(null)]
    [Description("The capital location of this country.")]
@@ -225,10 +237,10 @@ public partial class Country : IEu5Object<Country>
 
    [SaveAs]
    [ParseAs("timed_modifier",
-              AstNodeType.BlockNode,
-              isEmbedded: true,
-              isShatteredList: true,
-              itemNodeType: AstNodeType.BlockNode)]
+            AstNodeType.BlockNode,
+            isEmbedded: true,
+            isShatteredList: true,
+            itemNodeType: AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A modifier starting and ending at a given date.")]
    public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
@@ -237,13 +249,13 @@ public partial class Country : IEu5Object<Country>
    [ParseAs("government", AstNodeType.BlockNode, isEmbedded: true)]
    [DefaultValue(null)]
    [Description("The government state of this country.")]
-   public GovernmentState GovernmentState { get; set; } = GovernmentState.Empty;
+   public GovernmentState GovernmentState { get; set; } = null!;
 
    [PropertyConfig(isInlined: true)]
    [SuppressAgs]
    [DefaultValue(null)]
    [Description("The country definition associated with this country.")]
-   public CountryDefinition Definition { get; set; } = CountryDefinition.Empty;
+   public CountryDefinition Definition { get; set; } = null!;
 
    #endregion
 
@@ -252,7 +264,16 @@ public partial class Country : IEu5Object<Country>
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Country> GetGlobalItems() => Globals.Countries;
 
-   public static Country Empty { get; } = new() { UniqueId = "Arcanum_EMPTY_Country" };
+   private static readonly Lazy<Country> EmptyInstance = new (() =>
+   {
+      var emptyChar = new Country("Arcanum_Empty_Country");
+      emptyChar.Capital = Location.Empty;
+      emptyChar.GovernmentState = GovernmentState.Empty;
+      emptyChar.Definition = CountryDefinition.Empty;
+      return emptyChar;
+   });
+
+   public static Country Empty => EmptyInstance.Value;
    public string GetNamespace => "Map.Country";
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string ResultName => UniqueId;
