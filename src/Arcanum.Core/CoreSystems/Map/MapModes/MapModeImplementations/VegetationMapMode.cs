@@ -3,11 +3,11 @@ using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class VegetationLocationBasedMapMode : LocationBasedMapMode
+public class VegetationMapMode : LocationBasedMapMode
 {
    public bool IsLandOnly => false;
    public override string Name => "Vegetation";
-   public override Type DisplayType => typeof(Vegetation);
+   public override Type[] DisplayTypes => [typeof(Vegetation)];
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Vegetation;
    public override string Description => "Displays the vegetation type of each location on the map.";
    public string? IconSource => null;

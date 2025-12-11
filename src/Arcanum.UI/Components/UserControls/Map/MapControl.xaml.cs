@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -31,9 +32,9 @@ namespace Arcanum.UI.Components.UserControls.Map;
 // - click with alt for upper scope and alt shift for lower scope
 public partial class MapControl
 {
-   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
-   private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
-   private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
+   private static readonly Color4 SelectionColor = new (0.5f, 0, 0, 0);
+   private static readonly Color4 FreezeSelectionColor = new (0, 0, 0.5f, 0);
+   private static readonly Color4 PreviewColor = new (0.5f, 0.5f, 0, 0);
 
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
@@ -54,7 +55,7 @@ public partial class MapControl
    public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
 
    public static readonly DependencyProperty CurrentPosProperty =
-      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
+      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new (default(Vector2)));
 
    public Vector2 CurrentPos
    {
@@ -67,7 +68,7 @@ public partial class MapControl
 
    public MapControl()
    {
-      MapInteractionManager = new(this);
+      MapInteractionManager = new (this);
       InitializeComponent();
    }
 
@@ -100,6 +101,9 @@ public partial class MapControl
 
    public void UpdateColors()
    {
+      if (!MapModeManager.IsMapReady)
+         return;
+
       _selectionColor = (_currentBackgroundColor.Clone() as Color4[])!;
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
@@ -125,14 +129,14 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
-      Coords = new(this, imageSize);
+      Coords = new (this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors();
-      LocationRenderer = new(vertices, startColor, Coords.ImageAspectRatio);
+      LocationRenderer = new (vertices, startColor, Coords.ImageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
+      _d3dHost = new (LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
 
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
@@ -288,7 +292,7 @@ public partial class MapControl
    private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
    {
       MapInteractionManager.HandleMouseUp(e);
-      OnMapClick?.Invoke(new(CurrentPos, e.ChangedButton));
+      OnMapClick?.Invoke(new (CurrentPos, e.ChangedButton));
    }
 
    #endregion

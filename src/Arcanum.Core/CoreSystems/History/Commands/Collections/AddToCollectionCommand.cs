@@ -11,6 +11,7 @@ public class AddToCollectionCommand
    public AddToCollectionCommand(IEu5Object target, Enum attribute, object value) : base(target, attribute, value)
    {
       target._addToCollection(attribute, value);
+      InvalidateUI();
    }
 
    public override string GetDescription => Targets.Count > 1

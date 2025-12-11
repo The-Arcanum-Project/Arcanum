@@ -41,10 +41,9 @@ public interface IMapMode
 
    /// <summary>
    /// The data type being displayed by this map mode. <br/>
-   /// E.g. if this map mode displays population data, this would be typeof(PopulationData) <br/>
-   /// This is used for selection inference and other type-based operations.
+   /// !!THE FIRST ENTRY IS THE MAIN ENTRY WHICH IS USED FOR INFERING!!
    /// </summary>
-   public Type DisplayType { get; }
+   public Type[] DisplayTypes { get; }
 
    /// <summary>
    /// Renders the map mode

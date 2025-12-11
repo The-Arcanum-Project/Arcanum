@@ -2,6 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
+using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.UI.SpecializedEditors.Util;
 
@@ -9,10 +13,12 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
    where TSource : TTarget
 {
    private readonly ObservableCollection<TSource> _source;
+   private readonly IEu5Object _owner;
 
-   public ObservableCollectionProxy(ObservableCollection<TSource> source)
+   public ObservableCollectionProxy(ObservableCollection<TSource> source, IEu5Object owner)
    {
       _source = source;
+      _owner = owner;
       // Listen for changes in the source collection
       _source.CollectionChanged += OnCollectionChanged;
       // Also forward property changes (like for the Count property)
@@ -26,19 +32,27 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
 
    public override int Count => _source.Count;
 
-   public override TTarget this[int index] => _source[index];
+   public override TTarget this[int index]
+   {
+      get
+      {
+         Debug.Fail("I don't think this is needed");
+         return _source[index];
+      }
+   }
 
    public override bool TryAdd(TTarget target)
    {
       if (target is not TSource s)
          return false;
 
-      _source.Add(s);
+      Nx.AddToCollection(_owner, GetChildEnum(_owner), s);
       return true;
    }
 
    public override bool TryInsert(int index, TTarget target)
    {
+      Debug.Fail("I don't think this is needed");
       if (target is not TSource s)
          return false;
 
@@ -48,12 +62,15 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
 
    public override bool TryRemove(TTarget target)
    {
-      return target is TSource s && _source.Remove(s);
+      var result = target is TSource;
+      if (result)
+         Nx.RemoveFromCollection(_owner, GetChildEnum(_owner), (TSource)target!);
+      return result;
    }
 
    public override void RemoveAt(int index)
    {
-      _source.RemoveAt(index);
+      Nx.RemoveFromCollection(_owner, GetChildEnum(_owner), _source[index]);
    }
 
    public new void Dispose()
@@ -61,6 +78,23 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
       _source.CollectionChanged -= OnCollectionChanged;
       ((INotifyPropertyChanged)_source).PropertyChanged -= OnPropertyChanged;
       GC.SuppressFinalize(this);
+   }
+
+   private Enum GetChildEnum(IEu5Object obj)
+   {
+      if (obj is Province)
+         return Province.Field.Locations;
+      if (obj is Area)
+         return Area.Field.Provinces;
+      if (obj is Region)
+         return Region.Field.Areas;
+      if (obj is SuperRegion)
+         return SuperRegion.Field.Regions;
+      if (obj is Continent)
+         return Continent.Field.SuperRegions;
+
+      Debug.Fail("GetChildEnum called with invalid type");
+      throw new ArgumentException("obj is not a valid type in the hierarchy");
    }
 }
 

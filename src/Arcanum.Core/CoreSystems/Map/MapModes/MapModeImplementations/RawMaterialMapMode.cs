@@ -3,10 +3,10 @@ using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class GoodsLocationBasedMapMode : LocationBasedMapMode
+public class RawMaterialMapMode : LocationBasedMapMode
 {
    public override string Name => "Goods";
-   public override Type DisplayType => typeof(RawMaterial);
+   public override Type[] DisplayTypes => [typeof(RawMaterial)];
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Goods;
    public override string Description => "Displays the predominant goods produced in each location on the map.";
    public string? IconSource => null;

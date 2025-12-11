@@ -3,10 +3,10 @@ using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class TopographyLocationBasedMapMode : LocationBasedMapMode
+public class TopographyMapMode : LocationBasedMapMode
 {
    public bool IsLandOnly => false;
-   public override Type DisplayType => typeof(Topography);
+   public override Type[] DisplayTypes => [typeof(Topography)];
    public override string Name => "Topography";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Topography;
    public override string Description => "Displays the topography of each location on the map.";

@@ -9,6 +9,7 @@ public class RemoveFromCollectionCommand
    public RemoveFromCollectionCommand(IEu5Object target, Enum attribute, object value) : base(target, attribute, value)
    {
       target._removeFromCollection(attribute, value);
+      InvalidateUI();
    }
 
    public override string GetDescription => Targets.Count > 1

@@ -3,12 +3,12 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ContinentLocationBasedMapMode : LocationBasedMapMode
+public class ContinentMapMode : LocationBasedMapMode
 {
    public override string Name => "Continents";
    public override string Description => "Displays the Continents the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
-   public override Type DisplayType => typeof(Continent);
+   public override Type[] DisplayTypes => [typeof(Continent), typeof(SuperRegion)];
 
    public override int GetColorForLocation(Location location)
    {

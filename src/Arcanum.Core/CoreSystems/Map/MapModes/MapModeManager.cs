@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.Settings.BaseClasses;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils.Colors;
 using Vortice.Mathematics;
+using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -13,6 +16,8 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes;
 public static partial class MapModeManager
 {
    private static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
+   private static Color[] _blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
+   private static Random _random = new ("Arcanum".GetHashCode());
 
    #region Plugin MapModes
 
@@ -53,13 +58,22 @@ public static partial class MapModeManager
    #endregion
 
    private static MapModeType CurrentMode { get; set; } = MapModeType.Locations;
+
    public static IMapMode GetCurrent() => Get(CurrentMode);
+   // This is set once the map is ready
+   public static bool IsMapReady { get; set; } = false;
 
    // Event to notify that the mapmode has been changed.
    public static event Action<MapModeType>? OnMapModeChanged;
 
    private static void InitializeMapModeManager()
    {
+      SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.WaterShadeBaseColor), Handler);
+   }
+
+   private static void Handler(object sender, SettingsEventArgs e)
+   {
+      _blueColors = ColorGenerator.GenerateVariations(((Color)e.NewValue!), 40);
    }
 
    public static void SetMapMode(MapModeType type)
@@ -105,13 +119,27 @@ public static partial class MapModeManager
          mode.Render(colors);
    }
 
+   private static int DeterministicRandom(int input, int min, int max)
+   {
+      var x = (uint)input;
+
+      x ^= x << 13;
+      x ^= x >> 17;
+      x ^= x << 5;
+
+      var range = max - min;
+      return min + (int)(x % range);
+   }
+
    private static void GenerateLocationbaseMapMode(Color4[] colors, LocationBasedMapMode mode, int count)
    {
+      if (!IsMapReady)
+         return;
+
       if (((IMapMode)mode).IsLandOnly)
       {
          var waterProvinces = new HashSet<Location>(Globals.DefaultMapDefinition.SeaZones);
          waterProvinces.UnionWith(Globals.DefaultMapDefinition.Lakes);
-         var blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
          var useLocWater = Config.Settings.MapSettings.UseShadeOfColorOnWater;
          Parallel.For(0, count, ProcessLocation);
          waterProvinces.Clear();
@@ -122,7 +150,7 @@ public static partial class MapModeManager
             if (waterProvinces.Contains(location))
             {
                if (useLocWater)
-                  colors[i] = new (blueColors[Random.Shared.Next(blueColors.Count)].AsAbgrInt());
+                  colors[i] = new (_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
                else
                   colors[i] = new (location.Color.AsInt());
             }

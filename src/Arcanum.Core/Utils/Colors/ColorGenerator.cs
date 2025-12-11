@@ -194,7 +194,7 @@ public static class ColorGenerator
    /// <param name="saturationVariation">The maximum amount Saturation can change (e.g., 0.1 for +/- 10%).</param>
    /// <param name="lightnessVariation">The maximum amount Lightness can change (e.g., 0.1 for +/- 10%).</param>
    /// <returns>A list of generated Color objects.</returns>
-   public static List<Color> GenerateVariations(
+   public static Color[] GenerateVariations(
       Color baseColor,
       int count,
       double saturationVariation = 0.1,
@@ -203,7 +203,7 @@ public static class ColorGenerator
       if (count <= 0)
          return [];
 
-      var variations = new List<Color>(count);
+      var variations = new Color[count];
       var baseHsl = RgbToHsl(baseColor);
       var random = new Random();
 
@@ -225,7 +225,7 @@ public static class ColorGenerator
          newHsl.L = Math.Max(0, Math.Min(1, newHsl.L));
 
          // Convert the new HSL color back to RGB and add it to the list
-         variations.Add(HslToRgb(newHsl));
+         variations[i] = HslToRgb(newHsl);
       }
 
       return variations;

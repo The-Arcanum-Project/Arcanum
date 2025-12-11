@@ -9,7 +9,6 @@ using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
-using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -209,6 +208,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
             Debug.Assert(mapDataParser.Polygons != null,
                          "Map data parser has finished tesselation but polygons are null.");
             _ = MainMap.SetupRenderer(mapDataParser.Polygons!, mapDataParser.MapSize);
+            MapModeManager.IsMapReady = true;
          }
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
@@ -289,7 +289,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
-               var objs = SelectionManager.GetInferredObjectsForLocations([location], MapModeManager.GetCurrent().DisplayType);
+               var objs = SelectionManager.GetInferredObjectsForLocations([location], MapModeManager.GetCurrent().DisplayTypes[0]);
                if (objs is { Count: > 0 })
                   ArcClipboard.Copy(objs[0]);
             }
@@ -312,11 +312,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       if (objects.Length == 0)
          return;
 
-      if (objects[0] is not IMapInferable mapInferable)
-         return;
-
-      if (mapInferable.GetMapMode == MapModeManager.GetCurrent().Type)
+      if (MapModeManager.GetCurrent().DisplayTypes.Contains(objects[0].GetType()))
+      {
          MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
+         MainMap.UpdateColors();
+      }
    }
 
    private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)

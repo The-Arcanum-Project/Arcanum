@@ -24,10 +24,10 @@ public static class SelectionManager
    /// This is the collection of objects that are currently editable in the UI. <br/>
    /// This is what the UI listens to.
    /// </summary>
-   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
-   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
+   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new () { IsDistinct = true };
+   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new () { IsDistinct = true };
 
-   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
+   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new () { IsDistinct = true };
 
    public static event Action? PreviewChanged;
 
@@ -49,7 +49,7 @@ public static class SelectionManager
    /// Is Called after the selection has already updated the editable objects
    /// </summary>
    public static event PropertyChangedEventHandler? PropertyChanged;
-   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new(propertyName));
+   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new (propertyName));
 
    static SelectionManager()
    {
@@ -126,7 +126,7 @@ public static class SelectionManager
          {
             var mapMode = MapModeManager.GetCurrent();
 
-            if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
+            if (!EmptyRegistry.TryGet(mapMode.DisplayTypes[0], out var empty) || empty is not IMapInferable inferable)
                return;
 
             EditableObjects.ClearAndAdd(inferable.GetInferredList(cLocs));
@@ -168,9 +168,9 @@ public static class SelectionManager
 
       var mapMode = MapModeManager.GetCurrent();
 
-      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) ||
+      if (!EmptyRegistry.TryGet(mapMode.DisplayTypes[0], out var empty) ||
           empty is not IMapInferable inferable ||
-          obj.GetType() != mapMode.DisplayType)
+          obj.GetType() != mapMode.DisplayTypes[0])
          return [];
 
       return inferable.GetRelevantLocations(obj);
@@ -192,8 +192,7 @@ public static class SelectionManager
       return inferable.GetRelevantLocations([obj]);
    }
 
-   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects)
-      => _searchSelectedObjects.ClearAndAdd(objects);
+   public static void SetSearchSelectedObjects(IEnumerable<IEu5Object> objects) => _searchSelectedObjects.ClearAndAdd(objects);
 
    public static void ClearSearchSelectedObjects() => _searchSelectedObjects.Clear();
 

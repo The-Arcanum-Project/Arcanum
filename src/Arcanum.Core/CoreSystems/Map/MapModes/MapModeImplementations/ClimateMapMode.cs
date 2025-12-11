@@ -3,9 +3,9 @@ using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ClimateLocationBasedMapMode : LocationBasedMapMode
+public class ClimateMapMode : LocationBasedMapMode
 {
-   public override Type DisplayType => typeof(Climate);
+   public override Type[] DisplayTypes => [typeof(Climate)];
    public bool IsLandOnly => false;
    public override string Name => "Climate";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Climate;

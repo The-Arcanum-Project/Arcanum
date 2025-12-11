@@ -1,14 +1,15 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class SuperRegionLocationBasedMapMode : LocationBasedMapMode
+public class SuperRegionMapMode : LocationBasedMapMode
 {
    public override string Name => "SuperRegions";
    public override string Description => "Displays the SuperRegions the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.SuperRegions;
-   public override Type DisplayType => typeof(SuperRegion);
+   public override Type[] DisplayTypes => [typeof(SuperRegion), typeof(Region)];
 
    public override int GetColorForLocation(Location location)
    {

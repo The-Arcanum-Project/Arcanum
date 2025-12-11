@@ -8,13 +8,13 @@ public abstract class LocationBasedMapMode : IMapMode
    public abstract string Name { get; }
    public abstract string Description { get; }
    public abstract MapModeManager.MapModeType Type { get; }
-   public abstract Type DisplayType { get; }
+   public abstract Type[] DisplayTypes { get; }
 
    public void Render(Color4[] colorBuffer)
    {
       var index = 0;
       foreach (var location in Globals.Locations.Values)
-         colorBuffer[index++] = new(GetColorForLocation(location));
+         colorBuffer[index++] = new (GetColorForLocation(location));
    }
 
    public abstract int GetColorForLocation(Location location);

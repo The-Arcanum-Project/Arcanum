@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.UI.Components.Windows.MainWindows;
@@ -19,6 +20,7 @@ public class MapHandleImpl : IMapHandle
 
       Debug.Assert(tracing.Polygons is not null);
       _ = mainWindow.MainMap.SetupRenderer(tracing.Polygons!, tracing.MapSize);
+      MapModeManager.IsMapReady = true;
    }
 
    public void NotifyMapLoaded()

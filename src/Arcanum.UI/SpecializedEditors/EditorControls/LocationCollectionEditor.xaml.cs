@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Arcanum.UI.SpecializedEditors.Editors;
@@ -14,7 +13,7 @@ namespace Arcanum.UI.SpecializedEditors.EditorControls;
 
 public partial class LocationCollectionEditor
 {
-   private static readonly Lazy<LocationCollectionEditor> LazyInstance = new(() => new());
+   private static readonly Lazy<LocationCollectionEditor> LazyInstance = new (() => new ());
    private bool _ignoreSelectionChanged;
    public static LocationCollectionEditor Instance => LazyInstance.Value;
 
@@ -26,7 +25,7 @@ public partial class LocationCollectionEditor
       DependencyProperty.Register(nameof(LocationCollection),
                                   typeof(ObservableCollectionProxy<IEu5Object>),
                                   typeof(LocationCollectionEditor),
-                                  new(default(ObservableCollectionProxy<IEu5Object>)));
+                                  new (default(ObservableCollectionProxy<IEu5Object>)));
 
    public ObservableCollectionProxy<IEu5Object> LocationCollection
    {
@@ -34,7 +33,8 @@ public partial class LocationCollectionEditor
       set => SetValue(LocationCollectionProperty, value);
    }
 
-   public void SetLocationCollection<T>(IEu5Object locationCollection, AggregateLink<T> children,
+   public void SetLocationCollection<T>(IEu5Object locationCollection,
+                                        AggregateLink<T> children,
                                         LocationCollectionSpecializedEditor editor) where T : IEu5Object
    {
       _editor = editor;
@@ -42,17 +42,17 @@ public partial class LocationCollectionEditor
       {
          CollectionSelector.FullItemsSource = _parentCache =
                                                  ((IEu5Object)EmptyRegistry.Empties[locationCollection
-                                                      .GetType()]).GetGlobalItemsNonGeneric()
-                                                                  .Values;
+                                                                                      .GetType()]).GetGlobalItemsNonGeneric()
+                                                                                                  .Values;
       }
 
       SelectLocation(locationCollection, true);
-        LocationSelector.FullItemsSource = ((T)EmptyRegistry.Empties[typeof(T)]).GetGlobalItemsNonGeneric().Values;
+      LocationSelector.FullItemsSource = ((T)EmptyRegistry.Empties[typeof(T)]).GetGlobalItemsNonGeneric().Values;
 
       // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
       LocationCollection?.Dispose();
       // TODO: Fill LocationSelector with child objects
-      LocationCollection = new ObservableCollectionProxy<T, IEu5Object>(children);
+      LocationCollection = new ObservableCollectionProxy<T, IEu5Object>(children, locationCollection);
    }
 
    public void SelectLocation(IEu5Object location, bool ignoreSelectionChanged = false)
@@ -75,11 +75,12 @@ public partial class LocationCollectionEditor
       _editor.ResetFor([selectedLocation]);
    }
 
-    private void Location_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        // Get the location and remove it from the collection
-        if (sender is not FrameworkElement { DataContext: IEu5Object location }) return;
-        
-        LocationCollection.TryRemove(location);
-    }
+   private void Location_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+   {
+      // Get the location and remove it from the collection
+      if (sender is not FrameworkElement { DataContext: IEu5Object location })
+         return;
+
+      LocationCollection.TryRemove(location);
+   }
 }

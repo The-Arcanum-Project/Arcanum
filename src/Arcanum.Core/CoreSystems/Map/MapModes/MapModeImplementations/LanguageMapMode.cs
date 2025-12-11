@@ -3,10 +3,10 @@ using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class LanguageLocationBasedMapMode : LocationBasedMapMode
+public class LanguageMapMode : LocationBasedMapMode
 {
    public override string Name => "Language";
-   public override Type DisplayType => typeof(Language);
+   public override Type[] DisplayTypes => [typeof(Language)];
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Language;
    public override string Description => "Displays the primary language of each location on the map.";
    public string? IconSource => null;

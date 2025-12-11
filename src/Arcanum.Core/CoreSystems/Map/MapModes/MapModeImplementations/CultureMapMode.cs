@@ -3,10 +3,10 @@ using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class CultureLocationBasedMapMode : LocationBasedMapMode
+public class CultureMapMode : LocationBasedMapMode
 {
    public override string Name => "Culture";
-   public override Type DisplayType => typeof(Culture);
+   public override Type[] DisplayTypes => [typeof(Culture)];
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Culture;
    public override string Description => "Displays the culture of each location on the map.";
    public string? IconSource => null;

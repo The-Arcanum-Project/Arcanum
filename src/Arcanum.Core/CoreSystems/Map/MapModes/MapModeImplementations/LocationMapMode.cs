@@ -2,11 +2,11 @@
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class BaseLocationBasedMapMode : LocationBasedMapMode
+public class LocationMapMode : LocationBasedMapMode
 {
    public override string Name => "Locations";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Locations;
-   public override Type DisplayType => typeof(Location);
+   public override Type[] DisplayTypes => [typeof(Location)];
    public override string Description => "The default map mode.";
    public string? IconSource => null;
 

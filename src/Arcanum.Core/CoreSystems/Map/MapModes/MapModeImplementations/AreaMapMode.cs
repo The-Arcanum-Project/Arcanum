@@ -3,12 +3,12 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class AreaLocationBasedMapMode : LocationBasedMapMode
+public class AreaMapMode : LocationBasedMapMode
 {
    public override string Name => "Areas";
    public override string Description => "Displays the Areas the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Areas;
-   public override Type DisplayType => typeof(Area);
+   public override Type[] DisplayTypes => [typeof(Area), typeof(Province)];
 
    public override int GetColorForLocation(Location location)
    {

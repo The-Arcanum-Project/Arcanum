@@ -4,12 +4,12 @@ using Region = System.Drawing.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class RegionLocationBasedMapMode : LocationBasedMapMode
+public class RegionMapMode : LocationBasedMapMode
 {
    public override string Name => "Regions";
    public override string Description => "Displays the Regions the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Regions;
-   public override Type DisplayType => typeof(Region);
+   public override Type[] DisplayTypes => [typeof(Region), typeof(Area)];
 
    public override int GetColorForLocation(Location location)
    {
