@@ -54,7 +54,12 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color ToMediaColor() => ColorResolver.Instance.Resolve(Key).ToMediaColor();
       public override JominiColorType Type => JominiColorType.Key;
       public override string ToString() => $"{Key}";
-      public override Color4 ToColor4() => ColorResolver.Instance.Resolve(Key).ToColor4();
+
+      public override Color4 ToColor4()
+      {
+         var key = Key;
+         return ColorResolver.Instance.Resolve(key).ToColor4();
+      }
    }
 
    public sealed record Rgb(byte R, byte G, byte B) : JominiColor
@@ -89,7 +94,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color4 ToColor4()
       {
          var color = HsvConverter.Hsv360ToRgb(H, S, V);
-         return new (color.R, color.G, color.B, color.A);
+         return new (color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
       }
    }
 

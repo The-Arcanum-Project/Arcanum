@@ -1,4 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿#define ALLOW_PARALLEL
+
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Vortice.Mathematics;
@@ -16,7 +19,7 @@ public class PoliticalMapMode : IMapMode
    {
       var unassignedMarker = new JominiColor.Rgb(32, 32, 32).ToColor4();
       Array.Fill(colorBuffer, unassignedMarker);
-
+#if ALLOW_PARALLEL
       Parallel.ForEach(Globals.Countries.Values,
                        country =>
                        {
@@ -33,6 +36,33 @@ public class PoliticalMapMode : IMapMode
                                            country.OwnControlColony,
                                            country.OwnControlIntegrated);
                        });
+#else
+      foreach (var country in Globals.Countries.Values)
+      {
+         var color = country.Definition.Color.ToColor4();
+
+         PaintCollections(colorBuffer,
+                          color,
+                          country.OwnControlCores,
+                          country.OwnColony,
+                          country.OwnConquered,
+                          country.OwnCores,
+                          country.OwnIntegrated,
+                          country.OwnControlConquered,
+                          country.OwnControlColony,
+                          country.OwnControlIntegrated);
+      }
+#endif
+
+      for (var i = 0; i < colorBuffer.Length; i++)
+      {
+         if (Math.Abs(colorBuffer[i].R - 242) < 0.1 &&
+             Math.Abs(colorBuffer[i].G - 55) < 0.1 &&
+             Math.Abs(colorBuffer[i].B - 48) < 0.1)
+         {
+            Debug.WriteLine(i);
+         }
+      }
 
       if (!Config.Settings.MapSettings.UseShadeOfColorOnWater)
          return;

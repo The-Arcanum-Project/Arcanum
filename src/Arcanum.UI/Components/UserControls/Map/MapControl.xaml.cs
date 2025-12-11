@@ -110,6 +110,7 @@ public partial class MapControl
 
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
+
       _d3dHost.Invalidate();
    }
 
