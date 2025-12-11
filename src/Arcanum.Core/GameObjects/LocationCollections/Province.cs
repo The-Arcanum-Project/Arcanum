@@ -67,15 +67,13 @@ public partial class Province
        get;
        set
        {
-           if (!field.Provinces.Lock && !value.Provinces.Lock)
-           {
-               if (field != Area.Empty)
-                   field.Provinces.
-               _removeFromChild(this);
-               if (value != Area.Empty)
-                   value.Provinces.
-               _addFromChild(this);
-           }
+           if (field != Area.Empty)
+               field.Provinces.
+           _removeFromChild(this);
+           if (value != Area.Empty)
+               value.Provinces.
+           _addFromChild(this);
+           
            field = value;
        }
    } = Area.Empty;

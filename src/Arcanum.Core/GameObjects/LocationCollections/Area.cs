@@ -69,14 +69,11 @@ public partial class Area : IMapInferable, IEu5Object<Area>, IIndexRandomColor
         get;
         set
         {
-            if (!field.Areas.Lock && !value.Areas.Lock)
-            {
-                if (field != Region.Empty)
+            if (field != Region.Empty)
                     field.Areas._removeFromChild(this);
-                if (value != Region.Empty)
+            if (value != Region.Empty)
                     value.Areas._addFromChild(this);
-            }
-
+            
             field = value;
         }
     } = Region.Empty;

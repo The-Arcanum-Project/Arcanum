@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
-using Region = System.Drawing.Region;
+using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

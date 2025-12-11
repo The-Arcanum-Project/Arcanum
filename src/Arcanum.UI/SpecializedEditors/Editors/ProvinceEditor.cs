@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.Analytics.MapData;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GlobalStates;
@@ -38,7 +39,24 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
 
    public ProvinceEditor()
    {
+      //TODO: @Melco - Unsubscribe on disable
       FileStateManager.FileChanged += OnFileStateManagerOnFileChanged;
+      Selection.SelectionModified += OnSelectionChanged;
+   }
+   
+
+   private static void OnSelectionChanged()
+   {
+      var obj = Selection.GetSelectedLocations;
+      if (obj.Count != 1)
+      {
+         LocationCollectionEditor.Instance.SelectChild(null!);
+         return;
+      }
+
+      var loc = obj[0];
+      
+      LocationCollectionEditor.Instance.SelectChild(loc);
    }
 
    ~ProvinceEditor()
@@ -56,7 +74,8 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
       if (args.FullPath.EndsWith("definitions.txt"))
          _wasValidated = false;
    }
-
+   
+   
    public override void Reset()
    {
    }

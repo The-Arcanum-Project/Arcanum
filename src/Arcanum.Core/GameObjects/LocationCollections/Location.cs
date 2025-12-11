@@ -124,15 +124,13 @@ public partial class Location
        get;
        set
        {
-           if (!field.Locations.Lock && !value.Locations.Lock)
-           {
-               if (field != Province.Empty)
-                   field.Locations.
-               _removeFromChild(this);
-               if (value != Province.Empty)
-                   value.Locations.
-               _addFromChild(this);
-           }
+           if (field != Province.Empty)
+               field.Locations.
+           _removeFromChild(this);
+           if (value != Province.Empty)
+               value.Locations.
+           _addFromChild(this);
+           
            field = value;
        }
    } = Province.Empty;
