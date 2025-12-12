@@ -217,6 +217,9 @@ public class AllocatorViewModel : ViewModelBase
    {
       if (ArcClipboard.CurrentPayload != null && ArcClipboard.CurrentPayload.Value is Location cl)
       {
+         if (LoadedLocation == Location.Empty || LoadedLocation == cl)
+            return;
+
          var diff = 0d;
          foreach (var pop in cl.Pops)
          {
