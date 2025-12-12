@@ -297,10 +297,12 @@ public partial class $Type$ : IEmbeddedEu5Object&lt;$Type$&gt;
 {
    public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$Type$Settings;
    public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$Type$AgsSettings;
+   [PropertyConfig(isReadonly: true)]
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
+   public static VariableDataBlock Empty { get; } = new () { UniqueId = "$Type$_EMPTY" };
 }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>

@@ -38,6 +38,11 @@ public partial class Country : IEu5Object<Country>
 
    #region Nexus
 
+   [SaveAs]
+   [ParseAs("variables", customParser: "ArcParse_Variables")]
+   [Description("A collection of variable declarations contained within this data container.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<VariableDeclaration> Variables { get; set; } = [];
    [SuppressAgs]
    [Description("The unique tag for this country.")]
    public string UniqueId { get; set; } = null!;

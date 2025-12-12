@@ -4,14 +4,16 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-[ParserFor(typeof(Country), IgnoredBlockKeys = ["variables"])]
+[ParserFor(typeof(Country))]
 public partial class CountryParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : SetupFileLoadingService(dependencies)
 {
@@ -54,5 +56,45 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
 
          ParseProperties(countryBn, eu5Obj, ref pc, false);
       }
+   }
+
+   public static bool ArcParse_Variables(BlockNode node, Country country, ref ParsingContext pc)
+   {
+      if (!node.Children[0].IsBlockNode(ref pc, out var dataContainer))
+         return false;
+
+      if (!pc.IsSliceEqual(dataContainer, "data"))
+      {
+         pc.SetContext(dataContainer);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidBlockName,
+                                        "data",
+                                        dataContainer);
+         return false;
+      }
+
+      foreach (var varc in dataContainer.Children)
+      {
+         if (!varc.IsBlockNode(ref pc, out var varBlock))
+            continue;
+
+         if (!pc.IsSliceEqual(varBlock, "{"))
+         {
+            pc.SetContext(varBlock);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.InvalidBlockName,
+                                           "Array Declaration Block",
+                                           varBlock);
+            continue;
+         }
+
+         var vard = new VariableDeclaration();
+         foreach (var sn in varBlock.Children)
+            VariableDeclarationParsing.Dispatch(sn, vard, ref pc);
+
+         country.Variables.Add(vard);
+      }
+
+      return true;
    }
 }
