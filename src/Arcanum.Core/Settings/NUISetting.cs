@@ -49,6 +49,16 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
+   public NUISetting SocientalValueEntrySettings { get; set; } = new (SocientalValueEntry.Field.UniqueId,
+                                                                      Enum.GetValues<SocientalValueEntry.Field>().Cast<Enum>().ToArray(),
+                                                                      Enum.GetValues<SocientalValueEntry.Field>().Cast<Enum>().ToArray(),
+                                                                      Enum.GetValues<SocientalValueEntry.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting SocientalValueSettings { get; set; } = new (SocientalValue.Field.UniqueId,
+                                                                 Enum.GetValues<SocientalValue.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<SocientalValue.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<SocientalValue.Field>().Cast<Enum>().ToArray());
+
    public NUISetting VariableDataBlockSettings { get; set; } = new (VariableDataBlock.Field.UniqueId,
                                                                     Enum.GetValues<VariableDataBlock.Field>().Cast<Enum>().ToArray(),
                                                                     Enum.GetValues<VariableDataBlock.Field>().Cast<Enum>().ToArray(),

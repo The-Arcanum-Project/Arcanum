@@ -48,7 +48,7 @@ public partial class Location
    public ObservableRangeCollection<PopDefinition> Pops { get; set; } = [];
 
    [SaveAs]
-   [ParseAs("institution_presence",
+   [ParseAs(Globals.DO_NOT_PARSE_ME,
             isShatteredList: true,
             itemNodeType: AstNodeType.ContentNode,
             iEu5KeyType: typeof(Institution))]

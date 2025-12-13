@@ -3,9 +3,11 @@ using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.Court;
+using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
@@ -34,6 +36,24 @@ public static class SavingActionProvider
       }
 
       AsOneLine(false, sb, $"{targetKvp.Key} = {targetKvp.Value}");
+   }
+
+   public static void SocientalValueEntrySaving(IAgs target,
+                                                PropertySavingMetadata metadata,
+                                                IndentedStringBuilder sb,
+                                                bool asOneLine)
+   {
+      var sves = (ObservableRangeCollection<SocientalValueEntry>)target._getValue(metadata.NxProp);
+
+      if (sves.Count == 0)
+         return;
+
+      if (!asOneLine)
+         sb.AppendLine();
+      foreach (var sve in sves)
+         AsOneLine(asOneLine, sb, $"{sve.SocientalValue.UniqueId} = {FormatValue(SavingValueType.Int, sve, SocientalValueEntry.Field.Value)}");
+      if (!asOneLine)
+         sb.AppendLine();
    }
 
    public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)

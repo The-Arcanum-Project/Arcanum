@@ -39,6 +39,15 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
       }
    }
 
+   [SaveAs(savingMethod: "SocientalValueEntrySaving")]
+   [DefaultValue(null)]
+   [Description("The societal values upheld by this government.")]
+   [ParseAs(Globals.DO_NOT_PARSE_ME,
+            isShatteredList: true,
+            iEu5KeyType: typeof(SocientalValue),
+            itemNodeType: AstNodeType.ContentNode)]
+   public ObservableRangeCollection<SocientalValueEntry> SocietalValues { get; set; } = [];
+
    [SaveAs]
    [DefaultValue(GovernmentType.Monarchy)]
    [Description("The type of government this state represents.")]

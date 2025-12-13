@@ -10,7 +10,6 @@ using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
 using Common.Logger;
-using MultiCollectionEditor = Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors.MultiCollectionEditor;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -33,13 +32,20 @@ public partial class DebugPanelGrid
 
    private void FindNullLocationInMarketButton_Click(object sender, RoutedEventArgs e)
    {
-      var numModded = 0;
-      foreach (var climate in Globals.Climates.Values)
-         if (climate.Source.IsModded)
-            numModded++;
+      var foundAny = false;
+      foreach (var country in Globals.Countries.Values)
+      {
+         if (country.GovernmentState.SocietalValues.Count > 0)
+         {
+            Debug.WriteLine($"Country {country.UniqueId} has societal values:");
+            foreach (var svEntry in country.GovernmentState.SocietalValues)
+               Debug.WriteLine($" - {svEntry.SocientalValue} with intensity {svEntry.Value}");
+            foundAny = true;
+         }
+      }
 
-      MessageBox.Show($"Found {numModded} modded climates.\nFound {Globals.Climates.Values.Count - numModded} vanilla climates.");
-      //MessageBox.Show($"Num of objects to save: {SaveMaster.GetNeedsToBeSaveCount}");
+      if (!foundAny)
+         Debug.WriteLine("No countries with societal values found.");
    }
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
@@ -104,7 +110,6 @@ public partial class DebugPanelGrid
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      
    }
 
    private void InsertLogSpacerButton_Click(object sender, RoutedEventArgs e)

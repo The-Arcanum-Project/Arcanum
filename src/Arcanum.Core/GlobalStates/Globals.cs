@@ -46,7 +46,7 @@ public static class Globals
    public const string REPLACE_DESCRIPTION = "???REPLACE_ME???";
    public const string DO_NOT_PARSE_ME = "DO_NOT_PARSE_ME";
 
-   public static GameState State { get; set; } = new();
+   public static GameState State { get; set; } = new ();
 
    public static DefaultMapDefinition DefaultMapDefinition { get; set; } = null!;
    public static Dictionary<string, PopType> PopTypes { get; } = [];
@@ -59,6 +59,7 @@ public static class Globals
    public static Dictionary<string, ArtistType> ArtistTypes { get; set; } = [];
    public static Dictionary<string, TownSetup> TownSetups { get; set; } = [];
    public static Dictionary<string, BuildingLevel> BuildingLevels { get; set; } = [];
+   public static Dictionary<string, SocientalValue> SocientalValues { get; } = [];
 
    #region Religion
 
@@ -119,7 +120,7 @@ public static class Globals
    public static Dictionary<string, Building> Buildings { get; } = [];
    public static Dictionary<string, RawMaterial> RawMaterials { get; } = [];
    public static Dictionary<string, Market> Markets { get; } = [];
-   public static BuildingsManager BuildingsManager { get; set; } = new();
+   public static BuildingsManager BuildingsManager { get; set; } = new ();
 
    #endregion
 

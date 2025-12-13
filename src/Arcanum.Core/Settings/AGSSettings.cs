@@ -7,6 +7,8 @@ public class AGSSettings
 {
    public AgsSettings ModifierDataSettings { get; set; } = new ();
    public AgsSettings VariableDeclarationAgsSettings { get; set; } = new ();
+   public AgsSettings SocientalValueAgsSettings { get; set; } = new ();
+   public AgsSettings SocientalValueEntryAgsSettings { get; set; } = new ();
    public AgsSettings CharacterNameDeclarationAgsSettings { get; set; } = new ();
    public AgsSettings AgeAgsSettings { get; set; } = new ();
    public AgsSettings VegetationAgsSettings { get; set; } = new ();

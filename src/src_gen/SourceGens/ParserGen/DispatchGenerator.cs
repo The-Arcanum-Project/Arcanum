@@ -18,7 +18,7 @@ public static class DispatchGenerator
 
       AppendMainSwitchBody(sb, data);
 
-      sb.AppendLine("        return true;");
+      sb.AppendLine("        return false;");
       sb.AppendLine("    }");
       sb.AppendLine();
 
@@ -225,7 +225,7 @@ public static class DispatchGenerator
             sb.AppendLine("                }");
          }
 
-         sb.AppendLine("                break;");
+         sb.AppendLine("                return false;");
          sb.AppendLine("            }");
       }
 

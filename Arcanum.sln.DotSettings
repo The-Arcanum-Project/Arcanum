@@ -160,32 +160,15 @@
 public partial class $type$Parsing(IEnumerable&lt;IDependencyNode&lt;string&gt;&gt; dependencies)
    : ParserValidationLoadingService&lt;$type$&gt;(dependencies)
 {
-   public override void LoadSingleFile(RootNode rn,
-                                          LocationContext ctx,
-                                          Eu5FileObj fileObj,
-                                          string actionStack,
-                                          string source,
-                                          ref bool validation,
-                                          object? lockObject)
+   public override void LoadSingleFile(RootNode rn, ref ParsingContext pc, Eu5FileObj fileObj, object? lockObject)
    {
-      SimpleObjectParser.Parse(fileObj,
-                               rn,
-                               ctx,
-                               actionStack,
-                               source,
-                               ref validation,
-                               ParseProperties,
-                               GetGlobals(),
-                               lockObject);
+      SimpleObjectParser.Parse(fileObj, rn, ref pc, ParseProperties, Globals.$type$s, null);
    }
-   
-   protected override void ParsePropertiesToObject(BlockNode block,
-                                                   $type$ target,
-                                                   LocationContext ctx,
-                                                   string source,
-                                                   ref bool validation,
-                                                   bool allowUnknownNodes)
-      =&gt; ParseProperties(block, target, ctx, source, ref validation, allowUnknownNodes);
+
+   protected override void ParsePropertiesToObject(BlockNode block, $type$ target, ref ParsingContext pc, bool allowUnknownNodes)
+   {
+      ParseProperties(block, target, ref pc, false);
+   }
 }</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5AB809EBFF057241ADE5017D015E5D83/Text/@EntryValue">public class $Name$
 {
@@ -302,7 +285,7 @@ public partial class $Type$ : IEmbeddedEu5Object&lt;$Type$&gt;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public static VariableDataBlock Empty { get; } = new () { UniqueId = "$Type$_EMPTY" };
+   public static $Type$ Empty { get; } = new () { UniqueId = "$Type$_EMPTY" };
 }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=838E984E3FF4774FAF067FA3DC34BE29/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>

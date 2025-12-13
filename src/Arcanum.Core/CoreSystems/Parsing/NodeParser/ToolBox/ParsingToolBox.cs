@@ -1533,6 +1533,38 @@ public static class ParsingToolBox
                                            out value);
    }
 
+   public static bool ArcTryParse_SocientalValueEntry(ContentNode node,
+                                                      ref ParsingContext pc,
+                                                      [MaybeNullWhen(false)] out SocientalValueEntry value)
+   {
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ref pc))
+      {
+         value = null;
+         return pc.Fail();
+      }
+
+      if (!node.Value.IsLiteralValueNodeOptionalUnary(ref pc, out var str, out _) || !int.TryParse(str, out var intValue))
+      {
+         value = null;
+         return pc.Fail();
+      }
+
+      if (!LUtil.TryGetFromGlobalsAndLog(node.KeyNode, ref pc, Globals.SocientalValues, out var sv))
+      {
+         value = null;
+         return false;
+      }
+
+      value = new ()
+      {
+         SocientalValue = sv, Value = intValue,
+      };
+      return true;
+   }
+
    public static bool ArcTryParse_InstitutionPresence(ContentNode node,
                                                       ref ParsingContext pc,
                                                       [MaybeNullWhen(false)] out InstitutionPresence value)
