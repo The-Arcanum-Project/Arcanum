@@ -32,6 +32,12 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
    public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
+      if (AppData.IsHeadless)
+      {
+         ArcLog.WriteLine("MPS", LogLevel.INF, "Skipping map processing in headless mode.");
+         return true;
+      }
+
       using (var bitmap =
              new Bitmap(fileObj.Path.FullPath))
       {
@@ -46,8 +52,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       TotalPolygonsCount = _parsingPolygons.Count;
 
       _ = Tessellate();
-     
-      
+
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished loading and parsing map polygons.");
 
       return true;
@@ -55,10 +60,23 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
    private async Task Tessellate()
    {
+      if (AppData.IsHeadless)
+      {
+         // In headless mode, we do not need to tessellate the polygons
+         lock (this)
+         {
+            FinishedTesselation = true;
+            _parsingPolygons = null!;
+            UIHandle.Instance.MapHandle.NotifyMapLoaded();
+         }
+
+         return;
+      }
+
       await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
                                              i => Polygons![i] = _parsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
-   
+
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
 
       // TODO @MelCo: Make this right

@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
+using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
@@ -92,6 +93,7 @@ public class ParsingMaster
          index++;
       }
 #endif
+      ArcLog.WriteLine("PMS", LogLevel.INF, "Initialized parsing steps.");
    }
 
    /// <summary>
@@ -123,11 +125,16 @@ public class ParsingMaster
 
    public async Task<bool> ExecuteAllParsingSteps()
    {
+      ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "ModPath: " + FileManager.ModDataSpace.FullPath);
+      foreach (var dpend in FileManager.DependentDataSpaces)
+         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Dependent DataSpace: " + dpend.FullPath);
+
       var sw = Stopwatch.StartNew();
       EffectParser.ParseEffectDefinitions();
 
       InitializeSteps();
-
+      ArcLog.WriteLine("PMS", LogLevel.INF, "Starting parsing steps...");
+      ArcLog.WriteLine("PMS", LogLevel.INF, "Steps to execute: " + ParsingSteps);
       ParsingStepsDone = 0;
       var steps = _sortedLoadingSteps.ToList();
       var lockObj = new object();
@@ -135,6 +142,7 @@ public class ParsingMaster
 
       while (ParsingStepsDone < ParsingSteps)
       {
+         ArcLog.WriteLine("PMS", LogLevel.INF, "Executing parsing steps... " + $"{ParsingStepsDone}/{ParsingSteps} completed.");
          var hasPrioSteps = steps.Any(s => s.HasPriority);
          var readySteps = hasPrioSteps ? [steps[0]] : LookAheadSteps(steps);
          foreach (var step in readySteps)
@@ -159,6 +167,9 @@ public class ParsingMaster
                                                                  {
                                                                     var startNew = Stopwatch.StartNew();
                                                                     var wrapper = step.GetParsingStep();
+                                                                    ArcLog.WriteLine("PMS",
+                                                                                     LogLevel.INF,
+                                                                                     $"Starting heavy parsing step: {step.Name}");
                                                                     var result = wrapper.Execute();
                                                                     lock (lockObj)
                                                                        if (result)
@@ -177,14 +188,24 @@ public class ParsingMaster
                                                                  }
                                                                  catch (Exception e)
                                                                  {
-                                                                    UIHandle.Instance.PopUpHandle
-                                                                            .ShowMBox("An Exception occured during heavy parsing step: " +
-                                                                                      $"{step.Name}\n\n" +
-                                                                                      $"Exception Message: {e.Message}\n\n" +
-                                                                                      "Please check the log for more details.",
-                                                                                      "Parsing Error",
-                                                                                      MBoxButton.OK,
-                                                                                      MessageBoxImage.Error);
+                                                                    if (AppData.IsHeadless)
+                                                                       ArcLog.WriteLine(CommonLogSource.PMT,
+                                                                                        LogLevel.ERR,
+                                                                                        "An Exception occured during heavy parsing step: " +
+                                                                                        $"{step.Name}\n\n" +
+                                                                                        $"Exception Message: {e.Message}\n\n" +
+                                                                                        "Stack Trace:\n" +
+                                                                                        $"{e.StackTrace}\n\n" +
+                                                                                        "Please check the log for more details.");
+                                                                    else
+                                                                       UIHandle.Instance.PopUpHandle
+                                                                               .ShowMBox("An Exception occured during heavy parsing step: " +
+                                                                                         $"{step.Name}\n\n" +
+                                                                                         $"Exception Message: {e.Message}\n\n" +
+                                                                                         "Please check the log for more details.",
+                                                                                         "Parsing Error",
+                                                                                         MBoxButton.OK,
+                                                                                         MessageBoxImage.Error);
                                                                     throw
                                                                        new($"Exception occurred while executing heavy parsing step '{step.Name}': {e.Message}",
                                                                            e);
@@ -198,6 +219,9 @@ public class ParsingMaster
                                                                               {
                                                                                  var sw2 = Stopwatch.StartNew();
                                                                                  var wrapper = step.GetParsingStep();
+                                                                                 ArcLog.WriteLine("PMS",
+                                                                                                  LogLevel.INF,
+                                                                                                  $"Starting parsing step: {step.Name}");
                                                                                  var result = wrapper.Execute();
                                                                                  lock (lockObj)
                                                                                     if (result)
@@ -220,14 +244,24 @@ public class ParsingMaster
                                                                               }
                                                                               catch (Exception e)
                                                                               {
-                                                                                 UIHandle.Instance.PopUpHandle
-                                                                                         .ShowMBox("An Exception occured during parsing step: " +
-                                                                                                   $"{step.Name}\n\n" +
-                                                                                                   $"Exception Message: {e.Message}\n\n" +
-                                                                                                   "Please check the log for more details.",
-                                                                                                   "Parsing Error",
-                                                                                                   MBoxButton.OK,
-                                                                                                   MessageBoxImage.Error);
+                                                                                 if (AppData.IsHeadless)
+                                                                                    ArcLog.WriteLine(CommonLogSource.PMT,
+                                                                                                     LogLevel.ERR,
+                                                                                                     "An Exception occured during parsing step: " +
+                                                                                                     $"{step.Name}\n\n" +
+                                                                                                     $"Exception Message: {e.Message}\n\n" +
+                                                                                                     "Stack Trace:\n" +
+                                                                                                     $"{e.StackTrace}\n\n" +
+                                                                                                     "Please check the log for more details.");
+                                                                                 else
+                                                                                    UIHandle.Instance.PopUpHandle
+                                                                                            .ShowMBox("An Exception occured during parsing step: " +
+                                                                                                      $"{step.Name}\n\n" +
+                                                                                                      $"Exception Message: {e.Message}\n\n" +
+                                                                                                      "Please check the log for more details.",
+                                                                                                      "Parsing Error",
+                                                                                                      MBoxButton.OK,
+                                                                                                      MessageBoxImage.Error);
                                                                                  throw
                                                                                     new($"Exception occurred while executing parsing step '{step.Name}': {e.Message}",
                                                                                         e);
@@ -243,10 +277,14 @@ public class ParsingMaster
             if (await finishedTask)
                continue;
 
+            ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "A parsing step failed. Stopping further processing.");
+
             // A task failed. Cancel all other running tasks and stop.
             await cts.CancelAsync();
             return false;
          }
+
+         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Batch parsing steps completed.");
       }
 
       Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);

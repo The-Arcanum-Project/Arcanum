@@ -55,6 +55,30 @@ public static class FileManager
       }
    }
 
+   public static void InitHeadlessMode(string modPath, List<string> dependencies)
+   {
+      ModDataSpace = new("ModEUV",
+                         modPath.Split(Path.DirectorySeparatorChar),
+                         DataSpace.AccessType.ReadWrite);
+
+      DependentDataSpaces =
+      [
+         .. dependencies.Select(dep => new DataSpace("DependencyMod",
+                                                     dep.Split(Path.DirectorySeparatorChar),
+                                                     DataSpace.AccessType.ReadOnly)),
+      ];
+
+      CoreData.ModMetadata = ExistingModsLoader.ParseModMetadata(modPath)!;
+
+      FileDescriptorCache.Clear();
+      foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
+      {
+         foreach (var type in descriptor.LoadingService[0]
+                                        .ParsedObjects.Where(type => !FileDescriptorCache.TryAdd(type, descriptor)))
+            Debug.Fail($"FileDescriptorCache already contains a descriptor for type {type.FullName}");
+      }
+   }
+
    public static string SanitizePath(string path, char separationChar = '.')
    {
       if (string.IsNullOrEmpty(path))
@@ -150,11 +174,9 @@ public static class FileManager
       return Path.Combine(ModDataSpace.FullPath, Path.Combine(subPaths));
    }
 
-   public static bool ExistsInMod(string[] internalPath, bool isDirectory = false)
-      => ExistsInMod(Path.Combine(internalPath), isDirectory);
+   public static bool ExistsInMod(string[] internalPath, bool isDirectory = false) => ExistsInMod(Path.Combine(internalPath), isDirectory);
 
-   public static bool ExistsInVanilla(string[] internalPath, bool isDirectory = false)
-      => ExistsInVanilla(Path.Combine(internalPath), isDirectory);
+   public static bool ExistsInVanilla(string[] internalPath, bool isDirectory = false) => ExistsInVanilla(Path.Combine(internalPath), isDirectory);
 
    /// <summary>
    /// Returns true if the given path exists in the mod data space.
@@ -330,7 +352,7 @@ public static class FileManager
       // if we have a file ending we need to remove it and only check the path
       return CoreData.ModMetadata.ReplacePaths.Any(replacePath
                                                       => replacePath.Equals(RemoveFileNameEntryFromPath(subPaths,
-                                                                             out _)));
+                                                                                                        out _)));
    }
 
    private static string[] RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)
