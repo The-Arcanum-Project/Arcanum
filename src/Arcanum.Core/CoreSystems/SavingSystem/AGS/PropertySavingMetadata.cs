@@ -110,6 +110,7 @@ public class PropertySavingMetadata
    /// </summary>
    public void Format(IAgs ags,
                       IndentedStringBuilder sb,
+                      bool asOneLine,
                       string commentChar,
                       AgsSettings settings,
                       bool alwaysSerializeAll = false)
@@ -130,7 +131,7 @@ public class PropertySavingMetadata
       {
          if (ValueType == SavingValueType.IAgs && !IsCollection)
          {
-            HandleIAgsProperty((IAgs)value, sb, commentChar);
+            HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine);
             return;
          }
 
@@ -144,15 +145,18 @@ public class PropertySavingMetadata
          }
          else if (ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
          {
-            HandleEnumProperty(sb, value);
+            HandleEnumProperty(sb, value, asOneLine);
          }
          else
          {
-            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value, this)}");
+            if (asOneLine)
+               sb.Append($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value, this)} ");
+            else
+               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(ValueType, value, this)}");
          }
       }
       else
-         SavingMethod(ags, this, sb);
+         SavingMethod(ags, this, sb, asOneLine);
    }
 
    private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
@@ -204,7 +208,7 @@ public class PropertySavingMetadata
       return false;
    }
 
-   private void HandleEnumProperty(IndentedStringBuilder sb, object value)
+   private void HandleEnumProperty(IndentedStringBuilder sb, object value, bool isOneLine)
    {
       Debug.Assert(value is Enum, "Property is not an Enum");
 
@@ -219,7 +223,11 @@ public class PropertySavingMetadata
             if (!data.Mapping.TryGetValue(sv, out var stringRep))
                return;
 
-            sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {stringRep}");
+            var str = $"{Keyword} {SavingUtil.GetSeparator(Separator)} {stringRep}";
+            if (isOneLine)
+               sb.Append(str + " ");
+            else
+               sb.AppendLine(str);
          }
       }
       else
@@ -231,17 +239,23 @@ public class PropertySavingMetadata
       }
    }
 
-   private void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar)
+   private void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar, bool asOneLine)
    {
       var sm = ags.ClassMetadata.SavingMethod;
       if (sm != null)
       {
-         sm.Invoke(ags, [this], sb);
+         sm.Invoke(ags, [this], sb, asOneLine);
          return;
       }
 
       if (SaveEmbeddedAsIdentifier)
-         sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ags.SavingKey}");
+      {
+         var str = $"{Keyword} {SavingUtil.GetSeparator(Separator)} {ags.SavingKey}";
+         if (asOneLine)
+            sb.Append(str + " ");
+         else
+            sb.AppendLine(str);
+      }
       else
          ags.ToAgsContext(commentChar).BuildContext(sb);
    }

@@ -14,7 +14,7 @@ using Nexus.Core.Attributes;
 namespace Arcanum.Core.GameObjects.Court.State;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(asOneLine: true)]
 public partial class RulerTerm : IEu5Object<RulerTerm>
 {
    [SaveAs]
@@ -63,7 +63,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    [DefaultValue("")]
    public string UniqueId
    {
-      get => CharacterId.UniqueId;
+      get => "";
       set;
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

@@ -115,7 +115,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("parliament", AstNodeType.BlockNode, isEmbedded: true)]
    public ParliamentDefinition ParliamentDefinition { get; set; } = ParliamentDefinition.Empty;
 
-   [SaveAs(collectionAsPureIdentifierList: true)]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [Description("All reforms that have been enacted in this government state.")]
    [ParseAs("reforms", AstNodeType.BlockNode)]
@@ -127,7 +127,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("laws", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<EnactedLaw> EnactedLaws { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true, isEmbeddedObject: true)]
    [DefaultValue(null)]
    [Description("All rulers that have ruled in this government state.")]
    [ParseAs("ruler_term", isEmbedded: true, isShatteredList: true, itemNodeType: AstNodeType.BlockNode)]

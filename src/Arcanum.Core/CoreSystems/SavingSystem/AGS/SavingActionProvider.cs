@@ -23,7 +23,8 @@ public static class SavingActionProvider
 {
    public static void SaveIdentifierStringKvp(IAgs target,
                                               HashSet<PropertySavingMetadata> metadata,
-                                              IndentedStringBuilder sb)
+                                              IndentedStringBuilder sb,
+                                              bool asOneLine)
    {
       if (target is not IStringKvp targetKvp)
       {
@@ -32,18 +33,18 @@ public static class SavingActionProvider
             InvalidOperationException("SaveIdentifierStringKvp can only be used with IIdentifierStringKvp instances.");
       }
 
-      sb.AppendLine($"{targetKvp.Key} = {targetKvp.Value}");
+      AsOneLine(false, sb, $"{targetKvp.Key} = {targetKvp.Value}");
    }
 
-   public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not Road road)
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
 
-      sb.AppendLine($"{road.StartLocation.UniqueId} = {road.EndLocation.UniqueId}");
+      AsOneLine(asOneLine, sb, $"{road.StartLocation.UniqueId} = {road.EndLocation.UniqueId}");
    }
 
-   public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not JominiDate date)
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
@@ -52,24 +53,27 @@ public static class SavingActionProvider
          return;
 
       var md = metadata.First();
-      sb.AppendLine($"{md.Keyword} {GetSeparator(md.Separator)} {date}");
+      AsOneLine(asOneLine, sb, $"{md.Keyword} {GetSeparator(md.Separator)} {date}");
    }
 
    public static void SaveNameDeclaration(IAgs target,
                                           HashSet<PropertySavingMetadata> metadata,
-                                          IndentedStringBuilder sb)
+                                          IndentedStringBuilder sb,
+                                          bool asOneLine)
    {
       if (target is not CharacterNameDeclaration cnd)
          throw new
             InvalidOperationException("SaveNameDeclaration can only be used with CharacterNameDeclaration instances.");
 
+      var str = string.Empty;
       if (cnd.IsRandom)
-         sb.AppendLine($"{cnd.SavingKey} = {cnd.Name}");
+         str = $"{cnd.SavingKey} = {cnd.Name}";
       else if (!string.IsNullOrEmpty(cnd.Name))
-         sb.AppendLine($"{cnd.SavingKey} = {{ name = {cnd.Name} }}");
+         str = "{cnd.SavingKey} = {{ name = {cnd.Name} }}";
+      AsOneLine(asOneLine, sb, str);
    }
 
-   public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not IIagsEnumKvp<IAgs, Enum> kvp)
       {
@@ -77,69 +81,84 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveIAgsEnumKvp can only be used with IIagsEnumKvp<IAgs> instances.");
       }
 
-      sb.AppendLine($"{kvp.Key.SavingKey} = {EnumAgsRegistry.GetKey(kvp.Value)}");
+      AsOneLine(asOneLine, sb, $"{kvp.Key.SavingKey} = {EnumAgsRegistry.GetKey(kvp.Value)}");
    }
 
-   public static void SaveDemandData(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
+   public static void SaveDemandData(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not DemandData dd)
          throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
 
+      string str;
       if (dd.TargetAll > 0f)
-         sb.AppendLine($"all = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}");
+         str = $"all = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}";
       else if (dd.TargetUpper > 0f)
-         sb.AppendLine($"upper = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+         str = $"upper = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}";
       else
-         sb.AppendLine($"{FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}");
+         str =
+            $"{FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}";
+
+      AsOneLine(asOneLine, sb, str);
    }
 
    public static void MapMovementAssistSaving(IAgs target,
                                               HashSet<PropertySavingMetadata> metadata,
-                                              IndentedStringBuilder sb)
+                                              IndentedStringBuilder sb,
+                                              bool asOneLine)
    {
       if (target is not MapMovementAssist mma)
          throw new
             InvalidOperationException("MapMovementAssistSaving can only be used with MapMovementAssist instances.");
 
-      sb.AppendLine($"movement_assistance = {{ {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
+      AsOneLine(asOneLine,
+                sb,
+                $"movement_assistance = {{ {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
    }
 
    public static void EstateCountDefinitionSaving(IAgs target,
                                                   HashSet<PropertySavingMetadata> metadata,
-                                                  IndentedStringBuilder sb)
+                                                  IndentedStringBuilder sb,
+                                                  bool asOneLine)
    {
       if (target is not EstateCountDefinition ecd)
          throw new
             InvalidOperationException("EstateCountDefinitionSaving can only be used with EstateCountDefinition instances.");
 
-      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate)} = {FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count)}");
+      AsOneLine(asOneLine,
+                sb,
+                $"{FormatValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate)} = {FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count)}");
    }
 
    public static void ModValInstanceSaving(IAgs target,
                                            HashSet<PropertySavingMetadata> metadata,
-                                           IndentedStringBuilder sb)
+                                           IndentedStringBuilder sb,
+                                           bool asOneLine)
    {
       if (target is not ModValInstance mvi)
          throw new
             InvalidOperationException("ModValInstanceSaving can only be used with ModValInstance instances.");
 
-      sb.AppendLine(FormatValue(SavingValueType.Modifier, (object)mvi, null));
+      AsOneLine(asOneLine, sb, FormatValue(SavingValueType.Modifier, (object)mvi, null));
    }
 
    public static void SoundTollsSaving(IAgs target,
                                        HashSet<PropertySavingMetadata> metadata,
-                                       IndentedStringBuilder sb)
+                                       IndentedStringBuilder sb,
+                                       bool asOneLine)
    {
       if (target is not SoundToll st)
          throw new
             InvalidOperationException("SoundTollsSaving can only be used with SoundTolls instances.");
 
-      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne)} = {FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo)}");
+      AsOneLine(asOneLine,
+                sb,
+                $"{FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne)} = {FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo)}");
    }
 
    public static void DefaultMapDefinitionSaving(IAgs target,
                                                  HashSet<PropertySavingMetadata> metadata,
-                                                 IndentedStringBuilder sb)
+                                                 IndentedStringBuilder sb,
+                                                 bool asOneLine)
    {
       if (target is not DefaultMapDefinition dmd)
          throw new
@@ -152,35 +171,28 @@ public static class SavingActionProvider
          var prop = orderedProperties[i];
          if (settings.Format == SavingFormat.Spacious && i > 0)
             sb.AppendLine();
-         prop.Format(dmd, sb, "#", settings);
+         prop.Format(dmd, sb, asOneLine, "#", settings);
       }
-   }
-
-   public static void LocationSaving(IAgs target,
-                                     HashSet<PropertySavingMetadata> metadata,
-                                     IndentedStringBuilder sb)
-   {
-      if (target is not Location loc)
-         throw new
-            InvalidOperationException("LocationSaving can only be used with Location instances.");
-
-      sb.AppendLine($"{loc.UniqueId} = {loc.Color.AsHexString().ToLower()}");
    }
 
    public static void InstitutionPresenceSaving(IAgs target,
                                                 HashSet<PropertySavingMetadata> metadata,
-                                                IndentedStringBuilder sb)
+                                                IndentedStringBuilder sb,
+                                                bool asOneLine)
    {
       if (target is not InstitutionPresence ip)
          throw new
             InvalidOperationException("InstitutionPresenceSaving can only be used with InstitutionPresence instances.");
 
-      sb.AppendLine($"{FormatValue(SavingValueType.Identifier, ip, InstitutionPresence.Field.Institution)} = {FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent)}");
+      AsOneLine(asOneLine,
+                sb,
+                $"{FormatValue(SavingValueType.Identifier, ip, InstitutionPresence.Field.Institution)} = {FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent)}");
    }
 
    public static void Setup_vars_saving(IAgs target,
                                         PropertySavingMetadata metadata,
-                                        IndentedStringBuilder sb)
+                                        IndentedStringBuilder sb,
+                                        bool asOneLine)
    {
       if (target is not Country country)
          throw new

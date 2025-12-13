@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -98,38 +98,15 @@ public static class SavingUtil
    /// <returns>The complexity depth from this node downwards.</returns>
    private static int EstimateObjectComplexityRecursive(IAgs ags, HashSet<IAgs> visited)
    {
-      if (!visited.Add(ags))
-         return 0;
+      return 1;
+   }
 
-      var maxChildDepth = 0;
-      foreach (var prop in ags.SaveableProps)
-      {
-         object? value = null;
-         Nx.ForceGet(ags, prop.NxProp, ref value);
-
-         if (value is IAgs nestedAgs)
-         {
-            var depth = EstimateObjectComplexityRecursive(nestedAgs, visited);
-            if (depth > maxChildDepth)
-               maxChildDepth = depth;
-         }
-
-         else if (value is IEnumerable enumerable and not string)
-         {
-            foreach (var item in enumerable)
-               if (item is IAgs itemAgs)
-               {
-                  var depth = EstimateObjectComplexityRecursive(itemAgs, visited);
-                  if (depth > maxChildDepth)
-                     maxChildDepth = depth;
-                  break;
-               }
-         }
-      }
-
-      visited.Remove(ags);
-
-      return maxChildDepth + 1;
+   public static void AsOneLine(bool asOneLine, IndentedStringBuilder sb, string str)
+   {
+      if (asOneLine)
+         sb.Append($"{str} ");
+      else
+         sb.AppendLine(str);
    }
 
    /// <summary>
@@ -235,9 +212,7 @@ public static class SavingUtil
    /// <summary>
    /// Gets the string representation of a brace token.
    /// </summary>
-   /// <param name="separator"></param>
-   /// <returns></returns>
-   /// <exception cref="ArgumentOutOfRangeException"></exception>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static string GetBrace(TokenType separator)
    {
       return separator switch
