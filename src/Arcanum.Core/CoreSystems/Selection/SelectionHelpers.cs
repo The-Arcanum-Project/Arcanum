@@ -102,6 +102,20 @@ public static class SelectionHelpers
       throw new ArgumentException("current is not a valid parent type");
    }
 
+   public static Enum GetParentEnumFromChildrenEnum(Enum children)
+   {
+      return children switch
+      {
+         Province.Field.Locations => Location.Field.Province,
+         Area.Field.Provinces => Province.Field.Area,
+         Region.Field.Areas => Area.Field.Region,
+         SuperRegion.Field.Regions => Region.Field.SuperRegion,
+         Continent.Field.SuperRegions => SuperRegion.Field.Continent,
+         _ => throw new ArgumentException("children is not a valid children enum"),
+      };
+   }
+
+
    public static AggregateLink<T> GetAllChildren<T>(IEu5Object eu5Object) where T : IEu5Object
    {
 #if DEBUG

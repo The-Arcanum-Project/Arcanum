@@ -41,4 +41,21 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
 
       return true;
    }
+   
+   public bool TryAddMultiple(IEu5Object target, Enum attribute, object value, bool isAdd)
+   {
+      if (DisallowMerge(target, attribute) || !Value.Equals(value))
+         return false;
+
+      Targets.Add(target);
+      Debug.Assert(Attribute != null);
+      if (isAdd)
+         target._addToCollection(Attribute, Value);
+      else
+         target._removeFromCollection(Attribute, Value);
+
+      InvalidateUI();
+
+      return true;
+   }
 }
