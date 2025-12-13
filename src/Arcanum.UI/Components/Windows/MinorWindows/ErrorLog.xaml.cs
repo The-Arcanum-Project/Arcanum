@@ -166,7 +166,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       }
    }
 
-   private SimpleSearchSettings SearchSettings { get; set; } = new();
+   private SimpleSearchSettings SearchSettings { get; set; } = new ();
    private bool _isFullyLoaded;
 
    private string? FilterPropertyPath => FilterComboBox.SelectedItem is not FilterType filterType
@@ -255,17 +255,41 @@ public partial class ErrorLog : INotifyPropertyChanged
 
       lcv.SortDescriptions.Clear();
 
-      lcv.Filter =
-         SimpleCollectionViewFilterProvider.GenerateFilter(SearchSettings,
-                                                           query,
-                                                           FilterPropertyPath ?? string.Empty);
+      // 1. Generate the base filter from your search settings/text
+      var baseFilter = SimpleCollectionViewFilterProvider.GenerateFilter(SearchSettings,
+                                                                         query,
+                                                                         FilterPropertyPath ?? string.Empty);
 
-      // check if we have items to sort
+      // 2. Cache the vanilla path and checkbox state to avoid lookups per item
+      var vanillaPath = FileManager.GetVanillaPath();
+      bool showVanilla = VanillaErrors.IsChecked == true;
+
+      // 3. Create a combined filter
+      lcv.Filter = (item) =>
+      {
+         // First check: Does it pass the text/severity search?
+         if (baseFilter != null && !baseFilter(item))
+            return false;
+
+         // Second check: Vanilla path logic
+         if (item is Diagnostic diag)
+         {
+            bool isVanillaFile = diag.Context.FilePath.StartsWith(vanillaPath, StringComparison.OrdinalIgnoreCase);
+
+            // If the file is vanilla, but the checkbox is Unchecked, hide it.
+            if (isVanillaFile && !showVanilla)
+               return false;
+         }
+
+         return true;
+      };
+
+      // Check if we have items to sort
       if (lcv.Count < 2)
-         lcv.SortDescriptions.Add(new(FilterPropertyPath ?? string.Empty,
-                                      SearchSettings.SortingOption == ISearchSettings.SortingOptions.Acending
-                                         ? ListSortDirection.Ascending
-                                         : ListSortDirection.Descending));
+         lcv.SortDescriptions.Add(new SortDescription(FilterPropertyPath ?? string.Empty,
+                                                      SearchSettings.SortingOption == ISearchSettings.SortingOptions.Acending
+                                                         ? ListSortDirection.Ascending
+                                                         : ListSortDirection.Descending));
       lcv.Refresh();
    }
 
@@ -354,7 +378,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new(propertyName));
+      PropertyChanged?.Invoke(this, new (propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -497,7 +521,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       ExportToPdx();
    }
 
-   private void ExportToPdx()
+   private static void ExportToPdx()
    {
       Dictionary<string, int> diagnosticsPerFile = [];
       foreach (var diag in ErrorManager.Diagnostics)
@@ -564,6 +588,12 @@ public partial class ErrorLog : INotifyPropertyChanged
 
       if (Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl))
          ProcessHelper.OpenFile(filePath);
+   }
+
+   private void VanillaFilter_OnToggle(object sender, RoutedEventArgs e)
+   {
+      // Simply re-run the search logic with the current text
+      QuerySearch(SearchTextBox?.SearchInputTextBox?.Text ?? string.Empty);
    }
 }
 

@@ -10,6 +10,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Map;
@@ -23,6 +25,12 @@ namespace Arcanum.Core.GameObjects.Economy;
 public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
 {
    #region Nexus Properties
+
+   [SaveAs]
+   [ParseAs("development_threshold")]
+   [Description("The development threshold required for this raw material to appear.")]
+   [DefaultValue(0)]
+   public int DevelopmentThreshold { get; set; }
 
    [SaveAs]
    [ParseAs("method")]
@@ -114,6 +122,12 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    [DefaultValue(null)]
    public ObservableRangeCollection<DemandData> DemandMultiply { get; set; } = [];
 
+   [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
+   [ParseAs("wealth_impact_threshold", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
+   [Description("The wealth impact thresholds for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<EstateSatisfactionDefinition> EstateAttributes { get; set; } = [];
+
    #endregion
 
 #pragma warning disable AGS004
@@ -139,7 +153,7 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public static Dictionary<string, RawMaterial> GetGlobalItems() => Globals.RawMaterials;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 
-   public static RawMaterial Empty { get; } = new() { UniqueId = "Arcanum_Empty_RawMaterial" };
+   public static RawMaterial Empty { get; } = new () { UniqueId = "Arcanum_Empty_RawMaterial" };
 
    #endregion
 
