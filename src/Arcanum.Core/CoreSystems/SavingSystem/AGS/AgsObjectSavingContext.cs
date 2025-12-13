@@ -49,6 +49,10 @@ public class AgsObjectSavingContext
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
+            if (prop.NxProp.ToString().Contains("egency"))
+            {
+            }
+
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
             prop.Format(Ags, sb, CommentChar, Settings);
@@ -73,6 +77,10 @@ public class AgsObjectSavingContext
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
+            if (prop.NxProp.ToString().Contains("regency_date"))
+            {
+            }
+
             if (!properties.Contains(prop))
                continue;
 

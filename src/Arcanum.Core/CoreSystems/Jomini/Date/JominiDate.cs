@@ -71,11 +71,11 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
    [IgnoreModifiable]
    public readonly EventHandler<JominiDate> OnJominiDateChanged = delegate { };
 
-   public static JominiDate MinValue => new(int.MinValue);
+   public static JominiDate MinValue => new (int.MinValue);
 
-   public static JominiDate MaxValue => new(int.MaxValue);
+   public static JominiDate MaxValue => new (int.MaxValue);
 
-   public static JominiDate Empty => new(1, 1, 1);
+   public static JominiDate Empty { get; } = new (1, 1, 1);
 
    public static string GetNameOfMonth(int month)
    {
@@ -174,8 +174,8 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
       TimeStamp = year * 365 + StartJominiDateOfMonth[month - 1] + day - 1;
    }
 
-   public JominiDate Copy() => new(TimeStamp);
-   public static JominiDate Copy(JominiDate jominiDate) => new(jominiDate.Year, jominiDate.Month, jominiDate.Day);
+   public JominiDate Copy() => new (TimeStamp);
+   public static JominiDate Copy(JominiDate jominiDate) => new (jominiDate.Year, jominiDate.Month, jominiDate.Day);
    public int DaysBetween(JominiDate jominiDate) => jominiDate.TimeStamp - TimeStamp;
 
    public static int DaysInMonth(int month)
@@ -199,7 +199,7 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
    /// </summary>
    public static bool TryParse(string text, out JominiDate date)
    {
-      date = new(); // Or JominiDate.Empty if you prefer
+      date = new (); // Or JominiDate.Empty if you prefer
       if (string.IsNullOrWhiteSpace(text))
          return false;
 
@@ -212,7 +212,7 @@ public partial class JominiDate : INUI, IAgs, IEmpty<JominiDate>, IComparable<Jo
           int.TryParse(parts[2], out var day))
          try
          {
-            date = new(year, month, day);
+            date = new (year, month, day);
             return true;
          }
          catch (Exception)

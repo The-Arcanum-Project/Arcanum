@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -194,6 +195,8 @@ public class PropertySavingMetadata
                if (eu5Obj.Equals(defaultValue))
                   return true;
             }
+            else if (value is JominiDate date && date == JominiDate.Empty)
+               return true;
 
             break;
       }

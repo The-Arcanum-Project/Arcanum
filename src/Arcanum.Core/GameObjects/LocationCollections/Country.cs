@@ -13,7 +13,9 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.CountryLevel;
+using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.GameObjects.Court.State;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Nexus.Core.Attributes;
 using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
@@ -38,7 +40,7 @@ public partial class Country : IEu5Object<Country>
 
    #region Nexus
 
-   [SaveAs]
+   [SaveAs(savingMethod: "Setup_vars_saving")]
    [ParseAs("variables", customParser: "ArcParse_Variables")]
    [Description("A collection of variable declarations contained within this data container.")]
    [DefaultValue(null)]
@@ -77,23 +79,23 @@ public partial class Country : IEu5Object<Country>
    [Description("The religious school of this country.")]
    public ReligiousSchool ReligiousSchool { get; set; } = ReligiousSchool.Empty;
 
-   [SaveAs]
-   [DefaultValue("")]
+   [SaveAs(isShattered: true, valueType: SavingValueType.Identifier)]
+   [DefaultValue(null)]
    [ParseAs("dynasty", isShatteredList: true)]
    [Description("The ruling dynasty of this country.")]
-   public ObservableRangeCollection<string> Dynasty { get; set; } = [];
+   public ObservableRangeCollection<Dynasty> Dynasty { get; set; } = [];
 
    [SaveAs]
    [ParseAs("court_language")]
-   [DefaultValue("")]
+   [DefaultValue(null)]
    [Description("The court language of this country.")]
-   public string CourtLanguage { get; set; } = string.Empty;
+   public Language CourtLanguage { get; set; } = Language.Empty;
 
    [SaveAs]
    [ParseAs("liturgical_language")]
-   [DefaultValue("")]
+   [DefaultValue(null)]
    [Description("The liturgical language of this country.")]
-   public string LiturgicalLanguage { get; set; } = string.Empty;
+   public Language LiturgicalLanguage { get; set; } = Language.Empty;
 
    [SaveAs]
    [ParseAs("country_rank")]
@@ -120,67 +122,67 @@ public partial class Country : IEu5Object<Country>
    [Description("The key for the name of this country.")]
    public string CountryName { get; set; } = string.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_control_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations that are integrated of this country.")]
    public ObservableRangeCollection<Location> OwnControlIntegrated { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_control_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but controlled by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnControlConquered { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_control_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlColony { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned core locations of this country.")]
    public ObservableRangeCollection<Location> OwnCores { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but owned by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnConquered { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and integrated locations of this country.")]
    public ObservableRangeCollection<Location> OwnIntegrated { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("own_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnColony { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled core locations of this country.")]
    public ObservableRangeCollection<Location> ControlCores { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("control", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled locations of this country.")]
    public ObservableRangeCollection<Location> Control { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("our_cores_conquered_by_others", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations that are our cores but conquered by other countries.")]
@@ -192,17 +194,17 @@ public partial class Country : IEu5Object<Country>
    [Description("A list of included ??? for this country.")]
    public ObservableRangeCollection<string> Includes { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("accepted_cultures", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A list of accepted cultures for this country.")]
-   public ObservableRangeCollection<string> AcceptedCultures { get; set; } = [];
+   public ObservableRangeCollection<Culture> AcceptedCultures { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("tolerated_cultures", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A list of tolerated cultures for this country.")]
-   public ObservableRangeCollection<string> ToleratedCultures { get; set; } = [];
+   public ObservableRangeCollection<Culture> ToleratedCultures { get; set; } = [];
 
    [SaveAs]
    [ParseAs("currency_data", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
@@ -210,25 +212,25 @@ public partial class Country : IEu5Object<Country>
    [Description("A list of currency data effects for this country before game start.")]
    public ObservableRangeCollection<CurrencyData> CurrencyData { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("add_pops_from_locations", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("When starting the game, add pops from these locations to this country.")]
    public ObservableRangeCollection<Location> AddedPopsFromLocations { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("discovered_provinces", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("These provinces discovered by this country at game start.")]
    public ObservableRangeCollection<Province> DiscoveredProvinces { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("discovered_areas", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("These areas discovered by this country at game start.")]
    public ObservableRangeCollection<Area> DiscoveredAreas { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("discovered_regions", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("These regions discovered by this country at game start.")]
@@ -250,7 +252,7 @@ public partial class Country : IEu5Object<Country>
    [Description("A modifier starting and ending at a given date.")]
    public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [ParseAs("government", AstNodeType.BlockNode, isEmbedded: true)]
    [DefaultValue(null)]
    [Description("The government state of this country.")]

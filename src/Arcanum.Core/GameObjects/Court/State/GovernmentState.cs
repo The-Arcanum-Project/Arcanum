@@ -35,6 +35,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
       else
       {
          InheritRulerTerms = Country.Empty;
+         Ruler = Character.Empty;
       }
    }
 
@@ -78,11 +79,11 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("end_regency_date")]
    public JominiDate EndRegencyDate { get; set; } = JominiDate.Empty;
 
-   [SaveAs]
-   [DefaultValue("")]
+   [SaveAs(SavingValueType.Identifier)]
+   [DefaultValue(null)]
    [Description("The current ruler of this government state.")]
    [ParseAs("ruler")]
-   public string Ruler { get; set; } = string.Empty;
+   public Character Ruler { get; set; } = null!;
 
    [SaveAs]
    [DefaultValue("")]
@@ -102,7 +103,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("designated_heir_reason")]
    public DesignateHeirReason DesignateHeirReason { get; set; } = DesignateHeirReason.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [Description("How the heir is selected in this government state.")]
    [ParseAs("heir_selection")]
@@ -114,7 +115,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("parliament", AstNodeType.BlockNode, isEmbedded: true)]
    public ParliamentDefinition ParliamentDefinition { get; set; } = ParliamentDefinition.Empty;
 
-   [SaveAs]
+   [SaveAs(collectionAsPureIdentifierList: true)]
    [DefaultValue(null)]
    [Description("All reforms that have been enacted in this government state.")]
    [ParseAs("reforms", AstNodeType.BlockNode)]
@@ -138,13 +139,13 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("regnal_numbers", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<RegnalNumber> RegnalNumbers { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [Description("All estate privileges that are currently enacted.")]
    [ParseAs("privilege", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [DefaultValue(null)]
    [Description("List of estate attribute definitions associated with this pop type.")]

@@ -1478,6 +1478,28 @@ public static class ParsingToolBox
                                            out value);
    }
 
+   public static bool ArcTryParse_Dynasty(KeyOnlyNode node,
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Dynasty value)
+   {
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
+                                           Globals.Dynasties,
+                                           out value);
+   }
+
+   public static bool ArcTryParse_Culture(KeyOnlyNode node,
+                                          ref ParsingContext pc,
+                                          [MaybeNullWhen(false)] out Culture value)
+   {
+      using var scope = pc.PushScope();
+      return LUtil.TryGetFromGlobalsAndLog(node.KeyNode,
+                                           ref pc,
+                                           Globals.Cultures,
+                                           out value);
+   }
+
    public static bool ArcTryParse_ArtistType(KeyOnlyNode node,
                                              ref ParsingContext pc,
                                              [MaybeNullWhen(false)] out ArtistType value)

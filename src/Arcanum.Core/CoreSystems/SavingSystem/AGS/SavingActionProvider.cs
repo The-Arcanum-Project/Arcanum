@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.AgsRegistry;
+﻿using System.Diagnostics;
+using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -25,8 +26,11 @@ public static class SavingActionProvider
                                               IndentedStringBuilder sb)
    {
       if (target is not IStringKvp targetKvp)
+      {
+         Debug.Fail("Unexpected type in SaveIdentifierStringKvp");
          throw new
             InvalidOperationException("SaveIdentifierStringKvp can only be used with IIdentifierStringKvp instances.");
+      }
 
       sb.AppendLine($"{targetKvp.Key} = {targetKvp.Value}");
    }
@@ -68,7 +72,10 @@ public static class SavingActionProvider
    public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb)
    {
       if (target is not IIagsEnumKvp<IAgs, Enum> kvp)
+      {
+         Debug.Fail("Unexpected type in SaveIAgsEnumKvp");
          throw new InvalidOperationException("SaveIAgsEnumKvp can only be used with IIagsEnumKvp<IAgs> instances.");
+      }
 
       sb.AppendLine($"{kvp.Key.SavingKey} = {EnumAgsRegistry.GetKey(kvp.Value)}");
    }
@@ -169,5 +176,33 @@ public static class SavingActionProvider
             InvalidOperationException("InstitutionPresenceSaving can only be used with InstitutionPresence instances.");
 
       sb.AppendLine($"{FormatValue(SavingValueType.Identifier, ip, InstitutionPresence.Field.Institution)} = {FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent)}");
+   }
+
+   public static void Setup_vars_saving(IAgs target,
+                                        PropertySavingMetadata metadata,
+                                        IndentedStringBuilder sb)
+   {
+      if (target is not Country country)
+         throw new
+            InvalidOperationException("Setup_vars_saving can only be used with Country instances.");
+
+      if (country.Variables.Count == 0)
+         return;
+
+      using (sb.BlockWithName("variables"))
+      {
+         using (sb.BlockWithName("data"))
+         {
+            foreach (var vard in country.Variables)
+            {
+               using (sb.Block())
+               {
+                  sb.AppendLine($"flag = \"{vard.Flag}\"");
+                  sb.Append("data");
+                  ((IAgs)vard.DataBlock).ToAgsContext().BuildContext(sb);
+               }
+            }
+         }
+      }
    }
 }
