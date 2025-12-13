@@ -5,19 +5,24 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.ConsoleServices;
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Settings.BaseClasses;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.StyleClasses;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
@@ -31,6 +36,7 @@ using Common;
 using Common.UI;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using NUINavigation = Arcanum.UI.NUI.NUINavigation;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -40,7 +46,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private const int DEFAULT_WIDTH = 1920;
    private const int DEFAULT_HEIGHT = 1080;
 
-   private readonly ToolTipManager _toolTipManager = new();
+   private readonly ToolTipManager _toolTipManager = new ();
 
    #region Properties
 
@@ -135,6 +141,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    } = null!;
 
+   public string ClipboardText
+   {
+      get;
+      set
+      {
+         if (value == field)
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null!;
+
    #endregion
 
    public MainWindow()
@@ -193,6 +212,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
             Debug.Assert(mapDataParser.Polygons != null,
                          "Map data parser has finished tesselation but polygons are null.");
             _ = MainMap.SetupRenderer(mapDataParser.Polygons!, mapDataParser.MapSize);
+            MapModeManager.IsMapReady = true;
          }
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
@@ -204,8 +224,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       {
          var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
                                                               .LoadingService[0]).MapSize;
-         Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
-         MapModeManager.IsInitialized = true;
+         Selection.MapManager.InitializeMapData(new (0, 0, size.Item1, size.Item2));
+
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.FrozenSelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.SelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
+         SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.PrviewOpacityFactor), (_, _) => MainMap.RefreshAndRenderSelectionColors());
       };
 
       Selection.RectangleSelectionUpdated += _ =>
@@ -236,6 +259,71 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          SetUpToolTip(MainMap);
 
       SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
+
+      SetupMapModeLogic();
+      SetupClipboardLogic();
+   }
+
+   private void SetupClipboardLogic()
+   {
+      ArcClipboard.OnCopyAction += payload =>
+      {
+         ClipboardText = payload.Property == null
+                            ? $"Clipboard: {payload.Value.GetType().Name} ({((IEu5Object)payload.Value).UniqueId})"
+                            : $"Clipboard: {payload.Property} of {payload.Value.GetType().Name} ({((IEu5Object)payload.Value).UniqueId})";
+      };
+   }
+
+   private void SetupMapModeLogic()
+   {
+      MapModeManager.OnMapModeChanged += MapModeManagerOnOnMapModeChanged;
+      EventDistributor.ObjectOfTypeModified += UpdateMap;
+
+      MainMap.OnMapClick += MainMapOnOnMapClick;
+   }
+
+   private static void MainMapOnOnMapClick(MapClickEventArgs e)
+   {
+      if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+      {
+         if (e.MouseButton == MouseButton.Right)
+         {
+            if (!Selection.GetLocation(e.ClickPosition, out var location))
+               return;
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+               var objs = SelectionManager.GetInferredObjectsForLocations([location], MapModeManager.GetCurrent().DisplayTypes[0]);
+               if (objs is { Count: > 0 })
+                  ArcClipboard.Copy(objs[0]);
+            }
+            else
+               ArcClipboard.Copy(location);
+         }
+      }
+   }
+
+   private void MapModeManagerOnOnMapModeChanged(MapModeManager.MapModeType _)
+   {
+      Debug.Assert(MainMap != null, "MainMap is null in MapModeManagerOnOnMapModeChanged");
+      if (!MapModeManager.IsMapReady)
+         return;
+
+      // ReSharper disable twice InconsistentlySynchronizedField
+      MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
+      MainMap.UpdateColors();
+   }
+
+   private void UpdateMap(Type arg1, Enum arg2, IEu5Object[] objects)
+   {
+      if (objects.Length == 0)
+         return;
+
+      if (MapModeManager.GetCurrent().DisplayTypes.Contains(objects[0].GetType()))
+      {
+         MapModeManager.RenderCurrent(MainMap!.CurrentBackgroundColors);
+         MainMap.UpdateColors();
+      }
    }
 
    private void SelectionManagerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -253,7 +341,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          return;
       }
 
-      MainWindowGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter, true));
+      MainWindowGen.GenerateAndSetView(new (items.ToList(), true, UiPresenter, true));
    }
 
    private void SetUpToolTip(MapControl mainMap)
@@ -336,7 +424,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new(propertyName));
+      PropertyChanged?.Invoke(this, new (propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -455,11 +543,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      MainWindowGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)]
-                                                  .Value,
-                                           true,
-                                           UiPresenter,
-                                           true));
+      MainWindowGen.GenerateAndSetView(new (Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)]
+                                                   .Value,
+                                            true,
+                                            UiPresenter,
+                                            true));
    }
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -492,7 +580,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
       {
-         MapModeButtonGrid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
+         MapModeButtonGrid.ColumnDefinitions.Add(new () { Width = new (1, GridUnitType.Star) });
          var mapMode = MapModeManager.GetMapModeForButtonIndex(i);
          var routedCommand = GetMapModeButtonCommand(i);
          if (routedCommand != null && mapMode != null)
@@ -505,8 +593,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
          var button = new MapModeButton
          {
-            Margin = new(2),
-            Padding = new(0),
+            Margin = new (2),
+            Padding = new (0),
             Command = routedCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Bottom,
@@ -527,7 +615,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void OnMapModeCommandExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       if (MapModeButton.CommandToMapModeType.TryGetValue(e.Command, out var mapModeType))
-         MapModeManager.Activate(mapModeType);
+         MapModeManager.SetMapMode(mapModeType);
    }
 
    private void OnMapModeCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -597,6 +685,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void FreezeSelection_Command(object sender, ExecutedRoutedEventArgs e)
    {
       SelectionManager.ToggleFreeze();
+   }
+
+   private void CommandBinding_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      new ClipboardHistory().Show();
    }
 
    private void OpenArcanumWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)

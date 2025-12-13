@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.MapInteraction.Strategy;
 using Common.Logger;
 
@@ -10,16 +10,16 @@ public class MapInteractionManager
    private readonly MapControl _map;
    public readonly MapNavigationStrategy NavigationStrategy;
    public readonly RectangleSelectionStrategy RectangleSelectionStrategy;
-   public readonly LassoSelectionStrategy LassoSelectionStrategy = new();
-   public readonly BrushSelectionStrategy BrushSelectionStrategy = new();
+   public readonly LassoSelectionStrategy LassoSelectionStrategy = new ();
+   public readonly BrushSelectionStrategy BrushSelectionStrategy = new ();
 
    private IMapInteractionStrategy _activeStrategy;
 
    public MapInteractionManager(MapControl map)
    {
       _map = map;
-      NavigationStrategy = new(this);
-      RectangleSelectionStrategy = new(this);
+      NavigationStrategy = new (this);
+      RectangleSelectionStrategy = new ();
       _activeStrategy = NavigationStrategy;
    }
 

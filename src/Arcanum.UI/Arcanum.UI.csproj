@@ -36,7 +36,6 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Components\Models\"/>
-        <Folder Include="Components\UserControls\Specific\"/>
         <Folder Include="Components\UserControls\ViewModels\"/>
         <Folder Include="FeatureSpotlight\"/>
         <Folder Include="HostUIServices\"/>
@@ -312,6 +311,11 @@
             <SubType>Designer</SubType>
         </Page>
         <Page Update="NUI\EmbeddedView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\UserControls\Map\MapControl.xaml">
             <Generator>MSBuild:Compile</Generator>
             <XamlRuntime>Wpf</XamlRuntime>
             <SubType>Designer</SubType>

@@ -45,6 +45,7 @@
                                  Margin = "3"
                                  x:Name = "VanillaFolderButton"
                                  BorderThickness = "1"
+                                 ToolTip="Open explorer to select the EU5 vanilla folder (./Europa Universalis V/game)"
                                  Click = "VanillaFolderButton_Click">
             <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Folder20x20.png"
                    Stretch = "None" />
@@ -55,7 +56,8 @@
                                              Margin="3"
                                              FontSize="14"
                                              x:Name="VanillaFolderTextBox"
-                                             PlaceholderText="Select the EU5 vanilla folder">
+                                             PlaceholderText="Select the EU5 vanilla folder (./Europa Universalis V/game)"
+                                             ToolTip="Select the EU5 vanilla folder (./Europa Universalis V/game)">
         </baseControls:TextboxWithPlaceholder>
 
         <Border Grid.Column = "2"
@@ -85,7 +87,8 @@
                                  Margin = "3"
                                  x:Name = "ModFolderButton"
                                  BorderThickness = "1"
-                                 Click = "ModFolderButton_Click">
+                                 Click = "ModFolderButton_Click"
+                                 ToolTip="Open explorer to select your mod folder">
             <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Folder20x20.png"
                    Stretch = "None" />
         </styleClasses:BaseButton>
@@ -95,7 +98,8 @@
                                              Margin="3"
                                              FontSize="14"
                                              x:Name="ModFolderTextBox"
-                                             PlaceholderText="Select mod folder">
+                                             PlaceholderText="Select mod folder"
+                                             ToolTip="Select mod folder">
         </baseControls:TextboxWithPlaceholder>
 
         <Border Grid.Column = "2"

@@ -12,13 +12,17 @@ public interface IHistoryManager
    /// This event provides the ability to react to undo actions and can include
    /// additional information about the command being undone.
    /// </summary>
+#pragma warning disable CS0067 // Event is never used
    public static event Action<ICommand?>? UndoEvent;
+#pragma warning restore CS0067 // Event is never used
    /// <summary>
    /// An event that is triggered when a redo operation occurs in the command history system.
    /// Provides notifications that allow handling or reacting to redo actions, with
    /// additional context about the command being redone.
    /// </summary>
+#pragma warning disable CS0067 // Event is never used
    public static event Action<ICommand?>? RedoEvent;
+#pragma warning restore CS0067 // Event is never used
 
    /// <summary>
    /// Adds a command to the history manager for potential undo and redo operations.

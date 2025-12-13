@@ -3,14 +3,14 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ContinentMapMode : IMapMode
+public class ContinentMapMode : LocationBasedMapMode
 {
-   public string Name => "Continents";
-   public string Description => "Displays the Continents the locations are situated in.";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
-   public Type DisplayType => typeof(Continent);
+   public override string Name => "Continents";
+   public override string Description => "Displays the Continents the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
+   public override Type[] DisplayTypes => [typeof(Continent), typeof(SuperRegion)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Continent);
       if (parent == null)
@@ -19,21 +19,20 @@ public class ContinentMapMode : IMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public string[] GetTooltip(Location location) =>
+   public override string[] GetTooltip(Location location) =>
    [
       "Continent: " + (location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId ?? "None")
    ];
 
-   public string? GetLocationText(Location location)
-      => location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId;
+   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

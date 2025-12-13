@@ -14,14 +14,14 @@ using Nexus.Core.Attributes;
 namespace Arcanum.Core.GameObjects.Court.State;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(asOneLine: true)]
 public partial class RulerTerm : IEu5Object<RulerTerm>
 {
    [SaveAs]
-   [DefaultValue("")]
+   [DefaultValue(null)]
    [Description("The ID of the character serving this ruler term.")]
    [ParseAs("character")]
-   public string CharacterId { get; set; } = string.Empty;
+   public Character CharacterId { get; set; } = Character.Empty;
 
    [SaveAs]
    [DefaultValue("")]
@@ -42,7 +42,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public JominiDate EndDate { get; set; } = JominiDate.Empty;
 
    [SaveAs]
-   [DefaultValue(1)]
+   [DefaultValue(0)]
    [Description("The regnal number of the ruler during this term.")]
    [ParseAs("regnal_number")]
    public int RegnalNumber { get; set; }
@@ -63,14 +63,14 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    [DefaultValue("")]
    public string UniqueId
    {
-      get => CharacterId;
-      set => CharacterId = value;
+      get => "";
+      set;
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Dictionary<string, RulerTerm> GetGlobalItems() => [];
 
-   public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };
+   public static RulerTerm Empty { get; } = new () { UniqueId = "Arcanum_Empty_RulerTerm" };
 
    #endregion
 }

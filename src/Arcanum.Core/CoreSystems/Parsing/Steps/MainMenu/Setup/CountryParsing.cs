@@ -1,94 +1,100 @@
 ﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.LocationCollections;
+using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.Utils.Sorting;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 
-[ParserFor(typeof(Country), IgnoredBlockKeys = ["variables"])]
+[ParserFor(typeof(Country))]
 public partial class CountryParsing(IEnumerable<IDependencyNode<string>> dependencies)
-   : ParserValidationLoadingService<Country>(dependencies)
+   : SetupFileLoadingService(dependencies)
 {
    public override bool IsHeavyStep => true;
+   public override List<Type> ParsedObjects { get; } = SetupParsingManager.NestedSubTypes(Country.Empty).ToList();
 
-   private static void ValidateAndParseCountries(BlockNode rootBn,
-                                                 ref ParsingContext pc,
-                                                 Eu5FileObj fileObj)
+   public override void ReloadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
-      if (!Parser.EnforceNodeCountOfType(rootBn.Children,
-                                         1,
-                                         ref pc,
-                                         out List<BlockNode> cn2S))
-         return;
-
-      Dictionary<string, Country> tagCheck = new();
-      SimpleObjectParser.Parse(fileObj,
-                               cn2S[0].Children,
-                               ref pc,
-                               ParseProperties,
-                               tagCheck,
-                               false);
-
-      foreach (var country in tagCheck.Values)
-         Globals.Countries[country.UniqueId] = country;
    }
 
-   private static void HandleCurrentAgeParsing(ContentNode rootCn, ref ParsingContext pc)
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, object? lockObject)
    {
-      // TODO: Use the currentAge variable in custom saving
-      // ReSharper disable once NotAccessedVariable
-      string currentAge;
-      const string currentAgeKey = "current_age";
-      if (pc.IsSliceEqual(rootCn, currentAgeKey) && rootCn.Value is LiteralValueNode lvn)
-      {
-         // ReSharper disable once RedundantAssignment
-         currentAge = pc.SliceString(lvn);
+      return true;
+   }
+
+   public override void LoadSetupFile(StatementNode sn, ref ParsingContext pc, Eu5FileObj fileObj, object? lockObject)
+   {
+      if (!sn.IsBlockNode(ref pc, out var bn))
          return;
+
+      const string countriesKey = "countries";
+      if (pc.IsSliceEqual(bn, countriesKey))
+         bn = ((BlockNode)sn).Children[0] as BlockNode;
+
+      foreach (var cn in bn!.Children)
+      {
+         if (!cn.IsBlockNode(ref pc, out var countryBn))
+            continue;
+
+         var key = pc.SliceString(countryBn);
+         if (!Globals.Countries.TryGetValue(key, out var eu5Obj))
+         {
+            pc.SetContext(countryBn);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.UnknownKey,
+                                           key,
+                                           countryBn);
+            continue;
+         }
+
+         ParseProperties(countryBn, eu5Obj, ref pc, false);
+      }
+   }
+
+   public static bool ArcParse_Variables(BlockNode node, Country country, ref ParsingContext pc)
+   {
+      if (!node.Children[0].IsBlockNode(ref pc, out var dataContainer))
+         return false;
+
+      if (!pc.IsSliceEqual(dataContainer, "data"))
+      {
+         pc.SetContext(dataContainer);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidBlockName,
+                                        "data",
+                                        dataContainer);
+         return false;
       }
 
-      pc.SetContext(rootCn);
-      DiagnosticException.LogWarning(ref pc,
-                                     ParsingError.Instance.InvalidContentKeyOrType,
-                                     pc.SliceString(rootCn),
-                                     currentAgeKey);
-   }
+      foreach (var varc in dataContainer.Children)
+      {
+         if (!varc.IsBlockNode(ref pc, out var varBlock))
+            continue;
 
-   public override void LoadSingleFile(RootNode rn,
-                                       ref ParsingContext pc,
-                                       Eu5FileObj fileObj,
-                                       object? lockObject)
-   {
-      foreach (var rootStatement in rn.Statements)
-         switch (rootStatement)
+         if (!pc.IsSliceEqual(varBlock, "{"))
          {
-            case ContentNode rootCn:
-            {
-               HandleCurrentAgeParsing(rootCn, ref pc);
-               continue;
-            }
-
-            case BlockNode rootBn:
-            {
-               const string countriesKey = "countries";
-               if (pc.IsSliceEqual(rootBn, countriesKey))
-                  ValidateAndParseCountries(rootBn, ref pc, fileObj);
-               else
-                  DiagnosticException.LogWarning(ref pc,
-                                                 ParsingError.Instance.InvalidBlockNames,
-                                                 pc.SliceString(rootBn),
-                                                 new[] { countriesKey });
-
-               break;
-            }
+            pc.SetContext(varBlock);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.InvalidBlockName,
+                                           "Array Declaration Block",
+                                           varBlock);
+            continue;
          }
-   }
 
-   protected override void ParsePropertiesToObject(BlockNode block,
-                                                   Country target,
-                                                   ref ParsingContext pc,
-                                                   bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
+         var vard = new VariableDeclaration();
+         foreach (var sn in varBlock.Children)
+            VariableDeclarationParsing.Dispatch(sn, vard, ref pc);
+
+         country.Variables.Add(vard);
+      }
+
+      return true;
+   }
 }

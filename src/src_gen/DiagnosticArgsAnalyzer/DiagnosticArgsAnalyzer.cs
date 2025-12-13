@@ -11,12 +11,12 @@ namespace DiagnosticArgsAnalyzer;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 {
-   private static readonly DiagnosticDescriptor Rule = new("DA001",
-                                                           "Incorrect diagnostic arguments",
-                                                           "The call provides {0} argument(s), but the descriptor expects {1}: {2}", // New format
-                                                           "Usage",
-                                                           DiagnosticSeverity.Error,
-                                                           isEnabledByDefault: true);
+   private static readonly DiagnosticDescriptor Rule = new ("DA001",
+                                                            "Incorrect diagnostic arguments",
+                                                            "The call provides {0} argument(s), but the descriptor expects {1}: {2}", // New format
+                                                            "Usage",
+                                                            DiagnosticSeverity.Error,
+                                                            isEnabledByDefault: true);
 
    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
@@ -46,10 +46,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
          methodSymbol.Parameters.FirstOrDefault(p => p.Type.Name == nameof(DiagnosticDescriptor));
       var paramsParameter =
          methodSymbol.Parameters.FirstOrDefault(p => p.IsParams &&
-                                                     p.Type is IArrayTypeSymbol
-                                                     {
-                                                        ElementType.SpecialType: SpecialType.System_Object
-                                                     });
+                                                     p.Type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object });
 
       // If the method doesn't have the required parameters, it's not the one we're looking for.
       if (descriptorParameter == null || paramsParameter == null)
@@ -68,7 +65,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 
       BaseObjectCreationExpressionSyntax? creation = null;
 
-      var syntax = descriptorSymbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+      var syntax = descriptorSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
 
       switch (syntax)
       {
@@ -120,7 +117,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
                // Passed as an explicit array: args: new object[] { "a", "b" }
                ArrayCreationExpressionSyntax arrayCreation => arrayCreation.Initializer?.Expressions.Count ?? 0,
                // Passed as an implicit array: args: new[] { "a", "b" }
-               ImplicitArrayCreationExpressionSyntax implicitArray => implicitArray.Initializer?.Expressions.Count ?? 0,
+               ImplicitArrayCreationExpressionSyntax implicitArray => implicitArray.Initializer != null! ? implicitArray.Initializer.Expressions.Count : 0,
                // A collection expression's children are its elements.
                CollectionExpressionSyntax collectionExpression => collectionExpression.Elements.Count,
                _ => 1,
@@ -136,7 +133,7 @@ public class DiagnosticArgsAnalyzer : DiagnosticAnalyzer
 
          if (requiredArgs != providedArgs)
          {
-            var expectedParamsString = GetExpectedParamsFromDocs(descriptorSymbol!, requiredArgs);
+            var expectedParamsString = GetExpectedParamsFromDocs(descriptorSymbol, requiredArgs);
             context.ReportDiagnostic(Diagnostic.Create(Rule,
                                                        invocation.GetLocation(),
                                                        providedArgs,

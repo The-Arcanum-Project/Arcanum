@@ -41,17 +41,22 @@ public class AgsObjectSavingContext
 
       if (Ags.ClassMetadata.SavingMethod != null)
       {
-         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb);
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.ClassMetadata.AsOneLine);
          return;
       }
 
-      using (sb.BlockWithName(Ags, Settings.Format))
+      var asOneLine = Ags.ClassMetadata.AsOneLine;
+      using (sb.BlockWithName(Ags, Settings.Format, asOneLine))
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
+            if (prop.NxProp.ToString().Contains("ParliamentDefinition"))
+            {
+            }
+
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
-            prop.Format(Ags, sb, CommentChar, Settings);
+            prop.Format(Ags, sb, asOneLine, CommentChar, Settings);
          }
    }
 
@@ -65,20 +70,27 @@ public class AgsObjectSavingContext
 
       if (Ags.ClassMetadata.SavingMethod != null)
       {
-         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb);
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.ClassMetadata.AsOneLine);
          return;
       }
 
-      using (sb.BlockWithNameAndInjection(Ags, strategy))
+      var asOneLine = Ags.ClassMetadata.AsOneLine;
+      using (sb.BlockWithNameAndInjection(Ags, strategy, asOneLine))
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
+#if DEBUG
+            if (prop.NxProp.ToString().Contains("regency_date"))
+            {
+            }
+#endif
+
             if (!properties.Contains(prop))
                continue;
 
             if (Settings.Format == SavingFormat.Spacious && i > 0)
                sb.AppendLine();
-            prop.Format(Ags, sb, CommentChar, Settings, serializeDefaultValues);
+            prop.Format(Ags, sb, asOneLine, CommentChar, Settings, serializeDefaultValues);
          }
    }
 }

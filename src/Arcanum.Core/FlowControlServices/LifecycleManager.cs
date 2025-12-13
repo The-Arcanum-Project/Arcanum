@@ -44,7 +44,7 @@ public class LifecycleManager
       if (DebugConfig.Settings.EnableDebugLogging)
          UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
-
+      EmptyValidation.ValidateEmptyObjects();
       InitializeApplicationCore();
       // Step 1: Initialize core services
       LoadConfig();

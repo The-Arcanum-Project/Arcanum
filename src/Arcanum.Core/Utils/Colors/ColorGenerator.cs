@@ -128,6 +128,7 @@ public static class ColorGenerator
       return ValueValues[index * PRIME % ValueValues.Length] / 10;
    }
 
+   // ReSharper disable once UnusedMember.Local
    private static Color Generate(bool isLand, int index)
    {
       var h = GetHue(isLand, index);
@@ -210,7 +211,7 @@ public static class ColorGenerator
    /// <param name="saturationVariation">The maximum amount Saturation can change (e.g., 0.1 for +/- 10%).</param>
    /// <param name="lightnessVariation">The maximum amount Lightness can change (e.g., 0.1 for +/- 10%).</param>
    /// <returns>A list of generated Color objects.</returns>
-   public static List<Color> GenerateVariations(
+   public static Color[] GenerateVariations(
       Color baseColor,
       int count,
       double saturationVariation = 0.1,
@@ -219,7 +220,7 @@ public static class ColorGenerator
       if (count <= 0)
          return [];
 
-      var variations = new List<Color>(count);
+      var variations = new Color[count];
       var baseHsl = RgbToHsl(baseColor);
       var random = new Random();
 
@@ -241,7 +242,7 @@ public static class ColorGenerator
          newHsl.L = Math.Max(0, Math.Min(1, newHsl.L));
 
          // Convert the new HSL color back to RGB and add it to the list
-         variations.Add(HslToRgb(newHsl));
+         variations[i] = HslToRgb(newHsl);
       }
 
       return variations;
@@ -280,7 +281,7 @@ public static class ColorGenerator
          h /= 6;
       }
 
-      return new()
+      return new ()
       {
          H = h * 360,
          S = s,
@@ -368,7 +369,7 @@ public static class ColorGenerator
          var b = start.B + (end.B - start.B) * t;
 
          // Convert back to RGB
-         results[i] = OklabToRgb(new(l, a, b));
+         results[i] = OklabToRgb(new (l, a, b));
       }
 
       return results;
@@ -399,9 +400,9 @@ public static class ColorGenerator
       var s_ = MathF.Cbrt(s);
 
       // LMS to Oklab
-      return new(0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
-                 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
-                 0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
+      return new (0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
+                  1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
+                  0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
    }
 
    private static Color OklabToRgb(Oklab oklab)

@@ -12,14 +12,13 @@ public static class PerformanceCountersHelper
    private static float _cpuUsage;
    private static float _gpuUsage;
    private static float _vramUsage;
-   private static float _fps; // TODO: Hook this up to actual FPS counter
 
    private static Timer Updater { get; set; } = null!;
 
    private static DateTime _lastCpuCheck = DateTime.MinValue;
    private static TimeSpan _lastCpuTime = TimeSpan.Zero;
 
-   private static readonly GpuMonitor GPUMonitor = new();
+   private static readonly GpuMonitor GPUMonitor = new ();
 
    private const int UPDATE_INTERVAL_MS = 1000;
 
@@ -44,7 +43,7 @@ public static class PerformanceCountersHelper
          HasDedicatedGpu = false;
       }
 
-      Updater = new() { Interval = UPDATE_INTERVAL_MS };
+      Updater = new () { Interval = UPDATE_INTERVAL_MS };
       Updater.Elapsed += OnTimerTick;
       Updater.Start();
    }
@@ -99,8 +98,6 @@ public static class PerformanceCountersHelper
       _window.SetGpuUsage(_gpuUsage < 0 ? "GPU: [N/A]" : "GPU: [" + $"{Math.Round(_gpuUsage, 2):F2}%".PadLeft(6) + "]");
 
       _window.SetVramUsage(_vramUsage < 0 ? "VRAM: [N/A]" : $"VRAM: [{Math.Round(_vramUsage)} MB]");
-
-      _window.SetFps($"FPS: [{Math.Round(_fps)}]");
    }
 
    public static void Shutdown()

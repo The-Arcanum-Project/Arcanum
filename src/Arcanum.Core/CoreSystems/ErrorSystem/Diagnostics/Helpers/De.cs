@@ -8,15 +8,8 @@ public static class De
 {
    /// <summary>
    /// Creates a warning log entry for an invalid content key or node type. <br/>
-   /// Sets the position in the context to the provided key token. <br/>
-   /// Updates the <paramref name="validation"/> flag to false.
+   /// Sets the position in the context to the provided key token.
    /// </summary>
-   /// <param name="ctx"></param>
-   /// <param name="key"></param>
-   /// <param name="source"></param>
-   /// <param name="actionName"></param>
-   /// <param name="expected"></param>
-   /// <param name="validation"></param>
    public static void LogInvalidContentKeyOrNode(ref ParsingContext pc,
                                                  Token key,
                                                  object expected)
@@ -31,14 +24,7 @@ public static class De
    /// <summary>
    /// Creates a warning log entry for an invalid block name. <br/>
    /// Sets the position in the context to the provided key token. <br/>
-   /// Updates the <paramref name="validation"/> flag to false.
    /// </summary>
-   /// <param name="ctx"></param>
-   /// <param name="key"></param>
-   /// <param name="source"></param>
-   /// <param name="actionName"></param>
-   /// <param name="expected"></param>
-   /// <param name="validation"></param>
    public static void LogInvalidBlockName(ref ParsingContext pc,
                                           Token key,
                                           object expected)
@@ -60,7 +46,7 @@ public static class De
                               string action,
                               params object[] args)
    {
-      DiagnosticException diagnosticException = new(descriptor, args);
+      DiagnosticException diagnosticException = new (descriptor, args);
       diagnosticException.HandleDiagnostic(ctx, action);
    }
 }

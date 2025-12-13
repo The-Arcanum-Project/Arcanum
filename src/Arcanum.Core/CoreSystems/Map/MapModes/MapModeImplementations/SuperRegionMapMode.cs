@@ -1,16 +1,17 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class SuperRegionMapMode : IMapMode
+public class SuperRegionMapMode : LocationBasedMapMode
 {
-   public string Name => "SuperRegions";
-   public string Description => "Displays the SuperRegions the locations are situated in.";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.SuperRegions;
-   public Type DisplayType => typeof(SuperRegion);
+   public override string Name => "SuperRegions";
+   public override string Description => "Displays the SuperRegions the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.SuperRegions;
+   public override Type[] DisplayTypes => [typeof(SuperRegion), typeof(Region)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.SuperRegion);
       if (parent == null)
@@ -19,21 +20,20 @@ public class SuperRegionMapMode : IMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public string[] GetTooltip(Location location) =>
+   public override string[] GetTooltip(Location location) =>
    [
       "SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId ?? "None")
    ];
 
-   public string? GetLocationText(Location location)
-      => location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId;
+   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

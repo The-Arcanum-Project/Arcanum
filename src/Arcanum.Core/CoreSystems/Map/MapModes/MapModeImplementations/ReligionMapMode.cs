@@ -3,27 +3,27 @@ using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ReligionMapMode : IMapMode
+public class ReligionMapMode : LocationBasedMapMode
 {
-   public string Name => "Religion";
-   public Type DisplayType => typeof(Religion);
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Religion;
-   public string Description => "Displays the dominant religion of each location on the map.";
+   public override string Name => "Religion";
+   public override Type[] DisplayTypes => [typeof(Religion)];
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Religion;
+   public override string Description => "Displays the dominant religion of each location on the map.";
    public string? IconSource => null;
 
-   public int GetColorForLocation(Location location) => location.TemplateData.Religion.Color.AsInt();
+   public override int GetColorForLocation(Location location) => location.TemplateData.Religion.Color.AsInt();
 
-   public string[] GetTooltip(Location location) => [$"Religion: {location.TemplateData.Religion.UniqueId}"];
+   public override string[] GetTooltip(Location location) => [$"Religion: {location.TemplateData.Religion.UniqueId}"];
 
-   public string? GetLocationText(Location location) => null;
+   public override string? GetLocationText(Location location) => null;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

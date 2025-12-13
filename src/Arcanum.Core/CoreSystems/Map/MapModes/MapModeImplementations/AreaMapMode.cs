@@ -3,14 +3,14 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class AreaMapMode : IMapMode
+public class AreaMapMode : LocationBasedMapMode
 {
-   public string Name => "Areas";
-   public string Description => "Displays the Areas the locations are situated in.";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Areas;
-   public Type DisplayType => typeof(Area);
+   public override string Name => "Areas";
+   public override string Description => "Displays the Areas the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Areas;
+   public override Type[] DisplayTypes => [typeof(Area), typeof(Province)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Area);
       if (parent == null)
@@ -19,21 +19,17 @@ public class AreaMapMode : IMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public string[] GetTooltip(Location location) =>
-   [
-      "Area: " + (location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId ?? "None")
-   ];
+   public override string[] GetTooltip(Location location) => ["Area: " + (location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId ?? "None")];
 
-   public string? GetLocationText(Location location)
-      => location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId;
+   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

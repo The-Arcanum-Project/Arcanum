@@ -13,7 +13,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    {
       Debug.Assert(target._getValue(attribute) is IEnumerable);
 
-      _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
+      _targets.Add(new (target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
 
       InvalidateUI();
@@ -28,7 +28,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override void Undo()
    {
       base.Undo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var target in _targets)
          target.Target._addRangeToCollection(Attribute, target.OldValue);
    }
@@ -40,7 +40,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
    public override void Redo()
    {
       base.Redo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var target in _targets)
          target.Target._clearCollection(Attribute);
    }
@@ -54,7 +54,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
          return false;
 
       Debug.Assert(target._getValue(attribute) is IEnumerable);
-      _targets.Add(new(target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
+      _targets.Add(new (target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
 
       InvalidateUI();

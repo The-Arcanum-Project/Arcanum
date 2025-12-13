@@ -11,11 +11,11 @@ public class IgnoreDeserializationAndCreateNewConverter<T> : JsonConverter<T> wh
       // TODO: why is this here what did this do
 #if DEBUG_RESET_SETTINGS
       reader.Skip();
-      return new();
+      return new ();
 #endif
 
       // standard behavior
-      return JsonSerializer.Deserialize<T>(ref reader, options)!;
+      // return JsonSerializer.Deserialize<T>(ref reader, options)!;
    }
 
    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)

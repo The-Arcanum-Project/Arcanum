@@ -6,6 +6,7 @@ public class EvaluationContext
    public object Scope { get; }
 
    // A reference to the registry that holds all named IScriptValue objects.
+   // ReSharper disable once NotAccessedField.Local
    private readonly IReadOnlyDictionary<string, IScriptValue> _valueRegistry;
 
    public EvaluationContext(object scope, IReadOnlyDictionary<string, IScriptValue> registry)

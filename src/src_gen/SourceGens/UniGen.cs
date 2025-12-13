@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ParserGenerator.HelperClasses;
+using ParserGenerator.NexusGeneration;
 
 namespace ParserGenerator;
 
@@ -17,8 +18,8 @@ public class UniGen : IIncrementalGenerator
                                         .CreateSyntaxProvider(predicate: (node, _)
                                                                  => node is ClassDeclarationSyntax cds &&
                                                                     cds.Modifiers.Any(m => m.IsKind(SyntaxKind
-                                                                      .PartialKeyword)),
-                                                              transform: NexusHelpers.GetNexusClassSymbol)
+                                                                                                      .PartialKeyword)),
+                                                              transform: DataGatherer.GetNexusClassSymbol)
                                         .Where(s => s is not null);
 
       var combined = nexusClassesProvider.Collect()
@@ -51,11 +52,11 @@ public class UniGen : IIncrementalGenerator
       foreach (var nexusClassSymbol in nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
          try
          {
-            NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol,
-                                                      context,
-                                                      enumerableSymbol,
-                                                      ieu5ObjectSymbol,
-                                                      iListSymbol);
+            // NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol,
+            //                                           context,
+            //                                           enumerableSymbol,
+            //                                           ieu5ObjectSymbol,
+            //                                           iListSymbol);
             if (nexusClassSymbol.AllInterfaces.Any(i => i.ToDisplayString() == IAGS_INTERFACE))
                AgsHelper.RunSavingGenerator(nexusClassSymbol, context);
          }
@@ -71,6 +72,8 @@ public class UniGen : IIncrementalGenerator
             var diagnostic = Diagnostic.Create(descriptor, Location.None, ex.Message);
             context.ReportDiagnostic(diagnostic);
          }
+
+      Generator.RunNexusGenerator(nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>().ToArray(), context, compilation);
 
       EnumIndexGenerator.RunEnumIndexGenerator(context, AgsHelper.EnumAnalysisCache);
    }

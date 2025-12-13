@@ -3,13 +3,14 @@ using System.Windows;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
 using Arcanum.UI.Util.WindowManagement;
 using Common.Logger;
-using MultiCollectionEditor = Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors.MultiCollectionEditor;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -32,13 +33,20 @@ public partial class DebugPanelGrid
 
    private void FindNullLocationInMarketButton_Click(object sender, RoutedEventArgs e)
    {
-      var numModded = 0;
-      foreach (var climate in Globals.Climates.Values)
-         if (climate.Source.IsModded)
-            numModded++;
+      var foundAny = false;
+      foreach (var country in Globals.Countries.Values)
+      {
+         if (country.GovernmentState.SocietalValues.Count > 0)
+         {
+            Debug.WriteLine($"Country {country.UniqueId} has societal values:");
+            foreach (var svEntry in country.GovernmentState.SocietalValues)
+               Debug.WriteLine($" - {svEntry.SocientalValue} with intensity {svEntry.Value}");
+            foundAny = true;
+         }
+      }
 
-      MessageBox.Show($"Found {numModded} modded climates.\nFound {Globals.Climates.Values.Count - numModded} vanilla climates.");
-      //MessageBox.Show($"Num of objects to save: {SaveMaster.GetNeedsToBeSaveCount}");
+      if (!foundAny)
+         Debug.WriteLine("No countries with societal values found.");
    }
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
@@ -102,19 +110,25 @@ public partial class DebugPanelGrid
 
    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
-      var targets = Globals.Provinces.Values.Take(2);
-      var ownerWindow = Window.GetWindow(this);
-
-      var result = MultiCollectionEditor.ShowDialogN(ownerWindow!,
-                                                     "TestEditing",
-                                                     typeof(Location),
-                                                     targets.Select(x => x.LocationChildren),
-                                                     Globals.Locations.Values);
-      Debug.WriteLine($"Result: {result}");
    }
 
    private void InsertLogSpacerButton_Click(object sender, RoutedEventArgs e)
    {
       ArcLog.WriteLine("DBP", LogLevel.INF, "----------------------------------------");
+   }
+
+   private void PopsEditorTestButton_Click(object sender, RoutedEventArgs e)
+   {
+      var bwindow = new BaseWindow { Title = "Pops Editor Test" };
+      var allocator = new PopsEditor();
+      var locs = Globals.Locations.Values.ToArray();
+      var loc = locs[0]; //Random.Shared.Next(0, locs.Length)
+      var allocatroVm = new AllocatorViewModel(loc);
+      allocator.DataContext = allocatroVm;
+      bwindow.Content = allocator;
+      bwindow.Width = 500;
+      bwindow.Height = 1000;
+      bwindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+      bwindow.Show();
    }
 }

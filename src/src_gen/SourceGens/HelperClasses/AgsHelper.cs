@@ -21,7 +21,7 @@ public static class AgsHelper
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
 
-   public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
+   public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new ();
 
    public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
    {
@@ -76,7 +76,7 @@ public static class AgsHelper
 
          try
          {
-            saveAsProps.Add(new(member, saveAsAttr));
+            saveAsProps.Add(new (member, saveAsAttr));
          }
          catch (Exception e)
          {
@@ -181,13 +181,17 @@ public static class AgsHelper
       sb.AppendLine("        }");
 
       // --- The private static fields ---
+
+      var asOneLine = AttributeHelper.SimpleGetAttrArgValue<bool>(objectSaveAsAttr, 5, "asOneLine");
+
       sb.AppendLine("        // Pre-built metadata for the class itself.");
       sb.AppendLine("        private static readonly ClassSavingMetadata _classMetadata = new(");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
       sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], SAVING_COMMENT_PROVIDER)},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)}");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)},");
+      sb.AppendLine($"            {asOneLine.ToString().ToLowerInvariant()}");
       sb.AppendLine($"        );");
       sb.AppendLine();
 
@@ -317,13 +321,13 @@ public static class AgsHelper
             if (enumAgsDataAttr == null)
             {
                isEnumOverallValid = false; // Mark the whole enum as invalid.
-               fieldResults.Add(new(fieldSymbol, false, "INVALID", false));
+               fieldResults.Add(new (fieldSymbol, false, "INVALID", false));
             }
             else
             {
                var key = enumAgsDataAttr.ConstructorArguments[0].Value as string ?? fieldSymbol.Name.ToSnakeCase();
                var isIgnored = (bool)(enumAgsDataAttr.ConstructorArguments[1].Value ?? false);
-               fieldResults.Add(new(fieldSymbol, true, key, isIgnored));
+               fieldResults.Add(new (fieldSymbol, true, key, isIgnored));
             }
          }
 

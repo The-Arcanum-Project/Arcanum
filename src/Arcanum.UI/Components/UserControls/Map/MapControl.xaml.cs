@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
+using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
@@ -16,7 +18,7 @@ using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
 using Point = System.Windows.Point;
 
-namespace Arcanum.UI.Components.UserControls;
+namespace Arcanum.UI.Components.UserControls.Map;
 
 // What should the map support?
 // - Pan and Zoom with Mouse Wheel
@@ -31,9 +33,9 @@ namespace Arcanum.UI.Components.UserControls;
 // - click with alt for upper scope and alt shift for lower scope
 public partial class MapControl
 {
-   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
-   private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
-   private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
+   private static readonly Color4 SelectionColor = new (0.5f, 0, 0, 0);
+   private static readonly Color4 FreezeSelectionColor = new (0, 0, 0.5f, 0);
+   private static readonly Color4 PreviewColor = new (0.5f, 0.5f, 0, 0);
 
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
@@ -46,10 +48,15 @@ public partial class MapControl
    private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
 
+   public event Action<MapClickEventArgs>? OnMapClick;
+
    public static event Action? OnMapLoaded;
 
+   // Get to pass this into the color generation
+   public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
+
    public static readonly DependencyProperty CurrentPosProperty =
-      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
+      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new (default(Vector2)));
 
    public Vector2 CurrentPos
    {
@@ -62,7 +69,7 @@ public partial class MapControl
 
    public MapControl()
    {
-      MapInteractionManager = new(this);
+      MapInteractionManager = new (this);
       InitializeComponent();
    }
 
@@ -70,7 +77,7 @@ public partial class MapControl
    {
       HwndHostContainer.MouseWheel += OnMouseWheel;
       HwndHostContainer.MouseDown += OnMouseMiddleButtonDown;
-      HwndHostContainer.PreviewMouseUp += OnPreviewMouseMiddleButtonUp;
+      HwndHostContainer.PreviewMouseUp += OnPreviewMouseUp;
       HwndHostContainer.MouseMove += OnMouseMove;
       HwndHostContainer.MouseEnter += (_, _) => Window.GetWindow(this)!.KeyDown += MapInteractionManager.HandleKeyDown;
       HwndHostContainer.MouseLeave += (_, _) => Window.GetWindow(this)!.KeyDown -= MapInteractionManager.HandleKeyDown;
@@ -93,15 +100,18 @@ public partial class MapControl
       });
    }
 
-   public void SetColors(Color4[] colors)
+   public void UpdateColors()
    {
-      Debug.Assert(colors.Length == _currentBackgroundColor.Length,
-                   "Color array length does not match the number of locations.");
+      if (!MapModeManager.IsMapReady)
+         return;
 
-      _currentBackgroundColor = colors;
-      _selectionColor = (colors.Clone() as Color4[])!;
+      if (_selectionColor.Length != _currentBackgroundColor.Length)
+         _selectionColor = new Color4[_currentBackgroundColor.Length];
+      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
+
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
+
       _d3dHost.Invalidate();
    }
 
@@ -124,14 +134,14 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
-      Coords = new(this, imageSize);
+      Coords = new (this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors();
-      LocationRenderer = new(vertices, startColor, Coords.ImageAspectRatio);
+      LocationRenderer = new (vertices, startColor, Coords.ImageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
+      _d3dHost = new (LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
 
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
@@ -148,6 +158,7 @@ public partial class MapControl
 
       RefreshAndRenderSelectionColors();
    }
+   
 
    private void OnRendererLoaded(object? sender, ID3DRenderer e)
    {
@@ -177,21 +188,24 @@ public partial class MapControl
 
    private void RefreshSelectionColors()
    {
+      var frozenFactor = 1f - Config.Settings.MapSettings.FrozenSelectionColorOpacity;
+      var selectionFactor = 1f - Config.Settings.MapSettings.SelectionColorOpacity;
+      var previewFactor = 1f - Config.Settings.MapSettings.PrviewOpacityFactor;
+
       if (SelectionManager.ObjectSelectionMode == ObjectSelectionMode.Frozen)
-         foreach (var loc in SelectionManager.GetActiveSelectionLocations().Where(loc => loc != Location.Empty))
+         foreach (var loc in SelectionManager.GetActiveSelectionLocations())
          {
-            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + FreezeSelectionColor;
+            if (loc == Location.Empty)
+               continue;
+
+            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * frozenFactor + FreezeSelectionColor;
          }
 
-      foreach (var loc in SelectionManager.GetActiveSelectionLocations())
-      {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + SelectionColor;
-      }
+      foreach (var loc in Selection.GetSelectedLocations)
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * selectionFactor + SelectionColor;
 
       foreach (var loc in SelectionManager.PreviewedLocations)
-      {
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * 0.5f + PreviewColor;
-      }
+         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * previewFactor + PreviewColor;
    }
 
    private void LocationDeselectedAddHandler(List<Location> locations)
@@ -283,10 +297,17 @@ public partial class MapControl
       MapInteractionManager.HandleMouseDown(e);
    }
 
-   private void OnPreviewMouseMiddleButtonUp(object sender, MouseButtonEventArgs e)
+   private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
    {
       MapInteractionManager.HandleMouseUp(e);
+      OnMapClick?.Invoke(new (CurrentPos, e.ChangedButton));
    }
 
    #endregion
+
+   private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+   {
+      if (Keyboard.Modifiers != ModifierKeys.None)
+         e.Handled = true;
+   }
 }

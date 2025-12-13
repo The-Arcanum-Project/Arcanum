@@ -12,7 +12,7 @@ namespace Arcanum.Core.GameObjects.Court.State;
 
 [ObjectSaveAs(savingMethod: "SaveIdentifierStringKvp")]
 #pragma warning disable ARC002
-public partial class EnactedLaw : IEu5Object<EnactedLaw>
+public partial class EnactedLaw : IEu5Object<EnactedLaw>, IStringKvp
 #pragma warning restore ARC002
 {
    [SuppressAgs]
@@ -33,7 +33,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => string.Empty;
-   public static EnactedLaw Empty { get; } = new() { Key = string.Empty, Value = string.Empty };
+   public static EnactedLaw Empty { get; } = new () { Key = string.Empty, Value = string.Empty };
    public string GetNamespace => $"Court.GovernmentState.{nameof(EnactedLaw)}";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);

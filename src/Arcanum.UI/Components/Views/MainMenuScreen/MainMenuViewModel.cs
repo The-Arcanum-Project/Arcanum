@@ -7,6 +7,8 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.Windows.PopUp;
+using Common.UI.MBox;
 using Arcanum.Core.Utils.vdfParser;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -69,7 +71,7 @@ public class MainMenuViewModel : ObservableObject
          OnPropertyChanged(nameof(LaunchButtonText));
          OnPropertyChanged(nameof(IsNewProjectButtonVisible));
       }
-   } = null!;
+   }
 
    public required Windows.MainWindows.MainMenuScreen MenuWindow { get; set; }
 
@@ -138,22 +140,24 @@ public class MainMenuViewModel : ObservableObject
 
    internal bool GetDescriptorFromInput(out ProjectFileDescriptor descriptor)
    {
-      var modPath = ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)
-                             .Split(Path.DirectorySeparatorChar);
+      // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+      var modWholeGrainPath = ArcanumVm.ModFolderTextBox.Text?.TrimEnd(Path.DirectorySeparatorChar) ?? string.Empty;
+      var modPath = modWholeGrainPath.Split(Path.DirectorySeparatorChar);
       var modDataSpace = new DataSpace(Path.GetDirectoryName(ArcanumVm.ModFolderTextBox.Text) ?? string.Empty,
                                        modPath,
                                        DataSpace.AccessType.ReadWrite);
 
-      var vanillaPath = ArcanumVm.VanillaFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)
-                                 .Split(Path.DirectorySeparatorChar);
+      // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+      var vanillaPath = ArcanumVm.VanillaFolderTextBox.Text?.TrimEnd(Path.DirectorySeparatorChar)
+                                 .Split(Path.DirectorySeparatorChar) ?? [];
       var vanillaDataSpace = new DataSpace(Path.GetDirectoryName(ArcanumVm.VanillaFolderTextBox.Text) ?? string.Empty,
                                            vanillaPath,
                                            DataSpace.AccessType.ReadOnly);
 
-      descriptor = new(Path.GetFileName(ArcanumVm.ModFolderTextBox.Text.TrimEnd(Path.DirectorySeparatorChar)),
-                       modDataSpace,
-                       ArcanumVm.BaseMods.Select(mod => mod.DataSpace).ToList(),
-                       vanillaDataSpace);
+      descriptor = new (Path.GetFileName(modWholeGrainPath),
+                        modDataSpace,
+                        ArcanumVm.BaseMods.Select(mod => mod.DataSpace).ToList(),
+                        vanillaDataSpace);
 
       return descriptor.IsValid();
    }
@@ -167,11 +171,11 @@ public class MainMenuViewModel : ObservableObject
       ErrorManager.ClearLog();
       if (!descriptor.IsValid())
       {
-         MessageBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
+         MBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
                          "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
                          "If you are using base mods make sure that they are valid, too.",
                          "Invalid Project Data",
-                         MessageBoxButton.OK,
+                         MBoxButton.OK,
                          MessageBoxImage.Error);
          return;
       }
@@ -184,7 +188,7 @@ public class MainMenuViewModel : ObservableObject
       if (AppData.MainMenuScreenDescriptor.ProjectFiles
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                                       StringComparison.OrdinalIgnoreCase));
+                                                                     StringComparison.OrdinalIgnoreCase));
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 

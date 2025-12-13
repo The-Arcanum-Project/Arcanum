@@ -24,7 +24,7 @@ public static class ProjectFileUtil
 
    public static void AddFileFromStringToArchive(ZipArchive zip, string fileName, string content)
    {
-      ArgumentException.ThrowIfNullOrEmpty(fileName, nameof(fileName));
+      ArgumentException.ThrowIfNullOrEmpty(fileName);
 
       var entry = zip.CreateEntry(fileName);
       using var writer = new StreamWriter(entry.Open());

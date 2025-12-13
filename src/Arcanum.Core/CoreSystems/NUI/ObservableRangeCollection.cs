@@ -13,6 +13,14 @@ public class ObservableRangeCollection<T> : ObservableCollection<T>
 {
    public bool IsDistinct { get; set; }
 
+   public ObservableRangeCollection()
+   {
+   }
+
+   public ObservableRangeCollection(IEnumerable<T> collection) : base(collection)
+   {
+   }
+
    /// <summary>
    /// Adds a collection of items and raises a single notification.
    /// </summary>
@@ -51,7 +59,8 @@ public class ObservableRangeCollection<T> : ObservableCollection<T>
       using var _ = ListPool<T>.Get(out var oldItems);
       oldItems.AddRange(Items);
       Items.Clear();
-      AddRange(range);
+      foreach (var t in range)
+         Items.Add(t);
       OnCollectionChanged(new(NotifyCollectionChangedAction.Replace, range, oldItems));
    }
 }

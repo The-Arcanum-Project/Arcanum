@@ -3,32 +3,32 @@ using Arcanum.Core.Utils.Colors;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class NaturalHarborSuitabilityMapMode : IMapMode
+public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
 {
-   public string Name { get; } = "Natural Harbor Suitability";
-   public string Description { get; } = "Displays the natural harbor suitability of each coastal location on the map.";
-   public MapModeManager.MapModeType Type { get; } = MapModeManager.MapModeType.NaturalHarborSuitability;
-   public Type DisplayType { get; } = typeof(float);
+   public override string Name { get; } = "Natural Harbor Suitability";
+   public override string Description { get; } = "Displays the natural harbor suitability of each coastal location on the map.";
+   public override MapModeManager.MapModeType Type { get; } = MapModeManager.MapModeType.NaturalHarborSuitability;
+   public override Type[] DisplayTypes { get; } = [typeof(float)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       return ColorGenerator.GetRedGreenGradientInverse(location.TemplateData.NaturalHarborSuitability).AsAbgrInt();
    }
 
-   public string[] GetTooltip(Location location)
+   public override string[] GetTooltip(Location location)
    {
       return [$"Natural Harbor Suitability: {(location.TemplateData.NaturalHarborSuitability * 100):F2}%"];
    }
 
-   public string? GetLocationText(Location location) => null;
+   public override string? GetLocationText(Location location) => null;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

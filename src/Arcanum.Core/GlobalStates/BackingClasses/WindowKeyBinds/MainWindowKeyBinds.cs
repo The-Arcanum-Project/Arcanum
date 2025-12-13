@@ -71,4 +71,5 @@ public class MainWindowKeyBinds : KeyBindProvider
    // Misc
 
    public KeyGesture FreezeSelection { get; set; } = new(Key.W, ModifierKeys.Control);
+   public KeyGesture OpenClipboardHistory { get; set; } = new(Key.V, ModifierKeys.Control | ModifierKeys.Shift);
 }

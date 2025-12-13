@@ -1,10 +1,8 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(ReligiousSchool)], "02_core.txt")
+public class CoreWriter() : SetupFileWriter([], "") //SetupFileWriter([typeof(Institution), typeof(ReligiousSchool)], "02_core.txt")
 {
    public override IndentedStringBuilder WriteFile()
    {
@@ -13,6 +11,7 @@ public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(Religio
       {
          using (isb.BlockWithName("institutions"))
          {
+            // ReSharper disable once UnusedVariable
             foreach (var institution in Globals.Institutions.Values)
             {
                // TODO: not yet supported.
@@ -24,6 +23,7 @@ public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(Religio
       isb.AppendLine();
       using (isb.BlockWithName("religion_manager"))
       {
+         // ReSharper disable once UnusedVariable
          foreach (var school in Globals.ReligiousSchools.Values)
          {
             // TODO: not yet supported.

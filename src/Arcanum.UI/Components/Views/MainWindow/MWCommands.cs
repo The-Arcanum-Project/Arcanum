@@ -226,4 +226,10 @@ public static class MwCommands
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.FreezeSelection },
    };
+
+   // Clipboard Commands
+   public static readonly RoutedCommand HistoryClipboardCommand = new("HistoryClipboard", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenClipboardHistory },
+   };
 }

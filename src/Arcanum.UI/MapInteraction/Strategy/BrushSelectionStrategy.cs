@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
 

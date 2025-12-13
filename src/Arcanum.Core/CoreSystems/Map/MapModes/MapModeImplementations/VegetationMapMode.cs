@@ -3,28 +3,28 @@ using Arcanum.Core.GameObjects.Map;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class VegetationMapMode : IMapMode
+public class VegetationMapMode : LocationBasedMapMode
 {
    public bool IsLandOnly => false;
-   public string Name => "Vegetation";
-   public Type DisplayType => typeof(Vegetation);
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Vegetation;
-   public string Description => "Displays the vegetation type of each location on the map.";
+   public override string Name => "Vegetation";
+   public override Type[] DisplayTypes => [typeof(Vegetation)];
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Vegetation;
+   public override string Description => "Displays the vegetation type of each location on the map.";
    public string? IconSource => null;
 
-   public int GetColorForLocation(Location location) => location.TemplateData.Vegetation.Color.AsInt();
+   public override int GetColorForLocation(Location location) => location.TemplateData.Vegetation.Color.AsInt();
 
-   public string[] GetTooltip(Location location) => [$"Vegetation: {location.TemplateData.Vegetation.UniqueId}"];
+   public override string[] GetTooltip(Location location) => [$"Vegetation: {location.TemplateData.Vegetation.UniqueId}"];
 
-   public string? GetLocationText(Location location) => null;
+   public override string? GetLocationText(Location location) => null;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

@@ -1,4 +1,4 @@
-﻿namespace Arcanum.UI.NUI.Headers;
+﻿namespace Arcanum.UI.NUI;
 
 public partial class DefaultHeader
 {

@@ -11,11 +11,13 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
 {
    public readonly Enum NxOwnerProp;
    public readonly IEu5Object Owner;
+   public readonly Enum NxChildsProp;
 
-   public bool Lock = false;
+   public bool Lock;
 
-   public AggregateLink(Enum nxOwnerProp, IEu5Object owner)
+   public AggregateLink(Enum nxOwnerProp, Enum nxChildsProp, IEu5Object owner)
    {
+      NxChildsProp = nxChildsProp;
       NxOwnerProp = nxOwnerProp;
       Owner = owner;
       Debug.Assert(typeof(T).GetProperty(NxOwnerProp.ToString()) != null,
@@ -62,8 +64,6 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
    {
       if (newItems.Count == 0 || Lock)
          return;
-
-      var empty = EmptyRegistry.Empties[Owner.GetType()];
 
       Lock = true;
       foreach (var item in newItems)

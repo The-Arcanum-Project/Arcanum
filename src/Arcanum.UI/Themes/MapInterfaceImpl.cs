@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 using Common.UI.Map;
 
 namespace Arcanum.UI.Themes;

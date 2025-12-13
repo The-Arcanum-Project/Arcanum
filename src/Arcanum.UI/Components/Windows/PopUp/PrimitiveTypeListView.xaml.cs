@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -9,12 +10,29 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace Arcanum.UI.Components.Windows.PopUp;
 
+// ReSharper disable once UnusedType.Global
 public partial class PrimitiveTypeListView
 {
-   public class SelectableItem<T> : INotifyPropertyChanged
+   public sealed class SelectableItem<T> : INotifyPropertyChanged
    {
-      public T? Value { get; set; }
+      public T? Value
+      {
+         get;
+         set
+         {
+            if (EqualityComparer<T?>.Default.Equals(value, field))
+               return;
+
+            field = value;
+            OnPropertyChanged();
+         }
+      }
       public event PropertyChangedEventHandler? PropertyChanged;
+
+      private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+      {
+         PropertyChanged?.Invoke(this, new (propertyName));
+      }
    }
 
    // The collections that the ListBoxes will bind to.
@@ -47,8 +65,8 @@ public partial class PrimitiveTypeListView
             selectedItemsWrapped.Add(foundItem);
       }
 
-      AvailableItems = new(allItemsWrapped.Except(selectedItemsWrapped));
-      SelectedItems = new(selectedItemsWrapped);
+      AvailableItems = new (allItemsWrapped.Except(selectedItemsWrapped));
+      SelectedItems = new (selectedItemsWrapped);
    }
 
    #region Button Click Handlers

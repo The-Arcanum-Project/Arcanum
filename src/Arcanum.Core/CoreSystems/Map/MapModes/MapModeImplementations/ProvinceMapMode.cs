@@ -3,14 +3,14 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ProvinceMapMode : IMapMode
+public class ProvinceMapMode : LocationBasedMapMode
 {
-   public string Name => "Provinces";
-   public string Description => "Displays the provinces the locations are situated in.";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Provinces;
-   public Type DisplayType => typeof(Province);
+   public override string Name => "Provinces";
+   public override string Description => "Displays the provinces the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Provinces;
+   public override Type[] DisplayTypes => [typeof(Province), typeof(Location)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Province);
       if (parent == null)
@@ -19,21 +19,20 @@ public class ProvinceMapMode : IMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public string[] GetTooltip(Location location) =>
+   public override string[] GetTooltip(Location location) =>
    [
       "Province: " + (location.GetFirstParentOfType(LocationCollectionType.Province)?.UniqueId ?? "None")
    ];
 
-   public string? GetLocationText(Location location)
-      => location.GetFirstParentOfType(LocationCollectionType.Province)?.UniqueId;
+   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Province)?.UniqueId;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

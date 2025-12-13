@@ -9,9 +9,6 @@
         <RootNamespace>Arcanum.API</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="System.Drawing.Common" Version="8.0.0"/>
-    </ItemGroup>
-    <ItemGroup>
         <ProjectReference Include="..\Arcanum.Common\Arcanum.Common.csproj"/>
         <ProjectReference Include="..\src_gen\Nexus.Core\Nexus.Core.csproj"/>
     </ItemGroup>

@@ -8,12 +8,6 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
    protected IList<IEu5Object> Targets = new List<IEu5Object>();
    protected readonly object Value;
 
-   public override string GetDescription => Targets.Count > 1
-                                               ? $"{ActionDescription} {Value} to {Attribute} in {Targets.Count} objects of type {Type}"
-                                               : $"{ActionDescription} {Value} to {Attribute} in {Targets.First()}";
-
-   protected abstract string ActionDescription { get; }
-
    protected ModifyCollectionCommand(IEu5Object target, Enum attribute, object value)
       : base(target, attribute)
    {
@@ -37,7 +31,24 @@ public abstract class ModifyCollectionCommand : Eu5ObjectCommand
          return false;
 
       Targets.Add(target);
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
+      if (isAdd)
+         target._addToCollection(Attribute, Value);
+      else
+         target._removeFromCollection(Attribute, Value);
+
+      InvalidateUI();
+
+      return true;
+   }
+   
+   public bool TryAddMultiple(IEu5Object target, Enum attribute, object value, bool isAdd)
+   {
+      if (DisallowMerge(target, attribute) || !Value.Equals(value))
+         return false;
+
+      Targets.Add(target);
+      Debug.Assert(Attribute != null);
       if (isAdd)
          target._addToCollection(Attribute, Value);
       else

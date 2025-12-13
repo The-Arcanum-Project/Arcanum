@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.UI.NUI.Generator;
@@ -12,7 +13,7 @@ public static class EventHandlers
    /// when clicked. If the right mouse button is clicked, a context menu with navigation options
    /// is displayed instead.
    /// </summary>
-   public static void SetOnMouseUpHandler(TextBlock tb, NavH navh)
+   public static void SetOnMouseUpHandler(TextBlock tb, NavH navh, Enum nxProp)
    {
       MouseButtonEventHandler handler = (sender, args) =>
       {
@@ -21,18 +22,29 @@ public static class EventHandlers
 
          if (args.ChangedButton == MouseButton.Left)
          {
-            navh.NavigateTo(currentTarget);
-         }
-         else
-         {
-            var navs = navh.GetNavigations();
-            if (navs.Length < 1)
-               return;
+            // We Paste here if Shift is held down
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+               foreach (var navTarget in navh.Targets)
+                  ArcClipboard.Paste(navTarget, nxProp);
 
-            var contextMenu = ControlFactory.GetContextMenu(navs, navh);
-            tb.ContextMenu = contextMenu;
-            contextMenu.IsOpen = true;
-            args.Handled = true;
+               if (navh.Targets.Count >= 1)
+                  NUINavigation.Instance.ForceInvalidateUi();
+            }
+            else
+               navh.NavigateTo(currentTarget);
+         }
+         else if (args.ChangedButton == MouseButton.Right)
+         {
+            if (Keyboard.IsKeyDown(Key.LeftShift) && navh.Targets is [{ } target])
+               ArcClipboard.Copy(target, nxProp);
+            else
+            {
+               var contextMenu = ControlFactory.GetContextMenu(navh.GetNavigations(), navh, nxProp);
+               tb.ContextMenu = contextMenu;
+               contextMenu.IsOpen = true;
+               args.Handled = true;
+            }
          }
       };
       tb.MouseUp += handler;

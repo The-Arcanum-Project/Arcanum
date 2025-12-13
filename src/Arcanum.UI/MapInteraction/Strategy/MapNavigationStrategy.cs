@@ -2,13 +2,14 @@
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
 
 public class MapNavigationStrategy(MapInteractionManager mapInteractionManager) : IMapInteractionStrategy
 {
    // TODO: @MelCo is this needed
+   // ReSharper disable once UnusedMember.Local
    private readonly MapInteractionManager _mapInteractionManager = mapInteractionManager;
    private bool _isPanning;
    private bool _hasPanned;

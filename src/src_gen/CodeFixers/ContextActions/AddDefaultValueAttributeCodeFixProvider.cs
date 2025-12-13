@@ -12,8 +12,7 @@ namespace CodeFixers.ContextActions;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AddDefaultValueAttributeCodeFixProvider)), Shared]
 public class AddDefaultValueAttributeCodeFixProvider : CodeFixProvider
 {
-   public sealed override ImmutableArray<string> FixableDiagnosticIds
-      => [DefinedDiagnostics.MissingDefaultValueAttributeWarning.Id];
+   public sealed override ImmutableArray<string> FixableDiagnosticIds => [DefinedDiagnostics.MissingDefaultValueAttributeWarning.Id];
 
    public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -38,8 +37,8 @@ public class AddDefaultValueAttributeCodeFixProvider : CodeFixProvider
       context.RegisterCodeFix(CodeAction.Create(title: $"Add [DefaultValue] attribute to '{propertyName}'",
                                                 createChangedDocument: c
                                                    => AddDefaultValueAttributeAsync(context.Document,
-                                                    propertyDeclaration,
-                                                    c),
+                                                                                    propertyDeclaration,
+                                                                                    c),
                                                 equivalenceKey: "AddDefaultValueAttribute"),
                               diagnostic);
    }
@@ -60,7 +59,7 @@ public class AddDefaultValueAttributeCodeFixProvider : CodeFixProvider
       var attributeArgument = SyntaxFactory.AttributeArgument(defaultValueExpression);
       var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("DefaultValue"))
                                    .WithArgumentList(SyntaxFactory.AttributeArgumentList(SyntaxFactory
-                                                       .SingletonSeparatedList(attributeArgument)));
+                                                                                           .SingletonSeparatedList(attributeArgument)));
 
       // This logic for handling trivia and adding the attribute is reused from your example
       var newAttributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute))
@@ -71,7 +70,7 @@ public class AddDefaultValueAttributeCodeFixProvider : CodeFixProvider
                                   .AddAttributeLists(newAttributeList);
 
       var oldRoot = await document.GetSyntaxRootAsync(cancellationToken);
-      var newRoot = oldRoot.ReplaceNode(propertyDecl, newPropertyDeclaration);
+      var newRoot = oldRoot?.ReplaceNode(propertyDecl, newPropertyDeclaration);
 
       // DefaultValueAttribute is in System.ComponentModel
       const string requiredUsing = "System.ComponentModel";
@@ -82,7 +81,7 @@ public class AddDefaultValueAttributeCodeFixProvider : CodeFixProvider
          newRoot = compilationUnit.AddUsings(usingDirective.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
       }
 
-      return document.WithSyntaxRoot(newRoot);
+      return document.WithSyntaxRoot(newRoot!);
    }
 
    /// <summary>

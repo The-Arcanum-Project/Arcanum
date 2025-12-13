@@ -13,6 +13,8 @@ public class NUINavigation(int capacity)
    private readonly LinkedList<NavH> _items = [];
    private LinkedListNode<NavH>? _current;
 
+   public NavH? Current => _current?.Value;
+
    static NUINavigation()
    {
       EventDistributor.UpdateNUI += () => Instance.InvalidateUi();
@@ -73,6 +75,9 @@ public class NUINavigation(int capacity)
 
       GenerateUi(_current.Value);
    }
+   
+   //TODO: @Melco Fix this
+   public void ForceInvalidateUi() => GenerateUi(_current!.Value);
 
    internal static void GenerateUi(NavH navH)
    {

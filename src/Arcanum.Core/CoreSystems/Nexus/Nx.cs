@@ -2,6 +2,7 @@
 using System.Reflection;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.Nexus;
@@ -13,11 +14,12 @@ public static class Nx
    /// one of its parameters has the [PropertyValue] attribute.
    /// </summary>
    public static void Set<T>(
-      INexus target,
+      IEu5Object target,
       [LinkedPropertyEnum(nameof(target))] Enum e,
       [PropertyValue] T value)
    {
-      CommandManager.SetValueCommand((IEu5Object)target, e, value!);
+      if(!target.IgnoreCommand(e))
+         CommandManager.SetValueCommand(target, e, value!);
       target._setValue(e, value!);
    }
 
@@ -32,15 +34,22 @@ public static class Nx
                                   INexus target,
                                   Enum e)
    {
-      CommandManager.SetValueCommand((IEu5Object)target, e, value!);
+      if(!target.IgnoreCommand(e))
+         CommandManager.SetValueCommand((IEu5Object)target, e, value!);
+      else
+         target._setValue(e, value!);
    }
 
    public static void ForceSet<T>(T value, IEu5Object[] targets, Enum e)
    {
+      Debug.Assert(targets.Length > 0, nameof(targets) + " == 0");
       if (targets.Length == 1)
          ForceSet(value, targets[0], e);
-      else
+      else if(!targets[0].IgnoreCommand(e))
          CommandManager.SetValueCommand(targets, e, value!);
+      else
+         foreach (var target in targets)
+            target._setValue(e, value!);
    }
 
    [PropertyGetter]
@@ -112,7 +121,42 @@ public static class Nx
       T value)
    {
       Debug.Assert(value != null, nameof(value) + " != null");
-      CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
+      
+      
+      if(!target.IgnoreCommand(e))
+      {
+         var type = target.GetNxPropType(e);
+         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) && value is IEu5Object obj)
+            CommandManager.TransferBetweenLinksCommand((IEu5Object)target, e, obj);
+         else
+            CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
+      }
+      else
+         target._addToCollection(e, value);
+   }
+
+   public static void AddRangeToCollection<T>(
+      INexus target,
+      [LinkedPropertyEnum(nameof(target))] Enum e,
+      IEnumerable<T> values)
+   {
+      Debug.Assert(values != null, nameof(values) + " != null");
+
+      var type = target.GetNxPropType(e);
+      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>))
+      {
+         CommandManager.TransferBetweenLinksCommand((IEu5Object)target, e, values.Cast<IEu5Object>());
+         return;
+      }
+
+      foreach (var value in values)
+      {
+         Debug.Assert(value != null, nameof(value) + " != null");
+         if(!target.IgnoreCommand(e))
+               CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
+         else
+            target._addToCollection(e, value);
+      }
    }
 
    public static void RemoveFromCollection<T>(
@@ -121,7 +165,10 @@ public static class Nx
       T value)
    {
       Debug.Assert(value != null, nameof(value) + " != null");
-      CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
+      if(!target.IgnoreCommand(e))
+         CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
+      else
+         target._removeFromCollection(e, value);
    }
 
    /// <summary>
@@ -130,8 +177,10 @@ public static class Nx
    public static void ClearCollection(INexus target,
                                       [LinkedPropertyEnum(nameof(target))] Enum e)
    {
-      CommandManager.ClearCollectionCommand((IEu5Object)target, e);
-      target._clearCollection(e);
+      if(!target.IgnoreCommand(e))
+         CommandManager.ClearCollectionCommand((IEu5Object)target, e);
+      else
+         target._clearCollection(e);
    }
 
    /// <summary>

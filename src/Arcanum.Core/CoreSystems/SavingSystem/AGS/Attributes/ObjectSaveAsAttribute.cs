@@ -15,7 +15,8 @@ public class ObjectSaveAsAttribute(TokenType separator = TokenType.Equals,
                                    TokenType openingToken = TokenType.LeftBrace,
                                    TokenType closingToken = TokenType.RightBrace,
                                    string? savingMethod = null,
-                                   string? commentMethod = null)
+                                   string? commentMethod = null,
+                                   bool asOneLine = false)
    : Attribute
 {
    public TokenType Separator { get; } = separator;
@@ -23,4 +24,5 @@ public class ObjectSaveAsAttribute(TokenType separator = TokenType.Equals,
    public TokenType ClosingToken { get; } = closingToken;
    public string? SavingMethod { get; } = savingMethod;
    public string? CommentMethod { get; } = commentMethod;
+   public bool AsOneLine { get; } = asOneLine;
 }

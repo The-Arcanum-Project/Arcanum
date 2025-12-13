@@ -74,7 +74,7 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
 
    [Description("The factor by which the opacity of map elements is reduced when hovering over them.")]
    [DefaultValue(0.8f)]
-   public float HoverOpacityFactor
+   public float PrviewOpacityFactor
    {
       get;
       set => SetNotifyProperty(ref field, value);
@@ -152,8 +152,7 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       set => SetNotifyProperty(ref field, value);
    } = true;
 
-   [Description(
-      "If water locations should use a shade of the WaterShadeBaseColor as color or the color from the location definition.")]
+   [Description("If water locations should use a shade of the WaterShadeBaseColor as color or the color from the location definition.")]
    [DefaultValue(true)]
    public bool UseShadeOfColorOnWater
    {
@@ -176,4 +175,28 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = true;
+
+   [Description("The opacity of the selection color applied to selected map elements.")]
+   [DefaultValue(0.5f)]
+   public float SelectionColorOpacity
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 0.5f;
+
+   [Description("The opacity of the highlight color applied to highlighted map elements.")]
+   [DefaultValue(0.5f)]
+   public float HighlightColorOpacity
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 0.5f;
+
+   [Description("The opacity of the frozen selection color applied to frozen selected map elements.")]
+   [DefaultValue(0.5f)]
+   public float FrozenSelectionColorOpacity
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 0.5f;
 }

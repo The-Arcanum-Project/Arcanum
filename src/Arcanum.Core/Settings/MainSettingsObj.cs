@@ -27,6 +27,9 @@ public class MainSettingsObj
    [IsSubMenu("Error Handling")]
    public ErrorDescriptors ErrorDescriptors { get; set; } = ErrorDescriptors.Instance;
 
+   [IsSubMenu("Specialized Editors")]
+   public SpecializedEditorSettings SpecializedEditorSettings { get; set; } = new();
+
    public ErrorLogOptions ErrorLogOptions { get; set; } = new();
 
    [IsSubMenu("Keymap")]

@@ -4,7 +4,7 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Components.UserControls;
+using Arcanum.UI.Components.UserControls.Map;
 
 namespace Arcanum.UI.Util;
 

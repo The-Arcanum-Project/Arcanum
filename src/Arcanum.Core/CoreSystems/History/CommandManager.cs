@@ -65,7 +65,19 @@ public static class CommandManager
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value, true),
                            () => new AddToCollectionCommand(eu5Object, attribute, value));
    }
-
+   
+   public static bool TransferBetweenLinksCommand(IEu5Object eu5Object, Enum attribute, IEnumerable<IEu5Object> value)
+   {
+      return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
+                           () => new TransferBetweenLinksCommand(eu5Object, attribute, value));
+   }
+   
+   public static bool TransferBetweenLinksCommand(IEu5Object eu5Object, Enum attribute, IEu5Object value)
+   {
+      return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
+         () => new TransferBetweenLinksCommand(eu5Object, attribute, value));
+   }
+   
    /// <summary>
    /// A generic method to handle the creation and merging of history commands.
    /// </summary>

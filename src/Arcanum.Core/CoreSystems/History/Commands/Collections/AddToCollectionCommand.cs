@@ -11,14 +11,17 @@ public class AddToCollectionCommand
    public AddToCollectionCommand(IEu5Object target, Enum attribute, object value) : base(target, attribute, value)
    {
       target._addToCollection(attribute, value);
+      InvalidateUI();
    }
 
-   protected override string ActionDescription => "Add";
+   public override string GetDescription => Targets.Count > 1
+                                               ? $"Add {Value} to {Attribute} in {Targets.Count} objects of type {Type}"
+                                               : $"Add {Value} to {Attribute} in {Targets.First()}";
 
    public override void Undo()
    {
       base.Undo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var r in Targets)
          r._removeFromCollection(Attribute, Value);
    }
@@ -26,7 +29,7 @@ public class AddToCollectionCommand
    public override void Redo()
    {
       base.Redo();
-      Debug.Assert(Attribute != null, "Attribute != null");
+      Debug.Assert(Attribute != null);
       foreach (var r in Targets)
          r._addToCollection(Attribute, Value);
    }

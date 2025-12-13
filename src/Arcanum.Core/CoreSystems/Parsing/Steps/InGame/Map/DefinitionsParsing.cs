@@ -103,7 +103,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
 
             var superRegionKey = pc.SliceString(srBn);
             var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
-            if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out var srkn))
+            if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                continue;
 
             superRegion.FileLocation = srBn.GetFileLocation();
@@ -128,8 +128,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                region.FileLocation = rBn.GetFileLocation();
 
                LUtil.TryAddToGlobals(regionKey, ref pc, region, regionGlobals);
-               superRegion.LocationChildren.Add(region);
-               region.Parents.Add(superRegion);
+               superRegion.Regions.Add(region);
 
                foreach (var areaSn in rBn.Children)
                {
@@ -145,8 +144,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                   area.FileLocation = aBn.GetFileLocation();
 
                   LUtil.TryAddToGlobals(areaKey, ref pc, area, areaGlobals);
-                  region.LocationChildren.Add(area);
-                  area.Parents.Add(region);
+                  region.Areas.Add(area);
 
                   foreach (var provinceSn in aBn.Children)
                   {
@@ -165,8 +163,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                            ref pc,
                                            province,
                                            provinceGlobals);
-                     area.LocationChildren.Add(province);
-                     province.Parents.Add(area);
+                     area.Provinces.Add(province);
 
                      foreach (var locationSn in pBn.Children)
                      {
@@ -177,8 +174,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                         if (!LUtil.ParseLocation(kNode, ref pc, out var location))
                            continue;
 
-                        province.LocationChildren.Add(location);
-                        location.Parents.Add(province);
+                        province.Locations.Add(location);
                      }
                   }
                }

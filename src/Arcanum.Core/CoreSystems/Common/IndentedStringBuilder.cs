@@ -10,9 +10,9 @@ namespace Arcanum.Core.CoreSystems.Common;
 /// </summary>
 public class IndentedStringBuilder
 {
-   private readonly StringBuilder _builder = new();
+   private readonly StringBuilder _builder = new ();
    private string _indentString = "   "; // 3 spaces per indent level
-   private readonly StringBuilder _indentCacheBuilder = new();
+   private readonly StringBuilder _indentCacheBuilder = new ();
    private bool _isAtStartOfLine = true;
 
    public IndentedStringBuilder(int initialCapacity = 256)
@@ -21,7 +21,7 @@ public class IndentedStringBuilder
       _indentCacheBuilder.EnsureCapacity(32); // Preallocate some space for indentation levels
    }
 
-   public void SetIndent(int spaceCount) => _indentString = new(' ', spaceCount);
+   public void SetIndent(int spaceCount) => _indentString = new (' ', spaceCount);
 
    /// <summary>
    /// Sets the indentation to a specific level, overriding the current indentation.
@@ -160,29 +160,38 @@ public class IndentedStringBuilder
          _indentCacheBuilder.Length -= _indentString.Length;
    }
 
-   public IndentScope Indent() => new(this);
+   public IndentScope Indent() => new (this);
 
    public BlockScope Block(string openingBrace = "{", string closingBrace = "}")
    {
       AppendLine(openingBrace);
-      return new(this, closingBrace);
+      return new (this, closingBrace);
    }
 
    public BlockScope BlockWithName(string blockName,
                                    string separator = "=",
                                    string openingBrace = "{",
                                    string closingBrace = "}",
-                                   bool addNewLineBeforeClosing = false)
+                                   bool addNewLineBeforeClosing = false,
+                                   bool asOneLine = false)
    {
-      Append(blockName).Append(' ').Append(separator).Append(' ').Append(openingBrace).AppendLine();
-      return new(this, closingBrace, addNewLineBeforeClosing);
+      Append(blockName).Append(' ').Append(separator).Append(' ').Append(openingBrace);
+      if (!asOneLine)
+      {
+         _builder.AppendLine();
+         _isAtStartOfLine = true;
+      }
+
+      return new (this, closingBrace, addNewLineBeforeClosing, asOneLine);
    }
 
-   public BlockScope BlockWithName(IAgs ags, SavingFormat format)
+   public BlockScope BlockWithName(IAgs ags, SavingFormat format, bool asOneLine)
    {
       var addNewLine = format == SavingFormat.Spacious;
-      if (addNewLine)
+      if (addNewLine && !asOneLine)
+      {
          AppendLine();
+      }
 
       var key = ags.SavingKey;
       var separator = SavingUtil.GetSeparator(ags.ClassMetadata.Separator);
@@ -191,16 +200,21 @@ public class IndentedStringBuilder
 
       PrependIndentIfNecessary();
       _builder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
-      _builder.AppendLine();
-      _isAtStartOfLine = true;
+      if (!asOneLine)
+      {
+         _builder.AppendLine();
+         _isAtStartOfLine = true;
+      }
+      else
+         Append(" ");
 
-      return new(this, closingBrace, addNewLine);
+      return new (this, closingBrace, addNewLine);
    }
 
-   public BlockScope BlockWithNameAndInjection(IAgs ags, InjRepType injRepType)
+   public BlockScope BlockWithNameAndInjection(IAgs ags, InjRepType injRepType, bool asOneLine)
    {
       if (injRepType == InjRepType.None)
-         return BlockWithName(ags, ags.AgsSettings.Format);
+         return BlockWithName(ags, ags.AgsSettings.Format, asOneLine);
 
       var addNewLine = ags.AgsSettings.Format == SavingFormat.Spacious;
       if (addNewLine)
@@ -217,7 +231,7 @@ public class IndentedStringBuilder
       _builder.AppendLine();
       _isAtStartOfLine = true;
 
-      return new(this, closingBrace, addNewLine);
+      return new (this, closingBrace, addNewLine);
    }
 
    #endregion
@@ -323,9 +337,11 @@ public class IndentedStringBuilder
       private readonly IndentedStringBuilder _builder;
       private readonly string _closingBrace;
       private readonly bool _addNewLineBeforeClosing;
+      private readonly bool _asOneLine;
 
-      public BlockScope(IndentedStringBuilder builder, string closingBrace, bool addNewLineBeforeClosing = false)
+      public BlockScope(IndentedStringBuilder builder, string closingBrace, bool addNewLineBeforeClosing = false, bool asOneLine = false)
       {
+         _asOneLine = asOneLine;
          _builder = builder;
          _closingBrace = closingBrace;
          _addNewLineBeforeClosing = addNewLineBeforeClosing;
@@ -335,7 +351,7 @@ public class IndentedStringBuilder
       public void Dispose()
       {
          _builder.DecreaseIndent();
-         if (_addNewLineBeforeClosing)
+         if (_addNewLineBeforeClosing && !_asOneLine)
             _builder.AppendLine();
          _builder.AppendLine(_closingBrace);
       }

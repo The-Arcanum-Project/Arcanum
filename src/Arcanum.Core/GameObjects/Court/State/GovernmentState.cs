@@ -21,6 +21,33 @@ namespace Arcanum.Core.GameObjects.Court.State;
 [ObjectSaveAs]
 public partial class GovernmentState : IEu5Object<GovernmentState>
 {
+   public GovernmentState() : this(isEmpty: false)
+   {
+   }
+
+   private GovernmentState(bool isEmpty)
+   {
+      if (isEmpty)
+      {
+         UniqueId = "Arcanum_Empty_GovernmentState";
+         InheritRulerTerms = null!;
+      }
+      else
+      {
+         InheritRulerTerms = Country.Empty;
+         Ruler = Character.Empty;
+      }
+   }
+
+   [SaveAs(savingMethod: "SocientalValueEntrySaving")]
+   [DefaultValue(null)]
+   [Description("The societal values upheld by this government.")]
+   [ParseAs(Globals.DO_NOT_PARSE_ME,
+            isShatteredList: true,
+            iEu5KeyType: typeof(SocientalValue),
+            itemNodeType: AstNodeType.ContentNode)]
+   public ObservableRangeCollection<SocientalValueEntry> SocietalValues { get; set; } = [];
+
    [SaveAs]
    [DefaultValue(GovernmentType.Monarchy)]
    [Description("The type of government this state represents.")]
@@ -37,7 +64,11 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [DefaultValue("")]
    [Description("The type of a regency this government has.")]
    [ParseAs("inherit_ruler_terms")]
-   public Country InheritRulerTerms { get; set; } = Country.Empty;
+   public Country InheritRulerTerms
+   {
+      get => field ?? Country.Empty;
+      set;
+   }
 
    [SaveAs]
    [DefaultValue("")]
@@ -57,11 +88,11 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("end_regency_date")]
    public JominiDate EndRegencyDate { get; set; } = JominiDate.Empty;
 
-   [SaveAs]
-   [DefaultValue("")]
+   [SaveAs(SavingValueType.Identifier)]
+   [DefaultValue(null)]
    [Description("The current ruler of this government state.")]
    [ParseAs("ruler")]
-   public string Ruler { get; set; } = string.Empty;
+   public Character Ruler { get; set; } = null!;
 
    [SaveAs]
    [DefaultValue("")]
@@ -81,19 +112,19 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("designated_heir_reason")]
    public DesignateHeirReason DesignateHeirReason { get; set; } = DesignateHeirReason.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue("")]
    [Description("How the heir is selected in this government state.")]
    [ParseAs("heir_selection")]
-   public string HeirSelection { get; set; } = string.Empty;
+   public string HeirSelection { get; set; } = "";
 
-   [SaveAs]
+   [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [DefaultValue(null)]
    [Description("Properties defining the parliament of this government")]
    [ParseAs("parliament", AstNodeType.BlockNode, isEmbedded: true)]
    public ParliamentDefinition ParliamentDefinition { get; set; } = ParliamentDefinition.Empty;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [Description("All reforms that have been enacted in this government state.")]
    [ParseAs("reforms", AstNodeType.BlockNode)]
@@ -105,7 +136,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("laws", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<EnactedLaw> EnactedLaws { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true, isEmbeddedObject: true)]
    [DefaultValue(null)]
    [Description("All rulers that have ruled in this government state.")]
    [ParseAs("ruler_term", isEmbedded: true, isShatteredList: true, itemNodeType: AstNodeType.BlockNode)]
@@ -117,13 +148,13 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("regnal_numbers", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<RegnalNumber> RegnalNumbers { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [Description("All estate privileges that are currently enacted.")]
    [ParseAs("privilege", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.IAgs, isShattered: true, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [DefaultValue(null)]
    [Description("List of estate attribute definitions associated with this pop type.")]
@@ -154,7 +185,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    }
    public static Dictionary<string, GovernmentState> GetGlobalItems() => [];
 
-   public static GovernmentState Empty { get; } = new() { UniqueId = "Arcanum_Empty_GovernmentState" };
+   public static GovernmentState Empty { get; } = new (true);
 
    #endregion
 }

@@ -1,0 +1,689 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.ValueAllocators.PopsEditor"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.ValueAllocators"
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:charts = "clr-namespace:Arcanum.UI.Components.Charts.DonutChart"
+             xmlns:acb = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
+             xmlns:g = "clr-namespace:Arcanum.Core.GlobalStates;assembly=Arcanum.Core"
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls" mc:Ignorable = "d"
+             d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
+
+    <UserControl.InputBindings>
+        <!-- Alt+Z Undo -->
+        <KeyBinding Modifiers = "Alt" Key = "Z" Command = "{Binding UndoCommand}" />
+    </UserControl.InputBindings>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTextBoxStyle.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Style for the Lock Button -->
+            <Style x:Key = "LockToggleStyle" TargetType = "ToggleButton">
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border Background = "Transparent" Padding = "2">
+                                <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property = "Foreground" Value = "#AAA" />
+                <Setter Property = "Content" Value = "🔓" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Style.Triggers>
+                    <Trigger Property = "IsChecked" Value = "True">
+                        <Setter Property = "Content" Value = "🔒" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key = "ThinBaseButtonStyle" TargetType = "styleClasses:BaseButton"
+                   BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+                <Setter Property = "Background" Value = "Transparent" />
+                <Setter Property = "BorderThickness" Value = "1" />
+                <Setter Property = "FontWeight" Value = "Bold" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Setter Property = "Width" Value = "20" />
+            </Style>
+
+
+            <Style x:Key = "SliderRepeatButtonStyle" TargetType = "RepeatButton">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "IsTabStop" Value = "false" />
+                <Setter Property = "Focusable" Value = "false" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "RepeatButton">
+                            <Border Background = "{TemplateBinding Background}" Height = "4" CornerRadius = "2" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimSliderThumbStyle" TargetType = "Thumb">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Thumb">
+                            <Grid Background = "Transparent">
+                                <!-- 
+                                   THE INVISIBLE GRIP (Hit Box):
+                                   We make this wider than the visual thumb (e.g. 24px).
+                                   We use Negative Margins to center it over the 6px root.
+                                   Background="Transparent" captures the mouse clicks.
+                                -->
+                                <Border Width = "24" Height = "24" Margin = "-9,0,-9,0" Background = "Transparent" />
+
+                                <!-- THE VISUAL HANDLE -->
+                                <Border x:Name = "VisualThumb" Background = "#E0E0E0" BorderBrush = "#111"
+                                        BorderThickness = "1" CornerRadius = "3" Width = "6" Height = "14"
+                                        VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsMouseOver" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                </Trigger>
+                                <Trigger Property = "IsDragging" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#666" />
+                                </Trigger>
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "#555" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#333" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimColorSliderStyle" TargetType = "Slider">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Focusable" Value = "False" /> <!-- Prevents dotted focus rect -->
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Slider">
+                            <Grid>
+                                <!-- Background Rail (Dark Grey) -->
+                                <Border x:Name = "TrackBackground" Background = "#333333" Height = "4"
+                                        CornerRadius = "2" VerticalAlignment = "Center" />
+
+                                <!-- The Track logic -->
+                                <Track x:Name = "PART_Track">
+
+                                    <!-- Left Side (Filled) -->
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "{TemplateBinding Foreground}" />
+                                    </Track.DecreaseRepeatButton>
+
+                                    <!-- The Thumb -->
+                                    <Track.Thumb>
+                                        <Thumb Style = "{StaticResource SlimSliderThumbStyle}" />
+                                    </Track.Thumb>
+
+                                    <!-- Right Side (Unfilled) -->
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "Transparent" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <!-- Dim the filled track when disabled/locked -->
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter Property = "Foreground" Value = "#555" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Converters -->
+            <converters:DistributionToWidthConverter x:Key = "DistributionToWidthConverter" />
+            <converters:LimitToWidthConverter x:Key = "LimitToWidthConverter" />
+            <converters:BorderClipConverter x:Key = "BorderClipConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "20" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" MaxHeight = "800" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+
+            <!-- Location Name Title Bar -->
+            <TextBlock Grid.Row = "0"
+                       Text = "{Binding LoadedLocation.UniqueId,
+                          StringFormat=Pops of {0}:}"
+                       Margin = "0,0,0,3" FontSize = "16" FontWeight = "Bold" VerticalAlignment = "Center"
+                       HorizontalAlignment = "Center" />
+
+
+            <Border x:Name = "OuterBorder" Grid.Row = "1" CornerRadius = "4" BorderThickness = "1"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "Transparent"
+                    VerticalAlignment = "Stretch" HorizontalAlignment = "Stretch">
+
+                <ItemsControl x:Name = "CompositionBar" ItemsSource = "{Binding Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation = "Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Clip>
+                        <MultiBinding Converter = "{StaticResource BorderClipConverter}">
+                            <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
+                            <Binding ElementName = "CompositionBar" Path = "ActualHeight" />
+                            <Binding ElementName = "OuterBorder" Path = "CornerRadius" />
+                        </MultiBinding>
+                    </ItemsControl.Clip>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Height = "20" Background = "{Binding ColorBrush}" ToolTip = "{Binding Name}">
+                                <Border.Width>
+                                    <MultiBinding Converter = "{StaticResource DistributionToWidthConverter}">
+                                        <Binding Path = "Value" />
+                                        <Binding Path = "DataContext.TotalLimit"
+                                                 RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                        <!-- Bind to the Container's Width -->
+                                        <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
+                                    </MultiBinding>
+                                </Border.Width>
+
+                                <!-- Optional: Show Number inside bar if wide enough -->
+                                <TextBlock Text = "{Binding Value}"
+                                           Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "10"
+                                           FontWeight = "Bold" HorizontalAlignment = "Center"
+                                           VerticalAlignment = "Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType = "TextBlock">
+                                            <Setter Property = "Visibility" Value = "Visible" />
+                                            <Style.Triggers>
+                                                <!-- Hide text if value is 0 -->
+                                                <DataTrigger Binding = "{Binding Value}" Value = "0">
+                                                    <Setter Property = "Visibility" Value = "Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+
+            <!-- Header -->
+            <Grid Grid.Row = "2" Margin = "-5,4,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "30" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- MASTER LOCK TOGGLE -->
+                <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
+                              IsChecked = "{Binding AreAllLocked}" ToolTip = "Lock/Unlock All" />
+
+                <!-- Total and Settings -->
+                <Grid Grid.Column = "1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "Auto" /> <!-- Label -->
+                        <ColumnDefinition Width = "*" />  <!-- Slider -->
+                        <ColumnDefinition Width = "70" /> <!-- TextBox -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Log Toggle -->
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column = "0" Text = "Total:" FontWeight = "SemiBold" VerticalAlignment = "Center" />
+
+                    <Grid Grid.Column = "1" Margin = "6,0,4,0">
+                        <Slider Minimum = "0" Maximum = "{Binding MaxTotalLimit}"
+                                Value = "{Binding TotalLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                VerticalAlignment = "Center" TickFrequency = "100" IsSnapToTickEnabled = "False"
+                                Style = "{StaticResource SlimColorSliderStyle}"
+                                Foreground = "{StaticResource BlueAccentColorBrush}"
+                                local:InteractionMonitor.AllocatorVm = "{Binding}" />
+                    </Grid>
+
+                    <styleClasses:CorneredTextBox Grid.Column = "2"
+                                                  Text = "{Binding TotalLimit, UpdateSourceTrigger=Explicit}"
+                                                  local:TextBoxUtilities.UpdateDelay = "600" Width = "60" Height = "24"
+                                                  VerticalContentAlignment = "Center"
+                                                  HorizontalContentAlignment = "Center" FontWeight = "Bold"
+                                                  local:InteractionMonitor.AllocatorVm = "{Binding}" />
+
+
+                    <CheckBox Grid.Column = "3" IsChecked = "{Binding IsLogarithmic}" Content = "Log Scale"
+                              HorizontalAlignment = "Right" VerticalAlignment = "Center">
+                        <CheckBox.Style>
+                            <Style TargetType = "CheckBox" BasedOn = "{StaticResource {x:Type CheckBox}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding = "{Binding AutoDetectLogScale}" Value = "True">
+                                        <Setter Property = "ToolTip">
+                                            <Setter.Value>
+                                                Scale is currently managed automatically based on data distribution.
+                                                This can be changed in the UI Settings.
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </CheckBox.Style>
+                    </CheckBox>
+                </Grid>
+            </Grid>
+
+            <!-- Separator Line -->
+            <Rectangle Grid.Row = "3" Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}"
+                       Margin = "0,-2,0,10" />
+
+            <!-- Rows -->
+            <ItemsControl Grid.Row = "4" ItemsSource = "{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin = "0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "20" />
+                                <ColumnDefinition Width = "30" />
+                                <ColumnDefinition Width = "*" />
+                                <ColumnDefinition Width = "140" />
+                            </Grid.ColumnDefinitions>
+
+                            <ToggleButton Grid.Column = "0" Style = "{StaticResource LockToggleStyle}"
+                                          IsChecked = "{Binding IsLocked}" ToolTip = "Lock this value" />
+
+                            <TextBlock Grid.Column = "1" Text = "{Binding PercentageDisplay}"
+                                       VerticalAlignment = "Center" FontSize = "12" Opacity = "0.8" Margin = "5,0,0,0" />
+
+                            <Grid Grid.Column = "2" Margin = "10,0,10,0" x:Name = "SliderContainer">
+
+                                <Slider Minimum = "0"
+                                        Maximum = "{Binding DataContext.TotalLimit, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Value = "{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled = "{Binding IsNotLocked}" VerticalAlignment = "Center"
+                                        TickFrequency = "1" IsSnapToTickEnabled = "False"
+                                        Foreground = "{Binding ColorBrush}"
+                                        local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Style = "{StaticResource SlimColorSliderStyle}" />
+
+
+                                <Rectangle HorizontalAlignment = "Left" Fill = "{StaticResource DimErrorRedColorBrush}"
+                                           Height = "4" VerticalAlignment = "Center" IsHitTestVisible = "False">
+                                    <Rectangle.Width>
+                                        <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
+                                            <Binding Path = "SliderMinPosition" />
+                                            <Binding Path = "DataContext.TotalLimit"
+                                                     RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                            <Binding ElementName = "SliderContainer" Path = "ActualWidth" />
+                                        </MultiBinding>
+                                    </Rectangle.Width>
+                                </Rectangle>
+
+                                <Rectangle HorizontalAlignment = "Right"
+                                           Fill = "{StaticResource DimErrorRedColorBrush}" Height = "4"
+                                           VerticalAlignment = "Center" IsHitTestVisible = "False">
+                                    <Rectangle.Width>
+                                        <MultiBinding Converter = "{StaticResource LimitToWidthConverter}">
+                                            <Binding Path = "SliderMaxRemaining" />
+                                            <Binding Path = "DataContext.TotalLimit"
+                                                     RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                            <Binding ElementName = "SliderContainer" Path = "ActualWidth" />
+                                        </MultiBinding>
+                                    </Rectangle.Width>
+                                </Rectangle>
+
+                                <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
+                                           Margin = "2,-14,0,0" FontSize = "11" FontWeight = "Bold" Opacity = "0.8" />
+                            </Grid>
+
+                            <StackPanel Grid.Column = "3" Orientation = "Horizontal">
+                                <styleClasses:BaseButton Content = "-" Command = "{Binding DecrementCommand}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "15"
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                                <styleClasses:CorneredTextBox Text = "{Binding Value, UpdateSourceTrigger=Explicit}"
+                                                              local:TextBoxUtilities.UpdateDelay = "600"
+                                                              VerticalContentAlignment = "Center"
+                                                              HorizontalContentAlignment = "Center" Height = "24"
+                                                              Width = "50" Margin = "2,0"
+                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <styleClasses:CorneredTextBox.Style>
+                                        <Style TargetType = "styleClasses:CorneredTextBox"
+                                               BasedOn = "{StaticResource {x:Type styleClasses:CorneredTextBox}}">
+
+                                            <Style.Triggers>
+                                                <DataTrigger Binding = "{Binding IsLocked}" Value = "True">
+                                                    <Setter Property = "FontWeight" Value = "Bold" />
+                                                    <Setter Property = "Foreground" Value = "#D9534F" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </styleClasses:CorneredTextBox.Style>
+                                </styleClasses:CorneredTextBox>
+
+                                <styleClasses:BaseButton Content = "+" Command = "{Binding IncrementCommand}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "15"
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                                <styleClasses:BaseButton Content = "X"
+                                                         Command = "{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         CommandParameter = "{Binding}" Margin = "2,0,0,0"
+                                                         IsEnabled = "{Binding IsNotLocked}"
+                                                         Style = "{StaticResource ThinBaseButtonStyle}" Width = "25"
+                                                         ToolTip = "Delete this Popdefinition from the location"
+                                                         local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                                <ToggleButton x:Name = "SettingsBtn" Content = "⚙" Width = "25" Height = "24"
+                                              Style = "{StaticResource BlueToggleButtonStyle}" Margin = "2,0,0,0" />
+
+                                <Popup IsOpen = "{Binding IsChecked, ElementName=SettingsBtn}" StaysOpen = "False"
+                                       Placement = "Bottom" AllowsTransparency = "True">
+                                    <Border BorderThickness = "2" Padding = "10" CornerRadius = "4"
+                                            Background = "{StaticResource DefaultBackColorBrush}"
+                                            BorderBrush = "{StaticResource DefaultBorderColorBrush}">
+                                        <StackPanel>
+                                            <TextBlock Text = "Constraints" FontWeight = "Bold" Margin = "0,0,0,5" />
+
+                                            <Grid Margin = "0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width = "40" />
+                                                    <ColumnDefinition Width = "60" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text = "Min:" VerticalAlignment = "Center" />
+
+                                                <styleClasses:CorneredTextBox Grid.Column = "1"
+                                                                              Text = "{Binding MinLimit, UpdateSourceTrigger=Explicit}"
+                                                                              local:TextBoxUtilities.UpdateDelay = "300"
+                                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                            </Grid>
+
+                                            <Grid Margin = "0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width = "40" />
+                                                    <ColumnDefinition Width = "60" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text = "Max:" VerticalAlignment = "Center" />
+
+                                                <styleClasses:CorneredTextBox Grid.Column = "1"
+                                                                              Text = "{Binding MaxLimit, UpdateSourceTrigger=Explicit}"
+                                                                              local:TextBoxUtilities.UpdateDelay = "300"
+                                                                              local:InteractionMonitor.AllocatorVm = "{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Separator Line -->
+            <Rectangle Grid.Row = "5" Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}"
+                       Margin = "0, 2, 0, 0" />
+
+            <!-- Pop defition creator -->
+            <Grid Grid.Row = "6">
+                <StackPanel Orientation = "Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                            <ColumnDefinition Width = "Auto" />
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height = "Auto" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row = "0" Grid.ColumnSpan = "5" HorizontalAlignment = "Center"
+                                   VerticalAlignment = "Center" Text = "Create new Pop" />
+
+                        <!-- Create new Popdefinition Button -->
+                        <styleClasses:BaseButton Grid.Row = "0" Grid.Column = "4" Width = "24" Height = "24"
+                                                 Command = "{Binding PopDefinitionCreatorVm.CreatePopDefCommand}"
+                                                 HorizontalAlignment = "Right" Margin = "0,6,0,0"
+                                                 local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                                 Style = "{StaticResource ThinBaseButtonStyle}">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" Stretch = "Uniform"
+                                   ToolTip = "Create a new Pop Definition from the specified values">
+                            </Image>
+                        </styleClasses:BaseButton>
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "PopType" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.PopTypes}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.PopType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "3" Text = "Culture" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "4"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Cultures}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Culture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <!-- Vertical Spacer -->
+                        <Rectangle Grid.Row = "1" Grid.Column = "2" Grid.RowSpan = "2" Width = "1" Margin = "4, 3"
+                                   VerticalAlignment = "Stretch" Fill = "{StaticResource DefaultBorderColorBrush}" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Religion" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "1"
+                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Religions}, Path=Values}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Religion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "3" Text = "Size" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <baseControls:BaseNumericUpDown Grid.Row = "2" Grid.Column = "4"
+                                                        Value = "{Binding PopDefinitionCreatorVm.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        local:TextBoxUtilities.UpdateDelay = "600"
+                                                        HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                        local:InteractionMonitor.AllocatorVm = "{Binding}" />
+
+                    </Grid>
+
+                    <!-- Separator Line -->
+                    <Rectangle Height = "1" Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,3" />
+
+                    <!-- Random Creation and infering Elements -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height = "Auto" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                            <RowDefinition Height = "26" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                            <ColumnDefinition Width = "Auto" />
+                            <ColumnDefinition Width = "2*" />
+                            <ColumnDefinition Width = "3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row = "0" Grid.Column = "0" Grid.ColumnSpan = "5" Text = "Sample Data"
+                                   HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                   ToolTipService.InitialShowDelay = "50">
+                            <TextBlock.ToolTip>
+                                <TextBlock>
+                                    <Run Text = "Sampling:" FontWeight = "Bold" />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "You can create new Pop Definitions by sampling existing Pops in the world." />
+                                    <LineBreak />
+                                    <Run Text = "Each location meeting the " />
+                                    <Run Text = "two" FontWeight = "Bold" />
+                                    <Run Text = " defined conditions will be considered for sampling." />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "The new Pop Definition will inherit the two conditions and the third will be set randomly." />
+                                    <LineBreak />
+                                    <Run
+                                        Text = "The size will be the average modified by a random offset in the range of" />
+                                    <Run Text = "+-0 - 'Random %'" FontWeight = "Bold" />
+                                </TextBlock>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- Create new Popdefinition Button -->
+                        <styleClasses:BaseButton Grid.Row = "0" Grid.Column = "4" Width = "24" Height = "24"
+                                                 Command = "{Binding PopDefinitionCreatorVm.CreatePopDefFromSampeCommand}"
+                                                 HorizontalAlignment = "Right" Margin = "0,6,0,0"
+                                                 local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                                 Style = "{StaticResource ThinBaseButtonStyle}">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" Stretch = "Uniform"
+                                   ToolTip = "Create a new Pop Definition from the sampled values with the defined random offset.">
+                            </Image>
+                        </styleClasses:BaseButton>
+
+                        <!-- Two condition drop downs -->
+                        <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "Condition 1" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.SamplePopDefinitionSources}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                  IsDropdownOnly = "True" />
+
+                        <TextBlock Grid.Row = "1" Grid.Column = "3" Text = "Value 1" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "4"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.Condition1PossibleValues}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition1Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "3" Text = "Value 2" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "4"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.Condition2PossibleValues}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition2Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2" />
+
+                        <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Condition 2" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+                        <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding PopDefinitionCreatorVm.SamplePopDefinitionSources}"
+                                                  SelectedItem = "{Binding PopDefinitionCreatorVm.Condition2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                  IsDropdownOnly = "True" />
+
+
+                        <!-- Vertical Spacer -->
+                        <Rectangle Grid.Row = "1" Grid.Column = "2" Width = "1" Margin = "3"
+                                   VerticalAlignment = "Stretch" Grid.RowSpan = "3"
+                                   Fill = "{StaticResource DefaultBorderColorBrush}" />
+
+                        <TextBlock Grid.Row = "3" Grid.Column = "0" Text = "Random %" HorizontalAlignment = "Left"
+                                   VerticalAlignment = "Center" />
+
+                        <baseControls:FloatNumericUpDown Grid.Row = "3" Grid.Column = "1"
+                                                         Value = "{Binding PopDefinitionCreatorVm.RandomOffsetPercentage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         HorizontalAlignment = "Stretch" Margin = "0,2"
+                                                         BorderThickness = "0" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row = "7">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Separator Line -->
+                <Rectangle Grid.Row = "0" Grid.ColumnSpan = "2" Height = "1"
+                           Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,2,0,10" />
+
+                <DockPanel Grid.Row = "1" LastChildFill = "False" Margin = "0, 0, 0, 3">
+                    <TextBlock DockPanel.Dock = "Left" Text = "Paste from location:" HorizontalAlignment = "Left"
+                               VerticalAlignment = "Center" />
+
+                    <styleClasses:BaseButton DockPanel.Dock = "Left" Content = "📋" Width = "91" Height = "24"
+                                             Command = "{Binding PasteFromLocationCommand}"
+                                             HorizontalAlignment = "Right" Margin = "15,0,0,0"
+                                             local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                             Style = "{StaticResource ThinBaseButtonStyle}"
+                                             ToolTip = "Fetch Pop composition from another location and append it here." />
+                </DockPanel>
+
+            </Grid>
+
+            <!-- Calculated Values Info -->
+            <Grid Grid.Row = "8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Separator Line -->
+                <Rectangle Grid.Row = "0" Grid.ColumnSpan = "2" Height = "1"
+                           Fill = "{StaticResource DefaultBorderColorBrush}" Margin = "0,2,0,10" />
+
+                <!-- Donut Charts for religion and culture distribution -->
+                <!-- Religion Chart -->
+                <charts:DonutChart Grid.Row = "1" Grid.Column = "0" ItemsSource = "{Binding ReligionStats}"
+                                   CenterText = "Religions" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
+
+                <!-- Culture Chart -->
+                <charts:DonutChart Grid.Row = "1" Grid.Column = "1" ItemsSource = "{Binding CultureStats}"
+                                   CenterText = "Cultures" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
+
+                <!-- PopType Chart -->
+                <charts:DonutChart Grid.Row = "2" Grid.Column = "0" ItemsSource = "{Binding PopTypeStats}"
+                                   CenterText = "Pop Types" ChartSize = "110" StrokeThickness = "15"
+                                   ShowLegendValues = "False" />
+            </Grid>
+
+            <!-- Apply Changes Button -->
+            <styleClasses:BaseButton Grid.Row = "9" Content = "Apply Changes" Command = "{Binding ApplyChangesCommand}"
+                                     HorizontalAlignment = "Right" Width = "100" Margin = "0,10,0,0"
+                                     local:InteractionMonitor.AllocatorVm = "{Binding}"
+                                     Style = "{StaticResource ThinBaseButtonStyle}" />
+        </Grid>
+    </ScrollViewer>
+</UserControl>

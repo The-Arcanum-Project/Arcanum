@@ -20,7 +20,7 @@ public partial class DecimalBaseNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderThickness),
                                   typeof(Thickness),
                                   typeof(DecimalBaseNumericUpDown),
-                                  new(default(Thickness)));
+                                  new FrameworkPropertyMetadata(new Thickness(1)));
 
    public Thickness InnerBorderThickness
    {
@@ -32,7 +32,7 @@ public partial class DecimalBaseNumericUpDown
       DependencyProperty.Register(nameof(InnerBorderBrush),
                                   typeof(Brush),
                                   typeof(DecimalBaseNumericUpDown),
-                                  new(default(Brush)));
+                                  new FrameworkPropertyMetadata(null));
 
    public Brush InnerBorderBrush
    {

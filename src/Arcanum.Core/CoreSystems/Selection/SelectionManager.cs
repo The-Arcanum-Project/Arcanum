@@ -24,10 +24,10 @@ public static class SelectionManager
    /// This is the collection of objects that are currently editable in the UI. <br/>
    /// This is what the UI listens to.
    /// </summary>
-   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
-   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
+   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new () { IsDistinct = true };
+   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new () { IsDistinct = true };
 
-   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
+   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new () { IsDistinct = true };
 
    public static event Action? PreviewChanged;
 
@@ -52,7 +52,7 @@ public static class SelectionManager
    /// Is Called after the selection has already updated the editable objects
    /// </summary>
    public static event PropertyChangedEventHandler? PropertyChanged;
-   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new(propertyName));
+   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new (propertyName));
 
    static SelectionManager()
    {
@@ -61,7 +61,11 @@ public static class SelectionManager
 
    public static void Preview(List<IEu5Object> eu5Objects)
    {
-      PreviewedLocations.AddRange(GetRelevantLocationsForObjects(eu5Objects));
+      var targetLocs = GetRelevantLocationsForObjects(eu5Objects);
+      for (var i = targetLocs.Count - 1; i >= 0; i--)
+         if (targetLocs[i] == Location.Empty)
+            targetLocs.RemoveAt(i);
+      PreviewedLocations.AddRange(targetLocs);
       PreviewChanged?.Invoke();
    }
 
@@ -88,14 +92,16 @@ public static class SelectionManager
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
       {
-         if (obj is Location loc)
+         switch (obj)
          {
-            if (IsAllowedByFilters(loc))
-               locs.Add(loc);
+            case Location loc:
+               if (IsAllowedByFilters(loc))
+                  locs.Add(loc);
+               break;
+            case IMapInferable inferable:
+               locs.AddRange(inferable.GetRelevantLocations([obj]));
+               break;
          }
-
-         if (obj is IMapInferable inferable)
-            locs.AddRange(inferable.GetRelevantLocations([obj]));
       }
 
       return locs;
@@ -150,7 +156,7 @@ public static class SelectionManager
          {
             var mapMode = MapModeManager.GetCurrent();
 
-            if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) || empty is not IMapInferable inferable)
+            if (!EmptyRegistry.TryGet(mapMode.DisplayTypes[0], out var empty) || empty is not IMapInferable inferable)
                return;
 
             EditableObjects.ClearAndAdd(inferable.GetInferredList(cLocs));
@@ -192,12 +198,12 @@ public static class SelectionManager
 
       var mapMode = MapModeManager.GetCurrent();
 
-      if (mapMode.DisplayType.IsPrimitiveType())
+      if (mapMode.DisplayTypes[0].IsPrimitiveType())
          return [];
 
-      if (!EmptyRegistry.TryGet(mapMode.DisplayType, out var empty) ||
+      if (!EmptyRegistry.TryGet(mapMode.DisplayTypes[0], out var empty) ||
           empty is not IMapInferable inferable ||
-          obj.GetType() != mapMode.DisplayType)
+          obj.GetType() != mapMode.DisplayTypes[0])
          return [];
 
       return inferable.GetRelevantLocations(obj);

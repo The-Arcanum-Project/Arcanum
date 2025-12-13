@@ -10,51 +10,64 @@ public enum AdjacencyType
    Sea,
 }
 
-public partial class Adjacency(Location from,
-                               Location to,
-                               AdjacencyType type,
-                               string name,
-                               string comment,
-                               int startX,
-                               int startY,
-                               int endX,
-                               int endY) : INUI, ICollectionProvider<Adjacency>, IEmpty<Adjacency>
+public partial class Adjacency() : INUI, ICollectionProvider<Adjacency>, IEmpty<Adjacency>
 {
+   public Adjacency(Location from,
+                    Location to,
+                    AdjacencyType type,
+                    string name,
+                    string comment,
+                    int startX,
+                    int startY,
+                    int endX,
+                    int endY) : this()
+   {
+      From = from;
+      To = to;
+      Type = type;
+      Name = name;
+      Comment = comment;
+      StartX = startX;
+      StartY = startY;
+      EndX = endX;
+      EndY = endY;
+   }
+
    [Description("The location this adjacency starts from.")]
    [DefaultValue(null)]
-   public Location From { get; set; } = from;
+   public Location From { get; set; } = null!;
 
    [Description("The location this adjacency goes to.")]
    [DefaultValue(null)]
-   public Location To { get; set; } = to;
+   public Location To { get; set; } = null!;
 
    [Description("The type of adjacency.\nValid types: Sea, ")]
    [DefaultValue(AdjacencyType.Sea)]
-   public AdjacencyType Type { get; set; } = type;
+   public AdjacencyType Type { get; set; }
 
    [Description("The unique name of this adjacency.")]
    [DefaultValue("")]
-   public string Name { get; set; } = name;
+   public string Name { get; set; } = null!;
 
    [Description("A comment about this adjacency.")]
    [DefaultValue("")]
-   public string Comment { get; set; } = comment;
+   public string Comment { get; set; } = null!;
 
    [Description("The starting X coordinate of this adjacency on the map.")]
    [DefaultValue(0)]
-   public int StartX { get; set; } = startX;
+   public int StartX { get; set; }
 
    [Description("The starting Y coordinate of this adjacency on the map.")]
    [DefaultValue(0)]
-   public int StartY { get; set; } = startY;
+   public int StartY { get; set; }
 
    [Description("The ending X coordinate of this adjacency on the map.")]
    [DefaultValue(0)]
-   public int EndX { get; set; } = endX;
+   public int EndX { get; set; }
 
    [Description("The ending Y coordinate of this adjacency on the map.")]
    [DefaultValue(0)]
-   public int EndY { get; set; } = endY;
+   public int EndY { get; set; }
 
    public int GetLength()
    {
@@ -85,17 +98,14 @@ public partial class Adjacency(Location from,
    public override int GetHashCode() => Name.GetHashCode();
    public bool IsReadonly => false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.AdjacencySettings;
-   public INUINavigation[] Navigations =>
-   [
-      new NUINavigation(From, $"From {From.UniqueId}"), new NUINavigation(To, $"To {To.UniqueId}")
-   ];
-   public static Adjacency Empty { get; } = new(Location.Empty,
-                                                Location.Empty,
-                                                AdjacencyType.Sea,
-                                                "Empty_Adjacency",
-                                                string.Empty,
-                                                0,
-                                                0,
-                                                0,
-                                                0);
+   public INUINavigation[] Navigations => [new NUINavigation(From, $"From {From.UniqueId}"), new NUINavigation(To, $"To {To.UniqueId}")];
+   public static Adjacency Empty { get; } = new (Location.Empty,
+                                                 Location.Empty,
+                                                 AdjacencyType.Sea,
+                                                 "Empty_Adjacency",
+                                                 string.Empty,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 0);
 }

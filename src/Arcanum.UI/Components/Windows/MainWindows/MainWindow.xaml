@@ -8,8 +8,9 @@
                          xmlns:debugPanel = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows.DebugPanel"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
-                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime" Height = "1080" Width = "1920"
-                         FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
+                         xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
+                         xmlns:map = "clr-namespace:Arcanum.UI.Components.UserControls.Map" Height = "1080"
+                         Width = "1920" FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
                          WindowStartupLocation = "CenterScreen" Background = "{DynamicResource DefaultBackColorBrush}"
                          HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}" HeaderBorder = "0, 0, 0, 2"
@@ -133,6 +134,8 @@
         <CommandBinding Command = "mainWindow:MwCommands.FreezeSelectionCommand" Executed = "FreezeSelection_Command"
                         CanExecute = "CommandCanAlwaysExecute" />
 
+        <CommandBinding Command = "mainWindow:MwCommands.HistoryClipboardCommand"
+                        Executed = "CommandBinding_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <!-- Command Bindings for Debug Loading Triggers -->
         <CommandBinding Command = "mainWindow:MwCommands.ExecuteLexer" Executed = "ExecuteLexer"
@@ -320,32 +323,54 @@
     <styleClasses:BaseWindow.FooterContent>
         <Border BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "0, 1, 0, 0"
                 CornerRadius = "0" Margin = "0" Padding = "0">
-            <StackPanel Orientation = "Horizontal" Height = "19" Margin = "0" VerticalAlignment = "Bottom">
-                <TextBlock
-                    Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding CpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding GpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding VramUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-                <TextBlock
-                    Text = "{Binding Path=RectangleBounds, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                    Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" VerticalAlignment = "Center" />
-            </StackPanel>
+            <DockPanel LastChildFill = "False">
+                <StackPanel Orientation = "Horizontal" Height = "19" Margin = "0" VerticalAlignment = "Bottom"
+                            DockPanel.Dock = "Left">
+                    <TextBlock
+                        Text = "{Binding RamUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding CpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding GpuUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding VramUsage,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Fps,  RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding ElementName=MainMap, Path=CurrentPos, Converter={StaticResource Vector2ToStringConverter}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Path=HoveredLocation, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                    <TextBlock
+                        Text = "{Binding Path=RectangleBounds, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                        VerticalAlignment = "Center" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock = "Right" Orientation = "Horizontal" Height = "19" Margin = "0"
+                            VerticalAlignment = "Bottom">
+
+                    <TextBlock
+                        Text = "{Binding ClipboardText, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                        Margin = "2, 0" FontFamily = "{StaticResource DefaultMonospacedFont}" Width = "300"
+                        VerticalAlignment = "Center" />
+                    <styleClasses:BaseButton Content = "📋" Height = "17" Width = "19" Margin = "2,1"
+                                             VerticalAlignment = "Center" BorderThickness = "0"
+                                             Command = "mainWindow:MwCommands.HistoryClipboardCommand" />
+                </StackPanel>
+            </DockPanel>
         </Border>
     </styleClasses:BaseWindow.FooterContent>
 
@@ -359,7 +384,7 @@
             <ColumnDefinition Width = "Auto" />
             <ColumnDefinition Width = "50*" MinWidth = "400" />
             <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "20*" MinWidth = "200" />
+            <ColumnDefinition Width = "30*" MinWidth = "200" />
             <ColumnDefinition Width = "Auto" />
             <ColumnDefinition Width = "150" />
         </Grid.ColumnDefinitions>
@@ -438,10 +463,10 @@
                 </StackPanel>
             </Grid>
 
-            <uc:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
-                           BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
-                           HorizontalAlignment = "Stretch">
-            </uc:MapControl>
+            <map:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
+                            BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
+                            HorizontalAlignment = "Stretch">
+            </map:MapControl>
         </DockPanel>
 
         <GridSplitter Grid.Column = "3" Width = "4" ResizeBehavior = "PreviousAndNext">

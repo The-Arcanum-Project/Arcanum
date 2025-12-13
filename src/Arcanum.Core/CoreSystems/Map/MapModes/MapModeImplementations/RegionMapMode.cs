@@ -1,17 +1,17 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
-using Region = System.Drawing.Region;
+using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class RegionMapMode : IMapMode
+public class RegionMapMode : LocationBasedMapMode
 {
-   public string Name => "Regions";
-   public string Description => "Displays the Regions the locations are situated in.";
-   public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Regions;
-   public Type DisplayType => typeof(Region);
+   public override string Name => "Regions";
+   public override string Description => "Displays the Regions the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Regions;
+   public override Type[] DisplayTypes => [typeof(Region), typeof(Area)];
 
-   public int GetColorForLocation(Location location)
+   public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Region);
       if (parent == null)
@@ -20,21 +20,17 @@ public class RegionMapMode : IMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public string[] GetTooltip(Location location) =>
-   [
-      "Region: " + (location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId ?? "None")
-   ];
+   public override string[] GetTooltip(Location location) => ["Region: " + (location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId ?? "None")];
 
-   public string? GetLocationText(Location location)
-      => location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId;
+   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId;
 
-   public object?[]? GetVisualObject(Location location) => null;
+   public override object?[]? GetVisualObject(Location location) => null;
 
-   public void OnActivateMode()
+   public override void OnActivateMode()
    {
    }
 
-   public void OnDeactivateMode()
+   public override void OnDeactivateMode()
    {
    }
 }

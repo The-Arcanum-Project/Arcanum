@@ -18,15 +18,15 @@ public interface IPluginHost
    /// <summary>
    /// Retrieves a service instance of the specified type that is registered with the plugin host.
    /// </summary>
-   /// <typeparam name="TIService"></typeparam>
+   /// <typeparam name="TiService"></typeparam>
    /// <returns>The instance of the service if found; otherwise, null.</returns>
-   public TIService GetService<TIService>() where TIService : class, IService;
+   public TiService GetService<TiService>() where TiService : class, IService;
 
    /// <summary>
    /// Registers a service instance of the specified type with the plugin host.
    /// </summary>
    /// <param name="service">The instance of the service to be registered. Cannot be null.</param>
-   public void RegisterService<TIService>(TIService service) where TIService : class, IService;
+   public void RegisterService<TiService>(TiService service) where TiService : class, IService;
 
    /// <summary>
    /// Logs a given message to the plugin host's output mechanism.

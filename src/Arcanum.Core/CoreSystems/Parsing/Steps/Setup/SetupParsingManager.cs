@@ -20,26 +20,24 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 /// </summary>
 public static class SetupParsingManager
 {
-   private const string SETUP_START_NODE_PARSING = "Setup.Start.NodeParsing";
    private static readonly FrozenDictionary<string, SetupFileLoadingService> SetupFileLoaders;
 
    // Each file which edits the given object will be listed here if it originates from the setup folder.
    private static readonly Dictionary<Type, List<Eu5FileObj>> PartDefinitions = [];
 
-   private static Type[]? _parsedTypes;
    public static Type[] ParsedTypes
    {
       get
       {
-         if (_parsedTypes == null)
+         if (field == null)
          {
             List<Type> types = [];
             foreach (var service in RegisteredServices)
                types.AddRange(service.ParsedObjects);
-            _parsedTypes = [.. types];
+            field = [.. types];
          }
 
-         return _parsedTypes;
+         return field;
       }
    }
 
@@ -53,6 +51,7 @@ public static class SetupParsingManager
          { "locations", new LocationSetupParsing([]) },
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
+         { "countries", new CountryParsing([]) },
          { "dynasty_manager", new DynastyManagerParsing([]) },
       }.ToFrozenDictionary();
    }
@@ -77,8 +76,18 @@ public static class SetupParsingManager
          if (eu5Obj.GetNxPropType(prop) is { } t && typeof(IEu5Object).IsAssignableFrom(t))
          {
             var value = eu5Obj._getValue(prop);
-            if (value is IEu5Object &&
-                eu5Obj.SaveableProps.First(p => Equals(p.NxProp, prop)).ValueType != SavingValueType.Identifier)
+            Debug.Assert(value != null);
+            PropertySavingMetadata? first = null;
+            foreach (var p in eu5Obj.SaveableProps)
+            {
+               if (Equals(p.NxProp, prop))
+               {
+                  first = p;
+                  break;
+               }
+            }
+
+            if (value is IEu5Object && first?.ValueType != SavingValueType.Identifier)
                types.Add(t);
          }
 

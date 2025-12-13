@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.LocationCollections;
+using Vortice.Mathematics;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 
@@ -40,17 +41,15 @@ public interface IMapMode
 
    /// <summary>
    /// The data type being displayed by this map mode. <br/>
-   /// E.g. if this map mode displays population data, this would be typeof(PopulationData) <br/>
-   /// This is used for selection inference and other type-based operations.
+   /// !!THE FIRST ENTRY IS THE MAIN ENTRY WHICH IS USED FOR INFERING!!
    /// </summary>
-   public Type DisplayType { get; }
+   public Type[] DisplayTypes { get; }
 
    /// <summary>
-   /// Returns a color for the given location on the map.
+   /// Renders the map mode
    /// </summary>
-   /// <param name="location"></param>
    /// <returns></returns>
-   public int GetColorForLocation(Location location);
+   public void Render(Color4[] colorBuffer);
 
    /// <summary>
    /// Returns a tooltip string for the given location on the map. <br/>

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Generator;
+using Common.Logger;
 
 namespace Arcanum.UI.SpecializedEditors.Management;
 
@@ -76,8 +77,7 @@ public class SpecializedEditorsManager
       _propertyEditors[propertyType] = editor;
    }
 
-   public bool TryGetTypeEditor(Type targetType, [MaybeNullWhen(false)] out ISpecializedEditor editor)
-      => _typeEditors.TryGetValue(targetType, out editor);
+   public bool TryGetTypeEditor(Type targetType, [MaybeNullWhen(false)] out ISpecializedEditor editor) => _typeEditors.TryGetValue(targetType, out editor);
 
    public bool TryGetPropertyEditor(Type propertyType, [MaybeNullWhen(false)] out ISpecializedEditor editor)
       => _propertyEditors.TryGetValue(propertyType, out editor);
@@ -97,21 +97,34 @@ public class SpecializedEditorsManager
 
       foreach (var prop in targetObject.GetAllProperties())
       {
-         var nxPropType = targetObject.GetNxPropType(prop);
-         if (TryGetPropertyEditor(nxPropType, out var propEditor))
+         if (targetObject.IsCollection(prop))
          {
-            // Check if we already have this editor registered (can happen if multiple properties are of the same type)
-            var existingEntry = editors.FirstOrDefault(e => e.Key == propEditor);
-            if (existingEntry.Key != null)
-               existingEntry.Value.Add(prop);
-            else
-               editors.Add(new(propEditor, [prop]));
+            var itemType = targetObject.GetNxItemType(prop)!;
+            RegisterEditorForProperty(itemType, editors, prop);
+         }
+         else
+         {
+            var nxPropType = targetObject.GetNxPropType(prop);
+            RegisterEditorForProperty(nxPropType, editors, prop);
          }
       }
 
       editors.Sort((a, b) => b.Key.Priority.CompareTo(a.Key.Priority));
 
       return editors;
+   }
+
+   private void RegisterEditorForProperty(Type nxPropType, List<KeyValuePair<ISpecializedEditor, List<Enum?>>> editors, Enum prop)
+   {
+      if (TryGetPropertyEditor(nxPropType, out var propEditor))
+      {
+         // Check if we already have this editor registered (can happen if multiple properties are of the same type)
+         var existingEntry = editors.FirstOrDefault(e => e.Key == propEditor);
+         if (existingEntry.Key != null)
+            existingEntry.Value.Add(prop);
+         else
+            editors.Add(new(propEditor, [prop]));
+      }
    }
 
    public FrameworkElement ConstructEditorViewForObject(List<IEu5Object> targets)
@@ -122,6 +135,42 @@ public class SpecializedEditorsManager
       var editors = GetAllEditorsForType(targets[0]);
       if (editors.Count == 0)
          return _noEditorsTextBlock;
+   
+      // Check if current tabs are still valid for the new targets
+      foreach (var (editor, props) in editors)
+      {
+         if (_editorsTabControl.Items.OfType<TabItem>().FirstOrDefault(ti => (string)ti.Header == editor.DisplayName) is not { } tabItem)
+            continue;
+
+         var existingEditorView = tabItem.Content as SpecializedEditor;
+         if (existingEditorView == null)
+            continue;
+
+         // Check if the existing editor view can handle the new targets
+         if (editor.SupportsMultipleTargets)
+            existingEditorView.UpdateForNewTargets(props, targets);
+         else
+            existingEditorView.UpdateForNewTarget(props, targets[0]);
+      }
+      
+      if (_editorsTabControl.Items.Count == editors.Count)
+      {
+         var allMatch = true;
+
+         for (var i = 0; i < editors.Count; i++)
+         {
+            var (editor, _) = editors[i];
+
+            if (_editorsTabControl.Items[i] is TabItem tabItem &&
+                Equals(tabItem.Header, editor.DisplayName)) continue;
+            
+            allMatch = false;
+            break;
+         }
+
+         if (allMatch)
+            return _editorsTabControl;
+      }
 
       _editorsTabControl.Items.Clear();
       foreach (var (editor, props) in editors)
@@ -145,7 +194,18 @@ public class SpecializedEditorsManager
       {
          if (!_createdTypeEditors.TryGetValue(editor.GetType(), out specializedEditor))
          {
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
             specializedEditor = new(editor);
+#if DEBUG
+            sw.Stop();
+            ArcLog.WriteLine("SEM",
+                             LogLevel.INF,
+                             "Created specialized editor of type {0} in {1} ms",
+                             editor.GetType().Name,
+                             sw.ElapsedMilliseconds);
+#endif
             _createdTypeEditors[editor.GetType()] = specializedEditor;
          }
       }
@@ -154,7 +214,18 @@ public class SpecializedEditorsManager
       {
          if (!_createdPropertyEditors.TryGetValue(editor.GetType(), out specializedEditor))
          {
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
             specializedEditor = new(editor);
+#if DEBUG
+            sw.Stop();
+            ArcLog.WriteLine("SEM",
+                             LogLevel.INF,
+                             "Created specialized editor of type {0} in {1} ms",
+                             editor.GetType().Name,
+                             sw.ElapsedMilliseconds);
+#endif
             _createdPropertyEditors[editor.GetType()] = specializedEditor;
          }
       }

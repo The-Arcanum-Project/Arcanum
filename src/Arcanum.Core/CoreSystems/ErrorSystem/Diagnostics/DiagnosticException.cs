@@ -22,7 +22,7 @@ public sealed class DiagnosticException : Exception
    public static DiagnosticException Fallback([CallerMemberName] string functionName = "",
                                               [CallerLineNumber] int lineNumber = 0,
                                               [CallerFilePath] string filePath = "")
-      => new(ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
+      => new (ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
 
    public readonly DiagnosticDescriptor Descriptor;
    public readonly object[] Arguments;
@@ -98,44 +98,44 @@ public sealed class DiagnosticException : Exception
             if (!DebugConfig.Settings.ErrorsToHandle.Any(action.Contains))
                return;
 #endif
-      if (!Config.Settings.ErrorLogOptions.SuppressAllErrors &&
-          (Config.Settings.ErrorLogOptions.VanillaErrorsCausePopups || !LocationContext.IsVanillaContext(context)))
-         switch (ReportSeverity)
-         {
-            case DiagnosticReportSeverity.Silent:
-               break;
-            case DiagnosticReportSeverity.PopupNotify:
-               if (!AppData.IsHeadless)
-                  ohNoWhatShouldWeDoNow =
-                     MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                          .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
-                                                                    "Error Encountered",
-                                                                    icon: GetMessageBoxIconForSeverity(Severity)));
-               break;
-            case DiagnosticReportSeverity.PopupWarning:
-               if (!AppData.IsHeadless)
-                  ohNoWhatShouldWeDoNow =
-                     MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                          .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
-                                                                    "Error Encountered",
-                                                                    MBoxButton.OKRetryCancel,
-                                                                    GetMessageBoxIconForSeverity(Severity)));
-               break;
-            case DiagnosticReportSeverity.PopupError:
-               if (!AppData.IsHeadless)
-                  ohNoWhatShouldWeDoNow =
-                     MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                          .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
-                                                                    "Error Encountered",
-                                                                    MBoxButton.RetryCancel,
-                                                                    GetMessageBoxIconForSeverity(Severity)));
-               break;
-            case DiagnosticReportSeverity.Suppressed:
-               // TODO @Minnator: Write to the Debug log of Arcanum
-               return;
-            default:
-               throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
-         }
+         if (!Config.Settings.ErrorLogOptions.SuppressAllErrors &&
+             (Config.Settings.ErrorLogOptions.VanillaErrorsCausePopups || !LocationContext.IsVanillaContext(context)))
+            switch (ReportSeverity)
+            {
+               case DiagnosticReportSeverity.Silent:
+                  break;
+               case DiagnosticReportSeverity.PopupNotify:
+                  if (!AppData.IsHeadless)
+                     ohNoWhatShouldWeDoNow =
+                        MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
+                                                                       "Error Encountered",
+                                                                       icon: GetMessageBoxIconForSeverity(Severity)));
+                  break;
+               case DiagnosticReportSeverity.PopupWarning:
+                  if (!AppData.IsHeadless)
+                     ohNoWhatShouldWeDoNow =
+                        MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                                       "Error Encountered",
+                                                                       MBoxButton.OKRetryCancel,
+                                                                       GetMessageBoxIconForSeverity(Severity)));
+                  break;
+               case DiagnosticReportSeverity.PopupError:
+                  if (!AppData.IsHeadless)
+                     ohNoWhatShouldWeDoNow =
+                        MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                                       "Error Encountered",
+                                                                       MBoxButton.RetryCancel,
+                                                                       GetMessageBoxIconForSeverity(Severity)));
+                  break;
+               case DiagnosticReportSeverity.Suppressed:
+                  // TODO @Minnator: Write to the Debug log of Arcanum
+                  return;
+               default:
+                  throw new ArgumentOutOfRangeException(nameof(ReportSeverity), ReportSeverity, null);
+            }
 
 #if DEBUG
       }
@@ -171,7 +171,7 @@ public sealed class DiagnosticException : Exception
                                  string action,
                                  params object[] args)
    {
-      DiagnosticException diagnosticException = new(descriptor, args);
+      DiagnosticException diagnosticException = new (descriptor, args);
       diagnosticException.HandleDiagnostic(ctx, action);
    }
 
