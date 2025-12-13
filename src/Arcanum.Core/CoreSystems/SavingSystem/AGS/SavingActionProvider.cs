@@ -89,7 +89,7 @@ public static class SavingActionProvider
       if (cnd.IsRandom)
          str = $"{cnd.SavingKey} = {cnd.Name}";
       else if (!string.IsNullOrEmpty(cnd.Name))
-         str = "{cnd.SavingKey} = {{ name = {cnd.Name} }}";
+         str = $"{cnd.SavingKey} = {{ name = {cnd.Name} }}";
       AsOneLine(asOneLine, sb, str);
    }
 

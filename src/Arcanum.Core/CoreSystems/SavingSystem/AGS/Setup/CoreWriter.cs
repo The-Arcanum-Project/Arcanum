@@ -1,10 +1,8 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.Religious;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CoreWriter() : SetupFileWriter([typeof(Institution), typeof(ReligiousSchool)], "02_core.txt")
+public class CoreWriter() : SetupFileWriter([], "") //SetupFileWriter([typeof(Institution), typeof(ReligiousSchool)], "02_core.txt")
 {
    public override IndentedStringBuilder WriteFile()
    {

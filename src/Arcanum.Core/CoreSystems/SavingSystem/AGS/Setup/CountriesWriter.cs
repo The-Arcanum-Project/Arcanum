@@ -1,9 +1,28 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
+using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CountriesWriter() : SetupFileWriter([], "")
+public class CountriesWriter() : SetupFileWriter(SetupParsingManager.NestedSubTypes(Country.Empty), "10_countries.txt")
 {
-   // TODO:
-   public override IndentedStringBuilder WriteFile() => throw new NotImplementedException();
+   public override IndentedStringBuilder WriteFile()
+   {
+      var builder = new IndentedStringBuilder();
+      using (builder.BlockWithName("countries"))
+      {
+         using (builder.BlockWithName("countries"))
+         {
+            var countries = Globals.Countries.Values.ToList();
+            countries = countries.OrderBy(x => x.UniqueId).ToList();
+            foreach (var country in countries)
+            {
+               ((IAgs)country).ToAgsContext().BuildContext(builder);
+               builder.AppendLine();
+            }
+         }
+      }
+
+      return builder;
+   }
 }
