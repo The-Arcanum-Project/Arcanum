@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
@@ -94,15 +95,28 @@ public partial class MainMenuScreen
             return;
          }
       }
-      else if (!MainMenuViewModel.GetDescriptorFromInput(out descriptor))
+      else
       {
-         MessageBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
-                         "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
-                         "If you are using base mods make sure that they are valid, too.",
-                         "Invalid Project Data",
-                         MessageBoxButton.OK,
-                         MessageBoxImage.Error);
-         return;
+         var path = MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text;
+         if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
+            MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
+            var combine = Path.Combine(path, "game");
+            if (path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) && Path.Exists(combine))
+               MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text = combine;
+            else
+               return;
+         }
+         
+         if (!MainMenuViewModel.GetDescriptorFromInput(out descriptor))
+         {
+            MBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
+                            "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
+                            "If you are using base mods make sure that they are valid, too.",
+               "Invalid Project Data",
+               MBoxButton.OK,
+               MessageBoxImage.Error);
+            return;
+         }
       }
 
       await MainMenuViewModel.LaunchArcanum(descriptor);

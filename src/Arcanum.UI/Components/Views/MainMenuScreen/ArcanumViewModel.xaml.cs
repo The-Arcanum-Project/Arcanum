@@ -9,6 +9,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.MainMenuScreen;
+using Arcanum.UI.Components.Windows.PopUp;
 
 namespace Arcanum.UI.Components.Views.MainMenuScreen;
 
@@ -68,6 +69,14 @@ public partial class ArcanumViewModel
    {
       var defaultPath = Path.Combine(VdfParser.GetEu5Path(), "game");
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
+      if (path is not null && !path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
+         MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
+         var combine = Path.Combine(path, "game");
+         if (path.EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) && Path.Exists(combine))
+         {
+            path = combine;
+         }
+      }
       VanillaFolderTextBox.Text = path ?? string.Empty;
    }
 

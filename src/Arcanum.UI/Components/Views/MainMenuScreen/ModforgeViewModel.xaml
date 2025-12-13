@@ -86,16 +86,23 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation = "Horizontal">
-            <Image Source = "/Arcanum_UI;component/Assets/Images/ModforgeBanner.png" />
-            <TextBlock Text = "Interested in Modding EU4 instead? Check out Minnators Modforge!"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="330"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Image Stretch = "Uniform" Margin="15,5,0,0"
+                   RenderOptions.BitmapScalingMode = "HighQuality" Width="Auto" Height="Auto" Source = "/Arcanum_UI;component/Assets/Images/ModforgeBanner.png" />
+            <TextBlock Grid.Column="1" 
+                       Text = "Interested in Modding EU4 instead? Check out Minnators Modforge!"
                        Style = "{StaticResource TitleText}"
-                       Margin = "30,0,100,0"
+                       Margin = "10"
                        TextWrapping = "Wrap"
+                       HorizontalAlignment="Center"
                        VerticalAlignment = "Center"
                        FontSize = "20"
-                       Width = "340" />
-        </StackPanel>
+                       Width = "Auto" />
+        </Grid>
 
         <Rectangle Grid.Row = "1"
                    Fill = "{StaticResource DefaultBorderColorBrush}"

@@ -13,6 +13,7 @@
         WindowStyle = "None"
         ResizeMode = "NoResize"
         WindowStartupLocation = "CenterScreen"
+        Title="Arcanum Main Menu"
         Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
         Activated = "MainMenuScreen_OnActivated">
 
@@ -136,7 +137,7 @@
 
                             <styleClasses:BaseButton x:Name = "CreatNewProjectButton"
                                                      VerticalAlignment = "Center"
-                                                     Margin = "0"
+                                                     Margin = "0,0,10,0"
                                                      CornerRadius = "7"
                                                      Height = "25"
                                                      Width = "25"
@@ -149,7 +150,7 @@
                         
                         <TextBlock Text = "{Binding LaunchButtonText}"
                                    VerticalAlignment = "Center"
-                                   Margin = "10, 4, 4,4"
+                                   Margin = "0, 4, 4,4"
                                    FontSize = "14">
                         </TextBlock>
 
