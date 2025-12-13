@@ -50,7 +50,7 @@ public class AgsObjectSavingContext
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
-            if (prop.NxProp.ToString().Contains("ate"))
+            if (prop.NxProp.ToString().Contains("ParliamentDefinition"))
             {
             }
 

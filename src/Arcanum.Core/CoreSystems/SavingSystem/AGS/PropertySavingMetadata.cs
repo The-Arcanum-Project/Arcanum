@@ -186,7 +186,7 @@ public class PropertySavingMetadata
          {
             if (DefaultValue == null && value == null!)
                return true;
-            if (DefaultValue != null && DefaultValue.Equals(value))
+            if ((DefaultValue != null && DefaultValue.Equals(value)) || (value is string str && string.IsNullOrEmpty(str)))
                return true;
 
             break;
@@ -200,6 +200,8 @@ public class PropertySavingMetadata
                   return true;
             }
             else if (value is JominiDate date && date == JominiDate.Empty)
+               return true;
+            else if (value is string s && string.IsNullOrEmpty(s))
                return true;
 
             break;
@@ -281,7 +283,8 @@ public class PropertySavingMetadata
          foreach (var item in collection)
             if (item is IAgs ia)
             {
-               sb.Append($"{Keyword}");
+               if (SaveEmbeddedAsIdentifier)
+                  sb.Append($"{Keyword}");
                ia.ToAgsContext(commentChar).BuildContext(sb);
             }
             else

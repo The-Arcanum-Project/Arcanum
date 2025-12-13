@@ -188,7 +188,7 @@ public partial class Country : IEu5Object<Country>
    [Description("All Locations that are our cores but conquered by other countries.")]
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(isShattered: true)]
    [ParseAs("include", isShatteredList: true)]
    [DefaultValue(null)]
    [Description("A list of included ??? for this country.")]
@@ -242,9 +242,8 @@ public partial class Country : IEu5Object<Country>
    [Description("These tags are used by the AI to determine which advances to prefer.")]
    public ObservableRangeCollection<AiTag> AiAdvancePreferenceTags { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, isShattered: true)]
    [ParseAs("timed_modifier",
-            AstNodeType.BlockNode,
             isEmbedded: true,
             isShatteredList: true,
             itemNodeType: AstNodeType.BlockNode)]

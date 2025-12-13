@@ -116,9 +116,9 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [DefaultValue("")]
    [Description("How the heir is selected in this government state.")]
    [ParseAs("heir_selection")]
-   public string HeirSelection { get; set; } = string.Empty;
+   public string HeirSelection { get; set; } = "";
 
-   [SaveAs]
+   [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [DefaultValue(null)]
    [Description("Properties defining the parliament of this government")]
    [ParseAs("parliament", AstNodeType.BlockNode, isEmbedded: true)]
@@ -154,7 +154,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("privilege", AstNodeType.BlockNode)]
    public ObservableRangeCollection<string> Privileges { get; set; } = [];
 
-   [SaveAs(isShattered: true)]
+   [SaveAs(SavingValueType.IAgs, isShattered: true, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [ParseAs("-", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [DefaultValue(null)]
    [Description("List of estate attribute definitions associated with this pop type.")]
