@@ -568,9 +568,8 @@ public static class Eu5UiGen
             var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
 
             Debug.Assert(enumerable != null);
-            foreach (var obj in enumerable)
                foreach (var target in mspvm.Targets)
-                  Nx.AddToCollection(target, nxProp, obj);
+                  Nx.AddRangeToCollection(target, nxProp, enumerable);
          };
 
          RoutedEventHandler removeClick = (_, _) =>
