@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
@@ -55,6 +56,10 @@ public partial class ArcanumViewModel
          RecentProjectsPanel.Children.Remove(card);
          _recentProjectDescriptors.Remove(descriptor);
       }
+      
+      AppData.MainMenuScreenDescriptor.ProjectFiles.Remove(descriptor);
+      if(AppData.MainMenuScreenDescriptor.LastProjectFile == descriptor.ModName)
+         AppData.MainMenuScreenDescriptor.LastProjectFile = null;
 
       AddMoreRecentProjects();
    }
