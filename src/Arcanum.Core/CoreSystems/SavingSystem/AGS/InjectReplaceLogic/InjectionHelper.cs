@@ -40,6 +40,7 @@ public static class InjectionHelper
       {
          if (csso.SavingCategory == SavingCategory.FileOverride)
          {
+            // We do not add it to objects in file here as the updating of the objects in an EU5 FileObj will do so
             csso.SaveLocation.ObjectsInFile.Add(csso.Target);
             continue;
          }

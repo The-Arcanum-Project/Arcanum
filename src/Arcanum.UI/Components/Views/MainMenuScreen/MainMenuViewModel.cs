@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
+using Arcanum.Core.Utils.vdfParser;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using static Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen;
@@ -76,27 +77,27 @@ public class MainMenuViewModel : ObservableObject
 
    public MainMenuViewModel()
    {
-      HomeVm = new ();
-      ModforgeVm = new ();
-      FeatureFm = new ();
-      ArcanumVm = new (AppData.MainMenuScreenDescriptor.ProjectFiles, this);
-      AboutUsVm = new ();
-      AttributionsVm = new ();
+      HomeVm = new();
+      ModforgeVm = new();
+      FeatureFm = new();
+      ArcanumVm = new(AppData.MainMenuScreenDescriptor.ProjectFiles, this);
+      AboutUsVm = new();
+      AttributionsVm = new();
 
       CurrentView = HomeVm;
 
-      HomeVc = new (() => { SetCurrentView(MainMenuScreenView.Home); });
-      FeatureVc = new (() => { SetCurrentView(MainMenuScreenView.Feature); });
-      ModforgeVc = new (() => { SetCurrentView(MainMenuScreenView.Modforge); });
-      ArcanumVc = new (() =>
+      HomeVc = new(() => { SetCurrentView(MainMenuScreenView.Home); });
+      FeatureVc = new(() => { SetCurrentView(MainMenuScreenView.Feature); });
+      ModforgeVc = new(() => { SetCurrentView(MainMenuScreenView.Modforge); });
+      ArcanumVc = new(() =>
       {
          SetCurrentView(MainMenuScreenView.Arcanum);
          if (string.IsNullOrEmpty(ArcanumVm.ModFolderTextBox.Text))
             ArcanumVm.VanillaFolderTextBox.Text =
-               AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? string.Empty;
+               AppData.MainMenuScreenDescriptor.LastVanillaPath?.FullPath ?? VdfParser.GetEu5Path();
       });
-      AboutUsVc = new (() => { SetCurrentView(MainMenuScreenView.AboutUs); });
-      AttributionsVc = new (() => { SetCurrentView(MainMenuScreenView.Attributions); });
+      AboutUsVc = new(() => { SetCurrentView(MainMenuScreenView.AboutUs); });
+      AttributionsVc = new(() => { SetCurrentView(MainMenuScreenView.Attributions); });
    }
 
    internal void SetCurrentView(MainMenuScreenView view)
@@ -187,7 +188,7 @@ public class MainMenuViewModel : ObservableObject
       if (AppData.MainMenuScreenDescriptor.ProjectFiles
                  .Any(x => x.ModName.Equals(descriptor.ModName, StringComparison.OrdinalIgnoreCase)))
          AppData.MainMenuScreenDescriptor.ProjectFiles.RemoveAll(x => x.ModName.Equals(descriptor.ModName,
-                                                                                       StringComparison.OrdinalIgnoreCase));
+                                                                     StringComparison.OrdinalIgnoreCase));
 
       AppData.MainMenuScreenDescriptor.ProjectFiles.Add(descriptor);
 

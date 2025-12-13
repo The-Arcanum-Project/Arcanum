@@ -34,6 +34,7 @@ public class MainWindowKeyBinds : KeyBindProvider
    public KeyGesture OpenEffectWiki { get; set; } = new(Key.None);
    public KeyGesture OpenTriggerWiki { get; set; } = new(Key.None);
    public KeyGesture OpenModifierWiki { get; set; } = new(Key.None);
+   public KeyGesture OpenArcanumWiki { get; set; } = new(Key.None);
 
    // Search Bindings
    public KeyGesture OpenSearchWindow { get; set; } = new(Key.F, ModifierKeys.Control);

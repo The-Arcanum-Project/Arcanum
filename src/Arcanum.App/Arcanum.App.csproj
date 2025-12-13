@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
     </PropertyGroup>
 
@@ -17,7 +18,7 @@
         <!-- DISPLAY NAMES: Used for UI and Window Titles -->
         <Product>Arcanum Alpha</Product>
         <!-- VERSIONING: The single place to change the number -->
-        <Version>0.9.5</Version>
+        <Version>0.9.10</Version>
     </PropertyGroup>
 
     <ItemGroup>

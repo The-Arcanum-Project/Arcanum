@@ -27,9 +27,12 @@ using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
+using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
+using Arcanum.UI.Util.WindowManagement;
+using Common;
 using Common.UI;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -39,8 +42,9 @@ namespace Arcanum.UI.Components.Windows.MainWindows;
 
 public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
-   public const int DEFAULT_WIDTH = 1920;
-   public const int DEFAULT_HEIGHT = 1080;
+   private const string HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM = "https://eu5.paradoxwikis.com/Arcanum";
+   private const int DEFAULT_WIDTH = 1920;
+   private const int DEFAULT_HEIGHT = 1080;
 
    private readonly ToolTipManager _toolTipManager = new ();
 
@@ -472,12 +476,6 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       SearchWindow.ShowSearchWindow();
    }
 
-   private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
-   {
-      var historyWindow = new HistoryTreeView();
-      historyWindow.Show();
-   }
-
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
       AppData.HistoryManager.Redo(true);
@@ -659,6 +657,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       nuiObjectView.Show();
    }
 
+   private void OpenHistoryWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      WindowManager.OpenWindow<HistoryTreeView>();
+   }
+
    private void OpenDebugPanel_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       var debugPanel = new Debug_Panel();
@@ -687,5 +690,26 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private void CommandBinding_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
       new ClipboardHistory().Show();
+   }
+
+   private void OpenArcanumWikiCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      ProcessHelper.OpenLink(HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM);
+   }
+
+   private void SelectWastelands_CheckChanged(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox selectWastelands)
+         return;
+
+      SelectionManager.SelectWasteland = selectWastelands.IsChecked ?? true;
+   }
+
+   private void SelectWater_CheckChanged(object sender, RoutedEventArgs e)
+   {
+      if (sender is not CheckBox selectWater)
+         return;
+
+      SelectionManager.SelectWater = selectWater.IsChecked ?? true;
    }
 }

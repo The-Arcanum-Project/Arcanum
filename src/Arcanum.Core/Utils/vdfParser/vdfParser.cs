@@ -7,7 +7,7 @@ namespace Arcanum.Core.Utils.vdfParser;
 public static partial class VdfParser
 {
    private const string EU5_STEAM_ID = "3450310";
-   private const string EU5_FOLDER_NAME = "Europa Universalis V";
+   private const string EU5_FOLDER_NAME = "Europa Universalis V\\game";
 
    // private const string EU4_STEAM_ID = "236850";
    // private const string EU4_FOLDER_NAME = "Europa Universalis IV";
@@ -82,11 +82,10 @@ public static partial class VdfParser
       return libraries;
    }
 
-   private static string GetSteamLibrariesVdfPath
-      => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                      "Steam",
-                      "steamapps",
-                      "libraryfolders.vdf");
+   private static string GetSteamLibrariesVdfPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                                                                  "Steam",
+                                                                  "steamapps",
+                                                                  "libraryfolders.vdf");
 
    [GeneratedRegex(@"""([^""]*)""")]
    private static partial Regex GetPathRegex();

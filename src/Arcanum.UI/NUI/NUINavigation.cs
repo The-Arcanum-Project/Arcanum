@@ -75,10 +75,11 @@ public class NUINavigation(int capacity)
 
       GenerateUi(_current.Value);
    }
-
+   
+   //TODO: @Melco Fix this
    public void ForceInvalidateUi() => GenerateUi(_current!.Value);
 
-   private static void GenerateUi(NavH navH)
+   internal static void GenerateUi(NavH navH)
    {
       if (navH.Root.Content is IDisposable oldView)
          oldView.Dispose();

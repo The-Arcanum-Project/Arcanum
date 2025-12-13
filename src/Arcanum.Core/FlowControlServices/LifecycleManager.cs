@@ -15,7 +15,7 @@ namespace Arcanum.Core.FlowControlServices;
 
 public class LifecycleManager
 {
-   public static LifecycleManager Instance { get; } = new ();
+   public static LifecycleManager Instance { get; } = new();
 
    /* --- Bootup Sequence ---
     *
@@ -39,7 +39,6 @@ public class LifecycleManager
    public void RunStartUpSequence(IPluginHost host)
    {
 #if DEBUG
-
       // Step 0: Initialize debug elements
       LoadDebugElements();
       if (DebugConfig.Settings.EnableDebugLogging)
@@ -59,7 +58,7 @@ public class LifecycleManager
       //host.LoadConfigurationSettings();
 
       // Step 4: Discover, load and enable plugins
-      PluginManager = new (host);
+      PluginManager = new(host);
       PluginManager.LoadAndInitializePlugins();
 
       // Step 5: Show the main menu or UI
@@ -67,7 +66,6 @@ public class LifecycleManager
    }
 
 #if DEBUG
-
    private void LoadDebugElements()
    {
       DebugConfig.Settings =
@@ -85,29 +83,32 @@ public class LifecycleManager
 
    public void RunShutdownSequence()
    {
-      // Step 1: Unload plugins
-      PluginManager.UnloadAll();
+      if (!AppData.IsHeadless)
+      {
+         // Step 1: Unload plugins
+         PluginManager.UnloadAll();
 
-      // Step 2: Unload core services
-      PluginManager.Host.Unload();
+         // Step 2: Unload core services
+         PluginManager.Host.Unload();
 
-      // Step 3: Perform any additional cleanup if necessary
-      // This might include saving state, closing files, etc.
+         // Step 3: Perform any additional cleanup if necessary
+         // This might include saving state, closing files, etc.
 
-      // Shutdown the core application
-      ArcanumDataHandler.SaveAllGitData();
+         // Shutdown the core application
+         ArcanumDataHandler.SaveAllGitData();
 
-      MainMenuScreenDescriptor.SaveData();
+         MainMenuScreenDescriptor.SaveData();
 
-      // Save configs
-      var conifigPath = Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME);
-      JsonProcessor.Serialize(conifigPath, Config.Settings);
-      JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, Config.DIAGNOSTIC_CONFIG_NAME),
-                              Config.Settings.ErrorDescriptors.Save());
+         // Save configs
+         var conifigPath = Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME);
+         JsonProcessor.Serialize(conifigPath, Config.Settings);
+         JsonProcessor.Serialize(Path.Combine(IO.GetConfigPath, Config.DIAGNOSTIC_CONFIG_NAME),
+                                 Config.Settings.ErrorDescriptors.Save());
 
 #if DEBUG
-      SaveDebugElements();
+         SaveDebugElements();
 #endif
+      }
 
       // Step 4: Notify that the application has shut down
       OnApplicationShutDownCompleted?.Invoke(this, EventArgs.Empty);
@@ -119,11 +120,11 @@ public class LifecycleManager
       {
          var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath,
                                                                                         Config.CONFIG_FILE_NAME));
-         Config.Settings = parsedObj ?? new ();
+         Config.Settings = parsedObj ?? new();
       }
       catch (Exception)
       {
-         Config.Settings = new ();
+         Config.Settings = new();
       }
 
       var edcs =
@@ -144,7 +145,7 @@ public class LifecycleManager
 
    private static void InitializeApplicationCore()
    {
-      ArcanumDataHandler.LoadDefaultDescriptor(new ());
+      ArcanumDataHandler.LoadDefaultDescriptor(new());
       MainMenuScreenDescriptor.LoadData();
    }
 

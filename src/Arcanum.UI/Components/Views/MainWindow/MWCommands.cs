@@ -78,6 +78,11 @@ public static class MwCommands
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenModifierWiki },
    };
 
+   public static readonly RoutedCommand OpenArcanumWikiCommand = new("OpenArcanumWikiCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenArcanumWiki },
+   };
+
    // Search Commands
    public static readonly RoutedCommand OpenSearchWindowCommand = new("OpenSearchCommand", typeof(MainWindowView))
    {

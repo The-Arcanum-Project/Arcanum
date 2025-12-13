@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Windows;
@@ -157,6 +158,7 @@ public partial class MapControl
 
       RefreshAndRenderSelectionColors();
    }
+   
 
    private void OnRendererLoaded(object? sender, ID3DRenderer e)
    {

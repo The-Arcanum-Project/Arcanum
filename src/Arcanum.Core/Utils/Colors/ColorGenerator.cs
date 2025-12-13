@@ -1,4 +1,5 @@
-﻿using Color = System.Windows.Media.Color;
+﻿using static System.Windows.Media.Colors;
+using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.Utils.Colors;
 
@@ -103,6 +104,8 @@ public static class ColorGenerator
 
    private const int PRIME = 397;
 
+   private static readonly Color[] RedGreenGradient100 = GenerateGradient(LawnGreen, DarkRed, 100);
+
    #region ValueGetterHelpers
 
    public static int GetHue(bool isLand, int index)
@@ -156,6 +159,20 @@ public static class ColorGenerator
    }
 
    #endregion
+
+   public static Color GenerateColor(int index)
+   {
+      return Generate(false, index);
+   }
+
+   public static Color GetRedGreenGradient(float value)
+   {
+      value = Math.Clamp(value, 0, 1);
+      var index = (int)(value * (RedGreenGradient100.Length - 1));
+      return RedGreenGradient100[index];
+   }
+
+   public static Color GetRedGreenGradientInverse(float value) => GetRedGreenGradient(1 - value);
 
    /// <summary>
    /// Converts a Color object to its 32-bit ARGB (Alpha, Red, Green, Blue) integer representation.
@@ -319,4 +336,115 @@ public static class ColorGenerator
    }
 
    #endregion
+
+   /// <summary>
+   /// Generates a perceptually uniform color scale between two colors.
+   /// Uses Oklab color space for interpolation.
+   /// </summary>
+   public static Color[] GenerateGradient(Color colorStart, Color colorEnd, int steps)
+   {
+      switch (steps)
+      {
+         case <= 0:
+            return [];
+         case 1:
+            return [colorStart];
+      }
+
+      var results = new Color[steps];
+
+      // Convert RGB to Oklab
+      var start = RgbToOklab(colorStart);
+      var end = RgbToOklab(colorEnd);
+
+      // Interpolate
+      for (var i = 0; i < steps; i++)
+      {
+         // t is the percentage (0.0 to 1.0)
+         var t = (float)i / (steps - 1);
+
+         // Lerp (Linear Interpolation) in Oklab space
+         var l = start.L + (end.L - start.L) * t;
+         var a = start.A + (end.A - start.A) * t;
+         var b = start.B + (end.B - start.B) * t;
+
+         // Convert back to RGB
+         results[i] = OklabToRgb(new (l, a, b));
+      }
+
+      return results;
+   }
+
+   private struct Oklab(float l, float a, float b)
+   {
+      public readonly float L = l; // Lightness
+      public readonly float A = a; // Green-Red
+      public readonly float B = b; // Blue-Yellow
+   }
+
+   private static Oklab RgbToOklab(Color c)
+   {
+      // Convert 0-255 to 0-1 Linear RGB (Gamma Correction)
+      var r = InverseGamma(c.R / 255.0f);
+      var g = InverseGamma(c.G / 255.0f);
+      var b = InverseGamma(c.B / 255.0f);
+
+      // Linear RGB to LMS (Matrix multiplication)
+      var l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b;
+      var m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b;
+      var s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b;
+
+      // Cube root of LMS
+      var l_ = MathF.Cbrt(l);
+      var m_ = MathF.Cbrt(m);
+      var s_ = MathF.Cbrt(s);
+
+      // LMS to Oklab
+      return new (0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
+                  1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
+                  0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
+   }
+
+   private static Color OklabToRgb(Oklab oklab)
+   {
+      var l_ = oklab.L + 0.3963377774f * oklab.A + 0.2158037573f * oklab.B;
+      var m_ = oklab.L - 0.1055613458f * oklab.A - 0.0638541728f * oklab.B;
+      var s_ = oklab.L - 0.0894841775f * oklab.A - 1.2914855480f * oklab.B;
+
+      var l = l_ * l_ * l_;
+      var m = m_ * m_ * m_;
+      var s = s_ * s_ * s_;
+
+      var r = 4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s;
+      var g = -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s;
+      var b = -0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s;
+
+      // Apply Gamma to get back to sRGB and clamp to 0-255
+      return Color.FromArgb(255,
+                            (byte)ClampToByte(ApplyGamma(r) * 255.0f),
+                            (byte)ClampToByte(ApplyGamma(g) * 255.0f),
+                            (byte)ClampToByte(ApplyGamma(b) * 255.0f));
+   }
+
+   // Convert sRGB to Linear RGB
+   private static float InverseGamma(float c)
+   {
+      return c >= 0.04045f ? MathF.Pow((c + 0.055f) / 1.055f, 2.4f) : c / 12.92f;
+   }
+
+   // Convert Linear RGB to sRGB
+   private static float ApplyGamma(float c)
+   {
+      return c >= 0.0031308f ? 1.055f * MathF.Pow(c, 1.0f / 2.4f) - 0.055f : 12.92f * c;
+   }
+
+   private static int ClampToByte(float f)
+   {
+      return f switch
+      {
+         < 0 => 0,
+         > 255 => 255,
+         _ => (int)MathF.Round(f)
+      };
+   }
 }

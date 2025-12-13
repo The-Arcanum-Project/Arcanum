@@ -53,6 +53,8 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
       return new(Line, Column, source.Path.FullPath);
    }
 
+   public int End => CharPos + Length;
+
    // Writes a file where each object in said file is a "claiming" is space in the file marking each line and character position of the object.
    public static void Visualize(Eu5FileObj fo)
    {

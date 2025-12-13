@@ -52,6 +52,7 @@ public static class SetupParsingManager
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
          { "countries", new CountryParsing([]) },
+         { "dynasty_manager", new DynastyManagerParsing([]) },
       }.ToFrozenDictionary();
    }
 
@@ -115,6 +116,9 @@ public static class SetupParsingManager
          files.UnionWith(etFiles);
          processedTypes.UnionWith(etTypes);
       }
+
+      if (files.Count == 0 || processedTypes.Count == 0)
+         return [];
 
       Debug.Assert(files.Count > 0, "There should be at least one file to process.");
       Debug.Assert(processedTypes.Count > 0, "There should be at least one type processed.");

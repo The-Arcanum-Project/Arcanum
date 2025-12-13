@@ -189,7 +189,7 @@ public static class FileStateManager
          if (DateTime.UtcNow.Ticks < expiryTicks)
          {
 #if IS_DEBUG
-            Console.WriteLine($"[Ignored within cooldown] Change to '{fullPath}'");
+            ArcLog.WriteLine(CommonLogSource.FSM, LogLevel.INF, $"[Ignored within cooldown] Change to '{fullPath}'");
 #endif
             return;
          }
@@ -243,7 +243,7 @@ public static class FileStateManager
    private static void OnError(object sender, ErrorEventArgs e)
    {
 #if IS_DEBUG
-      Console.WriteLine($"[Error] FileSystemWatcher error: {e.GetException().Message}");
+      ArcLog.WriteLine(CommonLogSource.FSM, LogLevel.INF, $"[Error] FileSystemWatcher error: {e.GetException().Message}");
 #endif
    }
 

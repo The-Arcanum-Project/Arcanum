@@ -17,9 +17,14 @@ jobs:
       - name: Build Commit Message and Count
         id: build_message
         run: |
-          # Format the commit messages into a single string.
-          # jq outputs each formatted commit on a new line.
-          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | "`" + .id[0:7] + "` - " + .message + " - *" + .author.name + "*"')
+          # split("Conflicts:")[0]  -> Takes everything BEFORE the list of conflicts
+          # gsub("#"; "")           -> Removes all '#' characters to prevent Discord headers
+          # sub("\\s+$"; "")        -> Trims the trailing whitespace left behind
+          
+          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | 
+            (.message | split("Conflicts:")[0] | gsub("#"; "") | sub("\\s+$"; "")) as $msg | 
+            "`" + .id[0:7] + "` - " + $msg + " - *" + .author.name + "*"'
+          )
           
           # Set the message as a multi-line environment variable for the job.
           # The EOF heredoc syntax correctly preserves the newlines from the jq output.

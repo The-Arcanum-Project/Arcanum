@@ -83,6 +83,8 @@
                         Executed = "OpenTriggerWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenModifierWikiCommand"
                         Executed = "OpenModifierWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.OpenArcanumWikiCommand"
+                        Executed = "OpenArcanumWikiCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
 
         <CommandBinding Command = "mainWindow:MwCommands.OpenSearchWindowCommand"
                         Executed = "OpenSearchWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
@@ -290,6 +292,8 @@
                                            Command = "mainWindow:MwCommands.OpenTriggerWikiCommand" />
                     <uc:SearchableMenuItem Header = "Modifiers Wiki"
                                            Command = "mainWindow:MwCommands.OpenModifierWikiCommand" />
+                    <uc:SearchableMenuItem Header = "Arcanum Wiki"
+                                           Command = "mainWindow:MwCommands.OpenArcanumWikiCommand" />
                 </uc:SearchableMenuItem>
 
                 <uc:SearchableMenuItem Header = "Debug">
@@ -447,6 +451,15 @@
                             </TextBlock>
                         </styleClasses:BaseButton.ToolTip>
                     </styleClasses:BaseButton>
+
+                    <CheckBox VerticalAlignment = "Center" Margin = "0, 0, 4, 0" Checked = "SelectWater_CheckChanged"
+                              Unchecked = "SelectWater_CheckChanged" IsChecked = "True">
+                        Select Water
+                    </CheckBox>
+                    <CheckBox VerticalAlignment = "Center" Checked = "SelectWastelands_CheckChanged" IsChecked = "True"
+                              Unchecked = "SelectWastelands_CheckChanged">
+                        Select Wastelands
+                    </CheckBox>
                 </StackPanel>
             </Grid>
 

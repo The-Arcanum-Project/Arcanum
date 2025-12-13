@@ -9,6 +9,7 @@ using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
+using Arcanum.UI.Util.WindowManagement;
 using Common.Logger;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
@@ -50,13 +51,12 @@ public partial class DebugPanelGrid
 
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
    {
-      var sw = new SaveWindow();
-      sw.Show();
+      WindowManager.OpenWindow<SaveWindow>(true);
    }
 
    private void OpenSavingWindowExporterButton_Click(object sender, RoutedEventArgs e)
    {
-      new AgsWindow().Show();
+      WindowManager.OpenWindow<AgsWindow>(true);
    }
 
    private void OpenTestWindowButton_Click(object sender, RoutedEventArgs e)

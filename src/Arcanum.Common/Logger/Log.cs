@@ -25,6 +25,9 @@ public enum CommonLogSource
    NUI, // NUI
    AGP, // Generated Parsing system files
    AGS, // Automatic saving system
+   FUM, // File Update Manager
+   PRT, // Programm Root
+   PMT, // ParsingMasTer
 }
 
 public static class ArcLog
@@ -67,8 +70,7 @@ public static class ArcLog
       LogQueue.CompleteAdding();
    }
 
-   public static void Write(string source, LogLevel level, string message)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
+   public static void Write(string source, LogLevel level, string message) => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
 
    public static void Write(string source, LogLevel level, string message, Exception ex)
       => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message} | Exception: {ex}");
@@ -76,8 +78,7 @@ public static class ArcLog
    public static void Write(string source, LogLevel level, string message, params object[] args)
       => Log($"[{GetSourceString(source)}] [{level.ToString()}] {string.Format(message, args)}");
 
-   public static void WriteLine(string source, LogLevel level, string message)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
+   public static void WriteLine(string source, LogLevel level, string message) => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
 
    public static void WriteLine(string source, LogLevel level, string message, Exception ex)
       => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message} | Exception: {ex}");
@@ -137,5 +138,10 @@ public static class ArcLog
       }
 
       return result.PadRight(3).ToUpper();
+   }
+
+   public static void WritePure(string message)
+   {
+      LogQueue.Add(message);
    }
 }

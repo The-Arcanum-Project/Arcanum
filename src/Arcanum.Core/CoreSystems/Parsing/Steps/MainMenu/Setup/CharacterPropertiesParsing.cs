@@ -49,7 +49,16 @@ public partial class CharacterParsing(IEnumerable<IDependencyNode<string>> depen
          LUtil.TryAddToGlobals(((SimpleKeyNode)characterBlock.KeyNode).KeyToken,
                                ref pc,
                                eu5Obj);
-         ParseProperties(characterBlock, eu5Obj, ref pc, false);
+      }
+
+      foreach (var bnsn in bn.Children)
+      {
+         if (!bnsn.IsBlockNode(ref pc, out var characterBlock))
+            continue;
+
+         var key = pc.SliceString(characterBlock);
+
+         ParseProperties(characterBlock, Globals.Characters[key], ref pc, false);
       }
    }
 }
