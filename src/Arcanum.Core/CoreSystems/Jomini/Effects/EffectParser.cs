@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Arcanum.Core.CoreSystems.Jomini.Scopes;
+using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Effects;
 
@@ -7,15 +8,22 @@ public static class EffectParser
 {
    public static string DocumentsFolder => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-   public static void ParseEffectDefinitions()
+   public static bool ParseEffectDefinitions()
    {
       if (EffectRegistry.Effects.Count > 0)
-         return;
+         return true;
 
       var path = Path.Combine(DocumentsFolder, @"Paradox Interactive\Europa Universalis V\docs\effects.log");
+      if (!File.Exists(path))
+      {
+         UIHandle.Instance.PopUpHandle.ShowMBox(
+            "\"effects.log\" not found. Please run the 'script_docs' command in the EUV console!", "Error");
+         return false;
+      }
+
       var lines = File.ReadAllLines(path);
       if (lines == null! || lines.Length == 0)
-         return;
+         return false;
 
       EffectDefinition? effectDef = null;
 
@@ -70,6 +78,8 @@ public static class EffectParser
 
       if (effectDef != null)
          EffectRegistry.Effects.Add(effectDef.Name, effectDef);
+      
+      return true;
    }
 
    private static HashSet<ScopeType> ParseScopeTypes(string scopeString)

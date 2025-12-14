@@ -130,7 +130,10 @@ public class ParsingMaster
          ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Dependent DataSpace: " + dpend.FullPath);
 
       var sw = Stopwatch.StartNew();
-      EffectParser.ParseEffectDefinitions();
+      if (!EffectParser.ParseEffectDefinitions())
+      {
+         return false;
+      }
 
       InitializeSteps();
       ArcLog.WriteLine("PMS", LogLevel.INF, "Starting parsing steps...");
