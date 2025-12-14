@@ -20,6 +20,8 @@ public class SuperRegionMapMode : LocationBasedMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
+   public override bool IsLandOnly => false;
+
    public override string[] GetTooltip(Location location) =>
    [
       "SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId ?? "None")

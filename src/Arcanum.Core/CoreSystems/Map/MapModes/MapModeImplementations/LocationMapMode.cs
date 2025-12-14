@@ -15,7 +15,7 @@ public class LocationMapMode : LocationBasedMapMode
       return location.Color.AsInt();
    }
 
-   public bool IsLandOnly => false;
+   public override bool IsLandOnly => false;
 
    public override string[] GetTooltip(Location location) => [$"Color: {location.Color}"];
 

@@ -9,6 +9,7 @@ public abstract class LocationBasedMapMode : IMapMode
    public abstract string Description { get; }
    public abstract MapModeManager.MapModeType Type { get; }
    public abstract Type[] DisplayTypes { get; }
+   public virtual bool IsLandOnly => true;
 
    public void Render(Color4[] colorBuffer)
    {
@@ -16,7 +17,7 @@ public abstract class LocationBasedMapMode : IMapMode
       for (var i = 0; i < array.Length; i++)
       {
          var location = array[i];
-         colorBuffer[location.ColorIndex] = new (GetColorForLocation(location));
+         colorBuffer[location.ColorIndex] = new(GetColorForLocation(location));
       }
    }
 

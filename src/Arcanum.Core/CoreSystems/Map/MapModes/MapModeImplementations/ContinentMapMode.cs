@@ -9,6 +9,7 @@ public class ContinentMapMode : LocationBasedMapMode
    public override string Description => "Displays the Continents the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
    public override Type[] DisplayTypes => [typeof(Continent), typeof(SuperRegion)];
+   public override bool IsLandOnly => false;
 
    public override int GetColorForLocation(Location location)
    {

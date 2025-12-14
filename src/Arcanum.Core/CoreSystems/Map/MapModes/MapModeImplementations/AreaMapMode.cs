@@ -19,6 +19,7 @@ public class AreaMapMode : LocationBasedMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
+   public override bool IsLandOnly => false;
    public override string[] GetTooltip(Location location) => ["Area: " + (location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId ?? "None")];
 
    public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId;

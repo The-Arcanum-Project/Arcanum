@@ -9,6 +9,7 @@ public class ProvinceMapMode : LocationBasedMapMode
    public override string Description => "Displays the provinces the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Provinces;
    public override Type[] DisplayTypes => [typeof(Province), typeof(Location)];
+   public override bool IsLandOnly => false;
 
    public override int GetColorForLocation(Location location)
    {

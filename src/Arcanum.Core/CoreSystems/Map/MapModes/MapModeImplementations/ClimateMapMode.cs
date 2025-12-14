@@ -6,7 +6,7 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 public class ClimateMapMode : LocationBasedMapMode
 {
    public override Type[] DisplayTypes => [typeof(Climate)];
-   public bool IsLandOnly => false;
+   public override bool IsLandOnly => false;
    public override string Name => "Climate";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Climate;
    public override string Description => "Displays the climate of each location on the map.";

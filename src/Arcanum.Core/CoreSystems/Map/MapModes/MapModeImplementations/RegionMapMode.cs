@@ -20,6 +20,7 @@ public class RegionMapMode : LocationBasedMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
+   public override bool IsLandOnly => false;
    public override string[] GetTooltip(Location location) => ["Region: " + (location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId ?? "None")];
 
    public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId;
