@@ -14,11 +14,11 @@
 
     <PropertyGroup>
         <!-- STABLE IDENTIFIER: Used for Pack URIs and filename (Arcanum.exe) -->
-        <AssemblyName>Arcanum</AssemblyName>
+        <AssemblyName>Arcanum Aer Pre-Release</AssemblyName>
         <!-- DISPLAY NAMES: Used for UI and Window Titles -->
-        <Product>Arcanum Alpha</Product>
+        <Product>Arcanum Aer</Product>
         <!-- VERSIONING: The single place to change the number -->
-        <Version>0.9.10</Version>
+        <Version>1.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
