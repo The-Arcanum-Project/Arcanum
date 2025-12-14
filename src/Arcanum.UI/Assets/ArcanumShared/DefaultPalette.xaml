@@ -47,6 +47,8 @@
                      Color = "#FF0e3338" />
     <SolidColorBrush x:Key = "LightAccentBackColorBrush"
                      Color = "#194d55" />
+    <SolidColorBrush x:Key = "VeryLightAccentBackColorBrush"
+                     Color = "#4f818a" />
     <SolidColorBrush x:Key = "DimErrorRedColorBrush"
                      Color = "{StaticResource DimErrorRedColor}" />
     <SolidColorBrush x:Key = "DimWarningYellowColorBrush"
@@ -142,6 +144,7 @@
     <Color x:Key = "GreenForeColor"> #50964d </Color>
     <Color x:Key = "GreyedOutForeColor"> #676e70 </Color>
     <Color x:Key = "DisabledForeColor"> #595959 </Color>
+    <Color x:Key = "LightForeColor"> #cccccc </Color>
     <Color x:Key = "DefaultForeColor"> #dfdfdf </Color>
 
     <SolidColorBrush x:Key = "GreenForeColorBrush"
@@ -150,6 +153,8 @@
                      Color = "{StaticResource GreyedOutForeColor}" />
     <SolidColorBrush x:Key = "DisabledForeColorBrush"
                      Color = "{StaticResource DisabledForeColor}" />
+    <SolidColorBrush x:Key = "LightForeColorBrush"
+                     Color = "{StaticResource LightForeColor}" />
     <SolidColorBrush x:Key = "DefaultForeColorBrush"
                      Color = "{StaticResource DefaultForeColor}" />
 
