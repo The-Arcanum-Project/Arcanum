@@ -46,18 +46,18 @@ public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
    }
 
    [Description("If true, all error popups will be suppressed.")]
-   [DefaultValue(false)]
+   [DefaultValue(true)]
    public bool SuppressAllErrors
    {
       get;
       set => SetNotifyProperty(ref field, value);
-   }
+   } = true;
 
    [Description("If true, only vanilla errors will be suppressed.")]
-   [DefaultValue(false)]
+   [DefaultValue(true)]
    public bool SuppressVanillaErrors
    {
       get;
       set => SetNotifyProperty(ref field, value);
-   }
+   } = true;
 }

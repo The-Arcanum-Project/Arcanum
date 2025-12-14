@@ -28,7 +28,7 @@ public sealed class Parser(LexerResult lexerResult)
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
       if (string.IsNullOrWhiteSpace(source))
       {
-         DiagnosticException.CreateAndHandle(new (1, 1, fileObj.Path.FullPath),
+         DiagnosticException.CreateAndHandle(new(1, 1, fileObj.Path.FullPath),
                                              IOError.Instance.FileReadingError,
                                              "AST-Building",
                                              DiagnosticSeverity.Warning,
@@ -36,7 +36,7 @@ public sealed class Parser(LexerResult lexerResult)
                                              fileObj.Path.FullPath);
 
          source = string.Empty;
-         return new (0, 0);
+         return new(0, 0);
       }
 
       var lexer = new Lexer(source);
@@ -129,7 +129,7 @@ public sealed class Parser(LexerResult lexerResult)
 
       // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
       var current = Current();
-      DiagnosticException.CreateAndHandle(new (current.Line, current.Column, _fileObj?.Path?.FullPath ?? "N/A"),
+      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj?.Path?.FullPath ?? "N/A"),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -140,7 +140,7 @@ public sealed class Parser(LexerResult lexerResult)
                                           "a block or content definition");
 
       throw
-         new ($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a statement was expected.");
+         new($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a statement was expected in file '{_fileObj?.Path?.FullPath ?? "N/A"}'.");
    }
 
    private BlockNode ParseAnonymousBlock()
@@ -237,7 +237,7 @@ public sealed class Parser(LexerResult lexerResult)
       if (Match(TokenType.Number, TokenType.String, TokenType.Yes, TokenType.No, TokenType.Identifier, TokenType.Date))
          return new LiteralValueNode(Previous());
 
-      DiagnosticException.CreateAndHandle(new (Current().Line, Current().Column, _fileObj.Path.FullPath),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -248,7 +248,7 @@ public sealed class Parser(LexerResult lexerResult)
                                           "a value");
 
       throw
-         new ($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a value was expected.");
+         new($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a value was expected.");
    }
 
    private FunctionCallNode ParseFunctionCallNode()
@@ -284,7 +284,7 @@ public sealed class Parser(LexerResult lexerResult)
       if (Check(type))
          return Advance();
 
-      DiagnosticException.CreateAndHandle(new (Current().Line, Current().Column, _fileObj.Path.FullPath),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -294,7 +294,7 @@ public sealed class Parser(LexerResult lexerResult)
                                           Current().GetValue(_source),
                                           message);
 
-      throw new ($"Syntax Error on line {Peek().Line}: {message}");
+      throw new($"Syntax Error on line {Peek().Line}: {message}");
    }
 
    private Token Advance()

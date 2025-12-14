@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map;
@@ -16,6 +17,7 @@ public class MapManager
       AllLocations = new Location[Globals.Locations.Count];
       foreach (var loc in Globals.Locations.Values)
       {
+         Debug.Assert(loc != null);
          if (loc.ColorIndex < 0 || loc.ColorIndex >= AllLocations.Length)
             throw new($"Location {loc.UniqueId} has invalid ColorIndex {loc.ColorIndex}.");
 
@@ -24,7 +26,12 @@ public class MapManager
 
       Lqt = new(mapBounds, AllLocations);
       foreach (var location in AllLocations)
-         Lqt.Insert(location);
+      {
+         // TODO: HOW CAN LOCATIONS BE NULL HERE???
+         //Debug.Assert(location != null);
+         if (location != null!)
+            Lqt.Insert(location);
+      }
    }
 
    public Location? FindLocationAt(Vector2 point)
