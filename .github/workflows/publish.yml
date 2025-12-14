@@ -21,18 +21,6 @@ jobs:
 
     - name: Restore Dependencies
       run: dotnet restore
-      
-    # 2. Build Config 1: Framework Dependent:  Single File, ReadyToRun, NOT Self-Contained
-    - name: Publish Framework Dependent
-      run: |
-        dotnet publish src/Arcanum.App/Arcanum.App.csproj `
-          --configuration Release `
-          --framework net10.0-windows `
-          --runtime win-x64 `
-          --self-contained false `
-          -p:PublishSingleFile=true `
-          -p:PublishReadyToRun=true `
-          --output ./publish/dependent
 
     # 3. Build Config 2: Self Contained: Single File, ReadyToRun, Self-Contained, Extract Options
     - name: Publish Self Contained
@@ -48,9 +36,6 @@ jobs:
           -p:IncludeAllContentForSelfExtract=true `
           --output ./publish/contained
 
-    - name: Zip Framework Dependent
-      run: Compress-Archive -Path ./publish/dependent/*.exe -DestinationPath ./Arcanum-FrameworkDependent.zip
-
     - name: Zip Self Contained
       run: Compress-Archive -Path ./publish/contained/*.exe -DestinationPath ./Arcanum-SelfContained.zip
 
@@ -58,6 +43,5 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          ./Arcanum-FrameworkDependent.zip
           ./Arcanum-SelfContained.zip
           ./Arcanum-Source.zip
