@@ -106,7 +106,7 @@
                 <DataGridTemplateColumn Header = "Severity" Width = "50" CanUserReorder = "True" CanUserResize = "True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType = "{x:Type dig:Diagnostic}">
-                            <Border CornerRadius = "4" HorizontalAlignment = "Center" Margin = "0,1">
+                            <Border CornerRadius = "4" HorizontalAlignment = "Center" Margin = "1,1">
                                 <Border.Style>
                                     <Style TargetType = "Border">
                                         <Setter Property = "Background" Value = "Transparent" />

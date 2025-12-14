@@ -294,7 +294,7 @@ public static class Scheduler
             }
             catch (Exception ex)
             {
-               Console.Error.WriteLine($"[ERROR] Task on thread {Thread.CurrentThread.Name} failed: {ex.Message}");
+               ArcLog.WriteLine("SCH", LogLevel.CRT, $"Task on thread {Thread.CurrentThread.Name} failed: {ex.Message}");
             }
       }
       catch (OperationCanceledException)

@@ -94,7 +94,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          }
          catch (Exception e)
          {
-            Console.WriteLine(e);
+            ArcLog.WriteLine("MPP", LogLevel.CRT, e.ToString());
             throw;
          }
       }

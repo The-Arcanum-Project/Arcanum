@@ -90,7 +90,7 @@ public partial class DebugPanelGrid
       modCreator.ShowDialog();
 
       if (modCreator.CreatedInstance != null)
-         Console.WriteLine($"Created modifier instance: {modCreator.CreatedInstance}");
+         Debug.WriteLine($"Created modifier instance: {modCreator.CreatedInstance}");
    }
 
    private void GraphViewerButton_Click(object sender, RoutedEventArgs e)

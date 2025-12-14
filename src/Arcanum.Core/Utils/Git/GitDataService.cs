@@ -64,7 +64,7 @@ public static class GitDataService
       {
          var latestRelease = client.Repository.Release.GetLatest(repoOwner, repoName).Result;
 
-         Console.WriteLine("GitDataService: Fetched latest release from GitHub");
+         ArcLog.WriteLine("GDS", LogLevel.INF, "GitDataService: Fetched latest release from GitHub");
 
          gdo.Data = new()
          {

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Clipboard;
+using Common.Logger;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -77,7 +78,7 @@ public partial class ClipboardHistory
          // TODO: Logic to Paste 'item.Value' goes here
          // e.g., Clipboard.SetText(item.Value);
 
-         Console.WriteLine($"Selected: {item.Value}");
+         ArcLog.WriteLine("ClP", LogLevel.INF,$"Selected: {item.Value}");
          SafeClose();
       }
    }

@@ -308,7 +308,7 @@ public partial class SaveWindow
       }
       catch (Exception error) //finally
       {
-         Console.WriteLine("Error: " + error.Message);
+         //Console.WriteLine("Error: " + error.Message);
          //ShownFiles.Clear();
       }
    }
@@ -573,6 +573,7 @@ public partial class SaveWindow
       var changes = _savingWrapperManager.GetAllChangedFiles();
       foreach (var change in changes)
       {
+         /*
          Console.WriteLine("File: " + change.FileObj);
          Console.WriteLine("| Added: ");
          foreach (var addedObject in change.AddedObjects)
@@ -582,7 +583,7 @@ public partial class SaveWindow
          foreach (var transferredObject in change.TransferredObjects)
             Console.WriteLine("|  " + transferredObject.ResultName);
 
-         Console.WriteLine("-------------------");
+         Console.WriteLine("-------------------");*/
       }
    }
 }
