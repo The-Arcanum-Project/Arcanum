@@ -48,6 +48,7 @@ public class SaveAsMetadata
       IsEmbeddedObject = args.Length > 9 && ((bool?)args[9].Value ?? false);
       IsShattered = args.Length > 10 && ((bool?)args[10].Value ?? false);
       NumOfDecimalPlaces = args.Length > 11 ? (int?)args[11].Value ?? 0 : 0;
+      AlwaysWrite = args.Length > 12 && ((bool?)args[12].Value ?? false);
 
       // This part was correct, as it operates on the now-reliable Prop symbol.
       DefaultValueAttribute = Prop.GetAttributes()
@@ -67,6 +68,7 @@ public class SaveAsMetadata
    public bool CollectionAsPureIdentifierList { get; }
    public bool IsEmbeddedObject { get; }
    public bool IsShattered { get; }
+   public bool AlwaysWrite { get; }
    public int NumOfDecimalPlaces { get; set; }
    public AttributeData? DefaultValueAttribute { get; set; }
 

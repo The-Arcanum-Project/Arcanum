@@ -48,7 +48,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
             itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<SocientalValueEntry> SocietalValues { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    [DefaultValue(GovernmentType.Monarchy)]
    [Description("The type of government this state represents.")]
    [ParseAs("type")]
@@ -185,7 +185,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    }
    public static Dictionary<string, GovernmentState> GetGlobalItems() => [];
 
-   public static GovernmentState Empty { get; } = new (true);
+   public static GovernmentState Empty { get; } = new(true);
 
    #endregion
 }

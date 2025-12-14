@@ -72,6 +72,6 @@ public static class BnHelpers
 
    public static Eu5ObjectLocation GetFileLocation(this BlockNode bn)
    {
-      return new(bn.KeyNode.Column, bn.KeyNode.Line, bn.GetEndLocation().charPos, bn.KeyNode.Start);
+      return new(bn.KeyNode.Column, bn.KeyNode.Line, bn.GetEndLocation().charPos - bn.KeyNode.Start, bn.KeyNode.Start);
    }
 }

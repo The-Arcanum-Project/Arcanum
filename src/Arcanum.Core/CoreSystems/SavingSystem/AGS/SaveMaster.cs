@@ -4,6 +4,7 @@ using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
@@ -11,7 +12,9 @@ using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
+using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -253,6 +256,9 @@ public static class SaveMaster
    /// </summary>
    public static void SaveObjects(List<IEu5Object> objectsToSave)
    {
+      if (SaveDefnitionsFile(objectsToSave))
+         return;
+
       var fileGroups = objectsToSave.GroupBy(o => o.Source);
 
       foreach (var group in fileGroups)
@@ -274,6 +280,9 @@ public static class SaveMaster
       if (modifiedObjects.Any(o => o.Source != fileObj))
          throw new ArgumentException("All modified objects must belong to the same file.");
 
+      if (SaveDefnitionsFile(modifiedObjects))
+         return;
+
       var topLevelModObjs = FilterOutNestedObjects(modifiedObjects);
       var sb = FileUpdateManager.UpdateEu5ObjectsInFile(topLevelModObjs);
 
@@ -281,6 +290,31 @@ public static class SaveMaster
          return;
 
       WriteFile(sb.InnerBuilder, fileObj, true);
+   }
+
+   private static bool SaveDefnitionsFile(List<IEu5Object> objectsToSave)
+   {
+      var definitionObjects = new List<IEu5Object>();
+      for (var i = objectsToSave.Count - 1; i >= 0; i--)
+      {
+         var obj = objectsToSave[i];
+         if (obj is Continent or SuperRegion or Region or Area or Province)
+         {
+            definitionObjects.Add(obj);
+            objectsToSave.RemoveAt(i);
+         }
+      }
+
+      if (definitionObjects.Count == 0)
+         return false;
+
+      var sb = new IndentedStringBuilder();
+      foreach (IEu5Object obj in Globals.Continents.Values)
+         obj.ToAgsContext().BuildContext(sb);
+
+      WriteFile(sb.InnerBuilder, DescriptorDefinitions.DefinitionsDescriptor.Files[0], true);
+
+      return objectsToSave.Count > 0;
    }
 
    /// <summary>
@@ -472,6 +506,12 @@ public static class SaveMaster
    {
       if (fileObj == Eu5FileObj.Empty)
          return false;
+
+      if (fileObj == DescriptorDefinitions.DefinitionsDescriptor.Files[0])
+      {
+         SaveDefnitionsFile(fileObj.ObjectsInFile.ToList());
+         return true;
+      }
 
       IndentedStringBuilder? sb;
 

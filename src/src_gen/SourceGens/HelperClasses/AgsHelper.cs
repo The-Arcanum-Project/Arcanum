@@ -21,7 +21,7 @@ public static class AgsHelper
    private const string SAVING_COMMENT_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingCommentProvider";
    private const string CUSTOM_SAVING_PROVIDER = "Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingActionProvider";
 
-   public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new ();
+   public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
 
    public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
    {
@@ -76,7 +76,7 @@ public static class AgsHelper
 
          try
          {
-            saveAsProps.Add(new (member, saveAsAttr));
+            saveAsProps.Add(new(member, saveAsAttr));
          }
          catch (Exception e)
          {
@@ -244,6 +244,7 @@ public static class AgsHelper
       sb.AppendLine($"                    CollectionAsPureIdentifierList = {prop.CollectionAsPureIdentifierList.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    IsEmbeddedObject = {prop.IsEmbeddedObject.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    NumOfDecimalPlaces = {prop.NumOfDecimalPlaces.ToString()},");
+      sb.AppendLine($"                    AlwaysWrite = {prop.AlwaysWrite.ToString().ToLowerInvariant()}");
       sb.AppendLine("                },");
    }
 
@@ -321,13 +322,13 @@ public static class AgsHelper
             if (enumAgsDataAttr == null)
             {
                isEnumOverallValid = false; // Mark the whole enum as invalid.
-               fieldResults.Add(new (fieldSymbol, false, "INVALID", false));
+               fieldResults.Add(new(fieldSymbol, false, "INVALID", false));
             }
             else
             {
                var key = enumAgsDataAttr.ConstructorArguments[0].Value as string ?? fieldSymbol.Name.ToSnakeCase();
                var isIgnored = (bool)(enumAgsDataAttr.ConstructorArguments[1].Value ?? false);
-               fieldResults.Add(new (fieldSymbol, true, key, isIgnored));
+               fieldResults.Add(new(fieldSymbol, true, key, isIgnored));
             }
          }
 

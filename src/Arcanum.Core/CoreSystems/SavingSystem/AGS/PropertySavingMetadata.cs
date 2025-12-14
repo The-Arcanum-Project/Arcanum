@@ -78,6 +78,11 @@ public class PropertySavingMetadata
    /// </summary>
    public required int NumOfDecimalPlaces { get; init; }
 
+   /// <summary>
+   /// The property is always serialized
+   /// </summary>
+   public required bool AlwaysWrite { get; init; }
+
    #region Equality operations
 
    public override string ToString() => $"{NxProp} as {Keyword} ({ValueType})";
@@ -124,8 +129,9 @@ public class PropertySavingMetadata
          ValueType = SavingUtil.GetSavingValueType(value);
 
       // Required fields must always be saved
-      if (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
-         return;
+      if (!AlwaysWrite)
+         if (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
+            return;
 
       if (SavingMethod == null)
       {
