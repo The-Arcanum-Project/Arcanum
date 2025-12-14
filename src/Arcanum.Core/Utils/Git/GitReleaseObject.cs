@@ -9,7 +9,7 @@ public class GitReleaseObject : GitDataObjectBase
 public abstract class GitDataObjectBase
 {
    public string DataKey { get; init; } = string.Empty;
-   public TimeSpan FetchInterval { get; set; } = TimeSpan.FromDays(1);
+   public TimeSpan FetchInterval { get; set; } = TimeSpan.FromHours(12);
    public string RepositoryOwner { get; init; } = "Minnator";
    public string RepositoryName { get; init; } = "Arcanum";
    public string RepositoryInternalUrl { get; init; } = string.Empty;

@@ -44,20 +44,24 @@ public static class GitDataService
       return GetFileFromRepositoryUrl(owner, repository, branch, filePath);
    }
 
-   public static GitReleaseObject GetLatestVersion(string repoName, string repoOwner, string dataKey)
+   public static GitReleaseObject GetLatestVersion(string repoName, string repoOwner, string dataKey, GitReleaseObject? latestVersion)
    {
-      var gdo = AppData.ModforgeDataDescriptor.LatestVersion ??
-                new()
-                {
-                   RepositoryName = repoName,
-                   RepositoryOwner = repoOwner,
-                   DataKey = dataKey,
-                };
+      if (latestVersion != null && (latestVersion.DataKey != dataKey || latestVersion.RepositoryOwner != repoOwner || latestVersion.RepositoryName != repoName))
+      {
+         latestVersion = new()
+         {
+            RepositoryName = repoName,
+            RepositoryOwner = repoOwner,
+            DataKey = dataKey,
+         };
+      }
 
       // We still have data and it is not outdated, return it
-      if (gdo.IsDataAvailable() && !gdo.IsDataOutdated)
-         return gdo;
-
+      if (latestVersion.IsDataAvailable() && !latestVersion.IsDataOutdated)
+         return latestVersion;
+      
+      latestVersion.LastFetch = DateTime.Now;
+      
       var client = CreateClient(repoOwner);
 
       try
@@ -65,8 +69,8 @@ public static class GitDataService
          var latestRelease = client.Repository.Release.GetLatest(repoOwner, repoName).Result;
 
          ArcLog.WriteLine("GDS", LogLevel.INF, "GitDataService: Fetched latest release from GitHub");
-
-         gdo.Data = new()
+         
+         latestVersion.Data = new()
          {
             Name = latestRelease.Name,
             TagName = latestRelease.TagName,
@@ -84,7 +88,7 @@ public static class GitDataService
          ArcLog.WriteLine("GDS", LogLevel.ERR, e.ToString());
       }
 
-      return gdo;
+      return latestVersion;
    }
 
    private static GitHubClient CreateClient(string gitOwner) => new(new ProductHeaderValue(gitOwner));

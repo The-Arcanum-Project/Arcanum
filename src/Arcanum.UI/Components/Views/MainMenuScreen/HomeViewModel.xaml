@@ -108,36 +108,47 @@
                     Style = "{StaticResource PresentationCard}"
                     MouseUp = "OpenRelease">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint = "0,0"
-                                         EndPoint = "1,2">
-                        <GradientStop Color = "SandyBrown"
+                    <LinearGradientBrush StartPoint = "0,-0.5"
+                                         EndPoint = "1,1">
+                        <GradientStop x:Name = "ColorA" Color = "MediumPurple"
                                       Offset = "0.0" />
-                        <GradientStop Color = "Purple"
+                        <GradientStop x:Name = "ColorB" Color = "LightCoral"
                                       Offset = "1.0" />
                     </LinearGradientBrush>
                 </Border.Background>
 
                 <StackPanel>
-                    <TextBlock Text = "Latest Release"
-                               Style = "{StaticResource TitleText}"
-                               HorizontalAlignment = "Center"
-                               Margin = "10,20,10,0" />
-                    <TextBlock Text = "Arcanum Aer"
-                               Foreground = "{StaticResource AccentBackColorBrush}"
+                    <TextBlock
+                        Text = "Latest Release "
+                        TextAlignment="Center"
+                        VerticalAlignment="Center"
+                        TextWrapping="Wrap"
+                                   
+                        FontSize="24"
+                        Foreground="WhiteSmoke"
+                        Style = "{StaticResource TitleText}"
+                        HorizontalAlignment = "Center"
+                        Margin = "10,20,10,0" />
+                    <TextBlock x:Name="LatestReleaseName"
+                               Text = "-"
+                               Foreground = "WhiteSmoke"
                                TextAlignment = "Center"
-                               FontSize = "20"
-                               Margin = "20,18,20,0" />
-                    <TextBlock Text = "Version 1.0.0 - PreRelease"
-                               Foreground = "LightGray"
+                               FontWeight="DemiBold"
+                               FontSize = "21"
+                               Margin = "20,20,20,0" />
+                    <TextBlock x:Name="LatestReleaseVersion"
+                               Text = "-"
+                               Foreground = "{StaticResource LightForeColorBrush}"
                                TextAlignment = "Center"
                                FontSize = "12"
                                Margin = "20,5,20,20" />
-                    <TextBlock Text = "Up to date"
-                               Foreground = "LightGray"
+                    <TextBlock x:Name="LatestReleaseStatus"
+                               Text = "Fetching data..."
+                               Foreground = "{StaticResource LightForeColorBrush}"
                                TextWrapping = "WrapWithOverflow"
                                FontSize = "26"
                                HorizontalAlignment = "Center"
-                               Margin = "20,0,20,20" />
+                               Margin = "10,0,10,20" />
                 </StackPanel>
             </Border>
         </StackPanel>
