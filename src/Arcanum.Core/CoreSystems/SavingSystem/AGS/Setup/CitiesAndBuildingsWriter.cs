@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.LocationCollections;
@@ -9,6 +10,9 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 public class CitiesAndBuildingsWriter()
    : SetupFileWriter([typeof(Location), typeof(BuildingDefinition)], "07_cities_and_buildings.txt")
 {
+   // windows-1252 encoding
+   public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);
+
    public override IndentedStringBuilder WriteFile()
    {
       var sb = new IndentedStringBuilder();

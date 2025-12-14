@@ -88,7 +88,9 @@ public class DefaultParsingStep
       else
       {
          var swInner = Stopwatch.StartNew();
-         foreach (var file in Descriptor.Files)
+         var files = Descriptor.Files;
+         files = files.OrderBy(x => x.Path.FullPath).ToList();
+         foreach (var file in files)
          {
             FileStateManager.RegisterPath(file.Path);
             if (LoadingService.LoadWithErrorHandling(file, Descriptor, null) is { IsCritical: true })

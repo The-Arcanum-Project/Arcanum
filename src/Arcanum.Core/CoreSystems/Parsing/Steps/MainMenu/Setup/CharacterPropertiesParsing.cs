@@ -57,7 +57,6 @@ public partial class CharacterParsing(IEnumerable<IDependencyNode<string>> depen
             continue;
 
          var key = pc.SliceString(characterBlock);
-
          ParseProperties(characterBlock, Globals.Characters[key], ref pc, false);
       }
    }

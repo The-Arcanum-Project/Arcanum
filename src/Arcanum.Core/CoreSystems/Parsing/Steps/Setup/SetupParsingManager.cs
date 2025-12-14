@@ -48,11 +48,11 @@ public static class SetupParsingManager
       // All dependencies can be empty here as this is enforced to be last.
       SetupFileLoaders = new Dictionary<string, SetupFileLoadingService>
       {
+         { "dynasty_manager", new DynastyManagerParsing([]) },
          { "locations", new LocationSetupParsing([]) },
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
-         { "countries", new CountryParsing([]) },
-         { "dynasty_manager", new DynastyManagerParsing([]) },
+         //{ "countries", new CountryParsing([]) },
       }.ToFrozenDictionary();
    }
 
@@ -178,6 +178,7 @@ public static class SetupParsingManager
 
    public static bool LoadFile(Eu5FileObj fo, object? lockObject)
    {
+      ArcLog.WriteLine("SPS", LogLevel.INF, $"Loading setup file: {fo.Path.FullPath}");
       var rn = Parser.Parse(fo, out var source, out var ctx);
       var validation = true;
       var pc = new ParsingContext(ctx, source.AsSpan(), nameof(SetupParsingManager), ref validation);
@@ -197,6 +198,7 @@ public static class SetupParsingManager
                continue;
             }
 
+            ArcLog.WriteLine("SPS", LogLevel.INF, $"Loading setup file: {fo.Path.FullPath} with service for key: {key}");
             service.LoadSetupFile(sn, ref pc, fo, lockObject);
             foreach (var tt in service.ParsedObjects)
                if (!PartDefinitions.TryAdd(tt, [fo]))

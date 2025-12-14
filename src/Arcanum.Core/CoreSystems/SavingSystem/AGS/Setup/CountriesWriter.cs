@@ -1,11 +1,13 @@
-﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
-using Arcanum.Core.GameObjects.LocationCollections;
+﻿using System.Text;
+using Arcanum.Core.CoreSystems.Common;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CountriesWriter() : SetupFileWriter(SetupParsingManager.NestedSubTypes(Country.Empty), "10_countries.txt")
+public class CountriesWriter() : SetupFileWriter([], "") //SetupFileWriter(SetupParsingManager.NestedSubTypes(Country.Empty), "10_countries.txt")
 {
+   // windows-1252 encoding
+   public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);
+
    public override IndentedStringBuilder WriteFile()
    {
       var builder = new IndentedStringBuilder();

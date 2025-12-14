@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.Common;
+﻿using System.Text;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GameObjects.Pops;
@@ -7,6 +8,9 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
 public class PopsWriter() : SetupFileWriter([typeof(Location), typeof(PopDefinition)], "06_pops.txt")
 {
+   // windows-1252 encoding
+   public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);
+
    public override IndentedStringBuilder WriteFile()
    {
       var sb = new IndentedStringBuilder();
