@@ -237,4 +237,25 @@ public static class SavingActionProvider
          }
       }
    }
+
+   public static void DefinitionSaving(IAgs target,
+                                       HashSet<PropertySavingMetadata> metadata,
+                                       IndentedStringBuilder sb,
+                                       bool asOneLine)
+   {
+      if (target is not Continent c)
+         throw new
+            InvalidOperationException("DefinitionSaving can only be used with LocationCollectionDefinition instances.");
+
+      using (sb.BlockWithName(c.UniqueId, addNewLineBeforeClosing: true))
+         foreach (var sr in c.SuperRegions)
+            using (sb.BlockWithName(sr.UniqueId, addNewLineBeforeClosing: true))
+               foreach (var r in sr.Regions)
+                  using (sb.BlockWithName(r.UniqueId, addNewLineBeforeClosing: true))
+                     foreach (var a in r.Areas)
+                        using (sb.BlockWithName(a.UniqueId, addNewLineBeforeClosing: true))
+                           foreach (var p in a.Provinces)
+                              using (sb.BlockWithName(p.UniqueId, addNewLineBeforeClosing: true))
+                                 sb.AppendList(p.Locations.Select(x => x.UniqueId).ToList(), " ");
+   }
 }

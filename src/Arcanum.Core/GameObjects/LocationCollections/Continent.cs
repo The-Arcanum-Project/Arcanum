@@ -18,7 +18,7 @@ using Nexus.Core.Attributes;
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "DefinitionSaving")]
 public partial class Continent
    : IMapInferable, IEu5Object<Continent>, IIndexRandomColor
 {
