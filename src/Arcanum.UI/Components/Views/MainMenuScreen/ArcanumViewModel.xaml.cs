@@ -72,7 +72,7 @@ public partial class ArcanumViewModel
 
    private void VanillaFolderButton_Click(object sender, RoutedEventArgs e)
    {
-      var defaultPath = Path.Combine(VdfParser.GetEu5Path(), "game");
+      var defaultPath = VdfParser.GetEu5Path();
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
       if (path is not null && !path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
          MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
