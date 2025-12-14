@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.Views.MainMenuScreen;
+using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
@@ -97,6 +98,8 @@ public partial class MainMenuScreen
       }
       else
       {
+         MainMenuScreenDescriptor.SaveData();
+         
          var path = MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text;
          if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
             MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
@@ -192,5 +195,10 @@ public partial class MainMenuScreen
             loadingScreen.Close();
          Show();
       }
+   }
+
+   private void SettingsButton_OnClickButton_Click(object sender, RoutedEventArgs e)
+   {
+      SettingsWindow.ShowSettingsWindow();
    }
 }

@@ -110,6 +110,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "*" />
                     <ColumnDefinition Width = "100" />
+                    <ColumnDefinition Width = "100" />
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column = "0"
@@ -167,13 +168,29 @@
                         </styleClasses:BaseButton>
                     </StackPanel>
                 </Border>
-
+                
                 <styleClasses:BaseButton Grid.Column = "1"
-                                         x:Name = "CloseButton"
+                                         x:Name = "SettingsButton"
                                          VerticalAlignment = "Top"
                                          HorizontalAlignment = "Right"
                                          Margin = "0"
-                                         Padding = "23"
+                                         Padding = "20"
+                                         Background = "Transparent"
+                                         Click = "SettingsButton_OnClickButton_Click"
+                                         BorderThickness = "0">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Settings40x40.png"
+                           Stretch = "None"
+                           Margin = "0"
+                           VerticalAlignment = "Center"
+                           HorizontalAlignment = "Center">
+                    </Image>
+                </styleClasses:BaseButton>
+                
+                <styleClasses:BaseButton Grid.Column = "2"
+                                         x:Name = "CloseButton"
+                                         VerticalAlignment = "Top"
+                                         HorizontalAlignment = "Right"
+                                         Padding = "20"
                                          Background = "Transparent"
                                          Click = "CloseButton_Click"
                                          BorderThickness = "0">
