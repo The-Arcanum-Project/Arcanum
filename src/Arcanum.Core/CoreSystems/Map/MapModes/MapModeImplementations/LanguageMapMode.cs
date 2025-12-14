@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.Cultural;
+﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
@@ -13,7 +14,19 @@ public class LanguageMapMode : LocationBasedMapMode
 
    public override int GetColorForLocation(Location location)
    {
-      return location.TemplateData.Culture.Language.Color.AsInt();
+      // TODO: this is very inefficient. Do an Aggregate link or smth here?
+      var jomColor = location.TemplateData.Culture.Language.Color;
+      if (jomColor == JominiColor.Empty)
+      {
+         var tlang = location.TemplateData.Culture.Language;
+         foreach (var lang in Globals.Languages.Values)
+         {
+            if (lang.Dialects.Contains(tlang))
+               jomColor = lang.Color;
+         }
+      }
+
+      return jomColor.AsInt();
    }
 
    public override string[] GetTooltip(Location location) => [$"Language: {location.TemplateData.Culture.Language.UniqueId}"];

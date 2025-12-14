@@ -86,36 +86,36 @@ public static class FcnHelpers
 
       switch (fcnKey)
       {
+         // var rgb = new byte[3];
+         // for (var i = 0; i < args.Count; i++)
+         //    if (!args[i]
+         //          .TryParseByte(ref pc,
+         //                        out rgb[i],
+         //                        false))
+         //    {
+         //       if (!args[i]
+         //             .TryParseFloat(ref pc,
+         //                            out var f,
+         //                            false))
+         //       {
+         //          if (args[i]
+         //             .TryParseByte(ref pc,
+         //                           out rgb[i]))
+         //             continue;
+         //       }
+         //       else
+         //       {
+         //          rgb[i] = (byte)(f * 255f);
+         //          continue;
+         //       }
+         //
+         //       color = null;
+         //       return false;
+         //    }
+         //
+         // color = new JominiColor.Rgb(rgb[0], rgb[1], rgb[2]);
+         // break;
          case rgbFcn:
-            var rgb = new byte[3];
-            for (var i = 0; i < args.Count; i++)
-               if (!args[i]
-                     .TryParseByte(ref pc,
-                                   out rgb[i],
-                                   false))
-               {
-                  if (!args[i]
-                        .TryParseFloat(ref pc,
-                                       out var f,
-                                       false))
-                  {
-                     if (args[i]
-                        .TryParseByte(ref pc,
-                                      out rgb[i]))
-                        continue;
-                  }
-                  else
-                  {
-                     rgb[i] = (byte)(f * 255f);
-                     continue;
-                  }
-
-                  color = null;
-                  return false;
-               }
-
-            color = new JominiColor.Rgb(rgb[0], rgb[1], rgb[2]);
-            break;
          case hsvFcn:
             var hsv = new float[3];
             for (var i = 0; i < args.Count; i++)
@@ -126,6 +126,14 @@ public static class FcnHelpers
                }
 
             color = new JominiColor.Hsv(hsv[0], hsv[1], hsv[2]);
+            if (fcnKey == rgbFcn)
+            {
+               if (hsv[0] > 1f || hsv[1] > 1f || hsv[2] > 1f)
+                  color = new JominiColor.Rgb((byte)hsv[0], (byte)hsv[1], (byte)hsv[2]);
+               else
+                  color = new JominiColor.Rgb((byte)(hsv[0] * 255f), (byte)(hsv[1] * 255f), (byte)(hsv[2] * 255f));
+            }
+
             break;
          case hsv360Fcn:
             var hsv360 = new int[3];
