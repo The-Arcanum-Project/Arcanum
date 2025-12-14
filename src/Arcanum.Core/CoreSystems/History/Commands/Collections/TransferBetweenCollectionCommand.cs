@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using static Arcanum.Core.CoreSystems.Selection.SelectionHelpers;
 namespace Arcanum.Core.CoreSystems.History.Commands.Collections;
 
@@ -44,6 +45,9 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
             addition.Source._removeFromCollection(_attribute, addition.Value);
             _target._addToCollection(_attribute, addition.Value);
         }
+
+        FinalizeSetup();
+        
         InvalidateUI();
     }
     
@@ -54,7 +58,7 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
         : $"Transferred {_targets.Count} {_attribute} to {_target}";
     public override IEu5Object[] GetTargets() => _targets.Select(x => x.Source).Append(_target).ToArray();
 
-    public override void FinalizeSetup()
+    public sealed override void FinalizeSetup()
     {
         base.FinalizeSetup();
         _targets = _targets.ToArray();
@@ -106,6 +110,110 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
             
             addition.Source._removeFromCollection(_attribute, addition.Value);
             _target._addToCollection(_attribute, addition.Value);
+        }
+
+        InvalidateUI();
+
+        return true;
+    }
+    
+}
+
+public class RemoveFromLinkCommand : Eu5ObjectCommand
+{
+
+    
+    private readonly IEu5Object _target;
+    private readonly IEu5Object _empty;
+    
+    private IList<IEu5Object> _values = new List<IEu5Object>();
+    private readonly Enum _attribute;
+    
+    private readonly Enum _parentAttribute;
+    
+    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object value) : base(value, attribute)
+    {
+        _target = target;
+        _empty = (IEu5Object)EmptyRegistry.Empties[target.GetType()];
+        _attribute = attribute;
+        _parentAttribute = GetParentEnumFromChildrenEnum(_attribute);
+
+        
+        _values.Add(value);
+        
+        _target._removeFromCollection(_attribute, value);
+        InvalidateUI();
+    }
+
+    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object[] value) : base(value, attribute)
+    {
+        _target = target;
+        _empty = (IEu5Object)EmptyRegistry.Empties[target.GetType()];
+        _attribute = attribute;
+        _parentAttribute = GetParentEnumFromChildrenEnum(_attribute);
+
+        _values = value;
+        
+        foreach (var val in value) _target._removeFromCollection(_attribute, val);
+
+        base.FinalizeSetup();
+        InvalidateUI();
+    }
+    
+
+
+    public override string GetDescription => _values.Count == 1
+        ? $"Removed {_values[0]} from {_target}"
+        : $"Removed {_values.Count} {_attribute} from {_target}";
+    public override IEu5Object[] GetTargets() => [_target];
+
+    public override void FinalizeSetup()
+    {
+        base.FinalizeSetup();
+        _values = _values.ToArray();
+    }
+    
+    public override void Redo()
+    {
+        foreach (var target in _values)
+        {
+            target._setValue(_parentAttribute, _empty);
+        }
+        base.Redo();
+    }
+
+    public override void Undo()
+    {
+        foreach (var target in _values)
+        {
+            target._setValue(_parentAttribute, _target);
+        }
+        base.Undo();
+    }
+    
+    public bool TryAdd(IEu5Object target, Enum attribute, IEu5Object value)
+    {
+        if (DisallowMerge(target, attribute) || !target.Equals(_target))
+            return false;
+
+        _values.Add(value);
+        
+        _target._removeFromCollection(_attribute, value);
+        
+        InvalidateUI();
+
+        return true;
+    }
+    
+    public bool TryAdd(IEu5Object target, Enum attribute, IEnumerable<IEu5Object> value)
+    {
+        if (DisallowMerge(target, attribute))
+            return false;
+
+        foreach (var val in value)
+        {
+            _values.Add(val);
+            _target._removeFromCollection(_attribute, val);
         }
 
         InvalidateUI();

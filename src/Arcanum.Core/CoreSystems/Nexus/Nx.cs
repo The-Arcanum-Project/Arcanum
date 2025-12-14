@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core;
 
@@ -122,6 +124,10 @@ public static class Nx
    {
       Debug.Assert(value != null, nameof(value) + " != null");
       
+      // Check that the value is not already in the collection
+      var currentCollection = (IEnumerable<T>)target._getValue(e);
+      if (currentCollection.Contains(value))
+         return;
       
       if(!target.IgnoreCommand(e))
       {
@@ -142,6 +148,13 @@ public static class Nx
    {
       Debug.Assert(values != null, nameof(values) + " != null");
 
+      // get only the values which are not already in the collection
+      var currentCollection = (IEnumerable<T>)target._getValue(e);
+      values = values.Where(v => !currentCollection.Contains(v)).ToList();
+      
+      if(!values.HasItems())
+         return;
+      
       var type = target.GetNxPropType(e);
       if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>))
       {
@@ -158,13 +171,58 @@ public static class Nx
             target._addToCollection(e, value);
       }
    }
+   
+   public static void RemoveRangeFromCollection<T>(
+      INexus target,
+      [LinkedPropertyEnum(nameof(target))] Enum e,
+      IEnumerable<T> values)
+   {
+      Debug.Assert(values != null, nameof(values) + " != null");
+
+      // GET only the values which are actually in the collection
+      var currentCollection = (IEnumerable<T>)target._getValue(e);
+      values = values.Where(v => currentCollection.Contains(v)).ToList();
+      
+      if(!values.HasItems())
+         return;
+      
+      var type = target.GetNxPropType(e);
+      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) && target is IEu5Object eu5Val)
+      {
+         CommandManager.RemoveFromLinkCommand(eu5Val, e, values.Cast<IEu5Object>());
+            return;
+      }
+
+      foreach (var value in values)
+      {
+         Debug.Assert(value != null, nameof(value) + " != null");
+         if(!target.IgnoreCommand(e))
+            CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
+         else
+            target._removeFromCollection(e, value);
+      }
+   }
+
 
    public static void RemoveFromCollection<T>(
       INexus target,
       [LinkedPropertyEnum(nameof(target))] Enum e,
       T value)
    {
+      // Check that the value is actually in the collection before trying to remove it
+      var currentCollection = (IEnumerable<T>)target._getValue(e);
+      if (!currentCollection.Contains(value))
+         return;
       Debug.Assert(value != null, nameof(value) + " != null");
+      
+      var type = target.GetNxPropType(e);
+      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) &&
+          target is IEu5Object eu5Target && value is IEu5Object eu5Val)
+      {
+         CommandManager.RemoveFromLinkCommand(eu5Target, e, eu5Val);
+         return;
+      }
+      
       if(!target.IgnoreCommand(e))
          CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
       else

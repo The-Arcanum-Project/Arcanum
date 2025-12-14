@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
@@ -14,13 +15,14 @@ namespace Arcanum.UI.SpecializedEditors.EditorControls;
 
 public partial class LocationCollectionEditor
 {
-    private static readonly Lazy<LocationCollectionEditor> LazyInstance = new (() => new ());
+    private static readonly Lazy<LocationCollectionEditor> LazyInstance = new(() => new());
     private bool _ignoreSelectionChanged;
     public static LocationCollectionEditor Instance => LazyInstance.Value;
 
     private ICollection? _parentCache;
 
     private Type _currentChildType = null!;
+    private Type _currentParentType = null!;
 
     private LocationCollectionSpecializedEditor _editor = null!;
 
@@ -28,7 +30,7 @@ public partial class LocationCollectionEditor
         DependencyProperty.Register(nameof(LocationCollection),
             typeof(ObservableCollectionProxy<IEu5Object>),
             typeof(LocationCollectionEditor),
-            new (default(ObservableCollectionProxy<IEu5Object>)));
+            new(default(ObservableCollectionProxy<IEu5Object>)));
 
     public ObservableCollectionProxy<IEu5Object> LocationCollection
     {
@@ -36,7 +38,7 @@ public partial class LocationCollectionEditor
         set => SetValue(LocationCollectionProperty, value);
     }
 
-   public void SetLocationCollection<T>(IEu5Object locationCollection, AggregateLink<T> children,
+    public void SetLocationCollection<T>(IEu5Object locationCollection, AggregateLink<T> children,
         LocationCollectionSpecializedEditor editor) where T : IEu5Object
     {
         _editor = editor;
@@ -47,7 +49,7 @@ public partial class LocationCollectionEditor
                     .GetType()]).GetGlobalItemsNonGeneric()
                 .Values;
         }
-
+        _currentParentType = locationCollection.GetType();
         _currentChildType = typeof(T);
 
         SelectLocation(locationCollection, true);
@@ -56,7 +58,7 @@ public partial class LocationCollectionEditor
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         LocationCollection?.Dispose();
         // TODO: Fill LocationSelector with child objects
-      LocationCollection = new ObservableCollectionProxy<T, IEu5Object>(children, locationCollection);
+        LocationCollection = new ObservableCollectionProxy<T, IEu5Object>(children, locationCollection);
     }
 
     public void SelectLocation(IEu5Object location, bool ignoreSelectionChanged = false)
@@ -99,12 +101,11 @@ public partial class LocationCollectionEditor
     {
         if (LocationSelector.SelectedItem is not IEu5Object selectedLocation)
         {
+            var parent = Selection.GetSelectedLocations
+                .Select(location => SelectionHelpers.GetParentOfType(location, _currentChildType))
+                .Where(parent => !LocationCollection.Contains(parent)).ToArray();
+            LocationCollection.TryAddRange(parent);
 
-            foreach (var parent in Selection.GetSelectedLocations
-                         .Select(location => SelectionHelpers.GetParentOfType(location, _currentChildType))
-                         .Where(parent => !LocationCollection.Contains(parent)))
-                LocationCollection.TryAdd(parent);
-            
 
             return;
         }
@@ -116,16 +117,16 @@ public partial class LocationCollectionEditor
     {
         if (LocationSelector.SelectedItem is not IEu5Object selectedLocation)
         {
-
-            foreach (var parent in Selection.GetSelectedLocations
-                         .Select(location => SelectionHelpers.GetParentOfType(location, _currentChildType))
-                         .Where(parent => LocationCollection.Contains(parent)))
-                LocationCollection.TryRemove(parent);
+            var parent = Selection.GetSelectedLocations
+                .Select(location => SelectionHelpers.GetParentOfType(location, _currentChildType))
+                .Where(parent => LocationCollection.Contains(parent)).ToArray();
             
+            LocationCollection.TryRemoveRange(parent);
+
 
             return;
         }
-        
+
         LocationCollection.TryRemove(selectedLocation);
     }
 }
