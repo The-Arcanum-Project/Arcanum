@@ -48,19 +48,12 @@ jobs:
           -p:IncludeAllContentForSelfExtract=true `
           --output ./publish/contained
 
-    # Zip only the .exe from Dependent build
     - name: Zip Framework Dependent
       run: Compress-Archive -Path ./publish/dependent/*.exe -DestinationPath ./Arcanum-FrameworkDependent.zip
 
-    # Zip only the .exe from Contained build
     - name: Zip Self Contained
       run: Compress-Archive -Path ./publish/contained/*.exe -DestinationPath ./Arcanum-SelfContained.zip
 
-    # Zip Source Code (Uses git archive to exclude .git folder and build artifacts)
-    - name: Zip Source Code
-      run: git archive --format=zip --output Arcanum-Source.zip HEAD
-
-    # --- UPLOAD ---
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v2
       with:
