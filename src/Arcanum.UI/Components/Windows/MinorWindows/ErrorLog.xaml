@@ -106,7 +106,11 @@
                 <DataGridTemplateColumn Header = "Severity" Width = "50" CanUserReorder = "True" CanUserResize = "True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType = "{x:Type dig:Diagnostic}">
-                            <Border CornerRadius = "4" HorizontalAlignment = "Center" Margin = "1,1">
+                            <Border CornerRadius="4" 
+                                    HorizontalAlignment="Center" 
+                                    Margin="1,1"
+                                    UseLayoutRounding="True"
+                                    SnapsToDevicePixels="True">
                                 <Border.Style>
                                     <Style TargetType = "Border">
                                         <Setter Property = "Background" Value = "Transparent" />
@@ -128,7 +132,7 @@
                                 </Border.Style>
 
                                 <Image Width = "16" Height = "16" VerticalAlignment = "Center"
-                                       HorizontalAlignment = "Center">
+                                       HorizontalAlignment = "Center" Stretch="None">
                                     <Image.Style>
                                         <Style TargetType = "Image">
                                             <Setter Property = "Source"
