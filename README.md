@@ -1,4 +1,4 @@
- ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
+[![Lines of Code](https://img.shields.io/badge/dynamic/json?color=blue&label=Lines%20of%20Code&query=$[-1:].linesOfCode&url=https://api.codetabs.com/v1/loc?github=The-Arcanum-Project/Arcanum)](https://github.com/The-Arcanum-Project/Arcanum) ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
 
 # The Arcanum Project
 
