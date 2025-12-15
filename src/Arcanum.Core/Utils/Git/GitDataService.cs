@@ -46,7 +46,7 @@ public static class GitDataService
 
    public static GitReleaseObject GetLatestVersion(string repoName, string repoOwner, string dataKey, GitReleaseObject? latestVersion)
    {
-      if (latestVersion != null && (latestVersion.DataKey != dataKey || latestVersion.RepositoryOwner != repoOwner || latestVersion.RepositoryName != repoName))
+      if (latestVersion == null || latestVersion.DataKey != dataKey || latestVersion.RepositoryOwner != repoOwner || latestVersion.RepositoryName != repoName)
       {
          latestVersion = new()
          {
