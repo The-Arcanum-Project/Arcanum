@@ -1,4 +1,4 @@
-[![Lines of Code](https://img.shields.io/badge/dynamic/json?color=blue&label=Lines%20of%20Code&query=$[-1:].linesOfCode&url=https://api.codetabs.com/v1/loc?github=The-Arcanum-Project/Arcanum)](https://github.com/The-Arcanum-Project/Arcanum) ![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total)
+![Repo Size](https://img.shields.io/github/repo-size/Minnator/Arcanum) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Minnator/Arcanum) ![GitHub all releases](https://img.shields.io/github/downloads/Minnator/Arcanum/total) [![Lines of Code](https://img.shields.io/badge/dynamic/json?color=blueviolet&label=Lines%20of%20Code&query=$[-1:].linesOfCode&url=https://api.codetabs.com/v1/loc?github=The-Arcanum-Project/Arcanum)](https://github.com/The-Arcanum-Project/Arcanum)
 
 # The Arcanum Project
 
@@ -8,8 +8,7 @@ The tools are mainly being developed by [Minnator](https://github.com/Minnator) 
 This tool is in active development and will continue to become more feature-rich and polished.
 
 ## Documentation
-Our documentation is a work in progress. You can access the currently available parts here:
-https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html
+Our documentation is a work in progress. You can access the currently available parts [here](https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html)
 
 ## Overview
 - Desktop application for Windows built with .NET and WPF.
@@ -18,16 +17,14 @@ https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html
 
 ## Technology Stack
 - Language: C#
-- Runtime/Target framework: `net10.0-windows` (requires Windows)
+- Runtime/Target framework: `net10.0-windows`
 - UI framework: WPF
 - Build system & package manager: `dotnet` CLI / MSBuild, NuGet
 - Test framework: NUnit (with `NUnit3TestAdapter` and `Microsoft.NET.Test.Sdk`)
 
 ## Requirements
 - Windows 10/11 (x64)
-- .NET SDK 10 (targeting `net10.0-windows`)
-  - You can verify with: `dotnet --info`
-- A C# IDE is recommended (JetBrains Rider, Visual Studio 2022+, or VS Code with C# Dev Kit)
+- .NET SDK 10, only if building from source
 - Europa Universalis 5 installed (for real data paths used by the app)
 
 ## Quick Setup (Using a Release)
@@ -38,10 +35,10 @@ https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html
 5. Launch the current config and start modding.
 
 ## Build From Source
-Clone the repository and use the .NET SDK.
+Clone the repository and use the according .NET SDK.
 
 ```powershell
-git clone <this-repo-url>
+git clone https://github.com/The-Arcanum-Project/Arcanum
 cd Arcanum
 dotnet restore
 dotnet build Arcanum.sln -c Release
@@ -54,22 +51,7 @@ Use the app project in `src/Arcanum.App` (WPF WinExe).
 dotnet run -c Debug --project src\Arcanum.App\Arcanum.App.csproj
 ```
 
-This produces a Windows desktop application named `Arcanum` (see `AssemblyName` in the csproj).
-
-## Scripts and Commands
-There are no custom scripts in the repo at this time; use standard `dotnet` commands:
-- Restore: `dotnet restore`
-- Build (solution): `dotnet build Arcanum.sln -c Release`
-- Run (app): `dotnet run --project src\Arcanum.App\Arcanum.App.csproj`
-- Test: `dotnet test src\dev\UnitTests\UnitTests.csproj -c Release`
-
-Continuous Integration: see `.github/workflows/` for desktop CI (NUnit tests referenced).
-
-## Configuration and Environment Variables
-The application prompts for “mod” and “vanilla” paths in the UI on first launch.
-
-Known environment variables: none are required by default.
-- TODO: If optional env variables or configuration files are supported (e.g., for default paths, logging levels, or feature flags), document them here.
+This produces a Windows desktop application named `Arcanum [ReleaseName]` (see `AssemblyName` in the csproj).
 
 ## Editing – Quick Guide
 - Select any object via search or the map using different selection modes.
@@ -120,12 +102,10 @@ Top-level directories of interest:
 - `Common`, `Nexus.Core`, `DiagnosticArgsAnalyzer` — shared libs/analyzers referenced by projects.
 - `docs` — user documentation site sources (WIP).
 
-Open the solution `Arcanum.sln` in your IDE to work with all projects.
-
 ## License
-This project is licensed. See the `LICENSE` file in the repository root for details.
+This project is licensed. See the [LICENSE](https://github.com/The-Arcanum-Project/Arcanum/blob/main/LICENSE) file in the repository root for details.
 
 ## Input and Contribution
 We are currently not actively looking for contributors, but we are open to ideas and suggestions.
-If you have any suggestions, questions, or feedback, feel free to reach out on the official Discord server:
-https://discord.gg/CXFGsEgugn
+If you have any suggestions, questions, or feedback, feel free to reach out on the official [Discord server](https://discord.gg/CXFGsEgugn)
+
