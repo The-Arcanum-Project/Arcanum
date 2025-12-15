@@ -17,7 +17,7 @@ public static partial class MapModeManager
 {
    internal static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
    private static Color[] _blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
-   private static Random _random = new ("Arcanum".GetHashCode());
+   private static Random _random = new("Arcanum".GetHashCode());
 
    #region Plugin MapModes
 
@@ -25,7 +25,7 @@ public static partial class MapModeManager
    /// MapModes provided by plugins, keyed by their enum type.
    /// Each plugin provides their own enum to identify their map modes.
    /// </summary>
-   private static readonly Dictionary<Type, IReadOnlyDictionary<Enum, IMapMode>> Providers = new ();
+   private static readonly Dictionary<Type, IReadOnlyDictionary<Enum, IMapMode>> Providers = new();
 
    /// <summary>
    /// Registers a new provider of map modes, identified by its unique enum type.
@@ -78,6 +78,7 @@ public static partial class MapModeManager
 
    public static void SetMapMode(MapModeType type)
    {
+      Get(CurrentMode).OnDeactivateMode();
       CurrentMode = type;
       OnMapModeChanged?.Invoke(type);
    }
@@ -87,6 +88,7 @@ public static partial class MapModeManager
 #if DEBUG
       var sw = Stopwatch.StartNew();
 #endif
+      Get(CurrentMode).OnActivateMode();
       UpdateColors(colors, CurrentMode);
 #if DEBUG
       sw.Stop();
@@ -154,22 +156,22 @@ public static partial class MapModeManager
             if (waterProvinces.Contains(location))
             {
                if (useLocWater)
-                  colors[i] = new (_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
+                  colors[i] = new(_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
                else
-                  colors[i] = new (location.Color.AsInt());
+                  colors[i] = new(location.Color.AsInt());
             }
             else
-               colors[i] = new (mode.GetColorForLocation(location));
+               colors[i] = new(mode.GetColorForLocation(location));
          }
       }
       else
       {
          Parallel.For(0,
                       count,
-                      i => { colors[i] = new (mode.GetColorForLocation(LocationsArray[i])); });
+                      i => { colors[i] = new(mode.GetColorForLocation(LocationsArray[i])); });
       }
    }
 
    public static Color4 GetWaterColorForLocation(Location location)
-      => new (_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
+      => new(_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
 }

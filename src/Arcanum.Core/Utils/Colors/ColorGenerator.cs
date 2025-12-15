@@ -173,7 +173,41 @@ public static class ColorGenerator
       return RedGreenGradient100[index];
    }
 
+   public static Color GetRedGreenGradientLogarithmic(float value)
+   {
+      // Apply a logarithmic scale to the value to enhance lower ranges
+      var logValue = (float)(Math.Log10(1 + 9 * value) / Math.Log10(10));
+      return GetRedGreenGradient(logValue);
+   }
+
+   public static Color GetRedGreenGradientLogarithmicInverse(float value)
+   {
+      // Apply a logarithmic scale to the value to enhance lower ranges
+      var logValue = (float)(Math.Log10(1 + 9 * (1 - value)) / Math.Log10(10));
+      return GetRedGreenGradient(logValue);
+   }
+
    public static Color GetRedGreenGradientInverse(float value) => GetRedGreenGradient(1 - value);
+
+   public static Color GetColorSigmoid(float rawValue, float median)
+   {
+      if (median <= 0.0001f)
+         return GetRedGreenGradient(0);
+
+      // FORMULA: x / (x + k)
+      // This is a "Reinhard Tone Mapping" style curve used in graphics.
+      // We want the result to be 0.5 when rawValue == median.
+      // Solving 0.5 = m / (m + k) gives us k = median.
+
+      var t = rawValue / (rawValue + median);
+
+      // This creates a curve where:
+      // rawValue = 0      -> t = 0.0  (Green)
+      // rawValue = median -> t = 0.5  (Yellowish)
+      // rawValue = huge   -> t approaches 1.0 (Red)
+
+      return GetRedGreenGradient(1 - t);
+   }
 
    /// <summary>
    /// Converts a Color object to its 32-bit ARGB (Alpha, Red, Green, Blue) integer representation.
