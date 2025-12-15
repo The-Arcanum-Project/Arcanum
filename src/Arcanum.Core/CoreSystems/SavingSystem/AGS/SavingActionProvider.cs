@@ -132,7 +132,7 @@ public static class SavingActionProvider
 
       AsOneLine(asOneLine,
                 sb,
-                $"movement_assistance = {{ {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.X)} {FormatValue(SavingValueType.Float, mma, MapMovementAssist.Field.Y)} }}");
+                $"movement_assistance = {{ {FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.X), null)} {FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.Y), null)} }}");
    }
 
    public static void EstateCountDefinitionSaving(IAgs target,

@@ -124,12 +124,16 @@ public static class SavingUtil
          case SavingValueType.Int:
             return ((int)value).ToString();
          case SavingValueType.Float:
-            Debug.Assert(psm != null, "PropertySavingMetadata must be provided for float formatting.");
+            if (psm == null)
+               return ((float)value).ToString("F2", CultureInfo.InvariantCulture);
+
             return ((float)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Bool:
             return (bool)value ? "yes" : "no";
          case SavingValueType.Double:
-            Debug.Assert(psm != null, "PropertySavingMetadata must be provided for double formatting.");
+            if (psm == null)
+               return ((double)value).ToString("F2", CultureInfo.InvariantCulture);
+
             return ((double)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Identifier:
             if (value is IEu5Object eu5Obj)

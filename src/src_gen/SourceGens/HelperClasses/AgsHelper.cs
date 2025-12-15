@@ -185,7 +185,7 @@ public static class AgsHelper
       var asOneLine = AttributeHelper.SimpleGetAttrArgValue<bool>(objectSaveAsAttr, 5, "asOneLine");
 
       sb.AppendLine("        // Pre-built metadata for the class itself.");
-      sb.AppendLine("        private static readonly ClassSavingMetadata _classMetadata = new(");
+      sb.AppendLine("        public static readonly ClassSavingMetadata _classMetadata = new(");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
