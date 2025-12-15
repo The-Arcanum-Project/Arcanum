@@ -27,7 +27,6 @@ using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.HostUIServices.SettingsGUI;
-using Arcanum.UI.NUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
@@ -46,7 +45,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
    private const int DEFAULT_WIDTH = 1920;
    private const int DEFAULT_HEIGHT = 1080;
 
-   private readonly ToolTipManager _toolTipManager = new ();
+   private readonly ToolTipManager _toolTipManager = new();
 
    #region Properties
 
@@ -224,7 +223,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       {
          var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
                                                               .LoadingService[0]).MapSize;
-         Selection.MapManager.InitializeMapData(new (0, 0, size.Item1, size.Item2));
+         Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
 
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.FrozenSelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.SelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
@@ -341,7 +340,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          return;
       }
 
-      MainWindowGen.GenerateAndSetView(new (items.ToList(), true, UiPresenter, true));
+      MainWindowGen.GenerateAndSetView(new(items.ToList(), true, UiPresenter, true));
    }
 
    private void SetUpToolTip(MapControl mainMap)
@@ -424,7 +423,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new (propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -543,11 +542,11 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void TempTestingCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      MainWindowGen.GenerateAndSetView(new (Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)]
-                                                   .Value,
-                                            true,
-                                            UiPresenter,
-                                            true));
+      MainWindowGen.GenerateAndSetView(new(Globals.Locations.ToList()[Random.Shared.Next(0, Globals.Locations.Count)]
+                                                  .Value,
+                                           true,
+                                           UiPresenter,
+                                           true));
    }
 
    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -580,7 +579,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
       {
-         MapModeButtonGrid.ColumnDefinitions.Add(new () { Width = new (1, GridUnitType.Star) });
+         MapModeButtonGrid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
          var mapMode = MapModeManager.GetMapModeForButtonIndex(i);
          var routedCommand = GetMapModeButtonCommand(i);
          if (routedCommand != null && mapMode != null)
@@ -593,8 +592,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
          var button = new MapModeButton
          {
-            Margin = new (2),
-            Padding = new (0),
+            Margin = new(2),
+            Padding = new(0),
             Command = routedCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Bottom,
@@ -606,6 +605,8 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
                          : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
                            (i != 9 ? i + 1 : 0),
             MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Locations,
+            BorderThickness = new(1),
+            FontSize = 7,
          };
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);

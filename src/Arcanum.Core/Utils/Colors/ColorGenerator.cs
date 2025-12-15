@@ -1,4 +1,5 @@
-﻿using static System.Windows.Media.Colors;
+﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using static System.Windows.Media.Colors;
 using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.Utils.Colors;
@@ -281,7 +282,7 @@ public static class ColorGenerator
          h /= 6;
       }
 
-      return new ()
+      return new()
       {
          H = h * 360,
          S = s,
@@ -369,7 +370,7 @@ public static class ColorGenerator
          var b = start.B + (end.B - start.B) * t;
 
          // Convert back to RGB
-         results[i] = OklabToRgb(new (l, a, b));
+         results[i] = OklabToRgb(new(l, a, b));
       }
 
       return results;
@@ -400,9 +401,9 @@ public static class ColorGenerator
       var s_ = MathF.Cbrt(s);
 
       // LMS to Oklab
-      return new (0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
-                  1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
-                  0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
+      return new(0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
+                 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
+                 0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
    }
 
    private static Color OklabToRgb(Oklab oklab)
@@ -446,5 +447,74 @@ public static class ColorGenerator
          > 255 => 255,
          _ => (int)MathF.Round(f)
       };
+   }
+
+   private static long GetDistanceSquared(Color c1, Color c2)
+   {
+      long rmean = (c1.R + c2.R) / 2;
+      long r = c1.R - c2.R;
+      long g = c1.G - c2.G;
+      long b = c1.B - c2.B;
+
+      // Formula: https://en.wikipedia.org/wiki/Color_difference#Redmean_approximation
+      // We omit the Sqrt because we only need to compare relative sizes.
+      return (((512 + rmean) * r * r) >> 8) +
+             (4 * g * g) +
+             (((767 - rmean) * b * b) >> 8);
+   }
+
+   /// <summary>
+   /// Generates a color that maximizes distance from the provided list.
+   /// Thread-Safe.
+   /// </summary>
+   /// <param name="existingColors">Colors to avoid.</param>
+   /// <param name="attempts">Higher = better quality, slower. 20-50 is usually sufficient.</param>
+   public static Color GetMostDistinctColor(IList<JominiColor> existingColors, int attempts = 30)
+   {
+      if (existingColors.Count == 0)
+         return JominiColor.Empty.ToMediaColor();
+
+      var bestCandidate = JominiColor.Empty.ToMediaColor();
+      long maxMinDistance = -1;
+
+      // Try N random candidates
+      for (var i = 0; i < attempts; i++)
+      {
+         var candidate = GetRandomColor();
+
+         // Find the distance to the *closest* existing color for this candidate
+         var closestDistanceForThisCandidate = long.MaxValue;
+
+         for (var j = 0; j < existingColors.Count; j++)
+         {
+            var dist = GetDistanceSquared(candidate, existingColors[j].ToMediaColor());
+
+            // If this candidate is already too close to an existing color
+            // to beat our current best record, we can stop checking it immediately.
+            if (dist < maxMinDistance)
+            {
+               closestDistanceForThisCandidate = dist;
+               break;
+            }
+
+            if (dist < closestDistanceForThisCandidate)
+               closestDistanceForThisCandidate = dist;
+         }
+
+         // If this candidate's "weakest link" is better than our previous best, pick it.
+         if (closestDistanceForThisCandidate > maxMinDistance)
+         {
+            maxMinDistance = closestDistanceForThisCandidate;
+            bestCandidate = candidate;
+         }
+      }
+
+      return bestCandidate;
+   }
+
+   private static Color GetRandomColor()
+   {
+      var rng = Random.Shared;
+      return Color.FromArgb(255, (byte)rng.Next(256), (byte)rng.Next(256), (byte)rng.Next(256));
    }
 }
