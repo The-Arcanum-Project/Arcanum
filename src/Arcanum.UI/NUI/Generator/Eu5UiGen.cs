@@ -595,9 +595,8 @@ public static class Eu5UiGen
             var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
             Debug.Assert(enumerable != null);
 
-            foreach (var obj in enumerable)
-               foreach (var target in mspvm.Targets)
-                  Nx.RemoveFromCollection(target, nxProp, obj);
+            foreach (var target in mspvm.Targets)
+               Nx.RemoveRangeFromCollection(target, nxProp, enumerable);
          };
 
          panel.Children.Add(addButton);

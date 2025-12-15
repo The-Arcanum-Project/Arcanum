@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 
@@ -46,7 +47,7 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
       if (target is not TSource s)
          return false;
 
-      Nx.AddToCollection(_owner, GetChildEnum(_owner), s);
+      Nx.AddToCollection(_owner, SelectionHelpers.GetChildEnum(_owner), s);
       return true;
    }
 
@@ -64,13 +65,13 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
    {
       var result = target is TSource;
       if (result)
-         Nx.RemoveFromCollection(_owner, GetChildEnum(_owner), (TSource)target!);
+         Nx.RemoveFromCollection(_owner, SelectionHelpers.GetChildEnum(_owner), (TSource)target!);
       return result;
    }
 
    public override void RemoveAt(int index)
    {
-      Nx.RemoveFromCollection(_owner, GetChildEnum(_owner), _source[index]);
+      Nx.RemoveFromCollection(_owner, SelectionHelpers.GetChildEnum(_owner), _source[index]);
    }
 
    public new void Dispose()
@@ -80,21 +81,18 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
       GC.SuppressFinalize(this);
    }
 
-   private Enum GetChildEnum(IEu5Object obj)
+   public override bool TryAddRange(IList<IEu5Object> parent)
    {
-      if (obj is Province)
-         return Province.Field.Locations;
-      if (obj is Area)
-         return Area.Field.Provinces;
-      if (obj is Region)
-         return Region.Field.Areas;
-      if (obj is SuperRegion)
-         return SuperRegion.Field.Regions;
-      if (obj is Continent)
-         return Continent.Field.SuperRegions;
+      if (parent.Count <= 1 || parent[0] is not TSource) return false;
+      Nx.AddRangeToCollection(_owner, SelectionHelpers.GetChildEnum(_owner), parent);
+      return true;
+   }
 
-      Debug.Fail("GetChildEnum called with invalid type");
-      throw new ArgumentException("obj is not a valid type in the hierarchy");
+   public override bool TryRemoveRange(IList<IEu5Object> parent)
+   {
+      if (parent.Count <= 1 || parent[0] is not TSource) return false;
+      Nx.RemoveRangeFromCollection(_owner, SelectionHelpers.GetChildEnum(_owner), parent);
+      return true;
    }
 }
 
@@ -139,4 +137,7 @@ public abstract class ObservableCollectionProxy<TTarget>
    {
       GC.SuppressFinalize(this);
    }
+
+   public abstract bool TryAddRange(IList<IEu5Object> parent);
+   public abstract bool TryRemoveRange(IList<IEu5Object> parent);
 }

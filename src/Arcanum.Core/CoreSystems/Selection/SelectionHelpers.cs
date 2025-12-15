@@ -115,7 +115,27 @@ public static class SelectionHelpers
       };
    }
 
-
+   
+   public static Enum GetChildEnum(IEu5Object obj)
+   {
+      switch (obj)
+      {
+         case Province:
+            return Province.Field.Locations;
+         case Area:
+            return Area.Field.Provinces;
+         case Region:
+            return Region.Field.Areas;
+         case SuperRegion:
+            return SuperRegion.Field.Regions;
+         case Continent:
+            return Continent.Field.SuperRegions;
+         default:
+            Debug.Fail("GetChildEnum called with invalid type");
+            throw new ArgumentException("obj is not a valid type in the hierarchy");
+      }
+   }
+   
    public static AggregateLink<T> GetAllChildren<T>(IEu5Object eu5Object) where T : IEu5Object
    {
 #if DEBUG
