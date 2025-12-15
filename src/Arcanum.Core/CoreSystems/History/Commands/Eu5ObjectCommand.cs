@@ -76,6 +76,20 @@ public abstract class Eu5ObjectCommand : ICommand
         return $"{indentStr}{GetType().Name} targeting {GetTargets().Length} objects.";
     }
 
+    protected void InvalidateTargets(IEu5Object[] target, bool uiUpdate = true)
+    {
+        SaveMaster.InitCommand(this, target);
+        if (uiUpdate)
+            InvalidateUI();
+    }
+    
+    protected void InvalidateTargets(IEu5Object target, bool uiUpdate = true)
+    {
+        SaveMaster.InitCommand(this, target);
+        if (uiUpdate)
+            InvalidateUI();
+    }
+
     /// <summary>
     /// Returns the target objects affected by this command.
     /// </summary>

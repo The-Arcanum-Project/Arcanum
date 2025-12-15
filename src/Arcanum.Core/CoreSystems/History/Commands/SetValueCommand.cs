@@ -80,7 +80,7 @@ public class SetValueCommand : Eu5ObjectCommand
          Debug.Assert(Attribute != null);
          _targets.Add(new (target, target._getValue(attribute)));
          target._setValue(Attribute, _value);
-         InvalidateUI();
+         InvalidateTargets(target);
          return true;
       }
 
@@ -98,7 +98,7 @@ public class SetValueCommand : Eu5ObjectCommand
       _value = value;
       Debug.Assert(Attribute != null);
       target._setValue(Attribute, _value);
-      InvalidateUI();
+      InvalidateTargets(target);
       return true;
    }
 
@@ -127,7 +127,7 @@ public class SetValueCommand : Eu5ObjectCommand
       Debug.Assert(Attribute != null);
       foreach (var target in targets)
          target._setValue(Attribute, _value);
-      InvalidateUI();
+      InvalidateTargets(targets);
       return true;
    }
 }

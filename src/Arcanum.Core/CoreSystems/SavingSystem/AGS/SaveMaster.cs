@@ -161,6 +161,12 @@ public static class SaveMaster
          else
             ModificationCache[type] = 1;
       }
+      else
+      {
+         // check if command is already in the list
+         if (list.Contains(command))
+            return;
+      }
 
       list.Add(command);
    }

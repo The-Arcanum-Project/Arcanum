@@ -28,7 +28,7 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
         
         addition.Source._removeFromCollection(_attribute, addition.Value);
         _target._addToCollection(_attribute, addition.Value);
-        InvalidateUI();
+        InvalidateTargets(addition.Source);
     }
 
     public TransferBetweenLinksCommand(IEu5Object target, Enum attribute, IEnumerable<IEu5Object> value) : base(target, attribute)
@@ -44,11 +44,12 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
             
             addition.Source._removeFromCollection(_attribute, addition.Value);
             _target._addToCollection(_attribute, addition.Value);
+            InvalidateTargets(addition.Source, false);
         }
-
-        FinalizeSetup();
         
         InvalidateUI();
+        
+        FinalizeSetup();
     }
     
 
@@ -93,8 +94,8 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
         addition.Source._removeFromCollection(_attribute, addition.Value);
         _target._addToCollection(_attribute, addition.Value);
 
-        InvalidateUI();
-
+        InvalidateTargets(target, false);
+        InvalidateTargets(addition.Source);
         return true;
     }
     
@@ -110,9 +111,10 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
             
             addition.Source._removeFromCollection(_attribute, addition.Value);
             _target._addToCollection(_attribute, addition.Value);
+            InvalidateTargets(addition.Source, false);
         }
 
-        InvalidateUI();
+        InvalidateTargets(target);
 
         return true;
     }
@@ -131,7 +133,7 @@ public class RemoveFromLinkCommand : Eu5ObjectCommand
     
     private readonly Enum _parentAttribute;
     
-    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object value) : base(value, attribute)
+    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object value) : base(target, attribute)
     {
         _target = target;
         _empty = (IEu5Object)EmptyRegistry.Empties[target.GetType()];
@@ -145,7 +147,7 @@ public class RemoveFromLinkCommand : Eu5ObjectCommand
         InvalidateUI();
     }
 
-    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object[] value) : base(value, attribute)
+    public RemoveFromLinkCommand(IEu5Object target, Enum attribute, IEu5Object[] value) : base(target, attribute)
     {
         _target = target;
         _empty = (IEu5Object)EmptyRegistry.Empties[target.GetType()];
@@ -155,7 +157,7 @@ public class RemoveFromLinkCommand : Eu5ObjectCommand
         _values = value;
         
         foreach (var val in value) _target._removeFromCollection(_attribute, val);
-
+        
         base.FinalizeSetup();
         InvalidateUI();
     }
@@ -200,7 +202,7 @@ public class RemoveFromLinkCommand : Eu5ObjectCommand
         
         _target._removeFromCollection(_attribute, value);
         
-        InvalidateUI();
+        InvalidateTargets(value);
 
         return true;
     }
@@ -209,14 +211,16 @@ public class RemoveFromLinkCommand : Eu5ObjectCommand
     {
         if (DisallowMerge(target, attribute))
             return false;
-
-        foreach (var val in value)
+        
+        var valueArray = value.ToArray();
+        
+        foreach (var val in valueArray)
         {
             _values.Add(val);
             _target._removeFromCollection(_attribute, val);
         }
 
-        InvalidateUI();
+        InvalidateTargets(valueArray);
 
         return true;
     }

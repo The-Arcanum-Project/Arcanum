@@ -56,9 +56,7 @@ public class ClearCollectionCommand : Eu5ObjectCommand
       Debug.Assert(target._getValue(attribute) is IEnumerable);
       _targets.Add(new (target, (target._getValue(attribute) as IEnumerable)!.Cast<object>().ToArray()));
       target._clearCollection(attribute);
-
-      InvalidateUI();
-
+      InvalidateTargets(target);
       return true;
    }
 
