@@ -209,6 +209,15 @@ public static class ColorGenerator
       return GetRedGreenGradient(1 - t);
    }
 
+   public static Color GetColorSigmoidInverse(float rawValue, float median)
+   {
+      if (median <= 0.0001f)
+         return GetRedGreenGradientInverse(0);
+
+      var t = rawValue / (rawValue + median);
+      return GetRedGreenGradientInverse(t);
+   }
+
    /// <summary>
    /// Converts a Color object to its 32-bit ARGB (Alpha, Red, Green, Blue) integer representation.
    /// This is standard for WPF and GDI.

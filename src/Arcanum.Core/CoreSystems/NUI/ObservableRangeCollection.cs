@@ -21,6 +21,8 @@ public class ObservableRangeCollection<T> : ObservableCollection<T>
    {
    }
 
+   public List<T>? UnderlyingList => Items as List<T>;
+
    /// <summary>
    /// Adds a collection of items and raises a single notification.
    /// </summary>
