@@ -52,7 +52,7 @@ public static class SetupParsingManager
          { "locations", new LocationSetupParsing([]) },
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
-         { "countries", new CountryParsing([]) },
+         //{ "countries", new CountryParsing([]) },
       }.ToFrozenDictionary();
    }
 
