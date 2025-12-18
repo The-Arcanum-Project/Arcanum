@@ -12,7 +12,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 
 public static class InjectionHelper
 {
-   public static void HandleObjectsWithOptionalInjectLogic(List<IEu5Object> objsToSave)
+   public static void HandleObjectsWithOptionalInjectLogic(List<IEu5Object> objsToSave, Action<string> updateHandle)
    {
       var categorized = CategorizeSaveableObjects(objsToSave).ToList();
       EnsureCompatibilityWithExistingInjections(categorized);
@@ -23,7 +23,7 @@ public static class InjectionHelper
          return;
 
       // We now know that all objects are compatible, have a file to save to and have their final injects calculated.
-      SaveMaster.AppendOrCreateFiles(categorized, toRemoveFromFiles);
+      SaveMaster.AppendOrCreateFiles(categorized, toRemoveFromFiles, updateHandle);
    }
 
    private static void CalculateFinalInjects(List<CategorizedSaveable> cssos,

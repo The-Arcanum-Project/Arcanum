@@ -57,6 +57,12 @@
 
             <styleClasses:BaseButton Content = "Pops Editor Test" Margin = "2" Padding = "4"
                                      Click = "PopsEditorTestButton_Click" />
+
+            <styleClasses:BaseButton Content = "Saving Splash Determined" Margin = "2" Padding = "4"
+                                     Click = "SplashDeterminedButton_Click" />
+
+            <styleClasses:BaseButton Content = "Saving Splash Intermediate" Margin = "2" Padding = "4"
+                                     Click = "SplashIntermediateButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

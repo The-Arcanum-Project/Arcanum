@@ -131,4 +131,63 @@ public partial class DebugPanelGrid
       bwindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
       bwindow.Show();
    }
+
+   private async void SplashDeterminedButton_Click(object sender, RoutedEventArgs e)
+   {
+      await SaveWithKnownCount();
+   }
+
+   private async Task SaveWithKnownCount()
+   {
+      var filesToSave = new List<string>();
+      for (var i = 0; i < 10; i++)
+         filesToSave.Add($"mod_texture_{i}.png");
+
+      var splash = new SavingSplashScreen(filesToSave.Count) { Owner = Application.Current.MainWindow };
+
+      splash.Show();
+
+      try
+      {
+         await Task.Run(async () =>
+         {
+            foreach (var file in filesToSave)
+            {
+               await Task.Delay(500);
+               splash.UpdateProgress(file);
+            }
+         });
+      }
+      finally
+      {
+         splash.MarkAsComplete();
+      }
+   }
+
+   private async Task SaveWithUnknownCount()
+   {
+      var splash = new SavingSplashScreen { Owner = Application.Current.MainWindow };
+      splash.Show();
+
+      try
+      {
+         await Task.Run(async () =>
+         {
+            for (var i = 0; i < 15; i++)
+            {
+               await Task.Delay(300);
+               splash.UpdateProgress($"dynamic_file_{i}.dat");
+            }
+         });
+      }
+      finally
+      {
+         splash.MarkAsComplete();
+      }
+   }
+
+   private async void SplashIntermediateButton_Click(object sender, RoutedEventArgs e)
+   {
+      await SaveWithUnknownCount();
+   }
 }

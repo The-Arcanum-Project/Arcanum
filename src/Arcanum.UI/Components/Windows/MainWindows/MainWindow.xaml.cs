@@ -26,13 +26,16 @@ using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
 using Arcanum.UI.Util;
 using Arcanum.UI.Util.WindowManagement;
 using Common;
+using Common.Logger;
 using Common.UI;
+using Common.UI.MBox;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using NUINavigation = Arcanum.UI.NUI.NUINavigation;
@@ -359,9 +362,34 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       SettingsWindow.ShowSettingsWindow();
    }
 
-   private void SaveAllModified_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   private async void SaveAllModified_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      SaveMaster.SaveAll();
+      try
+      {
+         var splash = new SavingSplashScreen { Owner = this };
+         splash.Show();
+
+         try
+         {
+            await Task.Run(() =>
+            {
+               SaveMaster.SaveAll(splash.UpdateProgress);
+               return Task.CompletedTask;
+            });
+         }
+         finally
+         {
+            splash.MarkAsComplete();
+         }
+      }
+      catch (Exception ex)
+      {
+         ArcLog.WriteLine("MW", LogLevel.ERR, "Error while saving all modified files: " + ex);
+         MBox.Show("An error occurred while saving all modified files:\n" + ex.Message,
+                   "Error",
+                   MBoxButton.OK,
+                   MessageBoxImage.Error);
+      }
    }
 
    private void OpenSaveSelector_OnExecuted(object sender, ExecutedRoutedEventArgs e)

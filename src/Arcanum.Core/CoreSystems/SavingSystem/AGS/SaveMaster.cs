@@ -226,12 +226,7 @@ public static class SaveMaster
       return NewObjects.Values.Any(list => list.Contains(obj)) ? ObjState.New : ObjState.Unchanged;
    }
 
-   public static void SaveAll()
-   {
-      Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList());
-   }
-
-   public static void Save(List<Type> typesToSave)
+   public static void Save(List<Type> typesToSave, Action<string> updateHandle)
    {
       if (AppData.HistoryManager.Current == LastSavedHistoryNode)
          return;
@@ -242,7 +237,7 @@ public static class SaveMaster
             objsToSave.Add(obj);
 
       // We saved setup stuff and have nothing else to save
-      if (SaveSetupFolder(objsToSave) && objsToSave.Count == 0)
+      if (SaveSetupFolder(objsToSave, updateHandle) && objsToSave.Count == 0)
          return;
 
       // We save the objects without any replace and inject logic by simply inserting them into the file they originate from
@@ -252,7 +247,7 @@ public static class SaveMaster
          return;
       }
 
-      InjectionHelper.HandleObjectsWithOptionalInjectLogic(objsToSave);
+      InjectionHelper.HandleObjectsWithOptionalInjectLogic(objsToSave, updateHandle);
       LastSavedHistoryNode = AppData.HistoryManager.Current;
    }
 
@@ -326,7 +321,7 @@ public static class SaveMaster
    /// <summary>
    /// Extracts all setup objects from the list and removes them as they are already handled.
    /// </summary>
-   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects)
+   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
 
@@ -338,14 +333,14 @@ public static class SaveMaster
       // - Vanilla Split: pops / ranks / institutions are in separate files
       // - Combined: all pops / ranks / institutions are in a single file (I prefer this one)
       if (Config.Settings.SavingConfig.CompactSetupFolder)
-         SaveSetupCompacted(types);
+         SaveSetupCompacted(types, updateHandle);
       else
-         SaveSetupSplit(types);
+         SaveSetupSplit(types, updateHandle);
 
       return true;
    }
 
-   private static void SaveSetupSplit(Type[] types)
+   private static void SaveSetupSplit(Type[] types, Action<string> updateHandle)
    {
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
       Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
@@ -356,11 +351,14 @@ public static class SaveMaster
       {
          var writers = SetupFileWritersByType[type];
          foreach (var writer in writers)
+         {
+            updateHandle.Invoke($"Saving setup file: {writer.FullPath}");
             IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
+         }
       }
    }
 
-   private static void SaveSetupCompacted(Type[] types)
+   private static void SaveSetupCompacted(Type[] types, Action<string> updateHandle)
    {
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
 
@@ -377,6 +375,7 @@ public static class SaveMaster
       foreach (var type in types)
       {
          var empty = (IEu5Object)EmptyRegistry.Empties[type];
+         updateHandle.Invoke($"Saving compacted setup file for type: {empty.Source.Path.RelativePath}");
          var isb = new IndentedStringBuilder();
          foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
             ((IEu5Object)obj).ToAgsContext().BuildContext(isb);
@@ -385,7 +384,7 @@ public static class SaveMaster
       }
    }
 
-   public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles)
+   public static bool AppendOrCreateFiles(List<CategorizedSaveable> cssos, List<InjectObj> removeFromFiles, Action<string> updateHandle)
    {
       if (cssos.Count == 0 && removeFromFiles.Count == 0)
          return false;
@@ -423,6 +422,7 @@ public static class SaveMaster
 
       foreach (var (fo, value) in fileGroups)
       {
+         updateHandle.Invoke($"Saving file: {fo.Path.RelativePath}");
          // We have non -inject/replace objects that just override the file
          if (value[0].SavingCategory == SavingCategory.FileOverride)
          {
@@ -821,5 +821,10 @@ public static class SaveMaster
       }
 
       return topLevel;
+   }
+
+   public static void SaveAll(Action<string> updateHook)
+   {
+      Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList(), updateHook);
    }
 }

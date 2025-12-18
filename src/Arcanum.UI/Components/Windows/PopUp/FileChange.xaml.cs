@@ -112,9 +112,9 @@ public partial class FileChange
    public FileChangedEventArgs Args = null!;
 
    public static readonly DependencyProperty FileChangesProperty = DependencyProperty.Register(nameof(FileChanges),
-       typeof(ObservableCollection<FileChangeInfo>),
-       typeof(FileChangeInfo),
-       new(default(ObservableCollection<FileChangeInfo>)));
+                                                                                               typeof(ObservableCollection<FileChangeInfo>),
+                                                                                               typeof(FileChangeInfo),
+                                                                                               new(default(ObservableCollection<FileChangeInfo>)));
 
    public ObservableCollection<FileChangeInfo> FileChanges
    {
@@ -226,7 +226,8 @@ public partial class FileChange
 
    private void ButtonBase_OnClickSave(object sender, RoutedEventArgs e)
    {
-      SaveMaster.SaveAll();
+      var splashScreen = new SavingSplashScreen();
+      SaveMaster.SaveAll(splashScreen.UpdateProgress);
       FileStateManager.ReloadFile(Args);
       Close();
    }
