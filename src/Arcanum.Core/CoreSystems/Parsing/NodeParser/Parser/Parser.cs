@@ -12,14 +12,12 @@ public sealed class Parser(LexerResult lexerResult)
    private readonly IReadOnlyList<Token> _tokens = lexerResult.Tokens;
    private readonly int _tokensCount = lexerResult.Tokens.Count;
    private int _current;
-   private static Eu5FileObj _fileObj = Eu5FileObj.Empty;
+   private Eu5FileObj _fileObj = Eu5FileObj.Empty;
 
    public static RootNode Parse(Eu5FileObj fileObj, out string source, out LocationContext ctx)
    {
-      _fileObj = fileObj;
       ctx = LocationContext.GetNew(fileObj);
       var rn = Parse(fileObj, out source);
-      _fileObj = null!;
       return rn;
    }
 
@@ -41,7 +39,7 @@ public sealed class Parser(LexerResult lexerResult)
 
       var lexer = new Lexer(source);
       var lexerResult = lexer.ScanTokens();
-      var parser = new Parser(lexerResult);
+      var parser = new Parser(lexerResult) { _fileObj = fileObj, };
       return parser.Parse();
    }
 
