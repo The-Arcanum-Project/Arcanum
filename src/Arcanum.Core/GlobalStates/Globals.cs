@@ -131,5 +131,6 @@ public static class Globals
    #endregion
 
    public static Dictionary<string, Age> Ages { get; set; } = [];
+
    public static SetupContentNodes SetupContentNodes { get; set; } = new();
 }

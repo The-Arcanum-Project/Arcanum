@@ -23,7 +23,7 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
                              bool isShattered = false,
                              int numOfDecimalPlaces = 2,
                              bool alwaysWrite = false,
-                             Func<object, bool>? mustNotBeWritten = null) : Attribute
+                             string? mustNotBeWritten = null) : Attribute
 {
    public SavingValueType ValueType { get; } = valueType;
    public TokenType Separator { get; } = separator;
@@ -38,4 +38,8 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
    public bool IsShattered { get; } = isShattered;
    public int NumOfDecimalPlaces { get; } = numOfDecimalPlaces;
    public bool AlwaysWrite { get; } = alwaysWrite;
+   /// <summary>
+   /// Must be of type Func&lt;object , bool&gt;.
+   /// </summary>
+   public string? MustNotBeWritten { get; } = mustNotBeWritten;
 }

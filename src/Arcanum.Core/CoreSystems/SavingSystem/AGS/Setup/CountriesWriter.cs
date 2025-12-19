@@ -6,7 +6,7 @@ using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CountriesWriter() : SetupFileWriter(SetupParsingManager.NestedSubTypes(Country.Empty), "10_countries.txt")
+public class CountriesWriter() : SetupFileWriter([.. SetupParsingManager.NestedSubTypes(Country.Empty), typeof(Age)], "10_countries.txt")
 {
    // windows-1252 encoding
    public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);

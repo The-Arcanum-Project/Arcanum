@@ -132,7 +132,8 @@ public class PropertySavingMetadata
 
       // Required fields must always be saved
       if (!AlwaysWrite)
-         if (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
+         if ((MustNotBeWritten != null && MustNotBeWritten(ags)) ||
+             (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp)))
             return;
 
       if (SavingMethod == null)
@@ -169,9 +170,6 @@ public class PropertySavingMetadata
 
    private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
    {
-      if (MustNotBeWritten != null && MustNotBeWritten(value))
-         return true;
-
       if (!settings.SkipDefaultValues)
          return false;
 
