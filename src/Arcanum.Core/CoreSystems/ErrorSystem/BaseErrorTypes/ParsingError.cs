@@ -783,4 +783,32 @@ public class ParsingError : ILazySingleton
                                                                        "No object found after reloading for the given key '{0}'.",
                                                                        "The provided key '{0}' for an object of type '{1}' does not correspond to any known objects after reloading. Continuing without all objects present again can and will cause file corruption and invalid pointers. Please restart the project to make sure all data is loaded correctly.",
                                                                        DiagnosticReportSeverity.Suppressed);
+
+   /// <param name="0">The Location in question</param>
+   public DiagnosticDescriptor MissingNamedLocationEntry { get; } = new(DiagnosticCategory.Parsing,
+                                                                        81,
+                                                                        "Missing Named Location Entry",
+                                                                        DiagnosticSeverity.Error,
+                                                                        "No named location entry found for the given '{0}' Locations.",
+                                                                        "The provided Locations '{0}' does not have any valid entries in named_locations.txt.",
+                                                                        DiagnosticReportSeverity.Suppressed);
+
+   /// <param name="0">The Location in question</param>
+   /// <param name="1">The last known part in the hierarchy</param>
+   public DiagnosticDescriptor MissingPartInLocationHierarchy { get; } = new(DiagnosticCategory.Parsing,
+                                                                             82,
+                                                                             "Missing Part in Location Hierarchy",
+                                                                             DiagnosticSeverity.Error,
+                                                                             "Incomplete location hierarchy for '{0}'.",
+                                                                             "The provided Location '{0}' has to have a complete hierarchy up to a continent. Last known part: '{1}'.",
+                                                                             DiagnosticReportSeverity.Suppressed);
+
+   /// <param name="0">The Location in question</param>
+   public DiagnosticDescriptor MissingLocationTemplateEntry { get; } = new(DiagnosticCategory.Parsing,
+                                                                           83,
+                                                                           "Missing Location Template Entry",
+                                                                           DiagnosticSeverity.Information,
+                                                                           "No location template entry found for '{0}'.",
+                                                                           "The provided Locations '{0}' does not have any valid entries in location_templates.txt.",
+                                                                           DiagnosticReportSeverity.Suppressed);
 }
