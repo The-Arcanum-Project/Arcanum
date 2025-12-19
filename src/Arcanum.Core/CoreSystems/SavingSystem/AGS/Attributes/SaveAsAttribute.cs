@@ -22,8 +22,8 @@ public class SaveAsAttribute(SavingValueType valueType = SavingValueType.Auto,
                              bool isEmbeddedObject = false,
                              bool isShattered = false,
                              int numOfDecimalPlaces = 2,
-                             bool alwaysWrite = false
-) : Attribute
+                             bool alwaysWrite = false,
+                             Func<object, bool>? mustNotBeWritten = null) : Attribute
 {
    public SavingValueType ValueType { get; } = valueType;
    public TokenType Separator { get; } = separator;

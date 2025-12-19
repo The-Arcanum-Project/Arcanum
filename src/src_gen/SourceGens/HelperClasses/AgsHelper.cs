@@ -244,7 +244,8 @@ public static class AgsHelper
       sb.AppendLine($"                    CollectionAsPureIdentifierList = {prop.CollectionAsPureIdentifierList.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    IsEmbeddedObject = {prop.IsEmbeddedObject.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    NumOfDecimalPlaces = {prop.NumOfDecimalPlaces.ToString()},");
-      sb.AppendLine($"                    AlwaysWrite = {prop.AlwaysWrite.ToString().ToLowerInvariant()}");
+      sb.AppendLine($"                    AlwaysWrite = {prop.AlwaysWrite.ToString().ToLowerInvariant()},");
+      sb.AppendLine($"                    MustNotBeWritten = {prop.MustNotBeWritten ?? "null"},");
       sb.AppendLine("                },");
    }
 

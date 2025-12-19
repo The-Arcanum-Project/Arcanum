@@ -83,6 +83,8 @@ public class PropertySavingMetadata
    /// </summary>
    public required bool AlwaysWrite { get; init; }
 
+   public required Func<object, bool>? MustNotBeWritten { get; init; }
+
    #region Equality operations
 
    public override string ToString() => $"{NxProp} as {Keyword} ({ValueType})";
@@ -167,6 +169,9 @@ public class PropertySavingMetadata
 
    private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
    {
+      if (MustNotBeWritten != null && MustNotBeWritten(value))
+         return true;
+
       if (!settings.SkipDefaultValues)
          return false;
 
