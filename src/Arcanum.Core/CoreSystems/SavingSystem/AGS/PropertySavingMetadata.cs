@@ -167,9 +167,6 @@ public class PropertySavingMetadata
 
    private bool ShouldSkipValueProcessing(AgsSettings settings, object value)
    {
-      if (Config.Settings.SavingConfig.WriteAllDefaultValues)
-         return false;
-
       if (!settings.SkipDefaultValues)
          return false;
 

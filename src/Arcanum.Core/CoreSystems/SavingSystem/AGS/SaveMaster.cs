@@ -352,7 +352,7 @@ public static class SaveMaster
          var writers = SetupFileWritersByType[type];
          foreach (var writer in writers)
          {
-            updateHandle.Invoke($"Saving setup file: {writer.FullPath}");
+            updateHandle.Invoke($"Saving setup file: {writer.FileName}");
             IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
          }
       }
