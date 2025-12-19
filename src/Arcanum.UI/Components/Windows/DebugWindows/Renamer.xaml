@@ -4,23 +4,82 @@
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:metadata = "clr-namespace:System.Reflection.Metadata;assembly=System.Reflection.Metadata"
-                         mc:Ignorable = "d" Title = "Renamer" Height = "450" Width = "800">
-    <Grid>
+                         xmlns:baseTypes = "clr-namespace:Arcanum.Core.GameObjects.BaseTypes;assembly=Arcanum.Core"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
+                         Title = "Renamer" Height = "500" Width = "1000">
+
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:NullToVisibilityConverter x:Key = "NullToVisibilityConverter" />
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+    <Grid Margin = "4">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "1*" MinWidth = "150" />
-            <ColumnDefinition Width = "1*" MinWidth = "150" />
-            <ColumnDefinition Width = "4*" />
+            <ColumnDefinition Width = "220" />
+            <ColumnDefinition Width = "300" />
+            <ColumnDefinition Width = "*" />
         </Grid.ColumnDefinitions>
 
-        <ListView Grid.Column = "0" Margin = "4"
-                  ItemsSource = "{Binding NUIObjectTypes, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
-                  SelectionChanged = "Selector_OnSelectionChanged">
+        <!-- Column 0: Type Selector -->
+        <ListView
+            ItemsSource = "{Binding AvailableTypes, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+            SelectionChanged = "Selector_OnSelectionChanged" Margin = "2">
             <ListView.ItemTemplate>
-                <DataTemplate DataType = "{x:Type metadata:TypeName}">
-                    <TextBlock Text = "{Binding Name}" />
+                <DataTemplate>
+                    <TextBlock Text = "{Binding Name}" Padding = "2" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <!-- Column 1: Object Search and List -->
+        <Grid Grid.Column = "1" Margin = "2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+
+            <styleClasses:CorneredTextBox x:Name = "ItemSearchBox" Margin = "2" TextChanged = "OnItemSearchChanged" />
+
+            <ListView x:Name = "ObjectsListView" Grid.Row = "1" Margin = "2"
+                      ItemsSource = "{Binding ObjectsOfTargetType, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"
+                      SelectionMode = "Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType = "baseTypes:IEu5Object">
+                        <TextBlock Text = "{Binding UniqueId}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <!-- Column 2: Rename UI -->
+        <Border Grid.Column = "2" Margin = "4" Padding = "20" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                BorderThickness = "1" CornerRadius = "4">
+            <StackPanel
+                Visibility = "{Binding SelectedItem, ElementName=ObjectsListView, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Text = "Object Editor" FontSize = "20" FontWeight = "Bold" Margin = "0,0,0,10" />
+
+                <!-- Current Key -->
+                <Label Content = "Current Unique ID:" />
+                <styleClasses:CorneredTextBox
+                    Text = "{Binding SelectedItem.UniqueId, ElementName=ObjectsListView, Mode=OneWay}"
+                    IsReadOnly = "True" Margin = "0,0,0,10" Padding = "5" BorderThickness = "1" />
+
+                <!-- New Key -->
+                <Label Content = "New Unique ID:" FontWeight = "SemiBold" />
+                <styleClasses:CorneredTextBox x:Name = "NewIdTextBox" Margin = "0,0,0,25" Padding = "5" FontSize = "14"
+                                              BorderBrush = "{StaticResource DefaultBorderColorBrush}" />
+
+                <styleClasses:BaseButton Content = "Apply Rename" HorizontalAlignment = "Right" Width = "140"
+                                         Height = "35" Click = "ApplyRename_OnClick" />
+
+                <styleClasses:BaseButton Content = "Save Renaming" HorizontalAlignment = "Right" Width = "140"
+                                         Height = "35" Click = "Save_OnClick" />
+            </StackPanel>
+        </Border>
     </Grid>
 </styleClasses:BaseWindow>
