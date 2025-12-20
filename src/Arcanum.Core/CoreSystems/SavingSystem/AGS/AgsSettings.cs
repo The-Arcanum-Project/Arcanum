@@ -2,7 +2,6 @@
 using System.Reflection;
 using Arcanum.API.Attributes;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -79,45 +78,14 @@ public class AgsSettings
 
    public object ResetSaveOrder(PropertyInfo propInfo)
    {
-      var emptyInstance = TryGetStaticEmptyObject(propInfo);
-      if (emptyInstance == null)
-         throw new
-            InvalidOperationException($"Cannot reset SaveOrder for {propInfo.DeclaringType?.FullName}.{propInfo.Name} because the static Empty property could not be found.");
+      // propInfo is to a List<Enum>
+      var listType = propInfo.PropertyType;
+      if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(List<>))
+         return SaveOrder;
 
-      if (emptyInstance is not INexus nx)
-         throw new
-            InvalidOperationException($"Cannot reset SaveOrder for {propInfo.DeclaringType?.FullName}.{propInfo.Name} because the static Empty property is not an INexus.");
-
-      return nx.GetAllProperties();
-   }
-
-   private static object? TryGetStaticEmptyObject(PropertyInfo? propertyInfo)
-   {
-      if (propertyInfo == null)
-         return null;
-
-      var declaringType = propertyInfo.DeclaringType;
-      if (declaringType == null)
-         return null;
-
-      var implementsIEmpty = declaringType.GetInterfaces()
-                                          .Any(i =>
-                                                  i.IsGenericType &&
-                                                  i.GetGenericTypeDefinition() == typeof(IEmpty<>));
-
-      if (!implementsIEmpty)
-         return null;
-
-      var emptyProperty = declaringType.GetProperty("Empty",
-                                                    BindingFlags.Public |
-                                                    BindingFlags.Static |
-                                                    BindingFlags.FlattenHierarchy);
-
-      if (emptyProperty == null)
-         return null;
-
-      var emptyObject = emptyProperty.GetValue(null);
-      return emptyObject;
+      var enumType = listType.GetGenericArguments()[0];
+      var enumValues = (List<Enum>)Activator.CreateInstance(typeof(List<>).MakeGenericType(enumType))!;
+      return enumValues;
    }
 
    #endregion
