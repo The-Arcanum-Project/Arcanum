@@ -280,9 +280,9 @@ public partial class ErrorLog : INotifyPropertyChanged
 
       if (lcv.Count < 2)
          lcv.SortDescriptions.Add(new(FilterPropertyPath ?? string.Empty,
-                                                      SearchSettings.SortingOption == ISearchSettings.SortingOptions.Acending
-                                                         ? ListSortDirection.Ascending
-                                                         : ListSortDirection.Descending));
+                                      SearchSettings.SortingOption == ISearchSettings.SortingOptions.Acending
+                                         ? ListSortDirection.Ascending
+                                         : ListSortDirection.Descending));
       lcv.Refresh();
    }
 
@@ -588,6 +588,11 @@ public partial class ErrorLog : INotifyPropertyChanged
    {
       // Simply re-run the search logic with the current text
       QuerySearch(SearchTextBox?.SearchInputTextBox?.Text ?? string.Empty);
+   }
+
+   private void ExportToCsv_LeftOnClick(object sender, RoutedEventArgs e)
+   {
+      ExportToCsv_OnClick(sender, new(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseDownEvent, });
    }
 }
 

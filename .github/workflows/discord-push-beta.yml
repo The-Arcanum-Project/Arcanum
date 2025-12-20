@@ -1,0 +1,44 @@
+# .github/workflows/discord-push-beta.yml
+
+name: Discord Beta Push Webhook
+
+on:
+  push:
+    branches:
+      - '1.0.4-[Dd]ev'
+
+jobs:
+  send-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Commit Message and Count
+        id: build_message
+        run: |
+          # split("Conflicts:")[0]  -> Takes everything BEFORE the list of conflicts
+          # gsub("#"; "")           -> Removes all '#' characters to prevent Discord headers
+          # sub("\\s+$"; "")        -> Trims the trailing whitespace left behind
+          
+          COMMIT_MESSAGES=$(echo "$COMMITS_JSON" | jq -r '.[] | 
+            (.message | split("Conflicts:")[0] | gsub("#"; "") | sub("\\s+$"; "")) as $msg | 
+            "`" + .id[0:7] + "` - " + $msg + " - *" + .author.name + "*"'
+          )
+          COMMIT_COUNT=$(echo "$COMMITS_JSON" | jq 'length')
+          
+          echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV          
+          echo "message<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Send Discord BETA Webhook
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_BETA_WEBHOOK_URL }}
+          embed-title: "[${{ github.ref_name }}] ${{ env.COMMIT_COUNT }} new commit(s)"
+          embed-description: "${{ env.message }}"
+          embed-url: "${{ github.event.compare }}"
+          embed-color: "3447003"
+          # Safe fallback if timestamp is missing
+          embed-timestamp: "${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}"
+          embed-author-name: "${{ github.event.sender.login }}"
+          embed-author-url: "${{ github.event.sender.html_url }}"
+          embed-author-icon-url: "${{ github.event.sender.avatar_url }}"
