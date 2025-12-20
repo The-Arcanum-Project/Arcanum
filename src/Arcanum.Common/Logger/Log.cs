@@ -34,6 +34,9 @@ public static class ArcLog
 {
    private static readonly DateTime StartTime = DateTime.Now;
    private static readonly BlockingCollection<string> LogQueue = new();
+   public static LogLevel LogLevel { get; set; } = LogLevel.INF;
+
+   public static bool IsLevelEnabled(LogLevel level) => level >= LogLevel;
 
    // We want to log messages but in this format: [<Source>] [<Level>] <Message> 
    // The Source should be either a 3-letter or a word which will be converted to 3-letter

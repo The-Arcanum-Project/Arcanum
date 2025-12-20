@@ -183,10 +183,10 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
 
    [SaveAs(isShattered: true, isEmbeddedObject: true)]
    [ParseAs("timed_modifier",
-              AstNodeType.BlockNode,
-              isEmbedded: true,
-              isShatteredList: true,
-              itemNodeType: AstNodeType.BlockNode)]
+            AstNodeType.BlockNode,
+            isEmbedded: true,
+            isShatteredList: true,
+            itemNodeType: AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A modifier starting and ending at a given date.")]
    public ObservableRangeCollection<TimedModifier> TimedModifier { get; set; } = [];
@@ -283,16 +283,5 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
    #endregion
 
    public string Id => UniqueId;
-   public IEnumerable<IDependencyNode<string>> Dependencies
-   {
-      get
-      {
-         if (Mother != Empty)
-            yield return Mother;
-         if (Father != Empty)
-            yield return Father;
-         if (PregnancyRealFather != Empty)
-            yield return PregnancyRealFather;
-      }
-   }
+   public IDependencyNode<string>[] Dependencies => [Mother, Father, PregnancyRealFather];
 }

@@ -5,7 +5,7 @@ using Arcanum.Core.Utils.Sorting;
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
 public abstract class PureParseLoadingService(IEnumerable<IDependencyNode<string>> dependencies)
-   : FileLoadingService(dependencies)
+   : FileLoadingService(dependencies.ToArray())
 {
    private const string ACTION_STACK = nameof(PureParseLoadingService);
    public virtual string[] GroupingNodeNames => [];

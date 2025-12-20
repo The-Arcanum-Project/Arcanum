@@ -17,7 +17,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 /// </summary>
 public abstract class FileLoadingService : IDependencyNode<string>
 {
-   public IEnumerable<IDependencyNode<string>> Dependencies
+   public IDependencyNode<string>[] Dependencies
    {
       get;
       set => field = SuccessfullyLoaded
@@ -31,7 +31,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    /// </summary>
    public virtual bool IsHeavyStep => false;
    public string Name { get; }
-   private readonly Stopwatch _stopwatch = new ();
+   private readonly Stopwatch _stopwatch = new();
 
    public FileDescriptor Descriptor = null!;
 
@@ -45,7 +45,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
    //TODO @MelCo make dependencies optional for automatic dependency resolution
    protected FileLoadingService(IEnumerable<IDependencyNode<string>> dependencies)
    {
-      Dependencies = dependencies;
+      Dependencies = dependencies.ToArray();
       Name = GetType().Name;
    }
 
@@ -62,7 +62,7 @@ public abstract class FileLoadingService : IDependencyNode<string>
 
    public virtual DefaultParsingStep GetParsingStep()
    {
-      return new (this, Descriptor.IsMultithreadable);
+      return new(this, Descriptor.IsMultithreadable);
    }
 
    /// <summary>
