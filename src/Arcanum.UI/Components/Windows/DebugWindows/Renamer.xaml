@@ -4,9 +4,10 @@
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:renamer = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
                          xmlns:baseTypes = "clr-namespace:Arcanum.Core.GameObjects.BaseTypes;assembly=Arcanum.Core"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
-                         Title = "Renamer" Height = "500" Width = "1000">
+                         Title = "Renamer" Height = "600" Width = "1000">
 
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
@@ -71,14 +72,29 @@
 
                 <!-- New Key -->
                 <Label Content = "New Unique ID:" FontWeight = "SemiBold" />
-                <styleClasses:CorneredTextBox x:Name = "NewIdTextBox" Margin = "0,0,0,25" Padding = "5" FontSize = "14"
+                <styleClasses:CorneredTextBox x:Name = "NewIdTextBox" Margin = "0,0,0,15" Padding = "5" FontSize = "14"
                                               BorderBrush = "{StaticResource DefaultBorderColorBrush}" />
 
                 <styleClasses:BaseButton Content = "Apply Rename" HorizontalAlignment = "Right" Width = "140"
-                                         Height = "35" Click = "ApplyRename_OnClick" />
+                                         Height = "25" Click = "ApplyRename_OnClick" />
+
+                <!-- List view with all renames pending save -->
+                <TextBlock Text = "Pending Renames:" FontSize = "16" FontWeight = "Bold" Margin = "20,20,0,10" />
+                <ListView x:Name = "PendingRenamesListView" Height = "150"
+                          ItemsSource = "{Binding PendingRenames, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType = "{x:Type renamer:PrendingRename}">
+                            <StackPanel Orientation = "Horizontal">
+                                <TextBlock Text = "{Binding Target.UniqueId}" HorizontalAlignment = "Stretch" />
+                                <TextBlock Text = "→" Margin = "10,0" />
+                                <TextBlock Text = "{Binding NewId}" HorizontalAlignment = "Stretch" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
                 <styleClasses:BaseButton Content = "Save Renaming" HorizontalAlignment = "Right" Width = "140"
-                                         Height = "35" Click = "Save_OnClick" />
+                                         Height = "25" Click = "Save_OnClick" />
             </StackPanel>
         </Border>
     </Grid>

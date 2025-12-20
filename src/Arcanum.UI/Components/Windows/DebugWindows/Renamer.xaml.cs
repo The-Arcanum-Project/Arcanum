@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
@@ -19,13 +20,15 @@ public partial class Renamer
       DependencyProperty.Register(nameof(ObjectsOfTargetType),
                                   typeof(ObservableCollection<IEu5Object>),
                                   typeof(Renamer),
-                                  new PropertyMetadata(null));
+                                  new(null));
 
    public ObservableCollection<IEu5Object> ObjectsOfTargetType
    {
       get => (ObservableCollection<IEu5Object>)GetValue(ObjectsOfTargetTypeProperty);
       set => SetValue(ObjectsOfTargetTypeProperty, value);
    }
+
+   public ObservableCollection<PrendingRename> PendingRenames { get; } = [];
 
    public Renamer()
    {
@@ -73,34 +76,49 @@ public partial class Renamer
          return;
 
       var newId = NewIdTextBox.Text.Trim();
+
       if (string.IsNullOrWhiteSpace(newId))
       {
          MBox.Show("New Unique ID cannot be empty.");
          return;
       }
 
-      if (selectedObject.GetType() == typeof(Location))
-      {
-      }
-      else
-      {
-         var globals = selectedObject.GetGlobalItemsNonGeneric();
-         if (globals.Contains(newId))
-         {
-            MBox.Show($"An object with Unique ID '{newId}' already exists in the global registry.");
-            return;
-         }
-
-         if (globals.Contains(selectedObject.UniqueId))
-            globals.Remove(selectedObject.UniqueId);
-         selectedObject.UniqueId = newId;
-         globals.Add(newId, selectedObject);
-      }
+      PendingRenames.Add(new(selectedObject, newId));
 
       NewIdTextBox.Clear();
    }
 
    private void Save_OnClick(object sender, RoutedEventArgs e)
    {
+      List<IEu5Object> objectsToSave = [];
+      foreach (var rename in PendingRenames)
+      {
+         if (rename.Target is not Location loc)
+         {
+            var success = Core.CoreSystems.RenamingEngine.Renamer.RenameIEu5Object(rename.Target, rename.NewId);
+            if (!success)
+               MBox.Show($"Failed to rename {rename.Target.UniqueId} to {rename.NewId}.");
+            objectsToSave.Add(rename.Target);
+         }
+         else
+         {
+            var success = Core.CoreSystems.RenamingEngine.Renamer.RenameIEu5Object(rename.Target, rename.NewId);
+            if (!success)
+               MBox.Show($"Failed to rename {rename.Target.UniqueId} to {rename.NewId}.");
+            objectsToSave.Add(loc);
+            objectsToSave.Add(loc.Province);
+            objectsToSave.Add(loc.TemplateData);
+         }
+      }
+
+      var splash = new SavingSplashScreen();
+      splash.Show();
+      SaveMaster.SaveObjects(objectsToSave, splash.UpdateProgress);
+      splash.Close();
+
+      PendingRenames.Clear();
+      FilterAndDisplayItems(ItemSearchBox.Text);
    }
 }
+
+public record PrendingRename(IEu5Object Target, string NewId);
