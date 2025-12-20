@@ -91,6 +91,7 @@ public partial class Renamer
    private void Save_OnClick(object sender, RoutedEventArgs e)
    {
       List<IEu5Object> objectsToSave = [];
+      List<IEu5Object> setupObjectsToSave = [];
       foreach (var rename in PendingRenames)
       {
          if (rename.Target is not Location loc)
@@ -109,12 +110,15 @@ public partial class Renamer
             objectsToSave.Add(loc);
             objectsToSave.Add(loc.Province);
             objectsToSave.Add(loc.TemplateData);
+
+            setupObjectsToSave.Add(loc);
          }
       }
 
       var splash = new SavingSplashScreen { Owner = Application.Current.MainWindow };
       splash.Show();
       SaveMaster.SaveObjects(objectsToSave, splash.UpdateProgress);
+      SaveMaster.SaveSetupFolder(setupObjectsToSave, splash.UpdateProgress);
       splash.MarkAsComplete();
 
       PendingRenames.Clear();
