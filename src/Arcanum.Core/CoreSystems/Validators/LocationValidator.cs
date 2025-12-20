@@ -11,6 +11,7 @@ namespace Arcanum.Core.CoreSystems.Validators;
 public class LocationValidator : IValidator
 {
    private const string ACTION_NAME = "LocationValidator";
+   public string Name { get; } = ACTION_NAME;
    public int Priority { get; } = 1;
 
    public void Validate()

@@ -36,7 +36,7 @@ public class ParsingMaster
    public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
-   public IValidator[] Validators = [new LocationValidator()];
+   public static IValidator[] Validators = [new LocationValidator()];
 
    public static List<(string, TimeSpan)> StepDurationsByName => _sortedLoadingSteps
                                                                 .Select(loading
