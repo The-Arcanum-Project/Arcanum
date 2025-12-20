@@ -8,8 +8,11 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;
 
@@ -19,6 +22,7 @@ public partial class SearchWindow : INotifyPropertyChanged
 {
    private Queastor QueryQueastor { get; set; } = null!;
    private static string _lastSearchQuery = string.Empty;
+   private static MapControl _mapControl;
 
    // private readonly Window _parent =
    //    Application.Current.MainWindow ?? throw new InvalidOperationException("MainWindow is not set.");
@@ -50,8 +54,9 @@ public partial class SearchWindow : INotifyPropertyChanged
 
    public ICommand CloseCommand => new RelayCommand(Close);
 
-   public SearchWindow()
+   public SearchWindow(MapControl mapControl)
    {
+      _mapControl = mapControl;
       InitializeComponent();
       SearchTextBox.RequestSearch = Search;
       SearchTextBox.SettingsOpened = OpenSettingsWindow;
@@ -110,14 +115,12 @@ public partial class SearchWindow : INotifyPropertyChanged
    /// <param name="query"></param>
    /// <param name="alwaysOnTop"></param>
    /// <returns></returns>
-   public static SearchWindow ShowSearchWindow(string query = "", bool alwaysOnTop = false)
-   {
-      return ShowSearchWindow(query, alwaysOnTop, Queastor.GlobalInstance);
-   }
+   public static SearchWindow ShowSearchWindow(MapControl mapControl, string query = "", bool alwaysOnTop = false)
+      => ShowSearchWindow(query, alwaysOnTop, Queastor.GlobalInstance, mapControl);
 
-   public static SearchWindow ShowSearchWindow(string query, bool alwaysOnTop, Queastor queastor)
+   public static SearchWindow ShowSearchWindow(string query, bool alwaysOnTop, Queastor queastor, MapControl mapControl)
    {
-      var window = new SearchWindow { Topmost = alwaysOnTop, QueryQueastor = queastor };
+      var window = new SearchWindow(mapControl) { Topmost = alwaysOnTop, QueryQueastor = queastor };
       window.SearchTextBox.SearchInputTextBox.Text = query;
       window.Search(query);
       queastor.Settings = AppData.QueastorSearchSettings;
@@ -171,6 +174,12 @@ public partial class SearchWindow : INotifyPropertyChanged
    private void ExecuteOnSelected(ISearchable searchable)
    {
       searchable.OnSearchSelected();
+      if (searchable is IMapInferable mapInferable and IEu5Object inferable)
+      {
+         var locs = mapInferable.GetRelevantLocations([inferable]);
+         _mapControl.PanTo(locs);
+      }
+
       CloseCommand.Execute(null);
    }
 

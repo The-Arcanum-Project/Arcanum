@@ -24,7 +24,7 @@ public static class ValidatorCommands
                        return ["Available Validators:", ..ParsingMaster.Validators.Select(x => $"- {x.Name}")];
 
                     // Validation Mode (--<string>)
-                    if (argument.StartsWith("-"))
+                    if (argument.StartsWith('-'))
                     {
                        var payload = argument[1..];
 
