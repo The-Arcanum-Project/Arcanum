@@ -14,8 +14,7 @@ public static class IO
    public static string GetUserDocumentsPath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
    // TODO fix this to EU5 once we know the correct path
-   public static string GetUserModFolderPath
-      => Path.Combine(GetUserDocumentsPath, "Paradox Interactive", "Europa Universalis V", "mod");
+   public static string GetUserModFolderPath => Path.Combine(GetUserDocumentsPath, "Paradox Interactive", "Europa Universalis V", "mod");
 
    static IO()
    {
@@ -27,7 +26,9 @@ public static class IO
 
    public static string GetArcanumDataPath => Path.Combine(GetUserDocumentsPath, "Arcanum");
    public static string GetConfigPath => Path.Combine(GetArcanumDataPath, "Config");
-   public static string GetCrashLogsPath => Path.Combine(GetArcanumDataPath, "CrashLogs");
+   public static string GetLogsPath => Path.Combine(GetArcanumDataPath, "Logs");
+   public static string GetCrashLogsPath => Path.Combine(GetLogsPath, "CrashLogs");
+   public static string GetErrorLogsFilePath => Path.Combine(GetLogsPath, Config.Settings.ErrorLogOptions.ErrorLogFileName);
 
    // Directory Utils
    public static List<string> GetDirectories(string path,
@@ -193,14 +194,11 @@ public static class IO
    }
 
    // --- Specific Encoding Writers ---
-   public static bool WriteAllTextAnsi(string path, string data, bool append = false)
-      => WriteAllText(path, data, Windows1250Encoding, append);
+   public static bool WriteAllTextAnsi(string path, string data, bool append = false) => WriteAllText(path, data, Windows1250Encoding, append);
 
-   public static bool WriteAllTextUtf8(string path, string data, bool append = false)
-      => WriteAllText(path, data, NoBomUtf8Encoding, append);
+   public static bool WriteAllTextUtf8(string path, string data, bool append = false) => WriteAllText(path, data, NoBomUtf8Encoding, append);
 
-   public static bool WriteAllTextUtf8WithBom(string path, string data, bool append = false)
-      => WriteAllText(path, data, BomUtf8Encoding, append);
+   public static bool WriteAllTextUtf8WithBom(string path, string data, bool append = false) => WriteAllText(path, data, BomUtf8Encoding, append);
 
    // --- Directory Operations ---
    public static bool EnsureDirectoryExists(string directoryPath)

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem;
@@ -38,19 +39,24 @@ public static class ErrorManager
 
    public static void PrintDiagnosticsToConsole(bool clean)
    {
+      var sb = new StringBuilder();
       if (clean)
          Console.Clear();
       else
       {
-         ArcLog.WritePure("");
-         ArcLog.WritePure("");
+         sb.AppendLine("");
+         sb.AppendLine("");
       }
 
-      ArcLog.WritePure("########################################");
-      ArcLog.WritePure("############### ERRORLOG ###############");
-      ArcLog.WritePure("########################################");
+      ExportHumanReadableLog(sb);
+      ArcLog.WritePure(sb.ToString());
+   }
 
-      var sb = ExportToConsole();
+   public static void ExportHumanReadableLog(StringBuilder sb)
+   {
+      sb.AppendLine("########################################");
+      sb.AppendLine("############### ERRORLOG ###############");
+      sb.AppendLine("########################################");
 
       Dictionary<int, (Diagnostic, int)> diagnosticOccurrences = [];
       foreach (var diag in Diagnostics)
@@ -81,19 +87,20 @@ public static class ErrorManager
                throw new ArgumentOutOfRangeException();
          }
 
-      ArcLog.WritePure("");
-      ArcLog.WritePure("");
-      ArcLog.WritePure("# Total Diagnostics: " + Diagnostics.Count);
-      ArcLog.WritePure("# Errors: " + error);
-      ArcLog.WritePure("# Warnings: " + warning);
-      ArcLog.WritePure("# Info: " + info);
+      sb.AppendLine("");
+      sb.AppendLine("");
+      sb.AppendLine("# Total Diagnostics: " + Diagnostics.Count);
+      sb.AppendLine("# Errors: " + error);
+      sb.AppendLine("# Warnings: " + warning);
+      sb.AppendLine("# Info: " + info);
 
-      ArcLog.WritePure("");
-      ArcLog.WritePure("# ID | Name                                    | Occurrences");
+      sb.AppendLine("");
+      sb.AppendLine("# ID | Name                                    | Occurrences");
       foreach (var kvp in diagnosticOccurrences)
-         ArcLog.WritePure($"#{kvp.Key,4}: {kvp.Value.Item1.Code,-40}: {kvp.Value.Item2} occurrences");
-      ArcLog.WritePure("");
-      Console.WriteLine(sb.ToString());
+         sb.AppendLine($"#{kvp.Key,4}: {kvp.Value.Item1.Code,-40}: {kvp.Value.Item2} occurrences");
+      sb.AppendLine("");
+
+      IndentedStringBuilder.Merge(sb, ExportToConsole());
    }
 
    private static StringBuilder ExportToConsole()

@@ -3,7 +3,9 @@
 #define PRINT_PARSING_ORDER
 
 using System.Diagnostics;
+using System.Text;
 using System.Windows;
+using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -127,191 +129,193 @@ public class ParsingMaster
 
    public async Task<bool> ExecuteAllParsingSteps()
    {
-      ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "ModPath: " + FileManager.ModDataSpace.FullPath);
-      foreach (var dpend in FileManager.DependentDataSpaces)
-         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Dependent DataSpace: " + dpend.FullPath);
-
-      var sw = Stopwatch.StartNew();
-      if (!EffectParser.ParseEffectDefinitions())
+      try
       {
-         return false;
-      }
+         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "ModPath: " + FileManager.ModDataSpace.FullPath);
+         foreach (var dpend in FileManager.DependentDataSpaces)
+            ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Dependent DataSpace: " + dpend.FullPath);
 
-      InitializeSteps();
-      ArcLog.WriteLine("PMS", LogLevel.INF, "Starting parsing steps...");
-      ArcLog.WriteLine("PMS", LogLevel.INF, "Steps to execute: " + ParsingSteps);
-      ParsingStepsDone = 0;
-      var steps = _sortedLoadingSteps.ToList();
-      var lockObj = new object();
-      var cts = new CancellationTokenSource();
-
-      while (ParsingStepsDone < ParsingSteps)
-      {
-         ArcLog.WriteLine("PMS", LogLevel.INF, "Executing parsing steps... " + $"{ParsingStepsDone}/{ParsingSteps} completed.");
-         var hasPrioSteps = steps.Any(s => s.HasPriority);
-         var readySteps = hasPrioSteps ? [steps[0]] : LookAheadSteps(steps);
-         foreach (var step in readySteps)
-            steps.Remove(step);
-
-         if (readySteps.Count == 0)
+         var sw = Stopwatch.StartNew();
+         if (!EffectParser.ParseEffectDefinitions())
          {
-            // Deadlock check: No steps can run, but we are not finished.
-            if (ParsingStepsDone < ParsingSteps)
-               throw new
-                  InvalidOperationException($"Deadlock detected. No steps can be executed, but {ParsingSteps - ParsingStepsDone} steps remain.");
-
-            break;
-         }
-
-         List<Task<bool>> currentBatchTasks = [];
-         foreach (var step in readySteps)
-            if (step.IsHeavyStep)
-               currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
-                                                              {
-                                                                 try
-                                                                 {
-                                                                    var startNew = Stopwatch.StartNew();
-                                                                    var wrapper = step.GetParsingStep();
-                                                                    ArcLog.WriteLine("PMS",
-                                                                                     LogLevel.INF,
-                                                                                     $"Starting heavy parsing step: {step.Name}");
-                                                                    var result = wrapper.Execute();
-                                                                    lock (lockObj)
-                                                                       if (result)
-                                                                       {
-                                                                          ParsingStepsDone++;
-                                                                          StepDurations.Add(wrapper.Duration);
-                                                                          ParsingStepsChanged?.Invoke(this, step);
-                                                                          TotalProgressChanged?.Invoke(this,
-                                                                                                       ParsingStepsDone /
-                                                                                                       (double)ParsingSteps *
-                                                                                                       100.0);
-                                                                       }
-
-                                                                    step.LastTotalLoadingDuration = startNew.Elapsed;
-                                                                    return result;
-                                                                 }
-                                                                 catch (Exception e)
-                                                                 {
-                                                                    if (AppData.IsHeadless)
-                                                                       ArcLog.WriteLine(CommonLogSource.PMT,
-                                                                                        LogLevel.ERR,
-                                                                                        "An Exception occured during heavy parsing step: " +
-                                                                                        $"{step.Name}\n\n" +
-                                                                                        $"Exception Message: {e.Message}\n\n" +
-                                                                                        "Stack Trace:\n" +
-                                                                                        $"{e.StackTrace}\n\n" +
-                                                                                        "Please check the log for more details.");
-                                                                    else
-                                                                       UIHandle.Instance.PopUpHandle
-                                                                               .ShowMBox("An Exception occured during heavy parsing step: " +
-                                                                                         $"{step.Name}\n\n" +
-                                                                                         $"Exception Message: {e.Message}\n\n" +
-                                                                                         "Please check the log for more details.",
-                                                                                         "Parsing Error",
-                                                                                         MBoxButton.OK,
-                                                                                         MessageBoxImage.Error);
-                                                                    throw
-                                                                       new($"Exception occurred while executing heavy parsing step '{step.Name}': {e.Message}",
-                                                                           e);
-                                                                 }
-                                                              },
-                                                              cts.Token));
-            else
-               currentBatchTasks.Add(Scheduler.QueueWorkAsHeavyIfAvailable(() =>
-                                                                           {
-                                                                              try
-                                                                              {
-                                                                                 var sw2 = Stopwatch.StartNew();
-                                                                                 var wrapper = step.GetParsingStep();
-                                                                                 ArcLog.WriteLine("PMS",
-                                                                                                  LogLevel.INF,
-                                                                                                  $"Starting parsing step: {step.Name}");
-                                                                                 var result = wrapper.Execute();
-                                                                                 lock (lockObj)
-                                                                                    if (result)
-                                                                                    {
-                                                                                       ParsingStepsDone++;
-                                                                                       StepDurations
-                                                                                         .Add(wrapper.Duration);
-                                                                                       ParsingStepsChanged?.Invoke(this,
-                                                                                              step);
-                                                                                       TotalProgressChanged
-                                                                                        ?.Invoke(this,
-                                                                                                 ParsingStepsDone /
-                                                                                                 (double)ParsingSteps *
-                                                                                                 100.0);
-                                                                                    }
-
-                                                                                 step.LastTotalLoadingDuration =
-                                                                                    sw2.Elapsed;
-                                                                                 return result;
-                                                                              }
-                                                                              catch (Exception e)
-                                                                              {
-                                                                                 if (AppData.IsHeadless)
-                                                                                    ArcLog.WriteLine(CommonLogSource.PMT,
-                                                                                                     LogLevel.ERR,
-                                                                                                     "An Exception occured during parsing step: " +
-                                                                                                     $"{step.Name}\n\n" +
-                                                                                                     $"Exception Message: {e.Message}\n\n" +
-                                                                                                     "Stack Trace:\n" +
-                                                                                                     $"{e.StackTrace}\n\n" +
-                                                                                                     "Please check the log for more details.");
-                                                                                 else
-                                                                                    UIHandle.Instance.PopUpHandle
-                                                                                            .ShowMBox("An Exception occured during parsing step: " +
-                                                                                                      $"{step.Name}\n\n" +
-                                                                                                      $"Exception Message: {e.Message}\n\n" +
-                                                                                                      "Please check the log for more details.",
-                                                                                                      "Parsing Error",
-                                                                                                      MBoxButton.OK,
-                                                                                                      MessageBoxImage.Error);
-                                                                                 throw
-                                                                                    new($"Exception occurred while executing parsing step '{step.Name}': {e.Message}",
-                                                                                        e);
-                                                                              }
-                                                                           },
-                                                                           cts.Token));
-
-         while (currentBatchTasks.Count > 0)
-         {
-            var finishedTask = await Task.WhenAny(currentBatchTasks);
-            currentBatchTasks.Remove(finishedTask);
-
-            if (await finishedTask)
-               continue;
-
-            ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "A parsing step failed. Stopping further processing.");
-
-            // A task failed. Cancel all other running tasks and stop.
-            await cts.CancelAsync();
             return false;
          }
 
-         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Batch parsing steps completed.");
-      }
+         InitializeSteps();
+         ArcLog.WriteLine("PMS", LogLevel.INF, "Starting parsing steps...");
+         ArcLog.WriteLine("PMS", LogLevel.INF, "Steps to execute: " + ParsingSteps);
+         ParsingStepsDone = 0;
+         var steps = _sortedLoadingSteps.ToList();
+         var lockObj = new object();
+         var cts = new CancellationTokenSource();
 
-      Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);
-      Queastor.Queastor.GlobalInstance.RebuildBkTree();
+         while (ParsingStepsDone < ParsingSteps)
+         {
+            ArcLog.WriteLine("PMS", LogLevel.INF, "Executing parsing steps... " + $"{ParsingStepsDone}/{ParsingSteps} completed.");
+            var hasPrioSteps = steps.Any(s => s.HasPriority);
+            var readySteps = hasPrioSteps ? [steps[0]] : LookAheadSteps(steps);
+            foreach (var step in readySteps)
+               steps.Remove(step);
 
-      sw.Stop();
+            if (readySteps.Count == 0)
+            {
+               // Deadlock check: No steps can run, but we are not finished.
+               if (ParsingStepsDone < ParsingSteps)
+                  throw new
+                     InvalidOperationException($"Deadlock detected. No steps can be executed, but {ParsingSteps - ParsingStepsDone} steps remain.");
 
-      ArcLog.WriteLine("PMS", LogLevel.INF, $"All parsing steps completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+               break;
+            }
 
-      sw.Reset();
-      var sw2 = Stopwatch.StartNew();
-      foreach (var validator in Validators)
-      {
-         sw2.Reset();
-         sw2.Start();
-         validator.Validate();
-         sw2.Stop();
-         ArcLog.WriteLine("PMS", LogLevel.INF, $"Validator {validator.GetType().Name} completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
-      }
+            List<Task<bool>> currentBatchTasks = [];
+            foreach (var step in readySteps)
+               if (step.IsHeavyStep)
+                  currentBatchTasks.Add(Scheduler.QueueHeavyWork(() =>
+                                                                 {
+                                                                    try
+                                                                    {
+                                                                       var startNew = Stopwatch.StartNew();
+                                                                       var wrapper = step.GetParsingStep();
+                                                                       ArcLog.WriteLine("PMS",
+                                                                                        LogLevel.INF,
+                                                                                        $"Starting heavy parsing step: {step.Name}");
+                                                                       var result = wrapper.Execute();
+                                                                       lock (lockObj)
+                                                                          if (result)
+                                                                          {
+                                                                             ParsingStepsDone++;
+                                                                             StepDurations.Add(wrapper.Duration);
+                                                                             ParsingStepsChanged?.Invoke(this, step);
+                                                                             TotalProgressChanged?.Invoke(this,
+                                                                                                             ParsingStepsDone /
+                                                                                                             (double)ParsingSteps *
+                                                                                                             100.0);
+                                                                          }
 
-      sw.Stop();
-      ArcLog.WriteLine("PMS", LogLevel.INF, $"All validators completed in {sw2.Elapsed.TotalSeconds:F2} seconds.");
+                                                                       step.LastTotalLoadingDuration = startNew.Elapsed;
+                                                                       return result;
+                                                                    }
+                                                                    catch (Exception e)
+                                                                    {
+                                                                       if (AppData.IsHeadless)
+                                                                          ArcLog.WriteLine(CommonLogSource.PMT,
+                                                                                           LogLevel.ERR,
+                                                                                           "An Exception occured during heavy parsing step: " +
+                                                                                           $"{step.Name}\n\n" +
+                                                                                           $"Exception Message: {e.Message}\n\n" +
+                                                                                           "Stack Trace:\n" +
+                                                                                           $"{e.StackTrace}\n\n" +
+                                                                                           "Please check the log for more details.");
+                                                                       else
+                                                                          UIHandle.Instance.PopUpHandle
+                                                                                  .ShowMBox("An Exception occured during heavy parsing step: " +
+                                                                                            $"{step.Name}\n\n" +
+                                                                                            $"Exception Message: {e.Message}\n\n" +
+                                                                                            "Please check the log for more details.",
+                                                                                            "Parsing Error",
+                                                                                            MBoxButton.OK,
+                                                                                            MessageBoxImage.Error);
+                                                                       throw
+                                                                          new($"Exception occurred while executing heavy parsing step '{step.Name}': {e.Message}",
+                                                                              e);
+                                                                    }
+                                                                 },
+                                                                 cts.Token));
+               else
+                  currentBatchTasks.Add(Scheduler.QueueWorkAsHeavyIfAvailable(() =>
+                                                                              {
+                                                                                 try
+                                                                                 {
+                                                                                    var sw2 = Stopwatch.StartNew();
+                                                                                    var wrapper = step.GetParsingStep();
+                                                                                    ArcLog.WriteLine("PMS",
+                                                                                                     LogLevel.INF,
+                                                                                                     $"Starting parsing step: {step.Name}");
+                                                                                    var result = wrapper.Execute();
+                                                                                    lock (lockObj)
+                                                                                       if (result)
+                                                                                       {
+                                                                                          ParsingStepsDone++;
+                                                                                          StepDurations
+                                                                                            .Add(wrapper.Duration);
+                                                                                          ParsingStepsChanged?.Invoke(this,
+                                                                                                 step);
+                                                                                          TotalProgressChanged
+                                                                                           ?.Invoke(this,
+                                                                                                    ParsingStepsDone /
+                                                                                                    (double)ParsingSteps *
+                                                                                                    100.0);
+                                                                                       }
+
+                                                                                    step.LastTotalLoadingDuration =
+                                                                                       sw2.Elapsed;
+                                                                                    return result;
+                                                                                 }
+                                                                                 catch (Exception e)
+                                                                                 {
+                                                                                    if (AppData.IsHeadless)
+                                                                                       ArcLog.WriteLine(CommonLogSource.PMT,
+                                                                                                        LogLevel.ERR,
+                                                                                                        "An Exception occured during parsing step: " +
+                                                                                                        $"{step.Name}\n\n" +
+                                                                                                        $"Exception Message: {e.Message}\n\n" +
+                                                                                                        "Stack Trace:\n" +
+                                                                                                        $"{e.StackTrace}\n\n" +
+                                                                                                        "Please check the log for more details.");
+                                                                                    else
+                                                                                       UIHandle.Instance.PopUpHandle
+                                                                                               .ShowMBox("An Exception occured during parsing step: " +
+                                                                                                         $"{step.Name}\n\n" +
+                                                                                                         $"Exception Message: {e.Message}\n\n" +
+                                                                                                         "Please check the log for more details.",
+                                                                                                         "Parsing Error",
+                                                                                                         MBoxButton.OK,
+                                                                                                         MessageBoxImage.Error);
+                                                                                    throw
+                                                                                       new($"Exception occurred while executing parsing step '{step.Name}': {e.Message}",
+                                                                                           e);
+                                                                                 }
+                                                                              },
+                                                                              cts.Token));
+
+            while (currentBatchTasks.Count > 0)
+            {
+               var finishedTask = await Task.WhenAny(currentBatchTasks);
+               currentBatchTasks.Remove(finishedTask);
+
+               if (await finishedTask)
+                  continue;
+
+               ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "A parsing step failed. Stopping further processing.");
+
+               // A task failed. Cancel all other running tasks and stop.
+               await cts.CancelAsync();
+               return false;
+            }
+
+            ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.INF, "Batch parsing steps completed.");
+         }
+
+         Queastor.Queastor.AddIEu5ObjectsToQueastor(Queastor.Queastor.GlobalInstance, Eu5ObjectsRegistry.Eu5Objects);
+         Queastor.Queastor.GlobalInstance.RebuildBkTree();
+
+         sw.Stop();
+
+         ArcLog.WriteLine("PMS", LogLevel.INF, $"All parsing steps completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+
+         sw.Reset();
+         var sw2 = Stopwatch.StartNew();
+         foreach (var validator in Validators)
+         {
+            sw2.Reset();
+            sw2.Start();
+            validator.Validate();
+            sw2.Stop();
+            ArcLog.WriteLine("PMS", LogLevel.INF, $"Validator {validator.GetType().Name} completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+         }
+
+         sw.Stop();
+         ArcLog.WriteLine("PMS", LogLevel.INF, $"All validators completed in {sw2.Elapsed.TotalSeconds:F2} seconds.");
 
 #if DEBUG_PARSING_STEP_TIMES
       var sortedByDuration = StepDurationsByName.OrderByDescending(t => t.Item2).ToList();
@@ -321,8 +325,36 @@ public class ParsingMaster
                           LogLevel.DBG,
                           $"{duration.TotalSeconds.ToString("F2", CultureInfo.InvariantCulture)} s for '{name}'");
 #endif
+      }
+      finally
+      {
+         if (Config.Settings.ErrorLogOptions.AlwaysExportLogToFile)
+            SaveLog();
+      }
 
       return await Task.FromResult(true);
+   }
+
+   private static void SaveLog()
+   {
+      var sw = new Stopwatch();
+      sw.Start();
+      try
+      {
+         ArcLog.WriteLine("PSM", LogLevel.INF, $"Exporting error log to file: \"{Config.Settings.ErrorLogOptions.ErrorLogFileName}\"");
+         var sb = new StringBuilder();
+         ErrorManager.ExportHumanReadableLog(sb);
+         IO.IO.WriteAllTextUtf8(IO.IO.GetErrorLogsFilePath, sb.ToString());
+      }
+      catch (Exception e)
+      {
+         ArcLog.WriteLine("PMS",
+                          LogLevel.ERR,
+                          $"Failed to export error log to '{Config.Settings.ErrorLogOptions.ExportFilePath}'. Exception: {e.Message}");
+      }
+
+      sw.Stop();
+      ArcLog.WriteLine("PMS", LogLevel.INF, $"Exporting error log completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
    }
 
    /// Looks ahead in the parsing steps queue to check if the next steps dependencies are already loaded to load them in parallel
