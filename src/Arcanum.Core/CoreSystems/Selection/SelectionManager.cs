@@ -19,15 +19,16 @@ namespace Arcanum.Core.CoreSystems.Selection;
 /// </summary>
 public static class SelectionManager
 {
+   private static CancellationTokenSource? _previewCts;
    private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
    /// <summary>
    /// This is the collection of objects that are currently editable in the UI. <br/>
    /// This is what the UI listens to.
    /// </summary>
-   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new () { IsDistinct = true };
-   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new () { IsDistinct = true };
+   public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
+   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
 
-   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new () { IsDistinct = true };
+   public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
 
    public static event Action? PreviewChanged;
 
@@ -52,7 +53,7 @@ public static class SelectionManager
    /// Is Called after the selection has already updated the editable objects
    /// </summary>
    public static event PropertyChangedEventHandler? PropertyChanged;
-   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new (propertyName));
+   public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new(propertyName));
 
    static SelectionManager()
    {
@@ -69,10 +70,43 @@ public static class SelectionManager
       PreviewChanged?.Invoke();
    }
 
-   public static void Preview(List<IEu5Object> eu5Objects, int msDuration)
+   public static async void Preview(List<IEu5Object> eu5Objects, int msDuration)
    {
-      // TODO: Implement timed preview
-      PreviewChanged?.Invoke();
+      try
+      {
+         Preview(eu5Objects);
+
+         // If we want only one preview at a time, cancel any existing preview
+         // _previewCts?.Cancel(); 
+
+         var cts = new CancellationTokenSource();
+         _previewCts = cts;
+
+         var token = cts.Token;
+         try
+         {
+            await Task.Delay(msDuration, token);
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+               if (!token.IsCancellationRequested)
+                  UnPreview(eu5Objects);
+            });
+         }
+         catch (TaskCanceledException)
+         {
+            // The preview was cleared manually or cancelled before the timer finished.
+         }
+         finally
+         {
+            if (_previewCts == cts)
+               _previewCts = null;
+            cts.Dispose();
+         }
+      }
+      catch (Exception e)
+      {
+         ArcLog.WriteLine("SMN", LogLevel.ERR, $"Error during timed preview: {e}");
+      }
    }
 
    public static void UnPreview(List<IEu5Object> eu5Objects)
@@ -83,6 +117,9 @@ public static class SelectionManager
 
    public static void ClearPreview()
    {
+      _previewCts?.Cancel();
+      _previewCts = null;
+
       PreviewedLocations.Clear();
       PreviewChanged?.Invoke();
    }

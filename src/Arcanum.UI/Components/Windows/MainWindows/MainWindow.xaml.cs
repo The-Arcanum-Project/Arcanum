@@ -500,7 +500,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void OpenSearchWindow_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      SearchWindow.ShowSearchWindow();
+      SearchWindow.ShowSearchWindow(MainMap);
    }
 
    private void StepRedoCommand_Executed(object sender, ExecutedRoutedEventArgs e)

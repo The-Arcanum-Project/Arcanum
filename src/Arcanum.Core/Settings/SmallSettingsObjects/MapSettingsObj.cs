@@ -199,4 +199,12 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = 0.5f;
+
+   [Description("The duration in milliseconds for which a search result is highlighted on the map.")]
+   [DefaultValue(1000)]
+   public int SearchResultHighlightDurationMs
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 1000;
 }

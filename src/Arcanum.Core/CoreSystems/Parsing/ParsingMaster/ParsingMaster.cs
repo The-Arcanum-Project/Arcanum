@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem;
+using Arcanum.Core.CoreSystems.Validators;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
@@ -35,6 +36,7 @@ public class ParsingMaster
    public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
    public List<TimeSpan> StepDurations { get; } = [];
+   public static IValidator[] Validators = [new LocationValidator()];
 
    public static List<(string, TimeSpan)> StepDurationsByName => _sortedLoadingSteps
                                                                 .Select(loading
@@ -296,6 +298,20 @@ public class ParsingMaster
       sw.Stop();
 
       ArcLog.WriteLine("PMS", LogLevel.INF, $"All parsing steps completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+
+      sw.Reset();
+      var sw2 = Stopwatch.StartNew();
+      foreach (var validator in Validators)
+      {
+         sw2.Reset();
+         sw2.Start();
+         validator.Validate();
+         sw2.Stop();
+         ArcLog.WriteLine("PMS", LogLevel.INF, $"Validator {validator.GetType().Name} completed in {sw.Elapsed.TotalSeconds:F2} seconds.");
+      }
+
+      sw.Stop();
+      ArcLog.WriteLine("PMS", LogLevel.INF, $"All validators completed in {sw2.Elapsed.TotalSeconds:F2} seconds.");
 
 #if DEBUG_PARSING_STEP_TIMES
       var sortedByDuration = StepDurationsByName.OrderByDescending(t => t.Item2).ToList();

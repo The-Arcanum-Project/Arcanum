@@ -243,7 +243,7 @@ public static class SaveMaster
       // We save the objects without any replace and inject logic by simply inserting them into the file they originate from
       if (!Config.Settings.SavingConfig.UseInjectReplaceCalls)
       {
-         SaveObjects(objsToSave);
+         SaveObjects(objsToSave, updateHandle);
          return;
       }
 
@@ -255,15 +255,19 @@ public static class SaveMaster
    /// Sorts the given objects by their source file and saves each file with the modified objects. <br/>
    /// DOES NOT USE INJECT / REPLACE LOGIC!
    /// </summary>
-   public static void SaveObjects(List<IEu5Object> objectsToSave)
+   public static void SaveObjects(List<IEu5Object> objectsToSave, Action<string> updateProgress)
    {
-      if (SaveDefnitionsFile(objectsToSave))
+      if (SaveDefnitionsFile(objectsToSave) && objectsToSave.Count == 0)
          return;
 
       var fileGroups = objectsToSave.GroupBy(o => o.Source);
 
       foreach (var group in fileGroups)
+      {
+         updateProgress.Invoke($"Saving file: {group.Key.Path.Filename}");
          SaveFile(group.ToList());
+      }
+
       LastSavedHistoryNode = AppData.HistoryManager.Current;
    }
 
@@ -321,7 +325,7 @@ public static class SaveMaster
    /// <summary>
    /// Extracts all setup objects from the list and removes them as they are already handled.
    /// </summary>
-   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
+   public static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
 

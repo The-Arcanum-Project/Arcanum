@@ -21,7 +21,12 @@ public abstract record JominiColor : IEmpty<JominiColor>
       return (_cachedIntValue = (mediaColor.A << 24) | (mediaColor.B << 16) | (mediaColor.G << 8) | mediaColor.R).Value;
    }
 
-   public int AsHex() => AsInt() & 0xFFFFFF;
+   public int AsHex()
+   {
+      var c = ToMediaColor();
+      return ((c.A << 24) | (c.R << 16) | (c.G << 8) | c.B) & 0xFFFFFF;
+   }
+
    public string AsHexString() => AsHex().ToString("X6");
 
    public abstract Color ToMediaColor();
@@ -46,7 +51,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color ToMediaColor() => Color;
       public override JominiColorType Type => JominiColorType.Rgb;
       public override string ToString() => $"rgb {{ {Color.R} {Color.G} {Color.B} }}";
-      public override Color4 ToColor4() => new (Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
+      public override Color4 ToColor4() => new(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
    }
 
    public sealed record ColorKey(string Key) : JominiColor
@@ -67,7 +72,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color ToMediaColor() => Color.FromRgb(R, G, B);
       public override JominiColorType Type => JominiColorType.Rgb;
       public override string ToString() => $"rgb {{ {R} {G} {B} }}";
-      public override Color4 ToColor4() => new (R / 255.0f, G / 255.0f, B / 255.0f);
+      public override Color4 ToColor4() => new(R / 255.0f, G / 255.0f, B / 255.0f);
    }
 
    // Standard HSV where H is [0, 360], S and V are [0, 1]
@@ -80,7 +85,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color4 ToColor4()
       {
          var color = HsvConverter.Hsv360ToRgb(H * 360, S, V);
-         return new (color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
       }
    }
 
@@ -94,7 +99,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override Color4 ToColor4()
       {
          var color = HsvConverter.Hsv360ToRgb(H, S, V);
-         return new (color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
       }
    }
 
@@ -116,7 +121,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
          var r = (byte)((Value >> 16) & 0xFF);
          var g = (byte)((Value >> 8) & 0xFF);
          var b = (byte)(Value & 0xFF);
-         return new (r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+         return new(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
       }
    }
 

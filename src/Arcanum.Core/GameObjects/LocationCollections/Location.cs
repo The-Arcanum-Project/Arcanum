@@ -18,13 +18,14 @@ using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.LocationCollections;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(savingMethod: "LocationSaving")]
 public partial class Location
    : IMapInferable, IEu5Object<Location>
 {
@@ -112,7 +113,7 @@ public partial class Location
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static Location Empty { get; } = new () { UniqueId = "Empty_Arcanum_Location" };
+   public static Location Empty { get; } = new() { UniqueId = "Empty_Arcanum_Location" };
 
    [SaveAs(isEmbeddedObject: true)]
    [ParseAs("null", ignore: true)]
