@@ -24,7 +24,7 @@ using System.Globalization;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
-public class ParsingMaster
+public partial class ParsingMaster
 {
    [UsedImplicitly]
    public EventHandler<FileLoadingService>? ParsingStepsChanged;
@@ -37,6 +37,7 @@ public class ParsingMaster
    public static ParsingMaster Instance => LazyInstance.Value;
    public int ParsingSteps => _sortedLoadingSteps.Count;
    public int ParsingStepsDone { get; private set; }
+   // ReSharper disable once CollectionNeverQueried.Global
    public List<TimeSpan> StepDurations { get; } = [];
    public static IValidator[] Validators = [new LocationValidator()];
 
@@ -76,9 +77,6 @@ public class ParsingMaster
    /// </summary>
    private static void InitializeSteps()
    {
-      //_sortedLoadingSteps =
-      //   new(TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList));
-
       var (s1, _) = PartitionStepsByPriority(DescriptorDefinitions.LoadingStepsList);
 
       var sortedPrioritySteps = TopologicalSort.Sort<string, FileLoadingService>(s1);
@@ -126,18 +124,6 @@ public class ParsingMaster
       var remainingSteps = allStepsList.Where(s => !prioritySet.Contains(s)).ToList();
 
       return (prioritySteps, remainingSteps);
-   }
-
-   private sealed class GraphContext
-   {
-      public List<int>[] Dependents = null!;
-      public int[] RemainingDependencies = null!;
-      public ChannelWriter<int> Writer = null!;
-      public TaskCompletionSource<bool> Tcs = null!;
-      public CancellationTokenSource Cts = null!;
-      public int TotalSteps;
-      public int CompletedCount;
-      public ParsingMaster CtxInstance = null!;
    }
 
    public async Task<bool> ExecuteAllParsingSteps()
