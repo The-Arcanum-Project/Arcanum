@@ -24,7 +24,7 @@ namespace Arcanum.Core.GameObjects.InGame.Map;
 public static partial class MapMovementAssistParsingWhy;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(asOneLine: true)]
 public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IMapInferable
 {
    #region Nexus Properties
