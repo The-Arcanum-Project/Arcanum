@@ -290,16 +290,12 @@ public static class DescriptorDefinitions
           new("main_menu_setup", "txt", "#"),
           [
              new SetupParsingStep([
-                CountryDefinitionDescriptor.LoadingService[0],
-                // CharacterDiscovery.LoadingService[0],
-                LocationDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
-                // CountriesDescriptor.LoadingService[0],
+                CountryDefinitionDescriptor.LoadingService[0], LocationDescriptor.LoadingService[0], EstateDescriptor.LoadingService[0],
                 TraitDescriptor.LoadingService[0], ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0],
                 ArtistTypeDescriptor.LoadingService[0], PopTypeDescriptor.LoadingService[0], ColorParser.LoadingService[0],
-                ReligiousSchoolsDescriptor.LoadingService[0], InstitutionsDescriptor.LoadingService[0],
-                CountryRankDescriptor.LoadingService[0], LanguageDescriptor.LoadingService[0],
-                DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
-                InstitutionsDescriptor.LoadingService[0],
+                ReligiousSchoolsDescriptor.LoadingService[0], InstitutionsDescriptor.LoadingService[0], CountryRankDescriptor.LoadingService[0],
+                LanguageDescriptor.LoadingService[0], DesignateHeirReasonDescriptor.LoadingService[0], ParliamentTypeParsingDescriptor.LoadingService[0],
+                InstitutionsDescriptor.LoadingService[0], SocietalValuesDescriptor.LoadingService[0],
              ]),
           ],
           false);
