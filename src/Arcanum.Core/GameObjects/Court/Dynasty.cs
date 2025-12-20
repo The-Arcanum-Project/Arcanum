@@ -49,7 +49,7 @@ public partial class Dynasty : IEu5Object<Dynasty>
    [Description("The type of this dynasty.")]
    public DynastyNameType NameType { get; set; } = DynastyNameType.Default;
 
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(null)]
    [ParseAs("home")]
    [Description("The home location of this dynasty.")]

@@ -63,6 +63,9 @@
 
             <styleClasses:BaseButton Content = "Saving Splash Intermediate" Margin = "2" Padding = "4"
                                      Click = "SplashIntermediateButton_Click" />
+
+            <styleClasses:BaseButton Content = "Experimental Rename" Margin = "2" Padding = "4"
+                                     Click = "ExperimentalRenameButton_Click" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

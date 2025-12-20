@@ -3,6 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.Utils.Geometry;
 using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.UI;
@@ -107,6 +108,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          foreach (var polygon in polygonList)
             polygon.ColorIndex = loc.ColorIndex;
+
+         loc.Bounds = GeoRect.CalculateBounds(loc.Polygons);
       }
 
       lock (this)

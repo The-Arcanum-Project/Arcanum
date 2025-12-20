@@ -49,6 +49,7 @@ public class SaveAsMetadata
       IsShattered = args.Length > 10 && ((bool?)args[10].Value ?? false);
       NumOfDecimalPlaces = args.Length > 11 ? (int?)args[11].Value ?? 0 : 0;
       AlwaysWrite = args.Length > 12 && ((bool?)args[12].Value ?? false);
+      MustNotBeWritten = args.Length > 13 ? args[13].Value?.ToString() : null;
 
       // This part was correct, as it operates on the now-reliable Prop symbol.
       DefaultValueAttribute = Prop.GetAttributes()
@@ -70,6 +71,10 @@ public class SaveAsMetadata
    public bool IsShattered { get; }
    public bool AlwaysWrite { get; }
    public int NumOfDecimalPlaces { get; set; }
+   /// <summary>
+   /// Must be opf type Func&lt;object, bool&gt;.
+   /// </summary>
+   public string? MustNotBeWritten { get; }
    public AttributeData? DefaultValueAttribute { get; set; }
 
    private static string GetProviderString(TypedConstant value, string providerName)

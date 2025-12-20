@@ -83,6 +83,8 @@ public class PropertySavingMetadata
    /// </summary>
    public required bool AlwaysWrite { get; init; }
 
+   public required Func<object, bool>? MustNotBeWritten { get; init; }
+
    #region Equality operations
 
    public override string ToString() => $"{NxProp} as {Keyword} ({ValueType})";
@@ -130,7 +132,8 @@ public class PropertySavingMetadata
 
       // Required fields must always be saved
       if (!AlwaysWrite)
-         if (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp))
+         if ((MustNotBeWritten != null && MustNotBeWritten(ags)) ||
+             (!alwaysSerializeAll && ShouldSkipValueProcessing(settings, value) && !ags.IsRequired(NxProp)))
             return;
 
       if (SavingMethod == null)

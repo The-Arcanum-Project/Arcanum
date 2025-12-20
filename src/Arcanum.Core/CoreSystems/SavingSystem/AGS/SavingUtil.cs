@@ -137,7 +137,10 @@ public static class SavingUtil
             return ((double)value).ToString($"F{psm.NumOfDecimalPlaces}", CultureInfo.InvariantCulture);
          case SavingValueType.Identifier:
             if (value is IEu5Object eu5Obj)
+            {
+               Debug.Assert(!string.IsNullOrWhiteSpace(eu5Obj.UniqueId));
                return eu5Obj.UniqueId;
+            }
 
             return $"{value}";
          case SavingValueType.Color:

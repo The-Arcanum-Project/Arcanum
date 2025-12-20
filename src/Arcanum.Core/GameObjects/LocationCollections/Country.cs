@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
@@ -122,67 +123,67 @@ public partial class Country : IEu5Object<Country>
    [Description("The key for the name of this country.")]
    public string CountryName { get; set; } = string.Empty;
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_control_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations that are integrated of this country.")]
    public ObservableRangeCollection<Location> OwnControlIntegrated { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_control_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but controlled by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnControlConquered { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_control_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlColony { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned core locations of this country.")]
    public ObservableRangeCollection<Location> OwnCores { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but owned by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnConquered { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and integrated locations of this country.")]
    public ObservableRangeCollection<Location> OwnIntegrated { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("own_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnColony { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled core locations of this country.")]
    public ObservableRangeCollection<Location> ControlCores { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("control", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled locations of this country.")]
    public ObservableRangeCollection<Location> Control { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [ParseAs("our_cores_conquered_by_others", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations that are our cores but conquered by other countries.")]
@@ -270,7 +271,7 @@ public partial class Country : IEu5Object<Country>
    public INUINavigation[] Navigations { get; } = [];
    public static Dictionary<string, Country> GetGlobalItems() => Globals.Countries;
 
-   private static readonly Lazy<Country> EmptyInstance = new (() =>
+   private static readonly Lazy<Country> EmptyInstance = new(() =>
    {
       var emptyChar = new Country("Arcanum_Empty_Country");
       emptyChar.Capital = Location.Empty;
@@ -297,4 +298,15 @@ public partial class Country : IEu5Object<Country>
    public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.CountryAgsSettings;
    public string SavingKey => UniqueId;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
+
+   public static bool BuildingBasedCountryLimit(object obj)
+   {
+      if (obj is not Country country)
+      {
+         Debug.Fail("BuildingBasedCountryLimit called with non-Country object.");
+         return false;
+      }
+
+      return country.CountryType == CountryType.Building;
+   }
 }

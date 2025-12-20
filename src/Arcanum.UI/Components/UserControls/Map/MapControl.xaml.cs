@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Windows;
@@ -33,9 +32,9 @@ namespace Arcanum.UI.Components.UserControls.Map;
 // - click with alt for upper scope and alt shift for lower scope
 public partial class MapControl
 {
-   private static readonly Color4 SelectionColor = new (0.5f, 0, 0, 0);
-   private static readonly Color4 FreezeSelectionColor = new (0, 0, 0.5f, 0);
-   private static readonly Color4 PreviewColor = new (0.5f, 0.5f, 0, 0);
+   private static readonly Color4 SelectionColor = new(0.5f, 0, 0, 0);
+   private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
+   private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
 
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
@@ -52,11 +51,14 @@ public partial class MapControl
 
    public static event Action? OnMapLoaded;
 
+   private int _mapWidth = -1;
+   private int _mapHeight = -1;
+
    // Get to pass this into the color generation
    public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
 
    public static readonly DependencyProperty CurrentPosProperty =
-      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new (default(Vector2)));
+      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
 
    public Vector2 CurrentPos
    {
@@ -69,7 +71,7 @@ public partial class MapControl
 
    public MapControl()
    {
-      MapInteractionManager = new (this);
+      MapInteractionManager = new(this);
       InitializeComponent();
    }
 
@@ -134,14 +136,14 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
-      Coords = new (this, imageSize);
+      Coords = new(this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors();
-      LocationRenderer = new (vertices, startColor, Coords.ImageAspectRatio);
+      LocationRenderer = new(vertices, startColor, Coords.ImageAspectRatio);
       _currentBackgroundColor = startColor;
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
-      _d3dHost = new (LocationRenderer, HwndHostContainer, OnRendererLoaded);
+      _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
 
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
@@ -149,6 +151,9 @@ public partial class MapControl
 
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
+
+      _mapWidth = imageSize.Item1;
+      _mapHeight = imageSize.Item2;
    }
 
    private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -158,7 +163,6 @@ public partial class MapControl
 
       RefreshAndRenderSelectionColors();
    }
-   
 
    private void OnRendererLoaded(object? sender, ID3DRenderer e)
    {
@@ -233,8 +237,29 @@ public partial class MapControl
       UpdateRenderer();
    }
 
-   public void PanToWithView(float x, float y)
+   public void PanToCoords(float x, float y)
    {
+      if (_mapWidth <= 0 || _mapHeight <= 0)
+         return;
+
+      var coordX = x / _mapWidth;
+      var coordY = y / _mapHeight;
+      PanTo(coordX, coordY);
+   }
+
+   public void PanTo(List<Location> locations)
+   {
+      if (locations.Count == 0)
+         return;
+
+      var boundingBox = locations[0].Bounds;
+      for (var i = 1; i < locations.Count; i++)
+         boundingBox = RectangleF.Union(boundingBox, locations[i].Bounds);
+
+      var centerX = boundingBox.X + boundingBox.Width / 2f;
+      var centerY = boundingBox.Y + boundingBox.Height / 2f;
+
+      PanToCoords(centerX, centerY);
    }
 
    public void EnsureVisible(RectangleF area)
@@ -300,7 +325,7 @@ public partial class MapControl
    private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
    {
       MapInteractionManager.HandleMouseUp(e);
-      OnMapClick?.Invoke(new (CurrentPos, e.ChangedButton));
+      OnMapClick?.Invoke(new(CurrentPos, e.ChangedButton));
    }
 
    #endregion

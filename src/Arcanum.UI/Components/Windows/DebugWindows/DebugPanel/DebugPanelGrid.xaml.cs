@@ -190,4 +190,10 @@ public partial class DebugPanelGrid
    {
       await SaveWithUnknownCount();
    }
+
+   private void ExperimentalRenameButton_Click(object sender, RoutedEventArgs e)
+   {
+      var renamer = new Renamer();
+      renamer.Show();
+   }
 }
