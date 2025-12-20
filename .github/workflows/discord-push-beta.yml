@@ -18,19 +18,16 @@ jobs:
           # gsub("#"; "")           -> Removes all '#' characters to prevent Discord headers
           # sub("\\s+$"; "")        -> Trims the trailing whitespace left behind
           
-          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | 
+          COMMIT_MESSAGES=$(echo "$COMMITS_JSON" | jq -r '.[] | 
             (.message | split("Conflicts:")[0] | gsub("#"; "") | sub("\\s+$"; "")) as $msg | 
             "`" + .id[0:7] + "` - " + $msg + " - *" + .author.name + "*"'
           )
+          COMMIT_COUNT=$(echo "$COMMITS_JSON" | jq 'length')
           
-          # Set the message as a multi-line environment variable for the job.
-          # The EOF heredoc syntax correctly preserves the newlines from the jq output.
+          echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV          
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-          # Calculate the commit count using jq and save it as an environment variable
-          echo "COMMIT_COUNT=$(echo '${{ toJSON(github.event.commits) }}' | jq 'length')" >> $GITHUB_ENV
 
       - name: Send Discord BETA Webhook
         uses: tsickert/discord-webhook@v5.3.0

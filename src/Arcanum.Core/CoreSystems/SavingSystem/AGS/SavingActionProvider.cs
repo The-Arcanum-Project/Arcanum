@@ -23,6 +23,17 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// </summary>
 public static class SavingActionProvider
 {
+   public static void LocationSaving(IAgs target,
+                                     HashSet<PropertySavingMetadata> metadata,
+                                     IndentedStringBuilder sb,
+                                     bool asOneLine)
+   {
+      if (target is not Location location)
+         throw new InvalidOperationException("LocationSaving can only be used with Location instances.");
+
+      sb.Append(location.UniqueId).Append(" = ").Append(location.Color.AsHexString().ToLowerInvariant());
+   }
+
    public static void SaveIdentifierStringKvp(IAgs target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,

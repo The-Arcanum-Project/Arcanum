@@ -6,38 +6,17 @@ using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
-public static class DefaultCommands
+public static partial class DefaultCommands
 {
-   [Flags]
-   public enum CommandCategory
+   public class DefaultCommandDefinition(string name,
+                                         string usage,
+                                         Func<string[], string[]> execute,
+                                         ClearanceLevel clearance,
+                                         CommandCategory category,
+                                         params string[] aliases)
+      : CommandBase(name, usage, clearance, aliases, execute)
    {
-      None = 0, // No commands
-      Basic = 1 << 0, // echo, help, clear, list...
-      Alias = 1 << 1, // alias command...
-      Macro = 1 << 2, // macro command...
-      History = 1 << 3, // history command...
-      FileSystem = 1 << 4, // pwd...
-      Debug = 1 << 6, // set clearance (and other debug-specific commands)
-
-      // Common combinations
-      StandardUser = Basic | Alias | Macro | History | FileSystem,
-
-      All = ~None, // Special value to include all defined categories (bitwise NOT of None)
-   }
-
-   public class DefaultCommandDefinition : CommandBase
-   {
-      public CommandCategory Category { get; set; }
-
-      public DefaultCommandDefinition(string name,
-                                      string usage,
-                                      Func<string[], string[]> execute,
-                                      ClearanceLevel clearance,
-                                      CommandCategory category,
-                                      params string[] aliases) : base(name, usage, clearance, aliases, execute)
-      {
-         Category = category;
-      }
+      public CommandCategory Category { get; set; } = category;
    }
 
    public static ICommandDefinition CreateHelpCommand(IConsoleService consoleService)
@@ -208,10 +187,7 @@ public static class DefaultCommands
                                           {
                                              if (args is not ["-c"])
                                                 return args.Length > 0
-                                                          ?
-                                                          [
-                                                             "Invalid argument for history command. Use -c to clear history."
-                                                          ]
+                                                          ? ["Invalid argument for history command. Use -c to clear history."]
                                                           : consoleService.GetHistory().ToArray();
 
                                              consoleService.ClearHistory();
@@ -284,10 +260,7 @@ public static class DefaultCommands
                                                            .OpenPropertyGridWindow(AppData.MainMenuScreenDescriptor);
                                                    break;
                                                 default:
-                                                   return
-                                                   [
-                                                      $"Unknown type. Supported types: {string.Join(", ", supportedTypes)}"
-                                                   ];
+                                                   return [$"Unknown type. Supported types: {string.Join(", ", supportedTypes)}"];
                                              }
 
                                              return ["Finished opening AppData in property browser."];

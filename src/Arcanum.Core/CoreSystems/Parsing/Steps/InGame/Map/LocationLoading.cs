@@ -3,10 +3,10 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Sorting;
 
@@ -43,7 +43,7 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
          }
 
          var key = pc.SliceString(cn);
-         var loc = IEu5Object<Location>.CreateInstance(key, fileObj);
+         var loc = Eu5Activator.CreateInstance<Location>(key, fileObj, cn);
          loc.Color = new JominiColor.Int(hex);
 
          if (!cn.KeyNode.IsSimpleKeyNode(ref pc, out var skn))

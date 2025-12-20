@@ -290,4 +290,30 @@ public static class GeoRect
 
       return uA is >= 0 and <= 1 && uB is >= 0 and <= 1;
    }
+
+   public static RectangleF CalculateBounds(Polygon[] locPolygons)
+   {
+      if (locPolygons.Length == 0)
+         return RectangleF.Empty;
+
+      var minX = float.MaxValue;
+      var minY = float.MaxValue;
+      var maxX = float.MinValue;
+      var maxY = float.MinValue;
+
+      foreach (var polygon in locPolygons)
+      {
+         var bounds = polygon.Bounds;
+         if (bounds.Left < minX)
+            minX = bounds.Left;
+         if (bounds.Top < minY)
+            minY = bounds.Top;
+         if (bounds.Right > maxX)
+            maxX = bounds.Right;
+         if (bounds.Bottom > maxY)
+            maxY = bounds.Bottom;
+      }
+
+      return new(minX, minY, maxX - minX, maxY - minY);
+   }
 }

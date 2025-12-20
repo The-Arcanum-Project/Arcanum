@@ -4,6 +4,7 @@ using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;
+using Arcanum.Core.CoreSystems.ConsoleServices.Command_Implementations.Release_Commands;
 
 namespace Arcanum.Core.CoreSystems.ConsoleServices;
 
@@ -45,6 +46,8 @@ public class ConsoleServiceImpl : IConsoleService
    {
       _host = host ?? throw new ArgumentNullException(nameof(host), "Plugin host cannot be null.");
       DefaultCommands.RegisterDefaultCommands(this, category);
+      ErrorLogCommands.RegisterCommands(this);
+      ValidatorCommands.RegisterCommands(this);
 
       Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
       _outputReceiver = outputReceiver;
@@ -239,8 +242,7 @@ public class ConsoleServiceImpl : IConsoleService
 
    IReadOnlyList<string> IConsoleService.GetCommandAliases() => GetCommandAliases();
 
-   public IReadOnlyList<ICommandDefinition> GetRegisteredCommands()
-      => _commands.Values.Distinct().OrderBy(c => c.Name).ToList();
+   public IReadOnlyList<ICommandDefinition> GetRegisteredCommands() => _commands.Values.Distinct().OrderBy(c => c.Name).ToList();
 
    // --- Static Persistence ---
    public void SaveMacros()
@@ -377,8 +379,7 @@ public class ConsoleServiceImpl : IConsoleService
    }
 
    // --- Utility Methods ---
-   public List<string> GetCommandNames()
-      => _commands.Values.Select(x => x.Name).Distinct().OrderBy(name => name).ToList();
+   public List<string> GetCommandNames() => _commands.Values.Select(x => x.Name).Distinct().OrderBy(name => name).ToList();
 
    public List<string> GetCommandAliases()
    {
