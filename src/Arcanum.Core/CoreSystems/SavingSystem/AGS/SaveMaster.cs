@@ -325,7 +325,7 @@ public static class SaveMaster
    /// <summary>
    /// Extracts all setup objects from the list and removes them as they are already handled.
    /// </summary>
-   private static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
+   public static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
 
