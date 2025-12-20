@@ -1,11 +1,11 @@
-# .github/workflows/discord-commit-webhook.yml
+# .github/workflows/discord-push-beta.yml
 
-name: Discord Push Webhook
+name: Discord Beta Push Webhook
 
 on:
   push:
     branches:
-      - 1.0.4-Dev
+      - '1.0.4-[Dd]ev'
 
 jobs:
   send-to-discord:
@@ -18,19 +18,16 @@ jobs:
           # gsub("#"; "")           -> Removes all '#' characters to prevent Discord headers
           # sub("\\s+$"; "")        -> Trims the trailing whitespace left behind
           
-          COMMIT_MESSAGES=$(echo '${{ toJSON(github.event.commits) }}' | jq -r '.[] | 
+          COMMIT_MESSAGES=$(echo "$COMMITS_JSON" | jq -r '.[] | 
             (.message | split("Conflicts:")[0] | gsub("#"; "") | sub("\\s+$"; "")) as $msg | 
             "`" + .id[0:7] + "` - " + $msg + " - *" + .author.name + "*"'
           )
+          COMMIT_COUNT=$(echo "$COMMITS_JSON" | jq 'length')
           
-          # Set the message as a multi-line environment variable for the job.
-          # The EOF heredoc syntax correctly preserves the newlines from the jq output.
+          echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV          
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MESSAGES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-          # Calculate the commit count using jq and save it as an environment variable
-          echo "COMMIT_COUNT=$(echo '${{ toJSON(github.event.commits) }}' | jq 'length')" >> $GITHUB_ENV
 
       - name: Send Discord BETA Webhook
         uses: tsickert/discord-webhook@v5.3.0
@@ -40,7 +37,8 @@ jobs:
           embed-description: "${{ env.message }}"
           embed-url: "${{ github.event.compare }}"
           embed-color: "3447003"
-          embed-timestamp: "${{ github.event.head_commit.timestamp }}"
+          # Safe fallback if timestamp is missing
+          embed-timestamp: "${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}"
           embed-author-name: "${{ github.event.sender.login }}"
           embed-author-url: "${{ github.event.sender.html_url }}"
           embed-author-icon-url: "${{ github.event.sender.avatar_url }}"
