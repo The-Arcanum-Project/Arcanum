@@ -102,6 +102,7 @@ public partial class Renamer
          }
          else
          {
+            loc.TemplateData.UniqueId = rename.NewId;
             var success = Core.CoreSystems.RenamingEngine.Renamer.RenameIEu5Object(rename.Target, rename.NewId);
             if (!success)
                MBox.Show($"Failed to rename {rename.Target.UniqueId} to {rename.NewId}.");
@@ -111,10 +112,10 @@ public partial class Renamer
          }
       }
 
-      var splash = new SavingSplashScreen();
+      var splash = new SavingSplashScreen { Owner = Application.Current.MainWindow };
       splash.Show();
       SaveMaster.SaveObjects(objectsToSave, splash.UpdateProgress);
-      splash.Close();
+      splash.MarkAsComplete();
 
       PendingRenames.Clear();
       FilterAndDisplayItems(ItemSearchBox.Text);

@@ -257,7 +257,7 @@ public static class SaveMaster
    /// </summary>
    public static void SaveObjects(List<IEu5Object> objectsToSave, Action<string> updateProgress)
    {
-      if (SaveDefnitionsFile(objectsToSave))
+      if (SaveDefnitionsFile(objectsToSave) && objectsToSave.Count == 0)
          return;
 
       var fileGroups = objectsToSave.GroupBy(o => o.Source);
