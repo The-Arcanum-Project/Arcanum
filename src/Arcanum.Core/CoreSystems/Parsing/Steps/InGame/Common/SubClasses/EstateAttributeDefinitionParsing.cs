@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.GameObjects.Pops;
+using EstateAttributeDefinition = Arcanum.Core.GameObjects.InGame.Pops.EstateAttributeDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 

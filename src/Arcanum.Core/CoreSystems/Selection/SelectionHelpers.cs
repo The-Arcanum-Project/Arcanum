@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
-using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -115,7 +119,6 @@ public static class SelectionHelpers
       };
    }
 
-   
    public static Enum GetChildEnum(IEu5Object obj)
    {
       switch (obj)
@@ -135,7 +138,7 @@ public static class SelectionHelpers
             throw new ArgumentException("obj is not a valid type in the hierarchy");
       }
    }
-   
+
    public static AggregateLink<T> GetAllChildren<T>(IEu5Object eu5Object) where T : IEu5Object
    {
 #if DEBUG

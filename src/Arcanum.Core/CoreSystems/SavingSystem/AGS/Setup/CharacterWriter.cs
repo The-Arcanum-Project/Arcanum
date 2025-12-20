@@ -2,8 +2,8 @@
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.Utils.Sorting;
+using Character = Arcanum.Core.GameObjects.InGame.Court.Character;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

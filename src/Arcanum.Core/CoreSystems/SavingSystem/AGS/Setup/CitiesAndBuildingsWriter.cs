@@ -2,8 +2,10 @@
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
-using Arcanum.Core.GameObjects.LocationCollections;
 using BuildingDefinition = Arcanum.Core.GameObjects.MainMenu.States.BuildingDefinition;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using LocationRank = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.LocationRank;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

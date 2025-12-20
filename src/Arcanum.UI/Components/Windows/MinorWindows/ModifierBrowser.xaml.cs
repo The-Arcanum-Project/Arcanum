@@ -3,8 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.GlobalStates;
+using ModifierDefinition = Arcanum.Core.GameObjects.InGame.Common.ModifierDefinition;
 using Timer = System.Timers.Timer;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -31,10 +31,7 @@ public partial class ModifierBrowser
 
    public static ModifierBrowser ShowModifierBrowser()
    {
-      var browser = new ModifierBrowser
-      {
-         DocsObjDataGrid = { DataContext = new ListCollectionView(Globals.ModifierDefinitions.Values.ToList()) }
-      };
+      var browser = new ModifierBrowser { DocsObjDataGrid = { DataContext = new ListCollectionView(Globals.ModifierDefinitions.Values.ToList()) } };
 
       return browser;
    }

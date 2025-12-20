@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.Utils.Sorting;
-using ReligiousFaction = Arcanum.Core.GameObjects.Religious.ReligiousFaction;
+using ReligiousFaction = Arcanum.Core.GameObjects.InGame.Religious.ReligiousFaction;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 

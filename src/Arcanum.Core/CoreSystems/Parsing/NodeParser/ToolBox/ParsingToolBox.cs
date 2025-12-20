@@ -13,24 +13,50 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
-using Arcanum.Core.GameObjects.AbstractMechanics;
-using Arcanum.Core.GameObjects.Common;
-using Arcanum.Core.GameObjects.CountryLevel;
-using Arcanum.Core.GameObjects.Court;
-using Arcanum.Core.GameObjects.Court.State;
-using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.Cultural.SubObjects;
-using Arcanum.Core.GameObjects.Economy;
-using Arcanum.Core.GameObjects.Economy.SubClasses;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
-using Arcanum.Core.GameObjects.Map;
-using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religious;
-using Arcanum.Core.GameObjects.Religious.SubObjects;
-using ParliamentType = Arcanum.Core.GameObjects.Court.ParliamentType;
-using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Arcanum.Core.GameObjects.InGame.Cultural;
+using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using ArtistType = Arcanum.Core.GameObjects.InGame.Cultural.ArtistType;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
+using BuildingLevel = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.BuildingLevel;
+using Character = Arcanum.Core.GameObjects.InGame.Court.Character;
+using CharacterNameDeclaration = Arcanum.Core.GameObjects.InGame.Court.CharacterNameDeclaration;
+using Climate = Arcanum.Core.GameObjects.InGame.Map.Climate;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using CountryRank = Arcanum.Core.GameObjects.InGame.CountryLevel.CountryRank;
+using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
+using CultureGroup = Arcanum.Core.GameObjects.InGame.Cultural.CultureGroup;
+using CultureOpinionValue = Arcanum.Core.GameObjects.InGame.Cultural.SubObjects.CultureOpinionValue;
+using DemandData = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.DemandData;
+using DesignateHeirReason = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.DesignateHeirReason;
+using Dynasty = Arcanum.Core.GameObjects.InGame.Court.Dynasty;
+using EnactedLaw = Arcanum.Core.GameObjects.InGame.Court.State.EnactedLaw;
+using Estate = Arcanum.Core.GameObjects.InGame.Cultural.Estate;
+using EstateCountDefinition = Arcanum.Core.GameObjects.InGame.AbstractMechanics.EstateCountDefinition;
+using Institution = Arcanum.Core.GameObjects.InGame.Cultural.Institution;
+using InstitutionPresence = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.InstitutionPresence;
+using Language = Arcanum.Core.GameObjects.InGame.Cultural.Language;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using LocationRank = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.LocationRank;
+using ParliamentType = Arcanum.Core.GameObjects.InGame.Court.ParliamentType;
+using PopType = Arcanum.Core.GameObjects.InGame.Pops.PopType;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using RawMaterial = Arcanum.Core.GameObjects.InGame.Economy.RawMaterial;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using RegnalNumber = Arcanum.Core.GameObjects.InGame.Court.State.RegnalNumber;
+using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
+using ReligionGroup = Arcanum.Core.GameObjects.InGame.Religious.ReligionGroup;
+using ReligionOpinionValue = Arcanum.Core.GameObjects.InGame.Cultural.SubObjects.ReligionOpinionValue;
+using ReligiousFaction = Arcanum.Core.GameObjects.InGame.Religious.ReligiousFaction;
+using ReligiousFocus = Arcanum.Core.GameObjects.InGame.Religious.SubObjects.ReligiousFocus;
+using ReligiousSchool = Arcanum.Core.GameObjects.InGame.Religious.ReligiousSchool;
+using ReligiousSchoolOpinionValue = Arcanum.Core.GameObjects.InGame.Religious.SubObjects.ReligiousSchoolOpinionValue;
+using SocientalValueEntry = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValueEntry;
+using SoundToll = Arcanum.Core.GameObjects.InGame.Map.SoundToll;
+using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
+using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
+using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
+using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -640,7 +666,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -665,7 +691,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
+      value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
       return true;
    }
 
@@ -772,7 +798,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { Key = culture, Value = opinion };
+      value = new() { Key = culture, Value = opinion };
       return true;
    }
 
@@ -823,7 +849,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { Key = religion, Value = opinion };
+      value = new() { Key = religion, Value = opinion };
       return true;
    }
 
@@ -874,7 +900,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { Key = rs, Value = opinion };
+      value = new() { Key = rs, Value = opinion };
       return true;
    }
 
@@ -925,7 +951,7 @@ public static class ParsingToolBox
 
       var name = pc.SliceString(lvn);
 
-      value = new ()
+      value = new()
       {
          SavingKey = pc.SliceString(node),
          Name = name,
@@ -983,7 +1009,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new () { SavingKey = key, Name = pc.SliceString(lvn) };
+      value = new() { SavingKey = key, Name = pc.SliceString(lvn) };
       return true;
    }
 
@@ -1106,7 +1132,7 @@ public static class ParsingToolBox
       if (!skn.KeyToken.TryGetLocationFromToken(ref pc, out var from))
          return false;
 
-      value = new () { StraitLocationOne = from, StraitLocationTwo = loc };
+      value = new() { StraitLocationOne = from, StraitLocationTwo = loc };
       return true;
    }
 
@@ -1558,7 +1584,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new ()
+      value = new()
       {
          SocientalValue = sv, Value = intValue,
       };
@@ -1594,7 +1620,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new ()
+      value = new()
       {
          Institution = institution, IsPresent = isPresent,
       };
@@ -1654,7 +1680,7 @@ public static class ParsingToolBox
          return false;
       }
 
-      value = new ()
+      value = new()
       {
          Building = building, Level = level,
       };

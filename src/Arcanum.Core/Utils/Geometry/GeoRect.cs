@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Text;
 using Arcanum.Core.CoreSystems.Map;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.Utils.Geometry;
 

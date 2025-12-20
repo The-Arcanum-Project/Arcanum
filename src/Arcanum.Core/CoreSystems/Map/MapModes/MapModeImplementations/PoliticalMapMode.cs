@@ -3,8 +3,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Vortice.Mathematics;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

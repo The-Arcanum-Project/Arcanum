@@ -7,9 +7,9 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Economy;
 using Common.UI;
 using Nexus.Core.Attributes;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 
@@ -47,10 +47,7 @@ public partial class BuildingsManager : IEu5Object<BuildingsManager>
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManagerAgsSettings;
 
-   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new()
-   {
-      { "BuildingsManager", Globals.BuildingsManager },
-   };
+   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new() { { "BuildingsManager", Globals.BuildingsManager }, };
 
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

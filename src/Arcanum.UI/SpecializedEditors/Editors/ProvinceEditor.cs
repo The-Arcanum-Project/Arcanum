@@ -1,16 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.Analytics.MapData;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
-using Arcanum.Core.GlobalStates;
 using Arcanum.UI.SpecializedEditors.EditorControls;
 using Arcanum.UI.SpecializedEditors.Management;
 using Common;
-using Common.UI;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
 namespace Arcanum.UI.SpecializedEditors.Editors;
 
@@ -43,7 +39,6 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
       FileStateManager.FileChanged += OnFileStateManagerOnFileChanged;
       Selection.SelectionModified += OnSelectionChanged;
    }
-   
 
    private static void OnSelectionChanged()
    {
@@ -55,7 +50,7 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
       }
 
       var loc = obj[0];
-      
+
       LocationCollectionEditor.Instance.SelectChild(loc);
    }
 
@@ -74,8 +69,7 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
       if (args.FullPath.EndsWith("definitions.txt"))
          _wasValidated = false;
    }
-   
-   
+
    public override void Reset()
    {
    }
@@ -85,7 +79,7 @@ public class ProvinceEditor : LocationCollectionSpecializedEditor
       Debug.Assert(targets.Length == 1);
       Debug.Assert(targets[0].GetType() == typeof(Province));
       var target = (Province)targets[0];
-      LocationCollectionEditor.Instance.SetLocationCollection(target, target.Locations ,this);
+      LocationCollectionEditor.Instance.SetLocationCollection(target, target.Locations, this);
    }
 
    public override FrameworkElement GetEditorControl()

@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Map;
+﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

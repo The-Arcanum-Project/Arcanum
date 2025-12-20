@@ -8,9 +8,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Common.UI;
 using Nexus.Core.Attributes;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 

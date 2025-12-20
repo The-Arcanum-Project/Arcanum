@@ -2,9 +2,12 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Map;
-using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using LocationTemplateData = Arcanum.Core.GameObjects.InGame.Map.LocationTemplateData;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Validators;
 

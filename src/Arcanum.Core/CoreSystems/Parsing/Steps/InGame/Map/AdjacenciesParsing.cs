@@ -3,9 +3,9 @@ using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.Map;
+using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.Utils.Sorting;
-using Adjacency = Arcanum.Core.GameObjects.Map.Adjacency;
+using Adjacency = Arcanum.Core.GameObjects.InGame.Map.Adjacency;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 

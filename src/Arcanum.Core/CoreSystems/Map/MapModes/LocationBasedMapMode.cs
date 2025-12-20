@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Vortice.Mathematics;
+﻿using Vortice.Mathematics;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 

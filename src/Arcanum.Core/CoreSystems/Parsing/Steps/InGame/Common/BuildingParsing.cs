@@ -1,8 +1,8 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GameObjects.Economy;
 using Arcanum.Core.Utils.Sorting;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

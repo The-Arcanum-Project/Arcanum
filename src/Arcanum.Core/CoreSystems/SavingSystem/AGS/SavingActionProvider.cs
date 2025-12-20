@@ -4,16 +4,20 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GameObjects.AbstractMechanics;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Court;
-using Arcanum.Core.GameObjects.Court.State.SubClasses;
-using Arcanum.Core.GameObjects.Economy.SubClasses;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
-using Arcanum.Core.GameObjects.Map;
-using Arcanum.Core.GameObjects.Map.SubObjects;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
+using CharacterNameDeclaration = Arcanum.Core.GameObjects.InGame.Court.CharacterNameDeclaration;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using DefaultMapDefinition = Arcanum.Core.GameObjects.InGame.Map.DefaultMapDefinition;
+using DemandData = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.DemandData;
+using EstateCountDefinition = Arcanum.Core.GameObjects.InGame.AbstractMechanics.EstateCountDefinition;
+using InstitutionPresence = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.InstitutionPresence;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using MapMovementAssist = Arcanum.Core.GameObjects.InGame.Map.SubObjects.MapMovementAssist;
+using Road = Arcanum.Core.GameObjects.InGame.Map.Road;
+using SocientalValueEntry = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValueEntry;
+using SoundToll = Arcanum.Core.GameObjects.InGame.Map.SoundToll;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 

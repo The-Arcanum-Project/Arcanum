@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GameObjects.Court.State.SubClasses;
 using Arcanum.Core.Utils.Sorting;
+using DesignateHeirReason = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.DesignateHeirReason;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

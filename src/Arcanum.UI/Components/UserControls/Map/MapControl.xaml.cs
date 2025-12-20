@@ -7,7 +7,6 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
@@ -15,6 +14,7 @@ using Arcanum.UI.MapInteraction;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Point = System.Windows.Point;
 
 namespace Arcanum.UI.Components.UserControls.Map;

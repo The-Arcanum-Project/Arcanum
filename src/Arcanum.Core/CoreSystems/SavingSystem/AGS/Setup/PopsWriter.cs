@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

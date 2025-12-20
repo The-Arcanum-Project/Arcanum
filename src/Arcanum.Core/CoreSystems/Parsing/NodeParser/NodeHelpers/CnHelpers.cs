@@ -6,8 +6,8 @@ using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
-using Arcanum.Core.GameObjects.AbstractMechanics;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;

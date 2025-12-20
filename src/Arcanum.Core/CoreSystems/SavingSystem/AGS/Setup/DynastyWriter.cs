@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Court;
+using Dynasty = Arcanum.Core.GameObjects.InGame.Court.Dynasty;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

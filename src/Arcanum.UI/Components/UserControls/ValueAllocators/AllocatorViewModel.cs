@@ -8,14 +8,15 @@ using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religious;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
+using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
+using PopType = Arcanum.Core.GameObjects.InGame.Pops.PopType;
+using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -26,8 +27,8 @@ public class AllocatorViewModel : ViewModelBase
    private bool? _areAllLocked;
    private bool _suppressCalculation;
 
-   private readonly Stack<List<AllocationMemento>> _undoStack = new ();
-   private readonly Stack<int> _totalHistory = new ();
+   private readonly Stack<List<AllocationMemento>> _undoStack = new();
+   private readonly Stack<int> _totalHistory = new();
 
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
@@ -238,16 +239,16 @@ public class AllocatorViewModel : ViewModelBase
    private void InitializeLocationData(Location location)
    {
       LoadedLocation = location;
-      PopDefinitionCreatorVm = new (location, this);
+      PopDefinitionCreatorVm = new(location, this);
 
       TotalLimit = (int)location.Pops.Sum(x => x.Size * 1000);
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
       foreach (var pop in location.Pops)
-         Items.Add(new (this, pop));
+         Items.Add(new(this, pop));
 
       UpdateMasterLockState();
-      UpdateCalculatedInfo(null, new (nameof(Items)));
+      UpdateCalculatedInfo(null, new(nameof(Items)));
    }
 
    public void ResetFor(Location target)
@@ -302,9 +303,9 @@ public class AllocatorViewModel : ViewModelBase
           propertyChangedEventArgs.PropertyName != nameof(TotalLimit))
          return;
 
-      Dictionary<Religion, long> religionCounts = new ();
-      Dictionary<Culture, long> cultureCounts = new ();
-      Dictionary<PopType, long> popTypeCounts = new ();
+      Dictionary<Religion, long> religionCounts = new();
+      Dictionary<Culture, long> cultureCounts = new();
+      Dictionary<PopType, long> popTypeCounts = new();
       long totalPop = 0;
 
       foreach (var item in Items)
@@ -354,7 +355,7 @@ public class AllocatorViewModel : ViewModelBase
       var colorIndex = 0;
       foreach (var kvp in counts.OrderByDescending(x => x.Value))
       {
-         BasicChartItem chartItem = new ()
+         BasicChartItem chartItem = new()
          {
             Name = kvp.Key.UniqueId, Value = kvp.Value,
          };
@@ -451,7 +452,7 @@ public class AllocatorViewModel : ViewModelBase
 
       if (e.PropertyName == nameof(AllocationItem.Value))
          // We pass null or dummy args because UpdateCalculatedInfo logic is generic
-         UpdateCalculatedInfo(this, new (nameof(Items)));
+         UpdateCalculatedInfo(this, new(nameof(Items)));
    }
 
    private bool _isUpdatingLocks;

@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.SpecializedEditors.Editors;
 using Arcanum.UI.SpecializedEditors.Management;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
 namespace Arcanum.UI.NUI.Generator.SpecificGenerators;
 
@@ -57,7 +57,7 @@ public static class MainWindowGen
    private static void SetSpecializedEditors(NavH navh)
    {
       var content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
-      if(!Equals(_specialEditorsHost.Content, content))
+      if (!Equals(_specialEditorsHost.Content, content))
          _specialEditorsHost.Content = content;
       if (content is TabControl tc)
          tc.SelectedIndex = 0;

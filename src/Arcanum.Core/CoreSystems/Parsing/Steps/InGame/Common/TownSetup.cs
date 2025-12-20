@@ -7,10 +7,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Economy;
-using Arcanum.Core.GameObjects.Economy.SubClasses;
 using Common.UI;
 using Nexus.Core.Attributes;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
+using BuildingLevel = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.BuildingLevel;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

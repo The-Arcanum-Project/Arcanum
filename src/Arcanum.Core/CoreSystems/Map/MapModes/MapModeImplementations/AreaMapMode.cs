@@ -1,5 +1,7 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

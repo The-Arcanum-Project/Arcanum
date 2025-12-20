@@ -6,8 +6,8 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Arcanum.Core.Utils.Sorting;
-using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
-using ReligiousSchoolRelations = Arcanum.Core.GameObjects.Religious.SubObjects.ReligiousSchoolRelations;
+using InstitutionState = Arcanum.Core.GameObjects.InGame.Cultural.SubObjects.InstitutionState;
+using ReligiousSchoolRelations = Arcanum.Core.GameObjects.InGame.Religious.SubObjects.ReligiousSchoolRelations;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

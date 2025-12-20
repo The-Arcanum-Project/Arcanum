@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.SpecializedEditors.Management;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 

@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
-using Arcanum.Core.GameObjects.AbstractMechanics;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

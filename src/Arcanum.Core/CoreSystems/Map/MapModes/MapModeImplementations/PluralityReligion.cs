@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Religious;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

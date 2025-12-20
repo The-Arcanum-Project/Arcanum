@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

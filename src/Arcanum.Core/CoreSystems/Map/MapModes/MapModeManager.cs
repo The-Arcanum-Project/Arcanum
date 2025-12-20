@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils.Colors;
 using Vortice.Mathematics;
 using Color = System.Windows.Media.Color;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes;
 

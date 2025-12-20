@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.NUI;
 

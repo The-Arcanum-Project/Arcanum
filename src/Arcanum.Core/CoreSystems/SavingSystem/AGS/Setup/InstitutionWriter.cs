@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
+using InstitutionPresence = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.InstitutionPresence;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

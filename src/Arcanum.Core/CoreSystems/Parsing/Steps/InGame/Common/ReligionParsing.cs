@@ -3,7 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
-using Religion = Arcanum.Core.GameObjects.Religious.Religion;
+using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

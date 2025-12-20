@@ -2,9 +2,9 @@
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.UserControls.Map;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.UI.Util;
 

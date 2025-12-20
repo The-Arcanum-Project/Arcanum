@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.Economy;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Colors;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using RawMaterial = Arcanum.Core.GameObjects.InGame.Economy.RawMaterial;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

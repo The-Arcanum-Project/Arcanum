@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.GameObjects.Court.State;
+using EstateSatisfactionDefinition = Arcanum.Core.GameObjects.InGame.Court.State.EstateSatisfactionDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 

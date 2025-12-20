@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
+using VariableDataBlock = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDataBlock;
+using VariableDeclaration = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDeclaration;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
 

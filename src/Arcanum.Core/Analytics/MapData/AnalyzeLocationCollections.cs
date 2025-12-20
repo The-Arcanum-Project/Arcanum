@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 
 namespace Arcanum.Core.Analytics.MapData;
 

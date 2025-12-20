@@ -4,9 +4,9 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.Utils.Sorting;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using CountryDefinition = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.CountryDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 

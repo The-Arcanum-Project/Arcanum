@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Language = Arcanum.Core.GameObjects.InGame.Cultural.Language;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

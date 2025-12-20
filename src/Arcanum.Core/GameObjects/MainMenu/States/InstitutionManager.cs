@@ -9,7 +9,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
-using InstitutionState = Arcanum.Core.GameObjects.Cultural.SubObjects.InstitutionState;
+using InstitutionState = Arcanum.Core.GameObjects.InGame.Cultural.SubObjects.InstitutionState;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 
@@ -50,8 +50,7 @@ public partial class InstitutionManager : IEu5Object<InstitutionManager>
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionStateAgsSettings;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
-   public static Dictionary<string, InstitutionManager> GetGlobalItems()
-      => new() { { "State", Globals.State.InstitutionManager } };
+   public static Dictionary<string, InstitutionManager> GetGlobalItems() => new() { { "State", Globals.State.InstitutionManager } };
 
    public static InstitutionManager Empty { get; } = new() { UniqueId = "Arcanum_Empty_InstitutionState" };
 

@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Cultural;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
-using Arcanum.Core.GameObjects.Religious;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using Arcanum.UI.Components.Windows.PopUp;
 using CommunityToolkit.Mvvm.Input;
+using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
+using PopType = Arcanum.Core.GameObjects.InGame.Pops.PopType;
+using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
