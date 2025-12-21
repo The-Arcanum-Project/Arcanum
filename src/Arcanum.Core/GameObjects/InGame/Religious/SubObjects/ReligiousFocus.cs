@@ -37,7 +37,7 @@ public partial class ReligiousFocus : IEu5Object<ReligiousFocus>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousFocusSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousFocusAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousFocus;
    public static Dictionary<string, ReligiousFocus> GetGlobalItems() => Globals.ReligiousFocuses;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

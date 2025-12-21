@@ -104,7 +104,7 @@ public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IM
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationTemplateDataSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationTemplateDataAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationTemplateData;
    public static Dictionary<string, LocationTemplateData> GetGlobalItems() => Globals.LocationTemplateData;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

@@ -107,7 +107,7 @@ public partial class Location
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects |
                                  IQueastorSearchSettings.DefaultCategories.MapObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Location;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

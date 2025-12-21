@@ -49,7 +49,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, IIndexRandomCol
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Region;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

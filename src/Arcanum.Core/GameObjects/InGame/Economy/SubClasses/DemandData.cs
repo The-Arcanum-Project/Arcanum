@@ -37,7 +37,7 @@ public partial class DemandData : IEmbeddedEu5Object<DemandData>
    public float TargetAll { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DemandDataSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DemandDataAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DemandData;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

@@ -26,7 +26,7 @@ public partial class CultureOpinionValue : IEmpty<CultureOpinionValue>, IIagsEnu
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.OpinionValueSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.OpinionValueAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.OpinionValue;
    public string SavingKey => string.Empty;
    public static CultureOpinionValue Empty { get; } = new() { Key = Culture.Empty, Value = Opinion.Neutral };
 

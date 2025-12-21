@@ -52,7 +52,7 @@ public partial class ReligiousSchoolRelations : IEu5Object<ReligiousSchoolRelati
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousSchoolRelationsSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolRelationsAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolRelations;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Dictionary<string, ReligiousSchoolRelations> GetGlobalItems() => Globals.State.ReligiousSchoolRelations;

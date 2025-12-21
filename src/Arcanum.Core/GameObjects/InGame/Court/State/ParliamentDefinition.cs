@@ -27,7 +27,7 @@ public partial class ParliamentDefinition : IEu5Object<ParliamentDefinition>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ParliamentDefinitionSettings;
    public INUINavigation[] Navigations => throw new NotImplementedException();
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentDefinition;
    public string UniqueId
    {
       get => Type.UniqueId;

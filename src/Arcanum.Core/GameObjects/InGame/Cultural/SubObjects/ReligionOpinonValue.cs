@@ -46,7 +46,7 @@ public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.Eu5ObjOpinionValueSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Eu5ObjOpinionValueAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Eu5ObjOpinionValue;
    public static Dictionary<string, ReligionOpinionValue> GetGlobalItems() => [];
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

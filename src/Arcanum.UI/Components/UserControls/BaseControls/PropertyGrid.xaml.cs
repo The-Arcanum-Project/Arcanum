@@ -222,7 +222,7 @@ public partial class PropertyGrid
             continue;
 
          var categoryAttr = prop.GetCustomAttribute<CategoryAttribute>();
-         grid.SetValue(TitleProperty, e.NewValue.GetType().Name);
+         grid.SetValue(TitleProperty, e.NewValue.GetType().FullName);
 
          if (prop.GetIndexParameters().Length > 0)
             continue; // skip indexers
@@ -267,10 +267,7 @@ public partial class PropertyGrid
       if (collection == null)
          return;
 
-      var collectionView = new BaseCollectionView(collection)
-      {
-         WindowStartupLocation = WindowStartupLocation.CenterOwner,
-      };
+      var collectionView = new BaseCollectionView(collection) { WindowStartupLocation = WindowStartupLocation.CenterOwner, };
       collectionView.ShowDialog();
    }
 

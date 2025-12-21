@@ -51,7 +51,7 @@ public partial class SocientalValue : IEu5Object<SocientalValue>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.SocientalValueSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SocientalValueAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SocientalValue;
    public static Dictionary<string, SocientalValue> GetGlobalItems() => Globals.SocientalValues;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

@@ -137,7 +137,7 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureSettings;
    public INUINavigation[] Navigations => [new NUINavigation(Language == Language.Empty ? null : Language, "Language")];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Culture;
    public static Dictionary<string, Culture> GetGlobalItems() => Globals.Cultures;
 
    public static Culture Empty { get; } = new() { UniqueId = "Arcanum_Empty_Culture" };

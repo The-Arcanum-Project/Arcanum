@@ -38,7 +38,7 @@ public partial class ArtistType : IEu5Object<ArtistType>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ArtistTypeSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ArtistTypeAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ArtistType;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, ArtistType> GetGlobalItems() => Globals.ArtistTypes;
 

@@ -68,7 +68,7 @@ public partial class ReligionGroup : IEu5Object<ReligionGroup>, IMapInferable
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligionGroupSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligionGroupAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligionGroup;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, ReligionGroup> GetGlobalItems() => Globals.ReligionGroups;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

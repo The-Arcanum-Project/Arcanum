@@ -22,7 +22,7 @@ public partial class MapMovementAssist : IEmbeddedEu5Object<MapMovementAssist>
    public float Y { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.MapMovementAssistSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.MapMovementAssistAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.MapMovementAssist;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

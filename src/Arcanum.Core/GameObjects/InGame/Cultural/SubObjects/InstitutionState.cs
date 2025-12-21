@@ -52,7 +52,7 @@ public partial class InstitutionState : IEu5Object<InstitutionState>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionStateSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionStateAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionState;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    public static Dictionary<string, InstitutionState> GetGlobalItems()

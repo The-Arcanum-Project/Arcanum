@@ -39,7 +39,7 @@ public partial class DesignateHeirReason : IEu5Object<DesignateHeirReason>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DesignateHeirReasonSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DesignateHeirReasonAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DesignateHeirReason;
    public static Dictionary<string, DesignateHeirReason> GetGlobalItems() => Globals.DesignateHeirReasons;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

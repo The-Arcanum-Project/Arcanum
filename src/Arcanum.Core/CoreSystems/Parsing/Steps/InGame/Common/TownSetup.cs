@@ -46,7 +46,7 @@ public partial class TownSetup : IEu5Object<TownSetup>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TownSetupSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.TownSetupAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.TownSetup;
    public static Dictionary<string, TownSetup> GetGlobalItems() => Globals.TownSetups;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

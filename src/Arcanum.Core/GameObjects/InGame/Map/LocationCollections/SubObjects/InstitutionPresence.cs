@@ -26,7 +26,7 @@ public partial class InstitutionPresence : IEmbeddedEu5Object<InstitutionPresenc
    public bool IsPresent { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionPresenceSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionPresenceAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionPresence;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

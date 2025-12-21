@@ -99,7 +99,7 @@ public partial class CountryDefinition : IEu5Object<CountryDefinition>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CountryDefinitionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CountryDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CountryDefinition;
    public static Dictionary<string, CountryDefinition> GetGlobalItems() => Globals.CountryDefinitions;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

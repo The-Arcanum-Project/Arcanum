@@ -51,7 +51,7 @@ public partial class ParliamentType : IEu5Object<ParliamentType>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ParliamentTypeSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentTypeAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ParliamentType;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, ParliamentType> GetGlobalItems() => Globals.ParliamentTypes;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

@@ -46,7 +46,7 @@ public partial class EstateSatisfactionDefinition : IEu5Object<EstateSatisfactio
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateSatisfactionDefinitionSettings;
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateSatisfactionDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateSatisfactionDefinition;
    public static Dictionary<string, EstateSatisfactionDefinition> GetGlobalItems() => [];
 
    public static EstateSatisfactionDefinition Empty { get; } =

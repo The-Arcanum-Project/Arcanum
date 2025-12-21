@@ -39,7 +39,7 @@ public partial class ReligiousSchool : IEu5Object<ReligiousSchool>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousSchoolSettings;
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchool;
    public static Dictionary<string, ReligiousSchool> GetGlobalItems() => Globals.ReligiousSchools;
 
    public static ReligiousSchool Empty { get; } = new() { UniqueId = "Arcanum_Empty_ReligiousSchool" };

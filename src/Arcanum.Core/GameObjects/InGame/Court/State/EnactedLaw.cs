@@ -28,7 +28,7 @@ public partial class EnactedLaw : IEu5Object<EnactedLaw>, IStringKvp
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EnactedLawSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EnactedLawAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EnactedLaw;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

@@ -45,7 +45,7 @@ public partial class BuildingsManager : IEu5Object<BuildingsManager>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.BuildingsManagerSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManagerAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManager;
 
    public static Dictionary<string, BuildingsManager> GetGlobalItems() => new() { { "BuildingsManager", Globals.BuildingsManager }, };
 

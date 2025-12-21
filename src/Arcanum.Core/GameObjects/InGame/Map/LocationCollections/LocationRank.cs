@@ -96,7 +96,7 @@ public partial class LocationRank : IEu5Object<LocationRank>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LocationRankSettings;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationRankAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LocationRank;
    public static Dictionary<string, LocationRank> GetGlobalItems() => Globals.LocationRanks;
 
    public static LocationRank Empty { get; } = new() { UniqueId = "Arcanum_Empty_LocationRank" };

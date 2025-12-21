@@ -139,7 +139,7 @@ public partial class PopType : IEu5Object<PopType>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopTypeSettings;
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopTypeAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopType;
    public static Dictionary<string, PopType> GetGlobalItems() => Globals.PopTypes;
 
    public static PopType Empty { get; } = new() { UniqueId = "Arcanum_Empty_PopType" };

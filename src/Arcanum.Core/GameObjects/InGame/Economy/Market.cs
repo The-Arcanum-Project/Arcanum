@@ -52,7 +52,7 @@ public partial class Market : IEu5Object<Market>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.MarketSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.MarketAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Market;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, Market> GetGlobalItems() => Globals.Markets;
 

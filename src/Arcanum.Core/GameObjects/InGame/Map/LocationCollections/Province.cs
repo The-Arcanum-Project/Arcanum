@@ -48,7 +48,7 @@ public partial class Province
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ProvinceAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Province;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

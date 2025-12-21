@@ -248,7 +248,7 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LanguageNuiSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.LanguageAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Language;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, Language> GetGlobalItems() => Globals.Languages;
 

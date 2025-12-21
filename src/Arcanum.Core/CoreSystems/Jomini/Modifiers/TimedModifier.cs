@@ -59,7 +59,7 @@ public partial class TimedModifier : IEu5Object<TimedModifier>
    public bool IsReadonly => true;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.TimedModifierSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TimedModifierAgsSettings;
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TimedModifier;
    public string SavingKey => UniqueId;
    public static Dictionary<string, TimedModifier> GetGlobalItems() => []; // TODO parse static modifiers
    public InjRepType InjRepType { get; set; } = InjRepType.None;

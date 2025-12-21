@@ -57,7 +57,7 @@ public partial class CultureGroup : IEu5Object<CultureGroup>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CultureGroupSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureGroupAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CultureGroup;
    public static Dictionary<string, CultureGroup> GetGlobalItems() => Globals.CultureGroups;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

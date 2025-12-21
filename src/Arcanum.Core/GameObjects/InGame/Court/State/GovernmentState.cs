@@ -170,7 +170,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.GovernmentStateSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.GovernmentStateAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.GovernmentState;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public string SavingKey => "government";

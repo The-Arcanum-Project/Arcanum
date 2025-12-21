@@ -102,7 +102,7 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
 
    #endregion
 
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.VegetationAgsSettings;
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.Vegetation;
    public string SavingKey => UniqueId;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 

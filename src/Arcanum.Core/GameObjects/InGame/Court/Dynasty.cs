@@ -89,7 +89,7 @@ public partial class Dynasty : IEu5Object<Dynasty>
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DynastySettings;
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DynastyAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Dynasty;
    public static Dictionary<string, Dynasty> GetGlobalItems() => Globals.Dynasties;
 
    public static Dynasty Empty { get; } = new() { UniqueId = "Arcanum_Empty_Dynasty" };

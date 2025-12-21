@@ -26,7 +26,7 @@ public partial class EstateCountDefinition : IEmbeddedEu5Object<EstateCountDefin
    public int Count { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateCountDefinitonSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateCountDefinitonAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateCountDefiniton;
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

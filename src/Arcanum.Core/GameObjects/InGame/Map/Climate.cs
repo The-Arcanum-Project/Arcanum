@@ -129,7 +129,7 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    #endregion
 
    public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ClimateAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Climate;
    public string SavingKey => UniqueId;
 
    public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Climate;

@@ -48,7 +48,7 @@ public partial class Area : IMapInferable, IEu5Object<Area>, IIndexRandomColor
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
 
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.AreaAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Area;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]

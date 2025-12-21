@@ -58,7 +58,7 @@ public partial class Trait : IEu5Object<Trait>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TraitSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.TraitAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Trait;
    public static Dictionary<string, Trait> GetGlobalItems() => Globals.Traits;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

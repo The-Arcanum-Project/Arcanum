@@ -254,7 +254,7 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Religion;
    public static Dictionary<string, Religion> GetGlobalItems() => Globals.Religions;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

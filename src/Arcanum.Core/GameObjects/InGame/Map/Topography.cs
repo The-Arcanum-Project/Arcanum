@@ -161,7 +161,7 @@ public partial class Topography : IEu5Object<Topography>, IMapInferable
 
    #endregion
 
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.TopographyAgsSettings;
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.Topography;
    public string SavingKey => UniqueId;
 
    #region IMapInferable

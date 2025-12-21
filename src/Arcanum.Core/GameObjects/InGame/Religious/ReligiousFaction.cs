@@ -40,7 +40,7 @@ public partial class ReligiousFaction : IEu5Object<ReligiousFaction>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousFactionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousFactionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousFaction;
    public static Dictionary<string, ReligiousFaction> GetGlobalItems() => Globals.ReligiousFactions;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

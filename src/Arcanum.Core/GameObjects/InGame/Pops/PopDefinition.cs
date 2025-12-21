@@ -65,7 +65,7 @@ public partial class PopDefinition : IEu5Object<PopDefinition>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.PopDefinitionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.PopDefinition;
    public static Dictionary<string, PopDefinition> GetGlobalItems() => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 

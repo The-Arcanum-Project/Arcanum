@@ -37,7 +37,7 @@ public partial class Building : IEu5Object<Building>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.BuildingSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Building;
    public static Dictionary<string, Building> GetGlobalItems() => Globals.Buildings;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

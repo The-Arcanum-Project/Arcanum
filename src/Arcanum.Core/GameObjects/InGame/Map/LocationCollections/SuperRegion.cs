@@ -47,7 +47,7 @@ public partial class SuperRegion
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SuperRegionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SuperRegion;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]

@@ -28,7 +28,7 @@ public partial class ReligiousSchoolOpinionValue
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.ReligiousSchoolOpinionValueSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolOpinionValueAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ReligiousSchoolOpinionValue;
    public string SavingKey => string.Empty;
    public static ReligiousSchoolOpinionValue Empty { get; } =
       new() { Key = ReligiousSchool.Empty, Value = Opinion.Neutral };

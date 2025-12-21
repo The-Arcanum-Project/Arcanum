@@ -136,7 +136,7 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.DefaultMapDefinitionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DefaultMapDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.DefaultMapDefinition;
 
    public static Dictionary<string, DefaultMapDefinition> GetGlobalItems() => new() { { "Default Map", Globals.DefaultMapDefinition }, };
 

@@ -50,7 +50,7 @@ public partial class Regency : IEu5Object<Regency>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RegencySettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RegencyAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Regency;
    public static Dictionary<string, Regency> GetGlobalItems() => Globals.Regencies;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 

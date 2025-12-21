@@ -140,7 +140,7 @@ public partial class Age : IEu5Object<Age>
 
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
 
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.AgeAgsSettings;
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.Age;
    public string SavingKey => UniqueId;
 
    public InjRepType InjRepType { get; set; } = InjRepType.None;

@@ -168,7 +168,7 @@ public partial class Estate : IEu5Object<Estate>
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Estate;
    public static Dictionary<string, Estate> GetGlobalItems() => Globals.Estates;
 
    public static Estate Empty { get; } = new() { UniqueId = "Arcanum_Empty_Estate" };

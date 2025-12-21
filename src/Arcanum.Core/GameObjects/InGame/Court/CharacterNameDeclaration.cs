@@ -30,7 +30,7 @@ public partial class CharacterNameDeclaration : IEu5Object<CharacterNameDeclarat
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterNameDeclarationNUISettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterNameDeclarationAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterNameDeclaration;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]

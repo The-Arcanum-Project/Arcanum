@@ -46,7 +46,7 @@ public partial class VariableDeclaration : IEu5Object<VariableDeclaration>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.VariableDeclarationSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.VariableDeclarationAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.VariableDeclaration;
    public static Dictionary<string, VariableDeclaration> GetGlobalItems() => [];
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

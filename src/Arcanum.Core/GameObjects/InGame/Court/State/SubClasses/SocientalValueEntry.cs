@@ -26,7 +26,7 @@ public partial class SocientalValueEntry : IEmbeddedEu5Object<SocientalValueEntr
    public int Value { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.SocientalValueEntrySettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SocientalValueEntryAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SocientalValueEntry;
    [PropertyConfig(isReadonly: true)]
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

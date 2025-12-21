@@ -89,7 +89,7 @@ public partial class CountryRank : IEu5Object<CountryRank>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CountryRankSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CountryRankAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CountryRank;
    public static Dictionary<string, CountryRank> GetGlobalItems() => Globals.CountryRanks;
 
    public static CountryRank Empty { get; } = new() { UniqueId = "Arcanum_Empty_CountryRank" };

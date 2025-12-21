@@ -57,7 +57,7 @@ public partial class SoundToll : IEu5Object<SoundToll>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.SoundTollSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SoundTollAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SoundToll;
 
    public static Dictionary<string, SoundToll> GetGlobalItems() => Globals.DefaultMapDefinition.SoundTolls.ToDictionary(x => x.UniqueId, x => x);
 

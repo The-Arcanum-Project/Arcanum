@@ -57,7 +57,7 @@ public partial class StaticModifier : IEu5Object<StaticModifier>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.StaticModifierSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.StaticModifierAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.StaticModifier;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, StaticModifier> GetGlobalItems() => Globals.StaticModifiers;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;

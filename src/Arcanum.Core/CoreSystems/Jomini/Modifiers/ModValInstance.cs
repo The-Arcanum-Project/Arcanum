@@ -86,7 +86,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Definition.UniqueId, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstanceAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstance;
 
    public string FormatModifierPatternToCode()
    {

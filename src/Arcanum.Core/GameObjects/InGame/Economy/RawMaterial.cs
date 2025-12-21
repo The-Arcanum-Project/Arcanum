@@ -149,7 +149,7 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RawMaterialSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RawMaterialAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RawMaterial;
    public static Dictionary<string, RawMaterial> GetGlobalItems() => Globals.RawMaterials;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
 

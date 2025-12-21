@@ -262,7 +262,7 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.CharacterSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.CharacterAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Character;
    public static Dictionary<string, Character> GetGlobalItems() => Globals.Characters;
 
    private static readonly Lazy<Character> EmptyInstance = new(() =>

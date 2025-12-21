@@ -58,7 +58,7 @@ public partial class EstateAttributeDefinition : IEu5Object<EstateAttributeDefin
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.EstateAttributeDefinitionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateAttributeDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.EstateAttributeDefinition;
    public static Dictionary<string, EstateAttributeDefinition> GetGlobalItems() => [];
 
    public static EstateAttributeDefinition Empty { get; } =

@@ -50,7 +50,7 @@ public partial class BuildingLevel : IEu5Object<BuildingLevel>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.BuildingLevelSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingLevelAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingLevel;
    public static Dictionary<string, BuildingLevel> GetGlobalItems() => Globals.BuildingLevels;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

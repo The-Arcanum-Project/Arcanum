@@ -46,7 +46,7 @@ public partial class Institution : IEu5Object<Institution>
    public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.InstitutionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.InstitutionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Institution;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static Dictionary<string, Institution> GetGlobalItems() => Globals.Institutions;
 

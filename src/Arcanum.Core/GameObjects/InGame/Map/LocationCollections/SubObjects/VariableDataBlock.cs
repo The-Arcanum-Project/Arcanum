@@ -35,7 +35,7 @@ public partial class VariableDataBlock : IEmbeddedEu5Object<VariableDataBlock>
    public int Identity { get; set; }
 
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.VariableDataBlockSettings;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.VariableDataBlockAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.VariableDataBlock;
 
    [PropertyConfig(isReadonly: true)]
    public string UniqueId { get; set; } = string.Empty;

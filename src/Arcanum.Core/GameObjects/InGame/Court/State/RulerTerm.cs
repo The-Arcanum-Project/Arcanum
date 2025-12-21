@@ -57,7 +57,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RulerTermSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RulerTermAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.RulerTerm;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
    [DefaultValue("")]
