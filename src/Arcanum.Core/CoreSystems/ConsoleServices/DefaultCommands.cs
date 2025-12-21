@@ -285,7 +285,7 @@ public static partial class DefaultCommands
 
                                              return output.ToArray();
                                           },
-                                          clearance: ClearanceLevel.Debug,
+                                          clearance: ClearanceLevel.User,
                                           category: CommandCategory.Debug);
    }
 
