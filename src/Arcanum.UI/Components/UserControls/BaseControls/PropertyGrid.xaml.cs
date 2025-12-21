@@ -117,6 +117,18 @@ public partial class PropertyGrid
       SelectionChangedInternal(item);
    }
 
+   public static readonly DependencyProperty OwnerPropertyNameProperty =
+      DependencyProperty.Register(nameof(OwnerPropertyName),
+                                  typeof(string),
+                                  typeof(PropertyGrid),
+                                  new(string.Empty));
+
+   public string OwnerPropertyName
+   {
+      get => (string)GetValue(OwnerPropertyNameProperty);
+      set => SetValue(OwnerPropertyNameProperty, value);
+   }
+
    private void SelectionChangedInternal(PropertyItem item)
    {
       SelectedPropertyItem = item;
@@ -138,6 +150,7 @@ public partial class PropertyGrid
          InlinedPropertyGrid ??= new() { Margin = new(-1) };
          GridEmbeddedBorder.Child = InlinedPropertyGrid;
 
+         InlinedPropertyGrid.OwnerPropertyName = item.PropertyInfo.Name;
          InlinedPropertyGrid.SelectedObject = prop.GetValue(SelectedObject);
          ShowGridEmbedded = true;
 
@@ -210,8 +223,13 @@ public partial class PropertyGrid
       if (e.NewValue == null)
          return;
 
+      var contextName = grid.OwnerPropertyName;
+      grid.Title = string.IsNullOrEmpty(contextName) ? e.NewValue.GetType().Name : $"{contextName} ({e.NewValue.GetType().Name})";
+
       var props = e.NewValue.GetType()
                    .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+
+      grid.SetValue(TitleProperty, e.NewValue.GetType().Name);
 
       foreach (var prop in props)
       {
@@ -222,7 +240,6 @@ public partial class PropertyGrid
             continue;
 
          var categoryAttr = prop.GetCustomAttribute<CategoryAttribute>();
-         grid.SetValue(TitleProperty, e.NewValue.GetType().FullName);
 
          if (prop.GetIndexParameters().Length > 0)
             continue; // skip indexers
@@ -283,7 +300,10 @@ public partial class PropertyGrid
          return;
 
       var objectView =
-         new PropertyGridWindow(item.Value) { WindowStartupLocation = WindowStartupLocation.CenterOwner, };
+         new PropertyGridWindow(item.Value)
+         {
+            WindowStartupLocation = WindowStartupLocation.CenterOwner, MainGrid = { OwnerPropertyName = item.PropertyInfo.Name },
+         };
       objectView.ShowDialog();
    }
 
