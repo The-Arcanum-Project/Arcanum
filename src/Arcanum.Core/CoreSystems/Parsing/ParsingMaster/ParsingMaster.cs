@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Channels;
 using System.Windows;
 using Arcanum.Core.CoreSystems.ErrorSystem;
+using Arcanum.Core.CoreSystems.ErrorSystem.Exceptions;
 using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -217,11 +218,11 @@ public partial class ParsingMaster
                              ? Scheduler.QueueHeavyWork(workItem, cts.Token)
                              : Scheduler.QueueWorkAsHeavyIfAvailable(workItem, cts.Token);
 
-               _ = task.ContinueWith(OnTaskCompleteStatic,
-                                     Tuple.Create(context, stepId, step),
-                                     CancellationToken.None,
-                                     TaskContinuationOptions.ExecuteSynchronously,
-                                     TaskScheduler.Default);
+               var result = task.ContinueWith(OnTaskCompleteStatic,
+                                              Tuple.Create(context, stepId, step),
+                                              CancellationToken.None,
+                                              TaskContinuationOptions.ExecuteSynchronously,
+                                              TaskScheduler.Default);
             }
          }
       }
@@ -229,10 +230,9 @@ public partial class ParsingMaster
       {
          ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "Parsing steps execution was canceled.");
          completionTcs.TrySetResult(false);
-      }
-      finally
-      {
          SaveLog();
+
+         throw new ParsingCanceledException("Parsing steps execution was canceled.");
       }
 
       if (!await completionTcs.Task)
@@ -255,6 +255,7 @@ public partial class ParsingMaster
       }
 #endif
 
+      SaveLog();
       return true;
    }
 
@@ -304,7 +305,7 @@ public partial class ParsingMaster
       catch (Exception e)
       {
          HandleStepException(step, e);
-         return false;
+         throw new OperationCanceledException();
       }
 
       if (result)
