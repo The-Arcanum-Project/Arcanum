@@ -44,23 +44,34 @@ public sealed unsafe class MapTracing : IDisposable
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColor(int x, int y)
    {
-      var row = (byte*)_scan0 + y * _stride;
-      var xTimesThree = x * 3;
+      var row = (byte*)_scan0 + (y * _stride);
+      var pixel = row + x * 3;
+
       return ALPHA |
-             (row[xTimesThree + 2]) |
-             (row[xTimesThree + 1] << 8) |
-             (row[xTimesThree] << 16);
+             (pixel[2]) | // Red
+             (pixel[1] << 8) | // Green
+             (pixel[0] << 16); // Blue
    }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private static int GetColorRowPtr(byte* pixelPtr) => ALPHA |
+                                                        (pixelPtr[2]) |
+                                                        (pixelPtr[1] << 8) |
+                                                        (pixelPtr[0] << 16);
+
+   // Pre-calculated masks for 1bpp access (0x80 >> i)
+   // Replaces: (byte)(0x80 >> (x % 8))
+   private static ReadOnlySpan<byte> BitMasks => [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private void ClearPixel(int x, int y)
    {
-      if (x < 0 || x >= _width || y < 0 || y >= _height)
+      if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
          return;
 
       var row = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
-      // Set the bit to 1
-      row[x / 8] |= (byte)(0x80 >> (x % 8));
+
+      row[x >> 3] |= BitMasks[x & 7];
    }
 
    // ReSharper disable once UnusedMember.Local
@@ -73,7 +84,8 @@ public sealed unsafe class MapTracing : IDisposable
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColorWithOutsideCheck(int x, int y)
    {
-      if (x < 0 || x >= _width || y < 0 || y >= _height)
+      // unsigned cast to do (x < 0 || x >= width) in a single CPU instruction
+      if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
          return OUTSIDE_COLOR;
 
       return GetColor(x, y);
@@ -595,38 +607,40 @@ public sealed unsafe class MapTracing : IDisposable
 
       var lastSwitchX = 0;
       var lastSwitchY = 0;
-
-      for (var y = 0; y < _height; y++)
+      fixed (byte* bitMaskPtr = BitMasks)
       {
-         var row = (byte*)_scan0 + y * _stride;
-         var visitedRow = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
-
-         var lastColor = OUTSIDE_COLOR;
-
-         for (var x = 0; x < _width; x++)
+         for (var y = 0; y < _height; y++)
          {
-            var idx = x * 3;
-            var color = ALPHA |
-                        (row[idx + 2]) |
-                        (row[idx + 1] << 8) |
-                        row[idx] << 16;
+            var row = (byte*)_scan0 + y * _stride;
+            var visitedRow = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
 
-            var mask = (byte)(0x80 >> (x % 8));
-            if (color != lastColor)
+            var lastColor = OUTSIDE_COLOR;
+
+            for (var x = 0; x < _width; x++)
             {
-               if ((visitedRow[x / 8] & mask) == 0)
+               var color = GetColorRowPtr(row + x * 3);
+
+               var byteIndex = x >> 3;
+               var bitIndex = x & 7;
+               var mask = bitMaskPtr[bitIndex];
+
+               if (color != lastColor)
                {
-                  HandleIsland(new(x, y), polygonsDict, new(lastSwitchX, lastSwitchY), lastColor);
-                  counter++;
+                  var isVisited = (visitedRow[byteIndex] & mask) != 0;
+
+                  if (!isVisited)
+                  {
+                     HandleIsland(new(x, y), polygonsDict, new(lastSwitchX, lastSwitchY), lastColor);
+                     counter++;
+                  }
+
+                  lastSwitchX = x;
+                  lastSwitchY = y;
+                  lastColor = color;
                }
-
-               lastSwitchX = x;
-               lastSwitchY = y;
-
-               lastColor = color;
+               else
+                  visitedRow[byteIndex] |= mask;
             }
-            else
-               visitedRow[x / 8] |= mask;
          }
       }
 
