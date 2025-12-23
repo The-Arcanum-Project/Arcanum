@@ -125,6 +125,8 @@ public static class SaveMaster
          }
 
          list.Remove(command);
+         if (list.Count == 0)
+            NeedsToBeSaved.Remove(target);
       }
 
       ChangesSinceLastSave.Remove(command);

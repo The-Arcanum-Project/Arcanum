@@ -249,7 +249,7 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 #region IEu5Object
 
    public string GetNamespace =&gt; $"$Namespace$.{nameof($ClassName$)}";
-   public void OnSearchSelected() =&gt; UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() =&gt; SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '&gt;'));
    public Enum SearchCategory =&gt; IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly =&gt; false;

@@ -42,7 +42,7 @@ using NUINavigation = Arcanum.UI.NUI.NUINavigation;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
-public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
+public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
    private const string HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM = "https://eu5.paradoxwikis.com/Arcanum";
    private const int DEFAULT_WIDTH = 1920;
@@ -449,12 +449,12 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
    }
 
-   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+   private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
    {
       if (EqualityComparer<T>.Default.Equals(field, value))
          return false;
@@ -699,6 +699,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
+      if (SaveMaster.GetNeedsToBeSaveCount > 0)
+      {
+         var result = MBox.Show("There are unsaved changes. Do you really want to close without saving?",
+                                "Unsaved Changes",
+                                MBoxButton.OKCancel,
+                                MessageBoxImage.Warning);
+         if (result == MBoxResult.Cancel)
+         {
+            e.Cancel = true;
+            return;
+         }
+      }
+
       UIHandle.Instance.LogWindowHandle.CloseWindow();
       Application.Current.Dispatcher.Invoke(() =>
       {
