@@ -358,7 +358,7 @@ public AggregateLink&lt;$ChildType$&gt; $ChildType$s { get; set; }</s:String>
     $SELECTION$$END$
 #if DEBUG
     $sw$.Stop();
-    ArcLog.WriteLine("DBT", LogLevel.INF, $"$msg$ in {sw.ElapsedMilliseconds} ms");
+    ArcLog.WriteLine("DBT", LogLevel.INF, $"$msg$ in {$sw$.ElapsedMilliseconds} ms");
 #endif</s:String>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/@KeyIndexDefined">True</s:Boolean>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>

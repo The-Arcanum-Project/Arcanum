@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
@@ -17,10 +18,7 @@ public class Node : ICoordinateAdder
    private static int _totalNodes;
    private readonly int _nodeId;
 
-   public override string ToString()
-   {
-      return $"Node {_nodeId} at ({XPos}, {YPos})";
-   }
+   public override string ToString() => $"Node {_nodeId} at ({XPos}, {YPos})";
 
 #endif
 
@@ -57,17 +55,16 @@ public class Node : ICoordinateAdder
    /// <param name="dir"></param>
    /// <param name="lastNodeVisited"></param>
    public Node(int xPos, int yPos, Direction dir, bool lastNodeVisited = false) : this([
-       new(null, null, dir.RotateLeft()), new(null, null, dir),
-       new(null, null, dir.RotateRight(), visited: lastNodeVisited)
-    ],
-    xPos,
-    yPos)
+                                                                                          new(null, null, dir.RotateLeft()), new(null, null, dir),
+                                                                                          new(null, null, dir.RotateRight(), visited: lastNodeVisited)
+                                                                                       ],
+                                                                                       xPos,
+                                                                                       yPos)
    {
    }
 
    public static Node GetThreeWayNode(int xPos, int yPos, Direction dir) => new([
-                                                                                   new(null, null, dir.RotateRight()),
-                                                                                   new(null, null, dir),
+                                                                                   new(null, null, dir.RotateRight()), new(null, null, dir),
                                                                                    new(null, null, dir.RotateLeft())
                                                                                 ],
                                                                                 xPos,
@@ -76,10 +73,8 @@ public class Node : ICoordinateAdder
    public static Node GetOneWayNode(int xPos, int yPos, Direction dir) => new([new(null, null, dir),], xPos, yPos);
 
    public static Node GetFourWayNode(int xPos, int yPos, Direction dir) => new([
-                                                                                  new(null, null, dir.Invert()),
-                                                                                  new(null, null, dir.RotateRight()),
-                                                                                  new(null, null, dir.RotateLeft()),
-                                                                                  new(null, null, dir)
+                                                                                  new(null, null, dir.Invert()), new(null, null, dir.RotateRight()),
+                                                                                  new(null, null, dir.RotateLeft()), new(null, null, dir)
                                                                                ],
                                                                                xPos,
                                                                                yPos);
@@ -107,10 +102,8 @@ public class Node : ICoordinateAdder
    /// </summary>
    /// <param name="dir">The direction to check.</param>
    /// <returns>True if the segment has been visited; otherwise, false.</returns>
-   public bool TestDirection(Direction dir)
-   {
-      return GetSegment(dir).Visited;
-   }
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public bool TestDirection(Direction dir) => GetSegment(dir).Visited;
 
    /// <summary>
    /// Retrieves the cached segment information for the specified direction.

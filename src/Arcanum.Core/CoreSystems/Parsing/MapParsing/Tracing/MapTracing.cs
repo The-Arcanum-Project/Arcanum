@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
@@ -225,10 +226,8 @@ public sealed unsafe class MapTracing : IDisposable
    private Node TraceEdgeStartNodeWithOutsideCheck(Node startNode,
                                                    Direction startDirection)
    {
-      var (node, cache) = TraceEdge(startNode.Position, startDirection);
-
+      TraceEdge(startNode.Position, startDirection, out var node, out var cache);
       cache.Node = startNode;
-
       var startCache = startNode.GetSegment(startDirection);
       startCache.Node = node;
       startCache.Segment = cache.Segment?.Invert();
@@ -236,15 +235,16 @@ public sealed unsafe class MapTracing : IDisposable
       return node;
    }
 
-   private (Node, CacheNodeInfo) TraceEdge(Vector2I startPos, Direction startDirection, bool loopCheck = false)
+   private void TraceEdge(Vector2I startPos, Direction startDirection, out Node resultNode, out CacheNodeInfo resultCache, bool loopCheck = false)
    {
-      // Get pixel positions to the left and right of the start node in the given direction
       var points = DirectionHelper.GetStartPos(startPos.X, startPos.Y, startDirection);
+
+      // Cache these to avoid repeated property access
       var lColor = GetColorWithOutsideCheck(points.Xl, points.Yl);
       var rColor = GetColorWithOutsideCheck(points.Xr, points.Yr);
 
       var currentDirection = startDirection;
-      var currentSegment = new BorderSegment();
+      var currentSegment = new BorderSegment(); // Still allocated (necessary)
 
       var startPointX = points.Xpos;
       var startPointY = points.Ypos;
@@ -253,17 +253,20 @@ public sealed unsafe class MapTracing : IDisposable
       {
          ClearPixel(points.Xl, points.Yl);
          ClearPixel(points.Xr, points.Yr);
+
          currentDirection.Move(ref points, out var cachePos, out var xaxis);
+
          if (loopCheck && points.Xpos == startPointX && points.Ypos == startPointY)
          {
-            // We have looped back to the start position without finding a node.
-            // This can happen in case of small enclosed areas.
-            // To prevent infinite loops, we create a node here.
             currentSegment.Points.Add(points.GetPosition());
             var loopNode = Node.GetOneWayNode(points.Xpos, points.Ypos, startDirection);
             var segment = loopNode.Segments[0];
             segment.Segment = new(currentSegment, false);
-            return (loopNode, segment);
+
+            // Set OUT parameters and return
+            resultNode = loopNode;
+            resultCache = segment;
+            return;
          }
 
          var lTest = GetColorWithOutsideCheck(points.Xl, points.Yl);
@@ -281,12 +284,15 @@ public sealed unsafe class MapTracing : IDisposable
                points.Xr = cachePos;
             else
                points.Yr = cachePos;
-            currentDirection = currentDirection.RotateRight();
+
+            // Inlined RotateRight: (d + 1) & 3
+            currentDirection = (Direction)(((int)currentDirection + 1) & 3);
             lColor = lTest;
             currentSegment.Points.Add(points.GetPosition());
             continue;
-         } // Left turn
+         }
 
+         // Left turn
          if (lTest == rColor && rTest == rColor)
          {
             points.Xr = points.Xl;
@@ -295,7 +301,9 @@ public sealed unsafe class MapTracing : IDisposable
                points.Xl = cachePos;
             else
                points.Yl = cachePos;
-            currentDirection = currentDirection.RotateLeft();
+
+            // Inlined RotateLeft: (d - 1) & 3
+            currentDirection = (Direction)(((int)currentDirection - 1) & 3);
             rColor = lTest;
             currentSegment.Points.Add(points.GetPosition());
             continue;
@@ -304,21 +312,19 @@ public sealed unsafe class MapTracing : IDisposable
          // Node found
          var arriveDirection = currentDirection.Invert();
 
-         CacheNodeInfo cache;
-
          if (!NodeCache.TryGetValue(points.GetPosition(), out var node))
          {
             var dir = arriveDirection;
-            var isThreeWayNode = rTest == lTest;
+            var isThreeWayNode = (rTest == lTest);
 
             if (lTest == lColor)
             {
-               dir = currentDirection.RotateRight();
+               dir = (Direction)(((int)currentDirection + 1) & 3); // RotateRight
                isThreeWayNode = true;
             }
             else if (rTest == rColor)
             {
-               dir = currentDirection.RotateLeft();
+               dir = (Direction)(((int)currentDirection - 1) & 3); // RotateLeft
                isThreeWayNode = true;
             }
 
@@ -326,22 +332,23 @@ public sealed unsafe class MapTracing : IDisposable
                       ? Node.GetThreeWayNode(points.Xpos, points.Ypos, dir)
                       : Node.GetFourWayNode(points.Xpos, points.Ypos, currentDirection);
 
-            cache = node.GetSegment(arriveDirection);
-            //segment.Node = startNode;
-            cache.Segment = new(currentSegment, false);
+            resultCache = node.GetSegment(arriveDirection);
+            resultCache.Segment = new(currentSegment, false);
+
             NodeCache.Add(points.GetPosition(), node);
-            _nodeQueue.Enqueue(node);
+            _nodeQueue.Enqueue(node); // Keep our queue logic
          }
          else
          {
-            cache = node.GetSegment(arriveDirection);
-            //cache.Node = startNode;
-            cache.Segment = new(currentSegment, false);
+            resultCache = node.GetSegment(arriveDirection);
+            resultCache.Segment = new(currentSegment, false);
          }
 
          ClearPixel(points.Xl, points.Yl);
          ClearPixel(points.Xr, points.Yr);
-         return (node, cache);
+
+         resultNode = node;
+         return;
       }
    }
 
@@ -432,10 +439,12 @@ public sealed unsafe class MapTracing : IDisposable
    /// <param name="polygons"></param>
    private void VisitNode(Node node, List<PolygonParsing> polygons)
    {
-      var dirs = node.Segments.Select(s => s.Dir);
+      var segments = node.Segments;
 
-      foreach (var direction in dirs)
+      for (var i = 0; i < segments.Length; i++)
       {
+         var direction = segments[i].Dir;
+
          if (node.TestDirection(direction))
             continue;
 
@@ -447,49 +456,84 @@ public sealed unsafe class MapTracing : IDisposable
    //TODO: @MelCo: Optimize this method
    private PolygonParsing[] VisitNode(Node node,
                                       Dictionary<int, List<PolygonParsing>> polygons,
-                                      Direction[] arriveDirection)
+                                      Direction[] arriveDirections)
    {
-      var dirs = node.Segments.Select(s => s.Dir).ToList();
-      Debug.Assert(arriveDirection.All(a => dirs.Contains(a)));
-      var foundPolygon = new PolygonParsing[arriveDirection.Length];
-      var index = 0;
-      foreach (var direction in dirs)
+      var segments = node.Segments;
+
+#if DEBUG
+      // Ensure all arriveDirections exist in segments
+      foreach (var arrDir in arriveDirections)
       {
+         var found = false;
+         for (var i = 0; i < segments.Length; i++)
+            if (segments[i].Dir == arrDir)
+            {
+               found = true;
+               break;
+            }
+
+         Debug.Assert(found);
+      }
+#endif
+
+      var foundPolygons = new PolygonParsing[arriveDirections.Length];
+      var index = 0;
+
+      for (var i = 0; i < segments.Length; i++)
+      {
+         var direction = segments[i].Dir;
+
          if (node.TestDirection(direction))
             continue;
 
          var polygon = TraceFromNode(node, direction);
 
-         if (arriveDirection.Contains(direction))
+         // Check if this direction is in our 'arriveDirections' array
+         // Since arriveDirections is tiny (1 or 2 items), a manual loop is faster than HashSet overhead
+         var isArriveDir = false;
+         for (var k = 0; k < arriveDirections.Length; k++)
+            if (arriveDirections[k] == direction)
+            {
+               isArriveDir = true;
+               break;
+            }
+
+         if (isArriveDir)
          {
-            foundPolygon[index++] = polygon;
+            foundPolygons[index++] = polygon;
             continue;
          }
 
          if (!polygons.TryGetValue(polygon.Color, out var polygonsList))
-            polygons[polygon.Color] = [polygon];
-         else
-            polygonsList.Add(polygon);
+         {
+            polygonsList = [];
+            polygons[polygon.Color] = polygonsList;
+         }
+
+         polygonsList.Add(polygon);
       }
 
-      return foundPolygon;
+      return foundPolygons;
    }
 
    private void VisitNode(Node node, Dictionary<int, List<PolygonParsing>> polygons)
    {
-      var dirs = node.Segments.Select(s => s.Dir).ToList();
+      var segments = node.Segments;
 
-      foreach (var direction in dirs)
+      for (var i = 0; i < segments.Length; i++)
       {
+         var direction = segments[i].Dir;
+
          if (node.TestDirection(direction))
             continue;
 
          var polygon = TraceFromNode(node, direction);
+         ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygons, polygon.Color, out var exists);
 
-         if (!polygons.TryGetValue(polygon.Color, out var polygonsList))
-            polygons[polygon.Color] = [polygon];
-         else
-            polygonsList.Add(polygon);
+         if (!exists)
+            listRef = [];
+
+         listRef!.Add(polygon);
       }
    }
 
@@ -514,7 +558,7 @@ public sealed unsafe class MapTracing : IDisposable
       Debug.Assert(NodeCache.Count == 0);
       Debug.Assert(_nodeQueue.Count == 0);
 
-      var (startNode, startCache) = TraceEdge(new(position.X, position.Y + 1), Direction.North, true);
+      TraceEdge(new(position.X, position.Y + 1), Direction.North, out var startNode, out var startCache, true);
 
       if (!polygons.TryGetValue(parentColor, out var parentPolygonCandidates))
       {
@@ -524,7 +568,17 @@ public sealed unsafe class MapTracing : IDisposable
       }
 
       //TODO: @MelCo: Cache this value while being in the same polygon
-      var parent = parentPolygonCandidates.FirstOrDefault(polygonCandidate => polygonCandidate.IsOnBorder(borderPos));
+      PolygonParsing? parent = null;
+      var count = parentPolygonCandidates.Count;
+      for (var i = 0; i < count; i++)
+      {
+         var candidate = parentPolygonCandidates[i];
+         if (candidate.IsOnBorder(borderPos))
+         {
+            parent = candidate;
+            break;
+         }
+      }
 
       if (parent == null)
       {
@@ -554,7 +608,7 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
 
-      var (endNode, endCache) = TraceEdge(position, Direction.South);
+      TraceEdge(position, Direction.South, out var endNode, out var endCache);
 
       // Create a new segment from start to end node and link them
       var segment = new BorderSegment();
@@ -583,12 +637,33 @@ public sealed unsafe class MapTracing : IDisposable
 
    public List<PolygonParsing> Trace()
    {
+#if DEBUG
+      var sw2 = Stopwatch.StartNew();
+#endif
       TraceImageEdges();
+#if DEBUG
+      sw2.Stop();
+      ArcLog.WriteLine("DBT", LogLevel.INF, $"TraceImageEdges in {sw2.ElapsedMilliseconds} ms");
+#endif
+#if DEBUG
+      var sw3 = Stopwatch.StartNew();
+#endif
       TraceEdgeStubs();
+#if DEBUG
+      sw3.Stop();
+      ArcLog.WriteLine("DBT", LogLevel.INF, $"TraceEdgeStubs in {sw3.ElapsedMilliseconds} ms");
+#endif
 
+#if DEBUG
+      var sw4 = Stopwatch.StartNew();
+#endif
       List<PolygonParsing> polygons = [];
       while (_nodeQueue.TryDequeue(out var node))
          VisitNode(node, polygons);
+#if DEBUG
+      sw4.Stop();
+      ArcLog.WriteLine("DBT", LogLevel.INF, $"VisitNodes in {sw4.ElapsedMilliseconds} ms");
+#endif
 
       NodeCache.Clear();
 
@@ -598,12 +673,15 @@ public sealed unsafe class MapTracing : IDisposable
 
       //TODO: @MelCo: Fix this and remove later
       Dictionary<int, List<PolygonParsing>> polygonsDict = new();
-
-      foreach (var polygonParsing in polygons)
-         if (!polygonsDict.TryGetValue(polygonParsing.Color, out var polygonsList))
-            polygonsDict[polygonParsing.Color] = [polygonParsing];
-         else
-            polygonsList.Add(polygonParsing);
+      var polySpan = CollectionsMarshal.AsSpan(polygons);
+      for (var i = 0; i < polySpan.Length; i++)
+      {
+         var poly = polySpan[i];
+         ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygonsDict, poly.Color, out var exists);
+         if (!exists)
+            listRef = [];
+         listRef!.Add(poly);
+      }
 
       var counter = 0;
 
