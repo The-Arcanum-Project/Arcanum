@@ -7,10 +7,12 @@ public static class DispatchGenerator
 {
    public static void GenerateMainDispatcher(StringBuilder sb,
                                              List<PropertyData> data,
-                                             ITypeSymbol targetType)
+                                             ITypeSymbol targetType,
+                                             List<PropertyMetadata> dynamicContentParsers,
+                                             List<PropertyMetadata> dynamicBlockParsers)
    {
       data.RemoveAll(x => x.PropertyMetadata.IEu5KeyType != null);
-      GenerateInlineParsingLoop(sb, targetType);
+      GenerateInlineParsingLoop(sb, targetType, dynamicContentParsers, dynamicBlockParsers);
 
       sb.Append("    #region Dispatcher");
       sb.AppendLine();
@@ -46,7 +48,10 @@ public static class DispatchGenerator
       sb.AppendLine("    #endregion");
    }
 
-   public static void GenerateInlineParsingLoop(StringBuilder sb, ITypeSymbol targetType)
+   public static void GenerateInlineParsingLoop(StringBuilder sb,
+                                                ITypeSymbol targetType,
+                                                List<PropertyMetadata>? dynamicContentParsers,
+                                                List<PropertyMetadata>? dynamicBlockParsers)
    {
       sb.AppendLine("    #region Inline Parsing Loop");
       sb.AppendLine();
@@ -74,29 +79,44 @@ public static class DispatchGenerator
       // Dynamic Parsers
       sb.AppendLine("                // Dynamic parsers");
       sb.AppendLine("                var wasHandled = false;");
-      sb.AppendLine("                switch (node)");
-      sb.AppendLine("                {");
-      sb.AppendLine("                    case ContentNode:");
-      sb.AppendLine("                        foreach (var dcp in _dynamicContentParsers)");
-      sb.AppendLine("                            if (dcp((ContentNode)node, target, ref pc))");
-      sb.AppendLine("                            {");
-      sb.AppendLine("                                wasHandled = true;");
-      sb.AppendLine("                                break;");
-      sb.AppendLine("                            }");
-      sb.AppendLine("                        break;");
+
+      // Handle Content Nodes
+      if (dynamicContentParsers is { Count: > 0 })
+      {
+         sb.AppendLine("                if (node is ContentNode cNode)");
+         sb.AppendLine("                {");
+         for (var i = 0; i < dynamicContentParsers.Count; i++)
+         {
+            var methodName = PropCustomParserMethodName(dynamicContentParsers[i]);
+            sb.AppendLine(i == 0
+                             ? $"                    if ({methodName}(cNode, target, ref pc)) wasHandled = true;"
+                             : $"                    else if ({methodName}(cNode, target, ref pc)) wasHandled = true;");
+         }
+
+         sb.AppendLine("                }");
+      }
+
+      // Handle Block Nodes
+      if (dynamicBlockParsers is { Count: > 0 })
+      {
+         // Use 'else if' optimization since a node cannot be both
+         var prefix = dynamicContentParsers is { Count: > 0 } ? "else " : "";
+         sb.AppendLine($"                {prefix}if (node is BlockNode bNode)");
+         sb.AppendLine("                {");
+         for (var i = 0; i < dynamicBlockParsers.Count; i++)
+         {
+            var methodName = PropCustomParserMethodName(dynamicBlockParsers[i]);
+            sb.AppendLine(i == 0
+                             ? $"                    if ({methodName}(bNode, target, ref pc)) wasHandled = true;"
+                             : $"                    else if ({methodName}(bNode, target, ref pc)) wasHandled = true;");
+         }
+
+         sb.AppendLine("                }");
+      }
+
       sb.AppendLine();
-      sb.AppendLine("                    case BlockNode:");
-      sb.AppendLine("                        foreach (var dbp in _dynamicBlockParsers)");
-      sb.AppendLine("                            if (dbp((BlockNode)node, target, ref pc))");
-      sb.AppendLine("                            {");
-      sb.AppendLine("                                wasHandled = true;");
-      sb.AppendLine("                                break;");
-      sb.AppendLine("                            }");
-      sb.AppendLine("                        break;");
-      sb.AppendLine("                }");
-      sb.AppendLine();
-      sb.AppendLine("            if (wasHandled)");
-      sb.AppendLine("                continue;");
+      sb.AppendLine("               if (wasHandled)");
+      sb.AppendLine("                   continue;");
       sb.AppendLine();
 
       // Ignored Nodes Check
@@ -109,11 +129,11 @@ public static class DispatchGenerator
       sb.AppendLine("                {");
       sb.AppendLine("                    pc.Fail();");
       sb.AppendLine("                    pc.SetContext(node);");
-      sb.AppendLine("                     DiagnosticException.LogWarning(ref pc,");
-      sb.AppendLine("                        ParsingError.Instance.InvalidNodeType,");
-      sb.AppendLine("                        node.GetType().Name,");
-      sb.AppendLine("                        \"ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.\",");
-      sb.AppendLine("                        pc.SliceString(node.KeyNode));");
+      sb.AppendLine("                    DiagnosticException.LogWarning(ref pc,");
+      sb.AppendLine("                       ParsingError.Instance.InvalidNodeType,");
+      sb.AppendLine("                       node.GetType().Name,");
+      sb.AppendLine("                       \"ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.\",");
+      sb.AppendLine("                       pc.SliceString(node.KeyNode));");
       sb.AppendLine("                }");
       sb.AppendLine("            }");
       sb.AppendLine("        }");
@@ -121,6 +141,23 @@ public static class DispatchGenerator
       sb.AppendLine();
       sb.AppendLine("    #endregion");
    }
+
+   private static string PropCustomParserMethodName(PropertyMetadata prop)
+   {
+      if (prop.CustomParserMethodName != null)
+         return prop.CustomParserMethodName;
+
+      // Assuming standard naming convention used in your project
+      // Note: You might need to pass this logic in or duplicate the helper methods 
+      // (IsFlagsEnum, IsContentNodeListSuffix, etc.) into this class if they aren't accessible.
+      // For now, I'll use the basic format consistent with your output.
+      var suffix = prop.IsShatteredList ? "_PartList" : "";
+      var prefix = IsFlagsEnum(prop) ? "Flags" : "";
+      return $"ArcParse_{prefix}{prop.PropertyName}{suffix}";
+   }
+
+   private static bool IsFlagsEnum(PropertyMetadata prop)
+      => prop.PropertyType.GetAttributes().Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
 
    public static void AppendIsIgnoredCheck(StringBuilder sb, string[] ignoredCns, string[] ignoredBns)
    {
