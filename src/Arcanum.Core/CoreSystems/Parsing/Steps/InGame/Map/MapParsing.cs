@@ -39,8 +39,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          return true;
       }
 
-      using (var bitmap =
-             new Bitmap(fileObj.Path.FullPath))
+      using (var bitmap = new Bitmap(fileObj.Path.FullPath))
       {
          using (MapTracing tracing = new(bitmap))
          {

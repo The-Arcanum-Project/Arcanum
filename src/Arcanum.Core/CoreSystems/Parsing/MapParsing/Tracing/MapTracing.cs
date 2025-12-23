@@ -21,26 +21,27 @@ public sealed unsafe class MapTracing : IDisposable
    private readonly IntPtr _visitedBitmapDataPtr;
    private readonly int _visitedStride;
 
-   private Dictionary<Vector2I, Node> NodeCache { get; } = new ();
+   private Dictionary<Vector2I, Node> NodeCache { get; } = new();
 
    public MapTracing(Bitmap bmp)
    {
       _bitmap = bmp;
-      _bitmapData = _bitmap.LockBits(new (0, 0, bmp.Width, bmp.Height),
+      _bitmapData = _bitmap.LockBits(new(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.ReadOnly,
                                      PixelFormat.Format24bppRgb);
       _width = _bitmapData.Width;
       _height = _bitmapData.Height;
       _stride = _bitmapData.Stride;
       _scan0 = _bitmapData.Scan0;
-      _visitedBitmap = new (_bitmap.Width, _bitmap.Height, PixelFormat.Format1bppIndexed);
-      _visitedBitmapData = _visitedBitmap.LockBits(new (0, 0, bmp.Width, bmp.Height),
+      _visitedBitmap = new(_bitmap.Width, _bitmap.Height, PixelFormat.Format1bppIndexed);
+      _visitedBitmapData = _visitedBitmap.LockBits(new(0, 0, bmp.Width, bmp.Height),
                                                    ImageLockMode.ReadWrite,
                                                    PixelFormat.Format1bppIndexed);
       _visitedBitmapDataPtr = _visitedBitmapData.Scan0;
       _visitedStride = _visitedBitmapData.Stride;
    }
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColor(int x, int y)
    {
       var row = (byte*)_scan0 + y * _stride;
@@ -48,7 +49,7 @@ public sealed unsafe class MapTracing : IDisposable
       return ALPHA |
              (row[xTimesThree + 2]) |
              (row[xTimesThree + 1] << 8) |
-             row[xTimesThree] << 16;
+             (row[xTimesThree] << 16);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,9 +98,9 @@ public sealed unsafe class MapTracing : IDisposable
    private static void LinkNodes(Node a, Node b, BorderSegment segment)
    {
       a.Segments[2].Node = b;
-      a.Segments[2].Segment = new (segment, true);
+      a.Segments[2].Segment = new(segment, true);
       b.Segments[0].Node = a;
-      b.Segments[0].Segment = new (segment, false);
+      b.Segments[0].Segment = new(segment, false);
    }
 
    /// <summary>
@@ -112,7 +113,7 @@ public sealed unsafe class MapTracing : IDisposable
 
       Node? firstNode = null;
       var firstSegment = new BorderSegment();
-      firstSegment.Points.Add(new (0, 0));
+      firstSegment.Points.Add(new(0, 0));
 
       Node? lastNode = null;
 
@@ -130,7 +131,7 @@ public sealed unsafe class MapTracing : IDisposable
       }
 
       // Bottom Left Corner
-      currentSegment.Points.Add(new (0, _height));
+      currentSegment.Points.Add(new(0, _height));
       ClearPixel(0, _height - 1);
       // Bottom Edge (left to right)
       for (var x = 1; x <= _width - 1; x++)
@@ -143,7 +144,7 @@ public sealed unsafe class MapTracing : IDisposable
       }
 
       // Bottom Right Corner
-      currentSegment.Points.Add(new (_width, _height));
+      currentSegment.Points.Add(new(_width, _height));
       ClearPixel(_width - 1, _height - 1);
       // Right Edge (bottom to top)
       for (var y = _height - 1; y > 0; y--)
@@ -156,7 +157,7 @@ public sealed unsafe class MapTracing : IDisposable
       }
 
       // Top Right Corner
-      currentSegment.Points.Add(new (_width, 0));
+      currentSegment.Points.Add(new(_width, 0));
       ClearPixel(_width - 1, 0);
       // Top Edge (right to left)
       for (var x = _width - 1; x > 0; x--)
@@ -168,9 +169,9 @@ public sealed unsafe class MapTracing : IDisposable
          ClearPixel(x - 1, 0);
       }
 
+      // Close the loop
       currentSegment.Points.AddRange(firstSegment.Points);
 
-      //TODO: @MelCo: This currently does not handle the case where there are no nodes on the border.
       if (lastNode == null || firstNode == null)
          throw new
             InvalidOperationException("No nodes were on the border of the image. We currently do not support maps without nodes on the border.");
@@ -185,7 +186,7 @@ public sealed unsafe class MapTracing : IDisposable
 
          var newSegment = new BorderSegment();
 
-         Node node = new (xPos, yPos, direction, true);
+         Node node = new(xPos, yPos, direction, true);
 
          // First node found
 
@@ -196,7 +197,7 @@ public sealed unsafe class MapTracing : IDisposable
 
          // Update caches and references
 
-         NodeCache.Add(new (xPos, yPos), node);
+         NodeCache.Add(new(xPos, yPos), node);
          lastNode = node;
          currentSegment = newSegment;
          lastColor = color;
@@ -248,7 +249,7 @@ public sealed unsafe class MapTracing : IDisposable
             currentSegment.Points.Add(points.GetPosition());
             var loopNode = Node.GetOneWayNode(points.Xpos, points.Ypos, startDirection);
             var segment = loopNode.Segments[0];
-            segment.Segment = new (currentSegment, false);
+            segment.Segment = new(currentSegment, false);
             return (loopNode, segment);
          }
 
@@ -314,14 +315,14 @@ public sealed unsafe class MapTracing : IDisposable
 
             cache = node.GetSegment(arriveDirection);
             //segment.Node = startNode;
-            cache.Segment = new (currentSegment, false);
+            cache.Segment = new(currentSegment, false);
             NodeCache.Add(points.GetPosition(), node);
          }
          else
          {
             cache = node.GetSegment(arriveDirection);
             //cache.Node = startNode;
-            cache.Segment = new (currentSegment, false);
+            cache.Segment = new(currentSegment, false);
          }
 
          ClearPixel(points.Xl, points.Yl);
@@ -335,9 +336,10 @@ public sealed unsafe class MapTracing : IDisposable
    /// </summary>
    private void TraceEdgeStubs()
    {
-      var nodes = NodeCache.Values.ToList();
-      foreach (var node in nodes)
+      var nodes = NodeCache.Values.ToArray().AsSpan();
+      for (var i = 0; i < nodes.Length; i++)
       {
+         var node = nodes[i];
          // No node present, so try to find it
          if (node.Segments[1].Node != null)
             continue;
@@ -497,7 +499,7 @@ public sealed unsafe class MapTracing : IDisposable
 
       Debug.Assert(NodeCache.Count == 0);
 
-      var (startNode, startCache) = TraceEdge(new (position.X, position.Y + 1), Direction.North, true);
+      var (startNode, startCache) = TraceEdge(new(position.X, position.Y + 1), Direction.North, true);
 
       if (!polygons.ContainsKey(parentColor))
       {
@@ -540,8 +542,8 @@ public sealed unsafe class MapTracing : IDisposable
       var segmentDir = startCache.Segment!.Value;
       segmentDir.AddTo(segment.Points);
       endCache.Segment!.Value.Invert().AddTo(segment.Points);
-      startCache.Segment = new (segment, true);
-      endCache.Segment = new (segment, false);
+      startCache.Segment = new(segment, true);
+      endCache.Segment = new(segment, false);
       startCache.Node = endNode;
       endCache.Node = startNode;
 
@@ -581,7 +583,7 @@ public sealed unsafe class MapTracing : IDisposable
       sw.Start();
 
       //TODO: @MelCo: Fix this and remove later
-      Dictionary<int, List<PolygonParsing>> polygonsDict = new ();
+      Dictionary<int, List<PolygonParsing>> polygonsDict = new();
 
       foreach (var polygonParsing in polygons)
          if (!polygonsDict.TryGetValue(polygonParsing.Color, out var polygonsList))
@@ -614,7 +616,7 @@ public sealed unsafe class MapTracing : IDisposable
             {
                if ((visitedRow[x / 8] & mask) == 0)
                {
-                  HandleIsland(new (x, y), polygonsDict, new (lastSwitchX, lastSwitchY), lastColor);
+                  HandleIsland(new(x, y), polygonsDict, new(lastSwitchX, lastSwitchY), lastColor);
                   counter++;
                }
 

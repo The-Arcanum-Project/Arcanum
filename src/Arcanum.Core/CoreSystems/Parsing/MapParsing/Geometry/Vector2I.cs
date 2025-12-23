@@ -18,10 +18,13 @@ public struct Vector2I
    public int Y;
 
    // read / write with only one 64-bit integer
+   // This long is overlapping with the two ints above and thus represents their packed form and the entire struct is 8 bytes in size.
    [FieldOffset(0)]
    private readonly long _packed;
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   // Making this a primary constructor will cause issues.
+   // ReSharper disable once ConvertToPrimaryConstructor
    public Vector2I(int x, int y)
    {
       _packed = 0;
@@ -29,44 +32,13 @@ public struct Vector2I
       Y = y;
    }
 
-   public static Vector2I Zero
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(0, 0);
-   public static Vector2I One
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(1, 1);
-   public static Vector2I Up
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(0, 1);
-   public static Vector2I Down
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(0, -1);
-   public static Vector2I Left
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(-1, 0);
-   public static Vector2I Right
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get;
-   } = new(1, 0);
-
-   public float Magnitude
+   public readonly float Magnitude
    {
       [MethodImpl(MethodImplOptions.AggressiveInlining)]
       get => MathF.Sqrt(X * X + Y * Y);
    }
 
-   public int SqrMagnitude
+   public readonly int SqrMagnitude
    {
       [MethodImpl(MethodImplOptions.AggressiveInlining)]
       get => X * X + Y * Y;
@@ -104,7 +76,7 @@ public struct Vector2I
    private const long HASH_MULTIPLIER = -7046029254386353131;
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   public override int GetHashCode()
+   public readonly override int GetHashCode()
    {
       var v = _packed;
       v *= HASH_MULTIPLIER;
