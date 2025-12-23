@@ -21,6 +21,8 @@ public sealed unsafe class MapTracing : IDisposable
    private readonly IntPtr _visitedBitmapDataPtr;
    private readonly int _visitedStride;
 
+   private readonly Queue<Node> _nodeQueue = new();
+
    private Dictionary<Vector2I, Node> NodeCache { get; } = new();
 
    public MapTracing(Bitmap bmp)
@@ -197,7 +199,6 @@ public sealed unsafe class MapTracing : IDisposable
          // Color changed, finalize the current segment and start a new one
 
          var newSegment = new BorderSegment();
-
          Node node = new(xPos, yPos, direction, true);
 
          // First node found
@@ -207,9 +208,9 @@ public sealed unsafe class MapTracing : IDisposable
          else
             LinkNodes(lastNode, node, currentSegment);
 
-         // Update caches and references
-
          NodeCache.Add(new(xPos, yPos), node);
+         _nodeQueue.Enqueue(node);
+
          lastNode = node;
          currentSegment = newSegment;
          lastColor = color;
@@ -329,6 +330,7 @@ public sealed unsafe class MapTracing : IDisposable
             //segment.Node = startNode;
             cache.Segment = new(currentSegment, false);
             NodeCache.Add(points.GetPosition(), node);
+            _nodeQueue.Enqueue(node);
          }
          else
          {
@@ -510,22 +512,24 @@ public sealed unsafe class MapTracing : IDisposable
       // We have a border on the left of the position
 
       Debug.Assert(NodeCache.Count == 0);
+      Debug.Assert(_nodeQueue.Count == 0);
 
       var (startNode, startCache) = TraceEdge(new(position.X, position.Y + 1), Direction.North, true);
 
-      if (!polygons.ContainsKey(parentColor))
+      if (!polygons.TryGetValue(parentColor, out var parentPolygonCandidates))
       {
          NodeCache.Clear();
+         _nodeQueue.Clear();
          return;
       }
 
-      var parentPolygonCandidates = polygons[parentColor];
       //TODO: @MelCo: Cache this value while being in the same polygon
       var parent = parentPolygonCandidates.FirstOrDefault(polygonCandidate => polygonCandidate.IsOnBorder(borderPos));
 
       if (parent == null)
       {
          NodeCache.Clear();
+         _nodeQueue.Clear();
          return;
       }
 
@@ -544,6 +548,9 @@ public sealed unsafe class MapTracing : IDisposable
          hole.Segments.Add(startCache.Segment!.Value);
          hole.Segments.Add(startNode);
          parent.Holes.Add(hole);
+
+         _nodeQueue.Clear();
+         NodeCache.Clear();
          return;
       }
 
@@ -567,13 +574,10 @@ public sealed unsafe class MapTracing : IDisposable
 
       NodeCache.Remove(startNode.Position);
 
-      while (NodeCache.Count > 0)
-      {
-         var node = NodeCache.First();
-         VisitNode(node.Value, polygons);
-         NodeCache.Remove(node.Key);
-      }
+      while (_nodeQueue.TryDequeue(out var node))
+         VisitNode(node, polygons);
 
+      NodeCache.Clear();
       parent.Holes.AddRange(holes);
    }
 
@@ -583,12 +587,10 @@ public sealed unsafe class MapTracing : IDisposable
       TraceEdgeStubs();
 
       List<PolygonParsing> polygons = [];
-      while (NodeCache.Count > 0)
-      {
-         var node = NodeCache.First();
-         VisitNode(node.Value, polygons);
-         NodeCache.Remove(node.Key);
-      }
+      while (_nodeQueue.TryDequeue(out var node))
+         VisitNode(node, polygons);
+
+      NodeCache.Clear();
 
       // go through the entire visited bitmap and find borders which have not been visited yet
       var sw = new Stopwatch();
