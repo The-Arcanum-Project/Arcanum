@@ -128,10 +128,7 @@ public partial class Age : IEu5Object<Age>
    public string ResultName => UniqueId;
    public List<string> SearchTerms => [UniqueId];
 
-   public void OnSearchSelected()
-   {
-      SelectionManager.Eu5ObjectSelectedInSearch(this);
-   }
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;

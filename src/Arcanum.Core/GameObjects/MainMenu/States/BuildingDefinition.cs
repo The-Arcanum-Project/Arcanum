@@ -6,9 +6,9 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Common.UI;
 using Nexus.Core.Attributes;
 using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
@@ -56,7 +56,7 @@ public partial class BuildingDefinition : IEu5Object<BuildingDefinition>
    #region IEu5Object
 
    public string GetNamespace => $"Economy.Building.{nameof(BuildingDefinition)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
