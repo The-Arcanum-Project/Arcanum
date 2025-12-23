@@ -297,10 +297,13 @@ public static class SelectionManager
          if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
             return;
 
-         SetSearchSelectedObjects([obj]);
+         IEu5Object[] objs = [obj];
+         SetSearchSelectedObjects(objs);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)
                EditableObjects.ClearAndAdd(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
+            else
+               EditableObjects.ClearAndAdd(objs);
       }
    }
 
