@@ -11,7 +11,7 @@ namespace Arcanum.Core.CoreSystems.Common;
 public class IndentedStringBuilder
 {
    private readonly StringBuilder _builder = new();
-   private string _indentString = "   "; // 3 spaces per indent level
+   private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
    private readonly StringBuilder _indentCacheBuilder = new();
    private bool _isAtStartOfLine = true;
 
