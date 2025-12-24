@@ -1,0 +1,167 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.CommandGenerator"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+                         xmlns:local = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
+                         Title = "Arcanum Console Command Generator" Height = "800" Width = "1000"
+                         WindowStartupLocation = "CenterScreen"
+                         d:DataContext = "{d:DesignInstance Type=local:MainViewModel, IsDesignTimeCreatable=True}">
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+    <Grid Margin = "15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "400" /> <!-- Configuration -->
+            <ColumnDefinition Width = "15" />  <!-- Splitter -->
+            <ColumnDefinition Width = "*" />   <!-- Code Output -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Configuration -->
+        <DockPanel Grid.Column = "0">
+            <TextBlock Text = "Command Settings" FontSize = "18" FontWeight = "Bold" Margin = "0,0,0,15"
+                       DockPanel.Dock = "Top" />
+
+            <!-- Metadata Form -->
+            <StackPanel DockPanel.Dock = "Top">
+                <Label Content = "Command Name" />
+                <styleClasses:CorneredTextBox Text = "{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin = "0,0,0,10" />
+
+                <Label Content = "Aliases (comma separated)" />
+                <styleClasses:CorneredTextBox Text = "{Binding AliasesRaw, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin = "0,0,0,10" />
+
+                <Label Content = "Clearance Level" />
+                <ComboBox ItemsSource = "{Binding ClearanceLevels}" SelectedItem = "{Binding SelectedClearance}" />
+
+                <Label Content = "Category" />
+                <ComboBox ItemsSource = "{Binding Categories}" SelectedItem = "{Binding SelectedCategory}" />
+
+                <Label Content = "Description (Short)" />
+                <styleClasses:CorneredTextBox Text = "{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin = "0,0,0,20" />
+            </StackPanel>
+
+            <!-- Argument List -->
+            <Grid DockPanel.Dock = "Bottom" Margin = "0,10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "*" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text = "Arguments Configuration" FontWeight = "Bold" Margin = "5,0,0,5" />
+
+                <DataGrid Grid.Row = "1" ItemsSource = "{Binding Arguments}" AutoGenerateColumns = "False"
+                          HeadersVisibility = "Column" BorderThickness = "1" GridLinesVisibility = "Horizontal"
+                          HorizontalGridLinesBrush = "#3E3E42">
+                    <DataGrid.Columns>
+                        <!-- Name -->
+                        <DataGridTemplateColumn Header = "Name / Flag" Width = "100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <styleClasses:CorneredTextBox HorizontalAlignment = "Stretch"
+                                                                  VerticalAlignment = "Stretch"
+                                                                  Text = "{Binding Name, Mode=TwoWay}"
+                                                                  Background = "{StaticResource DefaultBackColorBrush}"
+                                                                  BorderThickness = "0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Type -->
+                        <DataGridTemplateColumn Header = "Type" Width = "90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox HorizontalAlignment = "Stretch" VerticalAlignment = "Center"
+                                              SelectedItem = "{Binding DataType, UpdateSourceTrigger=PropertyChanged}"
+                                              ItemsSource = "{Binding Source={x:Static local:MainViewModel.ArgTypes}}"
+                                              BorderThickness = "0"
+                                              Background = "{StaticResource DefaultBackColorBrush}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Required Checkbox -->
+                        <DataGridTemplateColumn Header = "Req." Width = "65">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked = "{Binding IsRequired, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                              Background = "{StaticResource DefaultBackColorBrush}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Fixed Pos Checkbox -->
+                        <DataGridTemplateColumn Header = "Fixed Pos" Width = "65">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox
+                                        IsChecked = "{Binding IsFixedPosition, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                        Background = "{StaticResource DefaultBackColorBrush}"
+                                        IsEnabled = "{Binding IsRequired}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Description -->
+                        <DataGridTemplateColumn Header = "Description" Width = "*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <styleClasses:CorneredTextBox HorizontalAlignment = "Stretch"
+                                                                  VerticalAlignment = "Stretch"
+                                                                  Text = "{Binding Description, Mode=TwoWay}"
+                                                                  BorderThickness = "0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Row = "2" Orientation = "Horizontal" HorizontalAlignment = "Right" Margin = "0,5,0,0">
+                    <styleClasses:BaseButton Content = "Remove Selected" Command = "{Binding RemoveArgumentCommand}"
+                                             Padding = "10,5" BorderThickness = "1" />
+
+                    <styleClasses:BaseButton Content = "Add Argument" Command = "{Binding AddArgumentCommand}"
+                                             Padding = "10,5" Margin = "5,0,0,0" BorderThickness = "1" />
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+
+        <!-- Right Panel: Output -->
+        <Border Grid.Column = "2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "*" />
+                    <RowDefinition Height = "Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text = "Generated C# Code" FontSize = "18" FontWeight = "Bold" Margin = "0,0,0,10" />
+
+                <styleClasses:CorneredTextBox Grid.Row = "1" Text = "{Binding GeneratedCode, Mode=OneWay}"
+                                              FontFamily = "Consolas" FontSize = "13" AcceptsReturn = "True"
+                                              VerticalScrollBarVisibility = "Auto"
+                                              HorizontalScrollBarVisibility = "Auto" IsReadOnly = "True"
+                                              BorderThickness = "1" />
+
+                <StackPanel Grid.Row = "2" Orientation = "Horizontal">
+                    <styleClasses:BaseButton Content = "Export" Command = "{Binding ExportCommand}" Margin = "0,10,0,0"
+                                             Height = "35" FontWeight = "Bold" BorderThickness = "1" />
+                    <styleClasses:BaseButton Content = "Copy to Clipboard" Command = "{Binding CopyCommand}"
+                                             Margin = "0,10,0,0" Height = "35" FontWeight = "Bold"
+                                             BorderThickness = "1" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</styleClasses:BaseWindow>

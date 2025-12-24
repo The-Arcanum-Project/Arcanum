@@ -196,4 +196,10 @@ public partial class DebugPanelGrid
       var renamer = new Renamer();
       renamer.Show();
    }
+
+   private void CommandGenerator_OnClick(object sender, RoutedEventArgs e)
+   {
+      var cmdGen = new CommandGenerator();
+      cmdGen.Show();
+   }
 }

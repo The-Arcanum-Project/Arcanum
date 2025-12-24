@@ -48,6 +48,7 @@ public class ConsoleServiceImpl : IConsoleService
       DefaultCommands.RegisterDefaultCommands(this, category);
       ErrorLogCommands.RegisterCommands(this);
       ValidatorCommands.RegisterCommands(this);
+      DataReturnCommands.RegisterCommands(this);
 
       Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
       _outputReceiver = outputReceiver;
