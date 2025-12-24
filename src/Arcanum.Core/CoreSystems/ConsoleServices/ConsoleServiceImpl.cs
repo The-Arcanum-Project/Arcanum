@@ -201,17 +201,15 @@ public class ConsoleServiceImpl : IConsoleService
       if (string.IsNullOrWhiteSpace(cmd))
          return;
 
-      var historyList = _history;
-
       if (cmd.StartsWith(CMD_PREFIX))
          cmd = cmd[CMD_PREFIX.Length..];
       // Only add if different from the last command
-      if (historyList.Count == 0 || !historyList[^1].Equals(cmd, StringComparison.OrdinalIgnoreCase))
-         historyList.Add(cmd.Trim()); // Trim to remove leading/trailing spaces
+      if (_history.Count == 0 || !_history[^1].Equals(cmd, StringComparison.OrdinalIgnoreCase))
+         _history.Add(cmd.Trim()); // Trim to remove leading/trailing spaces
 
-      if (historyList.Count > HISTORY_CAPACITY)
-         historyList.RemoveAt(0);
-      _historyIndex = historyList.Count; // Point to the position after the new entry
+      if (_history.Count > HISTORY_CAPACITY)
+         _history.RemoveAt(0);
+      _historyIndex = _history.Count; // Point to the position after the new entry
    }
 
    public string? GetPreviousHistoryEntry()

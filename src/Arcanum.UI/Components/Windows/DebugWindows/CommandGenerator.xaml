@@ -62,17 +62,16 @@
 
                 <DataGrid Grid.Row = "1" ItemsSource = "{Binding Arguments}" AutoGenerateColumns = "False"
                           HeadersVisibility = "Column" BorderThickness = "1" GridLinesVisibility = "Horizontal"
-                          HorizontalGridLinesBrush = "#3E3E42">
+                          HorizontalGridLinesBrush = "#3E3E42" CanUserAddRows = "False" CanUserDeleteRows = "False">
                     <DataGrid.Columns>
                         <!-- Name -->
                         <DataGridTemplateColumn Header = "Name / Flag" Width = "100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <styleClasses:CorneredTextBox HorizontalAlignment = "Stretch"
-                                                                  VerticalAlignment = "Stretch"
-                                                                  Text = "{Binding Name, Mode=TwoWay}"
-                                                                  Background = "{StaticResource DefaultBackColorBrush}"
-                                                                  BorderThickness = "0" />
+                                    <styleClasses:CorneredTextBox
+                                        Text = "{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment = "Stretch" VerticalAlignment = "Stretch"
+                                        Background = "{StaticResource DefaultBackColorBrush}" BorderThickness = "0" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -81,35 +80,36 @@
                         <DataGridTemplateColumn Header = "Type" Width = "90">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox HorizontalAlignment = "Stretch" VerticalAlignment = "Center"
-                                              SelectedItem = "{Binding DataType, UpdateSourceTrigger=PropertyChanged}"
-                                              ItemsSource = "{Binding Source={x:Static local:MainViewModel.ArgTypes}}"
-                                              BorderThickness = "0"
-                                              Background = "{StaticResource DefaultBackColorBrush}" />
+                                    <ComboBox
+                                        SelectedItem = "{Binding DataType, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        ItemsSource = "{Binding Source={x:Static local:MainViewModel.ArgTypes}}"
+                                        HorizontalAlignment = "Stretch" VerticalAlignment = "Center"
+                                        BorderThickness = "0" Background = "{StaticResource DefaultBackColorBrush}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Required Checkbox -->
+                        <!-- Required -->
                         <DataGridTemplateColumn Header = "Req." Width = "65">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked = "{Binding IsRequired, UpdateSourceTrigger=PropertyChanged}"
-                                              HorizontalAlignment = "Center" VerticalAlignment = "Center"
-                                              Background = "{StaticResource DefaultBackColorBrush}" />
+                                    <CheckBox
+                                        IsChecked = "{Binding IsRequired, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                        Background = "{StaticResource DefaultBackColorBrush}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Fixed Pos Checkbox -->
+                        <!-- Fixed Pos -->
                         <DataGridTemplateColumn Header = "Fixed Pos" Width = "65">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox
-                                        IsChecked = "{Binding IsFixedPosition, UpdateSourceTrigger=PropertyChanged}"
-                                        HorizontalAlignment = "Center" VerticalAlignment = "Center"
-                                        Background = "{StaticResource DefaultBackColorBrush}"
-                                        IsEnabled = "{Binding IsRequired}" />
+                                        IsChecked = "{Binding IsFixedPosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled = "{Binding IsRequired}" HorizontalAlignment = "Center"
+                                        VerticalAlignment = "Center"
+                                        Background = "{StaticResource DefaultBackColorBrush}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -118,17 +118,17 @@
                         <DataGridTemplateColumn Header = "Description" Width = "*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <styleClasses:CorneredTextBox HorizontalAlignment = "Stretch"
-                                                                  VerticalAlignment = "Stretch"
-                                                                  Text = "{Binding Description, Mode=TwoWay}"
-                                                                  BorderThickness = "0" />
+                                    <styleClasses:CorneredTextBox
+                                        Text = "{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment = "Stretch" VerticalAlignment = "Stretch"
+                                        BorderThickness = "0" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Grid.Row = "2" Orientation = "Horizontal" HorizontalAlignment = "Right" Margin = "0,5,0,0">
-                    <styleClasses:BaseButton Content = "Remove Selected" Command = "{Binding RemoveArgumentCommand}"
+                    <styleClasses:BaseButton Content = "Remove last" Command = "{Binding RemoveArgumentCommand}"
                                              Padding = "10,5" BorderThickness = "1" />
 
                     <styleClasses:BaseButton Content = "Add Argument" Command = "{Binding AddArgumentCommand}"
@@ -156,9 +156,9 @@
 
                 <StackPanel Grid.Row = "2" Orientation = "Horizontal">
                     <styleClasses:BaseButton Content = "Export" Command = "{Binding ExportCommand}" Margin = "0,10,0,0"
-                                             Height = "35" FontWeight = "Bold" BorderThickness = "1" />
+                                             Height = "25" FontWeight = "Bold" BorderThickness = "1" Width = "100" />
                     <styleClasses:BaseButton Content = "Copy to Clipboard" Command = "{Binding CopyCommand}"
-                                             Margin = "0,10,0,0" Height = "35" FontWeight = "Bold"
+                                             Margin = "0,10,0,0" Height = "25" FontWeight = "Bold" Width = "100"
                                              BorderThickness = "1" />
                 </StackPanel>
             </Grid>

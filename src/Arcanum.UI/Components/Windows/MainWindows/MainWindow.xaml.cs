@@ -5,8 +5,8 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Clipboard;
-using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -466,9 +466,8 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void OpenConsoleCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host,
-                                                                   "DebugConsole",
-                                                                   category: DefaultCommands.CommandCategory.All));
+      var console = LifecycleManager.Instance.PluginManager.Host.GetService<IConsoleService>();
+      var consoleWindow = new ConsoleWindow(console);
       consoleWindow.Show();
    }
 

@@ -33,8 +33,31 @@ internal static class DataReturnCommands
                  aliases: ["cp"]);
    }
 
+   private static DefaultCommands.DefaultCommandDefinition CreateList_Game_ObjectsCommand()
+   {
+      const string usage = "list_game_objects [-e] | Lists all available game objects -e: exclued embedded.";
+
+      return new(name: "list_game_objects",
+                 usage: usage,
+                 execute: args =>
+                 {
+                    // Flag: -e
+                    var e = args.Contains("e", StringComparer.OrdinalIgnoreCase);
+                    var keys = e
+                                  ? Eu5ObjectsRegistry.Eu5Objects.Where(x => !x.IsAssignableTo(typeof(IEmbeddedEu5Object<>))).Select(x => x.Name).ToArray()
+                                  : Eu5ObjectsRegistry.Eu5Objects.Select(x => x.Name).ToArray();
+
+                    // TODO: Implement Logic
+                    return [$"Number of game objects: {keys.Length}", ..keys];
+                 },
+                 clearance: ClearanceLevel.User,
+                 category: DefaultCommands.CommandCategory.StandardUser,
+                 aliases: ["list_gos"]);
+   }
+
    public static void RegisterCommands(ConsoleServiceImpl consoleServiceImpl)
    {
       consoleServiceImpl.RegisterCommand(CreateCopypropertiesCommand());
+      consoleServiceImpl.RegisterCommand(CreateList_Game_ObjectsCommand());
    }
 }

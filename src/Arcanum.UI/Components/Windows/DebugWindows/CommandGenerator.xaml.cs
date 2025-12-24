@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -89,7 +90,6 @@ public class ArgumentDefinition : INotifyPropertyChanged
 public class MainViewModel : INotifyPropertyChanged
 {
    // Properties
-
    public string Name
    {
       get;
@@ -100,7 +100,6 @@ public class MainViewModel : INotifyPropertyChanged
          Generate();
       }
    } = "name";
-
    public string AliasesRaw
    {
       get;
@@ -111,7 +110,6 @@ public class MainViewModel : INotifyPropertyChanged
          Generate();
       }
    } = "";
-
    public string Description
    {
       get;
@@ -122,7 +120,6 @@ public class MainViewModel : INotifyPropertyChanged
          Generate();
       }
    } = "description";
-
    public ClearanceLevel SelectedClearance
    {
       get;
@@ -133,7 +130,6 @@ public class MainViewModel : INotifyPropertyChanged
          Generate();
       }
    } = ClearanceLevel.User;
-
    public DefaultCommands.CommandCategory SelectedCategory
    {
       get;
@@ -157,6 +153,7 @@ public class MainViewModel : INotifyPropertyChanged
       }
    } = "";
 
+   // Static sources
    public static ArgDataType[] ArgTypes => Enum.GetValues<ArgDataType>();
    public static ClearanceLevel[] ClearanceLevels => Enum.GetValues<ClearanceLevel>();
    public static DefaultCommands.CommandCategory[] Categories => Enum.GetValues<DefaultCommands.CommandCategory>()
@@ -164,6 +161,7 @@ public class MainViewModel : INotifyPropertyChanged
                                                                                  x != DefaultCommands.CommandCategory.None)
                                                                      .ToArray();
 
+   // Commands
    public ICommand CopyCommand { get; }
    public ICommand ExportCommand { get; }
    public ICommand RemoveArgumentCommand { get; }
@@ -171,25 +169,9 @@ public class MainViewModel : INotifyPropertyChanged
 
    public MainViewModel()
    {
-      Arguments.CollectionChanged += (_, e) =>
-      {
-         if (e.NewItems != null)
-            foreach (ArgumentDefinition item in e.NewItems)
-               item.PropertyChanged += (_, _) => Generate();
+      Arguments.CollectionChanged += Arguments_CollectionChanged;
 
-         if (e.OldItems != null)
-            foreach (ArgumentDefinition item in e.OldItems)
-            {
-               item.PropertyChanged -= ItemOnPropertyChanged;
-               continue;
-
-               void ItemOnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs) => Generate();
-            }
-
-         Generate();
-      };
-
-      // Add a default argument to start with
+      // Add a default argument
       Arguments.Add(new() { Name = "target", DataType = ArgDataType.String });
 
       CopyCommand = new RelayCommand(_ => Clipboard.SetText(GeneratedCode));
@@ -197,10 +179,32 @@ public class MainViewModel : INotifyPropertyChanged
       RemoveArgumentCommand = new RelayCommand(_ =>
       {
          if (Arguments.Count > 0)
-            Arguments.RemoveAt(Arguments.Count - 1); // Simple remove last for demo
+            Arguments.RemoveAt(Arguments.Count - 1);
       });
       AddArgumentCommand = new RelayCommand(_ => Arguments.Add(new()));
 
+      Generate();
+   }
+
+   private void Arguments_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+   {
+      if (e.NewItems != null)
+      {
+         foreach (ArgumentDefinition item in e.NewItems)
+            item.PropertyChanged += Argument_PropertyChanged;
+      }
+
+      if (e.OldItems != null)
+      {
+         foreach (ArgumentDefinition item in e.OldItems)
+            item.PropertyChanged -= Argument_PropertyChanged;
+      }
+
+      Generate();
+   }
+
+   private void Argument_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+   {
       Generate();
    }
 
@@ -228,11 +232,13 @@ public class MainViewModel : INotifyPropertyChanged
       usageBuilder.Append($" | {Description}");
 
       if (Arguments.Any(a => !string.IsNullOrWhiteSpace(a.Description)))
+      {
          foreach (var arg in Arguments.Where(a => !string.IsNullOrWhiteSpace(a.Description)))
          {
             var prefix = arg.DataType == ArgDataType.Flag ? $"-{arg.Name}" : arg.Name;
             usageBuilder.Append($" {prefix}: {arg.Description}.");
          }
+      }
 
       var parsingLogic = new StringBuilder();
 
@@ -256,8 +262,12 @@ public class MainViewModel : INotifyPropertyChanged
 
          if (arg.DataType == ArgDataType.Flag)
          {
-            parsingLogic.AppendLine($"{indent}// Flag: -{arg.Name}");
-            parsingLogic.AppendLine($"{indent}bool {varName} = args.Contains(\"-{arg.Name}\", StringComparer.OrdinalIgnoreCase);");
+            parsingLogic.AppendLine($"{indent}      // Flag: -{arg.Name}");
+            parsingLogic.AppendLine($"{indent}      var {varName} = args.Contains(\"-{arg.Name}\", StringComparer.OrdinalIgnoreCase);");
+            parsingLogic.AppendLine($"{indent}      if ({varName})");
+            parsingLogic.AppendLine($"{indent}      {{");
+            parsingLogic.AppendLine($"{indent}          // TODO: Implement flag logic for '-{arg.Name}'");
+            parsingLogic.AppendLine($"{indent}      }}");
             parsingLogic.AppendLine();
             continue;
          }
@@ -268,7 +278,6 @@ public class MainViewModel : INotifyPropertyChanged
 
             GenerateTypeParsing(parsingLogic, indent, arg, indexAccess, varName, isFixed: true, fixedIndex);
 
-            // Only increment index if it's not "RemainingText" (which consumes the rest)
             if (arg.DataType != ArgDataType.RemainingText)
                fixedIndex++;
             continue;
@@ -282,7 +291,6 @@ public class MainViewModel : INotifyPropertyChanged
          const string innerIndent = "                ";
          var optIndexAccess = $"args[{fixedIndex}]";
 
-         // Ensure we don't try to parse a flag as a value
          parsingLogic.AppendLine($"{innerIndent}if (!args[{fixedIndex}].StartsWith('-'))");
          parsingLogic.AppendLine($"{innerIndent}{{");
 
@@ -328,38 +336,30 @@ public class MainViewModel : INotifyPropertyChanged
       switch (arg.DataType)
       {
          case ArgDataType.String:
-            if (isFixed)
-               sb.AppendLine($"{indent}var {varName} = {indexAccess};");
-            else
-               sb.AppendLine($"{indent}{varName} = {indexAccess};");
+            sb.AppendLine(isFixed ? $"{indent}var {varName} = {indexAccess};" : $"{indent}{varName} = {indexAccess};");
             break;
-
          case ArgDataType.Int:
             sb.AppendLine($"{indent}if (!int.TryParse({indexAccess}, out int {(isFixed ? varName : "temp_" + varName)}))");
             sb.AppendLine($"{indent}    return [\"Error: Argument '{arg.Name}' must be an integer.\"];");
             if (!isFixed)
                sb.AppendLine($"{indent}{varName} = temp_{varName};");
             break;
-
          case ArgDataType.Float:
             sb.AppendLine($"{indent}if (!float.TryParse({indexAccess}, out float {(isFixed ? varName : "temp_" + varName)}))");
             sb.AppendLine($"{indent}    return [\"Error: Argument '{arg.Name}' must be a number.\"];");
             if (!isFixed)
                sb.AppendLine($"{indent}{varName} = temp_{varName};");
             break;
-
          case ArgDataType.Bool:
             sb.AppendLine($"{indent}if (!bool.TryParse({indexAccess}, out bool {(isFixed ? varName : "temp_" + varName)}))");
             sb.AppendLine($"{indent}    return [\"Error: Argument '{arg.Name}' must be true/false.\"];");
             if (!isFixed)
                sb.AppendLine($"{indent}{varName} = temp_{varName};");
             break;
-
          case ArgDataType.RemainingText:
-            if (isFixed)
-               sb.AppendLine($"{indent}var {varName} = string.Join(\" \", args[{fixedIndex}..]);");
-            else
-               sb.AppendLine($"{indent}{varName} = string.Join(\" \", args[{fixedIndex}..]);");
+            sb.AppendLine(isFixed
+                             ? $"{indent}var {varName} = string.Join(\" \", args[{fixedIndex}..]);"
+                             : $"{indent}{varName} = string.Join(\" \", args[{fixedIndex}..]);");
             break;
       }
    }
