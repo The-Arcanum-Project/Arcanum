@@ -179,7 +179,12 @@ public partial class SearchWindow : INotifyPropertyChanged
       {
          var locs = mapInferable.GetRelevantLocations([inferable]);
          _mapControl.PanTo(locs);
-         SelectionManager.Preview(locs.Cast<IEu5Object>().ToList(), Config.Settings.MapSettings.SearchResultHighlightDurationMs);
+         if (Config.Settings.MapSettings.UseFlashingPreviewEffect)
+            SelectionManager.PreviewFlashing(locs.Cast<IEu5Object>().ToList(),
+                                             Config.Settings.MapSettings.SearchResultHighlightDurationMs,
+                                             Config.Settings.MapSettings.FlashIntervalMs);
+         else
+            SelectionManager.Preview(locs.Cast<IEu5Object>().ToList(), Config.Settings.MapSettings.SearchResultHighlightDurationMs);
       }
 
       CloseCommand.Execute(null);
