@@ -177,4 +177,11 @@ public interface IConsoleService : IService
    /// </summary>
    /// <returns>True if an output receiver is set; otherwise, false.</returns>
    public bool HasOutputReceiver();
+
+   /// <summary>
+   /// Provides a list of auto-complete options based on the given input text.
+   /// </summary>
+   /// <param name="text">The input text for which to retrieve auto-complete options.</param>
+   /// <returns>A list of strings representing the auto-complete options that match the input text.</returns>
+   public string[] GetAutoCompleteOptions(string text);
 }

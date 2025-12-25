@@ -30,7 +30,25 @@ internal static class DataReturnCommands
                  },
                  clearance: ClearanceLevel.User,
                  category: DefaultCommands.CommandCategory.StandardUser,
-                 aliases: ["cp"]);
+                 aliases: ["cp"],
+                 getSuggestions: strs =>
+                 {
+                    switch (strs.Length)
+                    {
+                       case 0:
+                          return Eu5ObjectsRegistry.Eu5Objects.Select(x => x.Name).ToArray();
+                       case 1:
+                       {
+                          var prefix = strs[0];
+                          return Eu5ObjectsRegistry.Eu5Objects
+                                                   .Where(x => x.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                                                   .Select(x => x.Name)
+                                                   .ToArray();
+                       }
+                       default:
+                          return [];
+                    }
+                 });
    }
 
    private static DefaultCommands.DefaultCommandDefinition CreateList_Game_ObjectsCommand()

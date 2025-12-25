@@ -338,6 +338,24 @@ public class ConsoleServiceImpl : IConsoleService
       _historyIndex = _history.Count; // Set the initial history index
    }
 
+   public string[] GetArguments(string input, out string commandName)
+   {
+      commandName = string.Empty;
+      var parts = SplitStringQuotes(input, trimQuotes: TrimQuotesOnArguments);
+      switch (parts.Length)
+      {
+         case <= 1:
+            return [];
+         case 2:
+            commandName = parts[1];
+            return [];
+      }
+
+      var startIndex = parts[0].StartsWith(CMD_PREFIX.Trim(), StringComparison.Ordinal) ? 1 : 0;
+      commandName = parts[startIndex];
+      return parts[(startIndex + 1)..];
+   }
+
    // --- Internal Logic ---
    private string[] ExecuteCommandLogic(string input)
    {
@@ -467,6 +485,20 @@ public class ConsoleServiceImpl : IConsoleService
    {
       _outputReceiver = outputReceiver ??
                         throw new ArgumentNullException(nameof(outputReceiver), "Output receiver cannot be null.");
+   }
+
+   public string[] GetAutoCompleteOptions(string text)
+   {
+      if (string.IsNullOrWhiteSpace(text))
+         return GetCommandNames().ToArray();
+
+      var args = GetArguments(text, out var cmdName);
+
+      if (!_commands.TryGetValue(cmdName, out var command) || CurrentClearance < command.Clearance)
+         return [];
+
+      var suggestions = command.GetSuggestions?.Invoke(args);
+      return suggestions ?? [];
    }
 
    public void Unload()

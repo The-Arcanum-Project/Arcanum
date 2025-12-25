@@ -155,6 +155,12 @@ public class LifecycleManager
       // This might include logging, configuration management, etc.
       host.RegisterService<IFileOperations>(new APIWrapperIO());
       host.RegisterService<IJsonProcessor>(new APIWrapperJsonProcessor());
-      host.RegisterService<IConsoleService>(new ConsoleServiceImpl(host, "ArcanumConsole"));
+      host.RegisterService<IConsoleService>(new ConsoleServiceImpl(host,
+                                                                   "ArcanumConsole"
+#if DEBUG
+                                                                  ,
+                                                                   category: DefaultCommands.CommandCategory.All
+#endif
+                                                                  ));
    }
 }
