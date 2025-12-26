@@ -236,6 +236,7 @@ public static class SaveMaster
       if (AppData.HistoryManager.Current == LastSavedHistoryNode)
          return;
 
+      CommandManager.FinalizeCurrentCommand();
       List<IEu5Object> objsToSave = [];
       foreach (var obj in NeedsToBeSaved.Keys)
          if (typesToSave.Contains(obj.GetType()))
@@ -262,6 +263,7 @@ public static class SaveMaster
    /// </summary>
    public static void SaveObjects(List<IEu5Object> objectsToSave, Action<string> updateProgress)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (SaveDefnitionsFile(objectsToSave) && objectsToSave.Count == 0)
          return;
 
@@ -282,6 +284,7 @@ public static class SaveMaster
    /// </summary>
    private static void SaveFile(List<IEu5Object> modifiedObjects)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (modifiedObjects.Count == 0)
          return;
 
@@ -304,6 +307,7 @@ public static class SaveMaster
 
    private static bool SaveDefnitionsFile(List<IEu5Object> objectsToSave)
    {
+      CommandManager.FinalizeCurrentCommand();
       var definitionObjects = new List<IEu5Object>();
       for (var i = objectsToSave.Count - 1; i >= 0; i--)
       {
@@ -332,6 +336,7 @@ public static class SaveMaster
    /// </summary>
    public static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
 
       // We do have nothing to handle here.
@@ -351,6 +356,7 @@ public static class SaveMaster
 
    private static void SaveSetupSplit(Type[] types, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
       Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
                    "All types must have a corresponding SetupFileWriter.");
@@ -369,6 +375,7 @@ public static class SaveMaster
 
    private static void SaveSetupCompacted(Type[] types, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
 
       // Create the dummy files:
@@ -519,6 +526,7 @@ public static class SaveMaster
    /// <returns></returns>
    public static bool SaveFile(Eu5FileObj fileObj, bool onlyModifiedObjects = false)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (fileObj == Eu5FileObj.Empty)
          return false;
 
@@ -834,6 +842,7 @@ public static class SaveMaster
 
    public static void SaveAll(Action<string> updateHook)
    {
+      CommandManager.FinalizeCurrentCommand();
       Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList(), updateHook);
    }
 }

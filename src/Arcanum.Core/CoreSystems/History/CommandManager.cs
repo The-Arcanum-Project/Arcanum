@@ -7,6 +7,7 @@ namespace Arcanum.Core.CoreSystems.History;
 public static class CommandManager
 {
    public static bool IgnoreCommands { get; private set; }
+   public static bool DidFinalizeCurrentCommand { get; private set; }
 
    public static IDisposable DisableCommands()
    {
@@ -65,31 +66,31 @@ public static class CommandManager
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value, true),
                            () => new AddToCollectionCommand(eu5Object, attribute, value));
    }
-   
+
    public static bool TransferBetweenLinksCommand(IEu5Object eu5Object, Enum attribute, IEnumerable<IEu5Object> value)
    {
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
                            () => new TransferBetweenLinksCommand(eu5Object, attribute, value));
    }
-   
+
    public static bool TransferBetweenLinksCommand(IEu5Object eu5Object, Enum attribute, IEu5Object value)
    {
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
-         () => new TransferBetweenLinksCommand(eu5Object, attribute, value));
+                           () => new TransferBetweenLinksCommand(eu5Object, attribute, value));
    }
-   
+
    public static bool RemoveFromLinkCommand(IEu5Object eu5Object, Enum attribute, IEu5Object value)
    {
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
-         () => new RemoveFromLinkCommand(eu5Object, attribute, value));
+                           () => new RemoveFromLinkCommand(eu5Object, attribute, value));
    }
-   
+
    public static bool RemoveFromLinkCommand(IEu5Object eu5Object, Enum attribute, IEnumerable<IEu5Object> value)
    {
       return HandleCommand(specificCommand => specificCommand.TryAdd(eu5Object, attribute, value),
-         () => new RemoveFromLinkCommand(eu5Object, attribute, value.ToArray()));
+                           () => new RemoveFromLinkCommand(eu5Object, attribute, value.ToArray()));
    }
-   
+
    /// <summary>
    /// A generic method to handle the creation and merging of history commands.
    /// </summary>
@@ -109,7 +110,7 @@ public static class CommandManager
       var manager = AppData.HistoryManager;
       var command = manager.CurrentCommand;
 
-      if (command is Eu5ObjectCommand eu5Command)
+      if (!DidFinalizeCurrentCommand && command is Eu5ObjectCommand eu5Command)
       {
          // Check if the current command is of the specific type we want and if we can add to it.
          if (eu5Command is TCommand specificCommand && tryAddAction(specificCommand))
@@ -122,7 +123,22 @@ public static class CommandManager
       // Create and add the new command.
       var newCommand = createCommandAction();
       manager.AddCommand(newCommand);
+      DidFinalizeCurrentCommand = false;
       return true;
+   }
+
+   public static void FinalizeCurrentCommand()
+   {
+      if (IgnoreCommands || DidFinalizeCurrentCommand)
+         return;
+
+      var manager = AppData.HistoryManager;
+      var command = manager.CurrentCommand;
+      if (command is Eu5ObjectCommand eu5Command)
+      {
+         eu5Command.FinalizeSetup();
+         DidFinalizeCurrentCommand = true;
+      }
    }
 
    /* If performance becomes an issue, we can revert to the original non-generic methods.

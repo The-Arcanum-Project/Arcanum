@@ -287,7 +287,7 @@ public static partial class DefaultCommands
                                              return output.ToArray();
                                           },
                                           clearance: ClearanceLevel.User,
-                                          category: CommandCategory.Debug);
+                                          category: CommandCategory.All);
    }
 
    private static string[] DrawTable(char separator = '|', params string[][] columns)
