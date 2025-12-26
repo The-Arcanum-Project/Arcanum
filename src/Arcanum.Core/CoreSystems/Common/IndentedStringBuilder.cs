@@ -214,7 +214,7 @@ public class IndentedStringBuilder
       else
          Append(" ");
 
-      return new(this, closingBrace, addNewLine);
+      return new(this, closingBrace, addNewLine, asOneLine);
    }
 
    public BlockScope BlockWithNameAndInjection(IAgs ags, InjRepType injRepType, bool asOneLine)
@@ -237,7 +237,7 @@ public class IndentedStringBuilder
       _builder.AppendLine();
       _isAtStartOfLine = true;
 
-      return new(this, closingBrace, addNewLine);
+      return new(this, closingBrace, addNewLine, asOneLine);
    }
 
    #endregion
@@ -359,7 +359,10 @@ public class IndentedStringBuilder
          _builder.DecreaseIndent();
          if (_addNewLineBeforeClosing && !_asOneLine)
             _builder.AppendLine();
-         _builder.AppendLine(_closingBrace);
+         if (_asOneLine)
+            _builder.Append(_closingBrace);
+         else
+            _builder.AppendLine(_closingBrace);
       }
    }
 }
