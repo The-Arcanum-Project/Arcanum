@@ -31,18 +31,16 @@ public class ToolTipManager
    {
       _mapToolTip.PlacementTarget = mainMap;
 
-      mainMap.OnAbsolutePositionChanged += pos =>
+      mainMap.OnAbsoluteLocationChangedLocation += (curLoc, pos) =>
       {
          if (_suppressUntilNotice || !Config.Settings.MapSettings.ShowTooltips)
             return;
 
-         if (!Selection.GetLocation(pos, out var curLoc))
+         if (curLoc == Location.Empty)
          {
-            if (_mapToolTip.IsOpen)
-            {
-               _mapToolTip.IsOpen = false;
-               _lastShownTooltipLocation = Location.Empty;
-            }
+            if (!_mapToolTip.IsOpen) return;
+            _mapToolTip.IsOpen = false;
+            _lastShownTooltipLocation = Location.Empty;
 
             return;
          }

@@ -46,6 +46,8 @@ public partial class MapControl
    private Color4[] _currentBackgroundColor = null!;
    private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
+   
+   public event Action<Location, Vector2>? OnAbsoluteLocationChangedLocation;
 
    public event Action<MapClickEventArgs>? OnMapClick;
 
@@ -84,12 +86,11 @@ public partial class MapControl
       HwndHostContainer.MouseEnter += (_, _) => Window.GetWindow(this)!.KeyDown += MapInteractionManager.HandleKeyDown;
       HwndHostContainer.MouseLeave += (_, _) => Window.GetWindow(this)!.KeyDown -= MapInteractionManager.HandleKeyDown;
 
-      OnAbsolutePositionChanged += pos =>
+      OnAbsoluteLocationChangedLocation += (loc, _) =>
       {
          if (!Selection.MapManager.IsMapDataInitialized)
             return;
-
-         var loc = Selection.MapManager.FindLocationAt(pos) ?? Location.Empty;
+         
          Selection.CurrentLocationBelowMouse = loc;
          Selection.Clear(SelectionTarget.Hover);
          Selection.Modify(SelectionTarget.Hover, SelectionMethod.Simple, [loc], true);
@@ -315,6 +316,8 @@ public partial class MapControl
    {
       Coords.InvalidateCache(position);
       OnAbsolutePositionChanged?.Invoke(CurrentPos);
+      var location = Selection.GetLocation(CurrentPos);
+      OnAbsoluteLocationChangedLocation?.Invoke(location, CurrentPos);
    }
 
    private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)

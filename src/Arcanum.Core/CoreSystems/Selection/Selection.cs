@@ -619,8 +619,18 @@ public static class Selection
 
    public static bool GetLocation(Vector2 vec2, [MaybeNullWhen(false)] out Location location)
    {
+      if (CurrentLocationBelowMouse != Location.Empty && CurrentLocationBelowMouse.Polygons.Any(p => p.Contains(vec2)))
+      {
+         location = CurrentLocationBelowMouse;
+         return true;
+      }
       location = MapManager.FindLocationAt(vec2);
       return location != null;
+   }
+
+   public static Location GetLocation(Vector2 vec2)
+   {
+      return GetLocation(vec2, out var location) ? location : Location.Empty;
    }
 
    public static List<Location> GetLocations(RectangleF rect)
