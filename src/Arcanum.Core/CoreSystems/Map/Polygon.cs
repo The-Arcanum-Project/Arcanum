@@ -347,20 +347,18 @@ public sealed class Polygon
 
    private static bool PointInTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c)
    {
-      var v0 = new Vector2(c.X - a.X, c.Y - a.Y);
-      var v1 = new Vector2(b.X - a.X, b.Y - a.Y);
-      var v2 = new Vector2(p.X - a.X, p.Y - a.Y);
+      double pX = p.X, pY = p.Y;
+      double aX = a.X, aY = a.Y;
+      double bX = b.X, bY = b.Y;
+      double cX = c.X, cY = c.Y;
 
-      var dot00 = v0.X * v0.X + v0.Y * v0.Y;
-      var dot01 = v0.X * v1.X + v0.Y * v1.Y;
-      var dot02 = v0.X * v2.X + v0.Y * v2.Y;
-      var dot11 = v1.X * v1.X + v1.Y * v1.Y;
-      var dot12 = v1.X * v2.X + v1.Y * v2.Y;
+      var cp1 = (bX - aX) * (pY - aY) - (bY - aY) * (pX - aX);
+      var cp2 = (cX - bX) * (pY - bY) - (cY - bY) * (pX - bX);
+      var cp3 = (aX - cX) * (pY - cY) - (aY - cY) * (pX - cX);
 
-      var invDenom = 1f / (dot00 * dot11 - dot01 * dot01);
-      var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-      var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+      var hasNeg = (cp1 < 0) || (cp2 < 0) || (cp3 < 0);
+      var hasPos = (cp1 > 0) || (cp2 > 0) || (cp3 > 0);
 
-      return u >= 0 && v >= 0 && u + v <= 1;
+      return !(hasNeg && hasPos);
    }
 }
