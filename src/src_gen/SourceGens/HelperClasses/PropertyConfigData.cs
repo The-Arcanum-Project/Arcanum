@@ -3,6 +3,15 @@ using Microsoft.CodeAnalysis;
 
 namespace ParserGenerator.HelperClasses;
 
+public enum AggregateLinkType : byte
+{
+   None,
+   Child,
+   Parent,
+   ReverseParent,
+   ReverseChild,
+}
+
 public class PropertyConfigData
 {
    public PropertyConfigData()
@@ -33,6 +42,8 @@ public class PropertyConfigData
       IsRequired = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 4, "isRequired");
       DefaultValueMethod = AttributeHelper.SimpleGetAttrArgValue<string>(attributeData, 7, "defaultValueMethod") ?? "";
       IgnoreCommand = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 8, "ignoreCommand");
+      AggregateLinkType = AttributeHelper.SimpleGetAttrArgValue<AggregateLinkType>(attributeData, 9, "aggreateLinkType");
+
       // Use the constructor arguments we just found.
       MinValue = PropertyConfigHelper.FormatTypedConstant(minValueArg);
       MaxValue = PropertyConfigHelper.FormatTypedConstant(maxValueArg);
@@ -51,6 +62,6 @@ public class PropertyConfigData
    public string MinValue { get; set; } = null!;
    public string MaxValue { get; set; } = null!;
    public string DefaultValueMethod { get; set; } = null!;
-
    public bool IgnoreCommand { get; set; }
+   public AggregateLinkType AggregateLinkType { get; set; } = AggregateLinkType.None;
 }

@@ -14,7 +14,8 @@ public class PropertyConfigAttribute(bool isReadonly = false,
                                      double minValue = double.MinValue,
                                      double maxValue = double.MaxValue,
                                      string defaultValueMethod = "",
-                                     bool ignoreCommand = false) : Attribute
+                                     bool ignoreCommand = false,
+                                     AggregateLinkType aggreateLinkType = AggregateLinkType.None) : Attribute
 {
    /// <summary>
    /// Whether the property is read-only in the NUI.
@@ -56,6 +57,6 @@ public class PropertyConfigAttribute(bool isReadonly = false,
    /// The name of a static method that provides the default value for this property.
    /// </summary>
    public string DefaultValueMethod { get; set; } = defaultValueMethod;
-   
+
    public bool IgnoreCommand { get; set; } = ignoreCommand;
 }

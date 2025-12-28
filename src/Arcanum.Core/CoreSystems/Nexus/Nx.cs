@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core;
 
@@ -11,6 +11,22 @@ namespace Arcanum.Core.CoreSystems.Nexus;
 
 public static class Nx
 {
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   internal static int GetEnumIndex(Enum property)
+   {
+      Debug.Assert(Enum.GetUnderlyingType(property.GetType()) == typeof(int),
+                   "Enum underlying type is not int");
+      return Unsafe.Unbox<int>(property);
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   internal static int GetEnumIndexByte(Enum property)
+   {
+      Debug.Assert(Enum.GetUnderlyingType(property.GetType()) == typeof(byte),
+                   "Enum underlying type is not byte");
+      return Unsafe.Unbox<byte>(property);
+   }
+
    /// <summary>
    /// A generic setter helper. The analyzer identifies it as a setter because
    /// one of its parameters has the [PropertyValue] attribute.
@@ -20,7 +36,7 @@ public static class Nx
       [LinkedPropertyEnum(nameof(target))] Enum e,
       [PropertyValue] T value)
    {
-      if(!target.IgnoreCommand(e))
+      if (!target.IgnoreCommand(e))
          CommandManager.SetValueCommand(target, e, value!);
       target._setValue(e, value!);
    }
@@ -36,7 +52,7 @@ public static class Nx
                                   INexus target,
                                   Enum e)
    {
-      if(!target.IgnoreCommand(e))
+      if (!target.IgnoreCommand(e))
          CommandManager.SetValueCommand((IEu5Object)target, e, value!);
       else
          target._setValue(e, value!);
@@ -47,7 +63,7 @@ public static class Nx
       Debug.Assert(targets.Length > 0, nameof(targets) + " == 0");
       if (targets.Length == 1)
          ForceSet(value, targets[0], e);
-      else if(!targets[0].IgnoreCommand(e))
+      else if (!targets[0].IgnoreCommand(e))
          CommandManager.SetValueCommand(targets, e, value!);
       else
          foreach (var target in targets)
@@ -123,13 +139,13 @@ public static class Nx
       T value)
    {
       Debug.Assert(value != null, nameof(value) + " != null");
-      
+
       // Check that the value is not already in the collection
       var currentCollection = (IEnumerable<T>)target._getValue(e);
       if (currentCollection.Contains(value))
          return;
-      
-      if(!target.IgnoreCommand(e))
+
+      if (!target.IgnoreCommand(e))
       {
          var type = target.GetNxPropType(e);
          if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) && value is IEu5Object obj)
@@ -151,10 +167,10 @@ public static class Nx
       // get only the values which are not already in the collection
       var currentCollection = (IEnumerable<T>)target._getValue(e);
       values = values.Where(v => !currentCollection.Contains(v)).ToList();
-      
-      if(!values.HasItems())
+
+      if (!values.HasItems())
          return;
-      
+
       var type = target.GetNxPropType(e);
       if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>))
       {
@@ -165,13 +181,13 @@ public static class Nx
       foreach (var value in values)
       {
          Debug.Assert(value != null, nameof(value) + " != null");
-         if(!target.IgnoreCommand(e))
-               CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
+         if (!target.IgnoreCommand(e))
+            CommandManager.AddToCollectionCommand((IEu5Object)target, e, value);
          else
             target._addToCollection(e, value);
       }
    }
-   
+
    public static void RemoveRangeFromCollection<T>(
       INexus target,
       [LinkedPropertyEnum(nameof(target))] Enum e,
@@ -182,27 +198,26 @@ public static class Nx
       // GET only the values which are actually in the collection
       var currentCollection = (IEnumerable<T>)target._getValue(e);
       values = values.Where(v => currentCollection.Contains(v)).ToList();
-      
-      if(!values.HasItems())
+
+      if (!values.HasItems())
          return;
-      
+
       var type = target.GetNxPropType(e);
       if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) && target is IEu5Object eu5Val)
       {
          CommandManager.RemoveFromLinkCommand(eu5Val, e, values.Cast<IEu5Object>());
-            return;
+         return;
       }
 
       foreach (var value in values)
       {
          Debug.Assert(value != null, nameof(value) + " != null");
-         if(!target.IgnoreCommand(e))
+         if (!target.IgnoreCommand(e))
             CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
          else
             target._removeFromCollection(e, value);
       }
    }
-
 
    public static void RemoveFromCollection<T>(
       INexus target,
@@ -213,17 +228,20 @@ public static class Nx
       var currentCollection = (IEnumerable<T>)target._getValue(e);
       if (!currentCollection.Contains(value))
          return;
+
       Debug.Assert(value != null, nameof(value) + " != null");
-      
+
       var type = target.GetNxPropType(e);
-      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregateLink<>) &&
-          target is IEu5Object eu5Target && value is IEu5Object eu5Val)
+      if (type.IsGenericType &&
+          type.GetGenericTypeDefinition() == typeof(AggregateLink<>) &&
+          target is IEu5Object eu5Target &&
+          value is IEu5Object eu5Val)
       {
          CommandManager.RemoveFromLinkCommand(eu5Target, e, eu5Val);
          return;
       }
-      
-      if(!target.IgnoreCommand(e))
+
+      if (!target.IgnoreCommand(e))
          CommandManager.RemoveFromCollectionCommand((IEu5Object)target, e, value);
       else
          target._removeFromCollection(e, value);
@@ -235,7 +253,7 @@ public static class Nx
    public static void ClearCollection(INexus target,
                                       [LinkedPropertyEnum(nameof(target))] Enum e)
    {
-      if(!target.IgnoreCommand(e))
+      if (!target.IgnoreCommand(e))
          CommandManager.ClearCollectionCommand((IEu5Object)target, e);
       else
          target._clearCollection(e);
