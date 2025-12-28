@@ -608,6 +608,8 @@ public static class Generator
                   sw.AppendLine($"return Unsafe.As<{propTypeName}, T>(ref val_{npd.PropertyName});");
                }
             }
+
+            sw.AppendLine("default: throw new ArgumentOutOfRangeException(\"Invalid Enum Index\");");
          });
       });
    }
