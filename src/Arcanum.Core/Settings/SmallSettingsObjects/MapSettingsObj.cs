@@ -8,6 +8,15 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
 public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
 {
+   
+   [Description("Will render map with fast border smoothing and without a pixel perfect result. (Applies on restart)")]
+   [DefaultValue(false)]
+   public bool UseFastBorderSmoothing
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = false;
+   
    [Description("If animations are used on map borders.")]
    [DefaultValue(true)]
    public bool AllowAnimatedBorders

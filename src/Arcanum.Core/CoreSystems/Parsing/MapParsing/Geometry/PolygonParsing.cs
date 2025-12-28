@@ -41,8 +41,14 @@ public class PolygonParsing(int color)
             tess.AddContour(holeContour);
          }
 
-      tess.Tessellate();
-
+      tess.Tessellate(normal: new (0, 0, 1));
+   
+      if (tess.VertexCount == 0 || tess.ElementCount == 0)
+      {
+         ArcLog.WriteLine("MPS", LogLevel.WRN, "Tessellation resulted in zero vertices or elements.");
+         return null!;
+      }
+      
       var vertices = new Vector2[tess.VertexCount];
 
       for (var i = 0; i < tess.VertexCount; i++)
@@ -85,39 +91,54 @@ public class PolygonParsing(int color)
       if (points.Count == 0)
          return false;
 
-      var cachedPoint = points[^1];
+      var p1 = points[^1];
 
+      // ReSharper disable once ForCanBeConvertedToForeach
       for (var i = 0; i < points.Count; i++)
       {
-         var borderPoint = points[i];
-         // Horizontal line
-         if (point.X == cachedPoint.X)
-            if (point.Y >= Math.Min(borderPoint.Y, cachedPoint.Y) && point.Y <= Math.Max(borderPoint.Y, cachedPoint.Y))
-               return true;
+         var p2 = points[i];
 
-         // Vertical line
-         if (point.Y == cachedPoint.Y)
-            if (point.Y >= Math.Min(borderPoint.X, cachedPoint.X) && point.Y <= Math.Max(borderPoint.X, cachedPoint.X))
-               return true;
+         // Vertical Segment Check
+         if (point.X == p1.X && point.X == p2.X)
+         {
+            var minY = p1.Y < p2.Y ? p1.Y : p2.Y;
+            var maxY = p1.Y > p2.Y ? p1.Y : p2.Y;
 
-         cachedPoint = borderPoint;
+            if (point.Y >= minY && point.Y <= maxY)
+               return true;
+         }
+         // Horizontal Segment Check
+         else if (point.Y == p1.Y && point.Y == p2.Y)
+         {
+            var minX = p1.X < p2.X ? p1.X : p2.X;
+            var maxX = p1.X > p2.X ? p1.X : p2.X;
+
+            if (point.X >= minX && point.X <= maxX)
+               return true;
+         }
+
+         p1 = p2;
       }
 
       return false;
    }
 
+
    public bool IsOnBorder(Vector2I point)
    {
-      var numberHoles = Holes.Count;
+      if (IsOnBorder(GetAllPoints(), point)) 
+         return true;
+      
+      // ReSharper disable once ForCanBeConvertedToForeach
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      for (var index = 0; index < Holes.Count; index++)
+      {
+         var hole = Holes[index];
+         if (IsOnBorder(hole.GetAllPoints(), point))
+            return true;
+      }
 
-      var points = new List<Vector2I>[numberHoles + 1];
-
-      for (var i = 0; i < numberHoles; i++)
-         points[i + 1] = Holes[i].GetAllPoints();
-
-      points[0] = GetAllPoints();
-
-      return points.Any(pts => IsOnBorder(pts, point));
+      return false;
    }
 }
 
