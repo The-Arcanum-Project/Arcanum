@@ -13,8 +13,11 @@ After [installing](Install.md) Arcanum, launch the tool for the first time.
 During this initial startup, Arcanum will create essential files and folders to store settings and configurations.
 You will then be taken directly to the [](Main-Menu.md).
 
-> If you encounter any issues during the first startup, please reach out to [us](https://discord.gg/9878NDb6uf).
+> Make sure you have done the necessary [setup steps](Install.md#setup-requirements) in order for Arcanum to function
 > {style="note"}
+
+> If you encounter any issues during the first startup, please reach out to [us](https://discord.gg/9878NDb6uf).
+
 
 ## Main Menu
 
