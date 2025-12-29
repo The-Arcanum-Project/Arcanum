@@ -129,13 +129,14 @@ public partial class Eu5ObjectCreator
       return missingFields.Count == 0;
    }
 
-   public static void ShowPopUp(Type type, Action<object> postCreationAction, bool addToGlobals = true)
+   public static IEu5Object? ShowPopUp(Type type, Action<IEu5Object> postCreationAction, bool addToGlobals = true)
    {
+      var newObj = (IEu5Object)Activator.CreateInstance(type)!;
       var window = new Eu5ObjectCreator
       {
          Owner = Application.Current.MainWindow,
          ObjectTitle = $"Create New {type.Name}",
-         CreatedObject = (IEu5Object?)Activator.CreateInstance(type),
+         CreatedObject = newObj,
       };
       window.MarkRequiredFields();
       window.WindowStyle = WindowStyle.ToolWindow;
@@ -147,7 +148,7 @@ public partial class Eu5ObjectCreator
          window.ShowDialog();
 
       if (window.CreatedObject == null)
-         return;
+         return null;
 
       var newObject = window.CreatedObject!;
       var createCommand = new CreateObjectCommand(newObject, true, addToGlobals);
@@ -155,5 +156,6 @@ public partial class Eu5ObjectCreator
       AppData.HistoryManager.AddCommand(createCommand);
 
       postCreationAction(newObject);
+      return newObject;
    }
 }

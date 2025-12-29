@@ -26,4 +26,6 @@ public interface IMapInferable
    /// Returns the map mode type associated with this inferable.
    /// </summary>
    public MapModeManager.MapModeType GetMapMode { get; }
+
+   public Location[] GetInferredFromSelection() => GetInferredList(Selection.Selection.GetSelectedLocations).Cast<Location>().ToArray();
 }
