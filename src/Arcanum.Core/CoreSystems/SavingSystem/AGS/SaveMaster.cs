@@ -192,7 +192,8 @@ public static class SaveMaster
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          RemoveChange(command);
-      AddChange(command);
+      else
+         AddChange(command);
    }
 
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object target)
@@ -215,12 +216,21 @@ public static class SaveMaster
                    "The command to add to is not the last executed command.");
       AddSingleCommand(command, target);
    }
+   
+   public static void AddToCommand(Eu5ObjectCommand command, IEu5Object[] targets)
+   {
+      Debug.Assert(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command,
+         "The command to add to is not the last executed command.");
+      foreach (var target in targets)
+         AddSingleCommand(command, target);
+   }
 
    public static void CommandUndone(Eu5ObjectCommand command)
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+         RemoveChange(command);
+      else
          AddChange(command);
-      RemoveChange(command);
    }
 
    public static ObjState GetState(IEu5Object obj)

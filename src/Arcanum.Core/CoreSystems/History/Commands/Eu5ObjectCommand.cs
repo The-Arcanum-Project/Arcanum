@@ -78,14 +78,14 @@ public abstract class Eu5ObjectCommand : ICommand
 
     protected void InvalidateTargets(IEu5Object[] target, bool uiUpdate = true)
     {
-        SaveMaster.InitCommand(this, target);
+        SaveMaster.AddToCommand(this, target);
         if (uiUpdate)
             InvalidateUI();
     }
     
     protected void InvalidateTargets(IEu5Object target, bool uiUpdate = true)
     {
-        SaveMaster.InitCommand(this, target);
+        SaveMaster.AddToCommand(this, target);
         if (uiUpdate)
             InvalidateUI();
     }
