@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.Utils.Geometry;
 
 namespace Arcanum.Core.CoreSystems.Map;
@@ -367,35 +367,79 @@ public sealed class Polygon
       return !(hasNeg && hasPos);
    }
 
-   public IEnumerable<Vector2I> GetIntegerCoordinates()
+   [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+   public void Rasterize<TAction>(ref TAction action, int clipMinY, int clipMaxY)
+      where TAction : struct, IPixelAction
    {
-      // Iterate over the indices in steps of 3 to process each triangle
-      for (var i = 0; i < TriangleIndices.Length; i += 3)
+      var indices = TriangleIndices;
+      var vertices = Vertices;
+
+      for (var i = 0; i < indices.Length; i += 3)
       {
-         var v0 = Vertices[TriangleIndices[i]];
-         var v1 = Vertices[TriangleIndices[i + 1]];
-         var v2 = Vertices[TriangleIndices[i + 2]];
+         var v0 = vertices[indices[i]];
+         var v1 = vertices[indices[i + 1]];
+         var v2 = vertices[indices[i + 2]];
 
-         // 1. Calculate the Axis-Aligned Bounding Box (AABB) for the current triangle.
-         // We use Floor/Ceiling to ensure we check any grid point that the triangle "touches".
-         var minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
-         var maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
-         var minY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
-         var maxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
+         // Standard Triangle Bounding Box
+         int triMinY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
+         int triMaxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
 
-         // 2. Iterate through the grid within this specific triangle's bounds.
-         for (var x = minX; x <= maxX; x++)
+         // --- OPTIMIZATION START ---
+         // Intersect Triangle Bounds with the Slice Bounds (Clipping)
+         // If the triangle is completely outside this horizontal strip, skip it.
+         int startY = Math.Max(triMinY, clipMinY);
+         int endY = Math.Min(triMaxY, clipMaxY);
+
+         if (startY > endY)
+            continue;
+         // --- OPTIMIZATION END ---
+
+         int minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
+         int maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
+
+         // Precompute Edge Functions (Same as before)
+         double edge1_Y = v1.Y - v0.Y;
+         double edge1_X = v1.X - v0.X;
+         double edge2_Y = v2.Y - v1.Y;
+         double edge2_X = v2.X - v1.X;
+         double edge3_Y = v0.Y - v2.Y;
+         double edge3_X = v0.X - v2.X;
+
+         // IMPORTANT: Calculate rowVal based on startY (the clipped top), not the triangle top.
+         double rowVal1 = edge1_X * (startY - v0.Y) - edge1_Y * (minX - v0.X);
+         double rowVal2 = edge2_X * (startY - v1.Y) - edge2_Y * (minX - v1.X);
+         double rowVal3 = edge3_X * (startY - v2.Y) - edge3_Y * (minX - v2.X);
+
+         for (int y = startY; y <= endY; y++)
          {
-            for (var y = minY; y <= maxY; y++)
+            double w1 = rowVal1;
+            double w2 = rowVal2;
+            double w3 = rowVal3;
+
+            for (int x = minX; x <= maxX; x++)
             {
-               // 3. Check if the point is mathematically inside the triangle.
-               // We create a Vector2 for the check to work with the existing float-based math.
-               if (PointInTriangle(new Vector2(x, y), v0, v1, v2))
+               bool neg = (w1 < 0) | (w2 < 0) | (w3 < 0);
+               bool pos = (w1 > 0) | (w2 > 0) | (w3 > 0);
+
+               if (!(neg && pos))
                {
-                  yield return new Vector2I(x, y);
+                  action.Invoke(x, y);
                }
+
+               w1 -= edge1_Y;
+               w2 -= edge2_Y;
+               w3 -= edge3_Y;
             }
+
+            rowVal1 += edge1_X;
+            rowVal2 += edge2_X;
+            rowVal3 += edge3_X;
          }
       }
    }
+}
+
+public interface IPixelAction
+{
+   void Invoke(int x, int y);
 }
