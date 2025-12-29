@@ -1,7 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -343,13 +345,12 @@ public partial class MapControl
          e.Handled = true;
    }
 
-   public void ExportBackColorsToBitmap()
+   private void ExportBackColorsToBitmap()
    {
       if (_mapWidth <= 0 || _mapHeight <= 0)
          return;
 
       using var bmp = new Bitmap(_mapWidth, _mapHeight, PixelFormat.Format24bppRgb);
-
       var bmpData = bmp.LockBits(new(0, 0, _mapWidth, _mapHeight),
                                  ImageLockMode.WriteOnly,
                                  bmp.PixelFormat);
@@ -358,28 +359,66 @@ public partial class MapControl
       var width = _mapWidth;
       var height = _mapHeight;
       var stride = bmpData.Stride;
-      var scan0 = bmpData.Scan0;
+
+      var sourcePolygons = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!;
+
+      const int sliceHeight = 32;
+
+      var workItems = new List<RenderTask>(sourcePolygons.Length * 2);
+
+      for (var i = 0; i < sourcePolygons.Length; i++)
+      {
+         var poly = sourcePolygons[i];
+
+         var complexity = poly.TriangleIndices.Length;
+         var polyTop = (int)poly.Bounds.Top;
+         var polyBottom = (int)poly.Bounds.Bottom;
+
+         if (polyBottom < 0 || polyTop >= height)
+            continue;
+
+         polyTop = Math.Max(0, polyTop);
+         polyBottom = Math.Min(height - 1, polyBottom);
+
+         var polyHeight = polyBottom - polyTop;
+
+         if (polyHeight <= sliceHeight)
+         {
+            // Cost = Complexity * Height
+            var cost = (long)complexity * polyHeight;
+            workItems.Add(new(poly, polyTop, polyBottom, cost));
+         }
+         else
+         {
+            for (var y = polyTop; y <= polyBottom; y += sliceHeight)
+            {
+               var sliceEnd = Math.Min(y + sliceHeight - 1, polyBottom);
+               var sliceH = sliceEnd - y;
+               var cost = (long)complexity * sliceH;
+               workItems.Add(new(poly, y, sliceEnd, cost));
+            }
+         }
+      }
+
+      workItems.Sort((a, b) => b.EstimatedCost.CompareTo(a.EstimatedCost));
 
       unsafe
       {
-         Parallel.ForEach(((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!,
-                          polygon =>
+         var scan0 = (byte*)bmpData.Scan0;
+         var partitioner = Partitioner.Create(workItems, EnumerablePartitionerOptions.NoBuffering);
+
+         Parallel.ForEach(partitioner,
+                          task =>
                           {
+                             var polygon = task.Polygon;
                              var color = colors[polygon.ColorIndex];
+
                              var r = (byte)(color.R * 255);
                              var g = (byte)(color.G * 255);
                              var b = (byte)(color.B * 255);
 
-                             foreach (var vec in polygon.GetIntegerCoordinates())
-                             {
-                                if (vec.X < 0 || vec.X >= width || vec.Y < 0 || vec.Y >= height)
-                                   continue;
-
-                                var pixelPtr = (byte*)scan0 + vec.Y * stride + vec.X * 3;
-                                pixelPtr[0] = b;
-                                pixelPtr[1] = g;
-                                pixelPtr[2] = r;
-                             }
+                             var drawer = new BitmapPixelDrawer(scan0, stride, width, height, r, g, b);
+                             polygon.Rasterize(ref drawer, task.YStart, task.YEnd);
                           });
       }
 
@@ -387,8 +426,27 @@ public partial class MapControl
       IO.SaveBitmap(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
    }
 
+   private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
+
    private void MenuItem_OnClick(object sender, RoutedEventArgs e)
    {
       ExportBackColorsToBitmap();
+   }
+
+   private readonly unsafe struct BitmapPixelDrawer(byte* scan0, int stride, int width, int height, byte r, byte g, byte b)
+      : IPixelAction
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      public void Invoke(int x, int y)
+      {
+         if (x < 0 || x >= width || y < 0 || y >= height)
+            return;
+
+         var pixelPtr = scan0 + y * stride + x * 3;
+
+         pixelPtr[0] = b;
+         pixelPtr[1] = g;
+         pixelPtr[2] = r;
+      }
    }
 }
