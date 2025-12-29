@@ -1,12 +1,11 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
-using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CountriesWriter() : SetupFileWriter([.. SetupParsingManager.NestedSubTypes(Country.Empty), typeof(Age)], "10_countries.txt")
+public class
+   CountriesWriter() : SetupFileWriter([], "") //SetupFileWriter([.. SetupParsingManager.NestedSubTypes(Country.Empty), typeof(Age)], "10_countries.txt")
 {
    // windows-1252 encoding
    public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);
