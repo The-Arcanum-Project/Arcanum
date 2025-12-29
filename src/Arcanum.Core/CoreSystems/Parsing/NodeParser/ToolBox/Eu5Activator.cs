@@ -11,16 +11,14 @@ public static class Eu5Activator
 {
    private static int _unNamedObjectCounter;
 
-   private static string GenerateUniqueIdForUnnamedObject<T>() where T : IEu5Object
-      => $"<unnamed_{typeof(T).Name}_{_unNamedObjectCounter++}>";
+   private static string GenerateUniqueIdForUnnamedObject<T>() where T : IEu5Object => $"<unnamed_{typeof(T).Name}_{_unNamedObjectCounter++}>";
 
-   public static T CreateEmbeddedInstance<T>(string? uniqueId, StatementNode node) where T : IEu5Object<T>, new()
-      => new()
-      {
-         UniqueId = uniqueId ?? GenerateUniqueIdForUnnamedObject<T>(),
-         Source = Eu5FileObj.Embedded,
-         FileLocation = GetLocationData(node),
-      };
+   public static T CreateEmbeddedInstance<T>(string? uniqueId, StatementNode node) where T : IEu5Object<T>, new() => new()
+   {
+      UniqueId = uniqueId ?? GenerateUniqueIdForUnnamedObject<T>(),
+      Source = Eu5FileObj.Embedded,
+      FileLocation = node.GetLocationData(),
+   };
 
    public static T CreateInstance<T>(string uniqueId, Eu5FileObj source, StatementNode node)
       where T : IEu5Object<T>, new()

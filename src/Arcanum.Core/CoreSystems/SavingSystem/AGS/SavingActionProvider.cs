@@ -136,6 +136,24 @@ public static class SavingActionProvider
       AsOneLine(asOneLine, sb, str);
    }
 
+   public static void SaveWealthImpactData(IAgs target,
+                                           HashSet<PropertySavingMetadata> metadata,
+                                           IndentedStringBuilder sb,
+                                           bool asOneLine)
+   {
+      if (target is not DemandData dd)
+         throw new InvalidOperationException("SaveWealthImpactData can only be used with WealthImpactData instances.");
+
+      string str;
+      if (dd.TargetAll > 0f)
+         str = $"all = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll)}";
+      else
+         str =
+            $"{FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType)} = {FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper)}";
+
+      AsOneLine(asOneLine, sb, str);
+   }
+
    public static void MapMovementAssistSaving(IAgs target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,

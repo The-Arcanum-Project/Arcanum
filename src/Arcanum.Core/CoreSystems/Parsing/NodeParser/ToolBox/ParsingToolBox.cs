@@ -14,6 +14,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.Cultural;
+using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using ArtistType = Arcanum.Core.GameObjects.InGame.Cultural.ArtistType;
@@ -1246,6 +1247,61 @@ public static class ParsingToolBox
       }
 
       return lvn.TryParseParliamentType(ref pc, out value);
+   }
+
+   public static bool ArcTryParse_WealthImpactData(ContentNode node,
+                                                   ref ParsingContext pc,
+                                                   [MaybeNullWhen(false)] out WealthImpactData value)
+   {
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ref pc))
+      {
+         pc.Fail();
+         value = null;
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
+      {
+         pc.Fail();
+         value = null;
+         return false;
+      }
+
+      var key = pc.SliceString(node);
+      value = Eu5Activator.CreateEmbeddedInstance<WealthImpactData>(null, node);
+
+      switch (key)
+      {
+         case "all":
+            if (!lvn.TryParseFloat(ref pc, out var all))
+            {
+               value = null;
+               return false;
+            }
+
+            value.TargetAll = all;
+            break;
+         default:
+            if (!Globals.PopTypes.TryGetValue(key, out var popType))
+            {
+               pc.SetContext(node);
+               DiagnosticException.LogWarning(ref pc,
+                                              ParsingError.Instance.UnknownObjectKey,
+                                              key,
+                                              nameof(PopType));
+               value = null;
+               pc.Fail();
+               return false;
+            }
+
+            value.PopType = popType;
+            break;
+      }
+
+      return true;
    }
 
    public static bool ArcTryParse_DemandData(ContentNode node,

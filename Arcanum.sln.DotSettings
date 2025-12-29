@@ -255,7 +255,7 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
    public bool IsReadonly =&gt; false;
    public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$ClassName$Settings;
    public INUINavigation[] Navigations =&gt; [];
-   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$AgsSettings;
+   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$;
    public static Dictionary&lt;string, $ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

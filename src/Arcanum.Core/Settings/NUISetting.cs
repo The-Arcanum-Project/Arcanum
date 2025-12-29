@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Adjacency = Arcanum.Core.GameObjects.InGame.Map.Adjacency;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
@@ -81,6 +82,10 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
+   public NUISetting WealthImpactDataSettings { get; set; } = new(WealthImpactData.Field.UniqueId,
+                                                                  Enum.GetValues<WealthImpactData.Field>().Cast<Enum>().ToArray(),
+                                                                  Enum.GetValues<WealthImpactData.Field>().Cast<Enum>().ToArray(),
+                                                                  Enum.GetValues<WealthImpactData.Field>().Cast<Enum>().ToArray());
    public NUISetting SocientalValueEntrySettings { get; set; } = new(SocientalValueEntry.Field.UniqueId,
                                                                      Enum.GetValues<SocientalValueEntry.Field>().Cast<Enum>().ToArray(),
                                                                      Enum.GetValues<SocientalValueEntry.Field>().Cast<Enum>().ToArray(),

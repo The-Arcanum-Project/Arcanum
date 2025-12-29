@@ -10,6 +10,7 @@ public class AGSSettings
    public AgsSettings SocientalValue { get; set; } = new();
    public AgsSettings SocientalValueEntry { get; set; } = new();
    public AgsSettings CharacterNameDeclaration { get; set; } = new();
+   public AgsSettings WealthImpactData { get; set; } = new();
    public AgsSettings Age { get; set; } = new();
    public AgsSettings Vegetation { get; set; } = new();
    public AgsSettings VariableDataBlock { get; set; } = new();

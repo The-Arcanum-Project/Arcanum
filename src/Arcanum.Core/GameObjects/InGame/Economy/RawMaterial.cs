@@ -117,6 +117,12 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public ObservableRangeCollection<DemandData> DemandAdd { get; set; } = [];
 
    [SaveAs]
+   [ParseAs("wealth_impact_threshold", itemNodeType: AstNodeType.ContentNode)]
+   [Description("The wealth impact threshold for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<WealthImpactData> WealthImpactData { get; set; } = [];
+
+   [SaveAs]
    [ParseAs("demand_multiply", itemNodeType: AstNodeType.ContentNode)]
    [Description("The demand multiplikation for this raw material.")]
    [DefaultValue(null)]
