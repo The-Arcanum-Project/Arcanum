@@ -26,7 +26,6 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
         
         _targets.Add(addition);
         
-        addition.Source._removeFromCollection(_attribute, addition.Value);
         _target._addToCollection(_attribute, addition.Value);
         InvalidateTargets(addition.Source);
     }

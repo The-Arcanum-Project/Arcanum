@@ -13,6 +13,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Utils.DataStructures;
+using Nexus.Core;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -58,24 +59,13 @@ public partial class SuperRegion
    public static SuperRegion Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
 
+   [SaveAs(isEmbeddedObject: true)]
    [ParseAs("null", ignore: true)]
    [Description("The Continent this SuperRegion belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   public Continent Continent
-   {
-      get => field;
-
-      set
-      {
-         if (field != Continent.Empty)
-            field.SuperRegions._removeFromChild(this);
-         if (value != Continent.Empty)
-            value.SuperRegions._addFromChild(this);
-
-         field = value;
-      }
-   } = Continent.Empty;
+   [PropertyConfig(aggregateLinktParent: "SuperRegions", aggreateLinkType: AggregateLinkType.Child)]
+   public Continent Continent { get; set; } = Continent.Empty;
 
    [DefaultValue(null)]
    [SuppressAgs]

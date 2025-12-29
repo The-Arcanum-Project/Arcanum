@@ -103,24 +103,4 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T>, IAggregateL
 
       Lock = false;
    }
-
-   public void _removeFromChild(T child)
-   {
-      if (Lock)
-         return;
-
-      Lock = true;
-      Remove(child);
-      Lock = false;
-   }
-
-   public void _addFromChild(T child)
-   {
-      if (Lock)
-         return;
-
-      Lock = true;
-      Add(child);
-      Lock = false;
-   }
 }

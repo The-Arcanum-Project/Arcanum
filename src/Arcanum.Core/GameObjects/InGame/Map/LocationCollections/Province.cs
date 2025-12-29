@@ -69,7 +69,7 @@ public partial class Province
    [SuppressAgs]
    [SaveAs(isEmbeddedObject: true)]
    [Description("The Locations that are part of this Province.")]
-   [ParseAs("-", ignore: true)]
+   [ParseAs("null", ignore: true)]
    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Province_Location")]
    public AggregateLink<Location> Locations { get; set; }
 

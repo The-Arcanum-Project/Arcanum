@@ -13,6 +13,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Utils.DataStructures;
+using Nexus.Core;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -60,19 +61,8 @@ public partial class Region : IMapInferable, IEu5Object<Region>, IIndexRandomCol
    [Description("The SuperRegion this Region belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   public SuperRegion SuperRegion
-   {
-      get;
-      set
-      {
-         if (field != SuperRegion.Empty)
-            field.Regions._removeFromChild(this);
-         if (value != SuperRegion.Empty)
-            value.Regions._addFromChild(this);
-
-         field = value;
-      }
-   } = SuperRegion.Empty;
+   [PropertyConfig(aggregateLinktParent: "Regions", aggreateLinkType: AggregateLinkType.Child)]
+   public SuperRegion SuperRegion { get; set; } = SuperRegion.Empty;
 
    [DefaultValue(null)]
    [SuppressAgs]

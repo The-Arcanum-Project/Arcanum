@@ -65,20 +65,8 @@ public partial class Area : IMapInferable, IEu5Object<Area>, IIndexRandomColor
    [Description("The Region this Area belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   [PropertyConfig(aggreateLinkType: AggregateLinkType.Parent)]
-   public Region Region
-   {
-      get;
-      set
-      {
-         if (field != Region.Empty)
-            field.Areas._removeFromChild(this);
-         if (value != Region.Empty)
-            value.Areas._addFromChild(this);
-
-         field = value;
-      }
-   } = Region.Empty;
+   [PropertyConfig(aggregateLinktParent: "Areas", aggreateLinkType: AggregateLinkType.Child)]
+   public Region Region { get; set; } = Region.Empty;
 
    [DefaultValue(null)]
    [SuppressAgs]
