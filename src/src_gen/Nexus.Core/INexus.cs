@@ -162,5 +162,15 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Returns the enum value corresponding to the given property if it's an aggregate link.
    /// </summary>
-   public Enum GetCorrespondingEnum(Enum property);
+   public Enum? GetCorrespondingEnum(Enum property);
+
+   /// <summary>
+   /// Returns whether the given property is an aggregate link.
+   /// </summary>
+   public bool IsAggregateLink(Enum property);
+
+   /// <summary>
+   /// Gets the AggregateLinkType of a property.
+   /// </summary>
+   public AggregateLinkType GetNxPropAggregateLinkType(Enum property);
 }

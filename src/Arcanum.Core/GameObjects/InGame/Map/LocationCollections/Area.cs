@@ -13,6 +13,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Utils.DataStructures;
+using Nexus.Core;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;

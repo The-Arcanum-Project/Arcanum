@@ -61,6 +61,7 @@ public partial class Province
    [Description("The Area this Province belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
+   [PropertyConfig(aggregateLinktParent: "Provinces")]
    public Area Area
    {
       get;

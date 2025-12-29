@@ -1,4 +1,4 @@
-﻿namespace Arcanum.Core.CoreSystems.NUI.Attributes;
+﻿namespace Nexus.Core;
 
 public enum AggregateLinkType : byte
 {

@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.GameObjects.BaseTypes;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.NUI.Attributes;
 
@@ -15,7 +16,8 @@ public class PropertyConfigAttribute(bool isReadonly = false,
                                      double maxValue = double.MaxValue,
                                      string defaultValueMethod = "",
                                      bool ignoreCommand = false,
-                                     AggregateLinkType aggreateLinkType = AggregateLinkType.None) : Attribute
+                                     AggregateLinkType aggreateLinkType = AggregateLinkType.None,
+                                     string? aggregateLinktParent = null) : Attribute
 {
    /// <summary>
    /// Whether the property is read-only in the NUI.
@@ -59,4 +61,8 @@ public class PropertyConfigAttribute(bool isReadonly = false,
    public string DefaultValueMethod { get; set; } = defaultValueMethod;
 
    public bool IgnoreCommand { get; set; } = ignoreCommand;
+
+   public AggregateLinkType AggregateLinkType { get; set; } = aggreateLinkType;
+
+   public string? AggregateLinkParent { get; set; } = aggregateLinktParent;
 }

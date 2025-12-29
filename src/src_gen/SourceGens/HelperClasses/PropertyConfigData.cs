@@ -43,6 +43,7 @@ public class PropertyConfigData
       DefaultValueMethod = AttributeHelper.SimpleGetAttrArgValue<string>(attributeData, 7, "defaultValueMethod") ?? "";
       IgnoreCommand = AttributeHelper.SimpleGetAttrArgValue<bool>(attributeData, 8, "ignoreCommand");
       AggregateLinkType = AttributeHelper.SimpleGetAttrArgValue<AggregateLinkType>(attributeData, 9, "aggreateLinkType");
+      AggregateLinkParent = AttributeHelper.SimpleGetAttrArgValue<string?>(attributeData, 10, "aggregateLinktParent");
 
       // Use the constructor arguments we just found.
       MinValue = PropertyConfigHelper.FormatTypedConstant(minValueArg);
@@ -64,4 +65,5 @@ public class PropertyConfigData
    public string DefaultValueMethod { get; set; } = null!;
    public bool IgnoreCommand { get; set; }
    public AggregateLinkType AggregateLinkType { get; set; } = AggregateLinkType.None;
+   public string? AggregateLinkParent { get; set; }
 }
