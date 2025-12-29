@@ -158,4 +158,9 @@ public interface INexus : INotifyPropertyChanged
    /// Creates a deep clone of this Nexus instance.
    /// </summary>
    public INexus DeepClone();
+
+   /// <summary>
+   /// Returns the enum value corresponding to the given property if it's an aggregate link.
+   /// </summary>
+   public Enum GetCorrespondingEnum(Enum property);
 }
