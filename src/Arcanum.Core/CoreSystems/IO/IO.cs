@@ -29,6 +29,7 @@ public static class IO
    public static string GetLogsPath => Path.Combine(GetArcanumDataPath, "Logs");
    public static string GetCrashLogsPath => Path.Combine(GetLogsPath, "CrashLogs");
    public static string GetErrorLogsFilePath => Path.Combine(GetLogsPath, Config.Settings.ErrorLogOptions.ErrorLogFileName);
+   public static string GetMapExportPath => Path.Combine(GetArcanumDataPath, "MapExports");
 
    // Directory Utils
    public static List<string> GetDirectories(string path,
@@ -476,4 +477,35 @@ public static class IO
    }
 
    #endregion
+
+   public static string GetNextAvailableFileName(string name, string folder)
+   {
+      if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(folder))
+         return name;
+
+      var filePath = Path.Combine(folder, name);
+      if (!File.Exists(filePath))
+         return name;
+
+      var fileNameWithoutExt = Path.GetFileNameWithoutExtension(name);
+      var extension = Path.GetExtension(name);
+      var counter = 1;
+
+      string newFileName;
+      do
+      {
+         newFileName = $"{fileNameWithoutExt} ({counter}){extension}";
+         filePath = Path.Combine(folder, newFileName);
+         counter++;
+      }
+      while (File.Exists(filePath));
+
+      return newFileName;
+   }
+
+   public static string GetNextAvailableFilePath(string name, string folder)
+   {
+      var newFileName = GetNextAvailableFileName(name, folder);
+      return Path.Combine(folder, newFileName);
+   }
 }

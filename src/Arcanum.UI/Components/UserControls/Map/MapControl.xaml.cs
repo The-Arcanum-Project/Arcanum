@@ -1,11 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Behaviors;
@@ -46,7 +50,7 @@ public partial class MapControl
    private Color4[] _currentBackgroundColor = null!;
    private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
-   
+
    public event Action<Location, Vector2>? OnAbsoluteLocationChangedLocation;
 
    public event Action<MapClickEventArgs>? OnMapClick;
@@ -90,7 +94,7 @@ public partial class MapControl
       {
          if (!Selection.MapManager.IsMapDataInitialized)
             return;
-         
+
          Selection.CurrentLocationBelowMouse = loc;
          Selection.Clear(SelectionTarget.Hover);
          Selection.Modify(SelectionTarget.Hover, SelectionMethod.Simple, [loc], true);
@@ -337,5 +341,54 @@ public partial class MapControl
    {
       if (Keyboard.Modifiers != ModifierKeys.None)
          e.Handled = true;
+   }
+
+   public void ExportBackColorsToBitmap()
+   {
+      if (_mapWidth <= 0 || _mapHeight <= 0)
+         return;
+
+      using var bmp = new Bitmap(_mapWidth, _mapHeight, PixelFormat.Format24bppRgb);
+
+      var bmpData = bmp.LockBits(new(0, 0, _mapWidth, _mapHeight),
+                                 ImageLockMode.WriteOnly,
+                                 bmp.PixelFormat);
+
+      var colors = _currentBackgroundColor;
+      var width = _mapWidth;
+      var height = _mapHeight;
+      var stride = bmpData.Stride;
+      var scan0 = bmpData.Scan0;
+
+      unsafe
+      {
+         Parallel.ForEach(((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!,
+                          polygon =>
+                          {
+                             var color = colors[polygon.ColorIndex];
+                             var r = (byte)(color.R * 255);
+                             var g = (byte)(color.G * 255);
+                             var b = (byte)(color.B * 255);
+
+                             foreach (var vec in polygon.GetIntegerCoordinates())
+                             {
+                                if (vec.X < 0 || vec.X >= width || vec.Y < 0 || vec.Y >= height)
+                                   continue;
+
+                                var pixelPtr = (byte*)scan0 + vec.Y * stride + vec.X * 3;
+                                pixelPtr[0] = b;
+                                pixelPtr[1] = g;
+                                pixelPtr[2] = r;
+                             }
+                          });
+      }
+
+      bmp.UnlockBits(bmpData);
+      IO.SaveBitmap(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
+   }
+
+   private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+   {
+      ExportBackColorsToBitmap();
    }
 }

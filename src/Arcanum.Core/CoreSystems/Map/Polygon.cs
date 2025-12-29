@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
+using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.Utils.Geometry;
 
 namespace Arcanum.Core.CoreSystems.Map;
@@ -52,8 +53,8 @@ public sealed class Polygon
          var span = new Span<Vector2>(Vertices, i, vector2Count);
          var vector = MemoryMarshal.Cast<Vector2, float>(span);
 
-         minValues = Vector.Min(minValues, new (vector));
-         maxValues = Vector.Max(maxValues, new (vector));
+         minValues = Vector.Min(minValues, new(vector));
+         maxValues = Vector.Max(maxValues, new(vector));
       }
 
       // Process the remaining elements that didn't fit into a full vector chunk
@@ -94,7 +95,7 @@ public sealed class Polygon
                maxY = maxValues[j];
          }
 
-      return new (minX, minY, maxX - minX, maxY - minY);
+      return new(minX, minY, maxX - minX, maxY - minY);
    }
 
    /// <summary>
@@ -347,10 +348,14 @@ public sealed class Polygon
 
    private static bool PointInTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c)
    {
-      double pX = p.X, pY = p.Y;
-      double aX = a.X, aY = a.Y;
-      double bX = b.X, bY = b.Y;
-      double cX = c.X, cY = c.Y;
+      double pX = p.X,
+             pY = p.Y;
+      double aX = a.X,
+             aY = a.Y;
+      double bX = b.X,
+             bY = b.Y;
+      double cX = c.X,
+             cY = c.Y;
 
       var cp1 = (bX - aX) * (pY - aY) - (bY - aY) * (pX - aX);
       var cp2 = (cX - bX) * (pY - bY) - (cY - bY) * (pX - bX);
@@ -360,5 +365,37 @@ public sealed class Polygon
       var hasPos = (cp1 > 0) || (cp2 > 0) || (cp3 > 0);
 
       return !(hasNeg && hasPos);
+   }
+
+   public IEnumerable<Vector2I> GetIntegerCoordinates()
+   {
+      // Iterate over the indices in steps of 3 to process each triangle
+      for (var i = 0; i < TriangleIndices.Length; i += 3)
+      {
+         var v0 = Vertices[TriangleIndices[i]];
+         var v1 = Vertices[TriangleIndices[i + 1]];
+         var v2 = Vertices[TriangleIndices[i + 2]];
+
+         // 1. Calculate the Axis-Aligned Bounding Box (AABB) for the current triangle.
+         // We use Floor/Ceiling to ensure we check any grid point that the triangle "touches".
+         var minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
+         var maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
+         var minY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
+         var maxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
+
+         // 2. Iterate through the grid within this specific triangle's bounds.
+         for (var x = minX; x <= maxX; x++)
+         {
+            for (var y = minY; y <= maxY; y++)
+            {
+               // 3. Check if the point is mathematically inside the triangle.
+               // We create a Vector2 for the check to work with the existing float-based math.
+               if (PointInTriangle(new Vector2(x, y), v0, v1, v2))
+               {
+                  yield return new Vector2I(x, y);
+               }
+            }
+         }
+      }
    }
 }

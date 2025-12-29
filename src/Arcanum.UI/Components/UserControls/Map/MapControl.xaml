@@ -3,7 +3,7 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable = "d" d:DesignHeight = "300"
-             d:DesignWidth = "300">
+             d:DesignWidth = "300" x:Name = "Root">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -21,11 +21,11 @@
             <!-- D3D11HwndHost will be added here from code-behind -->
             <Border.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header = "DirectX Overlay Menu" />
-                    <Separator />
-                    <MenuItem Header = "Option 1" />
-                    <MenuItem Header = "Option 2" />
-                    <MenuItem Header = "Exit" />
+                    <MenuItem Header = "Export MapMode" Click = "MenuItem_OnClick" />
+                    <!-- <Separator /> -->
+                    <!-- <MenuItem Header = "Option 1" /> -->
+                    <!-- <MenuItem Header = "Option 2" /> -->
+                    <!-- <MenuItem Header = "Exit" /> -->
                 </ContextMenu>
             </Border.ContextMenu>
         </Border>
