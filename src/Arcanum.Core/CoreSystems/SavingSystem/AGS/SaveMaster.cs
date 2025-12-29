@@ -216,11 +216,11 @@ public static class SaveMaster
                    "The command to add to is not the last executed command.");
       AddSingleCommand(command, target);
    }
-   
+
    public static void AddToCommand(Eu5ObjectCommand command, IEu5Object[] targets)
    {
       Debug.Assert(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command,
-         "The command to add to is not the last executed command.");
+                   "The command to add to is not the last executed command.");
       foreach (var target in targets)
          AddSingleCommand(command, target);
    }
@@ -337,6 +337,9 @@ public static class SaveMaster
          obj.ToAgsContext().BuildContext(sb);
 
       WriteFile(sb.InnerBuilder, DescriptorDefinitions.DefinitionsDescriptor.Files[0], true);
+
+      foreach (var defnition in definitionObjects)
+         RemoveObjectFromChanges(defnition);
 
       return objectsToSave.Count > 0;
    }
@@ -853,6 +856,6 @@ public static class SaveMaster
    public static void SaveAll(Action<string> updateHook)
    {
       CommandManager.FinalizeCurrentCommand();
-      Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList(), updateHook);
+      SaveObjects(NeedsToBeSaved.Keys.Distinct().ToList(), updateHook);
    }
 }
