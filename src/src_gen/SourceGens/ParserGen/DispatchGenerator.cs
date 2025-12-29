@@ -121,7 +121,7 @@ public static class DispatchGenerator
 
       // Ignored Nodes Check
       sb.AppendLine("                // Check if the node is ignored");
-      sb.AppendLine("                if (IsIgnoredNode(node, ref pc))");
+      sb.AppendLine("                if (IsIgnoredNode(node, ref pc, rawSource))");
       sb.AppendLine("                    continue;");
       sb.AppendLine();
       sb.AppendLine("                // Handle unknown nodes");
@@ -159,16 +159,16 @@ public static class DispatchGenerator
    private static bool IsFlagsEnum(PropertyMetadata prop)
       => prop.PropertyType.GetAttributes().Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
 
-   public static void AppendIsIgnoredCheck(StringBuilder sb, string[] ignoredCns, string[] ignoredBns)
+   public static void AppendIsIgnoredCheck(StringBuilder sb, string[] ignoredBns, string[] ignoredCns)
    {
       sb.AppendLine("    #region IsIgnoredCheck");
-      sb.AppendLine("    private unsafe static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc)");
+      sb.AppendLine("    private unsafe static bool IsIgnoredNode(StatementNode node, ref ParsingContext pc, char* rawSource)");
       sb.AppendLine("    {");
 
       var hasIgnored = ignoredCns.Length > 0 || ignoredBns.Length > 0;
       if (hasIgnored)
       {
-         sb.AppendLine("        ref byte ptr = ref pc.GetKeyStartReference(node);");
+         sb.AppendLine("        byte* ptr = (byte*)(rawSource + node.KeyNode.Start);");
          sb.AppendLine("        switch (node)");
 
          sb.AppendLine("        {");
