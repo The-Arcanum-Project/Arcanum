@@ -263,6 +263,9 @@ public static class SaveMaster
          return;
       }
 
+      if (SaveDefnitionsFile(objsToSave) && objsToSave.Count == 0)
+         return;
+
       InjectionHelper.HandleObjectsWithOptionalInjectLogic(objsToSave, updateHandle);
       LastSavedHistoryNode = AppData.HistoryManager.Current;
    }
@@ -856,6 +859,6 @@ public static class SaveMaster
    public static void SaveAll(Action<string> updateHook)
    {
       CommandManager.FinalizeCurrentCommand();
-      SaveObjects(NeedsToBeSaved.Keys.Distinct().ToList(), updateHook);
+      Save(NeedsToBeSaved.Keys.Select(x => x.GetType()).Distinct().ToList(), updateHook);
    }
 }
