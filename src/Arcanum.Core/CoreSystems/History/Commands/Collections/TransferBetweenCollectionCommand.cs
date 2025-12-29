@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using static Arcanum.Core.CoreSystems.Selection.SelectionHelpers;
@@ -41,8 +41,7 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
         {
             var addition = new ObjectData((IEu5Object)val._getValue(_parentAttribute), val);
             _targets.Add(addition);
-            
-            addition.Source._removeFromCollection(_attribute, addition.Value);
+
             _target._addToCollection(_attribute, addition.Value);
             InvalidateTargets(addition.Source, false);
         }
@@ -67,9 +66,10 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
     
     public override void Redo()
     {
+        var targetCollection = (IList)_target._getValue(_attribute);
         foreach (var target in _targets)
         {
-            target.Value._setValue(_parentAttribute, _target);
+            targetCollection.Add(target.Value);
         }
         base.Redo();
     }
@@ -78,7 +78,8 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
     {
         foreach (var target in _targets)
         {
-            target.Value._setValue(_parentAttribute, target.Source);
+            var targetCollection = (IList)target.Source._getValue(_attribute);
+            targetCollection.Add(target.Value);
         }
         base.Undo();
     }
@@ -90,8 +91,7 @@ public class TransferBetweenLinksCommand : Eu5ObjectCommand
 
         var addition = new ObjectData((IEu5Object)value._getValue(_parentAttribute), value);
         _targets.Add(addition);
-        
-        addition.Source._removeFromCollection(_attribute, addition.Value);
+
         _target._addToCollection(_attribute, addition.Value);
 
         InvalidateTargets(target, false);

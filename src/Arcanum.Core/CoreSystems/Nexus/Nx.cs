@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.Nexus.AggregateLinkHandling;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Utils.DataStructures;
@@ -49,9 +50,11 @@ public static class Nx
    /// <param name="e"></param>
    /// <typeparam name="T"></typeparam>
    public static void ForceSet<T>(T value,
-                                  INexus target,
-                                  Enum e)
+      INexus target,
+      Enum e)
    {
+      if (target.IsAggregateLink(e) && NxAggregateLinkManager.ForceSet((IEu5Object)value!, (IEu5Object)target, e))
+         return;
       if (!target.IgnoreCommand(e))
          CommandManager.SetValueCommand((IEu5Object)target, e, value!);
       else
@@ -61,6 +64,8 @@ public static class Nx
    public static void ForceSet<T>(T value, IEu5Object[] targets, Enum e)
    {
       Debug.Assert(targets.Length > 0, nameof(targets) + " == 0");
+      if (targets[0].IsAggregateLink(e) && NxAggregateLinkManager.ForceSet((IEu5Object)value!, targets, e))
+         return;
       if (targets.Length == 1)
          ForceSet(value, targets[0], e);
       else if (!targets[0].IgnoreCommand(e))

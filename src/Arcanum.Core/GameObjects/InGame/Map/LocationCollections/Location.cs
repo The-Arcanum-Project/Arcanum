@@ -118,19 +118,8 @@ public partial class Location
    [Description("The Province this Location belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   public Province Province
-   {
-      get;
-      set
-      {
-         if (field != Province.Empty)
-            field.Locations._removeFromChild(this);
-         if (value != Province.Empty)
-            value.Locations._addFromChild(this);
-
-         field = value;
-      }
-   } = Province.Empty;
+   [PropertyConfig(aggregateLinktParent: "Locations", aggreateLinkType: AggregateLinkType.Child)]
+   public Province Province { get; set; } = Province.Empty;
 
    #region Map Management
 

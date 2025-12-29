@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -7,12 +8,20 @@ using Arcanum.Core.Utils.Pools;
 
 namespace Arcanum.Core.Utils.DataStructures;
 
-public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IEu5Object
+public interface IAggregateLink : IList
 {
-   public readonly Enum NxOwnerProp;
-   public readonly IEu5Object Owner;
-   public readonly Enum NxChildsProp;
+   public Enum NxOwnerProp { get; }
+   public IEu5Object Owner { get; }
+   public Enum NxChildsProp { get; }
+}
 
+public sealed class AggregateLink<T> : ObservableRangeCollection<T>, IAggregateLink where T : IEu5Object
+{
+   
+   public Enum NxOwnerProp { get; }
+   public IEu5Object Owner { get; }
+   public Enum NxChildsProp { get; }
+   
    public bool Lock;
 
    public AggregateLink(Enum nxOwnerProp, Enum nxChildsProp, IEu5Object owner)
@@ -68,6 +77,10 @@ public sealed class AggregateLink<T> : ObservableRangeCollection<T> where T : IE
       Lock = true;
       foreach (var item in newItems)
       {
+         var oldOwner = (IEu5Object)item._getValue(NxOwnerProp);
+         if (!IEu5Object.IsEmpty(oldOwner))
+            ((AggregateLink<T>)((IEu5Object)item._getValue(NxOwnerProp))._getValue(NxChildsProp)).Remove(item);
+
          item._setValue(NxOwnerProp, Owner);
       }
 

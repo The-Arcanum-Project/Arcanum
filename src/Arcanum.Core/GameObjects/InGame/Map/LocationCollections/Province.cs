@@ -13,6 +13,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Utils.DataStructures;
+using Nexus.Core;
 using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -61,20 +62,8 @@ public partial class Province
    [Description("The Area this Province belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   [PropertyConfig(aggregateLinktParent: "Provinces")]
-   public Area Area
-   {
-      get;
-      set
-      {
-         if (field != Area.Empty)
-            field.Provinces._removeFromChild(this);
-         if (value != Area.Empty)
-            value.Provinces._addFromChild(this);
-
-         field = value;
-      }
-   } = Area.Empty;
+   [PropertyConfig(aggregateLinktParent: "Provinces", aggreateLinkType: AggregateLinkType.Child)]
+   public Area Area { get; set; } = Area.Empty;
 
    [DefaultValue(null)]
    [SuppressAgs]

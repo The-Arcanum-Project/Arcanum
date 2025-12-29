@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.Registry;
 using Nexus.Core;
 
 namespace Arcanum.Core.GameObjects.BaseTypes;
@@ -110,6 +111,12 @@ public interface IEu5Object : ISearchable, INUI, IAgs
       }
 
       return nonDefaultProps[..index];
+   }
+
+   public static bool IsEmpty(IEu5Object obj)
+   {
+      var empty = (IEu5Object)EmptyRegistry.Empties[obj.GetType()];
+      return ReferenceEquals(obj, empty);
    }
 
    public void ResetToDefault()
