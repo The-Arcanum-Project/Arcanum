@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Welcome to Arcanum" id="Starting-Page">
+
+    <section-starting-page>
+        <title>
+            Arcanum
+        </title>
+        <description>
+                is an unofficial, community-developed modding tool designed for Europa Universalis V, with the primary
+                goal of
+                making the modding process more accessible, efficient and intuitive for new and experienced creators
+                alike.
+        </description>
+        <spotlight>
+            <card href="Install.md" badge="folder" summary="How to quickly install Arcanum.">
+                Installation Guide
+            </card>
+            <card href="Getting-Started.md" badge="check-list" summary="Get up to speed using Arcanum.">
+                Getting Started
+            </card>
+        </spotlight>
+        <primary>
+            <title>Discover More About Arcanum</title>
+            <card href="About-Arcanum.md" summary="Learn more about Arcanum and its purpose.">
+                About Arcanum
+            </card>
+            <card href="Features.md" summary="What features does Arcanum offer?">
+                Supported Features
+            </card>
+        </primary>
+    </section-starting-page>
+</topic>

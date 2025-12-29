@@ -4,17 +4,17 @@
 
 <instance-profile id="u"
                   name="Arcanum User Documentation"
-                  start-page="About-Arcanum.md">
+                  start-page="Starting-Page.topic">
 
-        <toc-element topic="About-Arcanum.md"/>
-        <toc-element topic="Getting-Started.md">
-            <toc-element topic="Install.md"/>
-            <toc-element topic="Quick-Start-Guide.md"/>
-        </toc-element>
-        <toc-element topic="Features.md">
-            <toc-element topic="ErrorSystem.md"/>
-        </toc-element>
-        <toc-element topic="Main-Menu.md">
-        </toc-element>
-        <toc-element topic="About-this-Documentation.md"/>
-    </instance-profile>
+    <toc-element topic="Starting-Page.topic"/>
+    <toc-element topic="About-Arcanum.md"/>
+    <toc-element topic="Getting-Started.md">
+        <toc-element topic="Install.md"/>
+        <toc-element topic="Quick-Start-Guide.md"/>
+    </toc-element>
+    <toc-element topic="Features.md">
+        <toc-element topic="Main-Menu.md"/>
+        <toc-element topic="ErrorSystem.md"/>
+    </toc-element>
+    <toc-element topic="About-this-Documentation.md"/>
+</instance-profile>
