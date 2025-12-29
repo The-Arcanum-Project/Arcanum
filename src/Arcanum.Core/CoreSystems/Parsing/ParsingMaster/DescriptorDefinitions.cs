@@ -282,7 +282,7 @@ public static class DescriptorDefinitions
    public static readonly FileDescriptor CountryDefinitionDescriptor =
       new(["in_game", "setup", "countries"],
           new("country_definitions", "txt", "#"),
-          [new CountryDefinitionParsing([ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0]])],
+          [new CountryDefinitionParsing([ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0], LocationDescriptor.LoadingService[0]])],
           false);
 
    public static readonly FileDescriptor MainMenuSetupParsingDescriptor =
