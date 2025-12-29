@@ -110,7 +110,10 @@ public static class ParsingToolBox
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
                                              ref pc))
-         pc.Fail();
+      {
+         value = null;
+         return pc.Fail();
+      }
 
       if (node.Value is LiteralValueNode lvn)
       {
@@ -131,8 +134,7 @@ public static class ParsingToolBox
                                      pc.SliceString(node),
                                      Args);
       value = null;
-      pc.Fail();
-      return false;
+      return pc.Fail();
    }
 
    /// <summary>
@@ -655,16 +657,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
@@ -680,16 +680,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       value = new() { Key = pc.SliceString(node), Value = pc.SliceString(lvn) };
@@ -705,16 +703,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseCountry(ref pc, out value);
@@ -761,16 +757,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!Globals.Cultures.TryGetValue(pc.SliceString(node), out var culture))
@@ -812,16 +806,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!Globals.Religions.TryGetValue(pc.SliceString(node), out var religion))
@@ -863,16 +855,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!Globals.ReligiousSchools.TryGetValue(pc.SliceString(node), out var rs))
@@ -914,16 +904,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseCharacter(ref pc, out value);
@@ -938,16 +926,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var name = pc.SliceString(lvn);
@@ -998,16 +984,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!cn.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       value = new() { SavingKey = key, Name = pc.SliceString(lvn) };
@@ -1038,16 +1022,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParsePopType(ref pc, out value);
@@ -1154,16 +1136,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseDesignateHeirReason(ref pc, out value);
@@ -1178,16 +1158,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseEstate(ref pc, out value);
@@ -1210,16 +1188,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseTrait(ref pc, out value);
@@ -1234,16 +1210,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseParliamentType(ref pc, out value);
@@ -1258,16 +1232,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var key = pc.SliceString(node);
@@ -1313,16 +1285,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var key = pc.SliceString(node);
@@ -1377,16 +1347,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var key = pc.SliceString(node);
@@ -1531,16 +1499,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
@@ -1658,9 +1624,8 @@ public static class ParsingToolBox
           !node.Value.IsLiteralValueNode(ref pc, out var lvn) ||
           !lvn.TryParseBool(ref pc, out var isPresent))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var key = pc.SliceString(node);
@@ -1692,16 +1657,14 @@ public static class ParsingToolBox
                                              TokenType.Equals,
                                              ref pc))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       return lvn.TryParseArtistType(ref pc, out value);
@@ -1718,9 +1681,8 @@ public static class ParsingToolBox
           !node.Value.IsLiteralValueNode(ref pc, out var lvnValue) ||
           !lvnValue.TryParseInt(ref pc, out var level))
       {
-         pc.Fail();
          value = null;
-         return false;
+         return pc.Fail();
       }
 
       var key = pc.SliceString(node);
