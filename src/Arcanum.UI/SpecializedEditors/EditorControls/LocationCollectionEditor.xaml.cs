@@ -11,7 +11,7 @@ using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Arcanum.UI.Components.Windows.MinorWindows;
-using Arcanum.UI.SpecializedEditors.Editors;
+using Arcanum.UI.SpecializedEditors.Management;
 using Arcanum.UI.SpecializedEditors.Util;
 
 namespace Arcanum.UI.SpecializedEditors.EditorControls;
@@ -27,7 +27,7 @@ public partial class LocationCollectionEditor
    private Type _currentChildType = null!;
    private Type _currentParentType = null!;
 
-   private LocationCollectionSpecializedEditor _editor = null!;
+   private ISpecializedEditor _editor = null!;
 
    public static readonly DependencyProperty LocationCollectionProperty =
       DependencyProperty.Register(nameof(LocationCollection),
@@ -43,7 +43,7 @@ public partial class LocationCollectionEditor
 
    public void SetLocationCollection<T>(IEu5Object locationCollection,
                                         AggregateLink<T> children,
-                                        LocationCollectionSpecializedEditor editor) where T : IEu5Object
+                                        ISpecializedEditor editor) where T : IEu5Object
    {
       _editor = editor;
       if (_parentCache is not Collection<T>)

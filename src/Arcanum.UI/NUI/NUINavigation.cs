@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.NUI.Generator;
+using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI;
 
@@ -83,7 +84,7 @@ public class NUINavigation(int capacity)
    {
       if (navH.Root.Content is IDisposable oldView)
          oldView.Dispose();
-      Eu5UiGen.GenerateAndSetView(navH);
+      MainWindowGen.GenerateAndSetView(navH);
    }
 
    public void InvalidateUi(IEu5Object target)
