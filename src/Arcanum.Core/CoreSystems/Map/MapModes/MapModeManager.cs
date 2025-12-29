@@ -99,16 +99,20 @@ public static partial class MapModeManager
 
    public static IMapMode? GetMapModeForButtonIndex(int i)
    {
-      if (Config.Settings.MapModeConfig.QuickAccessMapModes.Count > i)
+      return i switch
       {
-         var modeType = Config.Settings.MapModeConfig.QuickAccessMapModes[i];
-         return modeType != MapModeType.Locations ? Get(modeType) : null;
-      }
-
-      if (!Config.Settings.MapModeConfig.DefaultAssignMapModes)
-         return null;
-
-      return i < Enum.GetNames<MapModeType>().Length ? Get((MapModeType)i) : null;
+         0 => Get(Config.Settings.MapModeConfig.MapMode01),
+         1 => Get(Config.Settings.MapModeConfig.MapMode02),
+         2 => Get(Config.Settings.MapModeConfig.MapMode03),
+         3 => Get(Config.Settings.MapModeConfig.MapMode04),
+         4 => Get(Config.Settings.MapModeConfig.MapMode05),
+         5 => Get(Config.Settings.MapModeConfig.MapMode06),
+         6 => Get(Config.Settings.MapModeConfig.MapMode07),
+         7 => Get(Config.Settings.MapModeConfig.MapMode08),
+         8 => Get(Config.Settings.MapModeConfig.MapMode09),
+         9 => Get(Config.Settings.MapModeConfig.MapMode10),
+         _ => null,
+      };
    }
 
    private static void UpdateColors(Color4[] colors, MapModeType type)
@@ -174,4 +178,41 @@ public static partial class MapModeManager
 
    public static Color4 GetWaterColorForLocation(Location location)
       => new(_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
+
+   public static void SetQuickMapModeSetting(int buttonIndex, MapModeType enumValue)
+   {
+      switch (buttonIndex)
+      {
+         case 0:
+            Config.Settings.MapModeConfig.MapMode01 = enumValue;
+            break;
+         case 1:
+            Config.Settings.MapModeConfig.MapMode02 = enumValue;
+            break;
+         case 2:
+            Config.Settings.MapModeConfig.MapMode03 = enumValue;
+            break;
+         case 3:
+            Config.Settings.MapModeConfig.MapMode04 = enumValue;
+            break;
+         case 4:
+            Config.Settings.MapModeConfig.MapMode05 = enumValue;
+            break;
+         case 5:
+            Config.Settings.MapModeConfig.MapMode06 = enumValue;
+            break;
+         case 6:
+            Config.Settings.MapModeConfig.MapMode07 = enumValue;
+            break;
+         case 7:
+            Config.Settings.MapModeConfig.MapMode08 = enumValue;
+            break;
+         case 8:
+            Config.Settings.MapModeConfig.MapMode09 = enumValue;
+            break;
+         case 9:
+            Config.Settings.MapModeConfig.MapMode10 = enumValue;
+            break;
+      }
+   }
 }

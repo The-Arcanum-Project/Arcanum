@@ -14,13 +14,65 @@ public class MapModeConfig() : InternalSearchableSetting(Config.Settings)
       set => SetNotifyProperty(ref field, value);
    } = 10;
 
-   [Description("The map modes that will be shown in the quick access bar. " +
-                "These must be valid enum values from the MapModeType enum or from any registered plugin map mode enum.")]
-   public List<MapModeManager.MapModeType> QuickAccessMapModes
+   public MapModeManager.MapModeType MapMode01
    {
       get;
       set => SetNotifyProperty(ref field, value);
-   } = new(10);
+   } = MapModeManager.MapModeType.Locations;
+
+   public MapModeManager.MapModeType MapMode02
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Provinces;
+
+   public MapModeManager.MapModeType MapMode03
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Areas;
+
+   public MapModeManager.MapModeType MapMode04
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Topography;
+
+   public MapModeManager.MapModeType MapMode05
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Climate;
+
+   public MapModeManager.MapModeType MapMode06
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Religion;
+
+   public MapModeManager.MapModeType MapMode07
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Culture;
+
+   public MapModeManager.MapModeType MapMode08
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Political;
+
+   public MapModeManager.MapModeType MapMode09
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.Vegetation;
+
+   public MapModeManager.MapModeType MapMode10
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = MapModeManager.MapModeType.PluralityCulture;
 
    [Description("If enabled, MapModeBUttons will automatically have the default map modes assigned to them.")]
    [DefaultValue(true)]
