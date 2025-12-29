@@ -58,6 +58,8 @@ public abstract class Eu5ObjectCommand : ICommand
 
     public virtual void Undo()
     {
+        if (!_initialized)
+            FinalizeSetup();
         SaveMaster.CommandUndone(this);
         InvalidateUI();
     }
