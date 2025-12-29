@@ -1,12 +1,10 @@
-using Arcanum.API.Core.IO;
-using Arcanum.Core.CoreSystems.ConsoleServices;
-
-namespace UnitTests;
-
 using Arcanum.API;
 using Arcanum.API.Console;
+using Arcanum.API.Core.IO;
+using Arcanum.Core.CoreSystems.ConsoleServices;
 using Moq;
-using NUnit.Framework;
+
+namespace UnitTests;
 
 [TestFixture]
 public class ConsoleServiceImplTests
@@ -49,6 +47,7 @@ public class ConsoleServiceImplTests
                                                           },
                                                           ClearanceLevel.Debug,
                                                           DefaultCommands.CommandCategory.Debug,
+                                                          null,
                                                           "alias1",
                                                           "alias2");
    }
