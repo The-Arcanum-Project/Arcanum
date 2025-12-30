@@ -20,7 +20,6 @@
         <Folder Include="CoreSystems\Parsing\MapParsing\Smoothing\"/>
         <Folder Include="GameObjects\InGame\"/>
         <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
-        <Folder Include="MapEditor\"/>
         <Folder Include="Utils\SearchingAlgorithms\"/>
     </ItemGroup>
 
