@@ -20,6 +20,28 @@
         <Folder Include="CoreSystems\Parsing\MapParsing\Smoothing\"/>
         <Folder Include="GameObjects\InGame\"/>
         <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
+        <Folder Include="MapEditor\Engine\Core\History\"/>
+        <Folder Include="MapEditor\Engine\Core\Input\"/>
+        <Folder Include="MapEditor\Engine\Core\Math\"/>
+        <Folder Include="MapEditor\Engine\Modes\Draft\Commands\"/>
+        <Folder Include="MapEditor\Engine\Modes\Draft\Generators\"/>
+        <Folder Include="MapEditor\Engine\Modes\Draft\Graph\"/>
+        <Folder Include="MapEditor\Engine\Modes\Draft\Models\"/>
+        <Folder Include="MapEditor\Engine\Modes\Nudge\Commands\"/>
+        <Folder Include="MapEditor\Engine\Modes\Nudge\Entities\"/>
+        <Folder Include="MapEditor\Engine\Modes\Nudge\Rendering\"/>
+        <Folder Include="MapEditor\Engine\Modes\Nudge\Spatial\"/>
+        <Folder Include="MapEditor\Engine\Modes\Nudge\Tools\"/>
+        <Folder Include="MapEditor\Engine\Modes\Sculpt\Brushes\"/>
+        <Folder Include="MapEditor\Engine\Modes\Sculpt\Commands\"/>
+        <Folder Include="MapEditor\Engine\Modes\Sculpt\Layers\"/>
+        <Folder Include="MapEditor\Engine\Modes\Shared\"/>
+        <Folder Include="MapEditor\Engine\Rendering\API\"/>
+        <Folder Include="MapEditor\Engine\Rendering\Resources\Buffers\"/>
+        <Folder Include="MapEditor\Engine\Rendering\Resources\Shaders\"/>
+        <Folder Include="MapEditor\Engine\Rendering\Resources\Textures\"/>
+        <Folder Include="MapEditor\Engine\Scene\"/>
+        <Folder Include="MapEditor\Workspace\"/>
         <Folder Include="Utils\SearchingAlgorithms\"/>
     </ItemGroup>
 
