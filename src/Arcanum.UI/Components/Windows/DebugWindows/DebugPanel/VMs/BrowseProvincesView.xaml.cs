@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 

@@ -1,5 +1,7 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -13,16 +15,16 @@ public class AreaMapMode : LocationBasedMapMode
    public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Area);
-      if (parent == null)
+      if (parent == null!)
          return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
 
       return ((IIndexRandomColor)parent).Color;
    }
 
    public override bool IsLandOnly => false;
-   public override string[] GetTooltip(Location location) => ["Area: " + (location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId ?? "None")];
+   public override string[] GetTooltip(Location location) => ["Area: " + (location.GetFirstParentOfType(LocationCollectionType.Area).UniqueId)];
 
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Area)?.UniqueId;
+   public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Area).UniqueId;
 
    public override object?[]? GetVisualObject(Location location) => null;
 

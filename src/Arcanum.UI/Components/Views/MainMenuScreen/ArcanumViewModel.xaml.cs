@@ -4,7 +4,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using Arcanum.Core.CoreSystems.IO;
-using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.vdfParser;
@@ -56,9 +55,9 @@ public partial class ArcanumViewModel
          RecentProjectsPanel.Children.Remove(card);
          _recentProjectDescriptors.Remove(descriptor);
       }
-      
+
       AppData.MainMenuScreenDescriptor.ProjectFiles.Remove(descriptor);
-      if(AppData.MainMenuScreenDescriptor.LastProjectFile == descriptor.ModName)
+      if (AppData.MainMenuScreenDescriptor.LastProjectFile == descriptor.ModName)
          AppData.MainMenuScreenDescriptor.LastProjectFile = null;
 
       AddMoreRecentProjects();
@@ -74,7 +73,8 @@ public partial class ArcanumViewModel
    {
       var defaultPath = VdfParser.GetEu5Path();
       var path = IO.SelectFolder(defaultPath, "Select the EU5 vanilla folder");
-      if (path is not null && !path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
+      if (path is not null && !path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase))
+      {
          MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
          var combine = Path.Combine(path, "game");
          if (path.EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) && Path.Exists(combine))
@@ -82,6 +82,7 @@ public partial class ArcanumViewModel
             path = combine;
          }
       }
+
       VanillaFolderTextBox.Text = path ?? string.Empty;
    }
 
@@ -139,6 +140,5 @@ public class ZeroToVisibilityConverter : IValueConverter
       return Visibility.Collapsed;
    }
 
-   public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-      => throw new NotImplementedException();
+   public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }

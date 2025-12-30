@@ -1,5 +1,7 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -14,18 +16,15 @@ public class ContinentMapMode : LocationBasedMapMode
    public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Continent);
-      if (parent == null)
+      if (parent == null!)
          return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
 
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public override string[] GetTooltip(Location location) =>
-   [
-      "Continent: " + (location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId ?? "None")
-   ];
+   public override string[] GetTooltip(Location location) => ["Continent: " + (location.GetFirstParentOfType(LocationCollectionType.Continent).UniqueId),];
 
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Continent)?.UniqueId;
+   public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Continent).UniqueId;
 
    public override object?[]? GetVisualObject(Location location) => null;
 

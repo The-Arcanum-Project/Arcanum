@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 

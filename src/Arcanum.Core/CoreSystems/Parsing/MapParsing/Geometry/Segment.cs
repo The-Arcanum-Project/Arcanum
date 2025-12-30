@@ -1,37 +1,47 @@
-﻿namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-public class BorderSegment
+namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+
+public readonly struct BorderSegment()
 {
-   public List<Vector2I> Points { get; } = [];
+   public readonly List<Vector2I> Points = [];
 }
 
-public readonly struct BorderSegmentDirectional : ICoordinateAdder
+[SkipLocalsInit]
+public readonly struct BorderSegmentDirectional(BorderSegment segment, bool isForward) : ICoordinateAdder
 {
-   public readonly BorderSegment Segment;
-   public readonly bool IsForward;
+   public readonly BorderSegment Segment = segment;
+   public readonly bool IsForward = isForward;
 
-   public BorderSegmentDirectional(BorderSegment segment, bool isForward)
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void AddTo(List<Vector2I> target)
    {
-      Segment = segment;
-      IsForward = isForward;
-   }
+      ReadOnlySpan<Vector2I> sourceSpan = CollectionsMarshal.AsSpan(Segment.Points);
 
-   public void AddTo(List<Vector2I> points)
-   {
+      var count = sourceSpan.Length;
+      if (count == 0)
+         return;
+
+      var writeStartIndex = target.Count;
+      CollectionsMarshal.SetCount(target, writeStartIndex + count);
+
+      var targetSpan = CollectionsMarshal.AsSpan(target);
+      var destSlice = targetSpan.Slice(writeStartIndex, count);
+
       if (IsForward)
-         points.AddRange(Segment.Points);
+         sourceSpan.CopyTo(destSlice);
       else
-         for (var i = Segment.Points.Count - 1; i >= 0; i--)
-            points.Add(Segment.Points[i]);
+      {
+         ref var srcStart = ref MemoryMarshal.GetReference(sourceSpan);
+         ref var destStart = ref MemoryMarshal.GetReference(destSlice);
+
+         for (var i = 0; i < count; i++)
+            Unsafe.Add(ref destStart, i) = Unsafe.Add(ref srcStart, count - 1 - i);
+      }
    }
 
-   public BorderSegmentDirectional Invert()
-   {
-      return new(Segment, !IsForward);
-   }
+   public BorderSegmentDirectional Invert() => new(Segment, !IsForward);
 
-   public override string ToString()
-   {
-      return string.Join(", ", IsForward ? Segment.Points : Segment.Points.AsEnumerable().Reverse());
-   }
+   public override string ToString() => IsForward ? "Fwd" : "Rev";
 }

@@ -1,8 +1,8 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.GameObjects.Cultural;
 using Arcanum.Core.Utils.Sorting;
+using ArtistType = Arcanum.Core.GameObjects.InGame.Cultural.ArtistType;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

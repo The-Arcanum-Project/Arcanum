@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Religious;
+﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using ReligionGroup = Arcanum.Core.GameObjects.InGame.Religious.ReligionGroup;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

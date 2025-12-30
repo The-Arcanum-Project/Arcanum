@@ -6,9 +6,9 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Utils.Sorting;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

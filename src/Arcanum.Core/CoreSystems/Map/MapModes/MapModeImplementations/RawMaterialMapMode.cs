@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
-using Arcanum.Core.GameObjects.Economy;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Colors;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using RawMaterial = Arcanum.Core.GameObjects.InGame.Economy.RawMaterial;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -12,8 +12,8 @@ public class RawMaterialMapMode : LocationBasedMapMode
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Goods;
    public override string Description => "Displays the predominant goods produced in each location on the map.";
    public string? IconSource => null;
-   private bool _isInitialized = false;
-   private int _emptyColor = 0;
+   private bool _isInitialized;
+   private int _emptyColor;
 
    public override int GetColorForLocation(Location location)
    {

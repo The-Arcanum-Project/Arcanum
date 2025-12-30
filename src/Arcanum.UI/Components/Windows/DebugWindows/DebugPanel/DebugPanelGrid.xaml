@@ -66,6 +66,10 @@
 
             <styleClasses:BaseButton Content = "Experimental Rename" Margin = "2" Padding = "4"
                                      Click = "ExperimentalRenameButton_Click" />
+
+            <styleClasses:BaseButton Content = "Command Generator" Margin = "2" Padding = "4"
+                                     Click = "CommandGenerator_OnClick">
+            </styleClasses:BaseButton>
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

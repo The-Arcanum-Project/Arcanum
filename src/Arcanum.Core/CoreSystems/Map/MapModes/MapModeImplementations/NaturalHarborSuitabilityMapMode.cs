@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.Utils.Colors;
+﻿using Arcanum.Core.Utils.Colors;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

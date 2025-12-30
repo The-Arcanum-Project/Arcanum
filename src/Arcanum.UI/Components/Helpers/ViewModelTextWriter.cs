@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Arcanum.UI.Components.Helpers;
 
@@ -10,11 +11,15 @@ public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
 {
    private readonly Action<string> _writeAction = writeAction ?? throw new ArgumentNullException(nameof(writeAction));
    private readonly StringBuilder _buffer = new();
+   private readonly Dispatcher _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
 
    public override void Write(char value)
    {
+      if (_dispatcher == null! || _dispatcher.HasShutdownStarted)
+         return;
+
       if (value == '\n')
-         Application.Current.Dispatcher.Invoke(() =>
+         _dispatcher.Invoke(() =>
          {
             _writeAction(_buffer.ToString());
             _buffer.Clear();
@@ -25,6 +30,9 @@ public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
 
    public override void Write(string? value)
    {
+      if (_dispatcher == null! || _dispatcher.HasShutdownStarted)
+         return;
+
       if (string.IsNullOrEmpty(value))
          return;
 
@@ -34,7 +42,7 @@ public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
       {
          _buffer.Append(lines[i]);
          if (i < lines.Length - 1)
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                _writeAction(_buffer.ToString());
                _buffer.Clear();
@@ -74,28 +82,9 @@ public class LogViewModel : INotifyPropertyChanged
       Console.SetOut(LogWriter);
    }
 
-   // Example method to simulate logging
-   public async Task StartLoggingAsync()
-   {
-      await Task.Run(async () =>
-      {
-         for (var i = 0; i < 10; i++)
-         {
-            await LogWriter.WriteLineAsync($"Log entry {i} at {DateTime.Now:T}");
-            Console.WriteLine($"Console message {i}...");
-            await Task.Delay(500);
-         }
-
-         await LogWriter.WriteLineAsync("Logging finished.");
-      });
-   }
-
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   protected void OnPropertyChanged([CallerMemberName] string? name = null)
-   {
-      PropertyChanged?.Invoke(this, new(name));
-   }
+   private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new(name));
 }
 
 // Helper class to adapt a TextWriter to a Stream for StreamWriter

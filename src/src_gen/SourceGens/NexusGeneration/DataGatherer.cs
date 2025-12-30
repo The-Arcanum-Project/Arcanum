@@ -10,23 +10,6 @@ public static class DataGatherer
 
    private static INamedTypeSymbol? _aggregateLinkSymbol;
 
-   public static INamedTypeSymbol? GetNexusClassType(GeneratorSyntaxContext context, CancellationToken token)
-   {
-      var classDeclaration = (ClassDeclarationSyntax)context.Node;
-
-      if (context.SemanticModel.GetDeclaredSymbol(classDeclaration, token) is INamedTypeSymbol
-          classSymbol)
-      {
-         var nexusInterface = context.SemanticModel.Compilation.GetTypeByMetadataName(INEXUS_INTERFACE);
-         if (nexusInterface != null &&
-             classSymbol.AllInterfaces.Contains(nexusInterface, SymbolEqualityComparer.Default))
-            return classSymbol;
-      }
-
-      _aggregateLinkSymbol ??= context.SemanticModel.Compilation.GetTypeByMetadataName(AGGREGATE_LINK_CLASS_NAME);
-      return null;
-   }
-
    public static List<NexusPropertyData> CreateNexusPropertyDataList(INamedTypeSymbol cs,
                                                                      SourceProductionContext context,
                                                                      INamedTypeSymbol enumerableSymbol,
@@ -54,7 +37,7 @@ public static class DataGatherer
    {
       var classDeclaration = (ClassDeclarationSyntax)context.Node;
 
-      if (ModelExtensions.GetDeclaredSymbol(context.SemanticModel, classDeclaration, token) is INamedTypeSymbol
+      if (context.SemanticModel.GetDeclaredSymbol(classDeclaration, token) is INamedTypeSymbol
           classSymbol)
       {
          var nexusInterface = context.SemanticModel.Compilation.GetTypeByMetadataName(INEXUS_INTERFACE);

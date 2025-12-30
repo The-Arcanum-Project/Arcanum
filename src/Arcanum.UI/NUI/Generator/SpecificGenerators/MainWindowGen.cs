@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.SpecializedEditors.Editors;
 using Arcanum.UI.SpecializedEditors.Management;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
 namespace Arcanum.UI.NUI.Generator.SpecificGenerators;
 
@@ -20,7 +20,12 @@ public static class MainWindowGen
    {
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
       // TODO: Initialize all the Editors to the manager
-      SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new ProvinceEditor());
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new LocationCollectionSpecializedEditor<Location, Province>(Province.Field.Locations));
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Area), new LocationCollectionSpecializedEditor<Province, Area>(Area.Field.Provinces));
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Region), new LocationCollectionSpecializedEditor<Area, Region>(Region.Field.Areas));
+      SpecialEditorMngr.RegisterTypeEditor(typeof(SuperRegion), new LocationCollectionSpecializedEditor<Region, SuperRegion>(SuperRegion.Field.Regions));
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Continent), new LocationCollectionSpecializedEditor<SuperRegion, Continent>(Continent.Field.SuperRegions));
+      
       SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new PopsEditor());
 
       _specialEditorsHost = specialEditorsHost;
@@ -57,7 +62,7 @@ public static class MainWindowGen
    private static void SetSpecializedEditors(NavH navh)
    {
       var content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
-      if(!Equals(_specialEditorsHost.Content, content))
+      if (!Equals(_specialEditorsHost.Content, content))
          _specialEditorsHost.Content = content;
       if (content is TabControl tc)
          tc.SelectedIndex = 0;

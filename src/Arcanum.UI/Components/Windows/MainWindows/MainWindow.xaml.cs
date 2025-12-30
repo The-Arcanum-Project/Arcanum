@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Clipboard;
-using Arcanum.Core.CoreSystems.ConsoleServices;
 using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -25,6 +26,7 @@ using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Components.Windows.MainWindows.MainWindowsHelpers;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -42,7 +44,7 @@ using NUINavigation = Arcanum.UI.NUI.NUINavigation;
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
-public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
+public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
    private const string HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM = "https://eu5.paradoxwikis.com/Arcanum";
    private const int DEFAULT_WIDTH = 1920;
@@ -143,6 +145,26 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
       }
    } = null!;
 
+   public ImageSource? CurrentActionIcon
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null;
+
+   public string CurrentActionText
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null!;
+
    public string ClipboardText
    {
       get;
@@ -155,6 +177,13 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
          OnPropertyChanged();
       }
    } = null!;
+
+   #endregion
+
+   #region Fields
+
+   // ReSharper disable once NotAccessedField.Local
+   private readonly CurrentActionVisualizer _cav;
 
    #endregion
 
@@ -177,6 +206,7 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
       Title = AppData.ProductName;
       VersionNumber = $"v{AppData.AppVersion}";
+      _cav = new(this);
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -449,26 +479,15 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
    }
 
-   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-   {
-      if (EqualityComparer<T>.Default.Equals(field, value))
-         return false;
-
-      field = value;
-      OnPropertyChanged(propertyName);
-      return true;
-   }
-
    private void OpenConsoleCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
    {
-      var consoleWindow = new ConsoleWindow(new ConsoleServiceImpl(LifecycleManager.Instance.PluginManager.Host,
-                                                                   "DebugConsole",
-                                                                   category: DefaultCommands.CommandCategory.All));
+      var console = LifecycleManager.Instance.PluginManager.Host.GetService<IConsoleService>();
+      var consoleWindow = new ConsoleWindow(console);
       consoleWindow.Show();
    }
 
@@ -699,6 +718,19 @@ public partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 
    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
    {
+      if (SaveMaster.GetNeedsToBeSaveCount > 0)
+      {
+         var result = MBox.Show("There are unsaved changes. Do you really want to close without saving?",
+                                "Unsaved Changes",
+                                MBoxButton.OKCancel,
+                                MessageBoxImage.Warning);
+         if (result == MBoxResult.Cancel)
+         {
+            e.Cancel = true;
+            return;
+         }
+      }
+
       UIHandle.Instance.LogWindowHandle.CloseWindow();
       Application.Current.Dispatcher.Invoke(() =>
       {

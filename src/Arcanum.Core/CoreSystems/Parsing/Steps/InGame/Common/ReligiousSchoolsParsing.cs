@@ -2,7 +2,7 @@
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.Utils.Sorting;
-using ReligiousSchool = Arcanum.Core.GameObjects.Religious.ReligiousSchool;
+using ReligiousSchool = Arcanum.Core.GameObjects.InGame.Religious.ReligiousSchool;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

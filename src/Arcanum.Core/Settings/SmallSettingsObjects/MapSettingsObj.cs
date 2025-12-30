@@ -8,6 +8,15 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
 public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
 {
+   
+   [Description("Will render map with fast border smoothing and without a pixel perfect result. (Applies on restart)")]
+   [DefaultValue(false)]
+   public bool UseFastBorderSmoothing
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = false;
+   
    [Description("If animations are used on map borders.")]
    [DefaultValue(true)]
    public bool AllowAnimatedBorders
@@ -207,4 +216,20 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = 1000;
+
+   [Description("The interval in milliseconds for the flashing effect when previewing search results on the map.")]
+   [DefaultValue(200)]
+   public int FlashIntervalMs
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 200;
+
+   [Description("If a flashing effect is used to preview search results on the map.")]
+   [DefaultValue(true)]
+   public bool UseFlashingPreviewEffect
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = true;
 }

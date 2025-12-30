@@ -1,5 +1,5 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Map;
+﻿using Climate = Arcanum.Core.GameObjects.InGame.Map.Climate;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 

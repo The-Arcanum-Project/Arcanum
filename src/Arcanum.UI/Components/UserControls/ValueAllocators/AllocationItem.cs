@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
-using Arcanum.Core.GameObjects.Pops;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 

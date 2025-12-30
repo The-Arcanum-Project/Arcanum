@@ -3,7 +3,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
-using Estate = Arcanum.Core.GameObjects.Cultural.Estate;
+using Estate = Arcanum.Core.GameObjects.InGame.Cultural.Estate;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

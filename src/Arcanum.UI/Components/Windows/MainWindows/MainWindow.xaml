@@ -151,21 +151,21 @@
     </Window.CommandBindings>
 
     <styleClasses:BaseWindow.HeaderContent>
-        <StackPanel Orientation = "Horizontal">
+        <DockPanel LastChildFill = "True" HorizontalAlignment = "Stretch">
             <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}"
                                      ToolTip = "Go Back to previous object view"
                                      Command = "mainWindow:MwCommands.GoToPreviousINUICommand"
-                                     behaviors:WindowDrag.IsDoubleClickExclusionZone = "True">
+                                     behaviors:WindowDrag.IsDoubleClickExclusionZone = "True" DockPanel.Dock = "Left">
                 <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/GoBack20x20.png" />
             </styleClasses:BaseButton>
             <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}"
                                      ToolTip = "Go Forward to next object view"
                                      Command = "mainWindow:MwCommands.GoToNextINUICommand"
-                                     behaviors:WindowDrag.IsDoubleClickExclusionZone = "True">
+                                     behaviors:WindowDrag.IsDoubleClickExclusionZone = "True" DockPanel.Dock = "Left">
                 <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/GoForward20x20.png" />
             </styleClasses:BaseButton>
 
-            <Menu>
+            <Menu DockPanel.Dock = "Left">
                 <uc:SearchableMenuItem Header = "File">
                     <uc:SearchableMenuItem Header = "Create new Project"
                                            Command = "mainWindow:MwCommands.NewProjectFileCommand">
@@ -317,7 +317,19 @@
                     <uc:SearchableMenuItem Header = "Parser Test" Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
             </Menu>
-        </StackPanel>
+            <!-- Action indicator panel -->
+            <StackPanel Width = "300" Orientation = "Horizontal" DockPanel.Dock = "Right">
+                <!-- Image to indicate the type of action that was last performed -->
+                <Image Width = "20" Height = "20" Margin = "0,0,5,0" VerticalAlignment = "Center"
+                       Source = "{Binding CurrentActionIcon, RelativeSource={RelativeSource AncestorType= styleClasses:BaseWindow}}" />
+                <!-- TextBlock to display a brief description of the last action -->
+                <TextBlock VerticalAlignment = "Center" TextTrimming = "CharacterEllipsis"
+                           HorizontalAlignment = "Stretch" TextAlignment = "Left"
+                           Text = "{Binding CurrentActionText, RelativeSource={RelativeSource AncestorType= styleClasses:BaseWindow}}" />
+            </StackPanel>
+            <!-- Filler to allow dragging the window -->
+            <Border />
+        </DockPanel>
     </styleClasses:BaseWindow.HeaderContent>
 
     <styleClasses:BaseWindow.FooterContent>

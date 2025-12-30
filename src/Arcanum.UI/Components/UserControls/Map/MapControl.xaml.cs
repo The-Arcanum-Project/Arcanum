@@ -1,13 +1,18 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
@@ -15,6 +20,7 @@ using Arcanum.UI.MapInteraction;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Point = System.Windows.Point;
 
 namespace Arcanum.UI.Components.UserControls.Map;
@@ -46,6 +52,8 @@ public partial class MapControl
    private Color4[] _currentBackgroundColor = null!;
    private Color4[] _selectionColor = null!;
    public event Action<Vector2>? OnAbsolutePositionChanged;
+
+   public event Action<Location, Vector2>? OnAbsoluteLocationChangedLocation;
 
    public event Action<MapClickEventArgs>? OnMapClick;
 
@@ -84,12 +92,11 @@ public partial class MapControl
       HwndHostContainer.MouseEnter += (_, _) => Window.GetWindow(this)!.KeyDown += MapInteractionManager.HandleKeyDown;
       HwndHostContainer.MouseLeave += (_, _) => Window.GetWindow(this)!.KeyDown -= MapInteractionManager.HandleKeyDown;
 
-      OnAbsolutePositionChanged += pos =>
+      OnAbsoluteLocationChangedLocation += (loc, _) =>
       {
          if (!Selection.MapManager.IsMapDataInitialized)
             return;
 
-         var loc = Selection.MapManager.FindLocationAt(pos) ?? Location.Empty;
          Selection.CurrentLocationBelowMouse = loc;
          Selection.Clear(SelectionTarget.Hover);
          Selection.Modify(SelectionTarget.Hover, SelectionMethod.Simple, [loc], true);
@@ -315,6 +322,8 @@ public partial class MapControl
    {
       Coords.InvalidateCache(position);
       OnAbsolutePositionChanged?.Invoke(CurrentPos);
+      var location = Selection.GetLocation(CurrentPos);
+      OnAbsoluteLocationChangedLocation?.Invoke(location, CurrentPos);
    }
 
    private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)
@@ -334,5 +343,110 @@ public partial class MapControl
    {
       if (Keyboard.Modifiers != ModifierKeys.None)
          e.Handled = true;
+   }
+
+   private void ExportBackColorsToBitmap()
+   {
+      if (_mapWidth <= 0 || _mapHeight <= 0)
+         return;
+
+      using var bmp = new Bitmap(_mapWidth, _mapHeight, PixelFormat.Format24bppRgb);
+      var bmpData = bmp.LockBits(new(0, 0, _mapWidth, _mapHeight),
+                                 ImageLockMode.WriteOnly,
+                                 bmp.PixelFormat);
+
+      var colors = _currentBackgroundColor;
+      var width = _mapWidth;
+      var height = _mapHeight;
+      var stride = bmpData.Stride;
+
+      var sourcePolygons = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!;
+
+      const int sliceHeight = 32;
+
+      var workItems = new List<RenderTask>(sourcePolygons.Length * 2);
+
+      for (var i = 0; i < sourcePolygons.Length; i++)
+      {
+         var poly = sourcePolygons[i];
+
+         var complexity = poly.TriangleIndices.Length;
+         var polyTop = (int)poly.Bounds.Top;
+         var polyBottom = (int)poly.Bounds.Bottom;
+
+         if (polyBottom < 0 || polyTop >= height)
+            continue;
+
+         polyTop = Math.Max(0, polyTop);
+         polyBottom = Math.Min(height - 1, polyBottom);
+
+         var polyHeight = polyBottom - polyTop;
+
+         if (polyHeight <= sliceHeight)
+         {
+            // Cost = Complexity * Height
+            var cost = (long)complexity * polyHeight;
+            workItems.Add(new(poly, polyTop, polyBottom, cost));
+         }
+         else
+         {
+            for (var y = polyTop; y <= polyBottom; y += sliceHeight)
+            {
+               var sliceEnd = Math.Min(y + sliceHeight - 1, polyBottom);
+               var sliceH = sliceEnd - y;
+               var cost = (long)complexity * sliceH;
+               workItems.Add(new(poly, y, sliceEnd, cost));
+            }
+         }
+      }
+
+      workItems.Sort((a, b) => b.EstimatedCost.CompareTo(a.EstimatedCost));
+
+      unsafe
+      {
+         var scan0 = (byte*)bmpData.Scan0;
+         var partitioner = Partitioner.Create(workItems, EnumerablePartitionerOptions.NoBuffering);
+
+         Parallel.ForEach(partitioner,
+                          task =>
+                          {
+                             var polygon = task.Polygon;
+                             var color = colors[polygon.ColorIndex];
+
+                             var r = (byte)(color.R * 255);
+                             var g = (byte)(color.G * 255);
+                             var b = (byte)(color.B * 255);
+
+                             var drawer = new BitmapPixelDrawer(scan0, stride, width, height, r, g, b);
+                             polygon.Rasterize(ref drawer, task.YStart, task.YEnd);
+                          });
+      }
+
+      bmp.UnlockBits(bmpData);
+      IO.SaveBitmap(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
+   }
+
+   private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
+
+   private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+   {
+      ExportBackColorsToBitmap();
+   }
+
+   private readonly unsafe struct BitmapPixelDrawer(byte* scan0, int stride, int width, int height, byte r, byte g, byte b)
+      : IPixelAction
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      public void Invoke(int x, int y)
+      {
+         if (x < 0 || x >= width || y < 0 || y >= height)
+            return;
+
+         var pixelPtr = scan0 + y * stride + x * 3;
+
+         pixelPtr[0] = b;
+         pixelPtr[1] = g;
+         pixelPtr[2] = r;
+      }
    }
 }

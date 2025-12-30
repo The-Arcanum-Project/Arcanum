@@ -12,7 +12,7 @@ public class MapHandleImpl : IMapHandle
 {
    private static void NotifyMapLoadedInternal()
    {
-      if (Application.Current.MainWindow is not MainWindow mainWindow)
+      if (Application.Current.MainWindow is not MainWindow mainWindow || MapModeManager.IsMapReady)
          return;
 
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
@@ -25,6 +25,6 @@ public class MapHandleImpl : IMapHandle
 
    public void NotifyMapLoaded()
    {
-      Application.Current.Dispatcher.Invoke(NotifyMapLoadedInternal);
+      Application.Current.Dispatcher.BeginInvoke(NotifyMapLoadedInternal);
    }
 }

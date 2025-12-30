@@ -4,7 +4,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Common.UI;
+using Arcanum.Core.CoreSystems.Selection;
 using Nexus.Core;
 using Nexus.Core.Attributes;
 
@@ -34,7 +34,7 @@ public partial class InjectObj : IEu5Object<InjectObj>
    #region IEu5Object
 
    public string GetNamespace => $"Injection.{nameof(InjectObj)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;

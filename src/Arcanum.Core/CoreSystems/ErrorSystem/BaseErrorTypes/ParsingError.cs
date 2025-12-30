@@ -1,6 +1,6 @@
 ﻿using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
-using Arcanum.Core.GameObjects.Map;
+using Arcanum.Core.GameObjects.InGame.Map;
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 

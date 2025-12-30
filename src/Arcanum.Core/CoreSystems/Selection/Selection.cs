@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Utils.Geometry;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Timer = System.Threading.Timer;
 
 namespace Arcanum.Core.CoreSystems.Selection;
@@ -13,7 +13,7 @@ public static class Selection
 {
    static Selection()
    {
-      TimedSelectionTimer = new (Callback);
+      TimedSelectionTimer = new(Callback);
    }
 
    /*
@@ -53,7 +53,7 @@ public static class Selection
    public static List<Vector2> DragPath { get; set; } = [];
    public static RectangleF DragArea { get; set; } = RectangleF.Empty;
 
-   public static MapManager MapManager = new ();
+   public static MapManager MapManager = new();
 
    public static Location CurrentLocationBelowMouse { get; set; } = Location.Empty;
 
@@ -400,10 +400,10 @@ public static class Selection
       // We just started dragging, so we need to initialize the drag area
       if (DragArea == RectangleF.Empty)
       {
-         DragArea = new (Math.Min(first.X, last.X),
-                         Math.Min(first.Y, last.Y),
-                         Math.Abs(first.X - last.X),
-                         Math.Abs(first.Y - last.Y));
+         DragArea = new(Math.Min(first.X, last.X),
+                        Math.Min(first.Y, last.Y),
+                        Math.Abs(first.X - last.X),
+                        Math.Abs(first.Y - last.Y));
       }
       // We are dragging, so we need to update the drag area
       else
@@ -524,7 +524,7 @@ public static class Selection
       var bp = SelectionHelpers.FindBiggestFullySelectedParent(location);
 
       // We have found no bigger parent scope or the selection is nto limited to a single location's parents
-      if (bp == null)
+      if (bp == null!)
          return;
 
       Set(SelectionTarget.Selection, SelectionMethod.Expand, ((IMapInferable)bp).GetRelevantLocations([bp]));
@@ -580,7 +580,7 @@ public static class Selection
    // Add the (timespan, locations) tuple to the TimedSelections list so it can be drawn in a special way
    public static void AddTimedSelection(List<Location> locations, TimeSpan duration, SelectionTarget target)
    {
-      TimedSelections.Add(new (locations, DateTime.Now.TimeOfDay + duration, target));
+      TimedSelections.Add(new(locations, DateTime.Now.TimeOfDay + duration, target));
       UpdateTimerInterval(duration);
    }
 
@@ -619,8 +619,19 @@ public static class Selection
 
    public static bool GetLocation(Vector2 vec2, [MaybeNullWhen(false)] out Location location)
    {
+      if (CurrentLocationBelowMouse != Location.Empty && CurrentLocationBelowMouse.Polygons.Any(p => p.Contains(vec2)))
+      {
+         location = CurrentLocationBelowMouse;
+         return true;
+      }
+
       location = MapManager.FindLocationAt(vec2);
       return location != null;
+   }
+
+   public static Location GetLocation(Vector2 vec2)
+   {
+      return GetLocation(vec2, out var location) ? location : Location.Empty;
    }
 
    public static List<Location> GetLocations(RectangleF rect)

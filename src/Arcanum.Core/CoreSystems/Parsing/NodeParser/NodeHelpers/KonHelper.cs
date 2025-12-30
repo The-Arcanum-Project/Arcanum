@@ -2,11 +2,13 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
-using Arcanum.Core.GameObjects.Court;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Religious;
-using Arcanum.Core.GameObjects.Religious.SubObjects;
-using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using ReligiousFaction = Arcanum.Core.GameObjects.InGame.Religious.ReligiousFaction;
+using ReligiousFocus = Arcanum.Core.GameObjects.InGame.Religious.SubObjects.ReligiousFocus;
+using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 

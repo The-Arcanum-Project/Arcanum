@@ -12,9 +12,12 @@ using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
-using Region = Arcanum.Core.GameObjects.LocationCollections.Region;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -122,6 +125,8 @@ public static class SaveMaster
          }
 
          list.Remove(command);
+         if (list.Count == 0)
+            NeedsToBeSaved.Remove(target);
       }
 
       ChangesSinceLastSave.Remove(command);
@@ -187,7 +192,8 @@ public static class SaveMaster
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
          RemoveChange(command);
-      AddChange(command);
+      else
+         AddChange(command);
    }
 
    public static void InitCommand(Eu5ObjectCommand command, IEu5Object target)
@@ -211,11 +217,20 @@ public static class SaveMaster
       AddSingleCommand(command, target);
    }
 
+   public static void AddToCommand(Eu5ObjectCommand command, IEu5Object[] targets)
+   {
+      Debug.Assert(ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command,
+                   "The command to add to is not the last executed command.");
+      foreach (var target in targets)
+         AddSingleCommand(command, target);
+   }
+
    public static void CommandUndone(Eu5ObjectCommand command)
    {
       if (ChangesSinceLastSave.HasItems() && ChangesSinceLastSave.Last() == command)
+         RemoveChange(command);
+      else
          AddChange(command);
-      RemoveChange(command);
    }
 
    public static ObjState GetState(IEu5Object obj)
@@ -231,6 +246,7 @@ public static class SaveMaster
       if (AppData.HistoryManager.Current == LastSavedHistoryNode)
          return;
 
+      CommandManager.FinalizeCurrentCommand();
       List<IEu5Object> objsToSave = [];
       foreach (var obj in NeedsToBeSaved.Keys)
          if (typesToSave.Contains(obj.GetType()))
@@ -247,6 +263,9 @@ public static class SaveMaster
          return;
       }
 
+      if (SaveDefnitionsFile(objsToSave) && objsToSave.Count == 0)
+         return;
+
       InjectionHelper.HandleObjectsWithOptionalInjectLogic(objsToSave, updateHandle);
       LastSavedHistoryNode = AppData.HistoryManager.Current;
    }
@@ -257,6 +276,7 @@ public static class SaveMaster
    /// </summary>
    public static void SaveObjects(List<IEu5Object> objectsToSave, Action<string> updateProgress)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (SaveDefnitionsFile(objectsToSave) && objectsToSave.Count == 0)
          return;
 
@@ -277,6 +297,7 @@ public static class SaveMaster
    /// </summary>
    private static void SaveFile(List<IEu5Object> modifiedObjects)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (modifiedObjects.Count == 0)
          return;
 
@@ -299,6 +320,7 @@ public static class SaveMaster
 
    private static bool SaveDefnitionsFile(List<IEu5Object> objectsToSave)
    {
+      CommandManager.FinalizeCurrentCommand();
       var definitionObjects = new List<IEu5Object>();
       for (var i = objectsToSave.Count - 1; i >= 0; i--)
       {
@@ -319,6 +341,9 @@ public static class SaveMaster
 
       WriteFile(sb.InnerBuilder, DescriptorDefinitions.DefinitionsDescriptor.Files[0], true);
 
+      foreach (var defnition in definitionObjects)
+         RemoveObjectFromChanges(defnition);
+
       return objectsToSave.Count > 0;
    }
 
@@ -327,6 +352,7 @@ public static class SaveMaster
    /// </summary>
    public static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       var types = SetupParsingManager.GetSetupTypesToProcess(modifiedObjects);
 
       // We do have nothing to handle here.
@@ -346,6 +372,7 @@ public static class SaveMaster
 
    private static void SaveSetupSplit(Type[] types, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
       Debug.Assert(types.All(t => SetupFileWritersByType.ContainsKey(t)),
                    "All types must have a corresponding SetupFileWriter.");
@@ -364,6 +391,7 @@ public static class SaveMaster
 
    private static void SaveSetupCompacted(Type[] types, Action<string> updateHandle)
    {
+      CommandManager.FinalizeCurrentCommand();
       Debug.Assert(types.All(t => t.IsAssignableTo(typeof(IEu5Object))), "All types must be IEu5Object types.");
 
       // Create the dummy files:
@@ -514,6 +542,7 @@ public static class SaveMaster
    /// <returns></returns>
    public static bool SaveFile(Eu5FileObj fileObj, bool onlyModifiedObjects = false)
    {
+      CommandManager.FinalizeCurrentCommand();
       if (fileObj == Eu5FileObj.Empty)
          return false;
 
@@ -829,6 +858,7 @@ public static class SaveMaster
 
    public static void SaveAll(Action<string> updateHook)
    {
-      Save(NeedsToBeSaved.Keys.Select(o => o.GetType()).Distinct().ToList(), updateHook);
+      CommandManager.FinalizeCurrentCommand();
+      Save(NeedsToBeSaved.Keys.Select(x => x.GetType()).Distinct().ToList(), updateHook);
    }
 }

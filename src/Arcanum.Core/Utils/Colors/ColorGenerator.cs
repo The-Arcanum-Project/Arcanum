@@ -439,25 +439,25 @@ public static class ColorGenerator
       var s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b;
 
       // Cube root of LMS
-      var l_ = MathF.Cbrt(l);
-      var m_ = MathF.Cbrt(m);
-      var s_ = MathF.Cbrt(s);
+      var ll = MathF.Cbrt(l);
+      var mm = MathF.Cbrt(m);
+      var ss = MathF.Cbrt(s);
 
       // LMS to Oklab
-      return new(0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
-                 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
-                 0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
+      return new(0.2104542553f * ll + 0.7936177850f * mm - 0.0040720468f * ss,
+                 1.9779984951f * ll - 2.4285922050f * mm + 0.4505937099f * ss,
+                 0.0259040371f * ll + 0.7827717662f * mm - 0.8086757660f * ss);
    }
 
    private static Color OklabToRgb(Oklab oklab)
    {
-      var l_ = oklab.L + 0.3963377774f * oklab.A + 0.2158037573f * oklab.B;
-      var m_ = oklab.L - 0.1055613458f * oklab.A - 0.0638541728f * oklab.B;
-      var s_ = oklab.L - 0.0894841775f * oklab.A - 1.2914855480f * oklab.B;
+      var ll = oklab.L + 0.3963377774f * oklab.A + 0.2158037573f * oklab.B;
+      var mm = oklab.L - 0.1055613458f * oklab.A - 0.0638541728f * oklab.B;
+      var ss = oklab.L - 0.0894841775f * oklab.A - 1.2914855480f * oklab.B;
 
-      var l = l_ * l_ * l_;
-      var m = m_ * m_ * m_;
-      var s = s_ * s_ * s_;
+      var l = ll * ll * ll;
+      var m = mm * mm * mm;
+      var s = ss * ss * ss;
 
       var r = 4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s;
       var g = -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s;

@@ -5,11 +5,11 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Economy;
-using Common.UI;
 using Nexus.Core.Attributes;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 
@@ -39,18 +39,15 @@ public partial class BuildingsManager : IEu5Object<BuildingsManager>
    #region IEu5Object
 
    public string GetNamespace => $"Setup.{nameof(BuildingsManager)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.BuildingsManagerSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManagerAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingsManager;
 
-   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new()
-   {
-      { "BuildingsManager", Globals.BuildingsManager },
-   };
+   public static Dictionary<string, BuildingsManager> GetGlobalItems() => new() { { "BuildingsManager", Globals.BuildingsManager }, };
 
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

@@ -2,9 +2,9 @@
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.Map;
 using Arcanum.Core.Utils.Sorting;
 using Common;
+using DefaultMapDefinition = Arcanum.Core.GameObjects.InGame.Map.DefaultMapDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 

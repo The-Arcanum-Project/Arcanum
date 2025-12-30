@@ -249,13 +249,13 @@ public partial class $ClassName$ : IEu5Object&lt;$ClassName$&gt;
 #region IEu5Object
 
    public string GetNamespace =&gt; $"$Namespace$.{nameof($ClassName$)}";
-   public void OnSearchSelected() =&gt; UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() =&gt; SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation =&gt; new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '&gt;'));
    public Enum SearchCategory =&gt; IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly =&gt; false;
    public NUISetting NUISettings =&gt; Config.Settings.NUIObjectSettings.$ClassName$Settings;
    public INUINavigation[] Navigations =&gt; [];
-   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$AgsSettings;
+   public AgsSettings AgsSettings =&gt; Config.Settings.AgsSettings.$ClassName$;
    public static Dictionary&lt;string, $ClassName$&gt; GetGlobalItems() =&gt; Globals.$ClassName$s;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
@@ -358,7 +358,7 @@ public AggregateLink&lt;$ChildType$&gt; $ChildType$s { get; set; }</s:String>
     $SELECTION$$END$
 #if DEBUG
     $sw$.Stop();
-    ArcLog.WriteLine("DBT", LogLevel.INF, $"$msg$ in {sw.ElapsedMilliseconds} ms");
+    ArcLog.WriteLine("DBT", LogLevel.INF, $"$msg$ in {$sw$.ElapsedMilliseconds} ms");
 #endif</s:String>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/@KeyIndexDefined">True</s:Boolean>
     <s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C701ECAF90C3274B966C3D448F0C7694/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>

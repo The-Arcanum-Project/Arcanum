@@ -3,9 +3,14 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.Windows.PopUp;
+using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
+using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
+using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
+using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 

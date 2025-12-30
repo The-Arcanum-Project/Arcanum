@@ -6,11 +6,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Common.UI;
 using Nexus.Core.Attributes;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.GameObjects.MainMenu.States;
 
@@ -55,13 +56,13 @@ public partial class BuildingDefinition : IEu5Object<BuildingDefinition>
    #region IEu5Object
 
    public string GetNamespace => $"Economy.Building.{nameof(BuildingDefinition)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.BuildingDefinitionSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingDefinitionAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.BuildingDefinition;
    public static Dictionary<string, BuildingDefinition> GetGlobalItems() => [];
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

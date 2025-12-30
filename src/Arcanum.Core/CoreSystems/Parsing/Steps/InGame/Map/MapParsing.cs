@@ -39,8 +39,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          return true;
       }
 
-      using (var bitmap =
-             new Bitmap(fileObj.Path.FullPath))
+      using (var bitmap = new Bitmap(fileObj.Path.FullPath))
       {
          using (MapTracing tracing = new(bitmap))
          {
@@ -72,6 +71,21 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          }
 
          return;
+      }
+
+
+      if (Config.Settings.MapSettings.UseFastBorderSmoothing)
+      {
+         await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
+            i =>
+            {
+               foreach (var segment in _parsingPolygons[i].Segments)
+                  if (segment is BorderSegmentDirectional directionalSegment)
+                     directionalSegment.SmoothBorders();
+            },
+            Scheduler.AvailableHeavyWorkers - 2);
+
+         ArcLog.WriteLine("MPS", LogLevel.INF, "Finished smoothing of map polygons.");
       }
 
       await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,

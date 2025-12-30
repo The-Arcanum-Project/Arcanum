@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.GameObjects.Court.State;
+using ParliamentDefinition = Arcanum.Core.GameObjects.InGame.Court.State.ParliamentDefinition;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

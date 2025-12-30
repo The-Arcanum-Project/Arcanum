@@ -6,7 +6,6 @@ using System.Diagnostics;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
 
 namespace Arcanum.UI.SpecializedEditors.Util;
 
@@ -83,14 +82,18 @@ public class ObservableCollectionProxy<TSource, TTarget> : ObservableCollectionP
 
    public override bool TryAddRange(IList<IEu5Object> parent)
    {
-      if (parent.Count <= 1 || parent[0] is not TSource) return false;
+      if (parent.Count <= 1 || parent[0] is not TSource)
+         return false;
+
       Nx.AddRangeToCollection(_owner, SelectionHelpers.GetChildEnum(_owner), parent);
       return true;
    }
 
    public override bool TryRemoveRange(IList<IEu5Object> parent)
    {
-      if (parent.Count <= 1 || parent[0] is not TSource) return false;
+      if (parent.Count <= 1 || parent[0] is not TSource)
+         return false;
+
       Nx.RemoveRangeFromCollection(_owner, SelectionHelpers.GetChildEnum(_owner), parent);
       return true;
    }

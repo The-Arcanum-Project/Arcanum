@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
-using Arcanum.Core.GameObjects.Court.State;
+using GovernmentState = Arcanum.Core.GameObjects.InGame.Court.State.GovernmentState;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

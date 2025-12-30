@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
-using Arcanum.Core.GlobalStates;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.StyleClasses;
@@ -38,11 +37,8 @@ public class MapModeButton : BaseButton
             {
                MapModeType = enumValue;
                MapModeManager.SetMapMode(enumValue);
-               if (Config.Settings.MapModeConfig.QuickAccessMapModes.Count > ButtonIndex)
-                  Config.Settings.MapModeConfig.QuickAccessMapModes[ButtonIndex] = enumValue;
-               else
-                  Config.Settings.MapModeConfig.QuickAccessMapModes
-                        .Add(enumValue); // Weird fallback but will do for now.
+               MapModeManager.SetQuickMapModeSetting(ButtonIndex, enumValue);
+
                if (!CommandToMapModeType.TryAdd(Command, enumValue))
                   CommandToMapModeType[Command] = enumValue;
             }),

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Map;
+using Common.Logger;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -10,7 +11,6 @@ using Vortice.Mathematics;
 using Color = System.Windows.Media.Color;
 
 namespace Arcanum.UI.DirectX;
-
 public readonly struct VertexPositionId2D(in Vector2 position, uint polygonId)
 {
    public static readonly unsafe uint SizeInBytes = (uint)sizeof(VertexPositionId2D);
@@ -84,6 +84,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
    {
       var imageAspectRatio = (float)imageSize.Item2 / imageSize.Item1;
       var vertices = new List<VertexPositionId2D>(3 * polygons.Length);
+      // ReSharper disable once ForCanBeConvertedToForeach
       for (var i = 0; i < polygons.Length; i++)
       {
          var polygon = polygons[i];
@@ -102,7 +103,9 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
                               (uint)polygon.ColorIndex));
          }
       }
-
+      
+      ArcLog.WriteLine("MAP", LogLevel.INF, "Created {0} triangles for location renderer.", vertices.Count / 3);
+      
       return vertices.ToArray();
    }
 

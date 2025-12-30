@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Arcanum.Core.Utils.Geometry;
 
@@ -52,8 +53,8 @@ public sealed class Polygon
          var span = new Span<Vector2>(Vertices, i, vector2Count);
          var vector = MemoryMarshal.Cast<Vector2, float>(span);
 
-         minValues = Vector.Min(minValues, new (vector));
-         maxValues = Vector.Max(maxValues, new (vector));
+         minValues = Vector.Min(minValues, new(vector));
+         maxValues = Vector.Max(maxValues, new(vector));
       }
 
       // Process the remaining elements that didn't fit into a full vector chunk
@@ -94,7 +95,7 @@ public sealed class Polygon
                maxY = maxValues[j];
          }
 
-      return new (minX, minY, maxX - minX, maxY - minY);
+      return new(minX, minY, maxX - minX, maxY - minY);
    }
 
    /// <summary>
@@ -329,9 +330,9 @@ public sealed class Polygon
    /// </summary>
    private static bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
    {
-      bool isInside = false;
-      int j = polygon.Length - 1;
-      for (int i = 0; i < polygon.Length; i++)
+      var isInside = false;
+      var j = polygon.Length - 1;
+      for (var i = 0; i < polygon.Length; i++)
       {
          if ((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y) &&
              (point.X <
@@ -347,20 +348,91 @@ public sealed class Polygon
 
    private static bool PointInTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c)
    {
-      var v0 = new Vector2(c.X - a.X, c.Y - a.Y);
-      var v1 = new Vector2(b.X - a.X, b.Y - a.Y);
-      var v2 = new Vector2(p.X - a.X, p.Y - a.Y);
+      double pX = p.X,
+             pY = p.Y;
+      double aX = a.X,
+             aY = a.Y;
+      double bX = b.X,
+             bY = b.Y;
+      double cX = c.X,
+             cY = c.Y;
 
-      var dot00 = v0.X * v0.X + v0.Y * v0.Y;
-      var dot01 = v0.X * v1.X + v0.Y * v1.Y;
-      var dot02 = v0.X * v2.X + v0.Y * v2.Y;
-      var dot11 = v1.X * v1.X + v1.Y * v1.Y;
-      var dot12 = v1.X * v2.X + v1.Y * v2.Y;
+      var cp1 = (bX - aX) * (pY - aY) - (bY - aY) * (pX - aX);
+      var cp2 = (cX - bX) * (pY - bY) - (cY - bY) * (pX - bX);
+      var cp3 = (aX - cX) * (pY - cY) - (aY - cY) * (pX - cX);
 
-      var invDenom = 1f / (dot00 * dot11 - dot01 * dot01);
-      var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-      var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+      var hasNeg = (cp1 < 0) || (cp2 < 0) || (cp3 < 0);
+      var hasPos = (cp1 > 0) || (cp2 > 0) || (cp3 > 0);
 
-      return u >= 0 && v >= 0 && u + v <= 1;
+      return !(hasNeg && hasPos);
    }
+
+   [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+   public void Rasterize<TAction>(ref TAction action, int clipMinY, int clipMaxY)
+      where TAction : struct, IPixelAction
+   {
+      var indices = TriangleIndices;
+      var vertices = Vertices;
+
+      for (var i = 0; i < indices.Length; i += 3)
+      {
+         var v0 = vertices[indices[i]];
+         var v1 = vertices[indices[i + 1]];
+         var v2 = vertices[indices[i + 2]];
+
+         var triMinY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
+         var triMaxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
+
+         var startY = Math.Max(triMinY, clipMinY);
+         var endY = Math.Min(triMaxY, clipMaxY);
+
+         if (startY > endY)
+            continue;
+
+         var minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
+         var maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
+
+         // Precompute Edge Functions 
+         double edge1Y = v1.Y - v0.Y;
+         double edge1X = v1.X - v0.X;
+         double edge2Y = v2.Y - v1.Y;
+         double edge2X = v2.X - v1.X;
+         double edge3Y = v0.Y - v2.Y;
+         double edge3X = v0.X - v2.X;
+
+         // Calculate rowVal based on startY (the clipped top), not the triangle top.
+         var rowVal1 = edge1X * (startY - v0.Y) - edge1Y * (minX - v0.X);
+         var rowVal2 = edge2X * (startY - v1.Y) - edge2Y * (minX - v1.X);
+         var rowVal3 = edge3X * (startY - v2.Y) - edge3Y * (minX - v2.X);
+
+         for (var y = startY; y <= endY; y++)
+         {
+            var w1 = rowVal1;
+            var w2 = rowVal2;
+            var w3 = rowVal3;
+
+            for (var x = minX; x <= maxX; x++)
+            {
+               var neg = (w1 < 0) | (w2 < 0) | (w3 < 0);
+               var pos = (w1 > 0) | (w2 > 0) | (w3 > 0);
+
+               if (!(neg && pos))
+                  action.Invoke(x, y);
+
+               w1 -= edge1Y;
+               w2 -= edge2Y;
+               w3 -= edge3Y;
+            }
+
+            rowVal1 += edge1X;
+            rowVal2 += edge2X;
+            rowVal3 += edge3X;
+         }
+      }
+   }
+}
+
+public interface IPixelAction
+{
+   void Invoke(int x, int y);
 }

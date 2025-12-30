@@ -5,10 +5,10 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Map;
-using Arcanum.Core.GameObjects.Map.SubObjects;
 using Arcanum.Core.Utils.Sorting;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using LocationTemplateData = Arcanum.Core.GameObjects.InGame.Map.LocationTemplateData;
+using MapMovementAssist = Arcanum.Core.GameObjects.InGame.Map.SubObjects.MapMovementAssist;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 

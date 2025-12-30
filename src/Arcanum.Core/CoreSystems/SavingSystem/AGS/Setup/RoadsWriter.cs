@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.Map;
+using Road = Arcanum.Core.GameObjects.InGame.Map.Road;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

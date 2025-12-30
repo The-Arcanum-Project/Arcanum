@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.GameObjects.LocationCollections;
+﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 

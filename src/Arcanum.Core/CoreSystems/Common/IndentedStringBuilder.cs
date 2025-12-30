@@ -10,9 +10,9 @@ namespace Arcanum.Core.CoreSystems.Common;
 /// </summary>
 public class IndentedStringBuilder
 {
-   private readonly StringBuilder _builder = new ();
-   private string _indentString = "   "; // 3 spaces per indent level
-   private readonly StringBuilder _indentCacheBuilder = new ();
+   private readonly StringBuilder _builder = new();
+   private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
+   private readonly StringBuilder _indentCacheBuilder = new();
    private bool _isAtStartOfLine = true;
 
    public IndentedStringBuilder(int initialCapacity = 256)
@@ -21,7 +21,7 @@ public class IndentedStringBuilder
       _indentCacheBuilder.EnsureCapacity(32); // Preallocate some space for indentation levels
    }
 
-   public void SetIndent(int spaceCount) => _indentString = new (' ', spaceCount);
+   public void SetIndent(int spaceCount) => _indentString = new(' ', spaceCount);
 
    /// <summary>
    /// Sets the indentation to a specific level, overriding the current indentation.
@@ -48,6 +48,12 @@ public class IndentedStringBuilder
       // Using ReadOnlySpan<char> is the most direct way to copy chunks.
       foreach (var chunk in _builder.GetChunks())
          sb.Append(chunk.Span);
+   }
+
+   public static void Merge(StringBuilder target, StringBuilder source)
+   {
+      foreach (var chunk in source.GetChunks())
+         target.Append(chunk.Span);
    }
 
    public void Merge(IndentedStringBuilder sb)
@@ -160,12 +166,12 @@ public class IndentedStringBuilder
          _indentCacheBuilder.Length -= _indentString.Length;
    }
 
-   public IndentScope Indent() => new (this);
+   public IndentScope Indent() => new(this);
 
    public BlockScope Block(string openingBrace = "{", string closingBrace = "}")
    {
       AppendLine(openingBrace);
-      return new (this, closingBrace);
+      return new(this, closingBrace);
    }
 
    public BlockScope BlockWithName(string blockName,
@@ -182,7 +188,7 @@ public class IndentedStringBuilder
          _isAtStartOfLine = true;
       }
 
-      return new (this, closingBrace, addNewLineBeforeClosing, asOneLine);
+      return new(this, closingBrace, addNewLineBeforeClosing, asOneLine);
    }
 
    public BlockScope BlockWithName(IAgs ags, SavingFormat format, bool asOneLine)
@@ -208,7 +214,7 @@ public class IndentedStringBuilder
       else
          Append(" ");
 
-      return new (this, closingBrace, addNewLine);
+      return new(this, closingBrace, addNewLine, asOneLine);
    }
 
    public BlockScope BlockWithNameAndInjection(IAgs ags, InjRepType injRepType, bool asOneLine)
@@ -231,7 +237,7 @@ public class IndentedStringBuilder
       _builder.AppendLine();
       _isAtStartOfLine = true;
 
-      return new (this, closingBrace, addNewLine);
+      return new(this, closingBrace, addNewLine, asOneLine);
    }
 
    #endregion
@@ -353,7 +359,10 @@ public class IndentedStringBuilder
          _builder.DecreaseIndent();
          if (_addNewLineBeforeClosing && !_asOneLine)
             _builder.AppendLine();
-         _builder.AppendLine(_closingBrace);
+         if (_asOneLine)
+            _builder.Append(_closingBrace);
+         else
+            _builder.AppendLine(_closingBrace);
       }
    }
 }

@@ -41,7 +41,7 @@ public partial class SaveWindow
    private readonly Queastor _newFileQuaestor;
    private readonly List<IEu5Object> _newObjects;
 
-   private readonly SavingWrapperManager _savingWrapperManager = new ();
+   private readonly SavingWrapperManager _savingWrapperManager = new();
 
    private FileDescriptor? _currentDescriptor;
 
@@ -61,7 +61,7 @@ public partial class SaveWindow
    public static readonly DependencyProperty SearchResultProperty = DependencyProperty.Register(nameof(SearchResult),
                                                                                                 typeof(ObservableCollection<ISearchable>),
                                                                                                 typeof(SaveWindow),
-                                                                                                new (default(ObservableCollection<ISearchable>)));
+                                                                                                new(default(ObservableCollection<ISearchable>)));
 
    public ObservableCollection<ISearchable> SearchResult
    {
@@ -72,7 +72,7 @@ public partial class SaveWindow
    public static readonly DependencyProperty ShownFilesProperty = DependencyProperty.Register(nameof(ShownFiles),
                                                                                               typeof(SortedObservableCollection<Eu5FileObj>),
                                                                                               typeof(SaveWindow),
-                                                                                              new (new SortedObservableCollection<Eu5FileObj>([])));
+                                                                                              new(new SortedObservableCollection<Eu5FileObj>([])));
 
    public SortedObservableCollection<Eu5FileObj> ShownFiles
    {
@@ -84,7 +84,7 @@ public partial class SaveWindow
       DependencyProperty.Register(nameof(ShownDescriptors),
                                   typeof(ObservableCollection<FileDescriptor>),
                                   typeof(SaveWindow),
-                                  new (new ObservableCollection<FileDescriptor>([])));
+                                  new(new ObservableCollection<FileDescriptor>([])));
 
    public ObservableCollection<FileDescriptor> ShownDescriptors
    {
@@ -95,7 +95,7 @@ public partial class SaveWindow
    public static readonly DependencyProperty ShownObjectsProperty = DependencyProperty.Register(nameof(ShownObjects),
                                                                                                 typeof(ObservableCollection<IEu5Object>),
                                                                                                 typeof(SaveWindow),
-                                                                                                new (new ObservableCollection<IEu5Object>([])));
+                                                                                                new(new ObservableCollection<IEu5Object>([])));
 
    public ObservableCollection<IEu5Object> ShownObjects
    {
@@ -104,7 +104,7 @@ public partial class SaveWindow
    }
 
    public static readonly DependencyProperty NewFileModeProperty =
-      DependencyProperty.Register(nameof(NewFileMode), typeof(bool), typeof(SaveWindow), new (false));
+      DependencyProperty.Register(nameof(NewFileMode), typeof(bool), typeof(SaveWindow), new(false));
 
    public bool NewFileMode
    {
@@ -116,7 +116,7 @@ public partial class SaveWindow
       DependencyProperty.Register(nameof(ValidFiles),
                                   typeof(List<Eu5FileObj>),
                                   typeof(SaveWindow),
-                                  new (default(List<Eu5FileObj>)));
+                                  new(default(List<Eu5FileObj>)));
 
    public List<Eu5FileObj> ValidFiles
    {
@@ -144,7 +144,7 @@ public partial class SaveWindow
       _descriptorsWithChangedFiles = _descriptorsWithChangedFiles.Distinct().ToList();
       _descriptorsWithChangedFiles.Sort(new FileDescriptorComparer());
 
-      _newFileQuaestor = new (new ());
+      _newFileQuaestor = new(new());
       foreach (var iEu5Object in newObjects)
          _newFileQuaestor.AddToIndex(iEu5Object);
       _newFileQuaestor.RebuildBkTree();
@@ -199,28 +199,28 @@ public partial class SaveWindow
    {
       NewFileMode = true;
       DescriptorsColumn.MinWidth = 0;
-      DescriptorsColumn.Width = new (0);
-      SplitterColumn.Width = new (0);
+      DescriptorsColumn.Width = new(0);
+      SplitterColumn.Width = new(0);
       ShownFiles.Clear();
-      ShownObjects = new (_newObjects);
+      ShownObjects = new(_newObjects);
    }
 
    private void SetUpNormalMode()
    {
       NewFileMode = false;
       DescriptorsColumn.MinWidth = 100;
-      DescriptorsColumn.Width = new (1, GridUnitType.Star);
+      DescriptorsColumn.Width = new(1, GridUnitType.Star);
       SplitterColumn.Width = GridLength.Auto;
       _currentDescriptor = null;
       ShownFiles.Clear();
       ShownObjects.Clear();
-      ShownDescriptors = new (_descriptorsWithChangedFiles);
+      ShownDescriptors = new(_descriptorsWithChangedFiles);
    }
 
    private void SearchBoxRequestSearch(string obj)
    {
       if (NewFileMode)
-         SearchResult = new (_newFileQuaestor.Search(obj));
+         SearchResult = new(_newFileQuaestor.Search(obj));
    }
 
    private void OpenSettingsWindow()
@@ -306,7 +306,7 @@ public partial class SaveWindow
       {
          DragDrop.DoDragDrop(ObjectListView, data, DragDropEffects.Move);
       }
-      catch (Exception error) //finally
+      catch (Exception) //finally
       {
          //Console.WriteLine("Error: " + error.Message);
          //ShownFiles.Clear();
@@ -350,7 +350,7 @@ public partial class SaveWindow
       }
 
       _currentDescriptor = selectedDescriptor;
-      ShownFiles = new (_savingWrapperManager.GetAllFiles(selectedDescriptor));
+      ShownFiles = new(_savingWrapperManager.GetAllFiles(selectedDescriptor));
       // Check if all new objects have a common descriptor
    }
 
@@ -366,7 +366,7 @@ public partial class SaveWindow
       }
 
       var file = FileListView.SelectedItem as Eu5FileObj ?? throw new InvalidOperationException();
-      ShownObjects = new (_savingWrapperManager.GetAllRelevantObjects(file, _changedObjects));
+      ShownObjects = new(_savingWrapperManager.GetAllRelevantObjects(file, _changedObjects));
    }
 
    private void DescriptionListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -383,7 +383,7 @@ public partial class SaveWindow
 
       _currentDescriptor =
          DescriptionListView.SelectedItem as FileDescriptor ?? throw new InvalidOperationException();
-      ShownFiles = new (_savingWrapperManager.GetAllRelevantFiles(_currentDescriptor, _relevantFiles));
+      ShownFiles = new(_savingWrapperManager.GetAllRelevantFiles(_currentDescriptor, _relevantFiles));
    }
 
    #endregion
@@ -446,10 +446,10 @@ public partial class SaveWindow
       if (dialog.DialogResult != true)
          return;
 
-      var newFile = _savingWrapperManager.GetFile(new (dialog.NewPath, _currentDescriptor));
+      var newFile = _savingWrapperManager.GetFile(new(dialog.NewPath, _currentDescriptor));
       var descriptor = _savingWrapperManager.GetDescriptor(_currentDescriptor);
       descriptor.AddNewFile(newFile);
-      ShownFiles = new (descriptor.AllFiles);
+      ShownFiles = new(descriptor.AllFiles);
    }
 
    private void SelectSearchResult(object sender, MouseButtonEventArgs e)
@@ -570,20 +570,20 @@ public partial class SaveWindow
 
    private void SaveWindow_OnClosed(object? sender, EventArgs e)
    {
-      var changes = _savingWrapperManager.GetAllChangedFiles();
-      foreach (var change in changes)
-      {
-         /*
-         Console.WriteLine("File: " + change.FileObj);
-         Console.WriteLine("| Added: ");
-         foreach (var addedObject in change.AddedObjects)
-            Console.WriteLine("|  " + addedObject.ResultName);
-
-         Console.WriteLine("| Transferred: ");
-         foreach (var transferredObject in change.TransferredObjects)
-            Console.WriteLine("|  " + transferredObject.ResultName);
-
-         Console.WriteLine("-------------------");*/
-      }
+      //       var changes = _savingWrapperManager.GetAllChangedFiles();
+      //       foreach (var change in changes)
+      //       {
+      //          /*
+      //          Console.WriteLine("File: " + change.FileObj);
+      //          Console.WriteLine("| Added: ");
+      //          foreach (var addedObject in change.AddedObjects)
+      //             Console.WriteLine("|  " + addedObject.ResultName);
+      //
+      //          Console.WriteLine("| Transferred: ");
+      //          foreach (var transferredObject in change.TransferredObjects)
+      //             Console.WriteLine("|  " + transferredObject.ResultName);
+      //
+      //          Console.WriteLine("-------------------");*/
+      //       }
    }
 }

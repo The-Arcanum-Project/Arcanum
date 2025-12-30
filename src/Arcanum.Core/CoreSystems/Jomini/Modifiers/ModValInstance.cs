@@ -8,7 +8,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Common;
+using ModifierDefinition = Arcanum.Core.GameObjects.InGame.Common.ModifierDefinition;
 
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
@@ -86,7 +86,7 @@ public partial class ModValInstance : IEu5Object<ModValInstance>
 
    public ISearchResult VisualRepresentation => new SearchResultItem(null, Definition.UniqueId, string.Empty);
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstanceAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.ModValInstance;
 
    public string FormatModifierPatternToCode()
    {

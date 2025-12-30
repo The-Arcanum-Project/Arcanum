@@ -13,8 +13,9 @@ public static partial class DefaultCommands
                                          Func<string[], string[]> execute,
                                          ClearanceLevel clearance,
                                          CommandCategory category,
+                                         Func<string[], string[]>? getSuggestions = null,
                                          params string[] aliases)
-      : CommandBase(name, usage, clearance, aliases, execute)
+      : CommandBase(name, usage, clearance, aliases, execute, getSuggestions)
    {
       public CommandCategory Category { get; set; } = category;
    }
@@ -285,8 +286,8 @@ public static partial class DefaultCommands
 
                                              return output.ToArray();
                                           },
-                                          clearance: ClearanceLevel.Debug,
-                                          category: CommandCategory.Debug);
+                                          clearance: ClearanceLevel.User,
+                                          category: CommandCategory.All);
    }
 
    private static string[] DrawTable(char separator = '|', params string[][] columns)

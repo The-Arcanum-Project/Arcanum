@@ -1,6 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.NUI;
 
@@ -26,4 +26,6 @@ public interface IMapInferable
    /// Returns the map mode type associated with this inferable.
    /// </summary>
    public MapModeManager.MapModeType GetMapMode { get; }
+
+   public Location[] GetInferredFromSelection() => GetInferredList(Selection.Selection.GetSelectedLocations).Cast<Location>().ToArray();
 }

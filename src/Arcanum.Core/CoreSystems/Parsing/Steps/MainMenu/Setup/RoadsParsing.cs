@@ -7,7 +7,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
-using Road = Arcanum.Core.GameObjects.Map.Road;
+using Road = Arcanum.Core.GameObjects.InGame.Map.Road;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

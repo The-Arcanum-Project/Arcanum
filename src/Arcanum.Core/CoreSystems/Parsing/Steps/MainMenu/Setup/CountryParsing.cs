@@ -7,9 +7,9 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.LocationCollections.SubObjects;
 using Arcanum.Core.Utils.Sorting;
+using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
+using VariableDeclaration = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDeclaration;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 

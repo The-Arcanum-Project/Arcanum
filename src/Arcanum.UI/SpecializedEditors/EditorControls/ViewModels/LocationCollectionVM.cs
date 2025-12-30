@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.NUI;
-using Arcanum.Core.GameObjects.LocationCollections.BaseClasses;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 
 namespace Arcanum.UI.SpecializedEditors.EditorControls.ViewModels;
 

@@ -2,8 +2,8 @@
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI.GraphDisplay;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.Court;
 using Arcanum.Core.Registry;
+using Character = Arcanum.Core.GameObjects.InGame.Court.Character;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 

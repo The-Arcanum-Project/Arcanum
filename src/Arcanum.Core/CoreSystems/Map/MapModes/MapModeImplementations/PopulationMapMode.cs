@@ -1,9 +1,9 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Arcanum.Core.GameObjects.LocationCollections;
-using Arcanum.Core.GameObjects.Pops;
 using Arcanum.Core.Utils.Colors;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -25,7 +25,7 @@ public class PopulationMapMode : LocationBasedMapMode
    }
 
    public override string[] GetTooltip(Location location) => [$"Population: {GetPopulation(location):N0}"];
-   public override string? GetLocationText(Location location) => GetPopulation(location).ToString("N0");
+   public override string GetLocationText(Location location) => GetPopulation(location).ToString("N0");
    public override object?[]? GetVisualObject(Location location) => null;
 
    public override void OnActivateMode()

@@ -60,4 +60,20 @@ public class ErrorLogOptions() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = true;
+
+   [Description("If true, the error log will always be exported to a file on exit.")]
+   [DefaultValue(true)]
+   public bool AlwaysExportLogToFile
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = true;
+
+   [Description("The name of the error log file.")]
+   [DefaultValue("Arcanum_ErrorLog.log")]
+   public string ErrorLogFileName
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = "Arcanum_ErrorLog.log";
 }

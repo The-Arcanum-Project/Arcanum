@@ -1,5 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.Economy;
+using Market = Arcanum.Core.GameObjects.InGame.Economy.Market;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 

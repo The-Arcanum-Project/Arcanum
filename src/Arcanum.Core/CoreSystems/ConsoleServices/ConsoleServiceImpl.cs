@@ -48,6 +48,7 @@ public class ConsoleServiceImpl : IConsoleService
       DefaultCommands.RegisterDefaultCommands(this, category);
       ErrorLogCommands.RegisterCommands(this);
       ValidatorCommands.RegisterCommands(this);
+      DataReturnCommands.RegisterCommands(this);
 
       Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
       _outputReceiver = outputReceiver;
@@ -200,17 +201,15 @@ public class ConsoleServiceImpl : IConsoleService
       if (string.IsNullOrWhiteSpace(cmd))
          return;
 
-      var historyList = _history;
-
       if (cmd.StartsWith(CMD_PREFIX))
          cmd = cmd[CMD_PREFIX.Length..];
       // Only add if different from the last command
-      if (historyList.Count == 0 || !historyList[^1].Equals(cmd, StringComparison.OrdinalIgnoreCase))
-         historyList.Add(cmd.Trim()); // Trim to remove leading/trailing spaces
+      if (_history.Count == 0 || !_history[^1].Equals(cmd, StringComparison.OrdinalIgnoreCase))
+         _history.Add(cmd.Trim()); // Trim to remove leading/trailing spaces
 
-      if (historyList.Count > HISTORY_CAPACITY)
-         historyList.RemoveAt(0);
-      _historyIndex = historyList.Count; // Point to the position after the new entry
+      if (_history.Count > HISTORY_CAPACITY)
+         _history.RemoveAt(0);
+      _historyIndex = _history.Count; // Point to the position after the new entry
    }
 
    public string? GetPreviousHistoryEntry()
@@ -337,6 +336,24 @@ public class ConsoleServiceImpl : IConsoleService
       }
 
       _historyIndex = _history.Count; // Set the initial history index
+   }
+
+   public string[] GetArguments(string input, out string commandName)
+   {
+      commandName = string.Empty;
+      var parts = SplitStringQuotes(input, trimQuotes: TrimQuotesOnArguments);
+      switch (parts.Length)
+      {
+         case <= 1:
+            return [];
+         case 2:
+            commandName = parts[1];
+            return [];
+      }
+
+      var startIndex = parts[0].StartsWith(CMD_PREFIX.Trim(), StringComparison.Ordinal) ? 1 : 0;
+      commandName = parts[startIndex];
+      return parts[(startIndex + 1)..];
    }
 
    // --- Internal Logic ---
@@ -468,6 +485,20 @@ public class ConsoleServiceImpl : IConsoleService
    {
       _outputReceiver = outputReceiver ??
                         throw new ArgumentNullException(nameof(outputReceiver), "Output receiver cannot be null.");
+   }
+
+   public string[] GetAutoCompleteOptions(string text)
+   {
+      if (string.IsNullOrWhiteSpace(text))
+         return GetCommandNames().ToArray();
+
+      var args = GetArguments(text, out var cmdName);
+
+      if (!_commands.TryGetValue(cmdName, out var command) || CurrentClearance < command.Clearance)
+         return [];
+
+      var suggestions = command.GetSuggestions?.Invoke(args);
+      return suggestions ?? [];
    }
 
    public void Unload()

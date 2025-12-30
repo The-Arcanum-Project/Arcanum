@@ -95,7 +95,7 @@
                        HorizontalAlignment = "Center" TextTrimming = "CharacterEllipsis" FontSize = "14" />
 
             <!-- Progress Bar -->
-            <ProgressBar x:Name = "SaveProgressBar" Grid.Row = "2" Height = "20" Minimum = "0"
+            <ProgressBar x:Name = "SaveProgressBar" Grid.Row = "2" Minimum = "0"
                          Style = "{StaticResource ModernProgressBarStyle}" />
         </Grid>
     </Border>

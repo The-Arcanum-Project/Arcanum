@@ -23,7 +23,7 @@ public partial class SearchWindow : INotifyPropertyChanged
 {
    private Queastor QueryQueastor { get; set; } = null!;
    private static string _lastSearchQuery = string.Empty;
-   private static MapControl _mapControl;
+   private static MapControl _mapControl = null!;
 
    // private readonly Window _parent =
    //    Application.Current.MainWindow ?? throw new InvalidOperationException("MainWindow is not set.");
@@ -113,9 +113,6 @@ public partial class SearchWindow : INotifyPropertyChanged
    /// <summary>
    /// Shows the search window with the given query and the Queastor.GlobalInstance as the Queastor.
    /// </summary>
-   /// <param name="query"></param>
-   /// <param name="alwaysOnTop"></param>
-   /// <returns></returns>
    public static SearchWindow ShowSearchWindow(MapControl mapControl, string query = "", bool alwaysOnTop = false)
       => ShowSearchWindow(query, alwaysOnTop, Queastor.GlobalInstance, mapControl);
 
@@ -179,7 +176,12 @@ public partial class SearchWindow : INotifyPropertyChanged
       {
          var locs = mapInferable.GetRelevantLocations([inferable]);
          _mapControl.PanTo(locs);
-         SelectionManager.Preview(locs.Cast<IEu5Object>().ToList(), Config.Settings.MapSettings.SearchResultHighlightDurationMs);
+         if (Config.Settings.MapSettings.UseFlashingPreviewEffect)
+            SelectionManager.PreviewFlashing(locs.Cast<IEu5Object>().ToList(),
+                                             Config.Settings.MapSettings.SearchResultHighlightDurationMs,
+                                             Config.Settings.MapSettings.FlashIntervalMs);
+         else
+            SelectionManager.Preview(locs.Cast<IEu5Object>().ToList(), Config.Settings.MapSettings.SearchResultHighlightDurationMs);
       }
 
       CloseCommand.Execute(null);

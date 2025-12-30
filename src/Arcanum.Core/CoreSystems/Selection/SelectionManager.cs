@@ -5,9 +5,9 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.Registry;
 using Application = System.Windows.Application;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -68,6 +68,32 @@ public static class SelectionManager
             targetLocs.RemoveAt(i);
       PreviewedLocations.AddRange(targetLocs);
       PreviewChanged?.Invoke();
+   }
+
+   public static async void PreviewFlashing(List<IEu5Object> eu5Objects, int duration, int flashDuration)
+   {
+      try
+      {
+         var cts = new CancellationTokenSource();
+         var token = cts.Token;
+
+         var endTime = DateTime.Now.AddMilliseconds(duration);
+         while (DateTime.Now < endTime && !token.IsCancellationRequested)
+         {
+            Application.Current?.Dispatcher.Invoke(() => Preview(eu5Objects));
+            await Task.Delay(flashDuration, token);
+            Application.Current?.Dispatcher.Invoke(() => UnPreview(eu5Objects));
+            await Task.Delay(flashDuration, token);
+         }
+      }
+      catch (TaskCanceledException)
+      {
+         // The preview was cleared manually or cancelled before the timer finished.
+      }
+      catch (Exception e)
+      {
+         ArcLog.WriteLine("SMN", LogLevel.ERR, $"Error during flashing preview: {e}");
+      }
    }
 
    public static async void Preview(List<IEu5Object> eu5Objects, int msDuration)
@@ -297,10 +323,13 @@ public static class SelectionManager
          if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
             return;
 
-         SetSearchSelectedObjects([obj]);
+         IEu5Object[] objs = [obj];
+         SetSearchSelectedObjects(objs);
          if (_searchSelectedObjects.Count == 1)
             if (obj is IMapInferable inferable)
                EditableObjects.ClearAndAdd(inferable.GetInferredList(inferable.GetRelevantLocations([obj])));
+            else
+               EditableObjects.ClearAndAdd(objs);
       }
    }
 

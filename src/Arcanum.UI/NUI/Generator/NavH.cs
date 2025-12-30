@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -73,7 +72,7 @@ public class NavH
          return;
 
       var nav = new NavH(navTarget, subViews, Root, true);
-      MainWindowGen.GenerateAndSetView(nav);
+      NUINavigation.GenerateUi(nav);
    }
 
    public override string ToString() => $"NavH: {string.Join(", ", Targets.Select(t => t.ToString()))}";

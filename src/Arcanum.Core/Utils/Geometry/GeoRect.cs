@@ -2,13 +2,14 @@
 using System.Numerics;
 using System.Text;
 using Arcanum.Core.CoreSystems.Map;
-using Arcanum.Core.GameObjects.LocationCollections;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.Utils.Geometry;
 
 public static class GeoRect
 {
-   private const float EPSILON = 1e-6f;
+   // Low epsilon due to big map and only single float precision
+   private const float EPSILON = 5e-4f;
 
    /// <summary>
    /// Helper method for floating-point comparison.
@@ -102,7 +103,7 @@ public static class GeoRect
       }
       else
       {
-         throw new ArgumentException("Rectangles must share at least one corner to calculate a difference.");
+         return new(rectA, false, rectB, true);
       }
 
       return new(verticalRect,

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Selection;
-using Arcanum.Core.GameObjects.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
@@ -11,6 +10,7 @@ using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
 using Arcanum.UI.Util.WindowManagement;
 using Common.Logger;
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -195,5 +195,11 @@ public partial class DebugPanelGrid
    {
       var renamer = new Renamer();
       renamer.Show();
+   }
+
+   private void CommandGenerator_OnClick(object sender, RoutedEventArgs e)
+   {
+      var cmdGen = new CommandGenerator();
+      cmdGen.Show();
    }
 }

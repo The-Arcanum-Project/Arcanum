@@ -5,12 +5,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
-using Arcanum.Core.GameObjects.Economy;
-using Arcanum.Core.GameObjects.Economy.SubClasses;
-using Common.UI;
 using Nexus.Core.Attributes;
+using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
+using BuildingLevel = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.BuildingLevel;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
@@ -40,13 +40,13 @@ public partial class TownSetup : IEu5Object<TownSetup>
    #region IEu5Object
 
    public string GetNamespace => $"Namespace.{nameof(TownSetup)}";
-   public void OnSearchSelected() => UIHandle.Instance.PopUpHandle.OpenPropertyGridWindow(this);
+   public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
    public bool IsReadonly => false;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.TownSetupSettings;
    public INUINavigation[] Navigations => [];
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.TownSetupAgsSettings;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.TownSetup;
    public static Dictionary<string, TownSetup> GetGlobalItems() => Globals.TownSetups;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;

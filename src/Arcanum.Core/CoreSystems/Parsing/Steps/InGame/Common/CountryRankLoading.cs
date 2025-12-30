@@ -2,8 +2,8 @@
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.CountryLevel;
 using Arcanum.Core.Utils.Sorting;
+using CountryRank = Arcanum.Core.GameObjects.InGame.CountryLevel.CountryRank;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 

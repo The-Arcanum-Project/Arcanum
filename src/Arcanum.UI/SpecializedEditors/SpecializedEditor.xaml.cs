@@ -16,19 +16,19 @@ public partial class SpecializedEditor
       DependencyProperty.Register(nameof(EditorContent),
                                   typeof(FrameworkElement),
                                   typeof(SpecializedEditor),
-                                  new (default(FrameworkElement)));
+                                  new(default(FrameworkElement)));
 
    public static readonly DependencyProperty TargetablePropertiesProperty =
       DependencyProperty.Register(nameof(TargetableProperties),
                                   typeof(string[]),
                                   typeof(SpecializedEditor),
-                                  new (default(string[])));
+                                  new(default(string[])));
 
    public static readonly DependencyProperty RequirementsStatusTextProperty =
       DependencyProperty.Register(nameof(RequirementsStatusText),
                                   typeof(string),
                                   typeof(SpecializedEditor),
-                                  new ("Available"));
+                                  new("Available"));
 
    public string[] TargetableProperties
    {
@@ -46,11 +46,12 @@ public partial class SpecializedEditor
       get => (FrameworkElement)GetValue(EditorContentProperty);
       set => SetValue(EditorContentProperty, value);
    }
-   public RelayCommand CheckRequirementsCommand => new (UpdateRequirementsStatus);
+   public RelayCommand CheckRequirementsCommand => new(UpdateRequirementsStatus);
 
    private readonly ISpecializedEditor _specializedEditor = null!;
    private object[] _targets = null!;
    private Enum?[] _targetProperty = null!;
+   private bool _ignoreEnableChange;
 
    public SpecializedEditor()
    {
@@ -83,6 +84,10 @@ public partial class SpecializedEditor
    /// </summary>
    public void UpdateForNewTarget(List<Enum?> props, IEu5Object target)
    {
+      _ignoreEnableChange = true;
+      EnabledToggleButton.IsChecked = _specializedEditor.Enabled;
+      _ignoreEnableChange = false;
+
       if (!_specializedEditor.Enabled)
       {
          EditorContent = null;
@@ -99,12 +104,13 @@ public partial class SpecializedEditor
       TargetableProperties = props.Select(p => p?.ToString() ?? _targets[0].GetType().Name).ToArray();
       _specializedEditor.ResetFor(_targets);
       UpdateRequirementsStatus();
-      EditorContent = _specializedEditor.GetEditorControl();
+      SetEditorContent();
       PropertySelector.SelectedIndex = 0;
    }
 
    public void UpdateForNewTargets(List<Enum?> props, List<IEu5Object> targets)
    {
+      EnabledToggleButton.IsChecked = _specializedEditor.Enabled;
       Debug.Assert(_specializedEditor != null, "Specialized editor instance must be provided.");
       Debug.Assert(props.Count > 0, "At least one targetable property must be provided.");
       Debug.Assert(_specializedEditor.SupportsMultipleTargets,
@@ -115,8 +121,19 @@ public partial class SpecializedEditor
       TargetableProperties = props.Select(p => p?.ToString() ?? _targets[0].GetType().Name).ToArray();
       _specializedEditor.ResetFor(_targets);
       UpdateRequirementsStatus();
-      EditorContent = _specializedEditor.GetEditorControl();
+      SetEditorContent();
       PropertySelector.SelectedIndex = 0;
+   }
+
+   private void SetEditorContent()
+   {
+      var newContent = _specializedEditor.GetEditorControl();
+
+      // Force re-evaluation of the binding in case we have some new object with the same control instance.
+      if (EditorContent == newContent)
+         EditorContent = null;
+
+      EditorContent = newContent;
    }
 
    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -129,7 +146,7 @@ public partial class SpecializedEditor
 
    private void ToggleButton_Update(object sender, RoutedEventArgs e)
    {
-      if (sender is not ToggleButton tb)
+      if (_ignoreEnableChange || sender is not ToggleButton tb)
          return;
 
       _specializedEditor.Enabled = tb.IsChecked == true;

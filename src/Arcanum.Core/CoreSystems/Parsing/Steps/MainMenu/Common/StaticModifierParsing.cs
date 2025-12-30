@@ -2,8 +2,8 @@
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
-using Arcanum.Core.GameObjects.Common;
 using Arcanum.Core.Utils.Sorting;
+using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
 
