@@ -35,7 +35,7 @@ public partial class Area : IMapInferable, IEu5Object<Area>, IIndexRandomColor
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
                                                                                     .GetFirstParentOfType(LocationCollectionType
-                                                                                                               .Area)!)
+                                                                                                               .Area))
                                                                           .Distinct()
                                                                           .ToList();
 

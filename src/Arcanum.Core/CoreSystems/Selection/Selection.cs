@@ -524,7 +524,7 @@ public static class Selection
       var bp = SelectionHelpers.FindBiggestFullySelectedParent(location);
 
       // We have found no bigger parent scope or the selection is nto limited to a single location's parents
-      if (bp == null)
+      if (bp == null!)
          return;
 
       Set(SelectionTarget.Selection, SelectionMethod.Expand, ((IMapInferable)bp).GetRelevantLocations([bp]));
@@ -624,6 +624,7 @@ public static class Selection
          location = CurrentLocationBelowMouse;
          return true;
       }
+
       location = MapManager.FindLocationAt(vec2);
       return location != null;
    }

@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.UI.NUI.Generator.SpecificGenerators;
 
 namespace Arcanum.UI.NUI.Generator;
 

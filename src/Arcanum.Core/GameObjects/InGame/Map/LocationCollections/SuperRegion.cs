@@ -36,7 +36,7 @@ public partial class SuperRegion
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
                                                                                     .GetFirstParentOfType(LocationCollectionType
-                                                                                                               .SuperRegion)!)
+                                                                                                               .SuperRegion))
                                                                           .Distinct()
                                                                           .ToList();
 

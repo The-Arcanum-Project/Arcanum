@@ -218,11 +218,11 @@ public partial class ParsingMaster
                              ? Scheduler.QueueHeavyWork(workItem, cts.Token)
                              : Scheduler.QueueWorkAsHeavyIfAvailable(workItem, cts.Token);
 
-               var result = task.ContinueWith(OnTaskCompleteStatic,
-                                              Tuple.Create(context, stepId, step),
-                                              CancellationToken.None,
-                                              TaskContinuationOptions.ExecuteSynchronously,
-                                              TaskScheduler.Default);
+               _ = task.ContinueWith(OnTaskCompleteStatic,
+                                     Tuple.Create(context, stepId, step),
+                                     CancellationToken.None,
+                                     TaskContinuationOptions.ExecuteSynchronously,
+                                     TaskScheduler.Default);
             }
          }
       }

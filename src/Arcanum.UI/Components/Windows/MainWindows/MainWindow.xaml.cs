@@ -182,6 +182,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    #region Fields
 
+   // ReSharper disable once NotAccessedField.Local
    private readonly CurrentActionVisualizer _cav;
 
    #endregion
@@ -481,16 +482,6 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
-   }
-
-   private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-   {
-      if (EqualityComparer<T>.Default.Equals(field, value))
-         return false;
-
-      field = value;
-      OnPropertyChanged(propertyName);
-      return true;
    }
 
    private void OpenConsoleCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)

@@ -35,7 +35,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, IIndexRandomCol
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
                                                                                     .GetFirstParentOfType(LocationCollectionType
-                                                                                                               .Region)!)
+                                                                                                               .Region))
                                                                           .Distinct()
                                                                           .ToList();
 

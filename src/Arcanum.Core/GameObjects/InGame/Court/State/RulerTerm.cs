@@ -63,7 +63,9 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    [DefaultValue("")]
    public string UniqueId
    {
+#pragma warning disable CS9266 // The '{0}' accessor of property '{1}' should use 'field' because the other accessor is using it.
       get => "";
+#pragma warning restore CS9266 // The '{0}' accessor of property '{1}' should use 'field' because the other accessor is using it.
       set;
    }
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;

@@ -17,7 +17,6 @@ public static partial class MapModeManager
 {
    internal static readonly Location[] LocationsArray = Globals.Locations.Values.ToArray();
    private static Color[] _blueColors = ColorGenerator.GenerateVariations(Config.Settings.MapSettings.WaterShadeBaseColor, 40);
-   private static Random _random = new("Arcanum".GetHashCode());
 
    #region Plugin MapModes
 

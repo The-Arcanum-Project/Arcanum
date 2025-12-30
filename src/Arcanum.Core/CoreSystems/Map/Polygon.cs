@@ -330,9 +330,9 @@ public sealed class Polygon
    /// </summary>
    private static bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
    {
-      bool isInside = false;
-      int j = polygon.Length - 1;
-      for (int i = 0; i < polygon.Length; i++)
+      var isInside = false;
+      var j = polygon.Length - 1;
+      for (var i = 0; i < polygon.Length; i++)
       {
          if ((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y) &&
              (point.X <
@@ -380,60 +380,53 @@ public sealed class Polygon
          var v1 = vertices[indices[i + 1]];
          var v2 = vertices[indices[i + 2]];
 
-         // Standard Triangle Bounding Box
-         int triMinY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
-         int triMaxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
+         var triMinY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
+         var triMaxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
 
-         // --- OPTIMIZATION START ---
-         // Intersect Triangle Bounds with the Slice Bounds (Clipping)
-         // If the triangle is completely outside this horizontal strip, skip it.
-         int startY = Math.Max(triMinY, clipMinY);
-         int endY = Math.Min(triMaxY, clipMaxY);
+         var startY = Math.Max(triMinY, clipMinY);
+         var endY = Math.Min(triMaxY, clipMaxY);
 
          if (startY > endY)
             continue;
-         // --- OPTIMIZATION END ---
 
-         int minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
-         int maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
+         var minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
+         var maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
 
-         // Precompute Edge Functions (Same as before)
-         double edge1_Y = v1.Y - v0.Y;
-         double edge1_X = v1.X - v0.X;
-         double edge2_Y = v2.Y - v1.Y;
-         double edge2_X = v2.X - v1.X;
-         double edge3_Y = v0.Y - v2.Y;
-         double edge3_X = v0.X - v2.X;
+         // Precompute Edge Functions 
+         double edge1Y = v1.Y - v0.Y;
+         double edge1X = v1.X - v0.X;
+         double edge2Y = v2.Y - v1.Y;
+         double edge2X = v2.X - v1.X;
+         double edge3Y = v0.Y - v2.Y;
+         double edge3X = v0.X - v2.X;
 
-         // IMPORTANT: Calculate rowVal based on startY (the clipped top), not the triangle top.
-         double rowVal1 = edge1_X * (startY - v0.Y) - edge1_Y * (minX - v0.X);
-         double rowVal2 = edge2_X * (startY - v1.Y) - edge2_Y * (minX - v1.X);
-         double rowVal3 = edge3_X * (startY - v2.Y) - edge3_Y * (minX - v2.X);
+         // Calculate rowVal based on startY (the clipped top), not the triangle top.
+         var rowVal1 = edge1X * (startY - v0.Y) - edge1Y * (minX - v0.X);
+         var rowVal2 = edge2X * (startY - v1.Y) - edge2Y * (minX - v1.X);
+         var rowVal3 = edge3X * (startY - v2.Y) - edge3Y * (minX - v2.X);
 
-         for (int y = startY; y <= endY; y++)
+         for (var y = startY; y <= endY; y++)
          {
-            double w1 = rowVal1;
-            double w2 = rowVal2;
-            double w3 = rowVal3;
+            var w1 = rowVal1;
+            var w2 = rowVal2;
+            var w3 = rowVal3;
 
-            for (int x = minX; x <= maxX; x++)
+            for (var x = minX; x <= maxX; x++)
             {
-               bool neg = (w1 < 0) | (w2 < 0) | (w3 < 0);
-               bool pos = (w1 > 0) | (w2 > 0) | (w3 > 0);
+               var neg = (w1 < 0) | (w2 < 0) | (w3 < 0);
+               var pos = (w1 > 0) | (w2 > 0) | (w3 > 0);
 
                if (!(neg && pos))
-               {
                   action.Invoke(x, y);
-               }
 
-               w1 -= edge1_Y;
-               w2 -= edge2_Y;
-               w3 -= edge3_Y;
+               w1 -= edge1Y;
+               w2 -= edge2Y;
+               w3 -= edge3Y;
             }
 
-            rowVal1 += edge1_X;
-            rowVal2 += edge2_X;
-            rowVal3 += edge3_X;
+            rowVal1 += edge1X;
+            rowVal2 += edge2X;
+            rowVal3 += edge3X;
          }
       }
    }

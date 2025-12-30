@@ -25,7 +25,7 @@ public class PopulationMapMode : LocationBasedMapMode
    }
 
    public override string[] GetTooltip(Location location) => [$"Population: {GetPopulation(location):N0}"];
-   public override string? GetLocationText(Location location) => GetPopulation(location).ToString("N0");
+   public override string GetLocationText(Location location) => GetPopulation(location).ToString("N0");
    public override object?[]? GetVisualObject(Location location) => null;
 
    public override void OnActivateMode()

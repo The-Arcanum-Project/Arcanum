@@ -15,16 +15,16 @@ public class RegionMapMode : LocationBasedMapMode
    public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Region);
-      if (parent == null)
+      if (parent == null!)
          return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
 
       return ((IIndexRandomColor)parent).Color;
    }
 
    public override bool IsLandOnly => false;
-   public override string[] GetTooltip(Location location) => ["Region: " + (location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId ?? "None")];
+   public override string[] GetTooltip(Location location) => ["Region: " + (location.GetFirstParentOfType(LocationCollectionType.Region).UniqueId)];
 
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Region)?.UniqueId;
+   public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Region).UniqueId;
 
    public override object?[]? GetVisualObject(Location location) => null;
 

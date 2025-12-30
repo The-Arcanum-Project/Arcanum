@@ -15,18 +15,15 @@ public class ProvinceMapMode : LocationBasedMapMode
    public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.Province);
-      if (parent == null)
+      if (parent == null!)
          return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
 
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public override string[] GetTooltip(Location location) =>
-   [
-      "Province: " + (location.GetFirstParentOfType(LocationCollectionType.Province)?.UniqueId ?? "None")
-   ];
+   public override string[] GetTooltip(Location location) => ["Province: " + (location.GetFirstParentOfType(LocationCollectionType.Province).UniqueId),];
 
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Province)?.UniqueId;
+   public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Province).UniqueId;
 
    public override object?[]? GetVisualObject(Location location) => null;
 

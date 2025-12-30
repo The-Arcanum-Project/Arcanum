@@ -15,7 +15,7 @@ public class SuperRegionMapMode : LocationBasedMapMode
    public override int GetColorForLocation(Location location)
    {
       var parent = location.GetFirstParentOfType(LocationCollectionType.SuperRegion);
-      if (parent == null)
+      if (parent == null!)
          return MapModeColorHelper.DEFAULT_EMPTY_COLOR;
 
       return ((IIndexRandomColor)parent).Color;
@@ -23,12 +23,9 @@ public class SuperRegionMapMode : LocationBasedMapMode
 
    public override bool IsLandOnly => false;
 
-   public override string[] GetTooltip(Location location) =>
-   [
-      "SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId ?? "None")
-   ];
+   public override string[] GetTooltip(Location location) => ["SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId),];
 
-   public override string? GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.SuperRegion)?.UniqueId;
+   public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId;
 
    public override object?[]? GetVisualObject(Location location) => null;
 

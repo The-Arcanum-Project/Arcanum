@@ -121,7 +121,7 @@ public abstract record JominiColor : IEmpty<JominiColor>
          var r = (byte)((Value >> 16) & 0xFF);
          var g = (byte)((Value >> 8) & 0xFF);
          var b = (byte)(Value & 0xFF);
-         return new(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+         return new(r / 255.0f, g / 255.0f, b / 255.0f);
       }
    }
 

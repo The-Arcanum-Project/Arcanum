@@ -12,8 +12,8 @@ public class RawMaterialMapMode : LocationBasedMapMode
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Goods;
    public override string Description => "Displays the predominant goods produced in each location on the map.";
    public string? IconSource => null;
-   private bool _isInitialized = false;
-   private int _emptyColor = 0;
+   private bool _isInitialized;
+   private int _emptyColor;
 
    public override int GetColorForLocation(Location location)
    {

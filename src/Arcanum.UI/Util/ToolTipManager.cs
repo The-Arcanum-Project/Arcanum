@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.UserControls.Map;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
@@ -31,14 +30,16 @@ public class ToolTipManager
    {
       _mapToolTip.PlacementTarget = mainMap;
 
-      mainMap.OnAbsoluteLocationChangedLocation += (curLoc, pos) =>
+      mainMap.OnAbsoluteLocationChangedLocation += (curLoc, _) =>
       {
          if (_suppressUntilNotice || !Config.Settings.MapSettings.ShowTooltips)
             return;
 
          if (curLoc == Location.Empty)
          {
-            if (!_mapToolTip.IsOpen) return;
+            if (!_mapToolTip.IsOpen)
+               return;
+
             _mapToolTip.IsOpen = false;
             _lastShownTooltipLocation = Location.Empty;
 

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
-using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
@@ -15,7 +14,7 @@ namespace Arcanum.Core.CoreSystems.Selection;
 
 public static class SelectionHelpers
 {
-   public static IEu5Object? FindBiggestFullySelectedParent(Location location)
+   public static IEu5Object FindBiggestFullySelectedParent(Location location)
    {
       var selected = Selection.GetSelectedLocations;
       IEu5Object current = location;
@@ -191,13 +190,5 @@ public static class SelectionHelpers
                return regionn;
 
       return null;
-   }
-
-   private static ILocation? GetNextParentType(ILocation loc)
-   {
-      return loc.LcType switch
-      {
-         _ => null,
-      };
    }
 }

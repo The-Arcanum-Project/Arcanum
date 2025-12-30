@@ -161,7 +161,7 @@ public partial class LocationCollectionEditor
 
    private static void PostCreationAction(IEu5Object obj)
    {
-      if (obj is not IMapInferable inferable)
+      if (obj is not IMapInferable)
          return;
 
       switch (obj)

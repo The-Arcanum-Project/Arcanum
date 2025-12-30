@@ -5,7 +5,7 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class VegetationMapMode : LocationBasedMapMode
 {
-   public bool IsLandOnly => false;
+   public override bool IsLandOnly => false;
    public override string Name => "Vegetation";
    public override Type[] DisplayTypes => [typeof(Vegetation)];
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Vegetation;

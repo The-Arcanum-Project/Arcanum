@@ -74,7 +74,7 @@ public static class MapTracingValidator
 
          writer.WriteLine(string.Join(" -> ", vertices.Select(v => $"({v.X},{v.Y})")));
 
-         if (poly.Holes?.Count > 0)
+         if (poly.Holes.Count > 0)
          {
             writer.WriteLine($"  Holes: {poly.Holes.Count}");
             foreach (var hole in SortPolygons(poly.Holes))

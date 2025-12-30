@@ -16,19 +16,19 @@ public partial class SpecializedEditor
       DependencyProperty.Register(nameof(EditorContent),
                                   typeof(FrameworkElement),
                                   typeof(SpecializedEditor),
-                                  new (default(FrameworkElement)));
+                                  new(default(FrameworkElement)));
 
    public static readonly DependencyProperty TargetablePropertiesProperty =
       DependencyProperty.Register(nameof(TargetableProperties),
                                   typeof(string[]),
                                   typeof(SpecializedEditor),
-                                  new (default(string[])));
+                                  new(default(string[])));
 
    public static readonly DependencyProperty RequirementsStatusTextProperty =
       DependencyProperty.Register(nameof(RequirementsStatusText),
                                   typeof(string),
                                   typeof(SpecializedEditor),
-                                  new ("Available"));
+                                  new("Available"));
 
    public string[] TargetableProperties
    {
@@ -46,12 +46,12 @@ public partial class SpecializedEditor
       get => (FrameworkElement)GetValue(EditorContentProperty);
       set => SetValue(EditorContentProperty, value);
    }
-   public RelayCommand CheckRequirementsCommand => new (UpdateRequirementsStatus);
+   public RelayCommand CheckRequirementsCommand => new(UpdateRequirementsStatus);
 
    private readonly ISpecializedEditor _specializedEditor = null!;
    private object[] _targets = null!;
    private Enum?[] _targetProperty = null!;
-   private bool _ignoreEnableChange = false;
+   private bool _ignoreEnableChange;
 
    public SpecializedEditor()
    {
@@ -128,9 +128,10 @@ public partial class SpecializedEditor
    private void SetEditorContent()
    {
       var newContent = _specializedEditor.GetEditorControl();
-      
+
       // Force re-evaluation of the binding in case we have some new object with the same control instance.
-      if (EditorContent == newContent) EditorContent = null;
+      if (EditorContent == newContent)
+         EditorContent = null;
 
       EditorContent = newContent;
    }
