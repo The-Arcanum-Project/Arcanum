@@ -2,6 +2,7 @@
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
@@ -94,6 +95,8 @@ public partial class Eu5ObjectCreator
       var newObject = window.CreatedObject;
       if (addToGlobals)
          newObject?.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
+      if (newObject is IIndexRandomColor irc)
+         irc.Index = newObject.GetGlobalItemsNonGeneric().Count - 1;
       return window.ShowDialog() == true;
    }
 
