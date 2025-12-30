@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.EventDistribution;
@@ -25,6 +26,7 @@ using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Components.Windows.MainWindows.MainWindowsHelpers;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
@@ -143,6 +145,26 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       }
    } = null!;
 
+   public ImageSource? CurrentActionIcon
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null;
+
+   public string CurrentActionText
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = null!;
+
    public string ClipboardText
    {
       get;
@@ -155,6 +177,12 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          OnPropertyChanged();
       }
    } = null!;
+
+   #endregion
+
+   #region Fields
+
+   private readonly CurrentActionVisualizer _cav;
 
    #endregion
 
@@ -177,6 +205,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
       Title = AppData.ProductName;
       VersionNumber = $"v{AppData.AppVersion}";
+      _cav = new(this);
    }
 
    public void GoToArcanumMenuScreenCommand_Executed(object sender, ExecutedRoutedEventArgs e)

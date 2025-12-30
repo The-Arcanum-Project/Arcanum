@@ -33,7 +33,7 @@ public static class NEF
    private static readonly FontFamily MonospacedFont =
       (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!;
 
-   private static BitmapImage LoadBitmap(string path)
+   internal static BitmapImage LoadBitmap(string path)
    {
       var bmp = new BitmapImage();
       bmp.BeginInit();
