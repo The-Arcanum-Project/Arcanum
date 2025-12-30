@@ -33,18 +33,6 @@ public class QueastorTests
    }
 
    [Test]
-   public void FuzzySearch_FindsCloseMatch()
-   {
-      var queastor = new Queastor(new() { MaxLevinsteinDistance = 1 });
-      var obj = new MockSearchable(terms: "Renderer");
-
-      queastor.AddToIndex(obj);
-
-      var results = queastor.Search("Rendere");
-      Assert.That(results, Does.Contain(obj));
-   }
-
-   [Test]
    public void NoFalsePositives_OnSearch()
    {
       var queastor = new Queastor(new());

@@ -22,7 +22,6 @@
         <Folder Include="GlobalStates\BackingClasses\ErrorDescriptorSettings\"/>
         <Folder Include="MapEditor\Engine\Core\History\"/>
         <Folder Include="MapEditor\Engine\Core\Input\"/>
-        <Folder Include="MapEditor\Engine\Core\Math\"/>
         <Folder Include="MapEditor\Engine\Modes\Draft\Commands\"/>
         <Folder Include="MapEditor\Engine\Modes\Draft\Generators\"/>
         <Folder Include="MapEditor\Engine\Modes\Draft\Graph\"/>
