@@ -1,6 +1,6 @@
 ﻿using Arcanum.API;
 
-namespace Arcanum.Core.PluginServices;
+namespace Arcanum.Core.CoreSystems.PluginServices;
 
 public static class DependencyManager
 {

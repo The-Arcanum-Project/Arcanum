@@ -2,15 +2,14 @@
 using Arcanum.API.UtilServices;
 using Arcanum.PluginHost.PluginServices;
 
-namespace Arcanum.Core.PluginServices;
+namespace Arcanum.Core.CoreSystems.PluginServices;
 
 public class PluginInfoService(PluginManager manager) : IPluginInfoService
 {
    private readonly PluginManager _pluginManager =
       manager ?? throw new ArgumentNullException(nameof(manager), "PluginManager cannot be null.");
 
-   public IPlugin? GetPluginByName(string name)
-      => _pluginManager.LoadedPlugins.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+   public IPlugin? GetPluginByName(string name) => _pluginManager.LoadedPlugins.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
    public IPlugin? GetPluginByGuid(Guid id) => _pluginManager[id];
 

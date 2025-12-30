@@ -7,7 +7,7 @@ using Arcanum.API.Events;
 using Arcanum.PluginHost;
 using Arcanum.PluginHost.PluginServices;
 
-namespace Arcanum.Core.PluginServices;
+namespace Arcanum.Core.CoreSystems.PluginServices;
 
 public class PluginManager : ISubroutineLogger
 {
@@ -252,7 +252,7 @@ public class PluginManager : ISubroutineLogger
          // if the plugin returns false, it will be marked as unloaded and inactive.;
          plugin.IsActive = plugin.Initialize(Host);
          sw.Stop();
-         plugin.RuntimeInfo = new (plugin.IsActive, sw.Elapsed);
+         plugin.RuntimeInfo = new(plugin.IsActive, sw.Elapsed);
          plugin.Status = !plugin.IsActive ? PluginStatus.Error : PluginStatus.Initialized;
       }
       catch (Exception ex)
@@ -278,7 +278,7 @@ public class PluginManager : ISubroutineLogger
    {
       var plugin = (IPlugin)Activator.CreateInstance(pluginType)!;
       if (plugin.RequiredHostVersion > HostInfo.Version)
-         throw new ($"Plugin {pluginType.FullName} requires a newer version of the host: {plugin.RequiredHostVersion}");
+         throw new($"Plugin {pluginType.FullName} requires a newer version of the host: {plugin.RequiredHostVersion}");
 
       return plugin;
    }

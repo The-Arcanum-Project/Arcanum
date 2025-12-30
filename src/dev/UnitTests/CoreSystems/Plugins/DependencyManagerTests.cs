@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Arcanum.API;
-using Arcanum.Core.PluginServices;
+using Arcanum.Core.CoreSystems.PluginServices;
 using Moq;
 
 namespace UnitTests.CoreSystems.Plugins;

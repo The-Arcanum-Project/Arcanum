@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 
-namespace Arcanum.Core.Analytics.MapData;
+namespace Arcanum.Core.CoreSystems.ConsoleServices.Analytics.MapData;
 
 public static class AnalyzeLocationCollections
 {

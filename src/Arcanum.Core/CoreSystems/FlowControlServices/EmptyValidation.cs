@@ -1,7 +1,7 @@
 ﻿using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 
-namespace Arcanum.Core.FlowControlServices;
+namespace Arcanum.Core.CoreSystems.FlowControlServices;
 
 public static class EmptyValidation
 {
