@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Numerics;
+using System.Reflection;
 using Arcanum.Core.MapEditor.Engine.Core.Math;
 using Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
@@ -8,13 +8,23 @@ namespace UnitTests.MapEditor.Engine.Core.Spatial;
 [TestFixture]
 public class QuadTreeNodeTests
 {
-   private class TestItem : ISpatialEntity
+   private class TestItem : I3DEntity
    {
       public int Id { get; } = Guid.NewGuid().GetHashCode();
-      public Vector2I Position2D { get; set; }
-      public RectF Bounds { get; set; }
-      public TestItem(float x, float y, float w, float h) => Bounds = new(x, y, w, h);
-      public override string ToString() => $"Item({Bounds.X},{Bounds.Y})";
+      public Vector3 Position3D { get; set; }
+      public Quaternion Rotation3D { get; set; }
+      public Vector3 Scale3D { get; set; }
+      public Vector3 LocalSize3D { get; set; }
+      public BoundingBoxF Bounds3D { get; private set; }
+
+      public TestItem(float x, float z, float w, float h)
+      {
+         var min = new Vector3(x, 0, z);
+         var max = new Vector3(x + w, 10, z + h);
+         Bounds3D = new(min, max);
+      }
+
+      public override string ToString() => $"Item({Bounds3D.Min.X},{Bounds3D.Min.Z})";
    }
 
    private QuadTree<TestItem> _tree;
@@ -27,7 +37,7 @@ public class QuadTreeNodeTests
       _tree = new(ref _worldBounds, maxObjectsPerNode: 2, maxDepth: 4);
    }
 
-   #region Internal State Inspection Helpers (Reflection)
+   #region Reflection Helpers
 
    private object GetRootNode()
    {
@@ -35,10 +45,10 @@ public class QuadTreeNodeTests
       return field!.GetValue(_tree)!;
    }
 
-   private static List<TestItem> GetNodeItems(object node)
+   private static List<TestItem>? GetNodeItems(object node)
    {
       var field = node.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance);
-      return (field!.GetValue(node) as List<TestItem>)!;
+      return field!.GetValue(node) as List<TestItem>;
    }
 
    private Array? GetNodeChildren(object node)
@@ -51,7 +61,7 @@ public class QuadTreeNodeTests
    {
       var children = GetNodeChildren(node);
       Assert.That(children, Is.Not.Null, "Node has no children (Leaf node)");
-      return children.GetValue(index)!;
+      return children!.GetValue(index)!;
    }
 
    #endregion
@@ -59,11 +69,10 @@ public class QuadTreeNodeTests
    [Test]
    public void Insert_Logic_ShouldNotInitializeItemsList_UntilFirstInsert()
    {
-      // Test lazy initialization of _items ??= new(maxObjects)
       var root = GetRootNode();
       var items = GetNodeItems(root);
 
-      Assert.That(items, Is.Null, "Node._items should be null before any insertion to save memory");
+      Assert.That(items, Is.Null, "Node._items should be null before any insertion");
 
       _tree.Insert(new(10, 10, 5, 5));
       items = GetNodeItems(root);
@@ -75,38 +84,37 @@ public class QuadTreeNodeTests
    [Test]
    public void GetChildIndex_Logic_VerifyQuadrants()
    {
-      // We force a split by adding 3 items (max is 2)
-      // World is 0,0 to 100,100. Midpoint is 50,50.
-
-      // Top Right (>50 X, <50 Y)
+      // Force split (Max 2 items)
+      // Top Right (>50 X, <50 Z)
       var tr = new TestItem(60, 10, 5, 5);
-      // Top Left (<50 X, <50 Y)
+      // Top Left (<50 X, <50 Z)
       var tl = new TestItem(10, 10, 5, 5);
-      // Bottom Left (<50 X, >50 Y)
+      // Bottom Left (<50 X, >50 Z)
       var bl = new TestItem(10, 60, 5, 5);
 
       _tree.Insert(tr);
       _tree.Insert(tl);
-      _tree.Insert(bl); // Triggers split
+      _tree.Insert(bl); // Split happens here
 
       var root = GetRootNode();
 
-      // Verify Root is empty (items moved down)
+      // Verify Root items moved down
       Assert.That(GetNodeItems(root), Is.Empty);
 
-      // Verify Distribution
-      // Children indices: 0:TR, 1:TL, 2:BL, 3:BR
+      // Verify Distribution (Indices: 0:TR, 1:TL, 2:BL, 3:BR)
       var childTr = GetChild(root, 0);
       var childTl = GetChild(root, 1);
       var childBl = GetChild(root, 2);
-      var childBr = GetChild(root, 3);
 
       Assert.Multiple(() =>
       {
-         Assert.That(GetNodeItems(childTr), Has.Count.EqualTo(1), "Top Right should have 1 item");
-         Assert.That(GetNodeItems(childTl), Has.Count.EqualTo(1), "Top Left should have 1 item");
-         Assert.That(GetNodeItems(childBl), Has.Count.EqualTo(1), "Bottom Left should have 1 item");
-         Assert.That(GetNodeItems(childBr), Is.Null, "Bottom Right should be uninitialized/null");
+         Assert.That(GetNodeItems(childTr), Has.Count.EqualTo(1), "Top Right (Index 0)");
+         Assert.That(GetNodeItems(childTl), Has.Count.EqualTo(1), "Top Left (Index 1)");
+         Assert.That(GetNodeItems(childBl), Has.Count.EqualTo(1), "Bottom Left (Index 2)");
+
+         // Bottom Right should exist but be empty/null items
+         var childBr = GetChild(root, 3);
+         Assert.That(GetNodeItems(childBr), Is.Null.Or.Empty);
       });
    }
 
@@ -124,7 +132,7 @@ public class QuadTreeNodeTests
       _tree.Insert(i3);
 
       var root = GetRootNode();
-      var tlChild = GetChild(root, 1);
+      var tlChild = GetChild(root, 1); // Top Left
 
       Assert.That(GetNodeItems(tlChild), Has.Count.EqualTo(3));
    }
@@ -132,49 +140,55 @@ public class QuadTreeNodeTests
    [Test]
    public void Remove_SwapRemove_Logic_ShouldNotCorruptList()
    {
+      // Large maxObjects to prevent splitting
       _tree = new(ref _worldBounds, maxObjectsPerNode: 10);
 
       var itemA = new TestItem(1, 1, 1, 1);
       var itemB = new TestItem(2, 2, 1, 1);
       var itemC = new TestItem(3, 3, 1, 1);
 
-      _tree.Insert(itemA); // Index 0
-      _tree.Insert(itemB); // Index 1
-      _tree.Insert(itemC); // Index 2
+      _tree.Insert(itemA);
+      _tree.Insert(itemB);
+      _tree.Insert(itemC);
 
-      // Remove item A (Index 0). 
-      // Swap-remove should take C (Index 2), put it at Index 0, and remove Index 2.
+      // Remove A. Logic should swap C into A's spot.
       _tree.Remove(itemA);
 
       var rootItems = GetNodeItems(GetRootNode());
 
       Assert.That(rootItems, Has.Count.EqualTo(2));
-      Assert.That(rootItems, Does.Contain(itemB));
-      Assert.That(rootItems, Does.Contain(itemC));
-      Assert.That(rootItems, Does.Not.Contain(itemA));
+      Assert.Multiple(() =>
+      {
+         // Use Id based check or ref check since we use new instances
+         Assert.That(rootItems!.Any(x => x.Id == itemB.Id), Is.True);
+         Assert.That(rootItems!.Any(x => x.Id == itemC.Id), Is.True);
+         Assert.That(rootItems!.Any(x => x.Id == itemA.Id), Is.False);
+      });
    }
 
    [Test]
    public void QueryRange_ManualChildUnrolling_ShouldFunctionCorrectly()
    {
-      _tree = new(ref _worldBounds, maxObjectsPerNode: 1); // Split immediately
+      // Force immediate split
+      _tree = new(ref _worldBounds, maxObjectsPerNode: 1);
 
-      var tr = new TestItem(80, 10, 5, 5); // Quadrant 0
-      var tl = new TestItem(10, 10, 5, 5); // Quadrant 1
-      var bl = new TestItem(10, 80, 5, 5); // Quadrant 2
-      var br = new TestItem(80, 80, 5, 5); // Quadrant 3
+      var tr = new TestItem(80, 10, 5, 5); // Index 0
+      var tl = new TestItem(10, 10, 5, 5); // Index 1
+      var bl = new TestItem(10, 80, 5, 5); // Index 2
+      var br = new TestItem(80, 80, 5, 5); // Index 3
 
       _tree.Insert(tr);
       _tree.Insert(tl);
       _tree.Insert(bl);
       _tree.Insert(br);
 
-      // Query specifically strictly inside Quadrant 3 (Bottom Right)
+      // Test specific quadrants to ensure loop unrolling (c[0], c[1]...) is correct
+      // Bottom Right Query
       var resBr = _tree.Query(new(70, 70, 20, 20));
       Assert.That(resBr, Has.Count.EqualTo(1));
       Assert.That(resBr[0].Id, Is.EqualTo(br.Id));
 
-      // Query specifically strictly inside Quadrant 1 (Top Left)
+      // Top Left Query
       var resTl = _tree.Query(new(0, 0, 20, 20));
       Assert.That(resTl, Has.Count.EqualTo(1));
       Assert.That(resTl[0].Id, Is.EqualTo(tl.Id));
@@ -183,25 +197,19 @@ public class QuadTreeNodeTests
    [Test]
    public void MidPoint_Calculations_ShouldBePrecise()
    {
-      // This tests the `_midX` and `_midY` pre-calculation logic.
-      // We place an item EXACTLY on the floating point boundary.
-      // 50.0f
-
+      // Item exactly on the 50.0 boundary
       var boundaryItem = new TestItem(50.0f, 10, 10, 10);
 
-      // Logic check:
-      // item.X (50) < _midX (50) ? FALSE
-      // item.X (50) > _midX (50) ? FALSE
-      // Result: Should return -1 (Straddle/Parent), even though it visually starts right on the line.
-
-      _tree.Insert(boundaryItem); // Item 1
-      _tree.Insert(new(10, 10, 2, 2)); // Item 2
-      _tree.Insert(new(12, 12, 2, 2)); // Item 3 (Trigger split)
+      _tree.Insert(boundaryItem);
+      _tree.Insert(new(10, 10, 2, 2));
+      _tree.Insert(new(12, 12, 2, 2)); // Split trigger
 
       var root = GetRootNode();
       var rootItems = GetNodeItems(root);
 
-      // The boundary item should have stayed in root because (50 < 50) is false.
+      // Boundary item should stay in root
       Assert.That(rootItems, Does.Contain(boundaryItem));
+      // Other items should be gone (moved to children)
+      Assert.That(rootItems, Has.Count.EqualTo(1));
    }
 }

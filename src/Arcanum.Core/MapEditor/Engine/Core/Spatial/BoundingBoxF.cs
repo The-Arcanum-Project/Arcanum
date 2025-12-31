@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-namespace UnitTests.MapEditor.Engine.Core.Spatial;
+namespace Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
 public struct BoundingBoxF : IEquatable<BoundingBoxF>
@@ -114,30 +114,50 @@ public struct BoundingBoxF : IEquatable<BoundingBoxF>
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public readonly bool Intersects(BoundingBoxF other)
    {
-      if (Sse.IsSupported)
-      {
-         var vMinA = Min.AsVector128();
-         var vMaxA = Max.AsVector128();
-         var vMinB = other.Min.AsVector128();
-         var vMaxB = other.Max.AsVector128();
+      if (!Sse.IsSupported)
+         return (Max.X >= other.Min.X) &
+                (Min.X <= other.Max.X) &
+                (Max.Y >= other.Min.Y) &
+                (Min.Y <= other.Max.Y) &
+                (Max.Z >= other.Min.Z) &
+                (Min.Z <= other.Max.Z);
 
-         // MaxA >= MinB  AND  MinA <= MaxB
-         var c1 = Vector128.GreaterThanOrEqual(vMaxA, vMinB);
-         var c2 = Vector128.LessThanOrEqual(vMinA, vMaxB);
+      var vMinA = Min.AsVector128();
+      var vMaxA = Max.AsVector128();
+      var vMinB = other.Min.AsVector128();
+      var vMaxB = other.Max.AsVector128();
 
-         var combined = Vector128.BitwiseAnd(c1, c2);
+      // MaxA >= MinB  AND  MinA <= MaxB
+      var c1 = Vector128.GreaterThanOrEqual(vMaxA, vMinB);
+      var c2 = Vector128.LessThanOrEqual(vMinA, vMaxB);
 
-         var mask = Sse.MoveMask(combined);
-         // Check X, Y, Z (bits 0, 1, 2)
-         return (mask & 0b0111) == 0b0111;
-      }
+      var combined = Vector128.BitwiseAnd(c1, c2);
 
-      return (Max.X >= other.Min.X) &
-             (Min.X <= other.Max.X) &
-             (Max.Y >= other.Min.Y) &
-             (Min.Y <= other.Max.Y) &
-             (Max.Z >= other.Min.Z) &
-             (Min.Z <= other.Max.Z);
+      var mask = Sse.MoveMask(combined);
+      // Check X, Y, Z (bits 0, 1, 2)
+      return (mask & 0b0111) == 0b0111;
+   }
+
+   public static void FromSpacialEntity(I3DEntity entity, ref BoundingBoxF bounds)
+   {
+      var rot = entity.Rotation3D;
+
+      // Calculate local "Half-Extents" (the distance from center to side along local axes)
+      // Multiply is faster than divide: / 2f -> * 0.5f
+      var halfSize = entity.LocalSize3D * entity.Scale3D * 0.5f;
+      var xVector = new Vector3(halfSize.X, 0f, 0f);
+      var yVector = new Vector3(0f, halfSize.Y, 0f);
+      var zVector = new Vector3(0f, 0f, halfSize.Z);
+
+      // Rotate these vectors into World Space
+      xVector = Vector3.Transform(xVector, rot);
+      yVector = Vector3.Transform(yVector, rot);
+      zVector = Vector3.Transform(zVector, rot);
+
+      var newExtent = Vector3.Abs(xVector) + Vector3.Abs(yVector) + Vector3.Abs(zVector);
+
+      bounds.Min = entity.Position3D - newExtent;
+      bounds.Max = entity.Position3D + newExtent;
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]

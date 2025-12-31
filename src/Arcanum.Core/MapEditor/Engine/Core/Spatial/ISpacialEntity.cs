@@ -1,18 +1,18 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
-using Arcanum.Core.MapEditor.Engine.Core.Math;
+﻿using System.Numerics;
 
 namespace Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
-public interface ISpatialEntity
+public interface I3DEntity
 {
-   int Id { get; }
-   Vector2I Position2D { get; set; }
-   RectF Bounds { get; set; }
-   // Vector3 Position3D { get; set; }
+   public int Id { get; }
 
-   public void MoveTo(Vector2I newPosition)
-   {
-      Position2D = newPosition;
-      Bounds = new(newPosition.X, newPosition.Y, Bounds.Width, Bounds.Height);
-   }
+   Vector3 Position3D { get; set; }
+   Quaternion Rotation3D { get; set; }
+   Vector3 Scale3D { get; set; }
+   /// <summary>
+   /// The size in 3D space without rotation and scaling applied.
+   /// </summary>
+   Vector3 LocalSize3D { get; }
+
+   BoundingBoxF Bounds3D { get; }
 }

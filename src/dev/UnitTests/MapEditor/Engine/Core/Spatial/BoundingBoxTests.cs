@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
 namespace UnitTests.MapEditor.Engine.Core.Spatial;
 

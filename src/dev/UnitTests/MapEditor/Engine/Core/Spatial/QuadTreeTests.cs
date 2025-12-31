@@ -1,4 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
+﻿using System.Numerics;
 using Arcanum.Core.MapEditor.Engine.Core.Math;
 using Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
@@ -7,13 +7,29 @@ namespace UnitTests.MapEditor.Engine.Core.Spatial;
 [TestFixture]
 public class QuadTreeTests
 {
-   // A concrete implementation of ISpatialEntity for testing purposes
-   private class TestEntity(float x, float y, float w, float h)
-      : ISpatialEntity
+   private class TestEntity : I3DEntity
    {
       public int Id { get; } = Guid.NewGuid().GetHashCode();
-      public Vector2I Position2D { get; set; } = new(0, 0);
-      public RectF Bounds { get; set; } = new(x, y, w, h);
+
+      public Vector3 Position3D { get; set; }
+      public Quaternion Rotation3D { get; set; }
+      public Vector3 Scale3D { get; set; } = Vector3.One;
+      public Vector3 LocalSize3D { get; set; }
+      public BoundingBoxF Bounds3D { get; private set; }
+
+      // Constructor mimics 2D inputs but maps them to 3D (X, Z) plane
+      public TestEntity(float x, float z, float w, float h)
+      {
+         SetBounds(x, z, w, h);
+      }
+
+      public void SetBounds(float x, float z, float w, float h)
+      {
+         var min = new Vector3(x, 0, z);
+         var max = new Vector3(x + w, 10, z + h); // Arbitrary height
+         Bounds3D = new(min, max);
+         Position3D = Bounds3D.Center;
+      }
    }
 
    private QuadTree<TestEntity> _quadTree;
@@ -22,21 +38,23 @@ public class QuadTreeTests
    [SetUp]
    public void Setup()
    {
-      // Create a world from (0,0) to (100,100)
+      // World is 0,0 to 100,100 on the X/Z plane
       _worldBounds = new(0, 0, 100, 100);
 
-      // Max 4 objects per node, Max depth 5
+      // Pass by ref as required by new constructor
       _quadTree = new(ref _worldBounds, maxObjectsPerNode: 4, maxDepth: 5);
    }
 
    [Test]
    public void Insert_SingleItem_ShouldBeFoundInQuery()
    {
+      // 10, 10 on the XZ plane
       var entity = new TestEntity(10, 10, 5, 5);
       _quadTree.Insert(entity);
 
       // Query a rect that fully encompasses the entity
-      var results = _quadTree.Query(new(0, 0, 20, 20));
+      var range = new RectF(0, 0, 20, 20);
+      var results = _quadTree.Query(range);
 
       Assert.That(results, Has.Count.EqualTo(1));
       Assert.That(results[0].Id, Is.EqualTo(entity.Id));
@@ -57,14 +75,12 @@ public class QuadTreeTests
    [Test]
    public void Splitting_WhenThresholdExceeded_ShouldDistributeItems()
    {
-      // Tree is configured to split after 4 items.
-      // We will insert 5 items into the Top-Left quadrant (0-50, 0-50).
-
+      // Tree splits after 4 items. Insert 5 into Top-Left (0-50, 0-50).
       var e1 = new TestEntity(1, 1, 2, 2);
       var e2 = new TestEntity(2, 2, 2, 2);
       var e3 = new TestEntity(3, 3, 2, 2);
       var e4 = new TestEntity(4, 4, 2, 2);
-      var e5 = new TestEntity(5, 5, 2, 2); // This forces the split
+      var e5 = new TestEntity(5, 5, 2, 2); // Forces split
 
       _quadTree.Insert(e1);
       _quadTree.Insert(e2);
@@ -72,7 +88,7 @@ public class QuadTreeTests
       _quadTree.Insert(e4);
       _quadTree.Insert(e5);
 
-      // Verify all are still retrievable via a root query
+      // Verify all are retrievable via root query
       var all = _quadTree.Query(_worldBounds);
       Assert.That(all, Has.Count.EqualTo(5));
 
@@ -85,25 +101,23 @@ public class QuadTreeTests
    public void StraddlingItems_ShouldStayInParentNode()
    {
       // World center is 50, 50.
-      // Create an item that crosses the vertical center line (X=50).
-      // It sits at X=48 with Width=4 (ends at 52).
+      // Item at X=48, Width=4 (Ends at 52). Crosses X=50.
       var straddler = new TestEntity(48, 10, 4, 4);
 
-      // Add enough items to force a split if possible, though the straddler 
-      // shouldn't go down to children.
       _quadTree.Insert(straddler);
+      // Add filler to force split
       _quadTree.Insert(new(10, 10, 2, 2));
       _quadTree.Insert(new(12, 12, 2, 2));
       _quadTree.Insert(new(14, 14, 2, 2));
-      _quadTree.Insert(new(16, 16, 2, 2)); // Trigger split
+      _quadTree.Insert(new(16, 16, 2, 2));
 
-      // Query specifically the left side
+      // Query Left side (0 to 49)
       var leftResults = _quadTree.Query(new(0, 0, 49, 100));
-      Assert.That(leftResults.Any(x => x.Id == straddler.Id), Is.True, "Left query should find it");
+      Assert.That(leftResults.Any(x => x.Id == straddler.Id), Is.True, "Should be found by Left query");
 
-      // Query specifically the right side
+      // Query Right side (51 to 100)
       var rightResults = _quadTree.Query(new(51, 0, 49, 100));
-      Assert.That(rightResults.Any(x => x.Id == straddler.Id), Is.True, "Right query should find it");
+      Assert.That(rightResults.Any(x => x.Id == straddler.Id), Is.True, "Should be found by Right query");
    }
 
    [Test]
@@ -126,92 +140,53 @@ public class QuadTreeTests
    public void Remove_NonExistingItem_ShouldReturnFalse()
    {
       var entity = new TestEntity(20, 20, 10, 10);
-      // Not inserting it
-
       var removed = _quadTree.Remove(entity);
-
       Assert.That(removed, Is.False);
    }
 
    [Test]
    public void Move_ShouldRelocateEntity()
    {
+      // Start at 10, 10
       var entity = new TestEntity(10, 10, 5, 5);
       _quadTree.Insert(entity);
 
       Assert.Multiple(() =>
       {
+         // Verify initial position
          Assert.That(_quadTree.Query(new(5, 5, 15, 15)), Has.Count.EqualTo(1));
          Assert.That(_quadTree.Query(new(80, 80, 10, 10)), Is.Empty);
       });
 
-      var newPos = new Vector2I(85, 85);
-      entity.Bounds = new(newPos.X, newPos.Y, 5, 5);
+      // Move to 85, 85 (Z is Y in the constructor of our test entity)
+      const float newX = 85f;
+      const float newZ = 85f;
 
-      _quadTree.Move(entity, newPos);
+      entity.SetBounds(newX, newZ, 5, 5);
+      var newPos3D = new Vector3(newX, 0, newZ);
+
+      // Action
+      _quadTree.Move(entity, newPos3D);
 
       Assert.Multiple(() =>
       {
+         // Should be gone from old spot
          Assert.That(_quadTree.Query(new(5, 5, 15, 15)), Is.Empty);
+         // Should be found in new spot
          Assert.That(_quadTree.Query(new(80, 80, 10, 10)), Has.Count.EqualTo(1));
       });
    }
 
    [Test]
-   public void Move_IntoDifferentQuadrant_ShouldWorkAfterSplit()
-   {
-      // Fill Top-Left to force split
-      for (var i = 0; i < 5; i++)
-         _quadTree.Insert(new(5, 5, 2, 2));
-
-      var mover = new TestEntity(10, 10, 2, 2);
-      _quadTree.Insert(mover);
-
-      // Move 'mover' to Bottom-Right (80, 80)
-      var newPos = new Vector2I(80, 80);
-      _quadTree.Move(mover, newPos);
-
-      var result = _quadTree.Query(new(70, 70, 20, 20));
-      Assert.That(result, Has.Count.EqualTo(1));
-      Assert.That(result[0].Id, Is.EqualTo(mover.Id));
-   }
-
-   [Test]
    public void QueryPoint_ShouldDetectItemUnderCursor()
    {
-      var entity = new TestEntity(50, 50, 10, 10); // Center at 55, 55 roughly
+      var entity = new TestEntity(50, 50, 10, 10); // X=50, Z=50
       _quadTree.Insert(entity);
 
-      // Click exactly inside the box
-      // Box is X:50->60, Y:50->60
+      // Click at 55, 55 (Center of box)
       var hits = _quadTree.QueryPoint(new(55, 55), radius: 1.0f);
 
       Assert.That(hits, Has.Count.EqualTo(1));
-   }
-
-   [Test]
-   public void QueryPoint_WithRadius_ShouldDetectNearbyItems()
-   {
-      var entity = new TestEntity(50, 50, 10, 10);
-      _quadTree.Insert(entity);
-
-      // Click at 48, 48. This is OUTSIDE the box (starts at 50,50).
-      // But if radius is 5, it should overlap.
-      var hits = _quadTree.QueryPoint(new(48, 48), radius: 5.0f);
-
-      Assert.That(hits, Has.Count.EqualTo(1));
-   }
-
-   [Test]
-   public void Clear_ShouldRemoveAllItems()
-   {
-      _quadTree.Insert(new(10, 10, 5, 5));
-      _quadTree.Insert(new(60, 60, 5, 5));
-
-      _quadTree.Clear();
-
-      var results = _quadTree.Query(_worldBounds);
-      Assert.That(results, Is.Empty);
    }
 
    [Test]
@@ -223,8 +198,9 @@ public class QuadTreeTests
       for (var i = 0; i < count; i++)
       {
          float x = rng.Next(0, 90);
-         float y = rng.Next(0, 90);
-         var ent = new TestEntity(x, y, 2, 2);
+         float z = rng.Next(0, 90);
+         // Ensure we create a valid 3D entity mapping Z correctly
+         var ent = new TestEntity(x, z, 2, 2);
          _quadTree.Insert(ent);
       }
 

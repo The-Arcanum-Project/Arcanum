@@ -14,17 +14,16 @@ public partial class QuadTree<T>
       private List<T>? _items;
       private Node[]? _children;
 
-      public void Insert(T item, int currentDepth, int maxObjects, int maxDepth)
+      public void Insert(T item, RectF itemBounds, int currentDepth, int maxObjects, int maxDepth)
       {
          if (_children != null)
          {
-            var b = item.Bounds;
-            var index = GetChildIndex(in b);
+            var index = GetChildIndex(in itemBounds);
 
             if (index != -1)
             {
                // Pass depth + 1 down the stack
-               _children[index].Insert(item, currentDepth + 1, maxObjects, maxDepth);
+               _children[index].Insert(item, itemBounds, currentDepth, maxObjects, maxDepth);
                return;
             }
          }
@@ -58,13 +57,13 @@ public partial class QuadTree<T>
          for (var i = list.Count - 1; i >= 0; i--)
          {
             var item = list[i];
-            var b = item.Bounds;
+            var b = Flatten(item);
             var index = GetChildIndex(in b);
 
             if (index != -1)
             {
                // Insert into child with incremented depth
-               _children[index].Insert(item, nextDepth, maxObjects, maxDepth);
+               _children[index].Insert(item, b, nextDepth, maxObjects, maxDepth);
 
                // Swap-Remove from current list
                var lastIdx = list.Count - 1;
@@ -76,13 +75,12 @@ public partial class QuadTree<T>
          }
       }
 
-      public bool Remove(T item)
+      public bool Remove(T item, RectF oldBounds)
       {
          if (_children != null)
          {
-            var b = item.Bounds;
-            var index = GetChildIndex(in b);
-            if (index != -1 && _children[index].Remove(item))
+            var index = GetChildIndex(in oldBounds);
+            if (index != -1 && _children[index].Remove(item, oldBounds))
                return true;
          }
 
@@ -92,7 +90,7 @@ public partial class QuadTree<T>
          // Swap-Removal
          var count = _items.Count;
          for (var i = 0; i < count; i++)
-            if (_items[i].Equals(item))
+            if (_items[i].Id == item.Id)
             {
                var lastIndex = count - 1;
                if (i < lastIndex)
@@ -113,8 +111,7 @@ public partial class QuadTree<T>
             for (var i = 0; i < count; i++)
             {
                var item = _items[i];
-               var b = item.Bounds;
-               if (range.Intersects(b))
+               if (range.Intersects(Flatten(item)))
                   results.Add(item);
             }
          }
