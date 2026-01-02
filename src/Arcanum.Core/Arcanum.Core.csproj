@@ -27,7 +27,6 @@
         <Folder Include="MapEditor\Engine\Modes\Draft\Graph\"/>
         <Folder Include="MapEditor\Engine\Modes\Draft\Models\"/>
         <Folder Include="MapEditor\Engine\Modes\Nudge\Commands\"/>
-        <Folder Include="MapEditor\Engine\Modes\Nudge\Entities\"/>
         <Folder Include="MapEditor\Engine\Modes\Nudge\Rendering\"/>
         <Folder Include="MapEditor\Engine\Modes\Nudge\Spatial\"/>
         <Folder Include="MapEditor\Engine\Modes\Nudge\Tools\"/>

@@ -4,6 +4,7 @@ namespace Arcanum.Core.MapEditor.Engine.Core.Spatial;
 
 public interface I3DEntity
 {
+   protected static int _nextId;
    public int Id { get; }
 
    Vector3 Position3D { get; set; }

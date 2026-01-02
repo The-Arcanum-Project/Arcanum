@@ -138,7 +138,7 @@ public struct BoundingBoxF : IEquatable<BoundingBoxF>
       return (mask & 0b0111) == 0b0111;
    }
 
-   public static void FromSpacialEntity(I3DEntity entity, ref BoundingBoxF bounds)
+   public static BoundingBoxF FromSpacialEntity(I3DEntity entity)
    {
       var rot = entity.Rotation3D;
 
@@ -156,8 +156,10 @@ public struct BoundingBoxF : IEquatable<BoundingBoxF>
 
       var newExtent = Vector3.Abs(xVector) + Vector3.Abs(yVector) + Vector3.Abs(zVector);
 
+      BoundingBoxF bounds;
       bounds.Min = entity.Position3D - newExtent;
       bounds.Max = entity.Position3D + newExtent;
+      return bounds;
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
