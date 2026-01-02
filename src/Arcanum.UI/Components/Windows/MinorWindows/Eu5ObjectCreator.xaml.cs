@@ -154,6 +154,8 @@ public partial class Eu5ObjectCreator
          return null;
 
       var newObject = window.CreatedObject!;
+      if (newObject is IIndexRandomColor irc)
+         irc.Index = newObject.GetGlobalItemsNonGeneric().Count - 1;
       var createCommand = new CreateObjectCommand(newObject, true, addToGlobals);
       createCommand.Execute();
       AppData.HistoryManager.AddCommand(createCommand);

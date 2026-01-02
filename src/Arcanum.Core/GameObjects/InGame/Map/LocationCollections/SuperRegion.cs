@@ -64,7 +64,7 @@ public partial class SuperRegion
    [Description("The Continent this SuperRegion belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   [PropertyConfig(aggregateLinktParent: "SuperRegions", aggreateLinkType: AggregateLinkType.Child)]
+   [PropertyConfig(aggregateLinktParent: "SuperRegions", aggreateLinkType: AggregateLinkType.Child, isRequired: true)]
    public Continent Continent { get; set; } = Continent.Empty;
 
    [DefaultValue(null)]

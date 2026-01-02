@@ -61,7 +61,7 @@ public partial class Region : IMapInferable, IEu5Object<Region>, IIndexRandomCol
    [Description("The SuperRegion this Region belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   [PropertyConfig(aggregateLinktParent: "Regions", aggreateLinkType: AggregateLinkType.Child)]
+   [PropertyConfig(aggregateLinktParent: "Regions", aggreateLinkType: AggregateLinkType.Child, isRequired: true)]
    public SuperRegion SuperRegion { get; set; } = SuperRegion.Empty;
 
    [DefaultValue(null)]
