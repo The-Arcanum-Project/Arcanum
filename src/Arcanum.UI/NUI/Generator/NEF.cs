@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -13,6 +14,8 @@ using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls;
 using Arcanum.UI.Components.UserControls.BaseControls;
 using Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox;
+using Arcanum.UI.NUI.Generator.StructConverters;
+using Common.Logger;
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -429,4 +432,144 @@ public static class NEF
    }
 
    #endregion
+
+   public static Grid GetVector2UI(Binding binding, bool isPropertyReadOnly, Vector2 vec2)
+   {
+      return BuildMultiComponentUI(binding,
+                                   isPropertyReadOnly,
+                                   components: [("X", vec2.X, new Vector2ComponentConverter("X")), ("Y", vec2.Y, new Vector2ComponentConverter("Y"))],
+                                   factory: values => new Vector2(values[0], values[1]));
+   }
+
+   public static Grid GetVector3UI(Binding binding, bool isPropertyReadOnly, Vector3 vec3)
+   {
+      return BuildMultiComponentUI(binding,
+                                   isPropertyReadOnly,
+                                   components:
+                                   [
+                                      ("X", vec3.X, new Vector3ComponentConverter("X")), ("Y", vec3.Y, new Vector3ComponentConverter("Y")),
+                                      ("Z", vec3.Z, new Vector3ComponentConverter("Z"))
+                                   ],
+                                   factory: values => new Vector3(values[0], values[1], values[2]));
+   }
+
+   public static Grid GetQuaternionUI(Binding binding, bool isPropertyReadOnly, Quaternion quat)
+   {
+      return BuildMultiComponentUI(binding,
+                                   isPropertyReadOnly,
+                                   components:
+                                   [
+                                      ("X", quat.X, new QuaternionComponentConverter("X")), ("Y", quat.Y, new QuaternionComponentConverter("Y")),
+                                      ("Z", quat.Z, new QuaternionComponentConverter("Z")), ("W", quat.W, new QuaternionComponentConverter("W"))
+                                   ],
+                                   factory: values => new Quaternion(values[0], values[1], values[2], values[3]));
+   }
+
+   /// <summary>
+   /// Generates a Grid containing N labeled float inputs.
+   /// </summary>
+   /// <param name="binding">The main binding to the parent object (used for Source/Path).</param>
+   /// <param name="isReadOnly">Global read-only state.</param>
+   /// <param name="components">List of tuples containing (Label Text, Initial Value, Specific Converter).</param>
+   /// <param name="factory">Function that takes an array of floats (in order) and returns the new Struct instance.</param>
+   private static Grid BuildMultiComponentUI(Binding binding,
+                                             bool isReadOnly,
+                                             (string Label, float Value, IValueConverter Converter)[] components,
+                                             Func<float[], object> factory)
+   {
+      var grid = new Grid
+      {
+         Margin = new(0),
+         SnapsToDevicePixels = true,
+         VerticalAlignment = VerticalAlignment.Center,
+      };
+
+      var inputs = new FloatNumericUpDown[components.Length];
+
+      for (var i = 0; i < components.Length; i++)
+      {
+         var (label, initialValue, converter) = components[i];
+         var isLast = i == components.Length - 1;
+
+         // Define Columns (10px Label, 1* Input)
+         grid.ColumnDefinitions.Add(new() { Width = new(10, GridUnitType.Pixel) });
+         grid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
+
+         // Add Label
+         var textBlock = new TextBlock
+         {
+            Text = label,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 12,
+            Margin = new(0, 0, 2, 0),
+            FontFamily = ControlFactory.MonoFontFamily,
+         };
+         textBlock.SetValue(Grid.ColumnProperty, i * 2);
+         grid.Children.Add(textBlock);
+
+         // Create Binding for this specific component
+         var compBinding = new Binding(binding.Path.Path)
+         {
+            Source = binding.Source,
+            Mode = BindingMode.OneWay,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            Converter = converter
+         };
+
+         // Add Numeric Input
+         var input = GetFloatUI(compBinding, initialValue, ControlFactory.SHORT_INFO_ROW_HEIGHT);
+         input.VerticalAlignment = VerticalAlignment.Center;
+         input.NudTextBox.IsReadOnly = isReadOnly;
+         input.Margin = isLast ? new(0) : new(0, 0, 4, 0); // Right margin for all except last
+         input.SetValue(Grid.ColumnProperty, (i * 2) + 1);
+
+         grid.Children.Add(input);
+         inputs[i] = input;
+      }
+
+      // Setup Update Logic (Reflection write-back)
+      if (isReadOnly)
+         return grid;
+
+      Action<float?> onValueChanged = _ =>
+      {
+         // Gather all current values
+         var values = new float[inputs.Length];
+         for (var j = 0; j < inputs.Length; j++)
+            values[j] = inputs[j].Value ?? 0;
+
+         // Create new struct instance using the factory
+         var newObject = factory(values);
+
+         try
+         {
+            var source = binding.Source;
+            var propName = binding.Path.Path;
+            var propInfo = source.GetType().GetProperty(propName);
+
+            if (propInfo != null && propInfo.CanWrite)
+               propInfo.SetValue(source, newObject);
+         }
+         catch
+         {
+            ArcLog.Error("NEF", $"Failed to set property '{binding.Path.Path}' value via reflection.");
+         }
+      };
+
+      // Subscribe
+      foreach (var input in inputs)
+         input.ValueChanged += onValueChanged;
+
+      // Cleanup
+      grid.Unloaded += OnGridOnUnloaded;
+
+      void OnGridOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         foreach (var input in inputs)
+            input.ValueChanged -= onValueChanged;
+         grid.Unloaded -= OnGridOnUnloaded;
+      }
+
+      return grid;
+   }
 }

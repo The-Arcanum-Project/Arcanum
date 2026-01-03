@@ -78,7 +78,11 @@ public partial class NUIObjectView
          {
             var emptyProperty = type.GetProperty("Empty", BindingFlags.Public | BindingFlags.Static);
             if (emptyProperty != null && emptyProperty.GetValue(null) is IEu5Object emptyInstance)
+            {
                newItems = emptyInstance.GetGlobalItemsNonGeneric().Values.Cast<INUI>().ToList();
+               if (newItems.Count == 0)
+                  newItems.Add(emptyInstance);
+            }
          }
       }
       else
