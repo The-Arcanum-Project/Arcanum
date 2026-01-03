@@ -811,4 +811,12 @@ public class ParsingError : ILazySingleton
                                                                            "No location template entry found for '{0}'.",
                                                                            "The provided Locations '{0}' does not have any valid entries in location_templates.txt.",
                                                                            DiagnosticReportSeverity.Silent);
+
+   public DiagnosticDescriptor DuplicateLocationColor { get; } = new(DiagnosticCategory.Parsing,
+                                                                     84,
+                                                                     "Duplicate Location Color",
+                                                                     DiagnosticSeverity.Error,
+                                                                     "Duplicate color definition found for value '{0}'.",
+                                                                     "Locations are uniquely identified by their color in map_data/named_locations.txt.\n'{0}' Is defined multiple times for locations '{1}' and '{2}'. The first occurrence will be used.",
+                                                                     DiagnosticReportSeverity.PopupNotify);
 }
