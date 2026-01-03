@@ -53,7 +53,7 @@ public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> d
                        ParsingError.Instance.InvalidLocationKey,
                        locName);
             pc.Fail();
-            return;
+            continue;
          }
 
          ParseProperties(objBn, loc, ref pc, false);
