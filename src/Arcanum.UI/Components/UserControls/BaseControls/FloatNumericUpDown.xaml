@@ -50,6 +50,7 @@
             <TextBox Name = "NudTextBox" Grid.Column = "0" Grid.Row = "0" Grid.RowSpan = "2" TextAlignment = "Left"
                      TextChanged = "NUDTextBox_TextChanged" PreviewTextInput = "NudTextBox_PreviewTextInput"
                      MouseWheel = "NudTextBox_MouseWheel" GotKeyboardFocus = "NudTextBox_GotKeyboardFocus"
+                     LostFocus = "NudTextBox_LostFocus" KeyDown = "NudTextBox_KeyDown"
                      Foreground = "{StaticResource DefaultForeColorBrush}"
                      FontFamily = "{Binding FontFamily, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      FontSize = "{StaticResource DefaultFontSize}" FontWeight = "{StaticResource DefaultFontWeight}"
