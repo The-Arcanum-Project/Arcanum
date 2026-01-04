@@ -293,7 +293,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorName = diagnostic.Descriptor.Name;
          ErrorMessage = diagnostic.Message;
          ErrorDescription = diagnostic.Description;
-         FileProbe = diagnostic.Descriptor.Resolution;
+         FileProbe = diagnostic.Descriptor.Resolution?.Invoke(diagnostic.Arguments) ?? string.Empty;
          SelectedPath = FileManager.SanitizePath(diagnostic.Context.FilePath);
          UpdateProbe(diagnostic);
       }
@@ -514,6 +514,63 @@ public partial class ErrorLog : INotifyPropertyChanged
       ExportToPdx();
    }
 
+   public static void ExportFixList()
+   {
+      Dictionary<string, List<Diagnostic>> diagnosticsPerFile = [];
+      foreach (var diag in ErrorManager.Diagnostics)
+      {
+         var sanitizedPath = FileManager.SanitizePath(diag.Context.FilePath, '\\');
+         foreach (var fileDescriptor in DescriptorDefinitions.FileDescriptors)
+         {
+            if (!sanitizedPath.StartsWith(fileDescriptor.FilePath))
+               continue;
+
+            if (!diagnosticsPerFile.TryAdd(sanitizedPath, [diag]))
+               diagnosticsPerFile[sanitizedPath].Add(diag);
+         }
+      }
+
+      var sb = new StringBuilder();
+      sb.AppendLine("# Arcanum Exported Fix List");
+      sb.AppendLine();
+      sb.AppendLine($"# Exported on: {DateTime.Now}");
+      sb.AppendLine($"# Total Diagnostics: {ErrorManager.Diagnostics.Count}");
+      sb.AppendLine();
+
+      foreach (var kvp in diagnosticsPerFile)
+      {
+         sb.AppendLine($"# File: [{kvp.Value.Count,2}]{kvp.Key}:");
+         foreach (var diagnostic in kvp.Value)
+         {
+            sb.AppendLine($" - {ProbeDiagnostic(diagnostic)}");
+            sb.AppendLine($"   Solution: {diagnostic.Descriptor.Resolution?.Invoke(diagnostic.Arguments) ?? string.Empty}");
+            sb.AppendLine();
+         }
+      }
+
+      var folder = string.IsNullOrWhiteSpace(Config.Settings.ErrorLogOptions.ExportFilePath)
+                      ? IO.GetArcanumDataPath
+                      : Config.Settings.ErrorLogOptions.ExportFilePath;
+      var filePath = Path.Combine(folder, "ExportedFixList.txt");
+      IO.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+   }
+
+   public static string ProbeDiagnostic(Diagnostic diag)
+   {
+      try
+      {
+         var lines = ReadLineRange(diag).Result;
+
+         for (var i = 0; i < lines.Length; i++)
+            lines[i] = lines[i].Trim();
+         return $"At [{diag.Context.LineNumber,6},{diag.Context.ColumnNumber,3}]:" + lines[2];
+      }
+      catch (Exception e)
+      {
+         return "Could not probe file.";
+      }
+   }
+
    private static void ExportToPdx()
    {
       Dictionary<string, int> diagnosticsPerFile = [];
@@ -592,6 +649,12 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    private void ExportToCsv_LeftOnClick(object sender, RoutedEventArgs e)
    {
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) || (Keyboard.IsKeyDown(Key.RightCtrl) && Mouse.LeftButton == MouseButtonState.Pressed))
+      {
+         ExportFixList();
+         return;
+      }
+
       ExportToCsv_OnClick(sender, new(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseDownEvent, });
    }
 }

@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using Arcanum.API.Attributes;
 
@@ -29,7 +29,7 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
                                   string message,
                                   string description,
                                   DiagnosticReportSeverity reportSeverity,
-                                  string resolution = "")
+                                  Func<object[], string>? resolution = null)
 {
    public object ResetSettings(PropertyInfo propertyInfo)
    {
@@ -57,7 +57,7 @@ public class DiagnosticDescriptor(DiagnosticCategory category,
    public string Name { get; } = name;
    public string Message { get; } = message;
    public string Description { get; } = description;
-   public string Resolution { get; } = resolution;
+   public Func<object[], string>? Resolution { get; } = resolution;
 
    public override string ToString() => $"{Category.GetPrefix()}-{Id:D4} {Name}";
 
