@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
@@ -10,7 +11,7 @@ public class RegionMapMode : LocationBasedMapMode
    public override string Name => "Regions";
    public override string Description => "Displays the Regions the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Regions;
-   public override Type[] DisplayTypes => [typeof(Region), typeof(Area)];
+   public override Type[] DisplayTypes => [typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
 
    public override int GetColorForLocation(Location location)
    {

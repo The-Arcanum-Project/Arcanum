@@ -10,7 +10,7 @@ public class AreaMapMode : LocationBasedMapMode
    public override string Name => "Areas";
    public override string Description => "Displays the Areas the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Areas;
-   public override Type[] DisplayTypes => [typeof(Area), typeof(Province)];
+   public override Type[] DisplayTypes => [typeof(Area), typeof(Province), typeof(Location)];
 
    public override int GetColorForLocation(Location location)
    {
