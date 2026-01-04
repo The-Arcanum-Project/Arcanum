@@ -6,14 +6,6 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
 public class MapModeConfig() : InternalSearchableSetting(Config.Settings)
 {
-   [Description("The number of map mode buttons to show in the map mode selection UI.")]
-   [DefaultValue(10)]
-   public int NumOfMapModeButtons
-   {
-      get;
-      set => SetNotifyProperty(ref field, value);
-   } = 10;
-
    public MapModeManager.MapModeType MapMode01
    {
       get;
