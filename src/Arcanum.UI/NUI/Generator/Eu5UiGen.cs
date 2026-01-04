@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -40,21 +41,21 @@ namespace Arcanum.UI.NUI.Generator;
 public static class Eu5UiGen
 {
    public readonly static Dictionary<Type, Func<object, Enum, int, int, FrameworkElement>> CustomShortInfoGenerators =
-      new () { { typeof(ModValInstance), Generator.CustomShortInfoGenerators.GetModValInstanceShortInfo }, };
+      new() { { typeof(ModValInstance), Generator.CustomShortInfoGenerators.GetModValInstanceShortInfo }, };
 
-   public readonly static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new ();
+   public readonly static Dictionary<Type, RoutedEventHandler> CustomCollectionEditors = new();
 
-   public readonly static Dictionary<Type, Func<Enum, FrameworkElement>> CustomTypeButtons = new ();
+   public readonly static Dictionary<Type, Func<Enum, FrameworkElement>> CustomTypeButtons = new();
 
-   public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new ();
+   public readonly static Dictionary<Type, Func<object, Enum, FrameworkElement>> CustomItemTypeButtons = new();
 
-   public readonly static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new ();
+   public readonly static Dictionary<Type, Func<Binding, int, int, Control>> CustomUiGenerators = new();
 
-   public static readonly Dictionary<Enum, bool> IsExpandedCache = new ();
+   public static readonly Dictionary<Enum, bool> IsExpandedCache = new();
 
-   public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true)
+   public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true, bool showEmptys = false)
    {
-      if (navh.Targets.Count > 0)
+      if (navh.Targets.Count > 0 && !showEmptys)
       {
          var empty = EmptyRegistry.Empties[navh.Targets[0].GetType()];
          if (navh.Targets.Any(t => t.Equals(empty)))
@@ -80,7 +81,7 @@ public static class Eu5UiGen
          return view;
 
       var primary = navh.Targets[0];
-      view.BaseViewBorder.BorderThickness = new (0);
+      view.BaseViewBorder.BorderThickness = new(0);
       var mainGrid = ControlFactory.GetMainGrid();
       view.BaseViewBorder.Child = mainGrid;
 
@@ -114,7 +115,7 @@ public static class Eu5UiGen
          Height = 8,
          VerticalAlignment = VerticalAlignment.Center,
          HorizontalAlignment = HorizontalAlignment.Left,
-         Margin = new (4, 0, 0, 0),
+         Margin = new(4, 0, 0, 0),
       };
 
       ellipse.ToolTip = state switch
@@ -263,7 +264,7 @@ public static class Eu5UiGen
       }
 
       var bottomBorderMarker = NEF.InlineBorderMarker(6, 2);
-      bottomBorderMarker.Margin = new (0, 0, 0, 6);
+      bottomBorderMarker.Margin = new(0, 0, 0, 6);
       GridManager.AddToGrid(inlineGrid, bottomBorderMarker, inlineGrid.RowDefinitions.Count, 0);
       GridManager.AddToGrid(mainGrid, inlineGrid, startRow, 0, 2, ControlFactory.SHORT_INFO_ROW_HEIGHT);
    }
@@ -282,7 +283,7 @@ public static class Eu5UiGen
       var mspvm = new MultiSelectPropertyViewModel(view, targets, nxProp);
       var ebv = new EmbeddedView(pevm, mspvm)
       {
-         MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new (0, 4, 0, 4),
+         MinHeight = ControlFactory.EMBEDDED_VIEW_HEIGHT, Margin = new(0, 4, 0, 4),
       };
 
       GridManager.AddToGrid(mainGrid, ebv, rowIndex, 0, 2, ControlFactory.EMBEDDED_VIEW_HEIGHT);
@@ -384,7 +385,7 @@ public static class Eu5UiGen
          if (typeof(IEu5Object).IsAssignableFrom(nxPropType) || typeof(IEu5Object) == nxPropType)
          {
             var embeddedValue = embedded._getValue(nxProp);
-            var ui = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new (embedded, false, navH.Root, true),
+            var ui = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(embedded, false, navH.Root, true),
                                                                               (IEu5Object)embeddedValue,
                                                                               nxProp,
                                                                               ControlFactory.SHORT_INFO_ROW_HEIGHT,
@@ -581,8 +582,8 @@ public static class Eu5UiGen
             var enumerable = SelectionManager.GetInferredObjectsForLocations(Selection.GetSelectedLocations, itemType);
 
             Debug.Assert(enumerable != null);
-               foreach (var target in mspvm.Targets)
-                  Nx.AddRangeToCollection(target, nxProp, enumerable);
+            foreach (var target in mspvm.Targets)
+               Nx.AddRangeToCollection(target, nxProp, enumerable);
          };
 
          RoutedEventHandler removeClick = (_, _) =>
@@ -734,10 +735,10 @@ public static class Eu5UiGen
       {
          Content = "M",
          ToolTip = $"Set to '{mmType.ToString()}' Map Mode",
-         Margin = new (1),
+         Margin = new(1),
          Width = 20,
          Height = 20,
-         BorderThickness = new (1),
+         BorderThickness = new(1),
       };
       RoutedEventHandler mapModeButtonClick = (_, _) => { MapModeManager.SetMapMode(mmType); };
       mapModeButton.Click += mapModeButtonClick;
@@ -759,7 +760,7 @@ public static class Eu5UiGen
                                                  DockPanel panel)
    {
       var eyeButton = NEF.GetEyeButton();
-      eyeButton.Margin = new (4, 0, 0, 0);
+      eyeButton.Margin = new(4, 0, 0, 0);
 
       ICollection allItems = null!;
       if (EmptyRegistry.Empties.TryGetValue(nxItemType, out var value))
@@ -827,9 +828,9 @@ public static class Eu5UiGen
       var border = new Border
       {
          BorderBrush = ControlFactory.AccentBrush,
-         BorderThickness = new (1.2, 0, 0, 1),
-         Margin = new (margin - 2, 6, 0, -2),
-         CornerRadius = new (0, 0, 0, 4),
+         BorderThickness = new(1.2, 0, 0, 1),
+         Margin = new(margin - 2, 6, 0, -2),
+         CornerRadius = new(0, 0, 0, 4),
          Width = 15,
          VerticalAlignment = VerticalAlignment.Stretch,
          HorizontalAlignment = HorizontalAlignment.Left,
@@ -1053,7 +1054,7 @@ public static class Eu5UiGen
             targets.Add((IEu5Object)value);
          }
 
-         mspvm = new (view, targets, nxProp, allowReadOnlyEditing);
+         mspvm = new(view, targets, nxProp, allowReadOnlyEditing);
       }
 
       var binding = new Binding(nameof(mspvm.Value))
@@ -1063,7 +1064,7 @@ public static class Eu5UiGen
          UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
       };
 
-      Control element;
+      FrameworkElement element;
       var val = Nx.ForceGetAs<object>(primary, nxProp);
 
       if (type == typeof(float))
@@ -1082,6 +1083,12 @@ public static class Eu5UiGen
          element = NEF.GetJominiColorUI(binding, primary.IsPropertyReadOnly(nxProp));
       else if (type == typeof(JominiDate))
          element = NEF.GetJominiDateUI(binding);
+      else if (val is Vector3 vec3)
+         element = NEF.GetVector3UI(binding, primary.IsPropertyReadOnly(nxProp), vec3);
+      else if (val is Vector2 vec2)
+         element = NEF.GetVector2UI(binding, primary.IsPropertyReadOnly(nxProp), vec2);
+      else if (val is Quaternion quat)
+         element = NEF.GetQuaternionUI(binding, primary.IsPropertyReadOnly(nxProp), quat);
       else if (type == typeof(object))
          element = NEF.GetStringUI(binding);
       else if (CustomUiGenerators.TryGetValue(type, out var generator))
@@ -1100,11 +1107,11 @@ public static class Eu5UiGen
 
       if (!allowReadOnlyEditing && primary.IsReadonly)
          element.IsEnabled = false;
-      element.VerticalAlignment = VerticalAlignment.Stretch;
+      // element.VerticalAlignment = VerticalAlignment.Stretch;
       element.Height = ControlFactory.SHORT_INFO_ROW_HEIGHT;
 
       var desc = NEF.DescriptorBlock(nxProp);
-      desc.Margin = new (leftMargin, 0, 0, 0);
+      desc.Margin = new(leftMargin, 0, 0, 0);
 
       SetUpPropertyContextMenu(primary, nxProp, desc, mspvm);
 
@@ -1113,7 +1120,7 @@ public static class Eu5UiGen
 
       SetTooltipIsAny(primary, nxProp, desc);
 
-      GetInferActionButtons(mspvm, nxProp, type, primary.GetNxItemType(nxProp), new (), navH);
+      GetInferActionButtons(mspvm, nxProp, type, primary.GetNxItemType(nxProp), new(), navH);
 
       var line = NEF.GenerateDashedLine(leftMargin);
       RenderOptions.SetEdgeMode(line, EdgeMode.Aliased);
@@ -1156,7 +1163,7 @@ public static class Eu5UiGen
       MouseButtonEventHandler mouseUpHandler = (_, _) =>
       {
          if (uiTarget.ContextMenu == null)
-            uiTarget.ContextMenu = new ();
+            uiTarget.ContextMenu = new();
          else
          {
             foreach (var item in uiTarget.ContextMenu.Items.OfType<MenuItem>())
@@ -1223,7 +1230,7 @@ public static class Eu5UiGen
          Height = 16,
          VerticalAlignment = VerticalAlignment.Center,
          HorizontalAlignment = HorizontalAlignment.Left,
-         Margin = new (0, 0, 0, 0),
+         Margin = new(0, 0, 0, 0),
          SnapsToDevicePixels = true,
          DataContext = vm,
       };
@@ -1252,7 +1259,7 @@ public static class Eu5UiGen
 
    private static void GenerateShortInfo(NavH navH, IEu5Object primary, Enum nxProp, Grid mainGrid, bool isMarked)
    {
-      var si = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new (primary, false, navH.Root, true),
+      var si = Generator.CustomShortInfoGenerators.GenerateEu5ShortInfo(new(primary, false, navH.Root, true),
                                                                         Nx.ForceGetAs<IEu5Object>(primary, nxProp),
                                                                         nxProp,
                                                                         ControlFactory.SHORT_INFO_ROW_HEIGHT,

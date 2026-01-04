@@ -62,6 +62,8 @@ public partial class Eu5Gen
       var dict = ((IEu5Object)EmptyRegistry.Empties[type]).GetGlobalItemsNonGeneric();
 
       var values = dict.Values.Cast<IEu5Object>().ToList();
+      if (values.Count == 0)
+         values.Add((IEu5Object)EmptyRegistry.Empties[type]);
 
       values.Sort((x, y) => string.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
 
@@ -88,7 +90,7 @@ public partial class Eu5Gen
       else
          SelectedObjectName = $"{selectedItems.Count} items selected";
 
-      Eu5UiGen.GenerateAndSetView(new(selectedItems, true, ViewPresenter, true));
+      Eu5UiGen.GenerateAndSetView(new(selectedItems, true, ViewPresenter, true), showEmptys: true);
 
       //NUIViewGenerator.GenerateAndSetView(new(selectedItems, true, ViewPresenter));
    }

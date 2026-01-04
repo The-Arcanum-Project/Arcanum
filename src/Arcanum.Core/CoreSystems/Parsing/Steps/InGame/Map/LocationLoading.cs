@@ -20,6 +20,7 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
                                        Eu5FileObj fileObj,
                                        object? lockObject)
    {
+      Dictionary<JominiColor, Location> colorToLocation = new(30_000);
       var cIndex = 0;
       foreach (var sn in rn.Statements)
       {
@@ -44,7 +45,22 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
 
          var key = pc.SliceString(cn);
          var loc = Eu5Activator.CreateInstance<Location>(key, fileObj, cn);
-         loc.Color = new JominiColor.Int(hex);
+         var color = new JominiColor.Int(hex);
+         loc.Color = color;
+
+         if (colorToLocation.TryGetValue(color, out var existingLoc))
+         {
+            pc.SetContext(cn);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.DuplicateLocationColor,
+                                           color.AsHexString(),
+                                           key,
+                                           existingLoc.UniqueId);
+            pc.Fail();
+            continue;
+         }
+
+         colorToLocation.Add(color, loc);
 
          if (!cn.KeyNode.IsSimpleKeyNode(ref pc, out var skn))
             continue;

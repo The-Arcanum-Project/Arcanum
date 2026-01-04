@@ -350,9 +350,16 @@ public static class FileManager
          return false;
 
       // if we have a file ending we need to remove it and only check the path
-      return CoreData.ModMetadata.ReplacePaths.Any(replacePath
-                                                      => replacePath.Equals(RemoveFileNameEntryFromPath(subPaths,
-                                                                                                        out _)));
+      try
+      {
+         return CoreData.ModMetadata.ReplacePaths.Any(replacePath
+                                                         => replacePath.Equals(subPaths));
+      }
+      catch (Exception e)
+      {
+         ArcLog.Error("FMN", "Failed to load mod metadata", e);
+         return false;
+      }
    }
 
    private static string[] RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)

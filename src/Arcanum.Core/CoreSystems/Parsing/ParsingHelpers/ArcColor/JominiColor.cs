@@ -126,4 +126,6 @@ public abstract record JominiColor : IEmpty<JominiColor>
    }
 
    public static JominiColor Empty { get; } = new Rgb(49, 49, 49);
+
+   public override int GetHashCode() => AsInt();
 }

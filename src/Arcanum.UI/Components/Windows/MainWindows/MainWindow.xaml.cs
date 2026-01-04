@@ -624,7 +624,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             CommandBindings.RemoveAt(i);
       }
 
-      for (var i = 0; i < Config.Settings.MapModeConfig.NumOfMapModeButtons; i++)
+      for (var i = 0; i < 10; i++)
       {
          MapModeButtonGrid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
          var mapMode = MapModeManager.GetMapModeForButtonIndex(i);

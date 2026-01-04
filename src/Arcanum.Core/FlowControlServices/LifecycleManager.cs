@@ -108,6 +108,7 @@ public class LifecycleManager
 #if DEBUG
          SaveDebugElements();
 #endif
+         ArcLog.Shutdown();
       }
 
       // Step 4: Notify that the application has shut down

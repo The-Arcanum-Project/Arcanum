@@ -73,6 +73,14 @@ public static class ArcLog
       LogQueue.CompleteAdding();
    }
 
+   public static void Error(string source, string message) => Log($"[{GetSourceString(source)}] [ERR] {message}");
+
+   public static void Error(string source, string message, Exception ex) => Log($"[{GetSourceString(source)}] [ERR] {message} | Exception: {ex}");
+
+   public static void Warning(string source, string message) => Log($"[{GetSourceString(source)}] [WRN] {message}");
+
+   public static void Warning(string source, string message, Exception ex) => Log($"[{GetSourceString(source)}] [WRN] {message} | Exception: {ex}");
+
    public static void Write(string source, LogLevel level, string message) => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
 
    public static void Write(string source, LogLevel level, string message, Exception ex)
