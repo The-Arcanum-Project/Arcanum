@@ -6,6 +6,8 @@ namespace Arcanum.Core.Settings;
 public class AGSSettings
 {
    public AgsSettings ModifierData { get; set; } = new();
+   public AgsSettings GameObjectLocator { get; set; } = new();
+   public AgsSettings NudgeData { get; set; } = new();
    public AgsSettings VariableDeclaration { get; set; } = new();
    public AgsSettings SocientalValue { get; set; } = new();
    public AgsSettings SocientalValueEntry { get; set; } = new();

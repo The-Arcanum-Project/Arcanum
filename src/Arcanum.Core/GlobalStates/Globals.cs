@@ -1,5 +1,6 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.AbstractMechanics;
+using Arcanum.Core.GameObjects.InGame.gfx.map;
 using Adjacency = Arcanum.Core.GameObjects.InGame.Map.Adjacency;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
@@ -107,6 +108,8 @@ public static class Globals
    public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
    public static Dictionary<string, Continent> Continents { get; } = [];
    public static Dictionary<string, Adjacency> Adjacencies { get; } = [];
+
+   public static Dictionary<string, GameObjectLocator> GameObjectLocators { get; } = [];
 
    #endregion
 

@@ -598,7 +598,8 @@ public class ParsingError : ILazySingleton
                                                                        DiagnosticSeverity.Error,
                                                                        "Duplicate color definition found for '{0}'.",
                                                                        "{1} are uniquely identified by their name.\n'{0}' Is defined multiple times. The first occurrence will be used.",
-                                                                       DiagnosticReportSeverity.Silent);
+                                                                       DiagnosticReportSeverity.Silent,
+                                                                       objects => $"Remove the duplicate definition of color '{objects[0]}'");
 
    /// <param name="0">The double value that is invalid</param>
    public DiagnosticDescriptor InvalidDoubleValue { get; } = new(DiagnosticCategory.Parsing,
@@ -722,7 +723,9 @@ public class ParsingError : ILazySingleton
                                                                DiagnosticSeverity.Warning,
                                                                "The date value {0} is partial and missing components.",
                                                                "The provided date value is incomplete. A date has to be in the format 'YYYY.MM.DD'. Missing months and days will be set to '1' by default if missing.",
-                                                               DiagnosticReportSeverity.Silent);
+                                                               DiagnosticReportSeverity.Silent,
+                                                               objects
+                                                                  => $"Complete the date value '{objects[0]}' to include all components (year, month, day)");
 
    /// <param name="0">The grouping key that is invalid</param>
    public DiagnosticDescriptor InvalidGroupingNode { get; } = new(DiagnosticCategory.Parsing,
@@ -741,7 +744,8 @@ public class ParsingError : ILazySingleton
                                                                         DiagnosticSeverity.Error,
                                                                         "The item '{0}' is duplicated in the collection {1}.",
                                                                         "Items in '{1}' must be unique. The item '{0}' appears multiple times. This error will be resolved when saving the affected object.",
-                                                                        DiagnosticReportSeverity.Silent);
+                                                                        DiagnosticReportSeverity.Silent,
+                                                                        objects => $"Remove {objects[0]} from the collection {objects[1]}");
 
    /// <param name="0">The expected token count</param>
    /// <param name="1">The actual token count</param>
@@ -801,7 +805,9 @@ public class ParsingError : ILazySingleton
                                                                              DiagnosticSeverity.Error,
                                                                              "Incomplete location hierarchy for '{0}'.",
                                                                              "The provided Location '{0}' has to have a complete hierarchy up to a continent. Last known part: '{1}'.",
-                                                                             DiagnosticReportSeverity.Silent);
+                                                                             DiagnosticReportSeverity.Silent,
+                                                                             objects
+                                                                                => $"Complete the location hierarchy for '{objects[0]}' up to a continent. Last known part: '{objects[1]}'");
 
    /// <param name="0">The Location in question</param>
    public DiagnosticDescriptor MissingLocationTemplateEntry { get; } = new(DiagnosticCategory.Parsing,
