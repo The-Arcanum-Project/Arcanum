@@ -654,6 +654,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Locations,
             BorderThickness = new(1),
             FontSize = 7,
+            ButtonIndex = i,
          };
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);
