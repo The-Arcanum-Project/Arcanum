@@ -10,17 +10,28 @@ namespace ParserGenerator;
 [Generator]
 public class ParserSourceGenerator : IIncrementalGenerator
 {
+   public enum NodeType
+   {
+      ContentNode,
+      BlockNode,
+      KeyOnlyNode,
+      StatementNode,
+   }
+
    private const string PARSER_FOR_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParserForAttribute";
    private const string PARSE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParseAsAttribute";
    private const string SAVE_AS_ATTRIBUTE = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.SaveAsAttribute";
    private const string PARSING_TOOLBOX_CLASS = "Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox.ParsingToolBox";
 
+   public const string ARC_PARSE_PREFIX = "ArcParse_";
+   private const string TOOL_METHOD_PREFIX = "ArcTryParse";
+
    public void Initialize(IncrementalGeneratorInitializationContext context)
    {
       var provider = context.SyntaxProvider
-                            .CreateSyntaxProvider(predicate: (node, _)
+                            .CreateSyntaxProvider((node, _)
                                                      => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 },
-                                                  transform: GetParserClassSymbol)
+                                                  GetParserClassSymbol)
                             .Where(s => s is not null); // Filter out classes that don't match our criteria
 
       context.RegisterSourceOutput(context.CompilationProvider.Combine(provider.Collect()),
@@ -28,8 +39,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    /// <summary>
-   /// This "transform" step is a semantic filter. It takes the candidate classes
-   /// from the predicate and checks if they *actually* have our [ParserFor] attribute.
+   ///    This "transform" step is a semantic filter. It takes the candidate classes
+   ///    from the predicate and checks if they *actually* have our [ParserFor] attribute.
    /// </summary>
    private static INamedTypeSymbol GetParserClassSymbol(GeneratorSyntaxContext context, CancellationToken token)
    {
@@ -49,8 +60,8 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    /// <summary>
-   /// This is the main method where we will eventually generate all our code.
-   /// For now, it will just prove that we've found the right classes.
+   ///    This is the main method where we will eventually generate all our code.
+   ///    For now, it will just prove that we've found the right classes.
    /// </summary>
    private static void Generate(Compilation compilation,
                                 ImmutableArray<INamedTypeSymbol> parsers,
@@ -156,18 +167,234 @@ public class ParserSourceGenerator : IIncrementalGenerator
       }
       catch (Exception e)
       {
-         context.ReportDiagnostic(Diagnostic.Create(new(id: "GEN002",
-                                                        title: "Generator Crash",
-                                                        messageFormat:
+         context.ReportDiagnostic(Diagnostic.Create(new("GEN002",
+                                                        "Generator Crash",
                                                         $"Generator failed while processing parser '{parserSymbol.Name}' for target type '{targetTypeSymbol.Name}'. Error: {e}",
-                                                        category: "Generator",
+                                                        "Generator",
                                                         DiagnosticSeverity.Error,
-                                                        isEnabledByDefault: true),
+                                                        true),
                                                     parserSymbol.Locations.FirstOrDefault()));
          throw;
       }
 
       return (hintName, sb.ToString());
+   }
+
+   private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
+                                                  PropertyMetadata prop,
+                                                  out string expectedToolName,
+                                                  out string message,
+                                                  out ITypeSymbol? genericType)
+   {
+      message = string.Empty;
+      var propertyType = prop.PropertyType;
+      if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
+      {
+         var isFlagsEnum = propertyType.GetAttributes()
+                                       .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+
+         var genericToolName = isFlagsEnum
+                                  ? $"{TOOL_METHOD_PREFIX}_FlagsEnum"
+                                  : $"{TOOL_METHOD_PREFIX}_Enum";
+
+         expectedToolName = genericToolName;
+
+         var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
+
+         // message +=
+         //    $"\n//Expected method signature: static bool {genericToolName}<{propertyType.Name}>({prop.AstNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+         // message += $"Possible candidates:";
+
+         foreach (var member in methods)
+         {
+            // message += $"\n//- {member.ToDisplayString()}";
+            // A valid tool must be static, generic, and have the right number of parameters.
+            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length != 3)
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must be static, generic, and have 3 parameters.";
+               continue;
+
+            if (member.Parameters[0].Type.Name != prop.AstNodeType.ToString())
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - first parameter type '{member.Parameters[0].Type.Name}' does not match AST node type '{prop.AstNodeType}'.";
+               continue;
+
+            var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
+            if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
+               // message +=
+               //    $"\n//Skipping method '{member.Name}' - must have an 'out' parameter of the generic type.";
+               continue;
+
+            genericType = member.TypeArguments.FirstOrDefault();
+            // message += $"\n//Found matching generic tool method '{member.Name}' for enum property '{prop.PropertyName}'.";
+            return member;
+         }
+
+         genericType = null;
+         return null;
+      }
+
+      // We have a block which represents a list of content or keyOnly nodes, e.g.
+      if (prop.IsCollection)
+      {
+      }
+
+      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX, prop, out genericType);
+      return FindToolByName(toolboxSymbol,
+                            expectedToolName,
+                            prop.IsCollection ? prop.ItemNodeType : prop.AstNodeType,
+                            prop.IsCollection ? genericType! : propertyType,
+                            prop,
+                            out message);
+   }
+
+   // Extracted the search logic to a reusable method
+   private static IMethodSymbol? FindToolByName(INamedTypeSymbol toolboxSymbol,
+                                                string toolName,
+                                                NodeType astNodeType,
+                                                ITypeSymbol propertyType,
+                                                PropertyMetadata prop,
+                                                out string message)
+   {
+      message = string.Empty;
+
+      message +=
+         $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
+
+      // Expected signature details
+      message +=
+         $"\n//Expected method signature: static bool {toolName}({astNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
+
+      message +=
+         $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
+
+      foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
+      {
+         if (!member.IsStatic || member.Parameters.Length != 3)
+            continue;
+
+         if (member.Parameters[0].Type.Name == astNodeType.ToString())
+         {
+            var outParam = member.Parameters.LastOrDefault(p => p.RefKind == RefKind.Out);
+            if (outParam != null && SymbolEqualityComparer.Default.Equals(outParam.Type, propertyType))
+            {
+               message = string.Empty;
+               return member;
+            }
+
+            if (prop.IsShatteredList)
+            {
+               var genericType = propertyType is INamedTypeSymbol { IsGenericType: true } namedType
+                                    ? namedType.TypeArguments.FirstOrDefault()
+                                    : null;
+               if (genericType != null &&
+                   outParam != null &&
+                   SymbolEqualityComparer.Default.Equals(outParam.Type, genericType))
+               {
+                  message = string.Empty;
+                  return member;
+               }
+            }
+
+            message =
+               $"Found method '{toolName}' but its 'out' parameter type '{outParam?.Type.Name}' does not match the property type '{propertyType.Name}'.";
+            return null;
+         }
+      }
+
+      message +=
+         $"\n\n//No matching method '{toolName}' found." +
+         $"\n//Found methods:" +
+         $"\n//-  {string.Join("\n//- ", toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>().Select(m => m.ToDisplayString()))}";
+      return null;
+   }
+
+   /// <summary>
+   ///    For a collection returns the expected tool name for the item type. <br />
+   ///    For non-collections returns the expected tool name for the property type.
+   /// </summary>
+   private static string GetExpectedToolName(ITypeSymbol type,
+                                             string prefix,
+                                             PropertyMetadata prop,
+                                             out ITypeSymbol? genericType)
+   {
+      genericType = null;
+      if (!prop.IsCollection)
+         return $"{prefix}_{type.Name}";
+
+      if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
+         return $"{prefix}_Object";
+
+      var itemType = namedType.TypeArguments.FirstOrDefault();
+      if (itemType == null)
+         return $"{prefix}_Object";
+
+      // If we have a collection we only need the method for the item type
+      genericType = itemType;
+      return $"{prefix}_{itemType.Name}";
+   }
+
+   private static (string HintName, string Source) GenerateKeywordsClass(
+      INamedTypeSymbol parserSymbol,
+      INamedTypeSymbol targetTypeSymbol,
+      List<PropertyMetadata> properties)
+   {
+      var className = $"{targetTypeSymbol.Name}Keywords";
+      var hintName = $"{parserSymbol.ContainingNamespace}.{className}.g.cs";
+
+      var sb = new StringBuilder();
+      sb.AppendLine("// <auto-generated/>");
+      sb.AppendLine($"namespace {parserSymbol.ContainingNamespace};");
+      sb.AppendLine();
+      sb.AppendLine($"public static class {className}");
+      sb.AppendLine("{");
+
+      // Use a HashSet to ensure we only generate one const per unique keyword string
+      var uniqueKeywords = new HashSet<string>();
+      foreach (var prop in properties)
+         if (uniqueKeywords.Add(prop.Keyword))
+            sb.AppendLine($"    public const string {prop.KeywordConstantName} = \"{prop.Keyword}\";");
+
+      sb.AppendLine("}");
+
+      return (hintName, sb.ToString());
+   }
+
+   private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
+                                       List<PropertyMetadata> propertiesToParse,
+                                       SourceProductionContext context)
+   {
+      foreach (var member in targetTypeSymbol.GetMembers().OfType<IPropertySymbol>())
+      {
+         // Check for [ParseAs] first
+         var parseAsAttr = member.GetAttributes()
+                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
+         if (parseAsAttr != null)
+            propertiesToParse.Add(new(member, parseAsAttr));
+         else if (member.GetAttributes()
+                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE) !=
+                  null)
+            // Report warning
+            context.ReportDiagnostic(Diagnostic.Create(new("PG001",
+                                                           "Missing [ParseAs] Attribute",
+                                                           $"Property '{member.Name}' in class '{targetTypeSymbol.Name}' is missing the required [ParseAs] attribute and will be ignored by the parser generator.",
+                                                           "SourceGens",
+                                                           DiagnosticSeverity.Warning,
+                                                           true),
+                                                       Location.None));
+      }
+   }
+
+   private static void ReportMissingDependency(SourceProductionContext context)
+   {
+      // Report a diagnostic that the ParsingToolBox class is missing
+      context.ReportDiagnostic(Diagnostic.Create(new("PARSERGEN001",
+                                                     "Missing Dependency",
+                                                     $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
+                                                     "SourceGens",
+                                                     DiagnosticSeverity.Warning,
+                                                     true),
+                                                 Location.None));
    }
 
    #region Generator Helpers
@@ -249,7 +476,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 
       foreach (var prop in properties)
       {
-         var propData = new PropertyData() { PropertyMetadata = prop };
+         var propData = new PropertyData { PropertyMetadata = prop };
          propDataList.Add(propData);
          propData.MethodCall = propData.PropertyMetadata.CustomParserMethodName ?? string.Empty;
 
@@ -313,6 +540,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                          toolMethodCall,
                                          genericType,
                                          targetTypeName,
+                                         parsers,
                                          classMetadata);
             continue;
          }
@@ -568,6 +796,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                     string toolMethodCall,
                                                     ITypeSymbol? genericType,
                                                     string targetTypeName,
+                                                    ImmutableArray<INamedTypeSymbol> parsers,
                                                     ParserClassMetadata pmc)
    {
       sb.AppendLine("// ### Collection Property Parser ###");
@@ -617,14 +846,35 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (prop.ItemNodeType == NodeType.BlockNode)
       {
          sb.AppendLine($"                var item = new {itemTypeName}();");
-         sb.AppendLine($"                if ({toolMethodCall}(childNode, item, ref pc))");
+         if (prop.IsArray)
+         {
+            var nestedParserSymbol = FindParserForType(prop.IsCollection ? prop.ItemType : prop.PropertyType, parsers);
+            if (nestedParserSymbol == null)
+            {
+               sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({prop.ItemType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))] was found for array property '{prop.PropertyName}'.");
+               sb.AppendLine("                continue;");
+            }
+            else
+            {
+               var nestedParserName = nestedParserSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+               sb.AppendLine($"                {nestedParserName}.ParseProperties(childNode, item, ref pc, {pmc.AllowUnknownNodes.ToString().ToLower()});");
+            }
+         }
+         else
+         {
+            sb.AppendLine($"                if ({toolMethodCall}(childNode, item, ref pc))");
+            sb.AppendLine("                {");
+         }
       }
       else
+      {
          sb.AppendLine($"                if ({toolMethodCall}(childNode, ref pc, out var item))");
+         sb.AppendLine("                {");
+      }
 
-      sb.AppendLine("                {");
-      GenerateAddLogic(sb, prop.IsHashSet, "collection", "item", "sn", "node");
-      sb.AppendLine("                }");
+      GenerateAddLogic(sb, prop.IsHashSet, "collection", "item", "sn", "node", !prop.IsArray ? new(' ', 20) : new(' ', 16));
+      if (!prop.IsArray)
+         sb.AppendLine("                }");
 
       sb.AppendLine("            }"); // End foreach
       sb.AppendLine($"           target.{prop.PropertyName} = collection;");
@@ -634,18 +884,24 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("    }");
    }
 
-   private static void GenerateAddLogic(StringBuilder sb, bool isHashSet, string collectionVar, string itemVar, string nodeVar, string parentNodeVar)
+   private static void GenerateAddLogic(StringBuilder sb,
+                                        bool isHashSet,
+                                        string collectionVar,
+                                        string itemVar,
+                                        string nodeVar,
+                                        string parentNodeVar,
+                                        string defaultOffset = "                    ")
    {
       if (isHashSet)
       {
-         sb.AppendLine($"                    if (!{collectionVar}.Add({itemVar}))");
-         sb.AppendLine("                    {");
-         sb.AppendLine($"                        pc.SetContext({nodeVar});");
-         sb.AppendLine("                        DiagnosticException.LogWarning(ref pc,");
-         sb.AppendLine("                            ParsingError.Instance.DuplicateItemInCollection,");
-         sb.AppendLine($"                            pc.SliceString({nodeVar}),");
-         sb.AppendLine($"                            pc.SliceString({parentNodeVar}));");
-         sb.AppendLine("                    }");
+         sb.AppendLine($"{defaultOffset}if (!{collectionVar}.Add({itemVar}))");
+         sb.AppendLine($"{defaultOffset}{{");
+         sb.AppendLine($"{defaultOffset}    pc.SetContext({nodeVar});");
+         sb.AppendLine($"{defaultOffset}    DiagnosticException.LogWarning(ref pc,");
+         sb.AppendLine($"{defaultOffset}        ParsingError.Instance.DuplicateItemInCollection,");
+         sb.AppendLine($"{defaultOffset}        pc.SliceString({nodeVar}),");
+         sb.AppendLine($"{defaultOffset}        pc.SliceString({parentNodeVar}));");
+         sb.AppendLine($"{defaultOffset}}}");
       }
       else
          sb.AppendLine($"                    {collectionVar}.Add({itemVar});");
@@ -678,13 +934,12 @@ public class ParserSourceGenerator : IIncrementalGenerator
       if (nestedParserSymbol == null)
       {
          var propTypeName2 = prop.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-         context.ReportDiagnostic(Diagnostic.Create(new(id: "PG002",
-                                                        title: "Missing Parser for Embedded Type",
-                                                        messageFormat:
+         context.ReportDiagnostic(Diagnostic.Create(new("PG002",
+                                                        "Missing Parser for Embedded Type",
                                                         $"No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}' in parser '{parserSymbol.Name}'.",
-                                                        category: "SourceGens",
+                                                        "SourceGens",
                                                         DiagnosticSeverity.Error,
-                                                        isEnabledByDefault: true),
+                                                        true),
                                                     Location.None));
 
          sb.AppendLine($"    // ERROR: No parser with [ParserFor(typeof({propTypeName2}))] was found for embedded property '{prop.PropertyName}', after looking for {nestedParserSymbol}");
@@ -716,10 +971,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    /// <summary>
-   /// For Collections the tool method will be for the item type, e.g., <c>ArcTryParse_String</c> for <c>List&lt;string&gt;</c> <br/>
-   /// For Enums the tool method will be <c>ArcTryParse_Enum&lt;T&gt;</c> <br/>
-   /// For Flags Enums the tool method will be <c>ArcTryParse_FlagsEnum&lt;T&gt;</c> <br/>
-   /// For all other types the tool method will be <c>ArcTryParse_Typename</c> <br/>
+   ///    For Collections the tool method will be for the item type, e.g., <c>ArcTryParse_String</c> for
+   ///    <c>List&lt;string&gt;</c> <br />
+   ///    For Enums the tool method will be <c>ArcTryParse_Enum&lt;T&gt;</c> <br />
+   ///    For Flags Enums the tool method will be <c>ArcTryParse_FlagsEnum&lt;T&gt;</c> <br />
+   ///    For all other types the tool method will be <c>ArcTryParse_Typename</c> <br />
    /// </summary>
    private static bool GenerateToolMethodCall(INamedTypeSymbol parserSymbol,
                                               INamedTypeSymbol toolboxSymbol,
@@ -828,240 +1084,4 @@ public class ParserSourceGenerator : IIncrementalGenerator
    }
 
    #endregion
-
-   public const string ARC_PARSE_PREFIX = "ArcParse_";
-   private const string TOOL_METHOD_PREFIX = "ArcTryParse";
-
-   private static IMethodSymbol? FindMatchingTool(INamedTypeSymbol toolboxSymbol,
-                                                  PropertyMetadata prop,
-                                                  out string expectedToolName,
-                                                  out string message,
-                                                  out ITypeSymbol? genericType)
-   {
-      message = string.Empty;
-      var propertyType = prop.PropertyType;
-      if (propertyType.BaseType != null && propertyType.BaseType.ToDisplayString() == "System.Enum")
-      {
-         var isFlagsEnum = propertyType.GetAttributes()
-                                       .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
-
-         var genericToolName = isFlagsEnum
-                                  ? $"{TOOL_METHOD_PREFIX}_FlagsEnum"
-                                  : $"{TOOL_METHOD_PREFIX}_Enum";
-
-         expectedToolName = genericToolName;
-
-         var methods = toolboxSymbol.GetMembers(genericToolName).OfType<IMethodSymbol>();
-
-         // message +=
-         //    $"\n//Expected method signature: static bool {genericToolName}<{propertyType.Name}>({prop.AstNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
-         // message += $"Possible candidates:";
-
-         foreach (var member in methods)
-         {
-            // message += $"\n//- {member.ToDisplayString()}";
-            // A valid tool must be static, generic, and have the right number of parameters.
-            if (!member.IsStatic || !member.IsGenericMethod || member.Parameters.Length != 3)
-            {
-               // message +=
-               //    $"\n//Skipping method '{member.Name}' - must be static, generic, and have 3 parameters.";
-               continue;
-            }
-
-            if (member.Parameters[0].Type.Name != prop.AstNodeType.ToString())
-            {
-               // message +=
-               //    $"\n//Skipping method '{member.Name}' - first parameter type '{member.Parameters[0].Type.Name}' does not match AST node type '{prop.AstNodeType}'.";
-               continue;
-            }
-
-            var outParam = member.Parameters.FirstOrDefault(p => p.RefKind == RefKind.Out);
-            if (outParam == null || outParam.Type.TypeKind != TypeKind.TypeParameter)
-            {
-               // message +=
-               //    $"\n//Skipping method '{member.Name}' - must have an 'out' parameter of the generic type.";
-               continue;
-            }
-
-            genericType = member.TypeArguments.FirstOrDefault();
-            // message += $"\n//Found matching generic tool method '{member.Name}' for enum property '{prop.PropertyName}'.";
-            return member;
-         }
-
-         genericType = null;
-         return null;
-      }
-
-      // We have a block which represents a list of content or keyOnly nodes, e.g.
-      if (prop.IsCollection)
-      {
-      }
-
-      expectedToolName = GetExpectedToolName(propertyType, TOOL_METHOD_PREFIX, prop, out genericType);
-      return FindToolByName(toolboxSymbol,
-                            expectedToolName,
-                            prop.IsCollection ? prop.ItemNodeType : prop.AstNodeType,
-                            prop.IsCollection ? genericType! : propertyType,
-                            prop,
-                            out message);
-   }
-
-   // Extracted the search logic to a reusable method
-   private static IMethodSymbol? FindToolByName(INamedTypeSymbol toolboxSymbol,
-                                                string toolName,
-                                                NodeType astNodeType,
-                                                ITypeSymbol propertyType,
-                                                PropertyMetadata prop,
-                                                out string message)
-   {
-      message = string.Empty;
-
-      message +=
-         $"\n\n//Searching for method '{toolName}' in ParsingToolBox for AST node type '{astNodeType}' and property type '{propertyType.Name}'.";
-
-      // Expected signature details
-      message +=
-         $"\n//Expected method signature: static bool {toolName}({astNodeType} node, ref ParsingContext pc, out {propertyType.Name} value)";
-
-      message +=
-         $"\n==>IsCollection: {prop.IsCollection}; IsShatteredList: {prop.IsShatteredList}; IsEmbedded: {prop.IsEmbedded}; IsHashSet: {prop.IsHashSet}";
-
-      foreach (var member in toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>())
-      {
-         if (!member.IsStatic || member.Parameters.Length != 3)
-            continue;
-
-         if (member.Parameters[0].Type.Name == astNodeType.ToString())
-         {
-            var outParam = member.Parameters.LastOrDefault(p => p.RefKind == RefKind.Out);
-            if (outParam != null && SymbolEqualityComparer.Default.Equals(outParam.Type, propertyType))
-            {
-               message = string.Empty;
-               return member;
-            }
-
-            if (prop.IsShatteredList)
-            {
-               var genericType = propertyType is INamedTypeSymbol { IsGenericType: true } namedType
-                                    ? namedType.TypeArguments.FirstOrDefault()
-                                    : null;
-               if (genericType != null &&
-                   outParam != null &&
-                   SymbolEqualityComparer.Default.Equals(outParam.Type, genericType))
-               {
-                  message = string.Empty;
-                  return member;
-               }
-            }
-
-            message =
-               $"Found method '{toolName}' but its 'out' parameter type '{outParam?.Type.Name}' does not match the property type '{propertyType.Name}'.";
-            return null;
-         }
-      }
-
-      message +=
-         $"\n\n//No matching method '{toolName}' found." +
-         $"\n//Found methods:" +
-         $"\n//-  {string.Join("\n//- ", toolboxSymbol.GetMembers(toolName).OfType<IMethodSymbol>().Select(m => m.ToDisplayString()))}";
-      return null;
-   }
-
-   /// <summary>
-   /// For a collection returns the expected tool name for the item type. <br/>
-   /// For non-collections returns the expected tool name for the property type.
-   /// </summary>
-   private static string GetExpectedToolName(ITypeSymbol type,
-                                             string prefix,
-                                             PropertyMetadata prop,
-                                             out ITypeSymbol? genericType)
-   {
-      genericType = null;
-      if (!prop.IsCollection)
-         return $"{prefix}_{type.Name}";
-
-      if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
-         return $"{prefix}_Object";
-
-      var itemType = namedType.TypeArguments.FirstOrDefault();
-      if (itemType == null)
-         return $"{prefix}_Object";
-
-      // If we have a collection we only need the method for the item type
-      genericType = itemType;
-      return $"{prefix}_{itemType.Name}";
-   }
-
-   public enum NodeType
-   {
-      ContentNode,
-      BlockNode,
-      KeyOnlyNode,
-      StatementNode,
-   }
-
-   private static (string HintName, string Source) GenerateKeywordsClass(
-      INamedTypeSymbol parserSymbol,
-      INamedTypeSymbol targetTypeSymbol,
-      List<PropertyMetadata> properties)
-   {
-      var className = $"{targetTypeSymbol.Name}Keywords";
-      var hintName = $"{parserSymbol.ContainingNamespace}.{className}.g.cs";
-
-      var sb = new StringBuilder();
-      sb.AppendLine("// <auto-generated/>");
-      sb.AppendLine($"namespace {parserSymbol.ContainingNamespace};");
-      sb.AppendLine();
-      sb.AppendLine($"public static class {className}");
-      sb.AppendLine("{");
-
-      // Use a HashSet to ensure we only generate one const per unique keyword string
-      var uniqueKeywords = new HashSet<string>();
-      foreach (var prop in properties)
-         if (uniqueKeywords.Add(prop.Keyword))
-            sb.AppendLine($"    public const string {prop.KeywordConstantName} = \"{prop.Keyword}\";");
-
-      sb.AppendLine("}");
-
-      return (hintName, sb.ToString());
-   }
-
-   private static void ExtractMetadata(INamedTypeSymbol targetTypeSymbol,
-                                       List<PropertyMetadata> propertiesToParse,
-                                       SourceProductionContext context)
-   {
-      foreach (var member in targetTypeSymbol.GetMembers().OfType<IPropertySymbol>())
-      {
-         // Check for [ParseAs] first
-         var parseAsAttr = member.GetAttributes()
-                                 .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
-         if (parseAsAttr != null)
-            propertiesToParse.Add(new(member, parseAsAttr));
-         else if (member.GetAttributes()
-                        .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == SAVE_AS_ATTRIBUTE) !=
-                  null)
-            // Report warning
-            context.ReportDiagnostic(Diagnostic.Create(new(id: "PG001",
-                                                           title: "Missing [ParseAs] Attribute",
-                                                           messageFormat:
-                                                           $"Property '{member.Name}' in class '{targetTypeSymbol.Name}' is missing the required [ParseAs] attribute and will be ignored by the parser generator.",
-                                                           category: "SourceGens",
-                                                           DiagnosticSeverity.Warning,
-                                                           isEnabledByDefault: true),
-                                                       Location.None));
-      }
-   }
-
-   private static void ReportMissingDependency(SourceProductionContext context)
-   {
-      // Report a diagnostic that the ParsingToolBox class is missing
-      context.ReportDiagnostic(Diagnostic.Create(new(id: "PARSERGEN001",
-                                                     title: "Missing Dependency",
-                                                     messageFormat:
-                                                     $"The required class '{PARSING_TOOLBOX_CLASS}' is not found. Ensure the necessary assembly is referenced.",
-                                                     category: "SourceGens",
-                                                     DiagnosticSeverity.Warning,
-                                                     isEnabledByDefault: true),
-                                                 Location.None));
-   }
 }

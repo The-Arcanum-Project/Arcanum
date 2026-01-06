@@ -50,7 +50,7 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
 
    [Description("The nudge data associated with this locator.")]
    [DefaultValue(null)]
-   [ParseAs("instances", itemNodeType: AstNodeType.BlockNode)]
+   [ParseAs("instances", itemNodeType: AstNodeType.BlockNode, isArray: true)]
    [SaveAs]
    public ObservableHashSet<NudgeData> NudgeDatas { get; set; } = [];
 
@@ -59,7 +59,11 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
 #pragma warning disable AGS004
    [Description("Unique key of this GameObjectLocator. Must be unique among all objects of this type.")]
    [DefaultValue("null")]
-   public string UniqueId { get; set; } = null!;
+   public string UniqueId
+   {
+      get => Name;
+      set;
+   }
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;

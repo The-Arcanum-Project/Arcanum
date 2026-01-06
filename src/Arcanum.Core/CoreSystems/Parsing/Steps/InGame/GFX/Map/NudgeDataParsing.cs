@@ -3,7 +3,5 @@ using Arcanum.Core.GameObjects.InGame.gfx.map;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.GFX.Map;
 
-[ParserFor(typeof(GameObjectLocator))]
-public partial class GameObjectLocatorParsing
-{
-}
+[ParserFor(typeof(NudgeData))]
+public static partial class NudgeDataParsing;

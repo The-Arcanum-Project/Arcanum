@@ -28,19 +28,19 @@ public partial class NudgeData : IEu5Object<NudgeData>
 
    [Description("The position of the nudge data.")]
    [DefaultValue("0,0,0")]
-   [ParseAs("position")]
+   [ParseAs("position", AstNodeType.BlockNode)]
    [SaveAs]
-   public Vector2 Position { get; set; } = new(124.0f, 3.33f);
+   public Vector3 Position { get; set; } = Vector3.Zero;
 
    [Description("The rotation of the nudge data.")]
    [DefaultValue("0,0,0,1")]
-   [ParseAs("rotation")]
+   [ParseAs("rotation", AstNodeType.BlockNode)]
    [SaveAs]
    public Quaternion Rotation { get; set; } = Quaternion.Identity;
 
    [Description("The scale of the nudge data.")]
    [DefaultValue("1,1,1")]
-   [ParseAs("scale")]
+   [ParseAs("scale", AstNodeType.BlockNode)]
    [SaveAs]
    public Vector3 Scale { get; set; } = Vector3.One;
 

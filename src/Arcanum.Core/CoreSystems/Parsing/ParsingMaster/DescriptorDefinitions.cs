@@ -1,6 +1,7 @@
 ﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.GFX.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
@@ -93,6 +94,18 @@ public static class DescriptorDefinitions
                                                                         ]),
                                                                      ],
                                                                      false);
+
+   public static readonly FileDescriptor GameObjecLocatorsDescriptor = new(["in_game", "gfx", "map", "map_objects"],
+                                                                           new("CityLocators", "txt", string.Empty),
+                                                                           [new CityGameObjectLocatorParsing([LocationDescriptor.LoadingService[0]])],
+                                                                           true,
+                                                                           [
+                                                                              "generated_map_object_locators_city.txt",
+                                                                              "generated_map_object_locators_combat.txt",
+                                                                              "generated_map_object_locators_volcano_eruption.txt",
+                                                                              "generated_map_object_locators_vfx.txt",
+                                                                              "generated_map_object_locators_unit_stack.txt"
+                                                                           ]);
 
    public static readonly FileDescriptor AdjacenciesDescriptor = new(["in_game", "map_data", "adjacencies.csv"],
                                                                      new("Adjacencies", "csv", string.Empty),
@@ -311,7 +324,7 @@ public static class DescriptorDefinitions
          EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor, TownSetupDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
          DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor,
          BuildingDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
-         MainMenuSetupParsingDescriptor, SocietalValuesDescriptor,
+         MainMenuSetupParsingDescriptor, SocietalValuesDescriptor, GameObjecLocatorsDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

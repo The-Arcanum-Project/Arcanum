@@ -7,26 +7,59 @@ namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
 public static class SnNodesHelpers
 {
-   public static bool IsUnaryStatementNode(this StatementNode node,
-                                           ref ParsingContext pc,
-                                           [MaybeNullWhen(false)] out UnaryStatementNode value)
+   extension(StatementNode node)
    {
-      using var scope = pc.PushScope();
-      if (node is not UnaryStatementNode usn)
+      public bool IsUnaryStatementNode(ref ParsingContext pc,
+                                       [MaybeNullWhen(false)] out UnaryStatementNode value)
       {
+         using var scope = pc.PushScope();
+         if (node is not UnaryStatementNode usn)
+         {
+            pc.SetContext(node);
+            var key = pc.SliceString(node);
+            DiagnosticException.LogWarning(ref pc,
+                                           ParsingError.Instance.InvalidNodeType,
+                                           $"{node.GetType().Name}({key})",
+                                           $"{nameof(UnaryStatementNode)}",
+                                           key);
+            value = null!;
+            return pc.Fail();
+         }
+
+         value = usn;
+         return true;
+      }
+
+      public bool ParseFloatFromUnaryOrKeyOnlyNode(ref ParsingContext pc,
+                                                   out float value)
+      {
+         using var scope = pc.PushScope();
+         if (node is UnaryStatementNode usn)
+         {
+            if (usn.TryParseFloatValue(ref pc, out value))
+               return true;
+
+            return pc.Fail();
+         }
+
+         if (node is KeyOnlyNode kon)
+         {
+            if (kon.TryParseFloatValue(ref pc, out value))
+               return true;
+
+            return pc.Fail();
+         }
+
+         value = 0;
          pc.SetContext(node);
          var key = pc.SliceString(node);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
                                         $"{node.GetType().Name}({key})",
-                                        $"{nameof(UnaryStatementNode)}",
+                                        $"{nameof(UnaryStatementNode)} or {nameof(KeyOnlyNode)}",
                                         key);
-         value = null!;
          return pc.Fail();
       }
-
-      value = usn;
-      return true;
    }
 
    extension(StatementNode node)

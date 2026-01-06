@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -62,15 +63,17 @@ using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 /// <summary>
-/// Any method in this class matching the signature of 'ArcTryParse{Type}' can be used in generated parsers to parse values of type {Type}.
-/// The method should return true if parsing was successful, and false otherwise.
-/// The method should also log any warnings or errors to the provided LocationContext.
-/// The method should have the following parameters:
-/// - ContentNode node: The content node to parse. / BlockNode node: The block node to parse. / KeyOnlyNode node: The key-only node to parse.
-/// - LocationContext ctx: The context to log warnings and errors.
-/// - string pc.BuildStackTrace(): The name of the action being performed, used for logging.
-/// - string source: The original source code being parsed.
-/// - out {Type} value: The parsed value, if successful.
+///    Any method in this class matching the signature of 'ArcTryParse{Type}' can be used in generated parsers to parse
+///    values of type {Type}.
+///    The method should return true if parsing was successful, and false otherwise.
+///    The method should also log any warnings or errors to the provided LocationContext.
+///    The method should have the following parameters:
+///    - ContentNode node: The content node to parse. / BlockNode node: The block node to parse. / KeyOnlyNode node: The
+///    key-only node to parse.
+///    - LocationContext ctx: The context to log warnings and errors.
+///    - string pc.BuildStackTrace(): The name of the action being performed, used for logging.
+///    - string source: The original source code being parsed.
+///    - out {Type} value: The parsed value, if successful.
 /// </summary>
 public static class ParsingToolBox
 {
@@ -138,9 +141,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a literal integer value into an int.
-   /// Validates that the ContentNode's separator is one of the supported types for integer values.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a literal integer value into an int.
+   ///    Validates that the ContentNode's separator is one of the supported types for integer values.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_Int32(ContentNode node,
                                         ref ParsingContext pc,
@@ -227,9 +230,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a literal boolean value into a bool.
-   /// Validates that the ContentNode's separator is an equals sign.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a literal boolean value into a bool.
+   ///    Validates that the ContentNode's separator is an equals sign.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_Boolean(ContentNode node,
                                           ref ParsingContext pc,
@@ -450,9 +453,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a location definition into a Location object.
-   /// Utilizes the LocationContext to resolve the location.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a location definition into a Location object.
+   ///    Utilizes the LocationContext to resolve the location.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_Location(ContentNode node,
                                            ref ParsingContext pc,
@@ -463,9 +466,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a location definition into a Location object.
-   /// Utilizes the LocationContext to resolve the location.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a location definition into a Location object.
+   ///    Utilizes the LocationContext to resolve the location.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_Location(KeyOnlyNode node,
                                            ref ParsingContext pc,
@@ -558,9 +561,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a religious school identifier into a ReligiousSchool object.
-   /// Utilizes the global ReligiousSchools dictionary to resolve the identifier.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a religious school identifier into a ReligiousSchool object.
+   ///    Utilizes the global ReligiousSchools dictionary to resolve the identifier.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_ReligiousSchool(ContentNode node,
                                                   ref ParsingContext pc,
@@ -590,9 +593,9 @@ public static class ParsingToolBox
    }
 
    /// <summary>
-   /// Parses a ContentNode containing a country rank identifier into a CountryRank object.
-   /// Utilizes the global CountryRanks list to resolve the identifier.
-   /// Logs warnings to the provided LocationContext if any issues are encountered during parsing.
+   ///    Parses a ContentNode containing a country rank identifier into a CountryRank object.
+   ///    Utilizes the global CountryRanks list to resolve the identifier.
+   ///    Logs warnings to the provided LocationContext if any issues are encountered during parsing.
    /// </summary>
    public static bool ArcTryParse_CountryRank(ContentNode cn,
                                               ref ParsingContext pc,
@@ -1702,6 +1705,114 @@ public static class ParsingToolBox
       {
          Building = building, Level = level,
       };
+      return true;
+   }
+
+   public static bool ArcTryParse_Vector2(BlockNode node, ref ParsingContext pc, out Vector2 value)
+   {
+      // Format: blockName = { xValue yValue }
+      using var scope = pc.PushScope();
+      value = default;
+
+      if (node.Children.Count != 2)
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"Expected exactly two child nodes in block for Vector2, found {node.Children.Count}.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      if (!node.Children[0].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var x) ||
+          !node.Children[1].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var y))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        "Failed to parse Vector2 values from child nodes.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      value = new(x, y);
+      return true;
+   }
+
+   public static bool ArcTryParse_Quaternion(BlockNode node, ref ParsingContext pc, out Quaternion value)
+   {
+      // Format: blockName = { xValue yValue zValue wValue }
+      using var scope = pc.PushScope();
+      value = default;
+
+      if (node.Children.Count != 4)
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"Expected exactly four child nodes in block for Quaternion, found {node.Children.Count}.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      if (!node.Children[0].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var x) ||
+          !node.Children[1].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var y) ||
+          !node.Children[2].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var z) ||
+          !node.Children[3].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var w))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        "Failed to parse Quaternion values from child nodes.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      value = new(x, y, z, w);
+      return true;
+   }
+
+   public static bool ArcTryParse_Vector3(BlockNode node, ref ParsingContext pc, out Vector3 value)
+   {
+      // Format: blockName = { xValue yValue zValue }
+      using var scope = pc.PushScope();
+      value = default;
+
+      if (node.Children.Count != 3)
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        $"Expected exactly three child nodes in block for Vector3, found {node.Children.Count}.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      if (!node.Children[0].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var x) ||
+          !node.Children[1].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var y) ||
+          !node.Children[2].ParseFloatFromUnaryOrKeyOnlyNode(ref pc, out var z))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidNodeType,
+                                        "Failed to parse Vector3 values from child nodes.",
+                                        nameof(KeyOnlyNode),
+                                        pc.SliceString(node));
+         pc.Fail();
+         return false;
+      }
+
+      value = new(x, y, z);
       return true;
    }
 }

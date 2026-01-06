@@ -6,26 +6,6 @@ namespace ParserGenerator;
 
 public record PropertyMetadata
 {
-   public IPropertySymbol Symbol { get; }
-   public string PropertyName => Symbol.Name;
-   public ITypeSymbol PropertyType => Symbol.Type;
-   public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
-                                     ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
-                                     : Symbol.Type;
-   public string Keyword { get; }
-   public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
-   public ParserSourceGenerator.NodeType AstNodeType { get; }
-   public string? CustomParserMethodName { get; }
-   public INamedTypeSymbol? IEu5KeyType { get; }
-   public bool IsEmbedded { get; }
-   public bool IsShatteredList { get; }
-   public bool IsCollection { get; }
-   public bool IsHashSet { get; }
-   public bool Ignore { get; }
-   public INamedTypeSymbol? CustomGlobalsSource { get; }
-
-   public ParserSourceGenerator.NodeType ItemNodeType { get; }
-
    public PropertyMetadata(IPropertySymbol symbol, AttributeData attribute)
    {
       Symbol = symbol;
@@ -41,6 +21,7 @@ public record PropertyMetadata
       CustomGlobalsSource =
          AttributeHelper.SimpleGetAttrArgValue<INamedTypeSymbol?>(attribute, 7, "customGlobalsSource");
       Ignore = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 8, "ignore");
+      IsArray = AttributeHelper.SimpleGetAttrArgValue<bool>(attribute, 9, "isArray");
 
       IsCollection = PropertyType.AllInterfaces.Any(i => i.ToDisplayString() == "System.Collections.ICollection");
       IsHashSet = PropertyType.OriginalDefinition.ToDisplayString() ==
@@ -49,9 +30,7 @@ public record PropertyMetadata
          IsCollection = true;
 
       if (IsEmbedded || ((IsHashSet || IsCollection) && !IsShatteredList))
-      {
          AstNodeType = ParserSourceGenerator.NodeType.BlockNode;
-      }
       else
       {
          // For non-embedded types, we need to parse the enum from the attribute.
@@ -76,6 +55,27 @@ public record PropertyMetadata
 
       Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
    }
+
+   public IPropertySymbol Symbol { get; }
+   public string PropertyName => Symbol.Name;
+   public ITypeSymbol PropertyType => Symbol.Type;
+   public ITypeSymbol ItemType => PropertyType is INamedTypeSymbol { IsGenericType: true } namedType
+                                     ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
+                                     : Symbol.Type;
+   public string Keyword { get; }
+   public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
+   public ParserSourceGenerator.NodeType AstNodeType { get; }
+   public string? CustomParserMethodName { get; }
+   public INamedTypeSymbol? IEu5KeyType { get; }
+   public bool IsEmbedded { get; }
+   public bool IsShatteredList { get; }
+   public bool IsCollection { get; }
+   public bool IsHashSet { get; }
+   public bool Ignore { get; }
+   public bool IsArray { get; }
+   public INamedTypeSymbol? CustomGlobalsSource { get; }
+
+   public ParserSourceGenerator.NodeType ItemNodeType { get; }
 
    private static string ToSnakeCase(string text)
    {

@@ -44,6 +44,16 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
          AllowMultipleFiles = false;
    }
 
+   public FileDescriptor(string[] localPath,
+                         FileTypeInformation fileType,
+                         FileLoadingService[] loadingService,
+                         bool isMultithreadable,
+                         List<string> fileNames) : this(localPath, fileType, loadingService, isMultithreadable)
+   {
+      foreach (var file in fileNames)
+         _files.Add(FileManager.GetGameOrModFileObj(file, this));
+   }
+
    public void CalculateFiles()
    {
       Files = FileManager.GetAllFileInfosForDirectory(this);

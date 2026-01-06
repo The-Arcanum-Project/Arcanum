@@ -104,6 +104,8 @@ public static class SimpleObjectParser
             continue;
          }
 
+         propsParser(bn, instance, ref pc, allowUnknownBlocks);
+
          // Otherwise we just add to globals as normal
          if (lockObject != null)
             lock (lockObject)
@@ -117,7 +119,6 @@ public static class SimpleObjectParser
                                                  typeof(TTarget),
                                                  "UniqueId");
                   pc.Fail();
-                  continue;
                }
             }
          else if (!globals.TryAdd(instance.UniqueId, instance))
@@ -129,10 +130,7 @@ public static class SimpleObjectParser
                                            typeof(TTarget),
                                            "UniqueId");
             pc.Fail();
-            continue;
          }
-
-         propsParser(bn, instance, ref pc, allowUnknownBlocks);
       }
    }
 
