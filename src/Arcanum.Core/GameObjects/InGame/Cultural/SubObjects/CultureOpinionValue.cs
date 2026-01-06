@@ -52,4 +52,6 @@ public partial class CultureOpinionValue : IEmpty<CultureOpinionValue>, IIagsEnu
    public override int GetHashCode() => HashCode.Combine(Key, Value);
 
    #endregion
+
+   public override string ToString() => $"{Key.UniqueId}: {Value}";
 }
