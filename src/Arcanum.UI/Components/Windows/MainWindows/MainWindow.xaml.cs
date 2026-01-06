@@ -656,6 +656,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             FontSize = 7,
             ButtonIndex = i,
          };
+         MapModeButton.QuickMapModeButtons[i] = button;
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);
       }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using Arcanum.API.Attributes;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.Settings.BaseClasses;
 
@@ -66,11 +66,10 @@ public class MapModeConfig() : InternalSearchableSetting(Config.Settings)
       set => SetNotifyProperty(ref field, value);
    } = MapModeManager.MapModeType.PluralityCulture;
 
-   [Description("If enabled, MapModeBUttons will automatically have the default map modes assigned to them.")]
-   [DefaultValue(true)]
-   public bool DefaultAssignMapModes
+   [IgnoreInPropertyGrid]
+   public List<MapModePreset> MapModePresets
    {
-      get;
+      get => field;
       set => SetNotifyProperty(ref field, value);
-   } = true;
+   } = [];
 }
