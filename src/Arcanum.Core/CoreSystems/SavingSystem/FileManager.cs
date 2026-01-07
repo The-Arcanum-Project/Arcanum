@@ -300,8 +300,9 @@ public static class FileManager
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(new(descriptor.LocalPath, fileName, VanillaDataSpace),
-                    descriptor);
+         var newObj = new Eu5FileObj(new(descriptor.LocalPath, fileName, VanillaDataSpace),
+                                     descriptor);
+         return newObj;
       }
 
       throw new

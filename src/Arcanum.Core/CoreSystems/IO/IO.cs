@@ -7,7 +7,7 @@ namespace Arcanum.Core.CoreSystems.IO;
 
 public static class IO
 {
-   private static readonly Encoding Windows1250Encoding;
+   public static readonly Encoding Windows1250Encoding;
    private static readonly UTF8Encoding BomUtf8Encoding;
    private static readonly UTF8Encoding NoBomUtf8Encoding; // Standard UTF-8 (no BOM)
 

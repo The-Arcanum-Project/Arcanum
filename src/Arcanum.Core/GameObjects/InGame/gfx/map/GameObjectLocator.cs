@@ -82,6 +82,7 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
    public static Dictionary<string, GameObjectLocator> GetGlobalItems() => Globals.GameObjectLocators;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
+   public string SavingKey => "game_object_locator";
 
    public static GameObjectLocator Empty { get; } = new() { UniqueId = "Arcanum_Empty_GameObjectLocator" };
 

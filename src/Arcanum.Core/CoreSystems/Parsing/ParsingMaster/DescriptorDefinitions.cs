@@ -104,8 +104,9 @@ public static class DescriptorDefinitions
                                                                               "generated_map_object_locators_combat.txt",
                                                                               "generated_map_object_locators_volcano_eruption.txt",
                                                                               "generated_map_object_locators_vfx.txt",
-                                                                              "generated_map_object_locators_unit_stack.txt"
-                                                                           ]);
+                                                                              "generated_map_object_locators_unit_stack.txt",
+                                                                           ],
+                                                                           IO.IO.Windows1250Encoding);
 
    public static readonly FileDescriptor AdjacenciesDescriptor = new(["in_game", "map_data", "adjacencies.csv"],
                                                                      new("Adjacencies", "csv", string.Empty),

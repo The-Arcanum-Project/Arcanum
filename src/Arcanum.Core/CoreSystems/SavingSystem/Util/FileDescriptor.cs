@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
@@ -14,12 +15,17 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public FileLoadingService[] LoadingService { get; }
    private List<Eu5FileObj> _files = [];
    public bool AllowMultipleFiles { get; init; } = true;
+   public Encoding FileEncoding { get; }
+   private readonly string[]? _definedPaths = null;
 
    public List<Eu5FileObj> Files
    {
       get
       {
-         if (_files.Count == 0)
+         if (_definedPaths != null)
+            foreach (var dp in _definedPaths)
+               _files.Add(FileManager.GetGameOrModFileObj(dp, this));
+         else if (_files.Count == 0)
             CalculateFiles();
          return _files;
       }
@@ -29,7 +35,8 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    public FileDescriptor(string[] localPath,
                          FileTypeInformation fileType,
                          FileLoadingService[] loadingService,
-                         bool isMultithreadable)
+                         bool isMultithreadable,
+                         Encoding? fileEncoding = null)
    {
       foreach (var fileLoadingService in loadingService)
          fileLoadingService.Descriptor = this;
@@ -38,6 +45,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
       FileType = fileType;
       LoadingService = loadingService;
       IsMultithreadable = isMultithreadable;
+      FileEncoding = fileEncoding ?? Encoding.UTF8;
 
       // We assume that if the last part of the path contains a dot, it's a file name.
       if (LocalPath.Length > 1 && LocalPath[^1].Contains('.'))
@@ -48,10 +56,10 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
                          FileTypeInformation fileType,
                          FileLoadingService[] loadingService,
                          bool isMultithreadable,
-                         List<string> fileNames) : this(localPath, fileType, loadingService, isMultithreadable)
+                         List<string> fileNames,
+                         Encoding? encoding = null) : this(localPath, fileType, loadingService, isMultithreadable, encoding)
    {
-      foreach (var file in fileNames)
-         _files.Add(FileManager.GetGameOrModFileObj(file, this));
+      _definedPaths = fileNames.ToArray();
    }
 
    public void CalculateFiles()

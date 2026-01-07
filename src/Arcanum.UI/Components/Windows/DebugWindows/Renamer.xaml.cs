@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.Windows.PopUp;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
@@ -16,16 +17,23 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class Renamer
 {
-   public static Type[] AvailableTypes => [typeof(Location), typeof(Province), typeof(Area), typeof(Region), typeof(SuperRegion), typeof(Continent)];
-
-   // Holds the full list for the selected type
-   private List<IEu5Object> _allObjectsOfCurrentType = [];
-
    public static readonly DependencyProperty ObjectsOfTargetTypeProperty =
       DependencyProperty.Register(nameof(ObjectsOfTargetType),
                                   typeof(ObservableCollection<IEu5Object>),
                                   typeof(Renamer),
                                   new(null));
+
+   // Holds the full list for the selected type
+   private List<IEu5Object> _allObjectsOfCurrentType = [];
+
+   public Renamer()
+   {
+      InitializeComponent();
+      DataContext = this;
+      ObjectsOfTargetType = [];
+   }
+
+   public static Type[] AvailableTypes => [typeof(Location), typeof(Province), typeof(Area), typeof(Region), typeof(SuperRegion), typeof(Continent)];
 
    public ObservableCollection<IEu5Object> ObjectsOfTargetType
    {
@@ -34,13 +42,6 @@ public partial class Renamer
    }
 
    public ObservableCollection<PrendingRename> PendingRenames { get; } = [];
-
-   public Renamer()
-   {
-      InitializeComponent();
-      DataContext = this;
-      ObjectsOfTargetType = [];
-   }
 
    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
    {
@@ -98,7 +99,6 @@ public partial class Renamer
       List<IEu5Object> objectsToSave = [];
       List<IEu5Object> setupObjectsToSave = [];
       foreach (var rename in PendingRenames)
-      {
          if (rename.Target is not Location loc)
          {
             var success = Core.CoreSystems.RenamingEngine.Renamer.RenameIEu5Object(rename.Target, rename.NewId);
@@ -115,10 +115,20 @@ public partial class Renamer
             objectsToSave.Add(loc);
             objectsToSave.Add(loc.Province);
             objectsToSave.Add(loc.TemplateData);
+            foreach (var olc in Globals.GameObjectLocators.Values)
+               foreach (var nd in olc.NudgeDatas)
+                  if (nd.TargetLocation == loc)
+                  {
+                     objectsToSave.Add(olc);
+                     break;
+                  }
+
+            foreach (var bdg in Globals.BuildingsManager.BuildingDefinitions)
+               if (bdg.Location == loc)
+                  objectsToSave.Add(bdg);
 
             setupObjectsToSave.Add(loc);
          }
-      }
 
       var splash = new SavingSplashScreen { Owner = Application.Current.MainWindow };
       splash.Show();

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
@@ -34,7 +35,10 @@ public static class KonHelper
                                          out float value)
    {
       var lexeme = pc.SliceString(node);
-      if (float.TryParse(lexeme, out value))
+      if (float.TryParse(lexeme,
+                         NumberStyles.Float | NumberStyles.AllowLeadingSign,
+                         CultureInfo.InvariantCulture,
+                         out value))
          return true;
 
       pc.SetContext(node);
