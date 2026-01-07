@@ -21,37 +21,37 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
    [Description("The name of objects this locator holds.")]
    [DefaultValue("")]
    [ParseAs("name")]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public string Name { get; set; } = string.Empty;
 
    [Description("Whether this locator is clamped to the water level.")]
    [DefaultValue(false)]
    [ParseAs("clamp_to_water_level")]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public bool ClampToWaterLevel { get; set; }
 
    [Description("Whether this locator renders underwater.")]
    [DefaultValue(false)]
    [ParseAs("render_under_water")]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public bool RenderUnderwater { get; set; }
 
    [Description("Whether this locator holds generated content.")]
    [DefaultValue(false)]
    [ParseAs("generated_content")]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public bool GeneratedContent { get; set; }
 
    [Description("The layers the locator belongs to.")]
    [DefaultValue("")]
    [ParseAs("layer")]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public string Layer { get; set; } = string.Empty;
 
    [Description("The nudge data associated with this locator.")]
    [DefaultValue(null)]
    [ParseAs("instances", itemNodeType: AstNodeType.BlockNode, isArray: true)]
-   [SaveAs]
+   [SaveAs(alwaysWrite: true)]
    public ObservableHashSet<NudgeData> NudgeDatas { get; set; } = [];
 
    #endregion

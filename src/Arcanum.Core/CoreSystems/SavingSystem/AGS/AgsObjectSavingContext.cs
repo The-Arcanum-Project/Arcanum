@@ -34,7 +34,7 @@ public class AgsObjectSavingContext
    /// Uses the context to generate the AGS formatted string for the object and appends it to the provided StringBuilder.
    /// </summary>
    /// <param name="sb"></param>
-   public void BuildContext(IndentedStringBuilder sb)
+   public void BuildContext(IndentedStringBuilder sb, bool isArray = false)
    {
       if (Settings.HasSavingComment && Ags.ClassMetadata.CommentProvider != null)
          Ags.ClassMetadata.CommentProvider(Ags, CommentChar, sb);
@@ -46,18 +46,26 @@ public class AgsObjectSavingContext
       }
 
       var asOneLine = Ags.ClassMetadata.AsOneLine;
-      using (sb.BlockWithName(Ags, Settings.Format, asOneLine))
-         for (var i = 0; i < OrderedProperties.Count; i++)
-         {
-            var prop = OrderedProperties[i];
-            if (prop.NxProp.ToString().Contains("ParliamentDefinition"))
-            {
-            }
+      if (isArray)
+      {
+         sb.AppendLine("{");
+         FormatProperties(sb, asOneLine);
+         sb.AppendLine("}");
+      }
+      else
+         using (sb.BlockWithName(Ags, Settings.Format, asOneLine))
+            FormatProperties(sb, asOneLine);
+   }
 
-            if (Settings.Format == SavingFormat.Spacious && i > 0)
-               sb.AppendLine();
-            prop.Format(Ags, sb, asOneLine, CommentChar, Settings);
-         }
+   private void FormatProperties(IndentedStringBuilder sb, bool asOneLine)
+   {
+      for (var i = 0; i < OrderedProperties.Count; i++)
+      {
+         var prop = OrderedProperties[i];
+         if (Settings.Format == SavingFormat.Spacious && i > 0)
+            sb.AppendLine();
+         prop.Format(Ags, sb, asOneLine, CommentChar, Settings);
+      }
    }
 
    public void BuildContext(IndentedStringBuilder sb,

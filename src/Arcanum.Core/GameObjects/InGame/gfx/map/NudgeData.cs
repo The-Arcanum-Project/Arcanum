@@ -23,7 +23,7 @@ public partial class NudgeData : IEu5Object<NudgeData>
    [Description("The location this nudge data is associated with.")]
    [DefaultValue(null)]
    [ParseAs("id")]
-   [SaveAs]
+   [SaveAs(SavingValueType.Identifier)]
    public Location TargetLocation { get; set; } = Location.Empty;
 
    [Description("The position of the nudge data.")]

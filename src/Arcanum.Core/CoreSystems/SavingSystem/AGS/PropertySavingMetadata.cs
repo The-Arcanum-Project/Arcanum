@@ -82,6 +82,7 @@ public class PropertySavingMetadata
    /// The property is always serialized
    /// </summary>
    public required bool AlwaysWrite { get; init; }
+   public required bool IsArray { get; init; }
 
    public required Func<object, bool>? MustNotBeWritten { get; init; }
 
@@ -453,7 +454,7 @@ public class PropertySavingMetadata
    {
       foreach (var item in collection)
          if (item is IAgs ia)
-            ia.ToAgsContext(commentChar).BuildContext(sb);
+            ia.ToAgsContext(commentChar).BuildContext(sb, IsArray);
          else
             throw new
                InvalidOperationException($"Collection property '{NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");

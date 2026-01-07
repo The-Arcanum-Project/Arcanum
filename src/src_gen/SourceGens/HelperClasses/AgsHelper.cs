@@ -212,7 +212,7 @@ public static class AgsHelper
                                              SourceProductionContext context,
                                              string namespaceName)
    {
-      var keyword = GetPropertyMetadata(prop.Prop, context);
+      var keyword = GetPropertyMetadata(prop.Prop, context, out bool isArray);
 
       if (prop.DefaultValueAttribute == null &&
           !prop.Prop.Type.AllInterfaces.Any(i => i.ToDisplayString() == UniGen.IAGS_INTERFACE) &&
@@ -246,6 +246,7 @@ public static class AgsHelper
       sb.AppendLine($"                    NumOfDecimalPlaces = {prop.NumOfDecimalPlaces.ToString()},");
       sb.AppendLine($"                    AlwaysWrite = {prop.AlwaysWrite.ToString().ToLowerInvariant()},");
       sb.AppendLine($"                    MustNotBeWritten = {prop.MustNotBeWritten ?? "null"},");
+      sb.AppendLine($"                    IsArray = {isArray.ToString().ToLowerInvariant()},");
       sb.AppendLine("                },");
    }
 
@@ -255,7 +256,7 @@ public static class AgsHelper
       return string.IsNullOrEmpty(bv) ? "null" : $"{providerName}.{bv}";
    }
 
-   private static string GetPropertyMetadata(IPropertySymbol prop, SourceProductionContext context)
+   private static string GetPropertyMetadata(IPropertySymbol prop, SourceProductionContext context, out bool b)
    {
       var parseAsAttr = prop.GetAttributes()
                             .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == PARSE_AS_ATTRIBUTE);
@@ -271,6 +272,7 @@ public static class AgsHelper
                                                        prop.Locations.FirstOrDefault(),
                                                        prop.Name,
                                                        prop.ContainingType.Name));
+            b = false;
             return "undefined_keyword";
          }
 
@@ -286,9 +288,11 @@ public static class AgsHelper
                                                     prop.Locations.FirstOrDefault(),
                                                     prop.Name,
                                                     prop.ContainingType.Name));
+         b = false;
          return "undefined_keyword";
       }
 
+      b = AttributeHelper.SimpleGetAttrArgValue<bool>(parseAsAttr!, 9, "isArray");
       return keyword;
    }
 

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
@@ -146,7 +147,16 @@ public static class SavingUtil
          case SavingValueType.Color:
             return ((JominiColor)value).ToString();
          case SavingValueType.Auto:
-            throw new InvalidOperationException("SavingValueType cannot be Auto at this point.");
+            if (value is Vector2 vec2)
+               return FormatVec2ToCode(vec2);
+            if (value is Vector3 vec3)
+               return FormatVec3ToCode(vec3);
+            if (value is Vector4 vec4)
+               return FormatVec4ToCode(vec4);
+            if (value is Quaternion quat)
+               return FormatQuaternionToCode(quat);
+
+            throw new InvalidOperationException("Auto type could not be resolved to a known complex type.");
          case SavingValueType.Enum:
             return value.ToString()!;
          case SavingValueType.IAgs:
@@ -161,6 +171,18 @@ public static class SavingUtil
             throw new ArgumentOutOfRangeException(nameof(svl), svl, null);
       }
    }
+
+   public static string FormatVec2ToCode(Vector2 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)}";
+
+   public static string FormatVec3ToCode(Vector3 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)} {vec.Z.ToString("F6", CultureInfo.InvariantCulture)}";
+
+   public static string FormatVec4ToCode(Vector4 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)} {vec.Z.ToString("F6", CultureInfo.InvariantCulture)} {vec.W.ToString("F6", CultureInfo.InvariantCulture)} }}";
+
+   public static string FormatQuaternionToCode(Quaternion quat)
+      => $"{{ {quat.X.ToString("F6", CultureInfo.InvariantCulture)} {quat.Y.ToString("F6", CultureInfo.InvariantCulture)} {quat.Z.ToString("F6", CultureInfo.InvariantCulture)} {quat.W.ToString("F6", CultureInfo.InvariantCulture)} }}";
 
    /// <summary>
    /// Formats a property value from a Nexus object according to the specified SavingValueType.
@@ -262,7 +284,7 @@ public static class SavingUtil
       if (item is IModifierPattern)
          return SavingValueType.Modifier;
 
-      return SavingValueType.String;
+      return SavingValueType.Auto;
       //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
    }
 
