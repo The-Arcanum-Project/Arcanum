@@ -494,9 +494,15 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                       out var genericType,
                                       out var hasEmbeddedParser,
                                       out var customParserName))
+
+         {
+            if (string.IsNullOrEmpty(propData.MethodCall))
+               propData.MethodCall = wrapperMethodName;
             continue;
+         }
 
          propData.MethodCall = propData.MethodCall == string.Empty ? wrapperMethodName : propData.MethodCall;
+         //sb.AppendLine($"// Found method candidates: wrapper: '{wrapperMethodName}', tool: '{toolMethodCall}', custom: '{customParserName}'");
 
          if (AddDynamicBlockParser(prop, sb, targetTypeName, customParserName, toolMethodCall))
             continue;
