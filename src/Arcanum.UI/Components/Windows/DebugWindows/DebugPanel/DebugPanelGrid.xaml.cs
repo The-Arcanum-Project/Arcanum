@@ -202,4 +202,10 @@ public partial class DebugPanelGrid
       var cmdGen = new CommandGenerator();
       cmdGen.Show();
    }
+
+   private void WordGenerator_OnClick(object sender, RoutedEventArgs e)
+   {
+      var wordGen = new NameGenerator();
+      wordGen.Show();
+   }
 }

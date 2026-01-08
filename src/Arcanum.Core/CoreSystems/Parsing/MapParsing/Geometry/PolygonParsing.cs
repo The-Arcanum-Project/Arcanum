@@ -41,14 +41,14 @@ public class PolygonParsing(int color)
             tess.AddContour(holeContour);
          }
 
-      tess.Tessellate(normal: new (0, 0, 1));
-   
+      tess.Tessellate(normal: new(0, 0, 1));
+
       if (tess.VertexCount == 0 || tess.ElementCount == 0)
       {
          ArcLog.WriteLine("MPS", LogLevel.WRN, "Tessellation resulted in zero vertices or elements.");
          return null!;
       }
-      
+
       var vertices = new Vector2[tess.VertexCount];
 
       for (var i = 0; i < tess.VertexCount; i++)
@@ -123,12 +123,11 @@ public class PolygonParsing(int color)
       return false;
    }
 
-
    public bool IsOnBorder(Vector2I point)
    {
-      if (IsOnBorder(GetAllPoints(), point)) 
+      if (IsOnBorder(GetAllPoints(), point))
          return true;
-      
+
       // ReSharper disable once ForCanBeConvertedToForeach
       // ReSharper disable once LoopCanBeConvertedToQuery
       for (var index = 0; index < Holes.Count; index++)

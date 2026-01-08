@@ -5,7 +5,6 @@
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>14</LangVersion>
     </PropertyGroup>
@@ -37,6 +36,41 @@
         <PackageReference Include="Pfim" Version="0.11.3"/>
         <PackageReference Include="System.Management" Version="9.0.9"/>
         <PackageReference Include="Vortice.Mathematics" Version="1.9.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Utils\NameGenerator\l_dutch.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_dutch.lang"/>
+        <None Remove="Utils\NameGenerator\l_english.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_english.lang"/>
+        <None Remove="Utils\NameGenerator\l_french.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_french.lang"/>
+        <None Remove="Utils\NameGenerator\l_german.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_german.lang"/>
+        <None Remove="Utils\NameGenerator\l_hungarian.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_hungarian.lang"/>
+        <None Remove="Utils\NameGenerator\l_italian.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_italian.lang"/>
+        <None Remove="Utils\NameGenerator\l_korean.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_korean.lang"/>
+        <None Remove="Utils\NameGenerator\l_lithuanian.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_lithuanian.lang"/>
+        <None Remove="Utils\NameGenerator\l_polish.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_polish.lang"/>
+        <None Remove="Utils\NameGenerator\l_portuguese.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_portuguese.lang"/>
+        <None Remove="Utils\NameGenerator\l_russian.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_russian.lang"/>
+        <None Remove="Utils\NameGenerator\l_spanish.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_spanish.lang"/>
+        <None Remove="Utils\NameGenerator\l_swedish.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_swedish.lang"/>
+        <None Remove="Utils\NameGenerator\l_turkish.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\l_turkish.lang"/>
+        <None Remove="Utils\NameGenerator\ls_japanese.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\ls_japanese.lang"/>
+        <None Remove="Utils\NameGenerator\ls_standardchinese.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\ls_standardchinese.lang"/>
     </ItemGroup>
 
 </Project>

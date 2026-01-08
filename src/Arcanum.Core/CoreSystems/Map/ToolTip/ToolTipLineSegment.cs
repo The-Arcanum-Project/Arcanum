@@ -1,4 +1,6 @@
-﻿using Brush = System.Windows.Media.Brush;
+﻿using System.Windows;
+using System.Windows.Documents;
+using Brush = System.Windows.Media.Brush;
 using Color = System.Windows.Media.Color;
 
 namespace Arcanum.Core.CoreSystems.Map.ToolTip;
@@ -18,9 +20,9 @@ public class ToolTipLineSegment(string text, ToolTipObjectType segmentType)
    public string? IconSource { get; set; }
 
    // This method converts the ToolTipLineSegment into a Run for WPF TextBlock
-   public System.Windows.Documents.Run ToRun()
+   public Run ToRun()
    {
-      var run = new System.Windows.Documents.Run(Text) { FontSize = FontSize };
+      var run = new Run(Text) { FontSize = FontSize };
       if (TextBrush != null)
          run.Foreground = TextBrush;
       if (Font != null)
@@ -30,16 +32,13 @@ public class ToolTipLineSegment(string text, ToolTipObjectType segmentType)
       }
 
       if (IsBold)
-         run.FontWeight = System.Windows.FontWeights.Bold;
+         run.FontWeight = FontWeights.Bold;
       if (IsItalic)
-         run.FontStyle = System.Windows.FontStyles.Italic;
+         run.FontStyle = FontStyles.Italic;
       if (IsUnderline)
       {
-         var textDecoration = new System.Windows.TextDecoration
-         {
-            Location = System.Windows.TextDecorationLocation.Underline,
-         };
-         var textDecorationCollection = new System.Windows.TextDecorationCollection { textDecoration };
+         var textDecoration = new TextDecoration { Location = TextDecorationLocation.Underline, };
+         var textDecorationCollection = new TextDecorationCollection { textDecoration };
          run.TextDecorations = textDecorationCollection;
       }
 

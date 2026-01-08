@@ -1,0 +1,29 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.NameGenerator"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:local = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+                         Title = "NameGenerator" Height = "450" Width = "800" WindowStartupLocation = "CenterScreen"
+                         d:DataContext = "{d:DesignInstance local:NameGenerator}">
+    <Grid>
+        <!-- 2 Columns: Left for controls, Right for output -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "2*" />
+            <ColumnDefinition Width = "3*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Side: Controls At the top a combobox with a binding to a collection of Language and below a button to generate-->
+        <StackPanel Grid.Column = "0" Margin = "10">
+            <ComboBox x:Name = "LanguageComboBox" ItemsSource = "{Binding Languages}" DisplayMemberPath = "Name"
+                      SelectedItem = "{Binding SelectedLanguage}" Height = "30" Margin = "0,0,0,10">
+            </ComboBox>
+            <styleClasses:BaseButton Content = "Generate Name" Command = "{Binding GenerateNameCommand}" Height = "30" />
+        </StackPanel>
+
+        <!-- Right Side: Output TextBox -->
+        <styleClasses:CorneredTextBox Grid.Column = "1" Text = "{Binding GenerationOutput}" Margin = "10"
+                                      IsReadOnly = "True" VerticalScrollBarVisibility = "Auto" TextWrapping = "Wrap" />
+    </Grid>
+</styleClasses:BaseWindow>

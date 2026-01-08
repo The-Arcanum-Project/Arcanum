@@ -1,483 +1,388 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.Reflection;
 
-namespace Arcanum.Core.Utils.LanguageEngine;
+namespace Arcanum.Core.Utils.NameGenerator;
 
 public static class NameGenerator
 {
-    public static readonly string WordsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NameGeneratorWords");
+   static readonly Assembly Assembly = typeof(NameGenerator).Assembly;
 
-    public class WeightedList<T>
-    {
-        List<T> Elements;
-        List<int> Weights;
-        int TotalWeights = 0;
-        Random Random = new Random();
-        public WeightedList(int Capacity = 1024)
-        {
-            Elements = new List<T>(Capacity);
-            Weights = new List<int>(Capacity);
-        }
-        public void Add(T element, int weight)
-        {
-            if (weight <= 0)
-            {
-                return;
-            }
-            Elements.Add(element);
-            Weights.Add(weight);
-            TotalWeights += weight;
-        }
-        public bool Remove(T element)
-        {
-            int Index = Elements.IndexOf(element);
-            if (Index == -1)
-            {
-                return false;
-            }
-            Elements.RemoveAt(Index);
-            TotalWeights -= Weights[Index];
-            Weights.RemoveAt(Index);
-            return true;
-        }
-        public T? GetRandomElement()
-        {
-            if (TotalWeights == 0)
-            {
-                return default;
-            }
-            int N = Random.Next(TotalWeights);
-            int Counted = 0;
-            for (int i = 0; i < Elements.Count; i++)
-            {
-                Counted += Weights[i];
-                if (Counted > N)
-                {
-                    return Elements[i];
-                }
-            }
-            return default;
-        }
-    }
+   public static List<Language> Languages = new();
 
-    public static List<Language> Languages = new List<Language>();
+   public static void LoadLanguages()
+   {
+      Languages.Clear();
 
-    public class Language
-    {
-        string Name = "";
-        int TotalWords = 0;
-        int UnusualLetterThreshold = 0;
-        Dictionary<string, int>[] Parts = new Dictionary<string, int>[3]
-        {
-        new Dictionary<string, int>(10000),
-        new Dictionary<string, int>(10000),
-        new Dictionary<string, int>(10000)
-        };
-        Dictionary<string, Dictionary<string, int>> NextLetterFrequency = new Dictionary<string, Dictionary<string, int>>();
-        Dictionary<string, Dictionary<string, int>> SecondLetterFrequency = new Dictionary<string, Dictionary<string, int>>();
-        Dictionary<string, Dictionary<string, int>> ThirdLetterFrequency = new Dictionary<string, Dictionary<string, int>>();
-        Dictionary<string, int> WordBeginnings = new Dictionary<string, int>(1000);
-        Dictionary<string, int> WordEndings = new Dictionary<string, int>(1000);
-        Dictionary<string, int> FirstLetterFrequency = new Dictionary<string, int>();
-        Dictionary<string, int> LastLetterFrequency = new Dictionary<string, int>();
+      foreach (var resource in Assembly.GetManifestResourceNames())
+      {
+         if (!resource.EndsWith(".lang", StringComparison.OrdinalIgnoreCase))
+            continue;
 
-        List<string> SimpleSyllables = new List<string>();
-        bool UsesSimpleSyllables = false;
+         var parts = resource.Split('.');
+         var file = parts[^2]; // l_english or ls_japanese
 
-        bool AllowTripleRepetition = false;
-        public Language(string Name)
-        {
-            this.Name = Name;
-        }
+         if (!file.StartsWith("l_") && !file.StartsWith("ls_"))
+            continue;
 
-        public string GetName()
-        {
-            return Name;
-        }
+         var syllables = file.StartsWith("ls_");
+         var languageName = file[(syllables ? 3 : 2)..];
 
-        public string GenerateWord(int ApproximateDesiredLength)
-        {
-            Random random = new Random();
-            string Word = "";
-            List<string> PartsUsed = new List<string>(10);
-            {
-                bool Ending = false;
-                while (Ending == false)
-                {
-                    if (Word.Length > ApproximateDesiredLength - 3)
-                    {
-                        Ending = true;
-                    }
-                    string Part = GetPart(Word, Ending, PartsUsed);
-                    if (Part == "" || Part == null)
-                    {
-                        break;
-                    }
-                    Word += Part;
-                }
-            }
-            return Word;
-        }
+         using var stream = Assembly.GetManifestResourceStream(resource)!;
+         using var reader = new StreamReader(stream);
+         var lines = reader.ReadToEnd()
+                           .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        private string GetPart(string ExistingWord, bool Ending, List<string> PartsUsed)
-        {
-            if (UsesSimpleSyllables)
-            {
-                if (SimpleSyllables.Count == 0)
-                {
-                    return "";
-                }
-                Random r = new Random();
-                return SimpleSyllables[r.Next(SimpleSyllables.Count)];
-            }
+         var language = new Language(languageName);
 
-            string LastLetter = ExistingWord.Length > 0 ? ExistingWord.Last().ToString() : "";
-            string SecondToLastLetter = ExistingWord.Length > 1 ? ExistingWord.Substring(ExistingWord.Length - 2, 1) : "";
-            string ThirdToLastLetter = ExistingWord.Length > 2 ? ExistingWord.Substring(ExistingWord.Length - 3, 1) : "";
-            WeightedList<string> Parts = new WeightedList<string>();
-            foreach (Dictionary<string, int> PartsDictionary in this.Parts)
-            {
-                foreach (string part in PartsDictionary.Keys)
-                {
-                    string FirstLetter = part.Substring(0, 1);
-                    string SecondLetter = part.Length > 1 ? part.Substring(1, 1) : "";
-                    string ThirdLetter = part.Length > 2 ? part.Substring(2, 1) : "";
+         if (syllables)
+            language.LoadSyllables(lines);
+         else
+            language.LoadWords(lines);
 
-                    if (AllowTripleRepetition == false)
-                    {
-                        if (SecondToLastLetter == LastLetter && LastLetter == FirstLetter)
-                        {
-                            continue;
-                        }
-                        if (LastLetter == FirstLetter && FirstLetter == SecondLetter)
-                        {
-                            continue;
-                        }
-                    }
+         Languages.Add(language);
+      }
+   }
 
-                    int Weight = PartsDictionary[part];
-                    int Divisor = 1;
-                    if (ExistingWord.Length > 0)
-                    {
-                        if (NextLetterFrequency.ContainsKey(LastLetter) == false || NextLetterFrequency[LastLetter].ContainsKey(FirstLetter) == false)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            Weight += NextLetterFrequency[LastLetter][FirstLetter];
-                        }
-                        if (PartsUsed.Contains(part))
-                        {
-                            Divisor *= 3;
-                        }
-                        if (SecondToLastLetter != "")
-                        {
-                            if (SecondLetterFrequency.ContainsKey(SecondToLastLetter) == false ||
-                                SecondLetterFrequency[SecondToLastLetter].ContainsKey(FirstLetter) == false)
-                            {
-                                Divisor *= 4;
-                            }
-                            else
-                            {
-                                Weight += SecondLetterFrequency[SecondToLastLetter][FirstLetter];
-                            }
+   public class WeightedList<T>
+   {
+      private readonly List<T> _elements;
+      private readonly Random _random = new();
+      private readonly List<int> _weights;
+      private int _totalWeights;
 
-                            if (ThirdLetterFrequency.ContainsKey(SecondToLastLetter) == false ||
-                                ThirdLetterFrequency[SecondToLastLetter].ContainsKey(SecondLetter) == false)
-                            {
-                                Divisor *= 2;
-                            }
-                            else
-                            {
-                                Weight += ThirdLetterFrequency[SecondToLastLetter][SecondLetter];
-                            }
+      public WeightedList(int capacity = 1024)
+      {
+         _elements = new(capacity);
+         _weights = new(capacity);
+      }
 
-                        }
-
-                        if (SecondLetterFrequency.ContainsKey(LastLetter) == false ||
-                            SecondLetterFrequency[LastLetter].ContainsKey(SecondLetter) == false)
-                        {
-                            Divisor *= 4;
-                        }
-                        else
-                        {
-                            Weight += SecondLetterFrequency[LastLetter][SecondLetter];
-                        }
-
-                        if (ThirdLetter != "")
-                        {
-                            if (ThirdLetterFrequency.ContainsKey(LastLetter) == false ||
-                            ThirdLetterFrequency[LastLetter].ContainsKey(ThirdLetter) == false)
-                            {
-                                Divisor *= 2;
-                            }
-                            else
-                            {
-                                Weight += ThirdLetterFrequency[LastLetter][ThirdLetter];
-                            }
-                        }
-
-                        if (ThirdToLastLetter != "")
-                        {
-                            if (ThirdLetterFrequency.ContainsKey(ThirdToLastLetter) == false ||
-                                ThirdLetterFrequency[ThirdToLastLetter].ContainsKey(FirstLetter) == false)
-                            {
-                                Divisor *= 2;
-                            }
-                            else
-                            {
-                                Weight += ThirdLetterFrequency[ThirdToLastLetter][FirstLetter];
-                            }
-                        }
-
-
-
-                    }
-                    else
-                    {
-                        if (WordBeginnings.ContainsKey(part) == false)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            if (FirstLetterFrequency.ContainsKey(FirstLetter) == false)
-                            {
-                                continue;
-                            }
-                            if (FirstLetterFrequency[FirstLetter] < UnusualLetterThreshold)
-                            {
-                                continue;
-                            }
-                            Weight += WordBeginnings[part];
-                        }
-                    }
-
-                    if (Ending)
-                    {
-                        if (WordEndings.ContainsKey(part) == false)
-                        {
-                            Divisor *= 10;
-                        }
-                        else
-                        {
-                            Weight += WordEndings[part];
-                        }
-
-                        string LastLetterOfPart = part.Substring(part.Length - 1);
-                        if (LastLetterFrequency.ContainsKey(LastLetterOfPart) == false)
-                        {
-                            continue;
-                        }
-                        if (LastLetterFrequency[LastLetterOfPart] < UnusualLetterThreshold)
-                        {
-                            continue;
-                        }
-                    }
-
-                    Weight /= Divisor;
-                    Parts.Add(part, Weight);
-                }
-            }
-            string Part = Parts.GetRandomElement() ?? "";
-            PartsUsed.Add(Part);
-            return Part;
-        }
-
-        public static string GenerateWord(List<Language> Languages, int ApproximateDesiredLength)
-        {
-            if (Languages.Count == 0)
-            {
-                return "";
-            }
-
-            Random random = new Random();
-            string Word = "";
-            List<string> PartsUsed = new List<string>(10);
-            {
-                bool Ending = false;
-                while (Ending == false)
-                {
-                    Language language = Languages[random.Next(Languages.Count)];
-                    if (Word.Length > ApproximateDesiredLength - 3)
-                    {
-                        Ending = true;
-                    }
-                    Word += language.GetPart(Word, Ending, PartsUsed);
-                }
-            }
-            return Word;
-        }
-
-        public void LoadWords(string[] words)
-        {
-            foreach (Dictionary<string, int> PartDictionary in Parts)
-            {
-                PartDictionary.Clear();
-            }
-            NextLetterFrequency.Clear();
-            SecondLetterFrequency.Clear();
-            WordBeginnings.Clear();
-            WordEndings.Clear();
-            FirstLetterFrequency.Clear();
-            LastLetterFrequency.Clear();
-            TotalWords = 0;
-            foreach (string line in words)
-            {
-                string word = line;
-                if (word.Contains(' '))
-                {
-                    word = word.Split(' ')[0];
-                }
-                if (word.Length < 2)
-                {
-                    continue;
-                }
-
-                TotalWords++;
-
-                for (int i = 2; i <= Math.Min(4, word.Length); i++)
-                {
-                    string beginning = word.Substring(0, i);
-                    if (WordBeginnings.TryAdd(beginning, 1) == false)
-                    {
-                        WordBeginnings[beginning]++;
-                    }
-
-                    string ending = word.Substring(word.Length - i, i);
-                    if (WordEndings.TryAdd(ending, 1) == false)
-                    {
-                        WordEndings[ending]++;
-                    }
-                }
-
-                for (int letters = 2; letters < 5; letters++)
-                {
-                    Dictionary<string, int> PartsDictionary = Parts[letters - 2];
-
-                    for (int i = 0; i <= word.Length - letters; i++)
-                    {
-                        string substring = word.Substring(i, letters);
-                        if (substring.Length == 2)
-                        {
-                            if (substring[0] == substring[1])
-                            {
-                                continue;
-                            }
-                        }
-                        if (PartsDictionary.TryAdd(substring, 1) == false)
-                        {
-                            PartsDictionary[substring]++;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < word.Length - 1; i++)
-                {
-                    string letter = word.Substring(i, 1);
-                    string nextLetter = word.Substring(i + 1, 1);
-                    NextLetterFrequency.TryAdd(letter, new Dictionary<string, int>());
-                    if (NextLetterFrequency[letter].TryAdd(nextLetter, 1) == false)
-                    {
-                        NextLetterFrequency[letter][nextLetter]++;
-                    }
-                }
-
-                for (int i = 0; i < word.Length - 2; i++)
-                {
-                    string letter = word.Substring(i, 1);
-                    string nextLetter = word.Substring(i + 2, 1);
-                    SecondLetterFrequency.TryAdd(letter, new Dictionary<string, int>());
-                    if (SecondLetterFrequency[letter].TryAdd(nextLetter, 1) == false)
-                    {
-                        SecondLetterFrequency[letter][nextLetter]++;
-                    }
-                }
-
-                for (int i = 0; i < word.Length - 3; i++)
-                {
-                    string letter = word.Substring(i, 1);
-                    string nextLetter = word.Substring(i + 3, 1);
-                    ThirdLetterFrequency.TryAdd(letter, new Dictionary<string, int>());
-                    if (ThirdLetterFrequency[letter].TryAdd(nextLetter, 1) == false)
-                    {
-                        ThirdLetterFrequency[letter][nextLetter]++;
-                    }
-                }
-
-                string firstLetter = word.Substring(0, 1);
-                if (FirstLetterFrequency.TryAdd(firstLetter, 1) == false)
-                {
-                    FirstLetterFrequency[firstLetter]++;
-                }
-
-                string lastLetter = word.Substring(word.Length - 1, 1);
-                if (LastLetterFrequency.TryAdd(lastLetter, 1) == false)
-                {
-                    LastLetterFrequency[lastLetter]++;
-                }
-            }
-
-            UnusualLetterThreshold = TotalWords / 500;
-        }
-
-        public void LoadSyllables(string[] syllables)
-        {
-            UsesSimpleSyllables = true;
-            foreach (string line in syllables)
-            {
-                string syllable = line;
-                if (syllable.Contains(' '))
-                {
-                    syllable = syllable.Split(' ')[0];
-                }
-                if (syllable.Length == 0)
-                {
-                    continue;
-                }
-                SimpleSyllables.Add(syllable);
-            }
-        }
-    }
-
-    public static void LoadLanguages()
-    {
-        Languages.Clear();
-
-        if(Directory.Exists(WordsFolder) == false)
-        {
+      public void Add(T element, int weight)
+      {
+         if (weight <= 0)
             return;
-        }
 
-        foreach (string filePath in Directory.GetFiles(WordsFolder))
-        {
-            string fileName = Path.GetFileName(filePath);
+         _elements.Add(element);
+         _weights.Add(weight);
+         _totalWeights += weight;
+      }
 
-            if (fileName.EndsWith(".txt") == false)
+      public bool Remove(T element)
+      {
+         var index = _elements.IndexOf(element);
+         if (index == -1)
+            return false;
+
+         _elements.RemoveAt(index);
+         _totalWeights -= _weights[index];
+         _weights.RemoveAt(index);
+         return true;
+      }
+
+      public T? GetRandomElement()
+      {
+         if (_totalWeights == 0)
+            return default;
+
+         var n = _random.Next(_totalWeights);
+         var counted = 0;
+         for (var i = 0; i < _elements.Count; i++)
+         {
+            counted += _weights[i];
+            if (counted > n)
+               return _elements[i];
+         }
+
+         return default;
+      }
+   }
+
+   public class Language
+   {
+      private readonly bool _allowTripleRepetition = false;
+      private readonly Dictionary<string, int> _firstLetterFrequency = new();
+      private readonly Dictionary<string, int> _lastLetterFrequency = new();
+      private readonly Dictionary<string, Dictionary<string, int>> _nextLetterFrequency = new();
+
+      private readonly Dictionary<string, int>[] _parts = new Dictionary<string, int>[3] { new(10000), new(10000), new(10000) };
+
+      private readonly Dictionary<string, Dictionary<string, int>> _secondLetterFrequency = new();
+
+      private readonly List<string> _simpleSyllables = new();
+      private readonly Dictionary<string, Dictionary<string, int>> _thirdLetterFrequency = new();
+      private readonly Dictionary<string, int> _wordBeginnings = new(1000);
+      private readonly Dictionary<string, int> _wordEndings = new(1000);
+      private int _totalWords;
+      private int _unusualLetterThreshold;
+      private bool _usesSimpleSyllables;
+
+      public Language(string name) => Name = name;
+      public string Name { get; }
+
+      public string GetName() => Name;
+
+      public string GenerateWord(int approximateDesiredLength)
+      {
+         var random = new Random();
+         var word = "";
+         var partsUsed = new List<string>(10);
+         {
+            var ending = false;
+            while (!ending)
             {
-                continue;
+               if (word.Length > approximateDesiredLength - 3)
+                  ending = true;
+               var part = GetPart(word, ending, partsUsed);
+               if (part == "" || part == null)
+                  break;
+
+               word += part;
+            }
+         }
+         return word;
+      }
+
+      private string GetPart(string existingWord, bool ending, List<string> partsUsed)
+      {
+         if (_usesSimpleSyllables)
+         {
+            if (_simpleSyllables.Count == 0)
+               return "";
+
+            var r = new Random();
+            return _simpleSyllables[r.Next(_simpleSyllables.Count)];
+         }
+
+         var lastLetter = existingWord.Length > 0 ? existingWord.Last().ToString() : "";
+         var secondToLastLetter = existingWord.Length > 1 ? existingWord.Substring(existingWord.Length - 2, 1) : "";
+         var thirdToLastLetter = existingWord.Length > 2 ? existingWord.Substring(existingWord.Length - 3, 1) : "";
+         var list = new WeightedList<string>();
+         foreach (var partsDictionary in _parts)
+         {
+            foreach (var part in partsDictionary.Keys)
+            {
+               var firstLetter = part[..1];
+               var secondLetter = part.Length > 1 ? part.Substring(1, 1) : "";
+               var thirdLetter = part.Length > 2 ? part.Substring(2, 1) : "";
+
+               if (!_allowTripleRepetition)
+               {
+                  if (secondToLastLetter == lastLetter && lastLetter == firstLetter)
+                     continue;
+
+                  if (lastLetter == firstLetter && firstLetter == secondLetter)
+                     continue;
+               }
+
+               var weight = partsDictionary[part];
+               var divisor = 1;
+               if (existingWord.Length > 0)
+               {
+                  if (!_nextLetterFrequency.ContainsKey(lastLetter) || !_nextLetterFrequency[lastLetter].ContainsKey(firstLetter))
+                     continue;
+
+                  weight += _nextLetterFrequency[lastLetter][firstLetter];
+                  if (partsUsed.Contains(part))
+                     divisor *= 3;
+                  if (secondToLastLetter != "")
+                  {
+                     if (!_secondLetterFrequency.ContainsKey(secondToLastLetter) ||
+                         !_secondLetterFrequency[secondToLastLetter].ContainsKey(firstLetter))
+                        divisor *= 4;
+                     else
+                        weight += _secondLetterFrequency[secondToLastLetter][firstLetter];
+
+                     if (!_thirdLetterFrequency.ContainsKey(secondToLastLetter) ||
+                         !_thirdLetterFrequency[secondToLastLetter].ContainsKey(secondLetter))
+                        divisor *= 2;
+                     else
+                        weight += _thirdLetterFrequency[secondToLastLetter][secondLetter];
+                  }
+
+                  if (!_secondLetterFrequency.ContainsKey(lastLetter) ||
+                      !_secondLetterFrequency[lastLetter].ContainsKey(secondLetter))
+                     divisor *= 4;
+                  else
+                     weight += _secondLetterFrequency[lastLetter][secondLetter];
+
+                  if (thirdLetter != "")
+                  {
+                     if (!_thirdLetterFrequency.ContainsKey(lastLetter) ||
+                         !_thirdLetterFrequency[lastLetter].ContainsKey(thirdLetter))
+                        divisor *= 2;
+                     else
+                        weight += _thirdLetterFrequency[lastLetter][thirdLetter];
+                  }
+
+                  if (thirdToLastLetter != "")
+                  {
+                     if (!_thirdLetterFrequency.ContainsKey(thirdToLastLetter) ||
+                         !_thirdLetterFrequency[thirdToLastLetter].ContainsKey(firstLetter))
+                        divisor *= 2;
+                     else
+                        weight += _thirdLetterFrequency[thirdToLastLetter][firstLetter];
+                  }
+               }
+               else
+               {
+                  if (!_wordBeginnings.ContainsKey(part))
+                     continue;
+
+                  if (!_firstLetterFrequency.TryGetValue(firstLetter, out var value))
+                     continue;
+
+                  if (value < _unusualLetterThreshold)
+                     continue;
+
+                  weight += _wordBeginnings[part];
+               }
+
+               if (ending)
+               {
+                  if (!_wordEndings.TryGetValue(part, out var wordEnding))
+                     divisor *= 10;
+                  else
+                     weight += wordEnding;
+
+                  var lastLetterOfPart = part[^1..];
+                  if (!_lastLetterFrequency.TryGetValue(lastLetterOfPart, out var value))
+                     continue;
+
+                  if (value < _unusualLetterThreshold)
+                     continue;
+               }
+
+               weight /= divisor;
+               list.Add(part, weight);
+            }
+         }
+
+         var getPart = list.GetRandomElement() ?? "";
+         partsUsed.Add(getPart);
+         return getPart;
+      }
+
+      public static string GenerateWord(List<Language> languages, int approximateDesiredLength)
+      {
+         if (languages.Count == 0)
+            return "";
+
+         var random = new Random();
+         var word = "";
+         var partsUsed = new List<string>(10);
+         {
+            var ending = false;
+            while (!ending)
+            {
+               var language = languages[random.Next(languages.Count)];
+               if (word.Length > approximateDesiredLength - 3)
+                  ending = true;
+               word += language.GetPart(word, ending, partsUsed);
+            }
+         }
+         return word;
+      }
+
+      public void LoadWords(string[] words)
+      {
+         foreach (var partDictionary in _parts)
+            partDictionary.Clear();
+         _nextLetterFrequency.Clear();
+         _secondLetterFrequency.Clear();
+         _wordBeginnings.Clear();
+         _wordEndings.Clear();
+         _firstLetterFrequency.Clear();
+         _lastLetterFrequency.Clear();
+         _totalWords = 0;
+         foreach (var line in words)
+         {
+            var word = line;
+            if (word.Contains(' '))
+               word = word.Split(' ')[0];
+            if (word.Length < 2)
+               continue;
+
+            _totalWords++;
+
+            for (var i = 2; i <= Math.Min(4, word.Length); i++)
+            {
+               var beginning = word[..i];
+               if (!_wordBeginnings.TryAdd(beginning, 1))
+                  _wordBeginnings[beginning]++;
+
+               var ending = word.Substring(word.Length - i, i);
+               if (!_wordEndings.TryAdd(ending, 1))
+                  _wordEndings[ending]++;
             }
 
-            if (fileName.StartsWith("l_") == false && fileName.StartsWith("ls_") == false)
+            for (var letters = 2; letters < 5; letters++)
             {
-                continue;
-            }
-            bool SyllableLanguage = fileName.StartsWith("ls_");
-            string LanguageName = fileName.Substring(SyllableLanguage ? 3 : 2).Split('.')[0];
-            Language language = new Language(LanguageName);
+               var partsDictionary = _parts[letters - 2];
 
-            if (SyllableLanguage)
-            {
-                language.LoadSyllables(File.ReadAllLines(fileName));
+               for (var i = 0; i <= word.Length - letters; i++)
+               {
+                  var substring = word.Substring(i, letters);
+                  if (substring.Length == 2)
+                     if (substring[0] == substring[1])
+                        continue;
+
+                  if (!partsDictionary.TryAdd(substring, 1))
+                     partsDictionary[substring]++;
+               }
             }
-            else
+
+            for (var i = 0; i < word.Length - 1; i++)
             {
-                language.LoadWords(File.ReadAllLines(fileName));
+               var letter = word.Substring(i, 1);
+               var nextLetter = word.Substring(i + 1, 1);
+               _nextLetterFrequency.TryAdd(letter, new());
+               if (!_nextLetterFrequency[letter].TryAdd(nextLetter, 1))
+                  _nextLetterFrequency[letter][nextLetter]++;
             }
-            Languages.Add(language);
-        }
-    }
+
+            for (var i = 0; i < word.Length - 2; i++)
+            {
+               var letter = word.Substring(i, 1);
+               var nextLetter = word.Substring(i + 2, 1);
+               _secondLetterFrequency.TryAdd(letter, new());
+               if (!_secondLetterFrequency[letter].TryAdd(nextLetter, 1))
+                  _secondLetterFrequency[letter][nextLetter]++;
+            }
+
+            for (var i = 0; i < word.Length - 3; i++)
+            {
+               var letter = word.Substring(i, 1);
+               var nextLetter = word.Substring(i + 3, 1);
+               _thirdLetterFrequency.TryAdd(letter, new());
+               if (!_thirdLetterFrequency[letter].TryAdd(nextLetter, 1))
+                  _thirdLetterFrequency[letter][nextLetter]++;
+            }
+
+            var firstLetter = word[..1];
+            if (!_firstLetterFrequency.TryAdd(firstLetter, 1))
+               _firstLetterFrequency[firstLetter]++;
+
+            var lastLetter = word.Substring(word.Length - 1, 1);
+            if (!_lastLetterFrequency.TryAdd(lastLetter, 1))
+               _lastLetterFrequency[lastLetter]++;
+         }
+
+         _unusualLetterThreshold = _totalWords / 500;
+      }
+
+      public void LoadSyllables(string[] syllables)
+      {
+         _usesSimpleSyllables = true;
+         foreach (var line in syllables)
+         {
+            var syllable = line;
+            if (syllable.Contains(' '))
+               syllable = syllable.Split(' ')[0];
+            if (syllable.Length == 0)
+               continue;
+
+            _simpleSyllables.Add(syllable);
+         }
+      }
+
+      public override string ToString() => Name;
+   }
 }
