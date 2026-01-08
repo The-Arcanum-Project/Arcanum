@@ -233,9 +233,9 @@ public partial class ErrorLog : INotifyPropertyChanged
       var baseModErrors = 0;
 
       foreach (var diagnostic in ErrorManager.Diagnostics)
-         if (diagnostic.Context.FilePath.StartsWith(FileManager.GetVanillaPath()))
+         if (diagnostic.Context.FileObj.Path.FullPath.StartsWith(FileManager.GetVanillaPath()))
             vanillaErrors++;
-         else if (diagnostic.Context.FilePath.StartsWith(FileManager.GetModPath()))
+         else if (diagnostic.Context.FileObj.Path.FullPath.StartsWith(FileManager.GetModPath()))
             modErrors++;
          else
             baseModErrors++;
@@ -269,7 +269,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
          if (item is Diagnostic diag)
          {
-            var isVanillaFile = diag.Context.FilePath.StartsWith(vanillaPath, StringComparison.OrdinalIgnoreCase);
+            var isVanillaFile = diag.Context.FileObj.Path.FullPath.StartsWith(vanillaPath, StringComparison.OrdinalIgnoreCase);
 
             if (isVanillaFile && !showVanilla)
                return false;
@@ -294,7 +294,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          ErrorMessage = diagnostic.Message;
          ErrorDescription = diagnostic.Description;
          FileProbe = diagnostic.Descriptor.Resolution?.Invoke(diagnostic.Arguments) ?? string.Empty;
-         SelectedPath = FileManager.SanitizePath(diagnostic.Context.FilePath);
+         SelectedPath = FileManager.SanitizePath(diagnostic.Context.FileObj.Path.FullPath);
          UpdateProbe(diagnostic);
       }
       else
@@ -314,7 +314,7 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    public static Task<string[]> ReadLineRange(Diagnostic diagnostic)
    {
-      return IO.ReadLineRange(diagnostic.Context.FilePath,
+      return IO.ReadLineRange(diagnostic.Context.FileObj.Path.FullPath,
                               diagnostic.Context.LineNumber - 2,
                               diagnostic.Context.LineNumber + 2);
    }
@@ -446,7 +446,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
 
-      ProcessHelper.OpenFolder(selectedDiagnostic.Context.FilePath);
+      ProcessHelper.OpenFolder(selectedDiagnostic.Context.FileObj.Path.FullPath);
    }
 
    private void OpenFileAtPos_OnClick(object sender, RoutedEventArgs e)
@@ -454,7 +454,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       if (ErrorLogDataGrid.SelectedItem is not Diagnostic selectedDiagnostic)
          return;
 
-      ProcessHelper.OpenFileAtLine(selectedDiagnostic.Context.FilePath,
+      ProcessHelper.OpenFileAtLine(selectedDiagnostic.Context.FileObj.Path.FullPath,
                                    selectedDiagnostic.Context.LineNumber,
                                    selectedDiagnostic.Context.ColumnNumber,
                                    PreferredEditor.VsCode);
@@ -519,7 +519,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       Dictionary<string, List<Diagnostic>> diagnosticsPerFile = [];
       foreach (var diag in ErrorManager.Diagnostics)
       {
-         var sanitizedPath = FileManager.SanitizePath(diag.Context.FilePath, '\\');
+         var sanitizedPath = FileManager.SanitizePath(diag.Context.FileObj.Path.FullPath, '\\');
          foreach (var fileDescriptor in DescriptorDefinitions.FileDescriptors)
          {
             if (!sanitizedPath.StartsWith(fileDescriptor.FilePath))
@@ -576,7 +576,7 @@ public partial class ErrorLog : INotifyPropertyChanged
       Dictionary<string, int> diagnosticsPerFile = [];
       foreach (var diag in ErrorManager.Diagnostics)
       {
-         var sanitizedPath = FileManager.SanitizePath(diag.Context.FilePath, '\\');
+         var sanitizedPath = FileManager.SanitizePath(diag.Context.FileObj.Path.FullPath, '\\');
          foreach (var fileDescriptor in DescriptorDefinitions.FileDescriptors)
          {
             if (!sanitizedPath.StartsWith(fileDescriptor.FilePath))
@@ -625,7 +625,7 @@ public partial class ErrorLog : INotifyPropertyChanged
          sb.AppendLine($"--> Description: {kvp.Value.First().Descriptor.Description.Replace("\n", "\n    ")}");
          sb.AppendLine();
          foreach (var diagnostic in kvp.Value)
-            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FilePath)} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
+            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FileObj.Path.FullPath)} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
          sb.AppendLine();
       }
 

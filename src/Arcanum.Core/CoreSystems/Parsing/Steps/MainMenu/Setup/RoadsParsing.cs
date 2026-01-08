@@ -40,7 +40,7 @@ public class RoadsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    public override bool LoadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
       var rn = Parser.Parse(fileObj, out var source);
-      var ctx = new LocationContext(0, 0, fileObj.Path.FullPath);
+      var ctx = new LocationContext(0, 0, fileObj);
       var validation = true;
       var pc = new ParsingContext(ctx, source.AsSpan(), nameof(RoadsParsing), ref validation);
 

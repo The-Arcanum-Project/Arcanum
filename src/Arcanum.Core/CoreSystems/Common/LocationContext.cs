@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -9,23 +8,23 @@ namespace Arcanum.Core.CoreSystems.Common;
 /// This context will be modified and passed around during the parsing process.
 /// If an error occurs, it will be used to provide a DiagnosticDescriptor with information.
 /// </summary>
-public class LocationContext(int lineNumber, int columnNumber, string filePath)
+public class LocationContext(int lineNumber, int columnNumber, Eu5FileObj fileObj)
 {
    public int LineNumber { get; set; } = lineNumber;
    public int ColumnNumber { get; set; } = columnNumber;
 
-   public string FilePath { get; set; } = filePath;
+   public Eu5FileObj FileObj { get; set; } = fileObj;
    /// <summary>
    /// The current action being performed during parsing.
    /// </summary>
-   public string ToErrorString => $"in File \"{FilePath}\" at Line {LineNumber}:{ColumnNumber}";
-   public static LocationContext Empty { get; } = new(int.MinValue, int.MinValue, string.Empty);
+   public string ToErrorString => $"in File \"{FileObj}\" at Line {LineNumber}:{ColumnNumber}";
+   public static LocationContext Empty { get; } = new(int.MinValue, int.MinValue, Eu5FileObj.Empty);
 
-   public LocationContext GetInstance() => new(LineNumber, ColumnNumber, FilePath);
+   public LocationContext GetInstance() => new(LineNumber, ColumnNumber, FileObj);
 
    public override string ToString()
    {
-      return $"File: {Path.GetFileName(FilePath)}, Line: {LineNumber}, Column: {ColumnNumber}";
+      return $"File: {Path.GetFileName(FileObj.Path.FullPath)}, Line: {LineNumber}, Column: {ColumnNumber}";
    }
 
    public void SetPosition(Token token)
@@ -48,10 +47,10 @@ public class LocationContext(int lineNumber, int columnNumber, string filePath)
       ColumnNumber = column;
    }
 
-   public static LocationContext GetNew(Eu5FileObj fileObj) => new(0, 0, fileObj.Path.FullPath);
+   public static LocationContext GetNew(Eu5FileObj fileObj) => new(0, 0, fileObj);
 
    public static bool IsVanillaContext(LocationContext context)
    {
-      return context.FilePath.StartsWith(FileManager.GetVanillaPath());
+      return context.FileObj.Path.FullPath.StartsWith(FileManager.GetVanillaPath());
    }
 }

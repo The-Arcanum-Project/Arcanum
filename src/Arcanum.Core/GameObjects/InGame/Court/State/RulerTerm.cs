@@ -47,6 +47,12 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    [ParseAs("regnal_number")]
    public int RegnalNumber { get; set; }
 
+   [SaveAs]
+   [DefaultValue(null)]
+   [Description("The co-rulers serving alongside the main ruler during this term.")]
+   [ParseAs(Globals.DO_NOT_PARSE_ME)]
+   public ObservableRangeCollection<RulerTerm> CoRulers { get; set; } = [];
+
    #region IEu5Object Implementation
 
    public string GetNamespace => $"Court.{nameof(RulerTerm)}";

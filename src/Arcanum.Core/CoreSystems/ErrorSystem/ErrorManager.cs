@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
@@ -108,7 +107,7 @@ public static class ErrorManager
       Dictionary<string, int> diagnosticsPerFile = [];
       foreach (var diag in Diagnostics)
       {
-         var sanitizedPath = FileManager.SanitizePath(diag.Context.FilePath, '\\');
+         var sanitizedPath = FileManager.SanitizePath(diag.Context.FileObj.Path.FullPath, '\\');
          foreach (var fileDescriptor in DescriptorDefinitions.FileDescriptors)
          {
             if (!sanitizedPath.StartsWith(fileDescriptor.FilePath))
@@ -157,7 +156,7 @@ public static class ErrorManager
          sb.AppendLine($"--> Description: {kvp.Value.First().Descriptor.Description.Replace("\n", "\n    ")}");
          sb.AppendLine();
          foreach (var diagnostic in kvp.Value)
-            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FilePath)} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
+            sb.AppendLine($"- {FileManager.SanitizePath(diagnostic.Context.FileObj.Path.FullPath)} (Line {diagnostic.Context.LineNumber}, Column {diagnostic.Context.ColumnNumber}) || {string.Join(" -|- ", diagnostic.Arguments)}");
          sb.AppendLine();
       }
 

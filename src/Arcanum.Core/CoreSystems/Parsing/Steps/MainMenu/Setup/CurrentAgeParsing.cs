@@ -43,7 +43,7 @@ public class CurrentAgeParsing(IEnumerable<IDependencyNode<string>> dependencies
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
                                         ageKey,
-                                        cn);
+                                        lvn);
          return;
       }
 

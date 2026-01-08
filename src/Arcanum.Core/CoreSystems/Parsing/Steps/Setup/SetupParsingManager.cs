@@ -52,8 +52,8 @@ public static class SetupParsingManager
          { "locations", new LocationSetupParsing([]) },
          { "building_manager", new BuildingManagerParsing([]) },
          { "character_db", new CharacterParsing([]) },
-         // { "countries", new CountryParsing([]) },
-         // { "current_age", new CurrentAgeParsing([]) },
+         { "countries", new CountryParsing([]) },
+         { "current_age", new CurrentAgeParsing([]) },
       }.ToFrozenDictionary();
    }
 

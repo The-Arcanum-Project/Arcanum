@@ -26,7 +26,7 @@ public sealed class Parser(LexerResult lexerResult)
       source = IO.IO.ReadAllTextUtf8(fileObj.Path.FullPath)!;
       if (string.IsNullOrWhiteSpace(source))
       {
-         DiagnosticException.CreateAndHandle(new(1, 1, fileObj.Path.FullPath),
+         DiagnosticException.CreateAndHandle(new(1, 1, fileObj),
                                              IOError.Instance.FileReadingError,
                                              "AST-Building",
                                              DiagnosticSeverity.Warning,
@@ -127,7 +127,7 @@ public sealed class Parser(LexerResult lexerResult)
 
       // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
       var current = Current();
-      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj?.Path?.FullPath ?? "N/A"),
+      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -235,7 +235,7 @@ public sealed class Parser(LexerResult lexerResult)
       if (Match(TokenType.Number, TokenType.String, TokenType.Yes, TokenType.No, TokenType.Identifier, TokenType.Date))
          return new LiteralValueNode(Previous());
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,
@@ -282,7 +282,7 @@ public sealed class Parser(LexerResult lexerResult)
       if (Check(type))
          return Advance();
 
-      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj.Path.FullPath),
+      DiagnosticException.CreateAndHandle(new(Current().Line, Current().Column, _fileObj),
                                           ParsingError.Instance.SyntaxError,
                                           "AST-Building",
                                           DiagnosticSeverity.Error,

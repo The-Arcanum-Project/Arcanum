@@ -64,5 +64,5 @@ public class LocationValidator : IValidator
       }
    }
 
-   private static LocationContext BuildContextFromObject(IEu5Object obj) => new(obj.FileLocation.Line, obj.FileLocation.Column, obj.Source.Path.FullPath);
+   private static LocationContext BuildContextFromObject(IEu5Object obj) => new(obj.FileLocation.Line, obj.FileLocation.Column, obj.Source);
 }

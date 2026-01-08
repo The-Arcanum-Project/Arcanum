@@ -22,7 +22,7 @@ public sealed class DiagnosticException : Exception
    public static DiagnosticException Fallback([CallerMemberName] string functionName = "",
                                               [CallerLineNumber] int lineNumber = 0,
                                               [CallerFilePath] string filePath = "")
-      => new (ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
+      => new(ErrorDescriptors.Instance.Misc.UnknownError, functionName, lineNumber.ToString(), filePath);
 
    public readonly DiagnosticDescriptor Descriptor;
    public readonly object[] Arguments;
@@ -108,7 +108,7 @@ public sealed class DiagnosticException : Exception
                   if (!AppData.IsHeadless)
                      ohNoWhatShouldWeDoNow =
                         MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FileObj.Path.FullPath)}\n\n{ToString()}\n\n{Description}\n\nAction: {action}",
                                                                        "Error Encountered",
                                                                        icon: GetMessageBoxIconForSeverity(Severity)));
                   break;
@@ -116,7 +116,7 @@ public sealed class DiagnosticException : Exception
                   if (!AppData.IsHeadless)
                      ohNoWhatShouldWeDoNow =
                         MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FileObj.Path.FullPath)}\n\n{ToString()}",
                                                                        "Error Encountered",
                                                                        MBoxButton.OKRetryCancel,
                                                                        GetMessageBoxIconForSeverity(Severity)));
@@ -125,7 +125,7 @@ public sealed class DiagnosticException : Exception
                   if (!AppData.IsHeadless)
                      ohNoWhatShouldWeDoNow =
                         MBoxResultToDiagnosticHandle(UIHandle.Instance.PopUpHandle
-                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FilePath)}\n\n{ToString()}",
+                                                             .ShowMBox($"At ({context.LineNumber}:{context.ColumnNumber}) in File: {FileManager.SanitizePath(context.FileObj.Path.FullPath)}\n\n{ToString()}",
                                                                        "Error Encountered",
                                                                        MBoxButton.RetryCancel,
                                                                        GetMessageBoxIconForSeverity(Severity)));
@@ -171,7 +171,7 @@ public sealed class DiagnosticException : Exception
                                  string action,
                                  params object[] args)
    {
-      DiagnosticException diagnosticException = new (descriptor, args);
+      DiagnosticException diagnosticException = new(descriptor, args);
       diagnosticException.HandleDiagnostic(ctx, action);
    }
 
