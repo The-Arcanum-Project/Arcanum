@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Court.State;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
 using CharacterNameDeclaration = Arcanum.Core.GameObjects.InGame.Court.CharacterNameDeclaration;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
@@ -27,6 +28,48 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// </summary>
 public static class SavingActionProvider
 {
+   public static void RulerTermSaving(IAgs target,
+                                      HashSet<PropertySavingMetadata> metadata,
+                                      IndentedStringBuilder sb,
+                                      bool asOneLine)
+   {
+      asOneLine = true;
+      if (target is not RulerTerm rt)
+         throw new InvalidOperationException("RulerTermSaving can only be used with RulerTerm instances.");
+
+      var trueOneLiner = rt.CoRulers.Count == 0;
+
+      if (trueOneLiner)
+      {
+         sb.Append("ruler_term = { ");
+         RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
+      }
+      else
+      {
+         sb.AppendLine("ruler_term = {");
+         using (sb.Indent())
+            RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
+      }
+
+      if (trueOneLiner)
+      {
+         sb.Append(" }");
+         sb.AppendLine();
+         return;
+      }
+
+      foreach (var ct in rt.CoRulers)
+      {
+         sb.AppendLine();
+         using (sb.Indent())
+            RulerTerm.FormatRulerTerm(sb, asOneLine, ct);
+      }
+
+      sb.AppendLine();
+      sb.Append("}");
+      sb.AppendLine();
+   }
+
    public static void LocationSaving(IAgs target,
                                      HashSet<PropertySavingMetadata> metadata,
                                      IndentedStringBuilder sb,

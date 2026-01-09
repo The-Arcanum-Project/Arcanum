@@ -7,6 +7,8 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.InGame.AbstractMechanics;
+using Arcanum.Core.GameObjects.InGame.Court.State;
 using Arcanum.Core.Utils.Sorting;
 using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 using VariableDeclaration = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDeclaration;
@@ -18,7 +20,10 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
    : SetupFileLoadingService(dependencies)
 {
    public override bool IsHeavyStep => true;
-   public override List<Type> ParsedObjects { get; } = SetupParsingManager.NestedSubTypes(Country.Empty).ToList();
+   public override List<Type> ParsedObjects { get; } =
+   [
+      .. SetupParsingManager.NestedSubTypes(Country.Empty), .. SetupParsingManager.NestedSubTypes(GovernmentState.Empty), typeof(Age)
+   ];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {

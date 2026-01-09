@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
+using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -14,7 +15,7 @@ using Nexus.Core.Attributes;
 namespace Arcanum.Core.GameObjects.InGame.Court.State;
 
 [NexusConfig]
-[ObjectSaveAs(asOneLine: true)]
+[ObjectSaveAs(savingMethod: "RulerTermSaving")]
 public partial class RulerTerm : IEu5Object<RulerTerm>
 {
    [SaveAs]
@@ -81,4 +82,15 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
    public static RulerTerm Empty { get; } = new() { UniqueId = "Arcanum_Empty_RulerTerm" };
 
    #endregion
+
+   public static void FormatRulerTerm(IndentedStringBuilder sb, bool asOneLine, RulerTerm rt)
+   {
+      SavingUtil.AsOneLine(asOneLine, sb, $"character = {SavingUtil.FormatValue(SavingValueType.Identifier, rt, Field.CharacterId)}");
+      SavingUtil.AsOneLine(asOneLine, sb, $"start_date = {rt.StartDate}");
+      if (rt.EndDate != JominiDate.Empty)
+         SavingUtil.AsOneLine(asOneLine, sb, $"end_date = {rt.EndDate}");
+      SavingUtil.AsOneLine(asOneLine, sb, $"regnal_number = {SavingUtil.FormatValue(SavingValueType.Int, rt, Field.RegnalNumber)}");
+      if (!string.IsNullOrEmpty(rt.RegnalName))
+         SavingUtil.AsOneLine(asOneLine, sb, $"regnal_name = {SavingUtil.FormatValue(SavingValueType.String, rt, Field.RegnalName)}");
+   }
 }

@@ -136,7 +136,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("laws", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<EnactedLaw> EnactedLaws { get; set; } = [];
 
-   [SaveAs(isShattered: true, isEmbeddedObject: true)]
+   [SaveAs(isShattered: true, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [DefaultValue(null)]
    [Description("All rulers that have ruled in this government state.")]
    [ParseAs("ruler_term", isEmbedded: true, isShatteredList: true, itemNodeType: AstNodeType.BlockNode)]

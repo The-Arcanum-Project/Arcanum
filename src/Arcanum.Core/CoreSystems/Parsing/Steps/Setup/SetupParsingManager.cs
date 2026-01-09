@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 /*
@@ -74,23 +75,40 @@ public static class SetupParsingManager
    {
       List<Type> types = [eu5Obj.GetType()];
       foreach (var prop in eu5Obj.GetAllProperties())
-         if (eu5Obj.GetNxPropType(prop) is { } t && typeof(IEu5Object).IsAssignableFrom(t))
-         {
-            var value = eu5Obj._getValue(prop);
-            Debug.Assert(value != null);
-            PropertySavingMetadata? first = null;
-            foreach (var p in eu5Obj.SaveableProps)
-            {
-               if (Equals(p.NxProp, prop))
-               {
-                  first = p;
-                  break;
-               }
-            }
+      {
+         object value;
+         PropertySavingMetadata? first = null;
+         Type? toAdd;
 
-            if (value is IEu5Object && first?.ValueType != SavingValueType.Identifier)
-               types.Add(t);
+         if (eu5Obj.IsCollection(prop))
+         {
+            toAdd = eu5Obj.GetNxItemType(prop);
+            if (!EmptyRegistry.TryGet(toAdd, out value))
+               continue;
          }
+         else
+         {
+            toAdd = eu5Obj.GetNxPropType(prop);
+            if (typeof(IEu5Object).IsAssignableFrom(toAdd))
+               value = eu5Obj._getValue(prop);
+            else
+               continue;
+         }
+
+         Debug.Assert(value != null);
+         Debug.Assert(toAdd != null);
+         foreach (var p in eu5Obj.SaveableProps)
+         {
+            if (Equals(p.NxProp, prop))
+            {
+               first = p;
+               break;
+            }
+         }
+
+         if (value is IEu5Object && first?.ValueType != SavingValueType.Identifier && first?.CollectionAsPureIdentifierList == false)
+            types.Add(toAdd);
+      }
 
       return types.ToArray();
    }

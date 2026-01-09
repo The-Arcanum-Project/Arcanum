@@ -1,8 +1,11 @@
-﻿namespace Arcanum.Core.Utils.Sorting;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.Registry;
+
+namespace Arcanum.Core.Utils.Sorting;
 
 public static class TopologicalSort
 {
-   public static List<TNode> Sort<TId, TNode>(IEnumerable<TNode> nodes)
+   public static List<TNode> SortGeneral<TId, TNode>(IEnumerable<TNode> nodes)
       where TNode : IDependencyNode<TId> where TId : notnull
    {
       var nodeDict = nodes.ToDictionary(n => n.Id);
@@ -30,6 +33,46 @@ public static class TopologicalSort
                   return false;
             }
             else
+            {
+               throw new InvalidOperationException($"Missing dependency '{depId}' for node '{n.Id}'");
+            }
+
+         visiting.Remove(n.Id);
+         visited.Add(n.Id);
+         sorted.Add(n);
+         return true;
+      }
+   }
+
+   public static List<TNode> Sort<TId, TNode>(IEnumerable<TNode> nodes)
+      where TNode : IDependencyNode<TId>, IEu5Object where TId : notnull
+   {
+      var empty = (IEu5Object)EmptyRegistry.Empties[typeof(TNode)];
+      var nodeDict = nodes.ToDictionary(n => n.Id);
+      var sorted = new List<TNode>();
+      var visited = new HashSet<TId>();
+      var visiting = new HashSet<TId>();
+
+      foreach (var node in nodeDict.Values)
+         if (!Visit(node))
+            throw new InvalidOperationException($"Circular dependency detected for node '{node.Id}'");
+
+      return sorted;
+
+      bool Visit(TNode n)
+      {
+         if (visited.Contains(n.Id))
+            return true;
+         if (!visiting.Add(n.Id))
+            return false;
+
+         foreach (var depId in n.Dependencies)
+            if (nodeDict.TryGetValue(depId.Id, out var depNode))
+            {
+               if (!Visit(depNode))
+                  return false;
+            }
+            else if (!Equals((IEu5Object)depId, empty))
             {
                throw new InvalidOperationException($"Missing dependency '{depId}' for node '{n.Id}'");
             }

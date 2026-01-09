@@ -127,6 +127,9 @@ public class PropertySavingMetadata
          CommentProvider(ags, commentChar, sb);
 
       var value = ags._getValue(NxProp);
+      if (value is JominiDate data)
+      {
+      }
 
       if (ValueType == SavingValueType.Auto)
          ValueType = SavingUtil.GetSavingValueType(value);
@@ -141,7 +144,7 @@ public class PropertySavingMetadata
       {
          if (ValueType == SavingValueType.IAgs && !IsCollection)
          {
-            HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine);
+            SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, this);
             return;
          }
 
@@ -246,27 +249,6 @@ public class PropertySavingMetadata
 
          sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {stringRep}");
       }
-   }
-
-   private void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar, bool asOneLine)
-   {
-      var sm = ags.ClassMetadata.SavingMethod;
-      if (sm != null)
-      {
-         sm.Invoke(ags, [this], sb, asOneLine);
-         return;
-      }
-
-      if (SaveEmbeddedAsIdentifier)
-      {
-         var str = $"{Keyword} {SavingUtil.GetSeparator(Separator)} {ags.SavingKey}";
-         if (asOneLine)
-            sb.Append(str + " ");
-         else
-            sb.AppendLine(str);
-      }
-      else
-         ags.ToAgsContext(commentChar).BuildContext(sb);
    }
 
    private void HandleShatteredCollection(IndentedStringBuilder sb,

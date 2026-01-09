@@ -206,6 +206,7 @@ public static class SavingUtil
    /// <param name="separator"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentOutOfRangeException"></exception>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static string GetSeparator(TokenType separator)
    {
       return separator switch
@@ -286,6 +287,27 @@ public static class SavingUtil
 
       return SavingValueType.Auto;
       //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
+   }
+
+   public static void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar, bool asOneLine, PropertySavingMetadata psm)
+   {
+      var sm = ags.ClassMetadata.SavingMethod;
+      if (sm != null)
+      {
+         sm.Invoke(ags, [psm], sb, asOneLine);
+         return;
+      }
+
+      if (psm.SaveEmbeddedAsIdentifier)
+      {
+         var str = $"{psm.Keyword} {GetSeparator(psm.Separator)} {ags.SavingKey}";
+         if (asOneLine)
+            sb.Append(str + " ");
+         else
+            sb.AppendLine(str);
+      }
+      else
+         ags.ToAgsContext(commentChar).BuildContext(sb);
    }
 
    /// <summary>
