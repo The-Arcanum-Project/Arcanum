@@ -379,14 +379,20 @@ public static class SaveMaster
                    "All types must have a corresponding SetupFileWriter.");
       Debug.Assert(types.Length == types.Distinct().Count(), "Types list must not contain duplicates.");
 
+      HashSet<SetupFileWriter> toWrite = [];
+
       foreach (var type in types)
       {
          var writers = SetupFileWritersByType[type];
          foreach (var writer in writers)
-         {
-            updateHandle.Invoke($"Saving setup file: {writer.FileName}");
-            IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
-         }
+            toWrite.Add(writer);
+      }
+
+      // Now save all files.
+      foreach (var writer in toWrite)
+      {
+         updateHandle.Invoke($"Saving setup file: {writer.FileName}");
+         IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
       }
    }
 
