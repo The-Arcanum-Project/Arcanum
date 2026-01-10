@@ -80,8 +80,15 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
       var areaGlobals = Area.GetGlobalItems();
       var provinceGlobals = Province.GetGlobalItems();
 
+      CommentNode? lastContinentComment = null;
       foreach (var sn in rn.Statements)
       {
+         if (sn is CommentNode comNode)
+         {
+            lastContinentComment = comNode;
+            continue;
+         }
+
          // Continent level locations
          if (!sn.IsBlockNode(ref pc, out var contBn))
             continue;
@@ -91,6 +98,12 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
          if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
             continue;
 
+         if (lastContinentComment is not null)
+         {
+            continent.AddStandaloneComment(lastContinentComment.CommentText);
+            lastContinentComment = null;
+         }
+
          continent.FileLocation = contBn.GetFileLocation();
 
          LUtil.TryAddToGlobals(continentKey,
@@ -98,8 +111,15 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                continent,
                                continentGlobals);
 
+         CommentNode? superReiognComment = null;
          foreach (var superRegionSn in contBn.Children)
          {
+            if (superRegionSn is CommentNode sComNode)
+            {
+               superReiognComment = sComNode;
+               continue;
+            }
+
             // SuperRegion level locations
             if (!superRegionSn.IsBlockNode(ref pc, out var srBn))
                continue;
@@ -109,6 +129,12 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
             if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                continue;
 
+            if (superReiognComment is not null)
+            {
+               superRegion.AddStandaloneComment(superReiognComment.CommentText);
+               superReiognComment = null;
+            }
+
             superRegion.FileLocation = srBn.GetFileLocation();
 
             LUtil.TryAddToGlobals(superRegionKey,
@@ -117,8 +143,15 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                   superRegionGlobals);
             continent.SuperRegions.Add(superRegion);
 
+            CommentNode? regionComment = null;
             foreach (var regionSn in srBn.Children)
             {
+               if (regionSn is CommentNode rComNode)
+               {
+                  regionComment = rComNode;
+                  continue;
+               }
+
                // Region level locations
                if (!regionSn.IsBlockNode(ref pc, out var rBn))
                   continue;
@@ -128,13 +161,26 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                   continue;
 
+               if (regionComment is not null)
+               {
+                  region.AddStandaloneComment(regionComment.CommentText);
+                  regionComment = null;
+               }
+
                region.FileLocation = rBn.GetFileLocation();
 
                LUtil.TryAddToGlobals(regionKey, ref pc, region, regionGlobals);
                superRegion.Regions.Add(region);
 
+               CommentNode? areaComment = null;
                foreach (var areaSn in rBn.Children)
                {
+                  if (areaSn is CommentNode aComNode)
+                  {
+                     areaComment = aComNode;
+                     continue;
+                  }
+
                   // Area level locations
                   if (!areaSn.IsBlockNode(ref pc, out var aBn))
                      continue;
@@ -144,13 +190,26 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                   if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                      continue;
 
+                  if (areaComment is not null)
+                  {
+                     area.AddStandaloneComment(areaComment.CommentText);
+                     areaComment = null;
+                  }
+
                   area.FileLocation = aBn.GetFileLocation();
 
                   LUtil.TryAddToGlobals(areaKey, ref pc, area, areaGlobals);
                   region.Areas.Add(area);
 
+                  CommentNode? provinceComment = null;
                   foreach (var provinceSn in aBn.Children)
                   {
+                     if (provinceSn is CommentNode pComNode)
+                     {
+                        provinceComment = pComNode;
+                        continue;
+                     }
+
                      // Province level locations
                      if (!provinceSn.IsBlockNode(ref pc, out var pBn))
                         continue;
@@ -159,6 +218,12 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                      var province = IEu5Object<Province>.CreateInstance(provinceKey, fileObj);
                      if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                         continue;
+
+                     if (provinceComment is not null)
+                     {
+                        province.AddStandaloneComment(provinceComment.CommentText);
+                        provinceComment = null;
+                     }
 
                      province.FileLocation = pBn.GetFileLocation();
 

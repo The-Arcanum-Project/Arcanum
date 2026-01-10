@@ -46,6 +46,10 @@ public static class Generator
             AppendEnumRegion(npds, builder);
          builder.AppendLine();
 
+         using (builder.Region("Comment Storage"))
+            AppendCommentStorage(builder, npds);
+         builder.AppendLine();
+
          using (builder.Region("NuiConfig Bitmask Methods"))
             AppendIntBitsAsBools(builder, npds.Select(npd => npd.PropertyConfigData).ToList());
          builder.AppendLine();
@@ -193,13 +197,11 @@ public static class Generator
          using (builder.Indent())
          {
             foreach (var npd in npds)
-            {
                if (npd.PropertyConfigData.AggregateLinkParent is not null)
                {
                   var fullPropertyType = npd.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                   builder.AppendLine($"{NX}Field.{npd.PropertyName} => {fullPropertyType}.Field.{npd.PropertyConfigData.AggregateLinkParent},");
                }
-            }
 
             builder.AppendLine("_ => null");
          }
@@ -255,11 +257,9 @@ public static class Generator
             }
             // Handle Primitives, Strings, and Value Types (Direct Copy)
             else
-            {
                // Logic check: If it's a reference type that implements ICloneable, we could call .Clone()
                // For now, standard assignment is safest for a general generator.
                m.AppendLine($"{NX}clone.{propName} = {propName};");
-            }
          }
 
          m.AppendLine();
@@ -282,10 +282,8 @@ public static class Generator
                                   .Any(m => m.Parameters.Length == 0 && m.IsOverride);
 
       if (hasToStringOverride)
-      {
          // User implemented it manually, do not generate.
          return;
-      }
 
       builder.AppendLine("public override string ToString()");
       builder.Block(b => { b.AppendLine($"return {NX}_getValue({NX}Field.UniqueId)?.ToString() ?? $\"{cs.Name}(no UniqueId)\";"); });
@@ -538,7 +536,7 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), $\"Invalid property enum value for:'{{property}}'\");");
-         m.AppendLine($"switch (Nx.GetEnumIndex(property))");
+         m.AppendLine("switch (Nx.GetEnumIndex(property))");
          m.Block(sw =>
          {
             for (var i = 0; i < npds.Count; i++)
@@ -553,7 +551,7 @@ public static class Generator
                   var valName = $"{npd.PropertyName}_val";
 
                   if (npd.IsCollection &&
-                      (typeSymbol.Name is "ObservableRangeCollection" or "List" or "HashSet"))
+                      typeSymbol.Name is "ObservableRangeCollection" or "List" or "HashSet")
                   {
                      var itemType = npd.CollectionItemType!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
@@ -602,7 +600,7 @@ public static class Generator
       builder.Block(m =>
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), $\"Invalid property enum value for:'{{property}}'\");");
-         m.AppendLine($"switch (Nx.GetEnumIndex(property))");
+         m.AppendLine("switch (Nx.GetEnumIndex(property))");
          m.Block(sw =>
          {
             for (var i = 0; i < npds.Count; i++)
@@ -624,7 +622,7 @@ public static class Generator
       {
          m.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property));");
 
-         m.AppendLine($"switch (Nx.GetEnumIndex(property))");
+         m.AppendLine("switch (Nx.GetEnumIndex(property))");
          m.Block(sw =>
          {
             for (var i = 0; i < npds.Count; i++)
@@ -687,7 +685,7 @@ public static class Generator
          builder.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), $\"Invalid property enum value for:'{{property}}'\");");
          builder.AppendLine($"var minValue = {NX}GetMinValue(property);");
          builder.AppendLine($"Debug.Assert({NX}GetNxPropType(property) == typeof(T), \"Requested type does not match property type\");");
-         builder.AppendLine($"return (T)minValue!;");
+         builder.AppendLine("return (T)minValue!;");
       });
 
       builder.AppendLine();
@@ -730,7 +728,7 @@ public static class Generator
          builder.AppendLine($"Debug.Assert(Enum.IsDefined(typeof({NX}Field), property), $\"Invalid property enum value for:'{{property}}'\");");
          builder.AppendLine($"var maxValue = {NX}GetMaxValue(property);");
          builder.AppendLine($"Debug.Assert({NX}GetNxPropType(property) == typeof(T), \"Requested type does not match property type\");");
-         builder.AppendLine($"return (T)maxValue!;");
+         builder.AppendLine("return (T)maxValue!;");
       });
    }
 
@@ -878,7 +876,7 @@ public static class Generator
                   $"{NX}IsMapInferButtonsDisabled", "Checks if the property has map infer buttons disabled.",
                   d => d.DisableMapInferButtons),
          ($"{NX}IS_REQUIRED", $"{NX}IsRequired", "Checks if the property is marked as required.", d => d.IsRequired),
-         ($"{NX}IGNORE_COMMAND", $"{NX}IgnoreCommand", "Checks if the property should ignore command behavior.", d => d.IgnoreCommand)
+         ($"{NX}IGNORE_COMMAND", $"{NX}IgnoreCommand", "Checks if the property should ignore command behavior.", d => d.IgnoreCommand),
       };
 
       var bitArrays = new int[nuiConfig.Count];
@@ -889,10 +887,8 @@ public static class Generator
             continue;
 
          for (var bitIndex = 0; bitIndex < flags.Length; bitIndex++)
-         {
             if (flags[bitIndex].Selector(data))
                bitArrays[i] |= 1 << bitIndex;
-         }
       }
 
       sb.AppendLine("/// <summary>");
@@ -945,7 +941,6 @@ public static class Generator
             var npd = npds[i];
             builder.AppendLine("/// <summary>");
             if (!string.IsNullOrEmpty(npd.Description))
-            {
                if (!string.IsNullOrEmpty(npd.Description))
                {
                   // Normalize newlines and split
@@ -955,13 +950,180 @@ public static class Generator
                      // Append the comment prefix to every line
                      builder.AppendLine($"/// {line}");
                }
-            }
 
             builder.AppendLine("/// </summary>");
             builder.AppendLine($"{npd.PropertyName} = {i},");
          }
 
       builder.AppendLine("}");
+   }
+
+   private static void AppendCommentStorage(IndentBuilder builder, List<NexusPropertyData> npds)
+   {
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Array of property comments for each property. <br/>");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("private string?[]? _leadingComments;");
+      builder.AppendLine("private string?[]? _inlineComments;");
+      builder.AppendLine("private string?[]? _closingComments;");
+      builder.AppendLine("private string[]? _blockBodyComment;");
+      builder.AppendLine();
+
+      builder.AppendLine("private void EnsureCommentStore(ref string?[]? store)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("if (store == null)");
+         using (builder.Indent())
+            builder.AppendLine($"store = new string?[{npds.Count}];");
+      });
+
+      // GetLeadingComment
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Sets the leading comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public void SetLeadingComment(Enum property, string? val)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("if (val == null && _leadingComments == null)");
+         using (builder.Indent())
+            builder.AppendLine("return;");
+         builder.AppendLine("EnsureCommentStore(ref _leadingComments);");
+         builder.AppendLine("_leadingComments![Nx.GetEnumIndex(property)] = val;");
+      });
+      builder.AppendLine();
+
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Gets the leading comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public string? GetLeadingComment(Enum property)");
+      using (builder.Indent())
+         builder.AppendLine("=> _leadingComments?[Nx.GetEnumIndex(property)];");
+      builder.AppendLine();
+
+      // SetInlineComment
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Sets the inline comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public void SetInlineComment(Enum property, string? val)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("if (val == null && _inlineComments == null)");
+         using (builder.Indent())
+            builder.AppendLine("return;");
+         builder.AppendLine("EnsureCommentStore(ref _inlineComments);");
+         builder.AppendLine("_inlineComments![Nx.GetEnumIndex(property)] = val;");
+      });
+      builder.AppendLine();
+
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Gets the inline comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public string? GetInlineComment(Enum property)");
+      using (builder.Indent())
+         builder.AppendLine("=> _inlineComments?[Nx.GetEnumIndex(property)];");
+      builder.AppendLine();
+
+      // SetClosingComment
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Sets the closing comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public void SetClosingComment(Enum property, string? val)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("if (val == null && _closingComments == null)");
+         using (builder.Indent())
+            builder.AppendLine("return;");
+         builder.AppendLine("EnsureCommentStore(ref _closingComments);");
+         builder.AppendLine("_closingComments![Nx.GetEnumIndex(property)] = val;");
+      });
+      builder.AppendLine();
+
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Gets the closing comment for a property.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public string? GetClosingComment(Enum property)");
+      using (builder.Indent())
+         builder.AppendLine("=> _closingComments?[Nx.GetEnumIndex(property)];");
+      builder.AppendLine();
+
+      // Standalone block body comments
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Add a standalone block comment.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public void AddStandaloneComment(string comment)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("if (_blockBodyComment == null)");
+         using (builder.Indent())
+            builder.AppendLine("_blockBodyComment = new string[] { comment };");
+         builder.AppendLine("else");
+         using (builder.Indent())
+            // Resize and add
+            builder.AppendLine("_blockBodyComment = _blockBodyComment.Append(comment).ToArray();");
+      });
+      builder.AppendLine();
+
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Gets the standalone block comments.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("public string[]? GetStandaloneComments()");
+      using (builder.Indent())
+         builder.AppendLine("=> _blockBodyComment;");
+      builder.AppendLine();
+
+      // _assignComments
+      builder.AppendLine("/// <summary>");
+      builder.AppendLine("/// Assigns comments from an AstNode to a property, handling shattered/collection merging.");
+      builder.AppendLine("/// </summary>");
+      builder.AppendLine("internal void _assignComments(Enum property, AstNode node, bool isShatteredOrCollection)");
+      builder.Block(_ =>
+      {
+         builder.AppendLine("string? lead = node.LeadingComment;");
+         builder.AppendLine("string? inline = node.InlineComment;");
+         builder.AppendLine("string? closing = (node as BlockNode)?.ClosingComment;");
+         builder.AppendLine();
+
+         builder.AppendLine("if (isShatteredOrCollection)");
+         builder.Block(__ =>
+         {
+            builder.AppendLine("var existingLead = GetLeadingComment(property);");
+            builder.AppendLine("if (!string.IsNullOrEmpty(existingLead) && !string.IsNullOrEmpty(lead))");
+            using (builder.Indent())
+               builder.AppendLine("lead = existingLead + \"\\n\" + lead;");
+            builder.AppendLine("else if (!string.IsNullOrEmpty(existingLead))");
+            using (builder.Indent())
+               builder.AppendLine("lead = existingLead;");
+            builder.AppendLine();
+
+            builder.AppendLine("var existingClose = GetClosingComment(property);");
+            builder.AppendLine("if (!string.IsNullOrEmpty(existingClose) && !string.IsNullOrEmpty(closing))");
+            using (builder.Indent())
+               builder.AppendLine("closing = existingClose + \"\\n\" + closing;");
+            builder.AppendLine("else if (!string.IsNullOrEmpty(existingClose))");
+            using (builder.Indent())
+               builder.AppendLine("closing = existingClose;");
+            builder.AppendLine();
+
+            builder.AppendLine("var existingInline = GetInlineComment(property);");
+            builder.AppendLine("if (!string.IsNullOrEmpty(existingInline) && !string.IsNullOrEmpty(inline))");
+            using (builder.Indent())
+               builder.AppendLine("inline = existingInline + \" \" + inline;");
+            builder.AppendLine("else if (!string.IsNullOrEmpty(existingInline))");
+            using (builder.Indent())
+               builder.AppendLine("inline = existingInline;");
+         });
+         builder.AppendLine();
+
+         builder.AppendLine("if (lead != null)");
+         using (builder.Indent())
+            builder.AppendLine("SetLeadingComment(property, lead);");
+         builder.AppendLine("if (inline != null)");
+         using (builder.Indent())
+            builder.AppendLine("SetInlineComment(property, inline);");
+         builder.AppendLine("if (closing != null)");
+         using (builder.Indent())
+            builder.AppendLine("SetClosingComment(property, closing);");
+      });
    }
 
    private static void AppendFileUsing(IndentBuilder builder, INamedTypeSymbol cs)
@@ -974,6 +1136,7 @@ public static class Generator
       builder.AppendLine("using Arcanum.Core.CoreSystems.History.Commands;");
       builder.AppendLine("using Arcanum.Core.CoreSystems.Nexus;");
       builder.AppendLine("using Arcanum.Core.CoreSystems.NUI.Attributes;");
+      builder.AppendLine("using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;");
       builder.AppendLine("using Arcanum.Core.Registry;");
       builder.AppendLine("using Nexus.Core;");
       builder.AppendLine("using System.Runtime.CompilerServices;");

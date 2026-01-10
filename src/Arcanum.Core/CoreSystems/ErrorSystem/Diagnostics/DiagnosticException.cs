@@ -88,6 +88,10 @@ public sealed class DiagnosticException : Exception
                                 DiagnosticSeverity? severity = null,
                                 DiagnosticReportSeverity? reportSeverity = null)
    {
+      if (Message.Contains("Comment"))
+      {
+      }
+
       Severity = severity ?? Descriptor.Severity;
       ReportSeverity = reportSeverity ?? Descriptor.ReportSeverity;
       var ohNoWhatShouldWeDoNow = DiagnosticHandle.Ignore;

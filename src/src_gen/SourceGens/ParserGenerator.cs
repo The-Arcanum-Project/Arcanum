@@ -845,6 +845,11 @@ public class ParserSourceGenerator : IIncrementalGenerator
       sb.AppendLine("            foreach (var sn in node.Children)");
       sb.AppendLine("            {");
 
+      // Conitue if CommentNode check
+      sb.AppendLine("                if (sn is CommentNode)");
+      sb.AppendLine("                    continue;");
+      sb.AppendLine();
+
       sb.AppendLine($"                if (!sn.{nodeCheckMethod}(ref pc, out var childNode))");
       sb.AppendLine("                    continue;");
       sb.AppendLine("");

@@ -23,8 +23,15 @@ public static class SimpleObjectParser
                                      bool allowUnknownBlocks = false) where TTarget : IEu5Object<TTarget>, new()
    {
       using var scope = pc.PushScope();
+      CommentNode? lastComment = null;
       foreach (var sn in statements)
       {
+         if (sn is CommentNode commentNode)
+         {
+            lastComment = commentNode;
+            continue;
+         }
+
          if (!ValidateAndCreateInstance(fileObj,
                                         ref pc,
                                         sn,
@@ -33,6 +40,12 @@ public static class SimpleObjectParser
                                         out var irType) ||
              instance == null)
             continue;
+
+         if (lastComment != null)
+         {
+            instance.AddStandaloneComment(lastComment.CommentText);
+            lastComment = null;
+         }
 
          // We check if we have an inject/replace and if so custom handling applies
          if (irType != InjRepType.None)
@@ -204,13 +217,26 @@ public static class SimpleObjectParser
                                                           object? lockObject) where TTarget : IEu5Object<TTarget>, new()
    {
       using var scope = pc.PushScope();
+      CommentNode? lastComment = null;
       foreach (var sn in statements)
       {
+         if (sn is CommentNode commentNode)
+         {
+            lastComment = commentNode;
+            continue;
+         }
+
          if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
          var instance = Eu5Activator.CreateInstance<TTarget>(pc.SliceString(bn), fileObj, bn);
          Debug.Assert(instance.Source != null);
+
+         if (lastComment != null)
+         {
+            instance.AddStandaloneComment(lastComment.CommentText);
+            lastComment = null;
+         }
 
          if (lockObject != null)
          {
@@ -268,8 +294,15 @@ public static class SimpleObjectParser
       where TTarget : INexus
    {
       using var scope = pc.PushScope();
+      CommentNode? lastComment = null;
       foreach (var sn in statements)
       {
+         if (sn is CommentNode commentNode)
+         {
+            lastComment = commentNode;
+            continue;
+         }
+
          if (!sn.IsBlockNode(ref pc, out var bn))
             continue;
 
@@ -282,6 +315,12 @@ public static class SimpleObjectParser
                                            key,
                                            typeof(TTarget));
             continue;
+         }
+
+         if (lastComment != null)
+         {
+            discoveredObj.AddStandaloneComment(lastComment.CommentText);
+            lastComment = null;
          }
 
          propsParser(bn, discoveredObj, ref pc, false);

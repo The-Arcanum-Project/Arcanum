@@ -54,6 +54,7 @@ public record PropertyMetadata
       }
 
       Keyword = attribute.ConstructorArguments[0].Value as string ?? ToSnakeCase(PropertyName);
+      FullEnumString = $"{Symbol.ContainingType.ToDisplayString()}.Field.{Symbol.Name}";
    }
 
    public IPropertySymbol Symbol { get; }
@@ -63,6 +64,7 @@ public record PropertyMetadata
                                      ? namedType.TypeArguments.FirstOrDefault() ?? Symbol.Type
                                      : Symbol.Type;
    public string Keyword { get; }
+   public string FullEnumString { get; }
    public string KeywordConstantName => SanitizeToIdentifier(Keyword).ToUpper();
    public ParserSourceGenerator.NodeType AstNodeType { get; }
    public string? CustomParserMethodName { get; }
