@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Arcanum.Core.GameObjects.InGame.gfx.map;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Adjacency = Arcanum.Core.GameObjects.InGame.Map.Adjacency;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
@@ -83,6 +84,10 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
+   public NUISetting CountryTemplateSettings { get; set; } = new(CountryTemplate.Field.UniqueId,
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray());
    public NUISetting NudgeDataSettings { get; set; } = new(NudgeData.Field.UniqueId,
                                                            Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),

@@ -825,4 +825,14 @@ public class ParsingError : ILazySingleton
                                                                      "Duplicate color definition found for value '{0}'.",
                                                                      "Locations are uniquely identified by their color in map_data/named_locations.txt.\n'{0}' Is defined multiple times for locations '{1}' and '{2}'. The first occurrence will be used.",
                                                                      DiagnosticReportSeverity.PopupNotify);
+
+   /// <param name="0">The string that has invalid formatting</param>
+   /// <param name="1">The expected string format</param>
+   public DiagnosticDescriptor InvalidStringFormat { get; } = new(DiagnosticCategory.Parsing,
+                                                                  85,
+                                                                  "Invalid String Format",
+                                                                  DiagnosticSeverity.Error,
+                                                                  "The string format is invalid: '{0}'.",
+                                                                  "The provided string '{0}' contains invalid formatting. Expected to be of the format '{1}'",
+                                                                  DiagnosticReportSeverity.Silent);
 }

@@ -22,7 +22,7 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
    public override bool IsHeavyStep => true;
    public override List<Type> ParsedObjects { get; } =
    [
-      .. SetupParsingManager.NestedSubTypes(Country.Empty), .. SetupParsingManager.NestedSubTypes(GovernmentState.Empty), typeof(Age)
+      .. SetupParsingManager.NestedSubTypes(Country.Empty), .. SetupParsingManager.NestedSubTypes(GovernmentState.Empty), typeof(Age),
    ];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj, object? lockObject)
@@ -61,6 +61,14 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
 
          ParseProperties(countryBn, eu5Obj, ref pc, false);
       }
+   }
+
+   private static partial bool ArcParse_GovernmentState(BlockNode node, Country target, ref ParsingContext pc)
+   {
+      if (target.GovernmentState == GovernmentState.Empty)
+         target.GovernmentState = new();
+      GovernmentsStateParsing.ParseProperties(node, target.GovernmentState, ref pc, false);
+      return true;
    }
 
    public static bool ArcParse_Variables(BlockNode node, Country country, ref ParsingContext pc)

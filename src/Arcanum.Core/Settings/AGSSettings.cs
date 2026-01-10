@@ -7,6 +7,7 @@ public class AGSSettings
 {
    public AgsSettings ModifierData { get; set; } = new();
    public AgsSettings GameObjectLocator { get; set; } = new();
+   public AgsSettings CountryTemplate { get; set; } = new();
    public AgsSettings NudgeData { get; set; } = new();
    public AgsSettings VariableDeclaration { get; set; } = new();
    public AgsSettings SocientalValue { get; set; } = new();
@@ -32,7 +33,50 @@ public class AGSSettings
    public AgsSettings Region { get; set; } = new();
    public AgsSettings SuperRegion { get; set; } = new();
    public AgsSettings Continent { get; set; } = new();
-   public AgsSettings Country { get; set; } = new();
+   public AgsSettings Country { get; set; } = new()
+   {
+      CustomSaveOrder = true,
+      SaveOrder =
+      [
+         // @formatter:off
+         GameObjects.InGame.Map.LocationCollections.Country.Field.CountryType,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnControlCores,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnControlIntegrated,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnControlConquered,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnControlColony, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnCores,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnConquered, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnIntegrated,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OwnColony, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.ControlCores,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Control,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.OurCoresConqueredByOthers,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.AddedPopsFromLocations,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.DiscoveredProvinces,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.DiscoveredAreas,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.DiscoveredRegions, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.CourtLanguage,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.LiturgicalLanguage,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.ReligiousSchool,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.StartingTechLevel, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Includes,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.GovernmentState, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Revolt,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Capital,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Dynasty,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.ToleratedCultures,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.AcceptedCultures, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Flag,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.CountryName, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.CurrencyData,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.CountryRank, 
+         GameObjects.InGame.Map.LocationCollections.Country.Field.IsValidForRelease,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.Variables,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.AiAdvancePreferenceTags,
+         GameObjects.InGame.Map.LocationCollections.Country.Field.TimedModifier,
+         // @formatter:on
+      ],
+   };
    public AgsSettings Location { get; set; } = new();
    public AgsSettings Culture { get; set; } = new();
    public AgsSettings TimedModifier { get; set; } = new() { SkipDefaultValues = false };

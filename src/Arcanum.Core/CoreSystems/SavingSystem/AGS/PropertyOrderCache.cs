@@ -27,8 +27,7 @@ public static class PropertyOrderCache
 
       public override bool Equals(object? obj) => obj is CacheKey other && Equals(other);
 
-      public override int GetHashCode()
-         => HashCode.Combine(Type, CustomSaveOrder, SortCollectionsSeparately, CustomOrderKey);
+      public override int GetHashCode() => HashCode.Combine(Type, CustomSaveOrder, SortCollectionsSeparately, CustomOrderKey);
    }
 
    private static readonly ConcurrentDictionary<CacheKey, List<PropertySavingMetadata>> Cache = new();
@@ -83,11 +82,11 @@ public static class PropertyOrderCache
    private static List<PropertySavingMetadata> SortBySettings(IReadOnlyList<PropertySavingMetadata> propertiesToSave,
                                                               List<Enum> saveOrder)
    {
-      var propertyMap = propertiesToSave.ToDictionary(p => p.ValueType.ToString());
+      var propertyMap = propertiesToSave.ToDictionary(p => p.NxProp);
       var sortedList = new List<PropertySavingMetadata>(saveOrder.Count);
 
       foreach (var enumValue in saveOrder)
-         if (propertyMap.TryGetValue(enumValue.ToString(), out var prop))
+         if (propertyMap.TryGetValue(enumValue, out var prop))
             sortedList.Add(prop);
 
       return sortedList;

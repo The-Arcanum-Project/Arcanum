@@ -9,6 +9,15 @@
         <LangVersion>14</LangVersion>
     </PropertyGroup>
 
+
+    <PropertyGroup>
+        <!-- Forces the compiler to write the source generator output to disk -->
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <!-- Optional: Specifies where to put them so you can find them easily -->
+        <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+
     <ItemGroup>
         <ProjectReference Include="..\Arcanum.PluginHost\Arcanum.PluginHost.csproj"/>
     </ItemGroup>

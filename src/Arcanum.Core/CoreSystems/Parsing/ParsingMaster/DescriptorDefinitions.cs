@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.GFX.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Common;
+using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common.UI;
@@ -299,6 +300,12 @@ public static class DescriptorDefinitions
           [new CountryDefinitionParsing([ReligionDescriptor.LoadingService[0], CultureDescriptor.LoadingService[0], LocationDescriptor.LoadingService[0]])],
           false);
 
+   public static readonly FileDescriptor CountryTemplateDescriptor =
+      new(["main_menu", "setup", "templates"],
+          new("country_templates", "txt", "#"),
+          [new CountryTemplateParsing([CountryDefinitionDescriptor.LoadingService[0]])],
+          false);
+
    public static readonly FileDescriptor MainMenuSetupParsingDescriptor =
       new(["main_menu", "setup", "start"],
           new("main_menu_setup", "txt", "#"),
@@ -325,7 +332,7 @@ public static class DescriptorDefinitions
          EstateDescriptor, ReligiousGroupDescriptor, ReligionDescriptor, TownSetupDescriptor, ReligiousFactionParsing, ReligiousFocusParsing,
          DesignateHeirReasonDescriptor, TraitDescriptor, ParliamentTypeParsingDescriptor, RawMaterialDescriptor, LocationTemplateDescriptor,
          BuildingDescriptor, StaticModifiersDescriptor, CultureGroupDescriptor, ArtistTypeDescriptor, CountryDefinitionDescriptor,
-         MainMenuSetupParsingDescriptor, SocietalValuesDescriptor, GameObjecLocatorsDescriptor,
+         MainMenuSetupParsingDescriptor, SocietalValuesDescriptor, GameObjecLocatorsDescriptor, CountryTemplateDescriptor,
       ];
 
       LoadingStepsList = new(FileDescriptors.Count);

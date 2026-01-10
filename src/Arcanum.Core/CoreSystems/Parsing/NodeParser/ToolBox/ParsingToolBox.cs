@@ -16,6 +16,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using ArtistType = Arcanum.Core.GameObjects.InGame.Cultural.ArtistType;
@@ -1813,6 +1814,43 @@ public static class ParsingToolBox
       }
 
       value = new(x, y, z);
+      return true;
+   }
+
+   public static bool ArcTryParse_CountryTemplate(ContentNode node,
+                                                  ref ParsingContext pc,
+                                                  [MaybeNullWhen(false)] out CountryTemplate value)
+   {
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ref pc))
+      {
+         value = null;
+         return pc.Fail();
+      }
+
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
+      {
+         value = null;
+         return pc.Fail();
+      }
+
+      var key = pc.SliceString(lvn);
+
+      if (!Globals.CountryTemplates.TryGetValue(key, out var template))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.UnknownKey,
+                                        key,
+                                        nameof(CountryTemplate));
+         value = null;
+         pc.Fail();
+         return false;
+      }
+
+      value = template;
       return true;
    }
 }

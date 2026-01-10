@@ -190,10 +190,10 @@ public partial class Country : IEu5Object<Country>
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
    [SaveAs(isShattered: true)]
-   [ParseAs("include", isShatteredList: true)]
+   [ParseAs("include", isShatteredList: true, itemNodeType: AstNodeType.ContentNode)]
    [DefaultValue(null)]
    [Description("A list of included ??? for this country.")]
-   public ObservableRangeCollection<string> Includes { get; set; } = [];
+   public ObservableRangeCollection<CountryTemplate> Includes { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("accepted_cultures", AstNodeType.BlockNode)]
@@ -213,7 +213,7 @@ public partial class Country : IEu5Object<Country>
    [Description("A list of currency data effects for this country before game start.")]
    public ObservableRangeCollection<CurrencyData> CurrencyData { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "IsPopsCountry")]
    [ParseAs("add_pops_from_locations", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("When starting the game, add pops from these locations to this country.")]
@@ -304,6 +304,17 @@ public partial class Country : IEu5Object<Country>
          return false;
       }
 
-      return country.CountryType == CountryType.Building;
+      return country.CountryType is CountryType.Building or CountryType.Pop;
+   }
+
+   private static bool IsPopsCountry(object obj)
+   {
+      if (obj is not Country country)
+      {
+         Debug.Fail("IsPopsCountry called with non-Country object.");
+         return false;
+      }
+
+      return country.CountryType != CountryType.Pop;
    }
 }
