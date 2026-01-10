@@ -189,7 +189,7 @@ public partial class Country : IEu5Object<Country>
    [Description("All Locations that are our cores but conquered by other countries.")]
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
-   [SaveAs(isShattered: true)]
+   [SaveAs(SavingValueType.String, isShattered: true)]
    [ParseAs("include", isShatteredList: true, itemNodeType: AstNodeType.ContentNode)]
    [DefaultValue(null)]
    [Description("A list of included ??? for this country.")]

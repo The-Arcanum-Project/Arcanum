@@ -152,7 +152,7 @@ public class PropertySavingMetadata
          {
             if (value is IEnumerable collection)
                if (IsShattered)
-                  HandleShatteredCollection(sb, commentChar, settings.Format, CollectionSeparator, collection);
+                  HandleShatteredCollection(sb, commentChar, settings.Format, CollectionSeparator, ValueType, collection);
                else
                   HandleCollection(ags, sb, commentChar, settings.Format, CollectionSeparator, collection);
          }
@@ -255,6 +255,7 @@ public class PropertySavingMetadata
                                           string commentChar,
                                           SavingFormat format,
                                           string collectionSeparator,
+                                          SavingValueType svt,
                                           IEnumerable collection)
    {
       if (!collection.HasItems())
@@ -290,11 +291,12 @@ public class PropertySavingMetadata
 
          foreach (var item in collection)
          {
-            var itemType = SavingUtil.GetSavingValueType(item);
-            if (itemType == SavingValueType.IAgs && item is IAgs ia)
+            if (svt == SavingValueType.Auto)
+               svt = SavingUtil.GetSavingValueType(item);
+            if (svt == SavingValueType.IAgs && item is IAgs ia)
                sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {ia.SavingKey}");
             else
-               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(itemType, item, this)}");
+               sb.AppendLine($"{Keyword} {SavingUtil.GetSeparator(Separator)} {SavingUtil.FormatValue(svt, item, this)}");
          }
       }
    }
