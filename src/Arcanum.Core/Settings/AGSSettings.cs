@@ -36,6 +36,7 @@ public class AGSSettings
    public AgsSettings Country { get; set; } = new()
    {
       CustomSaveOrder = true,
+      WriteEmptyCollectionHeader = false,
       SaveOrder =
       [
          // @formatter:off
