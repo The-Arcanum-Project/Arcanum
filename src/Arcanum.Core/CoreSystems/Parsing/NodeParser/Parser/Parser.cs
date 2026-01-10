@@ -82,63 +82,97 @@ public sealed class Parser(LexerResult lexerResult)
 
    private StatementNode ParseStatement()
    {
-      if (Check(TokenType.LeftBrace))
-         return ParseAnonymousBlock();
+      var leadingComments = ConsumeLeadingComments();
 
-      if (Check(TokenType.Minus))
+      if (IsAtEnd())
+      {
+         // If we hit EOF but have comments, return them as a CommentNode
+         if (leadingComments != null)
+            return new CommentNode(leadingComments);
+
+         throw new InvalidOperationException("Attempted to parse statement at end of file.");
+      }
+
+      StatementNode node = null!;
+
+      if (Check(TokenType.LeftBrace))
+         node = ParseAnonymousBlock();
+      else if (Check(TokenType.Minus))
       {
          var value = ParseValue();
          if (value is UnaryNode unaryNode)
-            return new UnaryStatementNode(unaryNode);
+            node = new UnaryStatementNode(unaryNode);
       }
-
       // Allow statements to begin with an Identifier, Date, Number or Quoted String
-      if (Check(TokenType.Identifier) ||
-          Check(TokenType.Date) ||
-          Check(TokenType.Number) ||
-          Check(TokenType.String))
+      else if (Check(TokenType.Identifier) ||
+               Check(TokenType.Date) ||
+               Check(TokenType.Number) ||
+               Check(TokenType.String))
       {
          // Check for scripted_trigger/effect pattern...
          if (Check(TokenType.Identifier) && CheckNext(TokenType.Identifier) && CheckAt(2, TokenType.Equals))
          {
             if (CheckTokenText(Peek(), "scripted_trigger") || CheckTokenText(Peek(), "scripted_effect"))
-               return ParseScriptedStatement();
+               node = ParseScriptedStatement();
          }
-
-         var key = ParseKey();
-
-         return Peek().Type switch
+         else
          {
-            TokenType.Equals when PeekNext().Type == TokenType.LeftBrace => ParseBlockStatement(key),
-            TokenType.LeftBrace => ParseBlockStatement(key),
-            TokenType.Equals
-            or TokenType.NotEquals
-            or TokenType.Less
-            or TokenType.Greater
-            or TokenType.LessOrEqual
-            or TokenType.GreaterOrEqual
-            or TokenType.QuestionEquals => ParseContentStatement(key),
-            _ => new KeyOnlyNode(key),
-         };
+            var key = ParseKey();
+
+            node = Peek().Type switch
+            {
+               TokenType.Equals when PeekNext().Type == TokenType.LeftBrace => ParseBlockStatement(key),
+               TokenType.LeftBrace => ParseBlockStatement(key),
+               TokenType.Equals
+               or TokenType.NotEquals
+               or TokenType.Less
+               or TokenType.Greater
+               or TokenType.LessOrEqual
+               or TokenType.GreaterOrEqual
+               or TokenType.QuestionEquals => ParseContentStatement(key),
+               _ => new KeyOnlyNode(key),
+            };
+         }
+      }
+      else if (Check(TokenType.AtIdentifier))
+         node = ParseContentStatement(ParseKey());
+      else if (Check(TokenType.Comment))
+      {
+         if (leadingComments != null)
+            return new CommentNode(leadingComments);
+
+         // Fallback
+         var cToken = Advance();
+         return new CommentNode(cToken.GetValue(_source));
       }
 
-      if (Check(TokenType.AtIdentifier))
-         return ParseContentStatement(ParseKey());
+      if (node == null!)
+      {
+         // If we gathered comments but found no statement (e.g. End of File or Block closing),
+         // return a standalone comment node.
+         if (leadingComments != null)
+            return new CommentNode(leadingComments);
 
-      // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-      var current = Current();
-      DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj),
-                                          ParsingError.Instance.SyntaxError,
-                                          "AST-Building",
-                                          DiagnosticSeverity.Error,
-                                          DiagnosticReportSeverity.PopupError,
-                                          current.Line,
-                                          _tokens[0].Column,
-                                          current.GetValue(_source),
-                                          "a block or content definition");
+         // ReSharper disable twice ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+         var current = Current();
+         DiagnosticException.CreateAndHandle(new(current.Line, current.Column, _fileObj),
+                                             ParsingError.Instance.SyntaxError,
+                                             "AST-Building",
+                                             DiagnosticSeverity.Error,
+                                             DiagnosticReportSeverity.PopupError,
+                                             current.Line,
+                                             _tokens[0].Column,
+                                             current.GetValue(_source),
+                                             "a block or content definition");
 
-      throw
-         new($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a statement was expected in file '{_fileObj?.Path?.FullPath ?? "N/A"}'.");
+         throw
+            new($"Syntax Error on line {Peek().Line}: Unexpected token '{Peek().GetValue(_source)}' where a statement was expected in file '{_fileObj?.Path?.FullPath ?? "N/A"}'.");
+      }
+
+      node.LeadingComment = leadingComments;
+      node.InlineComment = ConsumeInlineComment();
+
+      return node;
    }
 
    private BlockNode ParseAnonymousBlock()
@@ -150,6 +184,7 @@ public sealed class Parser(LexerResult lexerResult)
 
       Expect(TokenType.RightBrace, "'}' to close anonymous block.");
       block.ClosingToken = Previous();
+      block.ClosingComment = ConsumeInlineComment();
       return block;
    }
 
@@ -163,15 +198,23 @@ public sealed class Parser(LexerResult lexerResult)
    private BlockNode ParseBlockStatement(KeyNodeBase key)
    {
       Match(TokenType.Equals);
-
-      Expect(TokenType.LeftBrace, $"'{{' after block name '{key.GetKeyText(_source)}'.");
+      Expect(TokenType.LeftBrace, "...");
       var block = new BlockNode(key);
 
+      // Parse Children (and standalone comments inside)
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
+         // ConsumeLeadingComments handles comments before children.
+         // But if a block is empty except for comments:
+         // { # TODO }
+         // ParseStatement needs to handle returning a CommentNode.
          block.Children.Add(ParseStatement());
 
-      Expect(TokenType.RightBrace, "'}' to close the block.");
+      Expect(TokenType.RightBrace, "...");
       block.ClosingToken = Previous();
+
+      // Capture Closing Comment
+      // (Comment on same line as '}')
+      block.ClosingComment = ConsumeInlineComment();
       return block;
    }
 
@@ -356,6 +399,48 @@ public sealed class Parser(LexerResult lexerResult)
             break;
    }
 
+   private string? ConsumeLeadingComments()
+   {
+      if (!Check(TokenType.Comment))
+         return null;
+
+      var sb = new StringBuilder();
+      while (Check(TokenType.Comment))
+      {
+         var token = Advance();
+         // Extract text (lexer token includes '#', usually we want to keep it or strip it?)
+         // Let's keep the raw text from the source including '#'
+         sb.AppendLine(token.GetValue(_source));
+      }
+
+      // Remove last newline for cleanliness
+      if (sb.Length > 0 && sb[^1] == '\n')
+         sb.Length--;
+      return sb.ToString();
+   }
+
+   // Helper to consume a comment on the current line (Inline)
+   private string? ConsumeInlineComment()
+   {
+      // Check if next token is a comment
+      // AND check if it is on the SAME LINE as the previous token
+      if (Check(TokenType.Comment))
+      {
+         var commentToken = Peek();
+         var prevToken = Previous();
+
+         // Heuristic: If comment is on same line as previous token, it's inline.
+         // Note: Lexer tracks lines.
+         if (commentToken.Line == prevToken.Line)
+         {
+            Advance(); // Consume it
+            return commentToken.GetValue(_source);
+         }
+      }
+
+      return null;
+   }
+
    #endregion
 
    #region Print AST
@@ -369,6 +454,10 @@ public sealed class Parser(LexerResult lexerResult)
 
    public static void PrintAst(AstNode node, StringBuilder sb, string indent = "", string source = "")
    {
+      if (!string.IsNullOrEmpty(node.LeadingComment))
+         foreach (var line in node.LeadingComment.Split('\n'))
+            sb.AppendLine($"{indent}# {line.Trim()} (Leading)");
+
       switch (node)
       {
          case RootNode root:
@@ -381,8 +470,15 @@ public sealed class Parser(LexerResult lexerResult)
             if (block.KeyNode is SimpleKeyNode skn && skn.KeyToken.Type == TokenType.LeftBrace)
                name = "Array Block";
 
-            sb.AppendLine($"{indent}Block: '{name}'");
+            sb.Append($"{indent}Block: '{name}'");
+            if (!string.IsNullOrEmpty(node.InlineComment))
+               sb.Append($"  # {node.InlineComment} (Inline)");
+            sb.AppendLine();
+
             block.Children.ForEach(c => PrintAst(c, sb, indent + "  ", source));
+
+            if (!string.IsNullOrEmpty(block.ClosingComment))
+               sb.AppendLine($"{indent}}} # {block.ClosingComment} (Closing)");
             break;
 
          case UnaryNode unary:
@@ -406,6 +502,8 @@ public sealed class Parser(LexerResult lexerResult)
             var sep = content.Separator.GetValue(source);
             sb.Append($"{indent}Content: '{key}' {sep} ");
             PrintValue(content.Value, source, sb);
+            if (!string.IsNullOrEmpty(node.InlineComment))
+               sb.Append($" # {node.InlineComment} (Inline)");
             break;
 
          case ScopedIdentifierNode scoped:

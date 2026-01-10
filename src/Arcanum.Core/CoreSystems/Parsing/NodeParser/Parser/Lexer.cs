@@ -176,6 +176,9 @@ public sealed class Lexer
          _current++;
          _column++;
       }
+
+      // The COmment is added with the initial '#'
+      AddToken(TokenType.Comment);
    }
 
    private void ScanIdentifier(bool isAtIdentifier = false)
