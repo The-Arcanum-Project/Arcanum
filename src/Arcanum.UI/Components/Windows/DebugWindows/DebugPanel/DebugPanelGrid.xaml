@@ -73,6 +73,8 @@
             <styleClasses:BaseButton Content = "Word Generator" Margin = "2" Padding = "4"
                                      Click = "WordGenerator_OnClick" />
 
+            <styleClasses:BaseButton Content = "AST Builder Viewer" Margin = "2" Padding = "4"
+                                     Click = "ASTBuilderViewer_OnClick" />
 
         </StackPanel>
 

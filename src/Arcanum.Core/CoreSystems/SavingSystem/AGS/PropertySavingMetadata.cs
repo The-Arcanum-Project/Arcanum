@@ -127,9 +127,6 @@ public class PropertySavingMetadata
          CommentProvider(ags, commentChar, sb);
 
       var value = ags._getValue(NxProp);
-      if (value is JominiDate data)
-      {
-      }
 
       if (ValueType == SavingValueType.Auto)
          ValueType = SavingUtil.GetSavingValueType(value);

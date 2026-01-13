@@ -208,4 +208,9 @@ public partial class DebugPanelGrid
       var wordGen = new NameGenerator();
       wordGen.Show();
    }
+
+   private void ASTBuilderViewer_OnClick(object sender, RoutedEventArgs e)
+   {
+      new ASTBuilderTest().Show();
+   }
 }

@@ -1,18 +1,24 @@
-﻿using System.Text;
+﻿#region
+
+using System.Globalization;
+using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Common;
 
 /// <summary>
-/// A hyper-optimized, allocation-conscious StringBuilder that supports indentation for well-formatted, hierarchical strings.
-/// It supports automatic indentation management via IDisposable scopes.
+///    A hyper-optimized, allocation-conscious StringBuilder that supports indentation for well-formatted, hierarchical
+///    strings.
+///    It supports automatic indentation management via IDisposable scopes.
 /// </summary>
 public class IndentedStringBuilder
 {
    private readonly StringBuilder _builder = new();
-   private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
    private readonly StringBuilder _indentCacheBuilder = new();
+   private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
    private bool _isAtStartOfLine = true;
 
    public IndentedStringBuilder(int initialCapacity = 256)
@@ -21,12 +27,14 @@ public class IndentedStringBuilder
       _indentCacheBuilder.EnsureCapacity(32); // Preallocate some space for indentation levels
    }
 
+   public StringBuilder InnerBuilder => _builder;
+
    public void SetIndent(int spaceCount) => _indentString = new(' ', spaceCount);
 
    /// <summary>
-   /// Sets the indentation to a specific level, overriding the current indentation.
+   ///    Sets the indentation to a specific level, overriding the current indentation.
    /// </summary>
-   /// <param name="level">The desired number of indentation levels (0 for no indent).</param>
+   /// <param name = "level" >The desired number of indentation levels (0 for no indent).</param>
    public void SetIndentLevel(int level)
    {
       if (level < 0)
@@ -39,7 +47,127 @@ public class IndentedStringBuilder
          _indentCacheBuilder.Append(_indentString);
    }
 
-   public StringBuilder InnerBuilder => _builder;
+   #region List Appending
+
+   public void AppendList(IReadOnlyList<string> items, string separator)
+   {
+      if (items == null! || items.Count == 0)
+         return;
+
+      if (OneItemPerLine)
+      {
+         for (var i = 0; i < items.Count; i++)
+            AppendLine(items[i]);
+         return;
+      }
+
+      var padding = 0;
+      if (PadCollectionItems)
+      {
+         if (AutoCollectionPadding)
+         {
+            var maxLength = 0;
+            for (var i = 0; i < items.Count; i++)
+            {
+               var len = items[i].Length;
+               if (len > maxLength)
+                  maxLength = len;
+            }
+
+            padding = maxLength + 1;
+         }
+         else
+            padding = CollectionItemPadding;
+      }
+
+      var lineItemCount = 0;
+      PrependIndentIfNecessary();
+      var currentLineStartPos = _builder.Length;
+
+      for (var i = 0; i < items.Count; i++)
+      {
+         var item = items[i];
+
+         var needsLineBreak = (lineItemCount > 0 &&
+                               _builder.Length - currentLineStartPos + item.Length + separator.Length >
+                               MaxCollectionLineLength) ||
+                              lineItemCount >= MaxItemsInCollectionLine;
+
+         if (needsLineBreak)
+         {
+            _builder.AppendLine();
+            _isAtStartOfLine = true;
+            PrependIndentIfNecessary();
+            currentLineStartPos = _builder.Length;
+            lineItemCount = 0;
+         }
+
+         if (lineItemCount > 0)
+            _builder.Append(separator);
+
+         _builder.Append(item);
+         if (PadCollectionItems)
+         {
+            var padCount = padding - item.Length;
+            if (padCount > 0)
+               _builder.Append(' ', padCount);
+         }
+
+         lineItemCount++;
+      }
+   }
+
+   #endregion
+
+   public void Clear()
+   {
+      _builder.Clear();
+      _indentCacheBuilder.Clear();
+      _isAtStartOfLine = true;
+   }
+
+   public override string ToString() => _builder.ToString();
+
+   public readonly ref struct IndentScope
+   {
+      private readonly IndentedStringBuilder _builder;
+
+      public IndentScope(IndentedStringBuilder builder)
+      {
+         _builder = builder;
+         _builder.IncreaseIndent();
+      }
+
+      public void Dispose() => _builder.DecreaseIndent();
+   }
+
+   public readonly ref struct BlockScope
+   {
+      private readonly IndentedStringBuilder _builder;
+      private readonly string _closingBrace;
+      private readonly bool _addNewLineBeforeClosing;
+      private readonly bool _asOneLine;
+
+      public BlockScope(IndentedStringBuilder builder, string closingBrace, bool addNewLineBeforeClosing = false, bool asOneLine = false)
+      {
+         _asOneLine = asOneLine;
+         _builder = builder;
+         _closingBrace = closingBrace;
+         _addNewLineBeforeClosing = addNewLineBeforeClosing;
+         _builder.IncreaseIndent();
+      }
+
+      public void Dispose()
+      {
+         _builder.DecreaseIndent();
+         if (_addNewLineBeforeClosing && !_asOneLine)
+            _builder.AppendLine();
+         if (_asOneLine)
+            _builder.Append(_closingBrace);
+         else
+            _builder.AppendLine(_closingBrace);
+      }
+   }
 
    #region High-Performance Merging
 
@@ -195,9 +323,7 @@ public class IndentedStringBuilder
    {
       var addNewLine = format == SavingFormat.Spacious;
       if (addNewLine && !asOneLine)
-      {
          AppendLine();
-      }
 
       var key = ags.SavingKey;
       var separator = SavingUtil.GetSeparator(ags.ClassMetadata.Separator);
@@ -242,127 +368,59 @@ public class IndentedStringBuilder
 
    #endregion
 
-   #region Hyper-Optimized List Appending
+   #region Primitive Append Methods
 
-   public void AppendList(IReadOnlyList<string> items, string separator)
+   /// <summary> Appends an integer. Indentation is added automatically. </summary>
+   public IndentedStringBuilder Append(int value)
    {
-      if (items == null! || items.Count == 0)
-         return;
-
-      if (OneItemPerLine)
-      {
-         for (var i = 0; i < items.Count; i++)
-            AppendLine(items[i]);
-         return;
-      }
-
-      var padding = 0;
-      if (PadCollectionItems)
-      {
-         if (AutoCollectionPadding)
-         {
-            var maxLength = 0;
-            for (var i = 0; i < items.Count; i++)
-            {
-               var len = items[i].Length;
-               if (len > maxLength)
-                  maxLength = len;
-            }
-
-            padding = maxLength + 1;
-         }
-         else
-         {
-            padding = CollectionItemPadding;
-         }
-      }
-
-      var lineItemCount = 0;
       PrependIndentIfNecessary();
-      var currentLineStartPos = _builder.Length;
+      _builder.Append(value);
+      return this;
+   }
 
-      for (var i = 0; i < items.Count; i++)
-      {
-         var item = items[i];
+   /// <summary> Appends a boolean. Indentation is added automatically. </summary>
+   public IndentedStringBuilder Append(bool value)
+   {
+      PrependIndentIfNecessary();
+      _builder.Append(value); // Appends "True" or "False" by default
+      return this;
+   }
 
-         var needsLineBreak = (lineItemCount > 0 &&
-                               (_builder.Length - currentLineStartPos + item.Length + separator.Length >
-                                MaxCollectionLineLength)) ||
-                              (lineItemCount >= MaxItemsInCollectionLine);
+   /// <summary> Appends a double. Indentation is added automatically. </summary>
+   public IndentedStringBuilder Append(double value)
+   {
+      PrependIndentIfNecessary();
+      // Use invariant culture to ensure dot separator (not comma) for serialization
+      _builder.Append(value.ToString(CultureInfo.InvariantCulture));
+      return this;
+   }
 
-         if (needsLineBreak)
-         {
-            _builder.AppendLine();
-            _isAtStartOfLine = true;
-            PrependIndentIfNecessary();
-            currentLineStartPos = _builder.Length;
-            lineItemCount = 0;
-         }
+   /// <summary> Appends a long. Indentation is added automatically. </summary>
+   public IndentedStringBuilder Append(long value)
+   {
+      PrependIndentIfNecessary();
+      _builder.Append(value);
+      return this;
+   }
 
-         if (lineItemCount > 0)
-            _builder.Append(separator);
+   /// <summary> Appends an object using ToString(). Indentation is added automatically. </summary>
+   public IndentedStringBuilder Append(object? value)
+   {
+      if (value == null)
+         return this;
 
-         _builder.Append(item);
-         if (PadCollectionItems)
-         {
-            var padCount = padding - item.Length;
-            if (padCount > 0)
-               _builder.Append(' ', padCount);
-         }
+      PrependIndentIfNecessary();
+      _builder.Append(value);
+      return this;
+   }
 
-         lineItemCount++;
-      }
+   /// <summary> Appends a boolean as "yes" or "no". </summary>
+   public IndentedStringBuilder AppendYesNo(bool value)
+   {
+      PrependIndentIfNecessary();
+      _builder.Append(value ? "yes" : "no");
+      return this;
    }
 
    #endregion
-
-   public void Clear()
-   {
-      _builder.Clear();
-      _indentCacheBuilder.Clear();
-      _isAtStartOfLine = true;
-   }
-
-   public override string ToString() => _builder.ToString();
-
-   public readonly ref struct IndentScope
-   {
-      private readonly IndentedStringBuilder _builder;
-
-      public IndentScope(IndentedStringBuilder builder)
-      {
-         _builder = builder;
-         _builder.IncreaseIndent();
-      }
-
-      public void Dispose() => _builder.DecreaseIndent();
-   }
-
-   public readonly ref struct BlockScope
-   {
-      private readonly IndentedStringBuilder _builder;
-      private readonly string _closingBrace;
-      private readonly bool _addNewLineBeforeClosing;
-      private readonly bool _asOneLine;
-
-      public BlockScope(IndentedStringBuilder builder, string closingBrace, bool addNewLineBeforeClosing = false, bool asOneLine = false)
-      {
-         _asOneLine = asOneLine;
-         _builder = builder;
-         _closingBrace = closingBrace;
-         _addNewLineBeforeClosing = addNewLineBeforeClosing;
-         _builder.IncreaseIndent();
-      }
-
-      public void Dispose()
-      {
-         _builder.DecreaseIndent();
-         if (_addNewLineBeforeClosing && !_asOneLine)
-            _builder.AppendLine();
-         if (_asOneLine)
-            _builder.Append(_closingBrace);
-         else
-            _builder.AppendLine(_closingBrace);
-      }
-   }
 }
