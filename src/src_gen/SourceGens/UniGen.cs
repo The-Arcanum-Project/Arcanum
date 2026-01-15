@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ParserGenerator.HelperClasses;
+using ParserGenerator.IAgsGen;
 using ParserGenerator.NexusGeneration;
 
 namespace ParserGenerator;
@@ -44,12 +45,15 @@ public class UniGen : IIncrementalGenerator
       var enumerableSymbol = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
       var iListSymbol = compilation.GetTypeByMetadataName("System.Collections.IList");
       var ieu5ObjectSymbol = compilation.GetTypeByMetadataName("Arcanum.Core.GameObjects.BaseTypes.IEu5Object");
-      if (enumerableSymbol is null || ieu5ObjectSymbol is null || iListSymbol is null)
+      var iAgsSymbol = compilation.GetTypeByMetadataName("Arcanum.Core.CoreSystems.SavingSystem.AGS.IAgs");
+      if (enumerableSymbol is null || ieu5ObjectSymbol is null || iListSymbol is null || iAgsSymbol is null)
          return;
 
       AgsHelper.EnumAnalysisCache = [];
 
-      foreach (var nexusClassSymbol in nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>())
+      var nxClasses = nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>().ToList();
+      List<INamedTypeSymbol> iagsClasses = [];
+      foreach (var nexusClassSymbol in nxClasses)
          try
          {
             // NexusHelpers.RunPropertyModifierGenerator(nexusClassSymbol,
@@ -57,8 +61,16 @@ public class UniGen : IIncrementalGenerator
             //                                           enumerableSymbol,
             //                                           ieu5ObjectSymbol,
             //                                           iListSymbol);
-            if (nexusClassSymbol.AllInterfaces.Any(i => i.ToDisplayString() == IAGS_INTERFACE))
-               AgsHelper.RunSavingGenerator(nexusClassSymbol, context);
+
+            var implementsIAgs = nexusClassSymbol.AllInterfaces.Any(i =>
+                                                                       SymbolEqualityComparer.Default.Equals(i, iAgsSymbol) ||
+                                                                       SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, iAgsSymbol));
+
+            if (implementsIAgs)
+            {
+               AgsHelper.RunSavingGenerator(nexusClassSymbol, context, compilation);
+               iagsClasses.Add(nexusClassSymbol);
+            }
          }
          catch (Exception ex)
          {
@@ -73,6 +85,7 @@ public class UniGen : IIncrementalGenerator
             context.ReportDiagnostic(diagnostic);
          }
 
+      AgsSettingsHolderGen.GenerateSettingsHolder(context, iagsClasses);
       Generator.RunNexusGenerator(nexusClasses.Distinct(SymbolEqualityComparer.Default).OfType<INamedTypeSymbol>().ToArray(), context, compilation);
 
       EnumIndexGenerator.RunEnumIndexGenerator(context, AgsHelper.EnumAnalysisCache);

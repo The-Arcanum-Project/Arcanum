@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
+using ParserGenerator.IAgsGen;
 using ParserGenerator.SubClasses;
 
 namespace ParserGenerator.HelperClasses;
@@ -23,7 +24,7 @@ public static class AgsHelper
 
    public static Dictionary<string, EnumAnalysisResult> EnumAnalysisCache = new();
 
-   public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context)
+   public static void RunSavingGenerator(INamedTypeSymbol classSymbol, SourceProductionContext context, Compilation compilation)
    {
       var nexusProperties = Helpers.FindModifiableMembers(classSymbol, context).OfType<IPropertySymbol>().ToList();
       var objectSaveAsAttr = classSymbol.GetAttributes()
@@ -42,6 +43,9 @@ public static class AgsHelper
       var saveAsProps = new List<SaveAsMetadata>();
 
       GetValidProperties(context, nexusProperties, saveAsProps, classSymbol);
+
+      AgsSettingsGen.GenerateSettingsClasses(classSymbol, context, nexusProperties, saveAsProps, compilation);
+
       var (saverHintName, saverSource) =
          GenerateSaverClass(classSymbol, objectSaveAsAttr, saveAsProps, context);
 
@@ -147,7 +151,7 @@ public static class AgsHelper
                                                                       SourceProductionContext context)
    {
       var className = agsClassSymbol.Name;
-      var hintName = $"{agsClassSymbol.ContainingNamespace}.{className}Ags.g.cs";
+      var hintName = $"{className}Ags.g.cs";
       var namespaceName = agsClassSymbol.ToDisplayString();
 
       var sb = new StringBuilder();
@@ -182,16 +186,13 @@ public static class AgsHelper
 
       // --- The private static fields ---
 
-      var asOneLine = AttributeHelper.SimpleGetAttrArgValue<bool>(objectSaveAsAttr, 5, "asOneLine");
-
       sb.AppendLine("        // Pre-built metadata for the class itself.");
       sb.AppendLine("        public static readonly ClassSavingMetadata _classMetadata = new(");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[0])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[1])},");
       sb.AppendLine($"            TokenType.{Helpers.GetEnumMemberName(objectSaveAsAttr.ConstructorArguments[2])},");
       sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[4], SAVING_COMMENT_PROVIDER)},");
-      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)},");
-      sb.AppendLine($"            {asOneLine.ToString().ToLowerInvariant()}");
+      sb.AppendLine($"            {GetNullOrString(objectSaveAsAttr.ConstructorArguments[3], CUSTOM_SAVING_PROVIDER)}");
       sb.AppendLine($"        );");
       sb.AppendLine();
 

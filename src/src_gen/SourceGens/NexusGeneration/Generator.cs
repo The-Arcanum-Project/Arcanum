@@ -21,7 +21,7 @@ public static class Generator
       foreach (var cs in nexusClasses)
       {
          var code = Generate(cs, context, enumerableSymbol, ieu5ObjectSymbol, iListSymbol);
-         context.AddSource($"{cs.ContainingNamespace}.{cs.Name}.Nexus.g.cs", code.ToString());
+         context.AddSource($"{cs.Name}.Nexus.g.cs", code.ToString());
       }
    }
 

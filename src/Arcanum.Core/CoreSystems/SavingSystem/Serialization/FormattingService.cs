@@ -89,9 +89,9 @@ public static class FormattingService
          else
          {
             sb.Append(meta.Keyword)
-              .Append(' ')
+              .AppendSpacer()
               .Append(SavingUtil.GetSeparator(meta.Separator))
-              .Append(' ')
+              .AppendSpacer()
               .Append(SavingUtil.FormatValue(meta.ValueType, value, meta));
 
             if (asOneLine)
@@ -194,18 +194,20 @@ public static class FormattingService
             if (!data.Mapping.TryGetValue(sv, out var stringRep))
                return;
 
-            var str = $"{meta.Keyword} {SavingUtil.GetSeparator(meta.Separator)} {stringRep}";
+            sb.Append(meta.Keyword)
+              .AppendSeparator(SavingUtil.GetSeparator(meta.Separator))
+              .Append(stringRep);
             if (isOneLine)
-               sb.Append(str + " ");
-            else
-               sb.AppendLine(str);
+               sb.AppendSpacer();
          }
       else
       {
          if (!data.Mapping.TryGetValue(value.ToString()!, out var stringRep))
             return;
 
-         sb.AppendLine($"{meta.Keyword} {SavingUtil.GetSeparator(meta.Separator)} {stringRep}");
+         sb.Append(meta.Keyword)
+           .AppendSeparator(SavingUtil.GetSeparator(meta.Separator))
+           .Append(stringRep);
       }
    }
 
@@ -232,7 +234,7 @@ public static class FormattingService
             if (item is IAgs ia)
             {
                if (meta.SaveEmbeddedAsIdentifier)
-                  sb.Append($"{meta.Keyword}");
+                  sb.Append(meta.Keyword);
                ia.ToAgsContext(commentChar).BuildContext(sb);
             }
             else
@@ -250,10 +252,16 @@ public static class FormattingService
          {
             if (svt == SavingValueType.Auto)
                svt = SavingUtil.GetSavingValueType(item);
+
+            sb.Append(meta.Keyword)
+              .AppendSpacer()
+              .Append(SavingUtil.GetSeparator(meta.Separator))
+              .AppendSpacer();
+
             if (svt == SavingValueType.IAgs && item is IAgs ia)
-               sb.AppendLine($"{meta.Keyword} {SavingUtil.GetSeparator(meta.Separator)} {ia.SavingKey}");
+               sb.AppendLine(ia.SavingKey);
             else
-               sb.AppendLine($"{meta.Keyword} {SavingUtil.GetSeparator(meta.Separator)} {SavingUtil.FormatValue(svt, item, meta)}");
+               sb.AppendLine(SavingUtil.FormatValue(svt, item, meta));
          }
       }
    }
@@ -266,18 +274,19 @@ public static class FormattingService
                                        string collectionSeparator,
                                        IEnumerable collection)
    {
-      if (!collection.HasItems() && !ags.AgsSettings.WriteEmptyCollectionHeader)
+      var internalCollection = collection.Cast<object>().ToList();
+      if (internalCollection.Count == 0 && !ags.AgsSettings.WriteEmptyCollectionHeader)
          return;
 
       if (format == SavingFormat.Spacious)
          sb.AppendLine();
 
       if (meta.CollectionAsPureIdentifierList)
-         FormatAsIdentifierList(sb, collection, collectionSeparator);
+         FormatAsIdentifierList(sb, internalCollection, collectionSeparator);
       else if (meta.IsEmbeddedObject || meta.ValueType == SavingValueType.IAgs)
-         FormatAsEmbeddedObjectList(meta, sb, collection, commentChar);
+         FormatAsEmbeddedObjectList(meta, sb, internalCollection, commentChar);
       else
-         FormatAsValueList(meta, sb, collection, collectionSeparator);
+         FormatAsValueList(meta, sb, internalCollection, collectionSeparator);
 
       if (format == SavingFormat.Spacious)
          sb.AppendLine();

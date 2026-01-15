@@ -31,6 +31,7 @@ public static class SavingActionProvider
    public static void RulerTermSaving(IAgs target,
                                       HashSet<PropertySavingMetadata> metadata,
                                       IndentedStringBuilder sb,
+                                      // ReSharper disable once RedundantAssignment
                                       bool asOneLine)
    {
       asOneLine = true;
@@ -41,20 +42,19 @@ public static class SavingActionProvider
 
       if (trueOneLiner)
       {
-         sb.Append("ruler_term = { ");
+         sb.Append("ruler_term").AppendOpeningBrace();
          RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
       }
       else
       {
-         sb.AppendLine("ruler_term = {");
+         sb.AppendLine("ruler_term").AppendOpeningBrace();
          using (sb.Indent())
             RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
       }
 
       if (trueOneLiner)
       {
-         sb.Append(" }");
-         sb.AppendLine();
+         sb.AppendClosingBraceInLine().AppendLine();
          return;
       }
 
@@ -66,7 +66,7 @@ public static class SavingActionProvider
       }
 
       sb.AppendLine();
-      sb.Append("}");
+      sb.Append('}');
       sb.AppendLine();
    }
 
@@ -78,7 +78,9 @@ public static class SavingActionProvider
       if (target is not Location location)
          throw new InvalidOperationException("LocationSaving can only be used with Location instances.");
 
-      sb.Append(location.UniqueId).Append(" = ").Append(location.Color.AsHexString().ToLowerInvariant());
+      sb.Append(location.UniqueId)
+        .AppendSeparator()
+        .Append(location.Color.AsHexString().ToLowerInvariant());
    }
 
    public static void SaveIdentifierStringKvp(IAgs target,
@@ -93,7 +95,9 @@ public static class SavingActionProvider
             InvalidOperationException("SaveIdentifierStringKvp can only be used with IIdentifierStringKvp instances.");
       }
 
-      sb.Append(targetKvp.Key).Append(" = ").Append(targetKvp.Value);
+      sb.Append(targetKvp.Key)
+        .AppendSeparator()
+        .Append(targetKvp.Value);
    }
 
    public static void SocientalValueEntrySaving(IAgs target,
@@ -109,7 +113,9 @@ public static class SavingActionProvider
       if (!asOneLine)
          sb.AppendLine();
       foreach (var sve in sves)
-         sb.Append(sve.SocientalValue.UniqueId).Append(" = ").Append(FormatValue(SavingValueType.Int, sve, SocientalValueEntry.Field.Value));
+         sb.Append(sve.SocientalValue.UniqueId)
+           .AppendSeparator()
+           .Append(FormatValue(SavingValueType.Int, sve, SocientalValueEntry.Field.Value));
    }
 
    public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -117,7 +123,9 @@ public static class SavingActionProvider
       if (target is not Road road)
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
 
-      sb.Append(road.StartLocation.UniqueId).Append(" = ").Append(road.EndLocation.UniqueId);
+      sb.Append(road.StartLocation.UniqueId)
+        .AppendSeparator()
+        .Append(road.EndLocation.UniqueId);
    }
 
    public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -129,7 +137,7 @@ public static class SavingActionProvider
          return;
 
       var md = metadata.First();
-      sb.Append(md.Keyword).Append(' ').Append(GetSeparator(md.Separator)).Append(' ').Append(date);
+      sb.Append(md.Keyword).AppendSpacer().Append(GetSeparator(md.Separator)).AppendSpacer().Append(date);
    }
 
    public static void SaveNameDeclaration(IAgs target,
@@ -142,9 +150,11 @@ public static class SavingActionProvider
             InvalidOperationException("SaveNameDeclaration can only be used with CharacterNameDeclaration instances.");
 
       if (cnd.IsRandom)
-         sb.Append(cnd.SavingKey).Append(" = ").Append(cnd.Name);
+         sb.Append(cnd.SavingKey)
+           .AppendSeparator()
+           .Append(cnd.Name);
       else if (!string.IsNullOrEmpty(cnd.Name))
-         sb.Append(cnd.SavingKey).Append(" = { ").Append(cnd.Name).Append(" }");
+         sb.Append(cnd.SavingKey).AppendOpeningBrace().Append(cnd.Name).AppendSpacer().Append('}');
    }
 
    public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -155,7 +165,9 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveIAgsEnumKvp can only be used with IIagsEnumKvp<IAgs> instances.");
       }
 
-      sb.Append(kvp.Key.SavingKey).Append(" = ").Append(EnumAgsRegistry.GetKey(kvp.Value));
+      sb.Append(kvp.Key.SavingKey)
+        .AppendSeparator()
+        .Append(EnumAgsRegistry.GetKey(kvp.Value));
    }
 
    public static void SaveDemandData(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -164,12 +176,12 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
 
       if (dd.TargetAll > 0f)
-         sb.Append("all = ").Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll));
+         sb.Append("all").AppendSeparator().Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll));
       else if (dd.TargetUpper > 0f)
-         sb.Append("upper = ").Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
+         sb.Append("upper").AppendSeparator().Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
       else
          sb.Append(FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType))
-           .Append(" = ")
+           .AppendSeparator()
            .Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
    }
 
@@ -182,10 +194,10 @@ public static class SavingActionProvider
          throw new InvalidOperationException("SaveWealthImpactData can only be used with WealthImpactData instances.");
 
       if (dd.TargetAll > 0f)
-         sb.Append("all = ").Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll));
+         sb.Append("all").AppendSeparator().Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetAll));
       else
          sb.Append(FormatValue(SavingValueType.Identifier, dd, DemandData.Field.PopType))
-           .Append(" = ")
+           .AppendSeparator()
            .Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
    }
 
@@ -198,11 +210,12 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("MapMovementAssistSaving can only be used with MapMovementAssist instances.");
 
-      sb.Append("movement_assistance = { ")
+      sb.Append("movement_assistance")
+        .AppendOpeningBrace()
         .Append(FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.X), null))
-        .Append(' ')
+        .AppendSpacer()
         .Append(FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.Y), null))
-        .Append(" }");
+        .AppendClosingBraceInLine();
    }
 
    public static void EstateCountDefinitionSaving(IAgs target,
@@ -215,7 +228,7 @@ public static class SavingActionProvider
             InvalidOperationException("EstateCountDefinitionSaving can only be used with EstateCountDefinition instances.");
 
       sb.Append(FormatValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate))
-        .Append(" = ")
+        .AppendSeparator()
         .Append(FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count));
    }
 
@@ -241,7 +254,7 @@ public static class SavingActionProvider
             InvalidOperationException("SoundTollsSaving can only be used with SoundTolls instances.");
 
       sb.Append(FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationOne))
-        .Append(" = ")
+        .AppendSeparator()
         .Append(FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo));
    }
 
@@ -275,7 +288,7 @@ public static class SavingActionProvider
             InvalidOperationException("InstitutionPresenceSaving can only be used with InstitutionPresence instances.");
 
       sb.Append(FormatValue(SavingValueType.Identifier, ip, InstitutionPresence.Field.Institution))
-        .Append(" = ")
+        .AppendSeparator()
         .Append(FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent));
    }
 
@@ -299,8 +312,13 @@ public static class SavingActionProvider
             {
                using (sb.Block())
                {
-                  sb.AppendLine($"flag = \"{vard.Flag}\"");
-                  sb.Append("data");
+                  sb.Append("flag")
+                    .AppendSeparator()
+                    .Append('"')
+                    .Append(vard.Flag)
+                    .Append('"')
+                    .AppendLine()
+                    .Append("data");
                   ((IAgs)vard.DataBlock).ToAgsContext().BuildContext(sb);
                }
             }

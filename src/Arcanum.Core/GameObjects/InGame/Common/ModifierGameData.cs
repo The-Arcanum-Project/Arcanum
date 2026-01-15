@@ -126,7 +126,7 @@ public partial class ModifierGameData
              Bias == other.Bias;
    }
 
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierData;
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierGameData;
    public string UniqueId
    {
       get => "";

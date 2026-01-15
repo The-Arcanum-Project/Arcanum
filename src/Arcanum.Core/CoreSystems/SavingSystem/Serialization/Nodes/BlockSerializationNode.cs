@@ -45,7 +45,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
             // or we strip them to fit on one line.
             // Assuming child is ValueOutputNode or PropertyOutputNode
             child.Write(sb, ref commentChar, asOneLine);
-         sb.Append(" }");
+         sb.AppendSpacer().Append('}');
          WriteInlineComment(sb, ref commentChar); // Inline comment for the whole block
          return;
       }
@@ -61,10 +61,10 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       }
 
       // Closing
-      sb.Append("}");
+      sb.Append('}');
 
       if (!string.IsNullOrEmpty(ClosingComment))
-         sb.Append(' ').Append(ClosingComment);
+         sb.AppendSpacer().Append(ClosingComment);
 
       sb.AppendLine();
    }
@@ -74,9 +74,9 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       if (!string.IsNullOrEmpty(Key))
       {
          sb.Append(Key)
-           .Append(' ');
+           .AppendSpacer();
          AppendSeparator(sb, Separator);
-         sb.Append(' ');
+         sb.AppendSpacer();
       }
 
       sb.Append('{');

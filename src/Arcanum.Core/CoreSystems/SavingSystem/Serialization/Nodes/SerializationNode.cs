@@ -43,9 +43,9 @@ public abstract class SerializationNode
       }
 
       if (leadingSpace)
-         sb.Append(' ');
+         sb.AppendSpacer();
       if (!line.StartsWith(commentChar))
-         sb.Append(commentChar).Append(' ');
+         sb.Append(commentChar).AppendSpacer();
       sb.AppendLine(line.Trim());
    }
 
@@ -124,8 +124,6 @@ public abstract class SerializationNode
          case TokenType.Unexpected:
             throw new NotSupportedException("Unexpected is not a valid separator.");
          case TokenType.Whitespace:
-            sb.Append(' ');
-            break;
          case TokenType.NewLine:
             sb.AppendLine();
             break;

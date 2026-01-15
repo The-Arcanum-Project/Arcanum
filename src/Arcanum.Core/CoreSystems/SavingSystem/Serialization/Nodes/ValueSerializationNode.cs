@@ -9,7 +9,7 @@ public class ValueSerializationNode(object value) : SerializationNode
    public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
    {
       WriteLeadingComment(sb, ref commentChar);
-      sb.Append(Value?.ToString() ?? "null");
+      sb.Append(Value.ToString());
       WriteInlineComment(sb, ref commentChar);
    }
 }

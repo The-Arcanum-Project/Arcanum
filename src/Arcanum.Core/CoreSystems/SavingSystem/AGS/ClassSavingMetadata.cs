@@ -7,8 +7,7 @@ public class ClassSavingMetadata(TokenType separator,
                                  TokenType openingToken,
                                  TokenType closingToken,
                                  Func<IAgs, string, IndentedStringBuilder, string>? commentProvider = null,
-                                 Action<IAgs, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool>? savingMethod = null,
-                                 bool asOneLine = false)
+                                 Action<IAgs, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool>? savingMethod = null)
 {
    public TokenType Separator { get; } = separator;
    public TokenType OpeningToken { get; } = openingToken;
@@ -16,7 +15,6 @@ public class ClassSavingMetadata(TokenType separator,
    public Func<IAgs, string, IndentedStringBuilder, string>? CommentProvider { get; set; } = commentProvider;
    public Action<IAgs, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool>? SavingMethod { get; set; } =
       savingMethod;
-   public bool AsOneLine { get; } = asOneLine;
 
    public override string ToString()
    {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using ParserGenerator.IAgsGen;
 
 namespace ParserGenerator.SubClasses;
 
@@ -50,6 +51,7 @@ public class SaveAsMetadata
       NumOfDecimalPlaces = args.Length > 11 ? (int?)args[11].Value ?? 0 : 0;
       AlwaysWrite = args.Length > 12 && ((bool?)args[12].Value ?? false);
       MustNotBeWritten = args.Length > 13 ? args[13].Value?.ToString() : null;
+      CollectionFormatProfile = args.Length > 14 && args[14].Value is CollectionFormatProfile ? (CollectionFormatProfile)args[14].Value! : null;
 
       // This part was correct, as it operates on the now-reliable Prop symbol.
       DefaultValueAttribute = Prop.GetAttributes()
@@ -76,6 +78,7 @@ public class SaveAsMetadata
    /// </summary>
    public string? MustNotBeWritten { get; }
    public AttributeData? DefaultValueAttribute { get; set; }
+   public CollectionFormatProfile? CollectionFormatProfile { get; set; }
 
    private static string GetProviderString(TypedConstant value, string providerName)
    {

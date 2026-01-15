@@ -13,6 +13,6 @@ public class ManualSerializationNode(IAgs ags, List<PropertySavingMetadata> prop
    {
       WriteLeadingComment(sb, ref commentChar);
 
-      ags.ClassMetadata.SavingMethod?.Invoke(ags, [.. props], sb, ags.ClassMetadata.AsOneLine);
+      ags.ClassMetadata.SavingMethod?.Invoke(ags, [.. props], sb, ags.AgsSettings.AsOneLine);
    }
 }

@@ -41,11 +41,11 @@ public class AgsObjectSavingContext
 
       if (Ags.ClassMetadata.SavingMethod != null)
       {
-         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.ClassMetadata.AsOneLine);
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.AgsSettings.AsOneLine);
          return;
       }
 
-      var asOneLine = Ags.ClassMetadata.AsOneLine;
+      var asOneLine = Ags.AgsSettings.AsOneLine;
       if (isArray)
       {
          sb.AppendLine("{");
@@ -78,20 +78,15 @@ public class AgsObjectSavingContext
 
       if (Ags.ClassMetadata.SavingMethod != null)
       {
-         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.ClassMetadata.AsOneLine);
+         Ags.ClassMetadata.SavingMethod.Invoke(Ags, [..OrderedProperties], sb, Ags.AgsSettings.AsOneLine);
          return;
       }
 
-      var asOneLine = Ags.ClassMetadata.AsOneLine;
+      var asOneLine = Ags.AgsSettings.AsOneLine;
       using (sb.BlockWithNameAndInjection(Ags, strategy, asOneLine))
          for (var i = 0; i < OrderedProperties.Count; i++)
          {
             var prop = OrderedProperties[i];
-#if DEBUG
-            if (prop.NxProp.ToString().Contains("regency_date"))
-            {
-            }
-#endif
 
             if (!properties.Contains(prop))
                continue;

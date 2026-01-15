@@ -125,7 +125,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
                                                                        SourceProductionContext context,
                                                                        ParserClassMetadata? classMetadata)
    {
-      var hintName = $"{parserSymbol.ContainingNamespace}.{parserSymbol.Name}.g.cs";
+      var hintName = $"{parserSymbol.Name}.Parser.g.cs";
       var targetTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
       var handwrittenMethods = parserSymbol.GetMembers()

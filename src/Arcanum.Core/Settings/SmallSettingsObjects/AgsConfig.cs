@@ -17,6 +17,10 @@ public class AgsConfig
    [DefaultValue(3)]
    public int SpacesPerIndent { get; set; } = 3;
 
+   [Description("Number of spaces to use for each spacing between e.g. '=' or items in collections.")]
+   [DefaultValue(1)]
+   public int SpacesPerSpacing { get; set; } = 1;
+
    [Description("Whether to use INJECT/REPLACE calls when saving objects.")]
    [DefaultValue(true)]
    public bool UseInjectReplaceCalls { get; set; } = true;

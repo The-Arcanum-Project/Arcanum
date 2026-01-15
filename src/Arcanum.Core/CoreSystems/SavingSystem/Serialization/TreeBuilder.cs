@@ -19,7 +19,7 @@ public static class TreeBuilder
 
       var root = new BlockSerializationNode(FormattingService.FormatBlockNameWithInjection(gameObj, isArray),
                                             gameObj.AgsSettings.WriteEmptyCollectionHeader,
-                                            gameObj) { IsCompact = gameObj.ClassMetadata.AsOneLine };
+                                            gameObj) { IsCompact = gameObj.AgsSettings.AsOneLine };
       var writeEmptyBlocks = gameObj.AgsSettings.WriteEmptyCollectionHeader;
 
       // 1. Iterate Metadata

@@ -19,6 +19,7 @@ public class IndentedStringBuilder
    private readonly StringBuilder _builder = new();
    private readonly StringBuilder _indentCacheBuilder = new();
    private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
+   private string _spacerString = new(' ', Config.Settings.SavingConfig.SpacesPerSpacing);
    private bool _isAtStartOfLine = true;
 
    public IndentedStringBuilder(int initialCapacity = 256)
@@ -46,6 +47,10 @@ public class IndentedStringBuilder
       for (var i = 0; i < level; i++)
          _indentCacheBuilder.Append(_indentString);
    }
+
+   public void SetSpacer(int spaceCount) => _spacerString = new(' ', spaceCount);
+
+   public IndentedStringBuilder AppendSpacer() => Append(_spacerString);
 
    #region List Appending
 
@@ -118,6 +123,14 @@ public class IndentedStringBuilder
    }
 
    #endregion
+
+   public IndentedStringBuilder AppendOpeningBrace(char brace = '{', char separator = '=') => AppendSeparator(separator).Append(brace);
+
+   public IndentedStringBuilder AppendClosingBraceInLine(char brace = '}') => AppendSpacer().Append(brace);
+
+   public IndentedStringBuilder AppendSeparator(char separator = '=') => AppendSpacer().Append(separator).AppendSpacer();
+
+   public IndentedStringBuilder AppendSeparator(string separator) => AppendSpacer().Append(separator).AppendSpacer();
 
    public void Clear()
    {
