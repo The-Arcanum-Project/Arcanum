@@ -202,4 +202,10 @@ public partial class DebugPanelGrid
       var cmdGen = new CommandGenerator();
       cmdGen.Show();
    }
+
+   private void TemplateToPops_OnClick(object sender, RoutedEventArgs e)
+   {
+      var templateToPops = new TemplateToPopsWindow();
+      templateToPops.Show();
+   }
 }

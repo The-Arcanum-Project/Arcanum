@@ -68,8 +68,10 @@
                                      Click = "ExperimentalRenameButton_Click" />
 
             <styleClasses:BaseButton Content = "Command Generator" Margin = "2" Padding = "4"
-                                     Click = "CommandGenerator_OnClick">
-            </styleClasses:BaseButton>
+                                     Click = "CommandGenerator_OnClick" />
+
+            <styleClasses:BaseButton Content = "Write Template to pops" Margin = "2" Padding = "4"
+                                     Click = "TemplateToPops_OnClick" />
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

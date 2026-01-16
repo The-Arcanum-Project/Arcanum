@@ -1,0 +1,160 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.TemplateToPopsWindow"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:debugWindows = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
+                         xmlns:autoCompleteBox = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
+                         mc:Ignorable = "d" Title = "TemplateToPopsWindow" Height = "500" Width = "800"
+                         d:DataContext = "{d:DesignInstance debugWindows:TemplateToPopsWindow}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Main Toggle Style (Hardcoded text logic per your request) -->
+            <Style x:Key = "ToggleBtnStyle" TargetType = "ToggleButton">
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border x:Name = "border" CornerRadius = "4" BorderThickness = "1"
+                                    BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "#3E3E42"
+                                    Padding = "10">
+                                <StackPanel Orientation = "Horizontal" HorizontalAlignment = "Center">
+                                    <TextBlock x:Name = "txt" Text = "Custom Values to Pops"
+                                               Foreground = "{StaticResource DefaultForeColorBrush}"
+                                               FontWeight = "Bold" />
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsChecked" Value = "True">
+                                    <Setter TargetName = "border" Property = "Background"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                    <Setter TargetName = "border" Property = "BorderBrush"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                    <Setter TargetName = "txt" Property = "Text" Value = "Template to Pops" />
+                                    <Setter TargetName = "txt" Property = "Foreground"
+                                            Value = "{StaticResource DefaultForeColorBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- NEW: Sub Toggle Style (Generic text binding) -->
+            <Style x:Key = "SubToggleBtnStyle" TargetType = "ToggleButton">
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border x:Name = "border" CornerRadius = "4" BorderThickness = "1"
+                                    BorderBrush = "{StaticResource DefaultBorderColorBrush}" Background = "#3E3E42"
+                                    Padding = "8">
+                                <StackPanel Orientation = "Horizontal" HorizontalAlignment = "Center">
+                                    <!-- Binds directly to the Content you set on the button -->
+                                    <ContentPresenter x:Name = "content" HorizontalAlignment = "Center"
+                                                      VerticalAlignment = "Center"
+                                                      TextElement.Foreground = "{StaticResource DefaultForeColorBrush}"
+                                                      TextElement.FontWeight = "SemiBold" />
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsChecked" Value = "True">
+                                    <!-- Uses the same green/blue accent when Active -->
+                                    <Setter TargetName = "border" Property = "Background"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                    <Setter TargetName = "border" Property = "BorderBrush"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                </Trigger>
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter TargetName = "border" Property = "Opacity" Value = "0.4" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <StackPanel Margin = "20" HorizontalAlignment = "Stretch">
+            <TextBlock Text = "Template Configuration" FontSize = "18" FontWeight = "SemiBold" Margin = "0,0,0,20" />
+
+            <!-- 1. MAIN TOGGLE -->
+            <ToggleButton Style = "{StaticResource ToggleBtnStyle}" IsChecked = "{Binding WriteTemplateToPops}"
+                          Height = "45" Margin = "0,0,0,10" Cursor = "Hand" />
+
+            <!-- 1a. IMPORT CONFIGURATION (Visible/Enabled when Main Toggle is ON) -->
+            <Grid Margin = "0,0,0,20" IsEnabled = "{Binding CanEditImports}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Import Culture -->
+                <ToggleButton Grid.Column = "0" Style = "{StaticResource SubToggleBtnStyle}"
+                              IsChecked = "{Binding ImportCulture}" Content = "Import Culture" Height = "35"
+                              Margin = "0,0,5,0" Cursor = "Hand" />
+
+                <!-- Right: Import Religion -->
+                <ToggleButton Grid.Column = "1" Style = "{StaticResource SubToggleBtnStyle}"
+                              IsChecked = "{Binding ImportReligion}" Content = "Import Religion" Height = "35"
+                              Margin = "5,0,0,0" Cursor = "Hand" />
+            </Grid>
+
+            <Separator Background = "#444" Margin = "0,0,0,20" />
+
+            <!-- 2. DROPDOWNS (Manual Selection) -->
+            <!-- IsEnabled is bound to the negation of the toggle logic -->
+            <StackPanel IsEnabled = "{Binding CanEditSpecifics}">
+                <StackPanel.Style>
+                    <Style TargetType = "StackPanel">
+                        <Style.Triggers>
+                            <Trigger Property = "IsEnabled" Value = "False">
+                                <Setter Property = "Opacity" Value = "0.3" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <TextBlock Text = "Or Set Specific Data Manually:" FontStyle = "Italic" Foreground = "#AAA"
+                           Margin = "0,0,0,10" />
+
+                <!-- 2-Column Grid for Culture/Religion -->
+                <Grid HorizontalAlignment = "Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "*" />
+                        <ColumnDefinition Width = "*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Column: Culture -->
+                    <StackPanel Grid.Column = "0" Margin = "0,0,10,0" MaxWidth = "250" HorizontalAlignment = "Stretch">
+                        <TextBlock Text = "Culture Selection:" Margin = "0,0,0,5" />
+                        <autoCompleteBox:AutoCompleteComboBox FullItemsSource = "{Binding CultureMap.Values}"
+                                                              SelectedItem = "{Binding SelectedCulture}"
+                                                              DisplayMemberPath = "UniqueId" Height = "30"
+                                                              HorizontalAlignment = "Stretch" />
+                    </StackPanel>
+
+                    <!-- Right Column: Religion -->
+                    <StackPanel Grid.Column = "1" Margin = "10,0,0,0" MaxWidth = "250" HorizontalAlignment = "Stretch">
+                        <TextBlock Text = "Religion Selection:" Margin = "0,0,0,5" />
+                        <autoCompleteBox:AutoCompleteComboBox FullItemsSource = "{Binding ReligionMap.Values}"
+                                                              SelectedItem = "{Binding SelectedReligion}"
+                                                              DisplayMemberPath = "UniqueId" Height = "30"
+                                                              HorizontalAlignment = "Stretch" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- 3. APPLY BUTTON -->
+            <styleClasses:BaseButton Content = "Apply Changes" Height = "35" Margin = "0,30,0,0" Cursor = "Hand"
+                                     FontWeight = "Bold" Click = "OnApplyClick" />
+        </StackPanel>
+    </Grid>
+</styleClasses:BaseWindow>
