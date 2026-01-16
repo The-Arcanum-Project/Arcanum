@@ -40,21 +40,16 @@ public static class SavingActionProvider
 
       var trueOneLiner = rt.CoRulers.Count == 0;
 
+      sb.Append("ruler_term").AppendOpeningBrace(asOneLine: trueOneLiner).AppendSpacer();
       if (trueOneLiner)
-      {
-         sb.Append("ruler_term").AppendOpeningBrace();
          RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
-      }
       else
-      {
-         sb.AppendLine("ruler_term").AppendOpeningBrace();
          using (sb.Indent())
             RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
-      }
 
       if (trueOneLiner)
       {
-         sb.AppendClosingBraceInLine().AppendLine();
+         sb.AppendClosingBrace(asOneLine: true).AppendLine();
          return;
       }
 
@@ -65,9 +60,7 @@ public static class SavingActionProvider
             RulerTerm.FormatRulerTerm(sb, asOneLine, ct);
       }
 
-      sb.AppendLine();
-      sb.Append('}');
-      sb.AppendLine();
+      sb.AppendClosingBrace();
    }
 
    public static void LocationSaving(IAgs target,
@@ -113,9 +106,12 @@ public static class SavingActionProvider
       if (!asOneLine)
          sb.AppendLine();
       foreach (var sve in sves)
-         sb.Append(sve.SocientalValue.UniqueId)
+         sb.AppendNewLineIfNone()
+           .Append(sve.SocientalValue.UniqueId)
            .AppendSeparator()
            .Append(FormatValue(SavingValueType.Int, sve, SocientalValueEntry.Field.Value));
+
+      sb.AppendBlockNewLines();
    }
 
    public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -215,7 +211,7 @@ public static class SavingActionProvider
         .Append(FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.X), null))
         .AppendSpacer()
         .Append(FormatValue(SavingValueType.Float, mma._getValue(MapMovementAssist.Field.Y), null))
-        .AppendClosingBraceInLine();
+        .AppendClosingBrace();
    }
 
    public static void EstateCountDefinitionSaving(IAgs target,

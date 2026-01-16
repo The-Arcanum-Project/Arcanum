@@ -85,12 +85,25 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
 
    public static void FormatRulerTerm(IndentedStringBuilder sb, bool asOneLine, RulerTerm rt)
    {
-      SavingUtil.AsOneLine(asOneLine, sb, $"character = {SavingUtil.FormatValue(SavingValueType.Identifier, rt, Field.CharacterId)}");
-      SavingUtil.AsOneLine(asOneLine, sb, $"start_date = {rt.StartDate}");
-      if (rt.EndDate != JominiDate.Empty)
-         SavingUtil.AsOneLine(asOneLine, sb, $"end_date = {rt.EndDate}");
-      SavingUtil.AsOneLine(asOneLine, sb, $"regnal_number = {SavingUtil.FormatValue(SavingValueType.Int, rt, Field.RegnalNumber)}");
+      sb.Append("character")
+        .AppendSeparator()
+        .Append(SavingUtil.FormatValue(SavingValueType.Identifier, rt, Field.CharacterId))
+        .AppendPropertyNewLineOrSpacer(asOneLine)
+        .Append("start_date")
+        .AppendSeparator()
+        .Append(rt.StartDate)
+        .AppendPropertyNewLineOrSpacer(asOneLine)
+        .Append("end_date")
+        .AppendSeparator()
+        .Append(rt.EndDate)
+        .AppendPropertyNewLineOrSpacer(asOneLine)
+        .Append("regnal_number")
+        .AppendSeparator()
+        .Append(SavingUtil.FormatValue(SavingValueType.Int, rt, Field.RegnalNumber));
       if (!string.IsNullOrEmpty(rt.RegnalName))
-         SavingUtil.AsOneLine(asOneLine, sb, $"regnal_name = {SavingUtil.FormatValue(SavingValueType.String, rt, Field.RegnalName)}");
+         sb.AppendPropertyNewLineOrSpacer(asOneLine)
+           .Append("regnal_name")
+           .AppendSeparator()
+           .Append(SavingUtil.FormatValue(SavingValueType.String, rt, Field.RegnalName));
    }
 }

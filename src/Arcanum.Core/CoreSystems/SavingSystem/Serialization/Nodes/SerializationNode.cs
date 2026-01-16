@@ -37,10 +37,7 @@ public abstract class SerializationNode
    private static void AppendCommentLine(IndentedStringBuilder sb, ref string commentChar, string? line, bool leadingSpace)
    {
       if (string.IsNullOrWhiteSpace(line))
-      {
-         sb.AppendLine();
          return;
-      }
 
       if (leadingSpace)
          sb.AppendSpacer();

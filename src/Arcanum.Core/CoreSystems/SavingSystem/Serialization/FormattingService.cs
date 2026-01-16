@@ -75,7 +75,30 @@ public static class FormattingService
          // Nested, single objects
          if (meta is { ValueType: SavingValueType.IAgs, IsCollection: false })
          {
-            SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, meta);
+            // SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, meta);
+            var sm = ags.ClassMetadata.SavingMethod;
+            if (sm != null)
+            {
+               sm.Invoke(ags, [meta], sb, asOneLine);
+               return;
+            }
+
+            if (meta.SaveEmbeddedAsIdentifier)
+            {
+               sb.Append(meta.Keyword)
+                 .AppendSpacer()
+                 .AppendSeparator(SavingUtil.GetSeparator(meta.Separator))
+                 .AppendSpacer()
+                 .Append(ags.SavingKey);
+               if (asOneLine)
+                  sb.AppendSpacer();
+            }
+            else
+            {
+               var node = TreeBuilder.Construct((IEu5Object)value, meta.IsArray, meta);
+               node.Write(sb, ref commentChar, asOneLine);
+            }
+
             return;
          }
 
@@ -93,9 +116,6 @@ public static class FormattingService
               .Append(SavingUtil.GetSeparator(meta.Separator))
               .AppendSpacer()
               .Append(SavingUtil.FormatValue(meta.ValueType, value, meta));
-
-            if (asOneLine)
-               sb.AppendLine();
          }
       }
       // Custom saving
@@ -113,9 +133,9 @@ public static class FormattingService
    {
       if (value is IEnumerable collection)
          if (meta.IsShattered)
-            HandleShatteredCollection(meta, sb, commentChar, ags.AgsSettings.Format, meta.CollectionSeparator, meta.ValueType, collection);
+            HandleShatteredCollection(meta, sb, commentChar, ags, meta.CollectionSeparator, meta.ValueType, collection);
          else
-            HandleCollection(ags, meta, sb, commentChar, ags.AgsSettings.Format, meta.CollectionSeparator, collection);
+            HandleCollection(ags, meta, sb, commentChar, meta.CollectionSeparator, collection);
       else
          throw new
             InvalidOperationException($"Property '{meta.NxProp}' is marked as a collection but the value is not IEnumerable (actual type: '{value.GetType().Name}').");
@@ -124,10 +144,15 @@ public static class FormattingService
    internal static bool ShouldSkipCheck(PropertySavingMetadata meta, IEu5Object ags, object value, bool alwaysSerializeAll)
    {
       // Required fields must always be saved
-      if (!meta.AlwaysWrite)
+      if (!meta.AlwaysWrite && !Config.Settings.SavingConfig.WriteAllDefaultValues)
+      {
          if ((meta.MustNotBeWritten != null && meta.MustNotBeWritten(ags)) ||
              (!alwaysSerializeAll && ShouldSkipValueProcessing(meta, ags.AgsSettings, value) && !ags.IsRequired(meta.NxProp)))
             return true;
+      }
+      else
+         // We still have to check if the object is an empty IEu5Object as then we HAVE to skip it
+         return meta.ValueType == SavingValueType.IAgs && value is IEu5Object eu5Obj && eu5Obj.Equals(EmptyRegistry.Empties[eu5Obj.GetType()]);
 
       return false;
    }
@@ -214,7 +239,7 @@ public static class FormattingService
    public static void HandleShatteredCollection(PropertySavingMetadata meta,
                                                 IndentedStringBuilder sb,
                                                 string commentChar,
-                                                SavingFormat format,
+                                                IAgs ags,
                                                 string collectionSeparator,
                                                 SavingValueType svt,
                                                 IEnumerable collection)
@@ -226,30 +251,32 @@ public static class FormattingService
       {
          var maxItemsPerLine = sb.MaxItemsInCollectionLine;
          sb.MaxItemsInCollectionLine = 1;
-         FormatAsIdentifierList(sb, collection, collectionSeparator);
+         FormatAsIdentifierList(sb, collection, collectionSeparator, ags.AgsSettings.GetCollectionProfile(meta.NxProp));
          sb.MaxItemsInCollectionLine = maxItemsPerLine;
       }
       else if (meta.IsEmbeddedObject)
          foreach (var item in collection)
-            if (item is IAgs ia)
+            if (item is IEu5Object ia)
             {
                if (meta.SaveEmbeddedAsIdentifier)
                   sb.Append(meta.Keyword);
-               ia.ToAgsContext(commentChar).BuildContext(sb);
+               var node = TreeBuilder.Construct(ia, meta.IsArray, meta);
+               node.Write(sb, ref commentChar, ia.AgsSettings.AsOneLine);
+               sb.AppendLine();
             }
             else
                throw new
                   InvalidOperationException($"Collection property '{meta.NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");
       else
       {
-         if (!collection.HasItems())
-            return;
-
-         if (format == SavingFormat.Spacious)
+         if (ags.AgsSettings.Format == SavingFormat.Spacious)
             sb.AppendLine();
 
+         var startLength = sb.InnerBuilder.Length;
          foreach (var item in collection)
          {
+            if (startLength != sb.InnerBuilder.Length)
+               sb.AppendLine();
             if (svt == SavingValueType.Auto)
                svt = SavingUtil.GetSavingValueType(item);
 
@@ -261,7 +288,7 @@ public static class FormattingService
             if (svt == SavingValueType.IAgs && item is IAgs ia)
                sb.AppendLine(ia.SavingKey);
             else
-               sb.AppendLine(SavingUtil.FormatValue(svt, item, meta));
+               sb.Append(SavingUtil.FormatValue(svt, item, meta));
          }
       }
    }
@@ -270,7 +297,6 @@ public static class FormattingService
                                        PropertySavingMetadata meta,
                                        IndentedStringBuilder sb,
                                        string commentChar,
-                                       SavingFormat format,
                                        string collectionSeparator,
                                        IEnumerable collection)
    {
@@ -278,37 +304,80 @@ public static class FormattingService
       if (internalCollection.Count == 0 && !ags.AgsSettings.WriteEmptyCollectionHeader)
          return;
 
-      if (format == SavingFormat.Spacious)
+      if (ags.AgsSettings.Format == SavingFormat.Spacious)
          sb.AppendLine();
 
+      var collectionProfile = ags.AgsSettings.GetCollectionProfile(meta.NxProp);
+
       if (meta.CollectionAsPureIdentifierList)
-         FormatAsIdentifierList(sb, internalCollection, collectionSeparator);
+         FormatAsIdentifierList(sb, internalCollection, collectionSeparator, collectionProfile);
       else if (meta.IsEmbeddedObject || meta.ValueType == SavingValueType.IAgs)
          FormatAsEmbeddedObjectList(meta, sb, internalCollection, commentChar);
       else
-         FormatAsValueList(meta, sb, internalCollection, collectionSeparator);
+         FormatAsValueList(meta, sb, internalCollection, collectionSeparator, collectionProfile);
 
-      if (format == SavingFormat.Spacious)
+      if (ags.AgsSettings.Format == SavingFormat.Spacious)
          sb.AppendLine();
    }
 
-   public static void FormatAsIdentifierList(IndentedStringBuilder sb, IEnumerable collection, string separator)
+   public static void FormatAsIdentifierList(IndentedStringBuilder sb,
+                                             IEnumerable collection,
+                                             string separator,
+                                             CollectionFormatProfile profile)
    {
+      var query = collection.OfType<IAgs>().Select(x => x.SavingKey);
+
+      if (profile.SortMode == CollectionSortMode.Alphabetical)
+         query = query.OrderBy(x => x);
+      else if (profile.SortMode == CollectionSortMode.Numeric)
+         // Simple length-then-value sort is decent
+         query = query.OrderBy(x => x.Length).ThenBy(x => x);
+
+      var itemList = query.ToList();
+      if (itemList.Count == 0)
+         return;
+
+      // Constraints based on LayoutMode
+      var isGrid = profile.LayoutMode == CollectionLayoutMode.Grid;
+      var isVertical = profile.LayoutMode == CollectionLayoutMode.Vertical;
+      var isCompact = profile.LayoutMode == CollectionLayoutMode.Compact;
+
+      // Vertical = 1 per row. Compact = Infinite. Grid/Flow = User Setting.
+      var maxItemsPerLine = isVertical
+                               ? 1
+                               : isCompact
+                                  ? int.MaxValue
+                                  : profile.ItemsPerRow;
+
+      // Compact = Infinite length. Others = SB Setting.
+      var maxLineLength = isCompact ? int.MaxValue : sb.MaxCollectionLineLength;
+
+      // Setup Padding
+      var paddingWidth = 0;
+      if (profile.AlignColumns && !isVertical && !isCompact)
+      {
+         // Find longest item to ensure strict columns
+         var maxLen = itemList.Max(s => s.Length);
+         paddingWidth = Math.Max(maxLen, profile.ColumnWidth) + Config.Settings.SavingConfig.SpacesPerSpacing;
+      }
+
       var lineItemCount = 0;
       var currentLineStartPos = sb.InnerBuilder.Length;
       var isFirstItem = true;
 
-      foreach (var item in collection)
+      foreach (var item in itemList)
       {
-         if (item is not IAgs ia)
-            continue;
+         // Determine if we need to break to a new line
+         var lengthExceeded = sb.InnerBuilder.Length - currentLineStartPos + item.Length + separator.Length > maxLineLength;
+         var countExceeded = lineItemCount >= maxItemsPerLine;
 
-         var savingKey = ia.SavingKey;
+         // Logic:
+         // - Vertical: Always break (handled by countExceeded = 1)
+         // - Grid: Strictly break on count. Ignore length
+         // - Flow: Break on Count OR Length.
+         // - Compact: Never break (handled by MaxValue settings)
 
-         var needsLineBreak = !isFirstItem &&
-                              (sb.InnerBuilder.Length - currentLineStartPos + savingKey.Length + separator.Length >
-                               sb.MaxCollectionLineLength ||
-                               lineItemCount >= sb.MaxItemsInCollectionLine);
+         var needsLineBreak = !isFirstItem && (isGrid ? countExceeded : lengthExceeded || countExceeded);
 
          if (needsLineBreak)
          {
@@ -317,10 +386,21 @@ public static class FormattingService
             lineItemCount = 0;
          }
 
-         if (!isFirstItem)
+         // Append Separator (only if we didn't just newline, OR if separator is not a space)
+         // Typically identifiers are space separated. If we just did a newline, we don't need a space.
+         if (!isFirstItem && lineItemCount > 0)
             sb.Append(separator);
 
-         sb.Append(savingKey);
+         sb.Append(item);
+
+         // Apply Column Alignment Padding
+         if (paddingWidth > 0)
+         {
+            var spaces = paddingWidth - item.Length;
+            if (spaces > 0)
+               sb.InnerBuilder.Append(' ', spaces);
+         }
+
          lineItemCount++;
          isFirstItem = false;
       }
@@ -328,46 +408,73 @@ public static class FormattingService
       sb.AppendLine();
    }
 
-   public static void FormatAsValueList(PropertySavingMetadata meta, IndentedStringBuilder sb, IEnumerable collection, string separator)
+   public static void FormatAsValueList(PropertySavingMetadata meta,
+                                        IndentedStringBuilder sb,
+                                        IEnumerable collection,
+                                        string separator,
+                                        CollectionFormatProfile profile)
    {
-      var padding = 0;
-      if (sb.PadCollectionItems)
+      var stringValues = new List<string>();
+      foreach (var item in collection)
       {
-         if (sb.AutoCollectionPadding)
-         {
-            var maxLength = 0;
-            foreach (var item in collection)
-            {
-               var value = meta.CollectionItemKeyProvider != null
-                              ? meta.CollectionItemKeyProvider(item)
-                              : SavingUtil.FormatValue(meta.ValueType, item, meta);
-               if (value.Length > maxLength)
-                  maxLength = value.Length;
-            }
-
-            padding = maxLength + 1;
-         }
-         else
-            padding = sb.CollectionItemPadding;
+         var val = meta.CollectionItemKeyProvider != null
+                      ? meta.CollectionItemKeyProvider(item)
+                      : SavingUtil.FormatValue(meta.ValueType, item, meta);
+         stringValues.Add(val);
       }
 
+      if (stringValues.Count == 0)
+         return;
+
+      // Sorting
+      if (profile.SortMode == CollectionSortMode.Alphabetical)
+         stringValues.Sort(StringComparer.OrdinalIgnoreCase);
+      else if (profile.SortMode == CollectionSortMode.Numeric)
+         stringValues.Sort((a, b) =>
+         {
+            var lenCmp = a.Length.CompareTo(b.Length);
+            return lenCmp != 0 ? lenCmp : string.Compare(a, b, StringComparison.Ordinal);
+         });
+
+      // Setup Constraints
+      var isGrid = profile.LayoutMode == CollectionLayoutMode.Grid;
+      var isVertical = profile.LayoutMode == CollectionLayoutMode.Vertical;
+      var isCompact = profile.LayoutMode == CollectionLayoutMode.Compact;
+
+      var maxItemsPerLine = isVertical
+                               ? 1
+                               : isCompact
+                                  ? int.MaxValue
+                                  : profile.ItemsPerRow;
+
+      var maxLineLength = isCompact ? int.MaxValue : sb.MaxCollectionLineLength;
+
+      // Setup Padding
+      var paddingWidth = 0;
+      if (profile.AlignColumns && !isVertical && !isCompact)
+      {
+         var maxLen = 0;
+         foreach (var s in stringValues)
+            if (s.Length > maxLen)
+               maxLen = s.Length;
+
+         // Use user's ColumnWidth as minimum
+         paddingWidth = Math.Max(maxLen, profile.ColumnWidth) + Config.Settings.SavingConfig.SpacesPerSpacing;
+      }
+
+      // Execution Loop
       var lineItemCount = 0;
       var currentLineStartPos = sb.InnerBuilder.Length;
       var isFirstItem = true;
 
-      foreach (var item in collection)
+      foreach (var valueToAppend in stringValues)
       {
-         var valueToAppend = meta.CollectionItemKeyProvider != null
-                                ? meta.CollectionItemKeyProvider(item)
-                                : SavingUtil.FormatValue(meta.ValueType, item, meta);
+         // Calculate break condition
+         var lengthExceeded = sb.InnerBuilder.Length - currentLineStartPos + valueToAppend.Length + separator.Length > maxLineLength;
+         var countExceeded = lineItemCount >= maxItemsPerLine;
 
-         var needsLineBreak = !isFirstItem &&
-                              (sb.InnerBuilder.Length -
-                               currentLineStartPos +
-                               valueToAppend.Length +
-                               separator.Length >
-                               sb.MaxCollectionLineLength ||
-                               lineItemCount >= sb.MaxItemsInCollectionLine);
+         // Grid mode ignores length constraints to enforce visual grid
+         var needsLineBreak = !isFirstItem && (isGrid ? countExceeded : lengthExceeded || countExceeded);
 
          if (needsLineBreak)
          {
@@ -376,13 +483,14 @@ public static class FormattingService
             lineItemCount = 0;
          }
 
-         if (!isFirstItem)
+         if (!isFirstItem && lineItemCount > 0)
             sb.Append(separator);
 
          sb.Append(valueToAppend);
-         if (sb.PadCollectionItems)
+
+         if (paddingWidth > 0)
          {
-            var padCount = padding - valueToAppend.Length;
+            var padCount = paddingWidth - valueToAppend.Length;
             if (padCount > 0)
                sb.InnerBuilder.Append(' ', padCount);
          }
@@ -391,17 +499,20 @@ public static class FormattingService
          isFirstItem = false;
       }
 
-      if (collection.Cast<object?>().Any())
-         sb.AppendLine();
+      sb.AppendLine();
    }
 
    public static void FormatAsEmbeddedObjectList(PropertySavingMetadata meta, IndentedStringBuilder sb, IEnumerable collection, string commentChar)
    {
       foreach (var item in collection)
-         if (item is IAgs ia)
-            ia.ToAgsContext(commentChar).BuildContext(sb, meta.IsArray);
-         else
+      {
+         if (item is not IEu5Object eu5Obj)
             throw new
                InvalidOperationException($"Collection property '{meta.NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");
+
+         var node = TreeBuilder.Construct(eu5Obj, meta.IsArray, meta);
+         node.Write(sb, ref commentChar, eu5Obj.AgsSettings.AsOneLine);
+         sb.AppendLine();
+      }
    }
 }

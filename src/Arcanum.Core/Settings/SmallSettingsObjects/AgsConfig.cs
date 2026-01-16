@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.Settings.SmallSettingsObjects;
@@ -48,4 +49,20 @@ public class AgsConfig
    [Description("If true, the setup folder will save all e.g. location specific data into a single file. If false, separate files will be used as in vanilla.")]
    [DefaultValue(true)]
    public bool CompactSetupFolder { get; set; } = false;
+
+   [Description("The number of new lines to insert between properties when saving.")]
+   [DefaultValue(1)]
+   public int NewLinesBetweenProperties { get; set; } = 1;
+
+   [Description("The number of new lines to insert before a block when saving.")]
+   [DefaultValue(2)]
+   public int NewLinesBeforeBlock { get; set; } = 2;
+
+   [Description("The number of new lines to insert between objects when saving.")]
+   [DefaultValue(3)]
+   public int NewLinesBetweenObjects { get; set; } = 3;
+
+   [Description("Where the opening brace for blocks should be located when saving. Only applied if the block is not set to be on one line.")]
+   [DefaultValue(BraceLocation.SameLine)]
+   public BraceLocation OpeningBraceLocation { get; set; } = BraceLocation.SameLine;
 }

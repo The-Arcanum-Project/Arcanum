@@ -90,7 +90,7 @@ public partial class ASTBuilderTest
 
       if (sender is ListView { SelectedItem: IEu5Object ags })
       {
-         var node = TreeBuilder.Construct(ags, false);
+         var node = TreeBuilder.Construct(ags, false, null);
          var sw = Stopwatch.StartNew();
          var sb = new IndentedStringBuilder();
          var commentChar = "#";

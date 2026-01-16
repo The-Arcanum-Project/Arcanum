@@ -3,6 +3,7 @@
 using System.Globalization;
 using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 #endregion
@@ -124,9 +125,22 @@ public class IndentedStringBuilder
 
    #endregion
 
-   public IndentedStringBuilder AppendOpeningBrace(char brace = '{', char separator = '=') => AppendSeparator(separator).Append(brace);
+   public IndentedStringBuilder AppendOpeningBrace(string brace = "{", string separator = "=", bool asOneLine = false)
+   {
+      if (asOneLine)
+         return AppendSeparator(separator).Append(brace);
 
-   public IndentedStringBuilder AppendClosingBraceInLine(char brace = '}') => AppendSpacer().Append(brace);
+      return Config.Settings.SavingConfig.OpeningBraceLocation switch
+      {
+         BraceLocation.SameLine => AppendSeparator(separator).Append(brace),
+         BraceLocation.NewLine => AppendSeparator(separator).AppendLine().Append(brace),
+         BraceLocation.NewLineWithEquals => AppendLine().AppendSeparator(separator).Append(brace),
+         _ => throw new ArgumentOutOfRangeException(),
+      };
+   }
+
+   public IndentedStringBuilder AppendClosingBrace(char brace = '}', bool asOneLine = false)
+      => asOneLine ? AppendSpacer().Append(brace) : AppendLine().Append(brace);
 
    public IndentedStringBuilder AppendSeparator(char separator = '=') => AppendSpacer().Append(separator).AppendSpacer();
 
@@ -208,7 +222,7 @@ public class IndentedStringBuilder
    #region Configuration Properties (Unchanged)
 
    public int MaxItemsInCollectionLine { get; set; } = 7;
-   public int MaxCollectionLineLength { get; init; } = 130;
+   public int MaxCollectionLineLength { get; init; } = 250;
    public bool OneItemPerLine { get; init; } = false;
    public bool PadCollectionItems { get; set; } = false;
    public int CollectionItemPadding { get; set; } = 5;
@@ -265,6 +279,17 @@ public class IndentedStringBuilder
       return this;
    }
 
+   public IndentedStringBuilder AppendCommentLine(string comment, string commentChar = "#")
+   {
+      PrependIndentIfNecessary();
+      if (!comment.StartsWith(commentChar))
+         _builder.Append(commentChar);
+      _builder.Append(' ').Append(comment);
+      _builder.AppendLine();
+      _isAtStartOfLine = true;
+      return this;
+   }
+
    /// <summary> Appends the specified character sequence, followed by a newline. </summary>
    public IndentedStringBuilder AppendLine(ReadOnlySpan<char> text)
    {
@@ -294,6 +319,83 @@ public class IndentedStringBuilder
          _isAtStartOfLine = false;
       }
    }
+
+   public IndentedStringBuilder AppendLineFormat(PropertySavingMetadata? meta, bool asOneLine)
+   {
+      if (meta == null)
+      {
+         // no metadata => between objects
+         EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBetweenObjects);
+         return this;
+      }
+
+      // if we are a collection or embedded object and not inlined, we want block rule
+      if ((meta.IsCollection || meta.IsEmbeddedObject) && !asOneLine)
+      {
+         EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBeforeBlock);
+         return this;
+      }
+
+      // we are a normal property and if we are inlined we don't want any new lines
+      EnforceNewLineCount(asOneLine ? 0 : Config.Settings.SavingConfig.NewLinesBetweenProperties);
+      return this;
+   }
+
+   public IndentedStringBuilder AppendBlockNewLines() => EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBeforeBlock);
+
+   public IndentedStringBuilder AppendNewLineIfNone() => EnforceNewLineCount(1, false);
+
+   // Removes or adds new lines to ensure the specified count of consecutive new lines at the end of the builder.
+   public IndentedStringBuilder EnforceNewLineCount(int count, bool applllyFallback = true)
+   {
+      if (Length == 0)
+         return this;
+
+      if (count < 0)
+         count = 0;
+
+      var existingNewLines = 0;
+      for (var i = _builder.Length - 1; i >= 0; i--)
+         if (_builder[i] == '\n')
+            existingNewLines++;
+         else if (_builder[i] != '\r')
+            break;
+
+      if (existingNewLines < count)
+      {
+         var toAdd = count - existingNewLines;
+         for (var i = 0; i < toAdd; i++)
+            _builder.AppendLine();
+         _isAtStartOfLine = true;
+      }
+      else if (existingNewLines > count)
+      {
+         var toRemove = existingNewLines - count;
+         var newLength = _builder.Length;
+
+         for (var i = _builder.Length - 1; i >= 0 && toRemove > 0; i--)
+            if (_builder[i] == '\n')
+            {
+               newLength--;
+               toRemove--;
+            }
+            else if (_builder[i] == '\r')
+               newLength--;
+            else
+               break;
+
+         _builder.Length = newLength;
+         _isAtStartOfLine = true;
+      }
+
+      if (applllyFallback && _builder.Length > 0 && _builder[^1] != '\n')
+         AppendSpacer();
+
+      return this;
+   }
+
+   public IndentedStringBuilder AppendPropertyNewLineOrSpacer(bool asOneLine)
+      => asOneLine ? AppendSpacer() : EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBetweenProperties);
 
    #endregion
 
@@ -435,5 +537,13 @@ public class IndentedStringBuilder
       return this;
    }
 
+   public int Length => _builder.Length;
+
    #endregion
+
+   public int this[Index index]
+   {
+      get => _builder[index];
+      set => _builder[index] = (char)value;
+   }
 }

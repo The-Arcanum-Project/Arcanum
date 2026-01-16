@@ -11,6 +11,6 @@ public class CommentSerializationNode(string text) : SerializationNode
 
    public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
    {
-      sb.AppendLine(Text);
+      sb.AppendCommentLine(Text);
    }
 }

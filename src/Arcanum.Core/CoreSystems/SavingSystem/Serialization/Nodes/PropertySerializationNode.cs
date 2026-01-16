@@ -17,10 +17,11 @@ public class PropertySerializationNode(PropertySavingMetadata psm, object value,
    {
       FormattingService.AssignValueType(Psm, Value);
 
-      var shouldWrite = FormattingService.ShouldSkipCheck(Psm, Target, Value, false);
-      if (shouldWrite)
+      var shouldSkipCheck = FormattingService.ShouldSkipCheck(Psm, Target, Value, false);
+      if (shouldSkipCheck)
          return;
 
+      sb.AppendLineFormat(Psm, asOneLine);
       WriteLeadingComment(sb, ref commentChar);
       FormattingService.Format(Psm, sb, Target, commentChar, asOneLine, Value);
       WriteInlineComment(sb, ref commentChar);

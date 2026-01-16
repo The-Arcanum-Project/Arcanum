@@ -1,4 +1,4 @@
-﻿#define DO_SKIP_CHECK_IN_VISUALIZER
+﻿// #define DO_SKIP_CHECK_IN_VISUALIZER
 
 using System.Collections;
 using Arcanum.Core.CoreSystems.Common;
@@ -11,7 +11,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 
 public static class TreeBuilder
 {
-   public static SerializationNode Construct(IEu5Object gameObj, bool isArray)
+   public static SerializationNode Construct(IEu5Object gameObj, bool isArray, PropertySavingMetadata? psm)
    {
       if (gameObj.ClassMetadata.SavingMethod != null)
          // Custom Saving Method Defined
@@ -19,7 +19,8 @@ public static class TreeBuilder
 
       var root = new BlockSerializationNode(FormattingService.FormatBlockNameWithInjection(gameObj, isArray),
                                             gameObj.AgsSettings.WriteEmptyCollectionHeader,
-                                            gameObj) { IsCompact = gameObj.AgsSettings.AsOneLine };
+                                            gameObj,
+                                            psm) { IsCompact = gameObj.AgsSettings.AsOneLine };
       var writeEmptyBlocks = gameObj.AgsSettings.WriteEmptyCollectionHeader;
 
       // 1. Iterate Metadata
@@ -30,7 +31,7 @@ public static class TreeBuilder
 
          // A. Check Defaults / AlwaysWrite
          var rawValue = Nx.ForceGetAs<object>(gameObj, meta.NxProp);
-         if (!meta.AlwaysWrite && IsDefault(rawValue, meta.DefaultValue))
+         if (!meta.AlwaysWrite && !Config.Settings.SavingConfig.WriteAllDefaultValues && IsDefault(rawValue, meta.DefaultValue))
             continue;
 
          // B. Get Comments (Using Generated Methods)
@@ -45,7 +46,7 @@ public static class TreeBuilder
          // C. Create Nodes
          if (meta.IsCollection)
          {
-            var block = new BlockSerializationNode(meta.Keyword, gameObj.AgsSettings.WriteEmptyCollectionHeader, null, meta.Separator)
+            var block = new BlockSerializationNode(meta.Keyword, gameObj.AgsSettings.WriteEmptyCollectionHeader, gameObj, meta, meta.Separator)
             {
                LeadingComment = lead,
                InlineComment = inline,
@@ -96,7 +97,7 @@ public static class TreeBuilder
          // Recursion for complex objects
          // Note: We might need a generic non-typed version of BuildTree
          // Or use the item's own saving logic
-         return Construct(nestedObj, true);
+         return Construct(nestedObj, true, parentMeta);
 
       // Simple Value
       return new ValueSerializationNode(item); // Use proper serializer here
@@ -149,7 +150,7 @@ public static class TreeBuilder
             var count = 0;
             foreach (var c in block.Children)
                if (c is BulkValueSerializationNode bulk)
-                  foreach (var entry in bulk.Collection)
+                  foreach (var _ in bulk.Collection)
                      count++;
                else
                   count++;
@@ -165,11 +166,11 @@ public static class TreeBuilder
          case PropertySerializationNode prop:
          {
 #if DO_SKIP_CHECK_IN_VISUALIZER
-            var shouldSkip = FormattingService.ShouldSkipValueProcessing(prop.Psm, prop.Target.AgsSettings, prop.Value);
+            var shouldSkip = FormattingService.ShouldSkipCheck(prop.Psm, prop.Target, prop.Value, false);
             if (!shouldSkip)
                sb.AppendLine($"{indent}🔑 {typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value?.GetType().Name ?? "null"}{flagsStr}");
 #else
-            var shouldSkip = FormattingService.ShouldSkipValueProcessing(prop.Psm, prop.Target.AgsSettings, prop.Value);
+            var shouldSkip = FormattingService.ShouldSkipCheck(prop.Psm, prop.Target, prop.Value, false);
             var sss = shouldSkip ? "[Skipped]" : "";
             sb.AppendLine($"{indent}🔑 {sss}{typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value?.GetType().Name ?? "null"}{flagsStr}");
 #endif

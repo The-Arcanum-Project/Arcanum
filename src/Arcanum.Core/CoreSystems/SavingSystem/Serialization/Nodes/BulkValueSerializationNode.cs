@@ -14,7 +14,7 @@ public class BulkValueSerializationNode(IEnumerable collection, PropertySavingMe
 
    public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
    {
-      FormattingService.AssignValueType(meta, Collection);
-      FormattingService.HandleCollectionSerialization(meta, sb, Target, commentChar, Collection);
+      FormattingService.AssignValueType(Meta, Collection);
+      FormattingService.HandleCollectionSerialization(Meta, sb, Target, commentChar, Collection);
    }
 }
