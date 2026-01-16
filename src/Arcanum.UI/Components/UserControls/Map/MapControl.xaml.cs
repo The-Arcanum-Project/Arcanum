@@ -14,6 +14,7 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
@@ -423,7 +424,7 @@ public partial class MapControl
       }
 
       bmp.UnlockBits(bmpData);
-      IO.SaveBitmap(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
+      ImageTagger.ExportTaggedTexture(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
    }
 
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
@@ -448,5 +449,63 @@ public partial class MapControl
          pixelPtr[1] = g;
          pixelPtr[2] = r;
       }
+   }
+
+   private void SelectProvince_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(CurrentPos);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, location.Province.Locations, true, false);
+   }
+
+   private void SelectArea_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(CurrentPos);
+      if (location == Location.Empty)
+         return;
+
+      var locs = location.Province.Area.GetRelevantLocations([location.Province.Area]);
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, locs, true, false);
+   }
+
+   private void SelectRegion_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(CurrentPos);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.GetRelevantLocations([location.Province.Area.Region]),
+                       true,
+                       false);
+   }
+
+   private void SelectSuperRegion_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(CurrentPos);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.SuperRegion.GetRelevantLocations([location.Province.Area.Region.SuperRegion]),
+                       true,
+                       false);
+   }
+
+   private void SelectContinent_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(CurrentPos);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.SuperRegion.Continent.GetRelevantLocations([location.Province.Area.Region.SuperRegion.Continent]),
+                       true,
+                       false);
    }
 }

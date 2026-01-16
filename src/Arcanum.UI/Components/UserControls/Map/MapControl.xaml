@@ -22,10 +22,12 @@
             <Border.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header = "Export MapMode" Click = "MenuItem_OnClick" />
-                    <!-- <Separator /> -->
-                    <!-- <MenuItem Header = "Option 1" /> -->
-                    <!-- <MenuItem Header = "Option 2" /> -->
-                    <!-- <MenuItem Header = "Exit" /> -->
+                    <Separator />
+                    <MenuItem Header = "Select Province" Click = "SelectProvince_Click" />
+                    <MenuItem Header = "Select Area" Click = "SelectArea_Click" />
+                    <MenuItem Header = "Select Region" Click = "SelectRegion_Click" />
+                    <MenuItem Header = "Select Super Region" Click = "SelectSuperRegion_Click" />
+                    <MenuItem Header = "Select Continent" Click = "SelectContinent_Click" />
                 </ContextMenu>
             </Border.ContextMenu>
         </Border>
