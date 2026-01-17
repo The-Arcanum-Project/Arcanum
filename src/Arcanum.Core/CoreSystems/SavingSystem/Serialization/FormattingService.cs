@@ -151,11 +151,13 @@ public static class FormattingService
             return true;
       }
       else
-         // We still have to check if the object is an empty IEu5Object as then we HAVE to skip it
-         return meta.ValueType == SavingValueType.IAgs && value is IEu5Object eu5Obj && eu5Obj.Equals(EmptyRegistry.Empties[eu5Obj.GetType()]);
+         return !IsWriteableDefaultValue(value);
 
       return false;
    }
+
+   // We can only serialize certain default values directly, others need special handling and thus can not be written by default
+   private static bool IsWriteableDefaultValue(object value) => value is float or int or double or bool or Enum;
 
    public static bool ShouldSkipValueProcessing(PropertySavingMetadata meta, AgsSettings settings, object value)
    {

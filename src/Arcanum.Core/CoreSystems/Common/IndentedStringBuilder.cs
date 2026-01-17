@@ -134,7 +134,7 @@ public class IndentedStringBuilder
       {
          BraceLocation.SameLine => AppendSeparator(separator).Append(brace),
          BraceLocation.NewLine => AppendSeparator(separator).AppendLine().Append(brace),
-         BraceLocation.NewLineWithEquals => AppendLine().AppendSeparator(separator).Append(brace),
+         BraceLocation.NewLineWithEquals => AppendLine().Append(separator).AppendSpacer().Append(brace),
          _ => throw new ArgumentOutOfRangeException(),
       };
    }

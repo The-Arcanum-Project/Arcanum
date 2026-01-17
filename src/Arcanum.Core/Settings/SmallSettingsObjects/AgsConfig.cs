@@ -65,4 +65,8 @@ public class AgsConfig
    [Description("Where the opening brace for blocks should be located when saving. Only applied if the block is not set to be on one line.")]
    [DefaultValue(BraceLocation.SameLine)]
    public BraceLocation OpeningBraceLocation { get; set; } = BraceLocation.SameLine;
+
+   [Description("When exporting an image via Arcanum, we can write an invisible watermark into the image to identify it as exported by Arcanum. We do this to see where Arcanum is used and to be able to track issues better.")]
+   [DefaultValue(true)]
+   public bool WriteInvisibleWaterMarkInImages { get; set; } = true;
 }
