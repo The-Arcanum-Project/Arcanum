@@ -76,9 +76,12 @@
             <styleClasses:BaseButton Content = "AST Builder Viewer" Margin = "2" Padding = "4"
                                      Click = "ASTBuilderViewer_OnClick" />
 
+            <styleClasses:BaseButton Content = "Check for Arcanum Watermark" Margin = "2" Padding = "4"
+                                     Click = "ImageTagDecode_OnClick" />
+
+
         </StackPanel>
 
-        <ContentPresenter Grid.Column = "1" x:Name = "DebugView">
-        </ContentPresenter>
+        <ContentPresenter Grid.Column = "1" x:Name = "DebugView" />
     </Grid>
 </UserControl>

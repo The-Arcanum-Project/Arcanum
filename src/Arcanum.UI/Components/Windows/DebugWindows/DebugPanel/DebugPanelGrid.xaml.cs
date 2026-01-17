@@ -213,4 +213,9 @@ public partial class DebugPanelGrid
    {
       new ASTBuilderTest().Show();
    }
+
+   private void ImageTagDecode_OnClick(object sender, RoutedEventArgs e)
+   {
+      new WatermarkCheckerWindow().Show();
+   }
 }
