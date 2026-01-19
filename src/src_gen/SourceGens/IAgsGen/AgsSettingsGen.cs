@@ -12,6 +12,7 @@ public static class AgsSettingsGen
 {
    public const string AGS_SETTINGS_NAMESPACE = "Arcanum.Core.CoreSystems.SavingSystem.AGS.AgsSettings";
    public const string COLLECTION_FORMAT_NAMESPACE = "Arcanum.Core.CoreSystems.SavingSystem.Serialization.CollectionFormatProfile";
+   public const string RESET_METHOD_NAME = "ResetCollectionToDefault";
 
    public static INamedTypeSymbol AgsSettingsSymbol = null!;
 
@@ -27,16 +28,15 @@ public static class AgsSettingsGen
       var builder = new IndentBuilder();
 
       AppendUsings(builder, cs);
-
       AppendClassHeader(builder, cs);
 
       using (builder.Indent())
       {
          AppendConstructorCall(builder, cs);
-
-         var cfps = AppendCollectionData(builder, nexusProperties, saveAsProps);
-
-         AppendOverrides(builder, cs, cfps);
+         var profiles = CalculateProfiles(saveAsProps);
+         AppendCollectionProperties(builder, profiles);
+         AppendResetMethod(builder, profiles);
+         AppendOverrides(builder, profiles);
       }
 
       AppendClassFooter(builder);
@@ -99,24 +99,9 @@ public static class AgsSettingsGen
       return false;
    }
 
-   private static void AppendOverrides(IndentBuilder builder, INamedTypeSymbol cs, List<string> cfps)
+   private static List<GeneratedProfileData> CalculateProfiles(List<SaveAsMetadata> psms)
    {
-      builder.AppendLine("public override CollectionFormatProfile GetCollectionProfile(Enum prop) => prop.ToString() switch");
-      builder.AppendLine("{");
-      using (builder.Indent())
-      {
-         foreach (var cfp in cfps)
-            builder.AppendLine($"\"{cfp}\" => {cfp},");
-
-         builder.AppendLine("_ => base.GetCollectionProfile(prop),");
-      }
-
-      builder.AppendLine("};");
-   }
-
-   private static List<string> AppendCollectionData(IndentBuilder builder, List<IPropertySymbol> nxProps, List<SaveAsMetadata> psms)
-   {
-      List<string> collectionProfiles = [];
+      var results = new List<GeneratedProfileData>();
       foreach (var psm in psms)
       {
          if (!psm.IsCollection)
@@ -124,36 +109,90 @@ public static class AgsSettingsGen
 
          var collectionFormatAttr = psm.Prop.GetAttributes()
                                        .FirstOrDefault(ad => ad.AttributeClass?.Name == "AgsCollectionFormatAttribute");
+
          var cfp = CollectionDataGatherer.ParseCollectionProfile(collectionFormatAttr);
 
-         builder.AppendLine($"public CollectionFormatProfile {psm.Prop.Name} {{ get; set; }} = new ()");
+         // Apply Heuristics (optional, if you want logic like 'Embedded = Vertical')
+         if (psm.IsEmbeddedObject && cfp.LayoutMode == CollectionLayoutMode.Flow)
+            cfp.LayoutMode = CollectionLayoutMode.Vertical;
+
+         results.Add(new() { PropertyName = psm.Prop.Name, Profile = cfp });
+      }
+
+      return results;
+   }
+
+   private static void AppendCollectionProperties(IndentBuilder builder, List<GeneratedProfileData> profiles)
+   {
+      foreach (var data in profiles)
+      {
+         var cfp = data.Profile;
+
+         // Point to the single shared reset method
+         builder.AppendLine($"[CustomResetMethod(nameof({RESET_METHOD_NAME}))]");
+         builder.AppendLine($"public CollectionFormatProfile {data.PropertyName} {{ get; set; }} = new ()");
+         builder.AppendLine("{");
+         using (builder.Indent())
+            AppendProfileInitializers(builder, cfp);
+         builder.AppendLine("};");
+         builder.AppendLine();
+      }
+   }
+
+   private static void AppendResetMethod(IndentBuilder builder, List<GeneratedProfileData> profiles)
+   {
+      // Signature matches your reflection requirement: object Method(PropertyInfo)
+      builder.AppendLine($"public object {RESET_METHOD_NAME}(System.Reflection.PropertyInfo info)");
+      builder.AppendLine("{");
+      using (builder.Indent())
+      {
+         builder.AppendLine("return info.Name switch");
          builder.AppendLine("{");
          using (builder.Indent())
          {
-            builder.AppendLine($"LayoutMode = CollectionLayoutMode.{cfp.LayoutMode},");
-            builder.AppendLine($"ItemsPerRow = {cfp.ItemsPerRow},");
-            builder.AppendLine($"AlignColumns = {cfp.AlignColumns.ToString().ToLower()},");
-            builder.AppendLine($"ColumnWidth = {cfp.ColumnWidth},");
-            builder.AppendLine($"SortMode = CollectionSortMode.{cfp.SortMode},");
-            builder.AppendLine($"WriteEmpty = {cfp.WriteEmpty.ToString().ToLower()},");
+            foreach (var data in profiles)
+            {
+               builder.AppendLine($"\"{data.PropertyName}\" => new CollectionFormatProfile");
+               builder.AppendLine("{");
+               using (builder.Indent())
+                  AppendProfileInitializers(builder, data.Profile);
+               builder.AppendLine("},");
+            }
+
+            // Default fallback
+            builder.AppendLine("_ => new CollectionFormatProfile()");
          }
 
          builder.AppendLine("};");
-         builder.AppendLine();
-
-         collectionProfiles.Add(psm.Prop.Name);
       }
 
-      return collectionProfiles;
+      builder.AppendLine("}");
+      builder.AppendLine();
    }
 
-   public static string? GetParseAsKey(AttributeData attributeData)
+   private static void AppendProfileInitializers(IndentBuilder builder, CollectionFormatProfile cfp)
    {
-      if (attributeData.ConstructorArguments.IsEmpty)
-         return null;
+      builder.AppendLine($"LayoutMode = CollectionLayoutMode.{cfp.LayoutMode},");
+      builder.AppendLine($"ItemsPerRow = {cfp.ItemsPerRow},");
+      builder.AppendLine($"AlignColumns = {cfp.AlignColumns.ToString().ToLower()},");
+      builder.AppendLine($"ColumnWidth = {cfp.ColumnWidth},");
+      builder.AppendLine($"SortMode = CollectionSortMode.{cfp.SortMode},");
+      builder.AppendLine($"WriteEmpty = {cfp.WriteEmpty.ToString().ToLower()},");
+   }
 
-      var arg = attributeData.ConstructorArguments[0];
-      return arg.Value as string;
+   private static void AppendOverrides(IndentBuilder builder, List<GeneratedProfileData> profiles)
+   {
+      builder.AppendLine("public override CollectionFormatProfile GetCollectionProfile(Enum prop) => prop.ToString() switch");
+      builder.AppendLine("{");
+      using (builder.Indent())
+      {
+         foreach (var p in profiles)
+            builder.AppendLine($"\"{p.PropertyName}\" => {p.PropertyName},");
+
+         builder.AppendLine("_ => base.GetCollectionProfile(prop),");
+      }
+
+      builder.AppendLine("};");
    }
 
    private static void AppendClassFooter(IndentBuilder builder)
@@ -176,8 +215,15 @@ public static class AgsSettingsGen
       builder.AppendLine("#nullable enable");
       builder.AppendLine();
       builder.AppendLine("using Arcanum.Core.CoreSystems.SavingSystem.Serialization;");
+      builder.AppendLine("using Arcanum.API.Attributes;");
 
       builder.AppendLine();
       builder.AppendLine($"namespace {namespaceName};");
+   }
+
+   private struct GeneratedProfileData
+   {
+      public string PropertyName;
+      public CollectionFormatProfile Profile;
    }
 }

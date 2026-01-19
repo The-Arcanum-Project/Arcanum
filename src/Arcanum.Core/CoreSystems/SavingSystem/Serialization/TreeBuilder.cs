@@ -11,9 +11,9 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 
 public static class TreeBuilder
 {
-   public static SerializationNode Construct(IEu5Object gameObj, bool isArray, PropertySavingMetadata? psm)
+   public static SerializationNode Construct(IEu5Object gameObj, bool isArray, PropertySavingMetadata? psm, bool ignoreCustomSavingMethod = false)
    {
-      if (gameObj.ClassMetadata.SavingMethod != null)
+      if (gameObj.ClassMetadata.SavingMethod != null && !ignoreCustomSavingMethod)
          // Custom Saving Method Defined
          return new ManualSerializationNode(gameObj, [.. gameObj.SaveableProps]);
 
@@ -23,7 +23,6 @@ public static class TreeBuilder
                                             psm) { IsCompact = gameObj.AgsSettings.AsOneLine };
       var writeEmptyBlocks = gameObj.AgsSettings.WriteEmptyCollectionHeader;
 
-      // 1. Iterate Metadata
       foreach (var meta in gameObj.SaveableProps)
       {
          if (meta.MustNotBeWritten?.Invoke(gameObj) == true)
@@ -34,11 +33,6 @@ public static class TreeBuilder
          if (!meta.AlwaysWrite && !Config.Settings.SavingConfig.WriteAllDefaultValues && IsDefault(rawValue, meta.DefaultValue))
             continue;
 
-         // B. Get Comments (Using Generated Methods)
-         // We need a helper or dynamic dispatch because IEu5Object interface 
-         // might not have GetLeadingComment exposed directly unless casted.
-         // Assuming 'gameObj' is castable to the generated partial or we use reflection/dynamic.
-         // For now, let's assume we extended IEu5Object or cast:
          var lead = gameObj.GetLeadingComment(meta.NxProp);
          var inline = gameObj.GetInlineComment(meta.NxProp);
          var closing = gameObj.GetClosingComment(meta.NxProp);

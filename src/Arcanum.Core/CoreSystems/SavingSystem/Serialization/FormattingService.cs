@@ -73,23 +73,21 @@ public static class FormattingService
       if (meta.SavingMethod == null)
       {
          // Nested, single objects
-         if (meta is { ValueType: SavingValueType.IAgs, IsCollection: false })
+         if (meta is { ValueType: SavingValueType.IAgs, IsCollection: false } && value is IAgs agsValue)
          {
             // SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, meta);
-            var sm = ags.ClassMetadata.SavingMethod;
+            var sm = agsValue.ClassMetadata.SavingMethod;
             if (sm != null)
             {
-               sm.Invoke(ags, [meta], sb, asOneLine);
+               sm.Invoke(agsValue, [meta], sb, asOneLine);
                return;
             }
 
             if (meta.SaveEmbeddedAsIdentifier)
             {
                sb.Append(meta.Keyword)
-                 .AppendSpacer()
                  .AppendSeparator(SavingUtil.GetSeparator(meta.Separator))
-                 .AppendSpacer()
-                 .Append(ags.SavingKey);
+                 .Append(agsValue.SavingKey);
                if (asOneLine)
                   sb.AppendSpacer();
             }

@@ -104,7 +104,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       }
    }
 
-   private void SerializeChildElements(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public void SerializeChildElements(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
    {
       WriteInlineComment(sb, ref commentChar); // Inline comment for the OPENING brace
 

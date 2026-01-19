@@ -4,6 +4,8 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization.Nodes;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Court.State;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
@@ -150,7 +152,14 @@ public static class SavingActionProvider
            .AppendSeparator()
            .Append(cnd.Name);
       else if (!string.IsNullOrEmpty(cnd.Name))
-         sb.Append(cnd.SavingKey).AppendOpeningBrace().Append(cnd.Name).AppendSpacer().Append('}');
+         sb.Append(cnd.SavingKey)
+           .AppendOpeningBrace()
+           .AppendSpacer()
+           .Append("name")
+           .AppendSeparator()
+           .Append(cnd.Name)
+           .AppendSpacer()
+           .Append('}');
    }
 
    public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
@@ -263,15 +272,12 @@ public static class SavingActionProvider
          throw new
             InvalidOperationException("DefaultMapDefinitionSaving can only be used with DefaultMapDefinition instances.");
 
-      var settings = dmd.AgsSettings;
-      var orderedProperties = metadata.ToList();
-      for (var i = 0; i < orderedProperties.Count; i++)
-      {
-         var prop = orderedProperties[i];
-         if (settings.Format == SavingFormat.Spacious && i > 0)
-            sb.AppendLine();
-         prop.Format(dmd, sb, asOneLine, "#", settings);
-      }
+      var dmdNode = TreeBuilder.Construct(dmd, false, null, true);
+      if (dmdNode is not BlockSerializationNode bsn)
+         throw new InvalidOperationException($"DefaultMapDefinitionSaving expected a BlockSerializationNode but found a {dmdNode.GetType()}.");
+
+      var commentChar = "#";
+      bsn.SerializeChildElements(sb, ref commentChar, asOneLine);
    }
 
    public static void InstitutionPresenceSaving(IAgs target,
