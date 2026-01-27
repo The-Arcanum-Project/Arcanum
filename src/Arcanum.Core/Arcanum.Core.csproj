@@ -7,16 +7,26 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>14</LangVersion>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
 
     <PropertyGroup>
-        <!-- Forces the compiler to write the source generator output to disk -->
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <!-- Optional: Specifies where to put them so you can find them easily -->
         <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <DebugType>portable</DebugType>
+        <RunAnalyzers>false</RunAnalyzers>
+        <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+        <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Arcanum.PluginHost\Arcanum.PluginHost.csproj"/>
@@ -48,38 +58,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Utils\NameGenerator\l_dutch.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_dutch.lang"/>
-        <None Remove="Utils\NameGenerator\l_english.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_english.lang"/>
-        <None Remove="Utils\NameGenerator\l_french.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_french.lang"/>
-        <None Remove="Utils\NameGenerator\l_german.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_german.lang"/>
-        <None Remove="Utils\NameGenerator\l_hungarian.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_hungarian.lang"/>
-        <None Remove="Utils\NameGenerator\l_italian.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_italian.lang"/>
-        <None Remove="Utils\NameGenerator\l_korean.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_korean.lang"/>
-        <None Remove="Utils\NameGenerator\l_lithuanian.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_lithuanian.lang"/>
-        <None Remove="Utils\NameGenerator\l_polish.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_polish.lang"/>
-        <None Remove="Utils\NameGenerator\l_portuguese.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_portuguese.lang"/>
-        <None Remove="Utils\NameGenerator\l_russian.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_russian.lang"/>
-        <None Remove="Utils\NameGenerator\l_spanish.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_spanish.lang"/>
-        <None Remove="Utils\NameGenerator\l_swedish.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_swedish.lang"/>
-        <None Remove="Utils\NameGenerator\l_turkish.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\l_turkish.lang"/>
-        <None Remove="Utils\NameGenerator\ls_japanese.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\ls_japanese.lang"/>
-        <None Remove="Utils\NameGenerator\ls_standardchinese.lang"/>
-        <EmbeddedResource Include="Utils\NameGenerator\ls_standardchinese.lang"/>
+        <EmbeddedResource Include="Utils\NameGenerator\*.lang"/>
     </ItemGroup>
 
 </Project>
