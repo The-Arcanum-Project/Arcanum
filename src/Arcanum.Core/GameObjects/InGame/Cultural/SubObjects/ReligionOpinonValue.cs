@@ -11,7 +11,7 @@ using Arcanum.Core.GameObjects.InGame.Religious;
 
 namespace Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
 
-[ObjectSaveAs(savingMethod: "SaveIAgsEnumKvp")]
+[ObjectSaveAs(savingMethod: "SaveReligionOpinionValue")]
 public partial class ReligionOpinionValue : IEu5Object<ReligionOpinionValue>
 {
    #region Nexus Properties

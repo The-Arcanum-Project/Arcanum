@@ -170,7 +170,9 @@ public sealed class Parser(LexerResult lexerResult)
       }
 
       node.LeadingComment = leadingComments;
-      node.InlineComment = ConsumeInlineComment();
+      var trailingComment = ConsumeInlineComment();
+      if (trailingComment != null)
+         node.InlineComment = trailingComment;
 
       return node;
    }
@@ -178,7 +180,7 @@ public sealed class Parser(LexerResult lexerResult)
    private BlockNode ParseAnonymousBlock()
    {
       var brace = Expect(TokenType.LeftBrace, "'{' to start anonymous block.");
-      var block = new BlockNode(brace); // Use the '{' token as the identifier
+      var block = new BlockNode(brace) { InlineComment = ConsumeInlineComment() }; // Use the '{' token as the identifier
       while (!Check(TokenType.RightBrace) && !IsAtEnd())
          block.Children.Add(ParseStatement());
 
@@ -199,7 +201,7 @@ public sealed class Parser(LexerResult lexerResult)
    {
       Match(TokenType.Equals);
       Expect(TokenType.LeftBrace, "...");
-      var block = new BlockNode(key);
+      var block = new BlockNode(key) { InlineComment = ConsumeInlineComment() };
 
       // Parse Children (and standalone comments inside)
       while (!Check(TokenType.RightBrace) && !IsAtEnd())

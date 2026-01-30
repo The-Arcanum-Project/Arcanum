@@ -8,6 +8,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Serialization.Nodes;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Court.State;
+using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.InGame.Religious.SubObjects;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
 using CharacterNameDeclaration = Arcanum.Core.GameObjects.InGame.Court.CharacterNameDeclaration;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
@@ -30,7 +32,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// </summary>
 public static class SavingActionProvider
 {
-   public static void RulerTermSaving(IAgs target,
+   public static void RulerTermSaving(IEu5Object target,
                                       HashSet<PropertySavingMetadata> metadata,
                                       IndentedStringBuilder sb,
                                       // ReSharper disable once RedundantAssignment
@@ -65,7 +67,7 @@ public static class SavingActionProvider
       sb.AppendClosingBrace();
    }
 
-   public static void LocationSaving(IAgs target,
+   public static void LocationSaving(IEu5Object target,
                                      HashSet<PropertySavingMetadata> metadata,
                                      IndentedStringBuilder sb,
                                      bool asOneLine)
@@ -78,7 +80,7 @@ public static class SavingActionProvider
         .Append(location.Color.AsHexString().ToLowerInvariant());
    }
 
-   public static void SaveIdentifierStringKvp(IAgs target,
+   public static void SaveIdentifierStringKvp(IEu5Object target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,
                                               bool asOneLine)
@@ -95,7 +97,7 @@ public static class SavingActionProvider
         .Append(targetKvp.Value);
    }
 
-   public static void SocientalValueEntrySaving(IAgs target,
+   public static void SocientalValueEntrySaving(IEu5Object target,
                                                 PropertySavingMetadata metadata,
                                                 IndentedStringBuilder sb,
                                                 bool asOneLine)
@@ -116,7 +118,7 @@ public static class SavingActionProvider
       sb.AppendBlockNewLines();
    }
 
-   public static void RoadSavingMethod(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void RoadSavingMethod(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not Road road)
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
@@ -126,7 +128,7 @@ public static class SavingActionProvider
         .Append(road.EndLocation.UniqueId);
    }
 
-   public static void JominiDate(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void JominiDate(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not JominiDate date)
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
@@ -138,7 +140,7 @@ public static class SavingActionProvider
       sb.Append(md.Keyword).AppendSpacer().Append(GetSeparator(md.Separator)).AppendSpacer().Append(date);
    }
 
-   public static void SaveNameDeclaration(IAgs target,
+   public static void SaveNameDeclaration(IEu5Object target,
                                           HashSet<PropertySavingMetadata> metadata,
                                           IndentedStringBuilder sb,
                                           bool asOneLine)
@@ -162,20 +164,46 @@ public static class SavingActionProvider
            .Append('}');
    }
 
-   public static void SaveIAgsEnumKvp(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveReligiousSchoolOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
-      if (target is not IIagsEnumKvp<IAgs, Enum> kvp)
+      if (target is not ReligiousSchoolOpinionValue kvp)
       {
-         Debug.Fail("Unexpected type in SaveIAgsEnumKvp");
-         throw new InvalidOperationException("SaveIAgsEnumKvp can only be used with IIagsEnumKvp<IAgs> instances.");
+         Debug.Fail("Unexpected type in SaveCultureOpinionValue");
+         throw new InvalidOperationException("SaveCultureOpinionValue can only be used with ReligiousSchoolOpinionValue instances.");
       }
 
-      sb.Append(kvp.Key.SavingKey)
+      sb.Append(kvp.Key.UniqueId)
         .AppendSeparator()
         .Append(EnumAgsRegistry.GetKey(kvp.Value));
    }
 
-   public static void SaveDemandData(IAgs target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveCultureOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   {
+      if (target is not CultureOpinionValue kvp)
+      {
+         Debug.Fail("Unexpected type in SaveCultureOpinionValue");
+         throw new InvalidOperationException("SaveCultureOpinionValue can only be used with CultureOpinionValue instances.");
+      }
+
+      sb.Append(kvp.Key.UniqueId)
+        .AppendSeparator()
+        .Append(EnumAgsRegistry.GetKey(kvp.Value));
+   }
+
+   public static void SaveReligionOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   {
+      if (target is not ReligionOpinionValue kvp)
+      {
+         Debug.Fail("Unexpected type in SaveReligionOpinionValue");
+         throw new InvalidOperationException("SaveReligionOpinionValue can only be used with ReligionOpinionValue instances.");
+      }
+
+      sb.Append(kvp.Key.UniqueId)
+        .AppendSeparator()
+        .Append(EnumAgsRegistry.GetKey(kvp.Value));
+   }
+
+   public static void SaveDemandData(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
    {
       if (target is not DemandData dd)
          throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
@@ -190,7 +218,7 @@ public static class SavingActionProvider
            .Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
    }
 
-   public static void SaveWealthImpactData(IAgs target,
+   public static void SaveWealthImpactData(IEu5Object target,
                                            HashSet<PropertySavingMetadata> metadata,
                                            IndentedStringBuilder sb,
                                            bool asOneLine)
@@ -206,7 +234,7 @@ public static class SavingActionProvider
            .Append(FormatValue(SavingValueType.Float, dd, DemandData.Field.TargetUpper));
    }
 
-   public static void MapMovementAssistSaving(IAgs target,
+   public static void MapMovementAssistSaving(IEu5Object target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,
                                               bool asOneLine)
@@ -223,7 +251,7 @@ public static class SavingActionProvider
         .AppendClosingBrace();
    }
 
-   public static void EstateCountDefinitionSaving(IAgs target,
+   public static void EstateCountDefinitionSaving(IEu5Object target,
                                                   HashSet<PropertySavingMetadata> metadata,
                                                   IndentedStringBuilder sb,
                                                   bool asOneLine)
@@ -237,7 +265,7 @@ public static class SavingActionProvider
         .Append(FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count));
    }
 
-   public static void ModValInstanceSaving(IAgs target,
+   public static void ModValInstanceSaving(IEu5Object target,
                                            HashSet<PropertySavingMetadata> metadata,
                                            IndentedStringBuilder sb,
                                            bool asOneLine)
@@ -249,7 +277,7 @@ public static class SavingActionProvider
       sb.Append(FormatValue(SavingValueType.Modifier, (object)mvi, null));
    }
 
-   public static void SoundTollsSaving(IAgs target,
+   public static void SoundTollsSaving(IEu5Object target,
                                        HashSet<PropertySavingMetadata> metadata,
                                        IndentedStringBuilder sb,
                                        bool asOneLine)
@@ -263,7 +291,7 @@ public static class SavingActionProvider
         .Append(FormatValue(SavingValueType.Identifier, st, SoundToll.Field.StraitLocationTwo));
    }
 
-   public static void DefaultMapDefinitionSaving(IAgs target,
+   public static void DefaultMapDefinitionSaving(IEu5Object target,
                                                  HashSet<PropertySavingMetadata> metadata,
                                                  IndentedStringBuilder sb,
                                                  bool asOneLine)
@@ -280,7 +308,7 @@ public static class SavingActionProvider
       bsn.SerializeChildElements(sb, ref commentChar, asOneLine);
    }
 
-   public static void InstitutionPresenceSaving(IAgs target,
+   public static void InstitutionPresenceSaving(IEu5Object target,
                                                 HashSet<PropertySavingMetadata> metadata,
                                                 IndentedStringBuilder sb,
                                                 bool asOneLine)
@@ -294,7 +322,7 @@ public static class SavingActionProvider
         .Append(FormatValue(SavingValueType.Bool, ip, InstitutionPresence.Field.IsPresent));
    }
 
-   public static void Setup_vars_saving(IAgs target,
+   public static void Setup_vars_saving(IEu5Object target,
                                         PropertySavingMetadata metadata,
                                         IndentedStringBuilder sb,
                                         bool asOneLine)
@@ -321,14 +349,14 @@ public static class SavingActionProvider
                     .Append('"')
                     .AppendLine()
                     .Append("data");
-                  ((IAgs)vard.DataBlock).ToAgsContext().BuildContext(sb);
+                  ((IEu5Object)vard.DataBlock).ToAgsContext().BuildContext(sb);
                }
             }
          }
       }
    }
 
-   public static void DefinitionSaving(IAgs target,
+   public static void DefinitionSaving(IEu5Object target,
                                        HashSet<PropertySavingMetadata> metadata,
                                        IndentedStringBuilder sb,
                                        bool asOneLine)

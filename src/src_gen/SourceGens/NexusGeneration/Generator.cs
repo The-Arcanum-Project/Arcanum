@@ -85,6 +85,9 @@ public static class Generator
          using (builder.Region("Deep Clone"))
             AppendDeepClone(builder, cs, npds);
 
+         using (builder.Region("Object Comments"))
+            AppendObjectComments(builder);
+
          using (builder.Region("Property Changed & Indexer"))
             AppendPropertyChanged(builder);
          builder.AppendLine();
@@ -96,6 +99,14 @@ public static class Generator
 
       AppendFileFooter(builder);
       return builder.InnerBuilder;
+   }
+
+   private static void AppendObjectComments(IndentBuilder builder)
+   {
+      builder.AppendLine()
+             .AppendLine("public string? LeadingComment { get; set; }")
+             .AppendLine("public string? InlineComment { get; set; }")
+             .AppendLine("public string? ClosingComment { get; set; }");
    }
 
    private static void AppendMisc(IndentBuilder builder, List<NexusPropertyData> npds)

@@ -73,7 +73,7 @@ public static class FormattingService
       if (meta.SavingMethod == null)
       {
          // Nested, single objects
-         if (meta is { ValueType: SavingValueType.IAgs, IsCollection: false } && value is IAgs agsValue)
+         if (meta is { ValueType: SavingValueType.IAgs, IsCollection: false } && value is IEu5Object agsValue)
          {
             // SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, meta);
             var sm = agsValue.ClassMetadata.SavingMethod;
@@ -93,7 +93,7 @@ public static class FormattingService
             }
             else
             {
-               var node = TreeBuilder.Construct((IEu5Object)value, meta.IsArray, meta);
+               var node = TreeBuilder.Construct(agsValue, meta.IsArray, meta);
                node.Write(sb, ref commentChar, asOneLine);
             }
 

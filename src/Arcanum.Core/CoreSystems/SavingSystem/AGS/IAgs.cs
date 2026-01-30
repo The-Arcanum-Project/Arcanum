@@ -1,4 +1,5 @@
-﻿using Nexus.Core;
+﻿using Arcanum.Core.GameObjects.BaseTypes;
+using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -20,8 +21,7 @@ public interface IAgs : INexus
    /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
    /// </summary>
    /// <returns></returns>
-   public AgsObjectSavingContext ToAgsContext(string commentChar = "#")
-      => new(this, commentChar); //TODO fix this by using FileInformation
+   public AgsObjectSavingContext ToAgsContext(string commentChar = "#") => new((IEu5Object)this, commentChar); //TODO fix this by using FileInformation
 
    /// <summary>
    /// Returns the metadata for the class implementing this IAgs instance. <br/>

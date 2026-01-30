@@ -198,9 +198,6 @@ public static class AgsHelper
 
       sb.AppendLine("        public ClassSavingMetadata ClassMetadata => _classMetadata;");
       sb.AppendLine();
-
-      // --- The public accessor to the list ---
-      sb.AppendLine();
       sb.AppendLine("        public IReadOnlyList<PropertySavingMetadata> SaveableProps => _allProperties;");
       sb.AppendLine("    }");
       sb.AppendLine("}");

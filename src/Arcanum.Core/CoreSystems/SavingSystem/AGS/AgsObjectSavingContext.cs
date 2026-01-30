@@ -1,4 +1,5 @@
 ﻿using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -12,7 +13,7 @@ public class AgsObjectSavingContext
    /// <summary>
    /// The AGS instance being saved.
    /// </summary>
-   public IAgs Ags { get; init; }
+   public IEu5Object Ags { get; init; }
    /// <summary>
    /// The settings used for the object being saved.
    /// </summary>
@@ -22,7 +23,7 @@ public class AgsObjectSavingContext
    /// </summary>
    public List<PropertySavingMetadata> OrderedProperties { get; init; }
 
-   public AgsObjectSavingContext(IAgs ags, string commentChar = "#")
+   public AgsObjectSavingContext(IEu5Object ags, string commentChar = "#")
    {
       Ags = ags;
       Settings = ags.AgsSettings;

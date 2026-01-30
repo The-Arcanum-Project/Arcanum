@@ -51,7 +51,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       {
          // Header: "key = {" or "{"
          if (Metadata is not { IsShattered: true })
-            AppendHeaderToStringBuilder(sb);
+            AppendHeaderToStringBuilder(sb, ref commentChar);
 
          // Compact Mode (e.g. Colors, Arrays)
          if (IsCompact)
@@ -106,13 +106,11 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
 
    public void SerializeChildElements(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
    {
-      WriteInlineComment(sb, ref commentChar); // Inline comment for the OPENING brace
-
       foreach (var child in Children)
          child.Write(sb, ref commentChar, asOneLine);
    }
 
-   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb)
+   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb, ref string commentChar)
    {
       if (!string.IsNullOrEmpty(Key))
       {
@@ -125,7 +123,9 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       else
          sb.AppendOpeningBrace(asOneLine: true).AppendSpacer();
 
+      WriteInlineComment(sb, ref commentChar); // Inline comment for the OPENING brace
+
       if (!IsCompact)
-         sb.AppendLine();
+         sb.EnforceNewLineCount(1);
    }
 }

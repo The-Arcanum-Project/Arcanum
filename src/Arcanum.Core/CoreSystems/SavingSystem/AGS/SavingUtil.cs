@@ -289,7 +289,7 @@ public static class SavingUtil
       //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
    }
 
-   public static void HandleIAgsProperty(IAgs ags, IndentedStringBuilder sb, string commentChar, bool asOneLine, PropertySavingMetadata psm)
+   public static void HandleIAgsProperty(IEu5Object ags, IndentedStringBuilder sb, string commentChar, bool asOneLine, PropertySavingMetadata psm)
    {
       var sm = ags.ClassMetadata.SavingMethod;
       if (sm != null)

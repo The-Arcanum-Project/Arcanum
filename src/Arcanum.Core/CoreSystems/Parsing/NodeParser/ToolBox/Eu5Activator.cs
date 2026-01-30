@@ -13,18 +13,36 @@ public static class Eu5Activator
 
    private static string GenerateUniqueIdForUnnamedObject<T>() where T : IEu5Object => $"<unnamed_{typeof(T).Name}_{_unNamedObjectCounter++}>";
 
-   public static T CreateEmbeddedInstance<T>(string? uniqueId, StatementNode node) where T : IEu5Object<T>, new() => new()
+   public static T CreateEmbeddedInstance<T>(string? uniqueId, StatementNode node) where T : IEu5Object<T>, new()
    {
-      UniqueId = uniqueId ?? GenerateUniqueIdForUnnamedObject<T>(),
-      Source = Eu5FileObj.Embedded,
-      FileLocation = node.GetLocationData(),
-   };
+      var t = new T()
+      {
+         UniqueId = uniqueId ?? GenerateUniqueIdForUnnamedObject<T>(),
+         Source = Eu5FileObj.Embedded,
+         FileLocation = node.GetLocationData(),
+      };
+      if (node is BlockNode bn)
+      {
+         t.ClosingComment = bn.ClosingComment;
+         t.InlineComment = bn.InlineComment;
+         t.LeadingComment = bn.LeadingComment;
+      }
+
+      return t;
+   }
 
    public static T CreateInstance<T>(string uniqueId, Eu5FileObj source, StatementNode node)
       where T : IEu5Object<T>, new()
    {
       var t = IEu5Object<T>.CreateInstance(uniqueId, source);
       t.FileLocation = node.GetLocationData();
+      if (node is BlockNode bn)
+      {
+         t.ClosingComment = bn.ClosingComment;
+         t.InlineComment = bn.InlineComment;
+         t.LeadingComment = bn.LeadingComment;
+      }
+
       return t;
    }
 

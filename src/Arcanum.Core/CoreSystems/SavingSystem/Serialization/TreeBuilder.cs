@@ -20,7 +20,13 @@ public static class TreeBuilder
       var root = new BlockSerializationNode(FormattingService.FormatBlockNameWithInjection(gameObj, isArray),
                                             gameObj.AgsSettings.WriteEmptyCollectionHeader,
                                             gameObj,
-                                            psm) { IsCompact = gameObj.AgsSettings.AsOneLine };
+                                            psm)
+      {
+         IsCompact = gameObj.AgsSettings.AsOneLine,
+         InlineComment = gameObj.InlineComment,
+         LeadingComment = gameObj.LeadingComment,
+         ClosingComment = gameObj.ClosingComment,
+      };
       var writeEmptyBlocks = gameObj.AgsSettings.WriteEmptyCollectionHeader;
 
       foreach (var meta in gameObj.SaveableProps)
@@ -140,6 +146,7 @@ public static class TreeBuilder
             var keyStr = string.IsNullOrEmpty(block.Key) ? "<Anonymous>" : $"Key: '{block.Key}'";
             var compactStr = block.IsCompact ? " (Compact)" : "";
             var closingCmt = !string.IsNullOrEmpty(block.ClosingComment) ? " [Has Closing Cmt]" : "";
+            var inlineCmt = !string.IsNullOrEmpty(block.InlineComment) ? " [Has Inline Cmt]" : "";
 
             var count = 0;
             foreach (var c in block.Children)
@@ -149,7 +156,7 @@ public static class TreeBuilder
                else
                   count++;
 
-            sb.AppendLine($"{indent}📦 {typeName} -> [{count}]{keyStr}{compactStr}{flagsStr}{closingCmt}");
+            sb.AppendLine($"{indent}📦 {typeName} -> [{count}]{keyStr}{compactStr}{flagsStr}{inlineCmt}{closingCmt}");
 
             foreach (var child in block.Children)
                PrintRecursive(child, sb, indentLevel + 1);

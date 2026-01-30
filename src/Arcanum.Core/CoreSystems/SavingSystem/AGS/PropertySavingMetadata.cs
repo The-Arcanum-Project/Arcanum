@@ -116,7 +116,7 @@ public class PropertySavingMetadata
    /// Handles comments, collections, and custom saving methods as needed. <br/>
    /// Properties are only saved if they differ from their default values or are required.
    /// </summary>
-   public void Format(IAgs ags,
+   public void Format(IEu5Object ags,
                       IndentedStringBuilder sb,
                       bool asOneLine,
                       string commentChar,
@@ -141,7 +141,7 @@ public class PropertySavingMetadata
       {
          if (ValueType == SavingValueType.IAgs && !IsCollection)
          {
-            SavingUtil.HandleIAgsProperty((IAgs)value, sb, commentChar, asOneLine, this);
+            SavingUtil.HandleIAgsProperty((IEu5Object)value, sb, commentChar, asOneLine, this);
             return;
          }
 
