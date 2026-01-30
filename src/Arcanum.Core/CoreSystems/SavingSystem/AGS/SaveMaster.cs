@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
@@ -337,8 +338,8 @@ public static class SaveMaster
          return false;
 
       var sb = new IndentedStringBuilder();
-      foreach (IEu5Object obj in Globals.Continents.Values)
-         obj.ToAgsContext().BuildContext(sb);
+      foreach (var obj in Globals.Continents.Values)
+         TreeBuilder.ConstructAndWrite(obj, sb, obj.AgsSettings.AsOneLine, false, null, false, false);
 
       WriteFile(sb.InnerBuilder, DescriptorDefinitions.DefinitionsDescriptor.Files[0], true);
 
@@ -416,8 +417,8 @@ public static class SaveMaster
          var empty = (IEu5Object)EmptyRegistry.Empties[type];
          updateHandle.Invoke($"Saving compacted setup file for type: {empty.Source.Path.RelativePath}");
          var isb = new IndentedStringBuilder();
-         foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
-            ((IEu5Object)obj).ToAgsContext().BuildContext(isb);
+         foreach (IEu5Object obj in empty.GetGlobalItemsNonGeneric().Values)
+            TreeBuilder.ConstructAndWrite(obj, isb, obj.AgsSettings.AsOneLine, false, null, false, false);
          var newfo = FileStateManager.CreateEu5FileObject(empty);
          WriteFile(isb.InnerBuilder, newfo, true);
       }
@@ -494,8 +495,10 @@ public static class SaveMaster
          {
             objSb.Clear();
 
-            csso.Target.ToAgsContext()
-                .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
+            TreeBuilder.ConstructAndWriteInjRep(csso.Target, objSb, csso.Target.AgsSettings.AsOneLine, false, csso.GetPropertiesToSave());
+
+            // csso.Target.ToAgsContext()
+            //     .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
             var cssoInj = csso.InjectedObj;
 
             Debug.Assert(cssoInj != InjectObj.Empty,
@@ -622,7 +625,7 @@ public static class SaveMaster
          }
          else
          {
-            obj.ToAgsContext().BuildContext(objBuilder);
+            TreeBuilder.ConstructAndWrite(obj, sb, obj.AgsSettings.AsOneLine, false, null, false, false);
             if (obj.FileLocation == Eu5ObjectLocation.Empty)
                obj.FileLocation = new(0,
                                       CountNewLinesInStringBuilder(sb.InnerBuilder),

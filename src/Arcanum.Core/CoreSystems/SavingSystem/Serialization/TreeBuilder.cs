@@ -11,11 +11,38 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 
 public static class TreeBuilder
 {
+   public static void ConstructAndWrite(IEu5Object target,
+                                        IndentedStringBuilder sb,
+                                        bool isOneLine,
+                                        bool isArray,
+                                        PropertySavingMetadata? psm,
+                                        bool ignoreCustomSavingMethod,
+                                        bool writeDefaults)
+   {
+      var node = Construct(target, isArray, psm, ignoreCustomSavingMethod);
+      var commentChar = target.Source.Descriptor.FileType.CommentPrefix;
+      node.Write(sb, ref commentChar, isOneLine, writeDefaults);
+   }
+
+   public static void ConstructAndWriteInjRep(IEu5Object target,
+                                              IndentedStringBuilder sb,
+                                              bool isOneLine,
+                                              bool isArray,
+                                              HashSet<PropertySavingMetadata> psms)
+   {
+      var node = Construct(target, isArray, null, false);
+      var commentChar = target.Source.Descriptor.FileType.CommentPrefix;
+      if (node is not BlockSerializationNode blockNode)
+         throw new InvalidOperationException("InjRep serialization requires a BlockSerializationNode at the root.");
+
+      blockNode.Write(sb, ref commentChar, isOneLine, psms, target.InjRepType, true);
+   }
+
    public static SerializationNode Construct(IEu5Object gameObj, bool isArray, PropertySavingMetadata? psm, bool ignoreCustomSavingMethod = false)
    {
       if (gameObj.ClassMetadata.SavingMethod != null && !ignoreCustomSavingMethod)
          // Custom Saving Method Defined
-         return new ManualSerializationNode(gameObj, [.. gameObj.SaveableProps]);
+         return new ManualSerializationNode(gameObj, [.. gameObj.SaveableProps], psm);
 
       var root = new BlockSerializationNode(FormattingService.FormatBlockNameWithInjection(gameObj, isArray),
                                             gameObj.AgsSettings.WriteEmptyCollectionHeader,
@@ -146,7 +173,6 @@ public static class TreeBuilder
             var keyStr = string.IsNullOrEmpty(block.Key) ? "<Anonymous>" : $"Key: '{block.Key}'";
             var compactStr = block.IsCompact ? " (Compact)" : "";
             var closingCmt = !string.IsNullOrEmpty(block.ClosingComment) ? " [Has Closing Cmt]" : "";
-            var inlineCmt = !string.IsNullOrEmpty(block.InlineComment) ? " [Has Inline Cmt]" : "";
 
             var count = 0;
             foreach (var c in block.Children)
@@ -156,7 +182,7 @@ public static class TreeBuilder
                else
                   count++;
 
-            sb.AppendLine($"{indent}📦 {typeName} -> [{count}]{keyStr}{compactStr}{flagsStr}{inlineCmt}{closingCmt}");
+            sb.AppendLine($"{indent}📦 {typeName} -> [{count}]{keyStr}{compactStr}{flagsStr}{closingCmt}");
 
             foreach (var child in block.Children)
                PrintRecursive(child, sb, indentLevel + 1);
@@ -171,7 +197,7 @@ public static class TreeBuilder
             if (!shouldSkip)
                sb.AppendLine($"{indent}🔑 {typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value?.GetType().Name ?? "null"}{flagsStr}");
 #else
-            var shouldSkip = FormattingService.ShouldSkipCheck(prop.Psm, prop.Target, prop.Value, false);
+            var shouldSkip = FormattingService.ShouldSkipCheck(prop.Psm, prop.Target, prop.Value, false, false);
             var sss = shouldSkip ? "[Skipped]" : "";
             sb.AppendLine($"{indent}🔑 {sss}{typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value?.GetType().Name ?? "null"}{flagsStr}");
 #endif

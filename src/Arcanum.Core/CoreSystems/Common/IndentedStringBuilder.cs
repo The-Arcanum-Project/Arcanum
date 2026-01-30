@@ -546,4 +546,9 @@ public class IndentedStringBuilder
       get => _builder[index];
       set => _builder[index] = (char)value;
    }
+
+   public void AppendInjRepType(InjRepType agsInjRepType)
+   {
+      _builder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
+   }
 }

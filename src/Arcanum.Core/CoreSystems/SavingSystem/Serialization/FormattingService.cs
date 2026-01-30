@@ -54,10 +54,11 @@ public static class FormattingService
                              string commentChar,
                              bool asOneLine,
                              object value,
-                             bool alwaysSerializeAll = false)
+                             bool alwaysSerializeAll,
+                             bool writeDefaults)
    {
 #if DEBUG
-      if (ShouldSkipCheck(meta, ags, value, alwaysSerializeAll))
+      if (ShouldSkipCheck(meta, ags, value, alwaysSerializeAll, writeDefaults))
       {
          ArcLog.WriteLine("FMS", LogLevel.ERR, "Skipping property '{0}' during serialization should have been handled beforehand!", meta.NxProp);
          return;
@@ -79,7 +80,7 @@ public static class FormattingService
             var sm = agsValue.ClassMetadata.SavingMethod;
             if (sm != null)
             {
-               sm.Invoke(agsValue, [meta], sb, asOneLine);
+               sm.Invoke(agsValue, [meta], sb, asOneLine, writeDefaults);
                return;
             }
 
@@ -94,7 +95,7 @@ public static class FormattingService
             else
             {
                var node = TreeBuilder.Construct(agsValue, meta.IsArray, meta);
-               node.Write(sb, ref commentChar, asOneLine);
+               node.Write(sb, ref commentChar, asOneLine, writeDefaults);
             }
 
             return;
@@ -102,7 +103,7 @@ public static class FormattingService
 
          // Collections
          if (meta.IsCollection)
-            HandleCollectionSerialization(meta, sb, ags, commentChar, value);
+            HandleCollectionSerialization(meta, sb, ags, commentChar, value, writeDefaults);
          // Enums
          else if (meta.ValueType is SavingValueType.FlagsEnum or SavingValueType.Enum)
             HandleEnumProperty(meta, sb, value, asOneLine);
@@ -118,7 +119,7 @@ public static class FormattingService
       }
       // Custom saving
       else
-         meta.SavingMethod(ags, meta, sb, asOneLine);
+         meta.SavingMethod(ags, meta, sb, asOneLine, writeDefaults);
    }
 
    internal static void AssignValueType(PropertySavingMetadata meta, object value)
@@ -127,19 +128,24 @@ public static class FormattingService
          meta.ValueType = SavingUtil.GetSavingValueType(value);
    }
 
-   internal static void HandleCollectionSerialization(PropertySavingMetadata meta, IndentedStringBuilder sb, IEu5Object ags, string commentChar, object value)
+   internal static void HandleCollectionSerialization(PropertySavingMetadata meta,
+                                                      IndentedStringBuilder sb,
+                                                      IEu5Object ags,
+                                                      string commentChar,
+                                                      object value,
+                                                      bool writeDefaults)
    {
       if (value is IEnumerable collection)
          if (meta.IsShattered)
-            HandleShatteredCollection(meta, sb, commentChar, ags, meta.CollectionSeparator, meta.ValueType, collection);
+            HandleShatteredCollection(meta, sb, commentChar, ags, meta.CollectionSeparator, meta.ValueType, collection, writeDefaults);
          else
-            HandleCollection(ags, meta, sb, commentChar, meta.CollectionSeparator, collection);
+            HandleCollection(ags, meta, sb, commentChar, meta.CollectionSeparator, collection, writeDefaults);
       else
          throw new
             InvalidOperationException($"Property '{meta.NxProp}' is marked as a collection but the value is not IEnumerable (actual type: '{value.GetType().Name}').");
    }
 
-   internal static bool ShouldSkipCheck(PropertySavingMetadata meta, IEu5Object ags, object value, bool alwaysSerializeAll)
+   internal static bool ShouldSkipCheck(PropertySavingMetadata meta, IEu5Object ags, object value, bool alwaysSerializeAll, bool writeDefaults)
    {
       // Required fields must always be saved
       if (!meta.AlwaysWrite && !Config.Settings.SavingConfig.WriteAllDefaultValues)
@@ -149,7 +155,7 @@ public static class FormattingService
             return true;
       }
       else
-         return !IsWriteableDefaultValue(value);
+         return writeDefaults || !IsWriteableDefaultValue(value);
 
       return false;
    }
@@ -242,7 +248,8 @@ public static class FormattingService
                                                 IAgs ags,
                                                 string collectionSeparator,
                                                 SavingValueType svt,
-                                                IEnumerable collection)
+                                                IEnumerable collection,
+                                                bool writeDefaults)
    {
       if (!collection.HasItems())
          return;
@@ -261,7 +268,7 @@ public static class FormattingService
                if (meta.SaveEmbeddedAsIdentifier)
                   sb.Append(meta.Keyword);
                var node = TreeBuilder.Construct(ia, meta.IsArray, meta);
-               node.Write(sb, ref commentChar, ia.AgsSettings.AsOneLine);
+               node.Write(sb, ref commentChar, ia.AgsSettings.AsOneLine, writeDefaults);
                sb.AppendLine();
             }
             else
@@ -298,7 +305,8 @@ public static class FormattingService
                                        IndentedStringBuilder sb,
                                        string commentChar,
                                        string collectionSeparator,
-                                       IEnumerable collection)
+                                       IEnumerable collection,
+                                       bool writeDefaults)
    {
       var internalCollection = collection.Cast<object>().ToList();
       if (internalCollection.Count == 0 && !ags.AgsSettings.WriteEmptyCollectionHeader)
@@ -312,7 +320,7 @@ public static class FormattingService
       if (meta.CollectionAsPureIdentifierList)
          FormatAsIdentifierList(sb, internalCollection, collectionSeparator, collectionProfile);
       else if (meta.IsEmbeddedObject || meta.ValueType == SavingValueType.IAgs)
-         FormatAsEmbeddedObjectList(meta, sb, internalCollection, commentChar);
+         FormatAsEmbeddedObjectList(meta, sb, internalCollection, commentChar, writeDefaults);
       else
          FormatAsValueList(meta, sb, internalCollection, collectionSeparator, collectionProfile);
 
@@ -502,7 +510,11 @@ public static class FormattingService
       sb.AppendLine();
    }
 
-   public static void FormatAsEmbeddedObjectList(PropertySavingMetadata meta, IndentedStringBuilder sb, IEnumerable collection, string commentChar)
+   public static void FormatAsEmbeddedObjectList(PropertySavingMetadata meta,
+                                                 IndentedStringBuilder sb,
+                                                 IEnumerable collection,
+                                                 string commentChar,
+                                                 bool writeDefaults)
    {
       foreach (var item in collection)
       {
@@ -511,7 +523,7 @@ public static class FormattingService
                InvalidOperationException($"Collection property '{meta.NxProp}' contains non-IAgs item of type '{item?.GetType().Name ?? "null"}'.");
 
          var node = TreeBuilder.Construct(eu5Obj, meta.IsArray, meta);
-         node.Write(sb, ref commentChar, eu5Obj.AgsSettings.AsOneLine);
+         node.Write(sb, ref commentChar, eu5Obj.AgsSettings.AsOneLine, writeDefaults);
          sb.AppendLine();
       }
    }

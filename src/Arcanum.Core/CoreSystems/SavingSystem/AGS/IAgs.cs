@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.GameObjects.BaseTypes;
-using Nexus.Core;
+﻿using Nexus.Core;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -16,12 +15,6 @@ public interface IAgs : INexus
    /// </summary>
    [IgnoreModifiable]
    public IReadOnlyList<PropertySavingMetadata> SaveableProps { get; }
-
-   /// <summary>
-   /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
-   /// </summary>
-   /// <returns></returns>
-   public AgsObjectSavingContext ToAgsContext(string commentChar = "#") => new((IEu5Object)this, commentChar); //TODO fix this by using FileInformation
 
    /// <summary>
    /// Returns the metadata for the class implementing this IAgs instance. <br/>

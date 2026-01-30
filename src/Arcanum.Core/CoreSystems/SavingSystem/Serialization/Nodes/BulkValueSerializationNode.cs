@@ -12,9 +12,9 @@ public class BulkValueSerializationNode(IEnumerable collection, PropertySavingMe
    public PropertySavingMetadata Meta { get; } = meta;
    public IEu5Object Target { get; } = target;
 
-   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults)
    {
       FormattingService.AssignValueType(Meta, Collection);
-      FormattingService.HandleCollectionSerialization(Meta, sb, Target, commentChar, Collection);
+      FormattingService.HandleCollectionSerialization(Meta, sb, Target, commentChar, Collection, writeDefaults);
    }
 }

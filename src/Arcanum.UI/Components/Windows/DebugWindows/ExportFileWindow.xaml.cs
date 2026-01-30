@@ -7,10 +7,12 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
+
 // Add these using statements
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
@@ -89,7 +91,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
       var filtered = string.IsNullOrWhiteSpace(filter)
                         ? _allAvailableFiles
                         : _allAvailableFiles.Where(f => f.Path.Filename.Contains(filter,
-                                                       StringComparison.OrdinalIgnoreCase));
+                                                                                 StringComparison.OrdinalIgnoreCase));
 
       AvailableFiles.Clear();
       foreach (var file in filtered.OrderBy(f => f.Path.Filename))
@@ -225,7 +227,7 @@ public partial class ExportFileWindow : INotifyPropertyChanged
 
       var sb = new IndentedStringBuilder();
       foreach (var obj in value)
-         obj.ToAgsContext().BuildContext(sb);
+         TreeBuilder.ConstructAndWrite(obj, sb, false, false, null, false, false);
 
       PreviewText = sb.ToString();
    }

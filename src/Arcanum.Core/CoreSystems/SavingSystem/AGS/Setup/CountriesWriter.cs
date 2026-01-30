@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.InGame.Court.State;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
@@ -17,25 +18,22 @@ public class
 
    public override IndentedStringBuilder WriteFile()
    {
-      var builder = new IndentedStringBuilder();
+      var sb = new IndentedStringBuilder();
 
       if (Globals.SetupContentNodes.CurrentAge != Age.Empty)
-         builder.AppendLine("current_age = ").Append(Globals.SetupContentNodes.CurrentAge.UniqueId).AppendLine();
+         sb.AppendLine("current_age = ").Append(Globals.SetupContentNodes.CurrentAge.UniqueId).AppendLine();
 
-      using (builder.BlockWithName("countries"))
+      using (sb.BlockWithName("countries"))
       {
-         using (builder.BlockWithName("countries"))
+         using (sb.BlockWithName("countries"))
          {
             var countries = Globals.Countries.Values.ToList();
             countries = countries.OrderBy(x => x.UniqueId).ToList();
             foreach (var country in countries)
-            {
-               ((IAgs)country).ToAgsContext().BuildContext(builder);
-               builder.AppendLine();
-            }
+               TreeBuilder.ConstructAndWrite(country, sb, false, false, null, false, false);
          }
       }
 
-      return builder;
+      return sb;
    }
 }

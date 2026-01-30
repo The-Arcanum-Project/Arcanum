@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 #endregion
 
@@ -26,7 +27,17 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
    public IEu5Object? Target { get; } = target;
    public PropertySavingMetadata? Metadata { get; } = meta;
 
-   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults)
+   {
+      Write(sb, ref commentChar, asOneLine, null, InjRepType.None, false);
+   }
+
+   public void Write(IndentedStringBuilder sb,
+                     ref string commentChar,
+                     bool asOneLine,
+                     HashSet<PropertySavingMetadata>? properties,
+                     InjRepType strategy,
+                     bool writeDefaults)
    {
       var write = WriteEmpty || Children.Count > 0 || LeadingComment != null || InlineComment != null || ClosingComment != null;
       if (Children.Count > 0 && Children[0] is BulkValueSerializationNode node1)
@@ -46,21 +57,19 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       // There is also a check for this in the FormattingService.Format() method, but this only yields control over a property's value serialization.
       // Here we can control the entire block serialization.
       if (Metadata?.SavingMethod != null)
-         Metadata.SavingMethod.Invoke(Target!, Metadata, sb, asOneLine);
+         Metadata.SavingMethod.Invoke(Target!, Metadata, sb, asOneLine, writeDefaults);
       else
       {
          // Header: "key = {" or "{"
          if (Metadata is not { IsShattered: true })
-            AppendHeaderToStringBuilder(sb, ref commentChar);
+            AppendHeaderToStringBuilder(sb, ref commentChar, strategy);
 
          // Compact Mode (e.g. Colors, Arrays)
          if (IsCompact)
          {
             foreach (var child in Children)
-               // Compact nodes usually don't have leading comments rendered, 
-               // or we strip them to fit on one line.
-               // Assuming child is ValueOutputNode or PropertyOutputNode
-               child.Write(sb, ref commentChar, asOneLine);
+               if (ShouldFormatChild(properties, child))
+                  child.Write(sb, ref commentChar, asOneLine, writeDefaults);
             sb.AppendSpacer().Append('}');
             WriteInlineComment(sb, ref commentChar); // Inline comment for the whole block
             return;
@@ -70,9 +79,9 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
 
          if (Metadata is not { IsShattered: true })
             using (sb.Indent())
-               SerializeChildElements(sb, ref commentChar, asOneLine);
+               SerializeChildElements(sb, ref commentChar, asOneLine, properties, writeDefaults);
          else
-            SerializeChildElements(sb, ref commentChar, asOneLine);
+            SerializeChildElements(sb, ref commentChar, asOneLine, properties, writeDefaults);
 
          // Closing
          if (Metadata is not { IsShattered: true })
@@ -104,13 +113,32 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       }
    }
 
-   public void SerializeChildElements(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   private static bool ShouldFormatChild(HashSet<PropertySavingMetadata>? metadatas, SerializationNode child)
    {
-      foreach (var child in Children)
-         child.Write(sb, ref commentChar, asOneLine);
+      if (metadatas == null || metadatas.Count == 0)
+         return true;
+
+      return child switch
+      {
+         PropertySerializationNode propNode => metadatas.Contains(propNode.Psm),
+         BulkValueSerializationNode bulkNode => metadatas.Contains(bulkNode.Meta),
+         ManualSerializationNode manualNode => manualNode.Meta != null && metadatas.Contains(manualNode.Meta),
+         _ => true,
+      };
    }
 
-   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb, ref string commentChar)
+   public void SerializeChildElements(IndentedStringBuilder sb,
+                                      ref string commentChar,
+                                      bool asOneLine,
+                                      HashSet<PropertySavingMetadata>? metadatas,
+                                      bool writeDefaults)
+   {
+      foreach (var child in Children)
+         if (ShouldFormatChild(metadatas, child))
+            child.Write(sb, ref commentChar, asOneLine, writeDefaults);
+   }
+
+   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb, ref string commentChar, InjRepType strategy)
    {
       if (!string.IsNullOrEmpty(Key))
       {
@@ -118,7 +146,10 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
          if (key == Globals.DO_NOT_PARSE_ME)
             Debugger.Break();
 #endif
-         sb.Append(Key).AppendOpeningBrace(separator: SavingUtil.GetSeparator(Separator));
+         sb.Append(Key);
+         if (strategy != InjRepType.None)
+            sb.AppendInjRepType(strategy);
+         sb.AppendOpeningBrace(separator: SavingUtil.GetSeparator(Separator));
       }
       else
          sb.AppendOpeningBrace(asOneLine: true).AppendSpacer();

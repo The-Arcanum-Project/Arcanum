@@ -20,7 +20,7 @@ public static class AgsDelegates
    /// <param name="target">The IAgs object instance being saved.</param>
    /// <param name="metadata">The pre-compiled metadata for the property being saved.</param>
    /// <param name="sb">An <see cref="IndentedStringBuilder"/></param>
-   public delegate void AgsSavingAction(IEu5Object target, PropertySavingMetadata metadata, IndentedStringBuilder sb, bool asOneLine);
+   public delegate void AgsSavingAction(IEu5Object target, PropertySavingMetadata metadata, IndentedStringBuilder sb, bool asOneLine, bool writeDefaults);
 
    /// <summary>
    /// Represents a method that generates a unique key for an item in a collection.

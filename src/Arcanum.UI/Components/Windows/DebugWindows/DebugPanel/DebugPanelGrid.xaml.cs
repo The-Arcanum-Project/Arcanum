@@ -54,11 +54,6 @@ public partial class DebugPanelGrid
       WindowManager.OpenWindow<SaveWindow>(true);
    }
 
-   private void OpenSavingWindowExporterButton_Click(object sender, RoutedEventArgs e)
-   {
-      WindowManager.OpenWindow<AgsWindow>(true);
-   }
-
    private void OpenTestWindowButton_Click(object sender, RoutedEventArgs e)
    {
       new ExportFileWindow().Show();

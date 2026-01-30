@@ -3,6 +3,7 @@ using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
@@ -93,9 +94,10 @@ public static class FileUpdateManager
 
             // Format the object into the isb
             if (iterator.InjRepType != InjRepType.None)
-               iterator.ToAgsContext().BuildContext(isb, [.. iterator.SaveableProps], iterator.InjRepType, true);
+               TreeBuilder.ConstructAndWriteInjRep(iterator, isb, false, false, [.. iterator.SaveableProps]);
+            // iterator.ToAgsContext().BuildContext(isb, [.. iterator.SaveableProps], iterator.InjRepType, true);
             else
-               iterator.ToAgsContext().BuildContext(isb);
+               TreeBuilder.ConstructAndWrite(iterator, isb, iterator.AgsSettings.AsOneLine, false, null, false, false);
 
             var lineOffset = CountNewLinesInStringBuilder(isb.InnerBuilder) + 1;
             var itLength = isb.InnerBuilder.Length;
@@ -126,7 +128,7 @@ public static class FileUpdateManager
       foreach (var obj in newObjects)
       {
          isb.Clear();
-         obj.ToAgsContext().BuildContext(isb);
+         TreeBuilder.ConstructAndWrite(obj, isb, obj.AgsSettings.AsOneLine, false, null, false, false);
          obj.FileLocation = new(0,
                                 CountNewLinesInStringBuilder(sb.InnerBuilder),
                                 isb.InnerBuilder.Length,

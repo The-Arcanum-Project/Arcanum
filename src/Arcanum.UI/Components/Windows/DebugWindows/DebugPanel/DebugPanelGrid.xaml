@@ -22,9 +22,6 @@
             <styleClasses:BaseButton Content = "Saving Window" Margin = "2" Padding = "4"
                                      Click = "OpenSavingWindowButton_Click" />
 
-            <styleClasses:BaseButton Content = "Saving Exporter Window" Margin = "2" Padding = "4"
-                                     Click = "OpenSavingWindowExporterButton_Click" />
-
             <styleClasses:BaseButton Content = "Open File Exporter" Margin = "2" Padding = "4"
                                      Click = "OpenTestWindowButton_Click" />
 

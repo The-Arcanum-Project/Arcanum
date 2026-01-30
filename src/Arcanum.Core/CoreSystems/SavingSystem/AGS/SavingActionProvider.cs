@@ -36,7 +36,8 @@ public static class SavingActionProvider
                                       HashSet<PropertySavingMetadata> metadata,
                                       IndentedStringBuilder sb,
                                       // ReSharper disable once RedundantAssignment
-                                      bool asOneLine)
+                                      bool asOneLine,
+                                      bool writeDefaults)
    {
       asOneLine = true;
       if (target is not RulerTerm rt)
@@ -70,7 +71,8 @@ public static class SavingActionProvider
    public static void LocationSaving(IEu5Object target,
                                      HashSet<PropertySavingMetadata> metadata,
                                      IndentedStringBuilder sb,
-                                     bool asOneLine)
+                                     bool asOneLine,
+                                     bool writeDefaults)
    {
       if (target is not Location location)
          throw new InvalidOperationException("LocationSaving can only be used with Location instances.");
@@ -83,7 +85,8 @@ public static class SavingActionProvider
    public static void SaveIdentifierStringKvp(IEu5Object target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,
-                                              bool asOneLine)
+                                              bool asOneLine,
+                                              bool writeDefaults)
    {
       if (target is not IStringKvp targetKvp)
       {
@@ -100,7 +103,8 @@ public static class SavingActionProvider
    public static void SocientalValueEntrySaving(IEu5Object target,
                                                 PropertySavingMetadata metadata,
                                                 IndentedStringBuilder sb,
-                                                bool asOneLine)
+                                                bool asOneLine,
+                                                bool writeDefaults)
    {
       var sves = (ObservableRangeCollection<SocientalValueEntry>)target._getValue(metadata.NxProp);
 
@@ -118,7 +122,11 @@ public static class SavingActionProvider
       sb.AppendBlockNewLines();
    }
 
-   public static void RoadSavingMethod(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void RoadSavingMethod(IEu5Object target,
+                                       HashSet<PropertySavingMetadata> metadata,
+                                       IndentedStringBuilder sb,
+                                       bool asOneLine,
+                                       bool writeDefaults)
    {
       if (target is not Road road)
          throw new InvalidOperationException("RoadSavingMethod can only be used with AgsRoad instances.");
@@ -128,7 +136,7 @@ public static class SavingActionProvider
         .Append(road.EndLocation.UniqueId);
    }
 
-   public static void JominiDate(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void JominiDate(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine, bool writeDefaults)
    {
       if (target is not JominiDate date)
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
@@ -143,7 +151,8 @@ public static class SavingActionProvider
    public static void SaveNameDeclaration(IEu5Object target,
                                           HashSet<PropertySavingMetadata> metadata,
                                           IndentedStringBuilder sb,
-                                          bool asOneLine)
+                                          bool asOneLine,
+                                          bool writeDefaults)
    {
       if (target is not CharacterNameDeclaration cnd)
          throw new
@@ -164,7 +173,11 @@ public static class SavingActionProvider
            .Append('}');
    }
 
-   public static void SaveReligiousSchoolOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveReligiousSchoolOpinionValue(IEu5Object target,
+                                                      HashSet<PropertySavingMetadata> metadata,
+                                                      IndentedStringBuilder sb,
+                                                      bool asOneLine,
+                                                      bool writeDefaults)
    {
       if (target is not ReligiousSchoolOpinionValue kvp)
       {
@@ -177,7 +190,11 @@ public static class SavingActionProvider
         .Append(EnumAgsRegistry.GetKey(kvp.Value));
    }
 
-   public static void SaveCultureOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveCultureOpinionValue(IEu5Object target,
+                                              HashSet<PropertySavingMetadata> metadata,
+                                              IndentedStringBuilder sb,
+                                              bool asOneLine,
+                                              bool writeDefaults)
    {
       if (target is not CultureOpinionValue kvp)
       {
@@ -190,7 +207,11 @@ public static class SavingActionProvider
         .Append(EnumAgsRegistry.GetKey(kvp.Value));
    }
 
-   public static void SaveReligionOpinionValue(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveReligionOpinionValue(IEu5Object target,
+                                               HashSet<PropertySavingMetadata> metadata,
+                                               IndentedStringBuilder sb,
+                                               bool asOneLine,
+                                               bool writeDefaults)
    {
       if (target is not ReligionOpinionValue kvp)
       {
@@ -203,7 +224,7 @@ public static class SavingActionProvider
         .Append(EnumAgsRegistry.GetKey(kvp.Value));
    }
 
-   public static void SaveDemandData(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine)
+   public static void SaveDemandData(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine, bool writeDefaults)
    {
       if (target is not DemandData dd)
          throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
@@ -221,7 +242,8 @@ public static class SavingActionProvider
    public static void SaveWealthImpactData(IEu5Object target,
                                            HashSet<PropertySavingMetadata> metadata,
                                            IndentedStringBuilder sb,
-                                           bool asOneLine)
+                                           bool asOneLine,
+                                           bool writeDefaults)
    {
       if (target is not DemandData dd)
          throw new InvalidOperationException("SaveWealthImpactData can only be used with WealthImpactData instances.");
@@ -237,7 +259,8 @@ public static class SavingActionProvider
    public static void MapMovementAssistSaving(IEu5Object target,
                                               HashSet<PropertySavingMetadata> metadata,
                                               IndentedStringBuilder sb,
-                                              bool asOneLine)
+                                              bool asOneLine,
+                                              bool writeDefaults)
    {
       if (target is not MapMovementAssist mma)
          throw new
@@ -254,7 +277,8 @@ public static class SavingActionProvider
    public static void EstateCountDefinitionSaving(IEu5Object target,
                                                   HashSet<PropertySavingMetadata> metadata,
                                                   IndentedStringBuilder sb,
-                                                  bool asOneLine)
+                                                  bool asOneLine,
+                                                  bool writeDefaults)
    {
       if (target is not EstateCountDefinition ecd)
          throw new
@@ -268,7 +292,8 @@ public static class SavingActionProvider
    public static void ModValInstanceSaving(IEu5Object target,
                                            HashSet<PropertySavingMetadata> metadata,
                                            IndentedStringBuilder sb,
-                                           bool asOneLine)
+                                           bool asOneLine,
+                                           bool writeDefaults)
    {
       if (target is not ModValInstance mvi)
          throw new
@@ -280,7 +305,8 @@ public static class SavingActionProvider
    public static void SoundTollsSaving(IEu5Object target,
                                        HashSet<PropertySavingMetadata> metadata,
                                        IndentedStringBuilder sb,
-                                       bool asOneLine)
+                                       bool asOneLine,
+                                       bool writeDefaults)
    {
       if (target is not SoundToll st)
          throw new
@@ -294,7 +320,8 @@ public static class SavingActionProvider
    public static void DefaultMapDefinitionSaving(IEu5Object target,
                                                  HashSet<PropertySavingMetadata> metadata,
                                                  IndentedStringBuilder sb,
-                                                 bool asOneLine)
+                                                 bool asOneLine,
+                                                 bool writeDefaults)
    {
       if (target is not DefaultMapDefinition dmd)
          throw new
@@ -305,13 +332,14 @@ public static class SavingActionProvider
          throw new InvalidOperationException($"DefaultMapDefinitionSaving expected a BlockSerializationNode but found a {dmdNode.GetType()}.");
 
       var commentChar = "#";
-      bsn.SerializeChildElements(sb, ref commentChar, asOneLine);
+      bsn.SerializeChildElements(sb, ref commentChar, asOneLine, null, writeDefaults);
    }
 
    public static void InstitutionPresenceSaving(IEu5Object target,
                                                 HashSet<PropertySavingMetadata> metadata,
                                                 IndentedStringBuilder sb,
-                                                bool asOneLine)
+                                                bool asOneLine,
+                                                bool writeDefaults)
    {
       if (target is not InstitutionPresence ip)
          throw new
@@ -325,7 +353,8 @@ public static class SavingActionProvider
    public static void Setup_vars_saving(IEu5Object target,
                                         PropertySavingMetadata metadata,
                                         IndentedStringBuilder sb,
-                                        bool asOneLine)
+                                        bool asOneLine,
+                                        bool writeDefaults)
    {
       if (target is not Country country)
          throw new
@@ -349,7 +378,7 @@ public static class SavingActionProvider
                     .Append('"')
                     .AppendLine()
                     .Append("data");
-                  ((IEu5Object)vard.DataBlock).ToAgsContext().BuildContext(sb);
+                  TreeBuilder.ConstructAndWrite(target, sb, asOneLine, false, null, false, false);
                }
             }
          }
@@ -359,7 +388,9 @@ public static class SavingActionProvider
    public static void DefinitionSaving(IEu5Object target,
                                        HashSet<PropertySavingMetadata> metadata,
                                        IndentedStringBuilder sb,
-                                       bool asOneLine)
+                                       bool asOneLine,
+                                       bool writeDefaults
+   )
    {
       if (target is not Continent c)
          throw new

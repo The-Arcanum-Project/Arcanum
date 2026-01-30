@@ -95,7 +95,7 @@ public partial class ASTBuilderTest
          var sb = new IndentedStringBuilder();
          var commentChar = "#";
          PropertyOrderCache.Clear();
-         node.Write(sb, ref commentChar, ags.AgsSettings.AsOneLine);
+         node.Write(sb, ref commentChar, ags.AgsSettings.AsOneLine, false);
          sw.Stop();
          AstText = TreeBuilder.PrintTreeStructure(node);
          FormattedText = sb.ToString();

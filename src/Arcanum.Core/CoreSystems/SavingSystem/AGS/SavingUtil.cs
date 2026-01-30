@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
@@ -26,7 +27,7 @@ public static class SavingUtil
       {
          var sb = new IndentedStringBuilder();
          foreach (var item in items)
-            item.ToAgsContext().BuildContext(sb);
+            TreeBuilder.ConstructAndWrite(item, sb, item.AgsSettings.AsOneLine, false, null, false, false);
          return sb;
       }
 
@@ -40,7 +41,10 @@ public static class SavingUtil
                           var localSb = new IndentedStringBuilder();
 
                           for (var i = range.Item1; i < range.Item2; i++)
-                             items[i].ToAgsContext().BuildContext(localSb);
+                          {
+                             var item = items[i];
+                             TreeBuilder.ConstructAndWrite(item, localSb, item.AgsSettings.AsOneLine, false, null, false, false);
+                          }
 
                           chunkResults.TryAdd(partitionIndex, localSb);
                        });
@@ -287,27 +291,6 @@ public static class SavingUtil
 
       return SavingValueType.Auto;
       //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
-   }
-
-   public static void HandleIAgsProperty(IEu5Object ags, IndentedStringBuilder sb, string commentChar, bool asOneLine, PropertySavingMetadata psm)
-   {
-      var sm = ags.ClassMetadata.SavingMethod;
-      if (sm != null)
-      {
-         sm.Invoke(ags, [psm], sb, asOneLine);
-         return;
-      }
-
-      if (psm.SaveEmbeddedAsIdentifier)
-      {
-         var str = $"{psm.Keyword} {GetSeparator(psm.Separator)} {ags.SavingKey}";
-         if (asOneLine)
-            sb.Append(str + " ");
-         else
-            sb.AppendLine(str);
-      }
-      else
-         ags.ToAgsContext(commentChar).BuildContext(sb);
    }
 
    /// <summary>

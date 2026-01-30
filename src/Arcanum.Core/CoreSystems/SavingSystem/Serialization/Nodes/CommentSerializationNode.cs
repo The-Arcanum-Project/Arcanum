@@ -9,7 +9,7 @@ public class CommentSerializationNode(string text) : SerializationNode
 {
    public string Text { get; } = text;
 
-   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults)
    {
       sb.AppendCommentLine(Text);
    }

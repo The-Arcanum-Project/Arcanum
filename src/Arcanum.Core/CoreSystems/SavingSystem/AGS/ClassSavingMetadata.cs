@@ -8,13 +8,13 @@ public class ClassSavingMetadata(TokenType separator,
                                  TokenType openingToken,
                                  TokenType closingToken,
                                  Func<IEu5Object, string, IndentedStringBuilder, string>? commentProvider = null,
-                                 Action<IEu5Object, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool>? savingMethod = null)
+                                 Action<IEu5Object, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool, bool>? savingMethod = null)
 {
    public TokenType Separator { get; } = separator;
    public TokenType OpeningToken { get; } = openingToken;
    public TokenType ClosingToken { get; } = closingToken;
    public Func<IEu5Object, string, IndentedStringBuilder, string>? CommentProvider { get; set; } = commentProvider;
-   public Action<IEu5Object, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool>? SavingMethod { get; set; } =
+   public Action<IEu5Object, HashSet<PropertySavingMetadata>, IndentedStringBuilder, bool, bool>? SavingMethod { get; set; } =
       savingMethod;
 
    public override string ToString()

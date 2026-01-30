@@ -8,12 +8,15 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.Serialization.Nodes;
 /// Wraps an object that has a custom 'SavingMethod' defined in metadata.
 /// We cannot build an AST for this, so we defer execution until the Write phase.
 /// </summary>
-public class ManualSerializationNode(IEu5Object ags, List<PropertySavingMetadata> props) : SerializationNode
+public class ManualSerializationNode(IEu5Object ags, List<PropertySavingMetadata> props, PropertySavingMetadata? meta) : SerializationNode
 {
-   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public PropertySavingMetadata? Meta { get; } = meta;
+
+   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults)
    {
       WriteLeadingComment(sb, ref commentChar);
-
-      ags.ClassMetadata.SavingMethod?.Invoke(ags, [.. props], sb, ags.AgsSettings.AsOneLine);
+      if (Meta == null) // We have an entire object here
+         sb.AppendInjRepType(ags.InjRepType);
+      ags.ClassMetadata.SavingMethod?.Invoke(ags, [.. props], sb, ags.AgsSettings.AsOneLine, writeDefaults);
    }
 }

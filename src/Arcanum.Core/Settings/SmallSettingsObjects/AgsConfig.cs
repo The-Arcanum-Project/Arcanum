@@ -23,8 +23,8 @@ public class AgsConfig
    public int SpacesPerSpacing { get; set; } = 1;
 
    [Description("Whether to use INJECT/REPLACE calls when saving objects.")]
-   [DefaultValue(true)]
-   public bool UseInjectReplaceCalls { get; set; } = true;
+   [DefaultValue(false)]
+   public bool UseInjectReplaceCalls { get; set; } = false;
 
    [Description("Maximum percentage of properties to INJECT into an object before an REPLACE is used instead.")]
    [DefaultValue(0.5f)]

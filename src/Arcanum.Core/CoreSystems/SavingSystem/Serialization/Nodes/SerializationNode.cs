@@ -18,7 +18,7 @@ public abstract class SerializationNode
    /// <summary>
    ///    Writes this node to the StringBuilder.
    /// </summary>
-   public abstract void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine);
+   public abstract void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults);
 
    protected void WriteLeadingComment(IndentedStringBuilder sb, ref string commentChar)
    {

@@ -13,17 +13,17 @@ public class PropertySerializationNode(PropertySavingMetadata psm, object value,
    public object Value { get; } = value;
    public IEu5Object Target { get; } = target;
 
-   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine)
+   public override void Write(IndentedStringBuilder sb, ref string commentChar, bool asOneLine, bool writeDefaults)
    {
       FormattingService.AssignValueType(Psm, Value);
 
-      var shouldSkipCheck = FormattingService.ShouldSkipCheck(Psm, Target, Value, false);
+      var shouldSkipCheck = FormattingService.ShouldSkipCheck(Psm, Target, Value, false, writeDefaults);
       if (shouldSkipCheck)
          return;
 
       sb.AppendLineFormat(Psm, asOneLine);
       WriteLeadingComment(sb, ref commentChar);
-      FormattingService.Format(Psm, sb, Target, commentChar, asOneLine, Value);
+      FormattingService.Format(Psm, sb, Target, commentChar, asOneLine, Value, false, writeDefaults);
       WriteInlineComment(sb, ref commentChar);
    }
 }
