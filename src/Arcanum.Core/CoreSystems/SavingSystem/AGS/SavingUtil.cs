@@ -74,6 +74,7 @@ public static class SavingUtil
          InjRepType.REPLACE => "REPLACE",
          InjRepType.TRY_REPLACE => "TRY_REPLACE",
          InjRepType.REPLACE_OR_CREATE => "REPLACE_OR_CREATE",
+         InjRepType.None => string.Empty,
          _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
       };
    }

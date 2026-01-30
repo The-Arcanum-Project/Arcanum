@@ -62,7 +62,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       {
          // Header: "key = {" or "{"
          if (Metadata is not { IsShattered: true })
-            AppendHeaderToStringBuilder(sb, ref commentChar, strategy);
+            AppendHeaderToStringBuilder(sb, ref commentChar, strategy, Metadata?.IsArray ?? false);
 
          // Compact Mode (e.g. Colors, Arrays)
          if (IsCompact)
@@ -138,7 +138,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
             child.Write(sb, ref commentChar, asOneLine, writeDefaults);
    }
 
-   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb, ref string commentChar, InjRepType strategy)
+   private void AppendHeaderToStringBuilder(IndentedStringBuilder sb, ref string commentChar, InjRepType strategy, bool isArray)
    {
       if (!string.IsNullOrEmpty(Key))
       {
@@ -149,10 +149,10 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
          sb.Append(Key);
          if (strategy != InjRepType.None)
             sb.AppendInjRepType(strategy);
-         sb.AppendOpeningBrace(separator: SavingUtil.GetSeparator(Separator));
+         sb.AppendOpeningBrace(separator: SavingUtil.GetSeparator(Separator), isArray: isArray);
       }
       else
-         sb.AppendOpeningBrace(asOneLine: true).AppendSpacer();
+         sb.AppendOpeningBrace(asOneLine: true, isArray: isArray).AppendSpacer();
 
       WriteInlineComment(sb, ref commentChar); // Inline comment for the OPENING brace
 

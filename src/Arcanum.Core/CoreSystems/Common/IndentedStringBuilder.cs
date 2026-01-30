@@ -125,10 +125,14 @@ public class IndentedStringBuilder
 
    #endregion
 
-   public IndentedStringBuilder AppendOpeningBrace(string brace = "{", string separator = "=", bool asOneLine = false)
+   public IndentedStringBuilder AppendOpeningBrace(string brace = "{", string separator = "=", bool asOneLine = false, bool isArray = false)
    {
       if (asOneLine)
-         return AppendSeparator(separator).Append(brace);
+      {
+         if (!isArray)
+            AppendSpacer().AppendSeparator(separator);
+         return Append(brace);
+      }
 
       return Config.Settings.SavingConfig.OpeningBraceLocation switch
       {

@@ -4,6 +4,7 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -52,6 +53,7 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
    [DefaultValue(null)]
    [ParseAs("instances", itemNodeType: AstNodeType.BlockNode, isArray: true)]
    [SaveAs(alwaysWrite: true)]
+   [AgsCollectionFormat(LayoutMode = CollectionLayoutMode.Compact)]
    public ObservableHashSet<NudgeData> NudgeDatas { get; set; } = [];
 
    #endregion
