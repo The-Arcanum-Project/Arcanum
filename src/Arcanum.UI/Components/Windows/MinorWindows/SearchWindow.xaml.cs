@@ -15,13 +15,13 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Windows.PopUp;
+using Common;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
 public partial class SearchWindow : INotifyPropertyChanged
 {
-   private Queastor QueryQueastor { get; set; } = null!;
    private static string _lastSearchQuery = string.Empty;
    private static MapControl _mapControl = null!;
 
@@ -33,27 +33,6 @@ public partial class SearchWindow : INotifyPropertyChanged
                                   typeof(bool),
                                   typeof(SearchWindow),
                                   new(true));
-
-   public bool ShowCount
-   {
-      get => (bool)GetValue(ShowCountProperty);
-      set => SetValue(ShowCountProperty, value);
-   }
-
-   public int SearchResultCount
-   {
-      get;
-      private set
-      {
-         if (value == field)
-            return;
-
-         field = value;
-         OnPropertyChanged();
-      }
-   }
-
-   public ICommand CloseCommand => new RelayCommand(Close);
 
    public SearchWindow(MapControl mapControl)
    {
@@ -81,6 +60,31 @@ public partial class SearchWindow : INotifyPropertyChanged
          SearchTextBox.SearchInputTextBox.SelectAll();
       };
    }
+
+   private Queastor QueryQueastor { get; set; } = null!;
+
+   public bool ShowCount
+   {
+      get => (bool)GetValue(ShowCountProperty);
+      set => SetValue(ShowCountProperty, value);
+   }
+
+   public int SearchResultCount
+   {
+      get;
+      private set
+      {
+         if (value == field)
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public ICommand CloseCommand => new RelayCommand(Close);
+
+   public event PropertyChangedEventHandler? PropertyChanged;
 
    // private bool _isClosing;
 
@@ -111,7 +115,7 @@ public partial class SearchWindow : INotifyPropertyChanged
    }
 
    /// <summary>
-   /// Shows the search window with the given query and the Queastor.GlobalInstance as the Queastor.
+   ///    Shows the search window with the given query and the Queastor.GlobalInstance as the Queastor.
    /// </summary>
    public static SearchWindow ShowSearchWindow(MapControl mapControl, string query = "", bool alwaysOnTop = false)
       => ShowSearchWindow(query, alwaysOnTop, Queastor.GlobalInstance, mapControl);
@@ -165,8 +169,80 @@ public partial class SearchWindow : INotifyPropertyChanged
       while (element != null && element is not ListBoxItem)
          element = VisualTreeHelper.GetParent(element);
 
-      if (element is ListBoxItem { DataContext: ISearchable searchable })
+      if (element is not ListBoxItem { DataContext: ISearchable searchable })
+         return;
+
+      if (e.ChangedButton == MouseButton.Left)
          ExecuteOnSelected(searchable);
+      else if (e.ChangedButton == MouseButton.Right &&
+               !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) &&
+               searchable is IEu5Object eu5Object)
+      {
+         var contextMenu = new ContextMenu();
+         var explorerItem = new MenuItem
+         {
+            Header = "Open in Explorer",
+            Command = new RelayCommand(() =>
+            {
+               var path = eu5Object.Source.GetFullPath();
+               ProcessHelper.OpenExplorerAndSelectFile(path);
+            }),
+         };
+         var openFileItem = new MenuItem
+         {
+            Header = "Open File at Object Location",
+            Command = new RelayCommand(() =>
+            {
+               var path = eu5Object.Source.GetFullPath();
+               var location = eu5Object.FileLocation;
+               ProcessHelper.OpenFileAtLine(path, location.Line, location.CharPos, PreferredEditor.VsCode);
+            }),
+         };
+         var openFileAtTopItem = new MenuItem
+         {
+            Header = "Open File",
+            Command = new RelayCommand(() =>
+            {
+               var path = eu5Object.Source.GetFullPath();
+               ProcessHelper.OpenFileAtLine(path, 1, 0, PreferredEditor.VsCode);
+            }),
+         };
+
+         contextMenu.Items.Add(explorerItem);
+         contextMenu.Items.Add(openFileItem);
+         contextMenu.Items.Add(openFileAtTopItem);
+
+         AddEditorSpecificContextMenuItems(contextMenu, eu5Object);
+
+         contextMenu.IsOpen = true;
+      }
+   }
+
+   private static void AddEditorSpecificContextMenuItems(ContextMenu contextMenu, IEu5Object eu5Object)
+   {
+      var addedSeparator = false;
+
+      if (ProcessHelper.IsIntelliJInstalled())
+      {
+         var openInIntelliJItem = new MenuItem
+         {
+            Header = "Open in IntelliJ IDEA",
+            Command = new RelayCommand(() =>
+            {
+               var path = eu5Object.Source.GetFullPath();
+               var location = eu5Object.FileLocation;
+               ProcessHelper.OpenFileAtLine(path, location.Line, location.CharPos, PreferredEditor.IntelliJ);
+            }),
+         };
+         if (!addedSeparator)
+         {
+            contextMenu.Items.Add(new Separator());
+            addedSeparator = true;
+         }
+
+         contextMenu.Items.Add(openInIntelliJItem);
+      }
+      // Future: Add more editor-specific items here if needed
    }
 
    private void ExecuteOnSelected(ISearchable searchable)
@@ -257,8 +333,6 @@ public partial class SearchWindow : INotifyPropertyChanged
          };
       settingsPropWindow.ShowDialog();
    }
-
-   public event PropertyChangedEventHandler? PropertyChanged;
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {

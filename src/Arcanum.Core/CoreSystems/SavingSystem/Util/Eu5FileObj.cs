@@ -18,6 +18,8 @@ public class Eu5FileObj
    public bool IsVanilla => Path.DataSpace == FileManager.VanillaDataSpace;
    public bool IsModded => !IsVanilla;
 
+   public string GetFullPath() => Path.FullPath;
+
    private bool Equals(Eu5FileObj other) => Descriptor.Equals(other.Descriptor) && Path.Equals(other.Path);
 
    public override string ToString()
