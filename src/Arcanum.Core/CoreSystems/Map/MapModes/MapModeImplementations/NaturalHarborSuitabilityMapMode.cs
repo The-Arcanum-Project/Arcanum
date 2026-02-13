@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.Utils.Colors;
+﻿using Arcanum.Core.GameObjects.InGame.Map;
+using Arcanum.Core.Utils.Colors;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
@@ -8,7 +9,7 @@ public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
    public override string Name { get; } = "Natural Harbor Suitability";
    public override string Description { get; } = "Displays the natural harbor suitability of each coastal location on the map.";
    public override MapModeManager.MapModeType Type { get; } = MapModeManager.MapModeType.NaturalHarborSuitability;
-   public override Type[] DisplayTypes { get; } = [typeof(float)];
+   public override Type[] DisplayTypes { get; } = [typeof(LocationTemplateData)];
 
    public override int GetColorForLocation(Location location)
    {
