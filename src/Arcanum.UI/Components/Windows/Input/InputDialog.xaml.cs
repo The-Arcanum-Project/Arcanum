@@ -23,6 +23,8 @@ public partial class InputDialog
       Title = title;
       DescriptionText.Text = description;
       _kind = kind;
+
+      InputBox.Focus();
    }
 
    public object? Value { get; private set; }

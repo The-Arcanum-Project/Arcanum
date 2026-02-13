@@ -13,6 +13,7 @@ public class MapModeButton : BaseButton
    public static readonly MapModeButton[] QuickMapModeButtons = new MapModeButton[10];
    public static readonly Dictionary<ICommand, MapModeManager.MapModeType> CommandToMapModeType = new();
 
+   public bool IsContextTarget { get; set; }
    public int ButtonIndex { get; set; }
 
    public MapModeManager.MapModeType MapModeType
@@ -26,26 +27,26 @@ public class MapModeButton : BaseButton
       }
    }
 
+   private static void ClearContextTarget()
+   {
+      foreach (var button in QuickMapModeButtons)
+         button.IsContextTarget = false;
+   }
+
    protected override void OnMouseUp(MouseButtonEventArgs e)
    {
       if (e.ChangedButton == MouseButton.Left)
          return;
+
+      ClearContextTarget();
+      IsContextTarget = true;
 
       var contextMenu = new ContextMenu();
       foreach (var enumValue in Enum.GetValues<MapModeManager.MapModeType>())
       {
          var menuItem = new MenuItem
          {
-            Header = enumValue.ToString(),
-            Command = new RelayCommand(() =>
-            {
-               MapModeType = enumValue;
-               MapModeManager.SetMapMode(enumValue);
-               MapModeManager.SetQuickMapModeSetting(ButtonIndex, enumValue);
-
-               if (!CommandToMapModeType.TryAdd(Command, enumValue))
-                  CommandToMapModeType[Command] = enumValue;
-            }),
+            Header = enumValue.ToString(), Command = new RelayCommand(() => { SetMapModeCommand(enumValue, true); }),
          };
          contextMenu.Items.Add(menuItem);
       }
@@ -86,6 +87,21 @@ public class MapModeButton : BaseButton
       contextMenu.PlacementTarget = this;
    }
 
+   private void SetMapModeCommand(MapModeManager.MapModeType enumValue, bool render)
+   {
+      MapModeType = enumValue;
+      if (render)
+      {
+         MapModeManager.SetMapMode(enumValue);
+         Focus();
+      }
+
+      MapModeManager.SetQuickMapModeSetting(ButtonIndex, enumValue);
+
+      if (!CommandToMapModeType.TryAdd(Command, enumValue))
+         CommandToMapModeType[Command] = enumValue;
+   }
+
    private static MenuItem GetMapModePresetItem(MapModePreset preset)
    {
       var root = new MenuItem { Header = preset.Name };
@@ -96,7 +112,10 @@ public class MapModeButton : BaseButton
          Command = new RelayCommand(() =>
          {
             for (var i = 0; i < preset.Modes.Length && i < QuickMapModeButtons.Length; i++)
-               QuickMapModeButtons[i].MapModeType = preset.Modes[i];
+            {
+               var button = QuickMapModeButtons[i];
+               button.SetMapModeCommand(preset.Modes[i], button.IsContextTarget);
+            }
          }),
       });
 
@@ -104,9 +123,7 @@ public class MapModeButton : BaseButton
 
       root.Items.Add(new MenuItem
       {
-         Header = "Delete",
-         Command = new RelayCommand(() =>
-                                       Config.Settings.MapModeConfig.MapModePresets.Remove(preset)),
+         Header = "Delete", Command = new RelayCommand(() => Config.Settings.MapModeConfig.MapModePresets.Remove(preset)),
       });
 
       return root;
