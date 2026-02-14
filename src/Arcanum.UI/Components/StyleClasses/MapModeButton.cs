@@ -13,7 +13,7 @@ public class MapModeButton : BaseButton
    public static readonly MapModeButton[] QuickMapModeButtons = new MapModeButton[10];
    public static readonly Dictionary<ICommand, MapModeManager.MapModeType> CommandToMapModeType = new();
 
-   public bool IsContextTarget { get; set; }
+   private bool IsContextTarget { get; set; }
    public int ButtonIndex { get; set; }
 
    public MapModeManager.MapModeType MapModeType
@@ -23,7 +23,6 @@ public class MapModeButton : BaseButton
       {
          field = value;
          Content = value.ToString();
-         InvalidateVisual();
       }
    }
 
@@ -87,9 +86,20 @@ public class MapModeButton : BaseButton
       contextMenu.PlacementTarget = this;
    }
 
-   private void SetMapModeCommand(MapModeManager.MapModeType enumValue, bool render)
+   public void SetMapModeCommand(MapModeManager.MapModeType enumValue, bool render)
    {
       MapModeType = enumValue;
+
+      var mapMode = MapModeManager.Get(enumValue);
+      ToolTip = mapMode != null!
+                   ? mapMode.Name +
+                     '\n' +
+                     mapMode.Description +
+                     "\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
+                     (ButtonIndex != 9 ? ButtonIndex + 1 : 0)
+                   : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
+                     (ButtonIndex != 9 ? ButtonIndex + 1 : 0);
+
       if (render)
       {
          MapModeManager.SetMapMode(enumValue);

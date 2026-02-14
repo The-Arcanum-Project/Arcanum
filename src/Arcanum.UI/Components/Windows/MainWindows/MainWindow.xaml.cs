@@ -646,7 +646,9 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             VerticalAlignment = VerticalAlignment.Bottom,
             Height = 30,
             ToolTip = mapMode != null
-                         ? mapMode.Description +
+                         ? mapMode.Name +
+                           '\n' +
+                           mapMode.Description +
                            "\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
                            (i != 9 ? i + 1 : 0)
                          : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
