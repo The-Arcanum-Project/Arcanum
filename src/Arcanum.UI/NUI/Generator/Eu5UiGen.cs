@@ -1105,7 +1105,7 @@ public static class Eu5UiGen
          // throw new NotSupportedException($"Type {type} is not supported for property {nxProp}.");
       }
 
-      if (!allowReadOnlyEditing && primary.IsReadonly)
+      if (!allowReadOnlyEditing && (primary.IsReadonly || primary.IsPropertyReadOnly(nxProp)))
          element.IsEnabled = false;
       // element.VerticalAlignment = VerticalAlignment.Stretch;
       element.Height = ControlFactory.SHORT_INFO_ROW_HEIGHT;
