@@ -401,7 +401,7 @@
             <ColumnDefinition Width = "150" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "2"
+        <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
                 CornerRadius = "8" Margin = "0, 0, 2, 0">
             <ScrollViewer>
                 <ContentPresenter x:Name = "UiPresenter" />
@@ -450,7 +450,8 @@
                         </ComboBox.ToolTip>
                     </ComboBox>
                     <styleClasses:BaseButton Content = "Freeze Selection" Margin = "5,0" VerticalAlignment = "Center"
-                                             Height = "23" Command = "mainWindow:MwCommands.FreezeSelectionCommand">
+                                             BorderThickness = "1" Height = "23"
+                                             Command = "mainWindow:MwCommands.FreezeSelectionCommand">
                         <styleClasses:BaseButton.ToolTip>
                             <TextBlock>
                                 <Run> Freeze the current selection, preventing it from changing until unfrozen. </Run>
@@ -485,7 +486,7 @@
 
         </GridSplitter>
 
-        <Border Grid.Column = "4" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "2"
+        <Border Grid.Column = "4" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
                 CornerRadius = "8" Margin = "2, 0">
 
             <ContentPresenter x:Name = "SpecializedEditorPresenter" />

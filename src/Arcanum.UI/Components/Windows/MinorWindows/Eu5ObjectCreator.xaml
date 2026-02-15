@@ -4,15 +4,16 @@
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         mc:Ignorable = "d"
-                         Title = "Eu5ObjectCreator"
-                         Height = "450"
-                         Width = "800"
-                         WindowStyle = "None"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
+                         Title = "Eu5ObjectCreator" Height = "450" Width = "800" WindowStyle = "None"
                          WindowStartupLocation = "CenterScreen">
 
-    <Grid VerticalAlignment = "Stretch"
-          HorizontalAlignment = "Stretch">
+    <Window.Resources>
+        <converters:InverseBoolToVisibilityConverter x:Key = "InverseBoolToVisibilityConverter" />
+    </Window.Resources>
+
+
+    <Grid VerticalAlignment = "Stretch" HorizontalAlignment = "Stretch">
 
         <Grid.RowDefinitions>
             <RowDefinition Height = "Auto" />
@@ -20,28 +21,24 @@
             <RowDefinition Height = "Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock TextAlignment = "Center"
-                   VerticalAlignment = "Center"
-                   FontSize = "18"
-                   FontWeight = "Bold"
+        <TextBlock TextAlignment = "Center" VerticalAlignment = "Center" FontSize = "18" FontWeight = "Bold"
                    Text = "{Binding ObjectTitle, RelativeSource= {RelativeSource AncestorType = Window}}" />
 
-        <Grid Height = "30"
-              Grid.Row = "2">
+        <Grid Height = "30" Grid.Row = "2">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
                 <ColumnDefinition Width = "*" />
             </Grid.ColumnDefinitions>
 
-            <styleClasses:BaseButton Content = "Create"
-                                     Margin = "2"
-                                     HorizontalAlignment = "Stretch"
-                                     Click = "CreateButtonBase_OnClick" />
-            <styleClasses:BaseButton Grid.Column = "1"
-                                     Content = "Cancel"
-                                     Margin = "2"
-                                     HorizontalAlignment = "Stretch"
+            <styleClasses:BaseButton Grid.Column = "0" Grid.ColumnSpan = "2" Content = "Confirm" Margin = "2"
+                                     HorizontalAlignment = "Center" Width = "100" Click = "CreateButtonBase_OnClick" />
+
+            <styleClasses:BaseButton Grid.Column = "1" Content = "Cancel" Margin = "2" HorizontalAlignment = "Center"
+                                     Width = "100"
+                                     Visibility = "{Binding IsUniqueIdBase,
+                             RelativeSource={RelativeSource AncestorType=Window},
+                             Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                      Click = "CancelButtonBase_OnClick" />
         </Grid>
         <ScrollViewer Grid.Row = "1">

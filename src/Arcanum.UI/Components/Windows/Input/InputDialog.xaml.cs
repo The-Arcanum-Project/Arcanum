@@ -59,4 +59,10 @@ public partial class InputDialog
       Value = value;
       return true;
    }
+
+   public void Clear()
+   {
+      Value = null;
+      InputBox.Text = string.Empty;
+   }
 }
