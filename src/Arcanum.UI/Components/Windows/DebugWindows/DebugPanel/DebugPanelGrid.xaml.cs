@@ -213,4 +213,9 @@ public partial class DebugPanelGrid
    {
       new WatermarkCheckerWindow().Show();
    }
+
+   private void BindingTest_OnClick(object sender, RoutedEventArgs e)
+   {
+      new CommandBindingTest().ShowDialog();
+   }
 }

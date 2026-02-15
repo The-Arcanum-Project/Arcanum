@@ -76,6 +76,9 @@
             <styleClasses:BaseButton Content = "Check for Arcanum Watermark" Margin = "2" Padding = "4"
                                      Click = "ImageTagDecode_OnClick" />
 
+            <styleClasses:BaseButton Content = "Command Window Test" Margin = "2" Padding = "4"
+                                     Click = "BindingTest_OnClick" />
+
 
         </StackPanel>
 

@@ -14,7 +14,7 @@
         <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
         <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
         <Setter Property = "BorderBrush" Value = "{StaticResource DefaultBorderColorBrush}" />
-        <Setter Property = "BorderThickness" Value = "2" />
+        <Setter Property = "BorderThickness" Value = "1" />
         <Setter Property = "Padding" Value = "1" />
         <Setter Property = "Cursor" Value = "Arrow" />
         <Setter Property = "MinHeight" Value = "10" />
