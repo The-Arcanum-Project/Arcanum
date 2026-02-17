@@ -9,7 +9,9 @@ using Arcanum.API.Attributes;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings;
+using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.Components.UserControls.Settings;
 using Arcanum.UI.Util.WindowManagement;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
@@ -83,6 +85,14 @@ public partial class SettingsWindow
    {
       if (tabItem.Tag is not (PropertyInfo property, { } parentObject))
          return;
+
+      if (property.PropertyType == typeof(ShortcutSettingsProfile))
+      {
+         // Custom shortcut editor for ShortcutSettingsProfile
+         tabItem.Content = new ShortcutSettingsEditor();
+         tabItem.Tag = null;
+         return;
+      }
 
       tabItem.Content = GenerateContentForProperty(property, parentObject);
       tabItem.Tag = null;

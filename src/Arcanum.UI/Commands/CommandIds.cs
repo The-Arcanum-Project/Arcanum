@@ -7,6 +7,9 @@ public static class CommandIds
    {
       private const string PATH = nameof(UI);
 
+      // "ui.test_command"
+      public static readonly CommandId TestCommand = CommandId.Create(PATH);
+
       // "ui.window"
       public static class Window
       {
@@ -17,6 +20,40 @@ public static class CommandIds
 
          // "ui.window.minimize"
          public static readonly CommandId Minimize = CommandId.Create(WINDOW_PATH);
+
+         // "ui.window.maximize"
+         public static readonly CommandId Maximize = CommandId.Create(WINDOW_PATH);
+
+         public static class Layout
+         {
+            private const string LAYOUT_PATH = $"{WINDOW_PATH}.{nameof(Layout)}";
+
+            // "ui.window.layout.save"
+            public static readonly CommandId Save = CommandId.Create(LAYOUT_PATH);
+
+            // "ui.window.layout.load"
+            public static readonly CommandId Load = CommandId.Create(LAYOUT_PATH);
+         }
+      }
+   }
+
+   // "editor"
+   public static class Editor
+   {
+      private const string PATH = nameof(Editor);
+
+      // "editor.open_queastor"
+      public static readonly CommandId OpenQueastor = CommandId.Create(PATH);
+
+      // "editor.comment"
+      public static readonly CommandId Comment = CommandId.Create(PATH);
+
+      public static class Map
+      {
+         private const string MAP_PATH = $"{PATH}.{nameof(Map)}";
+
+         // "editor.map.rectangle_select_modifier"
+         public static readonly CommandId RectangleSelectModifier = CommandId.Create(MAP_PATH);
       }
    }
 

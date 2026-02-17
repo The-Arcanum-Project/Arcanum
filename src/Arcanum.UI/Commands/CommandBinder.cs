@@ -3,11 +3,16 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using Arcanum.UI.Commands.KeyMap;
 
 namespace Arcanum.UI.Commands;
 
 public static class CommandBinder
 {
+   private const int CHORD_TIMEOUT_MS = 1500;
+   private static KeyGesture? _pendingFirstStroke;
+   private static DateTime _lastStrokeTime;
+
    public static readonly DependencyProperty ScopesProperty =
       DependencyProperty.RegisterAttached("Scopes",
                                           typeof(string),
@@ -30,37 +35,111 @@ public static class CommandBinder
          var updateAction = () => SynchronizeScopedBindings(element, GetScopes(element));
 
          CommandRegistry.BindingsChanged += updateAction;
-         element.Unloaded += (s, ev) => { CommandRegistry.BindingsChanged -= updateAction; };
+         element.PreviewKeyDown += OnElementPreviewKeyDown;
+
+         element.Unloaded += (_, _) =>
+         {
+            CommandRegistry.BindingsChanged -= updateAction;
+            element.PreviewKeyDown -= OnElementPreviewKeyDown;
+         };
 
          // Initial sync
          updateAction();
       }
    }
 
+   private static bool IsModifierKey(Key key)
+      => key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift or Key.LeftAlt or Key.RightAlt or Key.LWin or Key.RWin or Key.System;
+
+   private static void OnElementPreviewKeyDown(object sender, KeyEventArgs e)
+   {
+      if (sender is not FrameworkElement element)
+         return;
+
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+      // We wait for the 'Action' key to be pressed.
+      if (IsModifierKey(key))
+         return;
+
+      var currentStroke = new KeyGesture(key, Keyboard.Modifiers);
+
+      var scopeString = GetScopes(element);
+      if (string.IsNullOrEmpty(scopeString))
+         return;
+
+      var activeScopes = scopeString.Split(',').Select(s => s.Trim()).ToList();
+      var commands = CommandRegistry.AllCommands
+                                    .Where(c => activeScopes.Contains(c.Scope, StringComparer.OrdinalIgnoreCase))
+                                    .ToList();
+
+      if (_pendingFirstStroke != null)
+      {
+         if ((DateTime.Now - _lastStrokeTime).TotalMilliseconds > CHORD_TIMEOUT_MS)
+            _pendingFirstStroke = null;
+         else
+         {
+            var chordCommand = commands.FirstOrDefault(c => c.Gestures.OfType<MultiKeyGesture>()
+                                                             .Any(g => IsMatch(g.FirstGesture, _pendingFirstStroke) &&
+                                                                       IsMatch(g.SecondGesture, currentStroke)));
+
+            if (chordCommand != null)
+            {
+               ExecuteCommand(chordCommand, element);
+               e.Handled = true;
+               _pendingFirstStroke = null;
+               return;
+            }
+         }
+      }
+
+      var isChordStart = commands.Any(c => c.Gestures.OfType<MultiKeyGesture>()
+                                            .Any(g => IsMatch(g.FirstGesture, currentStroke)));
+
+      if (isChordStart)
+      {
+         _pendingFirstStroke = currentStroke;
+         _lastStrokeTime = DateTime.Now;
+         e.Handled = true;
+      }
+      else
+         _pendingFirstStroke = null;
+   }
+
+   private static bool IsMatch(KeyGesture template, KeyGesture input) => template.Key == input.Key && template.Modifiers == input.Modifiers;
+
+   private static void ExecuteCommand(IAppCommand command, FrameworkElement element)
+   {
+      // Try to find a Window for Dialog scopes, otherwise null
+      object? parameter = element as Window ?? Window.GetWindow(element);
+      if (command.CanExecute(parameter))
+         command.Execute(parameter);
+   }
+
    public static void SynchronizeScopedBindings(FrameworkElement element, string? scopeString)
    {
       element.InputBindings.Clear();
-
       if (string.IsNullOrWhiteSpace(scopeString))
          return;
 
       var activeScopes = scopeString.Split(',').Select(s => s.Trim()).ToList();
+
+      // Filter for standard KeyGestures (WPF handles these)
       var filteredCommands = CommandRegistry.AllCommands
                                             .Where(c => activeScopes.Contains(c.Scope));
 
       foreach (var cmd in filteredCommands)
       {
          foreach (var gesture in cmd.Gestures)
-         {
-            var binding = new InputBinding(cmd, gesture);
-
-            // If the element is a Window, we pass the window
-            // as the default parameter for the shortcut execution.
-            if (element is Window w)
-               binding.CommandParameter = w;
-
-            element.InputBindings.Add(binding);
-         }
+            // Only add standard KeyGestures to InputBindings
+            // Chords are handled by the PreviewKeyDown event above
+            if (gesture is KeyGesture kg)
+            {
+               var binding = new InputBinding(cmd, kg);
+               if (element is Window w)
+                  binding.CommandParameter = w;
+               element.InputBindings.Add(binding);
+            }
       }
    }
 

@@ -35,6 +35,8 @@ public class MainSettingsObj
    [IsSubMenu("Keymap")]
    public UserKeyBinds UserKeyBinds { get; set; } = new();
 
+   public ShortcutSettingsProfile KeyMap { get; set; } = new();
+
 #if DEBUG
    public DebugConfigSettings DebugConfigSettings { get; set; } = DebugConfig.Settings;
 #endif
