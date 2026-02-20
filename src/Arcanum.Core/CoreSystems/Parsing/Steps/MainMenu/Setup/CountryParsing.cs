@@ -105,6 +105,7 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
          foreach (var sn in varBlock.Children)
             VariableDeclarationParsing.Dispatch(sn, vard, ref pc);
 
+         vard.Source = pc.Context.FileObj;
          country.Variables.Add(vard);
       }
 

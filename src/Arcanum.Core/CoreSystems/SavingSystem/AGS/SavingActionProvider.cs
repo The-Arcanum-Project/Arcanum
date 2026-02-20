@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Serialization.Nodes;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Court.State;
 using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.InGame.Religious.SubObjects;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
 using CharacterNameDeclaration = Arcanum.Core.GameObjects.InGame.Court.CharacterNameDeclaration;
@@ -50,7 +51,10 @@ public static class SavingActionProvider
          RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
       else
          using (sb.Indent())
+         {
+            sb.AppendLine();
             RulerTerm.FormatRulerTerm(sb, asOneLine, rt);
+         }
 
       if (trueOneLiner)
       {
@@ -66,6 +70,9 @@ public static class SavingActionProvider
       }
 
       sb.AppendClosingBrace();
+
+      if (rt.CoRulers.Count > 0)
+         sb.AppendLine();
    }
 
    public static void LocationSaving(IEu5Object target,
@@ -371,14 +378,24 @@ public static class SavingActionProvider
             {
                using (sb.Block())
                {
+                  var db = vard.DataBlock;
+                  var id = db.SaveableProps.First(x => Equals(x.NxProp, VariableDataBlock.Field.Identity));
+                  var type = db.SaveableProps.First(x => Equals(x.NxProp, VariableDataBlock.Field.DataType));
                   sb.Append("flag")
                     .AppendSeparator()
                     .Append('"')
                     .Append(vard.Flag)
                     .Append('"')
-                    .AppendLine()
-                    .Append("data");
-                  TreeBuilder.ConstructAndWrite(target, sb, asOneLine, false, null, false, false);
+                    .AppendLine();
+                  using (sb.BlockWithName("data"))
+                  {
+                     FormattingService.HandleEnumProperty(type, sb, db.DataType, asOneLine);
+                     sb.AppendLine()
+                       .Append("identity")
+                       .AppendSeparator()
+                       .Append(FormatValue(id.ValueType, db.Identity, id))
+                       .AppendLine();
+                  }
                }
             }
          }

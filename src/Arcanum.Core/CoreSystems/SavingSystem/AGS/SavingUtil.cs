@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -165,6 +166,9 @@ public static class SavingUtil
          case SavingValueType.Enum:
             return value.ToString()!;
          case SavingValueType.IAgs:
+            if (value is JominiDate date)
+               return date.ToString();
+
             throw new InvalidOperationException("IAgs type needs to be handled in advance");
          case SavingValueType.Modifier:
             if (value is ModValInstance mvi)
