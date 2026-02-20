@@ -9,8 +9,9 @@ public interface IAppCommand : ICommand, INotifyPropertyChanged
    public CommandId Id { get; }
    public string DisplayName { get; }
    public string Description { get; }
-   public string Category { get; }
    public ObservableCollection<InputGesture> Gestures { get; }
+   public ReadOnlyObservableCollection<InputGesture> DefaultGestures { get; }
    public string Tooltip { get; }
    public string Scope { get; }
+   public void ResetToDefault();
 }

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Arcanum.API;
+﻿using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
@@ -36,7 +35,7 @@ public class LifecycleManager
 
    public event EventHandler? OnApplicationShutDownCompleted;
 
-   public void RunStartUpSequence(IPluginHost host)
+   public void DebugInit()
    {
 #if DEBUG
       // Step 0: Initialize debug elements
@@ -44,6 +43,10 @@ public class LifecycleManager
       if (DebugConfig.Settings.EnableDebugLogging)
          UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
+   }
+
+   public void RunStartUpSequence(IPluginHost host)
+   {
       EmptyValidation.ValidateEmptyObjects();
       InitializeApplicationCore();
       // Step 1: Initialize core services

@@ -4,22 +4,45 @@
              xmlns:local = "clr-namespace:Arcanum.UI.Components.Views.Settings"
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
-             d:DataContext = "{d:DesignInstance}">
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:settings = "clr-namespace:Arcanum.UI.Components.UserControls.Settings" mc:Ignorable = "d"
+             d:DataContext = "{d:DesignInstance}" UseLayoutRounding = "True">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:GestureToTextConverter x:Key = "GestureConverter" />
             <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
             <converters:IsTopLevelConverter x:Key = "IsTopLevelConverter" />
+            <converters:StringToVisibilityConverter x:Key = "StringToVisibilityConverter" />
+
+            <ContextMenu x:Key = "ShortcutContextMenu">
+                <MenuItem Header = "Add Keyboard Shortcut"
+                          Command = "{Binding Path=PlacementTarget.(FrameworkElement.Tag).(settings:ShortcutSettingsEditor.AddShortcutCommand), RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                          CommandParameter = "{Binding}" />
+
+                <MenuItem Header = "Replace Keyboard Shortcut"
+                          Command = "{Binding Path=PlacementTarget.(FrameworkElement.Tag).(settings:ShortcutSettingsEditor.ReplaceShortcutCommand), RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                          CommandParameter = "{Binding}" />
+
+                <MenuItem Header = "Remove Keyboard Shortcut"
+                          Command = "{Binding Path=PlacementTarget.(FrameworkElement.Tag).(settings:ShortcutSettingsEditor.RemoveShortcutCommand), RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                          CommandParameter = "{Binding}" />
+
+                <Separator />
+                <MenuItem Header = "Reset to Default"
+                          Command = "{Binding Path=PlacementTarget.(FrameworkElement.Tag).(settings:ShortcutSettingsEditor.ResetCommand), RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                          CommandParameter = "{Binding}" />
+            </ContextMenu>
 
             <Style x:Key = "KeyPillStyle" TargetType = "Border">
                 <Setter Property = "Background" Value = "{StaticResource DarkBackColorBrush}" />
                 <Setter Property = "CornerRadius" Value = "3" />
-                <Setter Property = "Padding" Value = "4,1" />
+                <Setter Property = "Padding" Value = "4, 1, 4, 2" />
                 <Setter Property = "Margin" Value = "4,0" />
                 <Setter Property = "BorderBrush" Value = "{StaticResource LightBackColorBrush}" />
                 <Setter Property = "BorderThickness" Value = "1" />
+                <Setter Property = "VerticalAlignment" Value = "Stretch" />
             </Style>
 
             <Style x:Key = "RiderTreeViewItemStyle" TargetType = "TreeViewItem">
@@ -27,43 +50,61 @@
                 <Setter Property = "IsExpanded" Value = "{Binding IsExpanded, Mode=TwoWay}" />
                 <Setter Property = "Visibility"
                         Value = "{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <Setter Property = "Padding" Value = "0, 1" />
+                <Setter Property = "Padding" Value = "0" />
+                <Setter Property = "BorderThickness" Value = "1" />
                 <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+
+                <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
 
                 <Setter Property = "Template">
                     <Setter.Value>
                         <ControlTemplate TargetType = "TreeViewItem">
-                            <Grid Margin = "{TemplateBinding Padding}">
+                            <Grid Background = "Transparent">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition MinWidth = "19" Width = "Auto" />
+                                    <ColumnDefinition MinWidth = "12" Width = "Auto" />
                                     <ColumnDefinition Width = "*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height = "Auto" />
-                                    <RowDefinition Height = "Auto" />
-                                    <RowDefinition Height = "Auto" />
+                                    <RowDefinition Height = "Auto" /> <!-- Header Row -->
+                                    <RowDefinition Height = "Auto" /> <!-- Children Row -->
+                                    <RowDefinition Height = "Auto" /> <!-- Separator Row -->
                                 </Grid.RowDefinitions>
 
+                                <Border x:Name = "Bd" Grid.Row = "0" Grid.Column = "0" Grid.ColumnSpan = "2"
+                                        Background = "{TemplateBinding Background}"
+                                        BorderBrush = "{TemplateBinding BorderBrush}"
+                                        BorderThickness = "{TemplateBinding BorderThickness}" CornerRadius = "3"
+                                        Padding = "{TemplateBinding Padding}" SnapsToDevicePixels = "True">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition MinWidth = "12" Width = "Auto" />
+                                            <ColumnDefinition Width = "*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <ToggleButton x:Name = "Expander" Grid.Column = "0"
+                                                      Style = "{StaticResource ExpandCollapseToggleStyle}"
+                                                      ClickMode = "Press"
+                                                      IsChecked = "{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                                        <ContentPresenter x:Name = "PART_Header" Grid.Column = "1"
+                                                          ContentSource = "Header" HorizontalAlignment = "Stretch" />
+                                    </Grid>
+                                </Border>
+                                <ItemsPresenter x:Name = "ItemsHost" Grid.Row = "1" Grid.Column = "1"
+                                                Visibility = "Collapsed" />
+
+                                <!-- SEPARATOR -->
+                                <Border x:Name = "SectionLine" Grid.Row = "2" Grid.Column = "0" Grid.ColumnSpan = "2"
+                                        Height = "1" Background = "{StaticResource DefaultBorderColorBrush}"
+                                        Margin = "3, 5" Visibility = "Collapsed" SnapsToDevicePixels = "True" />
+
+                                <!-- Visual States for Expansion -->
                                 <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name = "SelectionStates">
-                                        <VisualState x:Name = "Selected" />
-                                        <VisualState x:Name = "Unselected" />
-                                        <VisualState x:Name = "SelectedInactive">
-                                            <Storyboard>
-                                                <ColorAnimationUsingKeyFrames Storyboard.TargetName = "Bd"
-                                                                              Storyboard.TargetProperty = "(Panel.Background).(SolidColorBrush.Color)">
-                                                    <EasingColorKeyFrame KeyTime = "0"
-                                                                         Value = "{StaticResource LightBackColor}" />
-                                                </ColorAnimationUsingKeyFrames>
-                                            </Storyboard>
-                                        </VisualState>
-                                    </VisualStateGroup>
                                     <VisualStateGroup x:Name = "ExpansionStates">
                                         <VisualState x:Name = "Expanded">
                                             <Storyboard>
-                                                <ObjectAnimationUsingKeyFrames
-                                                    Storyboard.TargetProperty = "(UIElement.Visibility)"
-                                                    Storyboard.TargetName = "ItemsHost">
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName = "ItemsHost"
+                                                                               Storyboard.TargetProperty = "(UIElement.Visibility)">
                                                     <DiscreteObjectKeyFrame KeyTime = "0"
                                                                             Value = "{x:Static Visibility.Visible}" />
                                                 </ObjectAnimationUsingKeyFrames>
@@ -72,30 +113,6 @@
                                         <VisualState x:Name = "Collapsed" />
                                     </VisualStateGroup>
                                 </VisualStateManager.VisualStateGroups>
-
-                                <!-- The Selection Border (Bd) -->
-                                <Border x:Name = "Bd" Grid.Row = "0" Grid.Column = "0" Grid.ColumnSpan = "2"
-                                        CornerRadius = "2" Background = "{TemplateBinding Background}"
-                                        BorderBrush = "{TemplateBinding BorderBrush}"
-                                        BorderThickness = "{TemplateBinding BorderThickness}"
-                                        Padding = "{TemplateBinding Padding}" SnapsToDevicePixels = "True" />
-
-                                <!-- The Arrow/Expander -->
-                                <ToggleButton x:Name = "Expander" Grid.Row = "0" Grid.Column = "0"
-                                              Style = "{StaticResource ExpandCollapseToggleStyle}" ClickMode = "Press"
-                                              IsChecked = "{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
-
-                                <!-- The Content (HierarchicalDataTemplate) -->
-                                <ContentPresenter x:Name = "PART_Header" Grid.Row = "0" Grid.Column = "1"
-                                                  ContentSource = "Header" HorizontalAlignment = "Stretch" />
-
-                                <!-- The Children (Indented) -->
-                                <ItemsPresenter x:Name = "ItemsHost" Grid.Row = "1" Grid.Column = "1"
-                                                Visibility = "Collapsed" />
-
-                                <Border x:Name = "SectionLine" Grid.Row = "2" Grid.Column = "0" Grid.ColumnSpan = "2"
-                                        Height = "1" Background = "{StaticResource DefaultBorderColorBrush}"
-                                        Margin = "3, 5" Visibility = "Collapsed" SnapsToDevicePixels = "True" />
                             </Grid>
 
                             <ControlTemplate.Triggers>
@@ -119,10 +136,12 @@
                                 <Trigger Property = "IsExpanded" Value = "false">
                                     <Setter TargetName = "ItemsHost" Property = "Visibility" Value = "Collapsed" />
                                 </Trigger>
+
                                 <Trigger SourceName = "Bd" Property = "IsMouseOver" Value = "True">
                                     <Setter TargetName = "Bd" Property = "Background"
                                             Value = "{StaticResource LightBackColorBrush}" />
                                 </Trigger>
+
                                 <Trigger Property = "IsSelected" Value = "True">
                                     <Setter TargetName = "Bd" Property = "Background"
                                             Value = "{StaticResource BlueSelectionBackColorBrush}" />
@@ -132,20 +151,30 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-
             <HierarchicalDataTemplate DataType = "{x:Type local:ShortcutTreeItem}" ItemsSource = "{Binding Children}">
-                <Grid HorizontalAlignment = "Stretch" Background = "Transparent" Margin = "0,0,10,0">
+                <Grid HorizontalAlignment = "Stretch" Background = "Transparent" Margin = "0,0,10,0"
+                      ContextMenu = "{StaticResource ShortcutContextMenu}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width = "*" />    <!-- Name -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Name -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Separator -->
+                        <ColumnDefinition Width = "*" />    <!-- Description -->
                         <ColumnDefinition Width = "Auto" /> <!-- Shortcuts -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- 0. The Name -->
+                    <!-- Name & Description -->
                     <TextBlock Grid.Column = "0" Text = "{Binding Name}" VerticalAlignment = "Center"
-                               Foreground = "{StaticResource DefaultForeColorBrush}" />
+                               FontWeight = "Bold" />
+                    <Border Grid.Column = "1" Width = "8" Height = "1"
+                            Background = "{StaticResource DefaultForeColorBrush}" VerticalAlignment = "Center"
+                            Margin = "10, 3, 10 ,0" SnapsToDevicePixels = "True"
+                            Visibility = "{Binding Description, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <TextBlock Grid.Column = "2" Text = "{Binding Description}"
+                               Foreground = "{StaticResource LightGrayAccentColorBrush}" FontSize = "10"
+                               TextWrapping = "NoWrap" TextTrimming = "CharacterEllipsis" Margin = "0, 0, 15, 2"
+                               VerticalAlignment = "Bottom" />
 
-                    <!-- 1. The Shortcuts -->
-                    <ItemsControl Grid.Column = "1" ItemsSource = "{Binding Gestures}" VerticalAlignment = "Center">
+                    <!-- Shortcuts -->
+                    <ItemsControl Grid.Column = "3" ItemsSource = "{Binding Gestures}" VerticalAlignment = "Center">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation = "Horizontal" />
@@ -153,9 +182,13 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Style = "{StaticResource KeyPillStyle}">
+                                <Border Style = "{StaticResource KeyPillStyle}"
+                                        ContextMenu = "{StaticResource ShortcutContextMenu}">
+                                    <Border.Tag>
+                                        <Binding RelativeSource = "{RelativeSource AncestorType=UserControl}" />
+                                    </Border.Tag>
                                     <TextBlock Text = "{Binding ., Converter={StaticResource GestureConverter}}"
-                                               FontSize = "10"
+                                               FontSize = "11" FontFamily = "{StaticResource DefaultMonospacedFont}"
                                                Foreground = "{StaticResource LightGrayAccentColorBrush}" />
                                 </Border>
                             </DataTemplate>
@@ -165,20 +198,54 @@
                     <Grid.Tag>
                         <Binding RelativeSource = "{RelativeSource AncestorType=UserControl}" />
                     </Grid.Tag>
-
-                    <Grid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header = "Add Keyboard Shortcut"
-                                      Command = "{Binding Path=PlacementTarget.Tag.AddShortcutCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                      CommandParameter = "{Binding}" />
-                            <Separator />
-                            <MenuItem Header = "Reset to Default"
-                                      Command = "{Binding Path=PlacementTarget.Tag.ResetCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                      CommandParameter = "{Binding}" />
-                        </ContextMenu>
-                    </Grid.ContextMenu>
                 </Grid>
             </HierarchicalDataTemplate>
+
+            <Style x:Key = "IconToggleButtonStyle" TargetType = "ToggleButton"
+                   BasedOn = "{StaticResource {x:Type ToggleButton}}">
+
+                <Setter Property = "Background" Value = "Transparent" />
+                <Setter Property = "BorderThickness" Value = "0" />
+
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ToggleButton">
+                            <Border x:Name = "Root" Background = "{TemplateBinding Background}" CornerRadius = "3">
+
+                                <!-- Icon placeholder -->
+                                <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+
+                                <!-- Selected wins over hover -->
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property = "IsChecked" Value = "True" />
+                                        <Condition Property = "IsMouseOver" Value = "True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName = "Root" Property = "Background"
+                                            Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                </MultiTrigger>
+
+                                <Trigger Property = "IsChecked" Value = "True">
+                                    <Setter TargetName = "Root" Property = "Background"
+                                            Value = "{StaticResource BlueAccentColorBrush}" />
+                                </Trigger>
+
+                                <Trigger Property = "IsMouseOver" Value = "True">
+                                    <Setter TargetName = "Root" Property = "Background"
+                                            Value = "{StaticResource LightBackColorBrush}" />
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
@@ -190,30 +257,99 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height = "Auto" />
+            <RowDefinition Height = "Auto" /> <!-- Search Bar and Buttons -->
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
 
-        <!-- Search Bar -->
-        <Border Background = "{StaticResource LightBackColorBrush}" CornerRadius = "3" Margin = "5" Padding = "5,2"
-                BorderThickness = "1" BorderBrush = "{StaticResource DefaultBorderColorBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width = "Auto" />
-                    <ColumnDefinition Width = "*" />
-                </Grid.ColumnDefinitions>
-                <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/Magnifer16x16.png" Margin = "0, 0, 3,0"
-                       Stretch = "UniformToFill" />
-                <TextBox Grid.Column = "1" x:Name = "SearchBox" Background = "Transparent" BorderThickness = "0"
-                         CaretBrush = "{StaticResource DefaultForeColorBrush}"
-                         Foreground = "{StaticResource DefaultForeColorBrush}" VerticalContentAlignment = "Center"
-                         TextChanged = "SearchBox_TextChanged" />
-            </Grid>
-        </Border>
+        <Grid Grid.Row = "0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "Auto" /> <!-- Expand All -->
+                <ColumnDefinition Width = "Auto" /> <!-- Collapse All -->
+                <ColumnDefinition Width = "*" /> <!-- Search Bar -->
+                <ColumnDefinition Width = "Auto" /> <!-- Reset All -->
+            </Grid.ColumnDefinitions>
+
+
+            <!-- Expand All Button -->
+            <styleClasses:BaseButton Grid.Column = "0" Width = "22" Height = "22" Margin = "2,0, 0, 0"
+                                     ToolTip = "Expand All" Click = "ExpandAll_Click" Background = "Transparent"
+                                     BorderThickness = "0">
+                <Viewbox Width = "12" Height = "12">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ExpandAll20x20.png" Stretch = "None"
+                           VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                </Viewbox>
+            </styleClasses:BaseButton>
+
+            <!-- Collapse All Button -->
+            <styleClasses:BaseButton Grid.Column = "1" Width = "22" Height = "22" Margin = "0" ToolTip = "Collapse All"
+                                     Click = "CollapseAll_Click" Background = "Transparent" BorderThickness = "0">
+                <Viewbox Width = "12" Height = "12">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/CollapseAll20x20.png" Stretch = "None"
+                           VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                </Viewbox>
+            </styleClasses:BaseButton>
+
+            <Border Grid.Column = "2" Background = "{StaticResource DarkBackColorBrush}" CornerRadius = "3"
+                    Margin = "5" Padding = "5,2" BorderThickness = "1"
+                    BorderBrush = "{StaticResource DefaultBorderColorBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "Auto" /> <!-- Magnifier -->
+                        <ColumnDefinition Width = "*" />    <!-- Search Box -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Search Keys Toggle -->
+                        <ColumnDefinition Width = "Auto" /> <!-- Search IDs Toggle -->
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column = "0" Source = "/Arcanum_UI;component/Assets/Icons/16x16/Magnifer16x16.png"
+                           Margin = "0, 0, 3,0" Stretch = "None" Width = "22" Height = "22"
+                           VerticalAlignment = "Center" HorizontalAlignment = "Left" />
+
+                    <!-- Search Bar -->
+                    <TextBox Grid.Column = "1" x:Name = "SearchBox" Background = "Transparent" BorderThickness = "0"
+                             CaretBrush = "{StaticResource DefaultForeColorBrush}"
+                             Foreground = "{StaticResource DefaultForeColorBrush}" VerticalContentAlignment = "Center"
+                             TextChanged = "SearchBox_TextChanged" />
+
+                    <!-- Search Keys Toggle -->
+                    <ToggleButton Grid.Column = "2" Width = "22" Height = "22" Margin = "2,0"
+                                  x:Name = "ToggleSearchKeys" Style = "{StaticResource IconToggleButtonStyle}"
+                                  ToolTip = "Search by Keyboard Shortcuts" Click = "SearchMode_Click">
+
+                        <Viewbox Width = "14" Height = "14">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Keyboard20x20.png"
+                                   Stretch = "None" VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                        </Viewbox>
+                    </ToggleButton>
+
+                    <!-- Search IDs Toggle -->
+                    <ToggleButton Grid.Column = "3" Width = "22" Height = "22" Margin = "2,0, -4, 0"
+                                  x:Name = "ToggleSearchIds" Style = "{StaticResource IconToggleButtonStyle}"
+                                  ToolTip = "Search by Command IDs" Click = "SearchMode_Click">
+
+                        <Viewbox Width = "12" Height = "12">
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Code20x20.png" Stretch = "None"
+                                   VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                        </Viewbox>
+                    </ToggleButton>
+                </Grid>
+            </Border>
+
+            <styleClasses:BaseButton Grid.Row = "0" Grid.Column = "3" Width = "22" Height = "22" Margin = "-4,0, 4, 0"
+                                     ToolTip = "Reset All to Default" Click = "ResetAll_Click"
+                                     Background = "Transparent" BorderThickness = "0">
+                <Viewbox Width = "12" Height = "12">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Reset20x20.png" Stretch = "None"
+                           VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                </Viewbox>
+            </styleClasses:BaseButton>
+
+        </Grid>
+
 
         <!-- The Tree -->
-        <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}"
+        <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
                   Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
-                  ItemContainerStyle = "{StaticResource RiderTreeViewItemStyle}" />
+                  ItemContainerStyle = "{StaticResource RiderTreeViewItemStyle}"
+                  ScrollViewer.HorizontalScrollBarVisibility = "Disabled" />
     </Grid>
 </UserControl>

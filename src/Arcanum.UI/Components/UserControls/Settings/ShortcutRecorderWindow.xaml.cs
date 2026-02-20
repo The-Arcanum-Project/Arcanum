@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.KeyMap;
+using Arcanum.UI.Commands;
 
 namespace Arcanum.UI.Components.UserControls.Settings;
 
@@ -8,16 +9,18 @@ public partial class ShortcutRecorderWindow
 {
    private readonly ShortcutRecorderViewModel _vm;
 
-   public ShortcutRecorderWindow()
+   public ShortcutRecorderWindow(IAppCommand command)
    {
       InitializeComponent();
       _vm = new()
       {
-         CommandName = "Unknown Command", CommandScope = "Global",
+         CommandId = command.Id.Value,
+         CommandName = command.DisplayName,
+         CommandScope = command.Scope,
+         CommandDescription = command.Description,
       };
       DataContext = _vm;
 
-      // Capture all keyboard input
       PreviewKeyDown += OnRecorderKeyDown;
    }
 
@@ -35,7 +38,6 @@ public partial class ShortcutRecorderWindow
       if (_vm.ActiveSlotIndex == 0)
       {
          _vm.FirstStroke = stroke;
-         // If they just recorded the first, and Second is enabled, move focus automatically
          if (_vm.IsSecondStrokeEnabled)
             _vm.ActiveSlotIndex = 1;
       }
@@ -62,4 +64,10 @@ public partial class ShortcutRecorderWindow
    }
 
    private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+   private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+   {
+      if (_vm.FirstStroke != null)
+         _vm.ActiveSlotIndex = 1;
+   }
 }

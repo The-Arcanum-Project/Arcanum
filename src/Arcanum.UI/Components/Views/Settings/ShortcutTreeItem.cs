@@ -9,6 +9,7 @@ namespace Arcanum.UI.Components.Views.Settings;
 public class ShortcutTreeItem : INotifyPropertyChanged
 {
    public string Name { get; set; } = string.Empty;
+   public string Description => Command != null ? Command.Description : string.Empty;
    public IAppCommand? Command { get; set; }
    public ObservableCollection<ShortcutTreeItem> Children { get; } = new();
    public bool IsExpanded

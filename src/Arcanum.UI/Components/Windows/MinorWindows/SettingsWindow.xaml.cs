@@ -86,7 +86,7 @@ public partial class SettingsWindow
       if (tabItem.Tag is not (PropertyInfo property, { } parentObject))
          return;
 
-      if (property.PropertyType == typeof(ShortcutSettingsProfile))
+      if (property.PropertyType == typeof(KeyMapState))
       {
          // Custom shortcut editor for ShortcutSettingsProfile
          tabItem.Content = new ShortcutSettingsEditor();

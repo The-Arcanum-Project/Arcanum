@@ -8,12 +8,12 @@ namespace Arcanum.UI.Commands;
 public sealed class ManagedCommand : IAppCommand
 {
    private readonly Predicate<object?>? _canExecute;
+   private readonly ObservableCollection<InputGesture> _defaultGestures = [];
    private readonly Action<object> _execute;
 
    public ManagedCommand(CommandId id,
                          string name,
                          string description,
-                         string category,
                          string scope,
                          Action<object> execute,
                          Predicate<object?>? canExecute = null)
@@ -21,12 +21,12 @@ public sealed class ManagedCommand : IAppCommand
       Id = id;
       DisplayName = name;
       Description = description;
-      Category = category;
       Scope = scope;
       _execute = execute;
       _canExecute = canExecute;
       Gestures = [];
       Gestures.CollectionChanged += (_, _) => OnPropertyChanged(nameof(Tooltip));
+      DefaultGestures = new(_defaultGestures);
 
       CommandRegistry.Register(this);
    }
@@ -34,13 +34,11 @@ public sealed class ManagedCommand : IAppCommand
    public ManagedCommand(CommandId id,
                          string name,
                          string description,
-                         string category,
                          Action<object> execute,
                          Predicate<object?>? canExecute = null,
                          params string[] scopes) : this(id,
                                                         name,
                                                         description,
-                                                        category,
                                                         scopes.Length > 0
                                                            ? string.Join(", ", scopes)
                                                            : throw new ArgumentNullException(nameof(scopes), "At least one scope must be provided."),
@@ -52,9 +50,17 @@ public sealed class ManagedCommand : IAppCommand
    public CommandId Id { get; }
    public string DisplayName { get; }
    public string Description { get; }
-   public string Category { get; }
    public string Scope { get; }
+
+   public void ResetToDefault()
+   {
+      Gestures.Clear();
+      foreach (var g in _defaultGestures)
+         Gestures.Add(g);
+   }
+
    public ObservableCollection<InputGesture> Gestures { get; }
+   public ReadOnlyObservableCollection<InputGesture> DefaultGestures { get; }
 
    public string Tooltip
    {
@@ -78,6 +84,13 @@ public sealed class ManagedCommand : IAppCommand
    public void Execute(object? parameter) => _execute(parameter!);
 
    public event PropertyChangedEventHandler? PropertyChanged;
+
+   public void AddDefaultGesture(InputGesture gesture)
+   {
+      _defaultGestures.Add(gesture);
+      if (!Gestures.Contains(gesture))
+         Gestures.Add(gesture);
+   }
 
    private static string GetGestureText(InputGesture gesture)
    {

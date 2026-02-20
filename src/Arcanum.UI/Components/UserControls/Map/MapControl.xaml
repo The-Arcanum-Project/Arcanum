@@ -28,6 +28,8 @@
                     <MenuItem Header = "Select Region" Click = "SelectRegion_Click" />
                     <MenuItem Header = "Select Super Region" Click = "SelectSuperRegion_Click" />
                     <MenuItem Header = "Select Continent" Click = "SelectContinent_Click" />
+                    <Separator />
+                    <MenuItem Header = "Copy Selected Location Ids" Click = "CopySelectedLocationIds_Click" />
                 </ContextMenu>
             </Border.ContextMenu>
         </Border>

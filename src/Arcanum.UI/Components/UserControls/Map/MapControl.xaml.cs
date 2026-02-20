@@ -508,4 +508,14 @@ public partial class MapControl
                        true,
                        false);
    }
+
+   private void CopySelectedLocationIds_Click(object sender, RoutedEventArgs e)
+   {
+      var selectedLocations = Selection.GetSelectedLocations;
+      if (selectedLocations.Count == 0)
+         return;
+
+      var idList = string.Join(" ", selectedLocations.Select(loc => loc.UniqueId));
+      Clipboard.SetText(idList);
+   }
 }

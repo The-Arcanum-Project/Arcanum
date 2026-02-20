@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.Logger;
@@ -54,6 +55,8 @@ internal static class Program
       // Initialize Plugin Host and Lifecycle Manager
       var pluginHost = new PluginHost.PluginHost();
       UiHandlesInjector.InjectUiHandles();
+      LifecycleManager.Instance.DebugInit();
+      CommandRegistry.Initialize();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
       var clean = false;
 
