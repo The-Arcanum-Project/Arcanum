@@ -21,6 +21,9 @@ public partial class PoliticalEditor
       ViewModel = new();
       DataContext = this;
       InitializeComponent();
+
+      if (SelectionManager.EditableObjects.Count == 1 && SelectionManager.EditableObjects[0] is Country country)
+         ViewModel.UpdateViewModel(country);
    }
 
    public PoliticalEditorViewModel ViewModel { get; }

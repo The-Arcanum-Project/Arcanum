@@ -152,5 +152,6 @@ public partial class SpecializedEditor
 
       _specializedEditor.Enabled = tb.IsChecked == true;
       MainWindowGen.UpdateSpecializedEditors();
+      UpdateRequirementsStatus();
    }
 }

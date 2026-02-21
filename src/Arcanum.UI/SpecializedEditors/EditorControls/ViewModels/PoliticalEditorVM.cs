@@ -171,6 +171,8 @@ public class PoliticalEditorViewModel : INotifyPropertyChanged
 
    public void UpdateViewModel(Country country)
    {
+      SelectedCountry = country;
+
       OwnControlCoreLocations = country.OwnControlCores;
       OwnControlIntegratedLocations = country.OwnControlIntegrated;
       OwnControlConqueredLocations = country.OwnControlConquered;
