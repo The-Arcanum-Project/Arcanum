@@ -69,10 +69,6 @@ public static class CommandLibrary
                          {
                             /* This command is meant to be used as a modifier, so it doesn't execute an action on its own. */
                          }).WithDefaultGesture(Key.LeftShift);
-
-      // Example: Ctrl+K, Ctrl+C to Comment
-      new ManagedCommand(CommandIds.Editor.Comment, "Comment", "...", CommandScopes.DIALOG, _ => MessageBox.Show("Comment command executed!"))
-        .WithChord(Key.K, ModifierKeys.Control, Key.C, ModifierKeys.Control);
    }
 
    extension(ManagedCommand cmd)

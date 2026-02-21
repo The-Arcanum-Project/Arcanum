@@ -3,7 +3,6 @@
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                     xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters">
 
-
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
@@ -28,8 +27,13 @@
                             CornerRadius = "{Binding Path=CornerRadius, RelativeSource={RelativeSource TemplatedParent}}"
                             Padding = "{TemplateBinding Padding}" HorizontalAlignment = "Stretch"
                             VerticalAlignment = "Stretch">
-                        <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                        <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                          Content = "{TemplateBinding Content}"
+                                          ContentTemplate = "{TemplateBinding ContentTemplate}"
+                                          ContentTemplateSelector = "{TemplateBinding ContentTemplateSelector}"
+                                          ContentStringFormat = "{TemplateBinding ContentStringFormat}" />
                     </Border>
+
                     <ControlTemplate.Triggers>
                         <Trigger Property = "IsMouseOver" Value = "True">
                             <Setter TargetName = "border" Property = "Background"
@@ -38,7 +42,6 @@
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
 
-                        <!-- Focused + Mouse NOT over + Border > 0 -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition
@@ -53,7 +56,6 @@
                             <Setter Property = "BorderBrush" Value = "{StaticResource SelectedControlBorderColorBrush}" />
                         </MultiDataTrigger>
 
-                        <!-- Focused + Mouse NOT over + Border = 0 -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition

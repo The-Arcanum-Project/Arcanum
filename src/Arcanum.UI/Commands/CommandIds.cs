@@ -55,6 +55,11 @@ public static class CommandIds
          // "editor.map.rectangle_select_modifier"
          public static readonly CommandId RectangleSelectModifier = CommandId.Create(MAP_PATH);
       }
+
+      public static class SpecializedEditors
+      {
+         private const string SPE_PATH = $"{PATH}.{nameof(SpecializedEditors)}";
+      }
    }
 
    // "file"

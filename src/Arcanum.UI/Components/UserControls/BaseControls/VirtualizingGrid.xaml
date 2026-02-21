@@ -1,0 +1,57 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.VirtualizingGrid"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml" x:Name = "Root">
+    <ListView ItemsSource = "{Binding ElementName=Root, Path=ChunkedItems}" VirtualizingPanel.IsVirtualizing = "True"
+              VirtualizingPanel.VirtualizationMode = "Recycling" HorizontalContentAlignment = "Stretch"
+              ScrollViewer.HorizontalScrollBarVisibility = "Disabled" BorderThickness = "0" Background = "Transparent">
+
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <ItemsControl ItemsSource = "{Binding}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns = "{Binding ElementName=Root, Path=Columns}" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border MouseLeftButtonDown = "Cell_MouseDown" Background = "Transparent"
+                                    CornerRadius = "4" Margin = "2">
+                                <Border.Style>
+                                    <Style TargetType = "Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding = "{Binding IsSelected}" Value = "True">
+                                                <Setter Property = "Background"
+                                                        Value = "{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                                <Setter Property = "TextElement.Foreground"
+                                                        Value = "{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <ContentPresenter Content = "{Binding Value}"
+                                                  ContentTemplate = "{Binding ElementName=Root, Path=ItemTemplate}" />
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+
+        <ListView.ItemContainerStyle>
+            <Style TargetType = "ListViewItem">
+                <Setter Property = "Focusable" Value = "False" />
+                <Setter Property = "Background" Value = "Transparent" />
+                <Setter Property = "Padding" Value = "0" />
+                <Setter Property = "HorizontalContentAlignment" Value = "Stretch" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "ListViewItem">
+                            <ContentPresenter />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ListView.ItemContainerStyle>
+    </ListView>
+</UserControl>

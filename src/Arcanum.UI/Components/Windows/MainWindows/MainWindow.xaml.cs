@@ -539,7 +539,10 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void UndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
+      var sw = Stopwatch.StartNew();
       AppData.HistoryManager.Undo(false);
+      sw.Stop();
+      ArcLog.WriteLine("MW", LogLevel.INF, $"Undo executed in {sw.ElapsedMilliseconds} ms");
    }
 
    private void CommandCanStrepRedoExecute(object sender, CanExecuteRoutedEventArgs e)

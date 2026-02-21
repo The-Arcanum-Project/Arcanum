@@ -58,6 +58,9 @@ public static class CommandBinder
 
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
 
+      if (ValidateKeyInput(key))
+         return;
+
       // We wait for the 'Action' key to be pressed.
       if (IsModifierKey(key))
          return;
@@ -104,6 +107,71 @@ public static class CommandBinder
       }
       else
          _pendingFirstStroke = null;
+
+      var singleCommand = commands.FirstOrDefault(c => c.Gestures.Where(g => g is not MultiKeyGesture)
+                                                        .Any(g => IsMatch((KeyGesture)g, currentStroke)));
+
+      if (singleCommand != null)
+      {
+         singleCommand.Execute(null);
+         e.Handled = true;
+      }
+   }
+
+   private static bool ValidateKeyInput(Key key)
+   {
+      if (key is Key.None
+              or Key.DeadCharProcessed
+              or Key.ImeProcessed
+              or Key.LeftCtrl
+              or Key.RightCtrl
+              or Key.LeftAlt
+              or Key.RightAlt
+              or Key.LeftShift
+              or Key.RightShift
+              or Key.LWin
+              or Key.RWin)
+         return true;
+
+      // TEXT INPUT GUARD: Block "Typing" gestures.
+      // We want to ignore: 'A', 'Shift + A', '1', 'Shift + 1', 'Space', 'Shift + Space'.
+      // We want to allow: 'Ctrl + A', 'Alt + F4', 'F1', 'Shift + F1', 'Delete'.
+
+      var modifiers = Keyboard.Modifiers;
+
+      // Check if a "Command Modifier" (Ctrl, Alt, or Win) is pressed.
+      var hasCommandModifier = (modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Windows)) != 0;
+
+      if (!hasCommandModifier)
+      {
+         // If we are here, the user is pressing [Key] or [Shift + Key].
+         // We must BLOCK everything that looks like text input.
+         // We only ALLOW specific non-printable "Function" keys.
+
+         var isAllowedFunctionKey = key switch
+         {
+            // Function Keys (F1-F24) are always valid commands, even with just Shift
+            >= Key.F1 and <= Key.F24 => true,
+
+            // Core navigation/editing keys
+            Key.Escape or Key.Tab or Key.Enter => true,
+            Key.Insert or Key.Delete or Key.Back => true,
+            Key.Home or Key.End or Key.PageUp or Key.PageDown => true,
+            Key.Left or Key.Right or Key.Up or Key.Down => true,
+
+            // Media keys
+            Key.MediaNextTrack or Key.MediaPreviousTrack or Key.MediaPlayPause => true,
+
+            // Everything else (Letters A-Z, Digits 0-9, OemSymbols, Space) is rejected
+            // because without Ctrl/Alt, it is just text input.
+            _ => false,
+         };
+
+         if (!isAllowedFunctionKey)
+            return true;
+      }
+
+      return false;
    }
 
    private static bool IsMatch(KeyGesture template, KeyGesture input) => template.Key == input.Key && template.Modifiers == input.Modifiers;
@@ -154,9 +222,12 @@ public static class CommandBinder
          button.Command = cmd;
 
          // Bind Content to DisplayName
-         BindingOperations.SetBinding(button,
-                                      ContentControl.ContentProperty,
-                                      new Binding(nameof(IAppCommand.DisplayName)) { Source = cmd, Mode = BindingMode.OneWay });
+         if (button is ContentControl cc && cc.Content is null)
+         {
+            BindingOperations.SetBinding(button,
+                                         ContentControl.ContentProperty,
+                                         new Binding(nameof(IAppCommand.DisplayName)) { Source = cmd, Mode = BindingMode.OneWay });
+         }
 
          // Bind ToolTip to Tooltip
          BindingOperations.SetBinding(button,

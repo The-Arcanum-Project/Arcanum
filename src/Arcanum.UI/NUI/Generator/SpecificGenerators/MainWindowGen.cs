@@ -25,7 +25,8 @@ public static class MainWindowGen
       SpecialEditorMngr.RegisterTypeEditor(typeof(Region), new LocationCollectionSpecializedEditor<Area, Region>(Region.Field.Areas));
       SpecialEditorMngr.RegisterTypeEditor(typeof(SuperRegion), new LocationCollectionSpecializedEditor<Region, SuperRegion>(SuperRegion.Field.Regions));
       SpecialEditorMngr.RegisterTypeEditor(typeof(Continent), new LocationCollectionSpecializedEditor<SuperRegion, Continent>(Continent.Field.SuperRegions));
-      
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Country), new PoliticalEditor());
+
       SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new PopsEditor());
 
       _specialEditorsHost = specialEditorsHost;

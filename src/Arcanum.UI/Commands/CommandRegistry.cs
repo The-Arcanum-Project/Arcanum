@@ -84,7 +84,8 @@ public static class CommandRegistry
       if (Commands.TryGetValue(id, out var cmd))
          return cmd;
 
-      throw new KeyNotFoundException($"Command '{id.Value}' not found. Ensure CommandLibrary.Initialize() was called.");
+      ArcLog.Write("CRS", LogLevel.ERR, "Command with ID {0} not found in registry.", id.Value);
+      return null!;
    }
 
    public static void Initialize()
@@ -97,6 +98,9 @@ public static class CommandRegistry
       foreach (var profile in state.CommandProfiles)
       {
          var cmd = Get(new(profile.CommandId));
+
+         if (cmd == null!)
+            continue;
 
          cmd.Gestures.Clear();
          foreach (var chord in profile.Shortcuts)
