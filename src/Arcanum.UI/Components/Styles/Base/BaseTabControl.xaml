@@ -8,56 +8,38 @@
     </ResourceDictionary.MergedDictionaries>
 
     <Style TargetType = "{x:Type TabItem}">
-        <Setter Property = "Background"
-                Value = "{StaticResource DefaultBackColorBrush}" />
-        <Setter Property = "Foreground"
-                Value = "{StaticResource DefaultForeColorBrush}" />
-        <Setter Property = "Padding"
-                Value = "12,6,12,6" />
-        <Setter Property = "Margin"
-                Value = "0,0,-1,0" />
+        <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
+        <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+        <Setter Property = "Padding" Value = "12,6,12,6" />
+        <Setter Property = "Margin" Value = "0,0,-1,0" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "{x:Type TabItem}">
                     <Grid SnapsToDevicePixels = "True">
-                        <Border x:Name = "mainBorder"
-                                BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                                Background = "{TemplateBinding Background}"
-                                BorderThickness = "2,1"
-                                Margin = "0, 2, 3, 0"
-                                CornerRadius = "3">
-                            <ContentPresenter x:Name = "content"
-                                              ContentSource = "Header"
-                                              HorizontalAlignment = "Center"
-                                              VerticalAlignment = "Center"
+                        <Border x:Name = "mainBorder" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                Background = "{TemplateBinding Background}" BorderThickness = "2,1"
+                                Margin = "0, 2, 3, 0" CornerRadius = "3">
+                            <ContentPresenter x:Name = "content" ContentSource = "Header"
+                                              HorizontalAlignment = "Center" VerticalAlignment = "Center"
                                               Margin = "{TemplateBinding Padding}" />
                         </Border>
                         <Border x:Name = "selectionIndicator"
                                 BorderBrush = "{StaticResource BlueSelectionBackColorBrush}"
-                                BorderThickness = "2,0,0,0"
-                                Visibility = "Collapsed"
-                                Margin = "0, 2, 3, 0"
+                                BorderThickness = "2,0,0,0" Visibility = "Collapsed" Margin = "0, 2, 3, 0"
                                 CornerRadius = "2,0, 0, 2" />
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property = "IsMouseOver"
-                                 Value = "True">
-                            <Setter TargetName = "mainBorder"
-                                    Property = "Background"
+                        <Trigger SourceName = "content" Property = "IsMouseOver" Value = "True">
+                            <Setter TargetName = "mainBorder" Property = "Background"
                                     Value = "{StaticResource LightBackColorBrush}" />
                         </Trigger>
-                        <Trigger Property = "IsSelected"
-                                 Value = "True">
+                        <Trigger Property = "IsSelected" Value = "True">
                             <!-- <Setter TargetName = "mainBorder" -->
                             <!--         Property = "Background" -->
                             <!--         Value = "{StaticResource TabSelectedBrush}" /> -->
                             <!-- Remove the bottom border to make it look connected to the content -->
-                            <Setter TargetName = "selectionIndicator"
-                                    Property = "BorderThickness"
-                                    Value = "4,0,0,0" />
-                            <Setter TargetName = "selectionIndicator"
-                                    Property = "Visibility"
-                                    Value = "Visible" />
+                            <Setter TargetName = "selectionIndicator" Property = "BorderThickness" Value = "4,0,0,0" />
+                            <Setter TargetName = "selectionIndicator" Property = "Visibility" Value = "Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -66,14 +48,10 @@
     </Style>
 
     <Style TargetType = "{x:Type TabControl}">
-        <Setter Property = "Background"
-                Value = "{StaticResource DefaultBackColorBrush}" />
-        <Setter Property = "BorderBrush"
-                Value = "{StaticResource DefaultBorderColorBrush}" />
-        <Setter Property = "BorderThickness"
-                Value = "2" />
-        <Setter Property = "Padding"
-                Value = "0" />
+        <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
+        <Setter Property = "BorderBrush" Value = "{StaticResource DefaultBorderColorBrush}" />
+        <Setter Property = "BorderThickness" Value = "2" />
+        <Setter Property = "Padding" Value = "0" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "{x:Type TabControl}">
@@ -90,110 +68,62 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Header for Top placement (hidden by default) -->
-                        <TabPanel x:Name = "TopHeaderPanel"
-                                  Grid.Column = "1"
-                                  Grid.Row = "0"
-                                  IsItemsHost = "true"
-                                  Visibility = "Visible"
-                                  KeyboardNavigation.TabIndex = "1"
-                                  Background = "Transparent" />
+                        <TabPanel x:Name = "TopHeaderPanel" Grid.Column = "1" Grid.Row = "0" IsItemsHost = "true"
+                                  Visibility = "Visible" KeyboardNavigation.TabIndex = "1" Background = "Transparent" />
 
                         <!-- ScrollViewer for Left/Right placement -->
-                        <ScrollViewer Grid.Column = "0"
-                                      Grid.Row = "0"
-                                      x:Name = "HeaderScrollViewer"
-                                      HorizontalScrollBarVisibility = "Disabled"
-                                      VerticalScrollBarVisibility = "Auto"
+                        <ScrollViewer Grid.Column = "0" Grid.Row = "0" x:Name = "HeaderScrollViewer"
+                                      HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto"
                                       Visibility = "Collapsed">
-                            <TabPanel x:Name = "SideHeaderPanel"
-                                      IsItemsHost = "true"
-                                      KeyboardNavigation.TabIndex = "1"
+                            <TabPanel x:Name = "SideHeaderPanel" IsItemsHost = "true" KeyboardNavigation.TabIndex = "1"
                                       Background = "Transparent" />
                         </ScrollViewer>
 
-                        <Border x:Name = "ContentPanel"
-                                Grid.Column = "1"
-                                Grid.Row = "1"
+                        <Border x:Name = "ContentPanel" Grid.Column = "1" Grid.Row = "1"
                                 BorderThickness = "{TemplateBinding BorderThickness}"
                                 BorderBrush = "{TemplateBinding BorderBrush}"
                                 Background = "{TemplateBinding Background}"
                                 KeyboardNavigation.DirectionalNavigation = "Contained"
                                 KeyboardNavigation.TabIndex = "2">
-                            <ContentPresenter x:Name = "PART_SelectedContentHost"
-                                              ContentSource = "SelectedContent"
+                            <ContentPresenter x:Name = "PART_SelectedContentHost" ContentSource = "SelectedContent"
                                               Margin = "{TemplateBinding Padding}"
                                               SnapsToDevicePixels = "{TemplateBinding SnapsToDevicePixels}" />
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <!-- Trigger for Left-aligned tabs -->
-                        <Trigger Property = "TabStripPlacement"
-                                 Value = "Left">
+                        <Trigger Property = "TabStripPlacement" Value = "Left">
                             <!-- Show the ScrollViewer, hide the top panel -->
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Visibility"
-                                    Value = "Visible" />
-                            <Setter TargetName = "TopHeaderPanel"
-                                    Property = "Visibility"
-                                    Value = "Collapsed" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Visibility" Value = "Visible" />
+                            <Setter TargetName = "TopHeaderPanel" Property = "Visibility" Value = "Collapsed" />
 
                             <!-- Place items in the grid correctly -->
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.Row"
-                                    Value = "0" />
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.Column"
-                                    Value = "0" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.Row"
-                                    Value = "0" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.Column"
-                                    Value = "1" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.Row" Value = "0" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.Column" Value = "0" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.Row" Value = "0" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.Column" Value = "1" />
 
                             <!-- Span the full height -->
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.RowSpan"
-                                    Value = "2" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.RowSpan"
-                                    Value = "2" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.RowSpan" Value = "2" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.RowSpan" Value = "2" />
 
                         </Trigger>
 
                         <!-- Trigger for Top-aligned tabs (this is the default) -->
-                        <Trigger Property = "TabStripPlacement"
-                                 Value = "Top">
+                        <Trigger Property = "TabStripPlacement" Value = "Top">
                             <!-- This is the default state, no setters needed if defaults are correct -->
                         </Trigger>
 
                         <!-- Add triggers for Right and Bottom if needed -->
-                        <Trigger Property = "TabStripPlacement"
-                                 Value = "Right">
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Visibility"
-                                    Value = "Visible" />
-                            <Setter TargetName = "TopHeaderPanel"
-                                    Property = "Visibility"
-                                    Value = "Collapsed" />
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.Row"
-                                    Value = "0" />
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.Column"
-                                    Value = "1" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.Row"
-                                    Value = "0" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.Column"
-                                    Value = "0" />
-                            <Setter TargetName = "HeaderScrollViewer"
-                                    Property = "Grid.RowSpan"
-                                    Value = "2" />
-                            <Setter TargetName = "ContentPanel"
-                                    Property = "Grid.RowSpan"
-                                    Value = "2" />
+                        <Trigger Property = "TabStripPlacement" Value = "Right">
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Visibility" Value = "Visible" />
+                            <Setter TargetName = "TopHeaderPanel" Property = "Visibility" Value = "Collapsed" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.Row" Value = "0" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.Column" Value = "1" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.Row" Value = "0" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.Column" Value = "0" />
+                            <Setter TargetName = "HeaderScrollViewer" Property = "Grid.RowSpan" Value = "2" />
+                            <Setter TargetName = "ContentPanel" Property = "Grid.RowSpan" Value = "2" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

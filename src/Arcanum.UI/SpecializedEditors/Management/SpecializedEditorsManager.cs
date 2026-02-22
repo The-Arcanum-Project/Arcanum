@@ -39,7 +39,7 @@ public class SpecializedEditorsManager
    private readonly Dictionary<Type, SpecializedEditor> _createdPropertyEditors = new();
 
    // Reused TabControl for displaying specialized editors
-   private readonly TabControl _editorsTabControl = new();
+   internal readonly TabControl _editorsTabControl = new();
 
    private readonly TextBlock _noEditorsTextBlock = new()
    {
@@ -135,7 +135,7 @@ public class SpecializedEditorsManager
       var editors = GetAllEditorsForType(targets[0]);
       if (editors.Count == 0)
          return _noEditorsTextBlock;
-   
+
       // Check if current tabs are still valid for the new targets
       foreach (var (editor, props) in editors)
       {
@@ -152,7 +152,7 @@ public class SpecializedEditorsManager
          else
             existingEditorView.UpdateForNewTarget(props, targets[0]);
       }
-      
+
       if (_editorsTabControl.Items.Count == editors.Count)
       {
          var allMatch = true;
@@ -162,8 +162,9 @@ public class SpecializedEditorsManager
             var (editor, _) = editors[i];
 
             if (_editorsTabControl.Items[i] is TabItem tabItem &&
-                Equals(tabItem.Header, editor.DisplayName)) continue;
-            
+                Equals(tabItem.Header, editor.DisplayName))
+               continue;
+
             allMatch = false;
             break;
          }

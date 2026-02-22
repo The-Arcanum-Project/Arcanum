@@ -138,6 +138,7 @@ internal static class Program
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseGridSplitter.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseContextMenu.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseDataGrid.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseToggleButton.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Specific/CenteredTabControlStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseTreeView.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseListView.xaml",
          $"/{uiAssemblyName};component/Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
       };
