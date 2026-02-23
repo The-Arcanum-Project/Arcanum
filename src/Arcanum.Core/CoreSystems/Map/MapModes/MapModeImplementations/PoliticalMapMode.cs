@@ -14,7 +14,7 @@ public class PoliticalMapMode : IMapMode
    public string Name => "Political";
    public string Description => "Displays the owner of each location.";
    public MapModeManager.MapModeType Type => MapModeManager.MapModeType.Political;
-   public Type[] DisplayTypes { get; } = [typeof(Country)];
+   public Type[] DisplayTypes { get; } = [typeof(Country), typeof(Location)];
 
    public void Render(Color4[] colorBuffer)
    {
