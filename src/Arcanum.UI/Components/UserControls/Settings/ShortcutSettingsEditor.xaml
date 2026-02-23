@@ -162,7 +162,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Name & Description -->
-                    <TextBlock Grid.Column = "0" Text = "{Binding Name}" VerticalAlignment = "Center"
+                    <TextBlock Grid.Column = "0" Text = "{Binding GetModifiedName}" VerticalAlignment = "Center"
                                FontWeight = "Bold" />
                     <Border Grid.Column = "1" Width = "8" Height = "1"
                             Background = "{StaticResource DefaultForeColorBrush}" VerticalAlignment = "Center"

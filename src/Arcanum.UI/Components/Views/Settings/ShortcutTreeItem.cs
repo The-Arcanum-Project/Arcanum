@@ -31,6 +31,20 @@ public class ShortcutTreeItem : INotifyPropertyChanged
       }
    } = true;
 
+   public string GetModifiedName
+   {
+      get
+      {
+         if (Command == null)
+            return Name;
+
+         if (Command.HasUserDefinedGestures)
+            return $"{Name} *";
+         else
+            return Name;
+      }
+   }
+
    public bool IsCommand => Command != null;
    public ObservableCollection<InputGesture>? Gestures => Command?.Gestures;
 

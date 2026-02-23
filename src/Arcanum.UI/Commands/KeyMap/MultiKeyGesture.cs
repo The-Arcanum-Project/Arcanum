@@ -32,4 +32,14 @@ public class MultiKeyGesture : InputGesture
       var second = converter.Convert(SecondGesture, typeof(string), null, CultureInfo.CurrentCulture);
       return $"{first}, {second}";
    }
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is not MultiKeyGesture other)
+         return false;
+
+      return FirstGesture.Equals(other.FirstGesture) && SecondGesture.Equals(other.SecondGesture);
+   }
+
+   public override int GetHashCode() => HashCode.Combine(FirstGesture, SecondGesture);
 }

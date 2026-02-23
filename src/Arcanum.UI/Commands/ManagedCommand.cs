@@ -16,6 +16,7 @@ public sealed class ManagedCommand : IAppCommand
                          string description,
                          string scope,
                          Action<object> execute,
+                         bool isHiddenInPalette = false,
                          Predicate<object?>? canExecute = null)
    {
       Id = id;
@@ -27,6 +28,7 @@ public sealed class ManagedCommand : IAppCommand
       Gestures = [];
       Gestures.CollectionChanged += (_, _) => OnPropertyChanged(nameof(Tooltip));
       DefaultGestures = new(_defaultGestures);
+      IsHiddenInPalette = isHiddenInPalette;
 
       CommandRegistry.Register(this);
    }
@@ -35,6 +37,7 @@ public sealed class ManagedCommand : IAppCommand
                          string name,
                          string description,
                          Action<object> execute,
+                         bool isHiddenInPalette = false,
                          Predicate<object?>? canExecute = null,
                          params string[] scopes) : this(id,
                                                         name,
@@ -43,6 +46,7 @@ public sealed class ManagedCommand : IAppCommand
                                                            ? string.Join(", ", scopes)
                                                            : throw new ArgumentNullException(nameof(scopes), "At least one scope must be provided."),
                                                         execute,
+                                                        isHiddenInPalette,
                                                         canExecute)
    {
    }
@@ -58,6 +62,9 @@ public sealed class ManagedCommand : IAppCommand
       foreach (var g in _defaultGestures)
          Gestures.Add(g);
    }
+
+   public bool IsHiddenInPalette { get; }
+   public Predicate<object?>? PaletteVisibilityPredicate { get; set; }
 
    public ObservableCollection<InputGesture> Gestures { get; }
    public ReadOnlyObservableCollection<InputGesture> DefaultGestures { get; }
