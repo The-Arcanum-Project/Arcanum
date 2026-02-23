@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using Arcanum.Core.ApplicationContext;
+using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
 using Arcanum.UI.Commands.KeyMap;
 
 namespace Arcanum.UI.Commands;
@@ -13,7 +15,11 @@ public static class CommandLibrary
                          "Close",
                          "Closes the current window.",
                          CommandScopes.DIALOG,
-                         param => (param as Window)?.Close()).WithDefaultGesture(Key.Escape);
+                         param =>
+                         {
+                            if (param is Window window)
+                               window.Close();
+                         }).WithDefaultGesture(Key.Escape);
 
       new ManagedCommand(CommandIds.UI.TestCommand,
                          "Test Command",
@@ -69,6 +75,13 @@ public static class CommandLibrary
                          {
                             /* This command is meant to be used as a modifier, so it doesn't execute an action on its own. */
                          }).WithDefaultGesture(Key.LeftShift);
+
+      // Specialized Editors Commands
+      new ManagedCommand(CommandIds.Editor.SpecializedEditors.PoliticalEditor.SyncWithSelection,
+                         "Sync with Selection",
+                         "Toggles whether the Political Editor should sync with the current selection.",
+                         CommandScopes.POLITICAL_EDITOR,
+                         _ => { ArcAppContext.Get<IPoliticalEditor>()?.ToggleSyncState(); }).WithDefaultGesture(Key.S, ModifierKeys.Control | ModifierKeys.Alt);
    }
 
    extension(ManagedCommand cmd)

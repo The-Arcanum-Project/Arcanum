@@ -1,12 +1,28 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
+using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Commands;
 
 namespace Arcanum.UI.SpecializedEditors.EditorControls.ViewModels;
 
-public class PoliticalEditorViewModel : INotifyPropertyChanged
+public class PoliticalEditorViewModel : IPoliticalEditor, INotifyPropertyChanged
 {
+   public PoliticalEditorViewModel()
+   {
+      SyncWithSearchCommand = CommandRegistry.Get(CommandIds.Editor.SpecializedEditors.PoliticalEditor.SyncWithSelection);
+      SubscribeToSelectionChanges();
+   }
+
+   public IAppCommand SyncWithSearchCommand { get; }
+   public static IEnumerable<Country> Countries => Globals.Countries.Values;
+   public static IEnumerable<Location> Locations => Globals.Locations.Values;
+   public void SubscribeToSelectionChanges() => SelectionManager.EditableObjectsChanged += SyncWithSelectionEffect;
+   public void UnsubscribeFromSelectionChanges() => SelectionManager.EditableObjectsChanged -= SyncWithSelectionEffect;
+
    public ObservableCollection<Location> OwnControlCoreLocations
    {
       get;
@@ -151,11 +167,25 @@ public class PoliticalEditorViewModel : INotifyPropertyChanged
          OnPropertyChanged();
       }
    }
+   public bool SyncWithSearch
+   {
+      get;
+      set
+      {
+         if (value == field)
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   } = true;
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
    public void Clear()
    {
+      SelectedCountry = null;
+
       OwnControlCoreLocations = [];
       OwnControlIntegratedLocations = [];
       OwnControlConqueredLocations = [];
@@ -199,5 +229,18 @@ public class PoliticalEditorViewModel : INotifyPropertyChanged
       field = value;
       OnPropertyChanged(propertyName);
       return true;
+   }
+
+   public void SyncWithSelectionEffect()
+   {
+      if (SelectionManager.EditableObjects.Count == 1 && SyncWithSearch && SelectionManager.EditableObjects[0] is Country country)
+         UpdateViewModel(country);
+   }
+
+   public void ToggleSyncState()
+   {
+      SyncWithSearch = !SyncWithSearch;
+      if (SyncWithSearch)
+         SyncWithSelectionEffect();
    }
 }

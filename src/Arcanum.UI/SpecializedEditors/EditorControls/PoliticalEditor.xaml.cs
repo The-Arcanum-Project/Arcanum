@@ -19,17 +19,14 @@ public partial class PoliticalEditor
    public PoliticalEditor()
    {
       ViewModel = new();
-      DataContext = this;
+      DataContext = ViewModel;
       InitializeComponent();
 
-      if (SelectionManager.EditableObjects.Count == 1 && SelectionManager.EditableObjects[0] is Country country)
+      if (SelectionManager.EditableObjects.Count == 1 && ViewModel.SyncWithSearch && SelectionManager.EditableObjects[0] is Country country)
          ViewModel.UpdateViewModel(country);
    }
 
    public PoliticalEditorViewModel ViewModel { get; }
-
-   public static IEnumerable<Country> Countries => Globals.Countries.Values;
-   public static IEnumerable<Location> Locations => Globals.Locations.Values;
 
    public void AddLocations(EntitySelector selector)
    {
@@ -38,6 +35,9 @@ public partial class PoliticalEditor
          return;
 
       var locations = Selection.GetSelectedLocations;
+
+      if (SpecificLocationBox.SelectedItem is Location specificLocation && !locations.Contains(specificLocation))
+         locations.Add(specificLocation);
 
       if (selector.IsUniqueInAll)
          EnforceUniqueInAll(locations, target);
@@ -53,12 +53,16 @@ public partial class PoliticalEditor
       if (target is null)
          return;
 
-      RemoveFromCollection(Selection.GetSelectedLocations, selector.TargetProperty, target);
+      var locations = Selection.GetSelectedLocations;
+      if (SpecificLocationBox.SelectedItem is Location specificLocation && !locations.Contains(specificLocation))
+         locations.Add(specificLocation);
+
+      RemoveFromCollection(locations, selector.TargetProperty, target);
    }
 
    private static void EnforceUniqueInProperty(List<Location> locations, Country target, Enum property)
    {
-      foreach (var country in Countries)
+      foreach (var country in Globals.Countries.Values)
       {
          if (country == target)
             continue;
@@ -69,7 +73,7 @@ public partial class PoliticalEditor
 
    private static void EnforceUniqueInAll(List<Location> locations, Country target)
    {
-      foreach (var country in Countries)
+      foreach (var country in Globals.Countries.Values)
       {
          if (country == target)
             continue;

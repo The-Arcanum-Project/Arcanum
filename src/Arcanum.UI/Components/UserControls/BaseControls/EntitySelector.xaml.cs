@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Windows;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.UI.SpecializedEditors.EditorControls;
 using CommunityToolkit.Mvvm.Input;
@@ -153,6 +154,22 @@ public partial class EntitySelector
       get => GetValue(RemoveCommandParameterProperty);
       set => SetValue(RemoveCommandParameterProperty, value);
    }
+   public ICommand LocationHover { get; } = new RelayCommand<object>(obj =>
+   {
+      if (obj is not CellItem { Value: Location location })
+         return;
+
+      Console.WriteLine($"Hovering over {location}");
+      SelectionManager.Preview([location]);
+   });
+
+   public ICommand LocationUnhover { get; } = new RelayCommand<object>(obj =>
+   {
+      if (obj is not CellItem { Value: Location location })
+         return;
+
+      SelectionManager.UnPreview([location]);
+   });
 
    private static void OnAddedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {

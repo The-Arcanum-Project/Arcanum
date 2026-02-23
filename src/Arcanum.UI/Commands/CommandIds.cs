@@ -59,6 +59,14 @@ public static class CommandIds
       public static class SpecializedEditors
       {
          private const string SPE_PATH = $"{PATH}.{nameof(SpecializedEditors)}";
+
+         public static class PoliticalEditor
+         {
+            private const string PE_PATH = $"{SPE_PATH}.{nameof(PoliticalEditor)}";
+
+            // "editor.specialized_editors.political_editor.sync_with_search"
+            public static readonly CommandId SyncWithSelection = CommandId.Create(PE_PATH);
+         }
       }
    }
 

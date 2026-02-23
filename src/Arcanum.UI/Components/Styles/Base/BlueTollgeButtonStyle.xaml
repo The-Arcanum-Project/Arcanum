@@ -13,6 +13,7 @@
         <Setter Property = "BorderThickness" Value = "1" />
         <Setter Property = "Padding" Value = "2" />
         <Setter Property = "Cursor" Value = "Hand" />
+        <Setter Property = "SnapsToDevicePixels" Value = "True" />
 
         <Setter Property = "Template">
             <Setter.Value>

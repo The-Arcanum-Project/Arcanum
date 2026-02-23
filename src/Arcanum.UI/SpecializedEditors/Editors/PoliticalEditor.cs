@@ -17,9 +17,10 @@ public class PoliticalEditor : ISpecializedEditor
 
    public void Reset()
    {
-      EditorControls.PoliticalEditor.Instance.ViewModel.Clear();
-      if (SelectionManager.EditableObjects.Count == 1 && SelectionManager.EditableObjects[0] is Country country)
-         EditorControls.PoliticalEditor.Instance.ViewModel.UpdateViewModel(country);
+      var vm = EditorControls.PoliticalEditor.Instance.ViewModel;
+      vm.Clear();
+      if (SelectionManager.EditableObjects.Count == 1 && vm.SyncWithSearch && SelectionManager.EditableObjects[0] is Country country)
+         vm.UpdateViewModel(country);
    }
 
    public void ResetFor(object[] targets)
@@ -29,4 +30,20 @@ public class PoliticalEditor : ISpecializedEditor
    public FrameworkElement GetEditorControl() => EditorControls.PoliticalEditor.Instance;
 
    public IEnumerable<MenuItem> GetContextMenuActions() => [];
+
+   public void OnEnabledChanged(bool value)
+   {
+      if (!value)
+      {
+         EditorControls.PoliticalEditor.Instance.ViewModel.UnsubscribeFromSelectionChanges();
+         return;
+      }
+
+      if (SelectionManager.EditableObjects.Count == 1 &&
+          EditorControls.PoliticalEditor.Instance.ViewModel.SyncWithSearch &&
+          SelectionManager.EditableObjects[0] is Country country)
+         EditorControls.PoliticalEditor.Instance.ViewModel.UpdateViewModel(country);
+
+      EditorControls.PoliticalEditor.Instance.ViewModel.SubscribeToSelectionChanges();
+   }
 }

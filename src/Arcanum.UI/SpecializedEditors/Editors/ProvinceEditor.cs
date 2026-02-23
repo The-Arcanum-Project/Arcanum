@@ -74,4 +74,8 @@ public class LocationCollectionSpecializedEditor<TChild, TParent> : ISpecialized
    public FrameworkElement GetEditorControl() => LocationCollectionEditor.Instance;
 
    public IEnumerable<MenuItem> GetContextMenuActions() => [];
+
+   public void OnEnabledChanged(bool value)
+   {
+   }
 }

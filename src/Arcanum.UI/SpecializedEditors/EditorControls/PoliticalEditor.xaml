@@ -8,8 +8,11 @@
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
              xmlns:locationCollections = "clr-namespace:Arcanum.Core.GameObjects.InGame.Map.LocationCollections;assembly=Arcanum.Core"
              xmlns:autoCompleteBox = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
-             mc:Ignorable = "d" d:DesignWidth = "300" commands:CommandBinder.Scopes = "PoliticalEditor"
-             d:DataContext = "{d:DesignInstance local:PoliticalEditor}">
+             xmlns:viewModels = "clr-namespace:Arcanum.UI.SpecializedEditors.EditorControls.ViewModels"
+             mc:Ignorable = "d" d:DesignWidth = "300"
+             commands:CommandBinder.Scopes = "{x:Static commands:CommandScopes.POLITICAL_EDITOR}"
+             commands:ContextBinder.ObserveContext = "True"
+             d:DataContext = "{d:DesignInstance Type=viewModels:PoliticalEditorViewModel, IsDesignTimeCreatable=True}">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -23,10 +26,8 @@
                 <Setter Property = "GridItemTemplate">
                     <Setter.Value>
                         <DataTemplate DataType = "{x:Type locationCollections:Location}">
-                            <Border Background = "{StaticResource DarkBackColorBrush}" CornerRadius = "2" Padding = "0">
-                                <TextBlock Text = "{Binding UniqueId}" HorizontalAlignment = "Left"
-                                           FontFamily = "{StaticResource DefaultMonospacedFont}" />
-                            </Border>
+                            <TextBlock Text = "{Binding UniqueId}" HorizontalAlignment = "Left"
+                                       FontFamily = "{StaticResource DefaultMonospacedFont}" />
                         </DataTemplate>
                     </Setter.Value>
                 </Setter>
@@ -34,6 +35,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -50,13 +53,31 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "90" />
                 <ColumnDefinition Width = "*" />
+                <ColumnDefinition Width = "Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock Text = "Country:" FontWeight = "Bold" Margin = "0,0,10,0" />
 
             <autoCompleteBox:AutoCompleteComboBox Grid.Column = "1" FullItemsSource = "{Binding Countries}"
-                                                  SelectedItem = "{Binding ViewModel.SelectedCountry}"
+                                                  SelectedItem = "{Binding SelectedCountry}"
                                                   SelectionChanged = "CountrySelector_SelectionChanged" />
+
+            <!-- SyncWithSearch ToggleButton -->
+            <ToggleButton Grid.Column = "2" Margin = "4,0,0,0" Width = "22" Height = "22"
+                          IsChecked = "{Binding SyncWithSearch, Mode=OneWay}"
+                          Style = "{StaticResource BlueToggleButtonStyle}"
+                          commands:CommandBinder.Assign = "{Binding SyncWithSearchCommand}">
+                <Path Data = "{StaticResource Icon.Sync}" Fill = "{StaticResource DefaultForeColorBrush}"
+                      Stretch = "Uniform" />
+                <ToggleButton.ToolTip>
+                    <TextBlock>
+                        <Run Text = "If Checked, the selected Country in this editor will automatically sync with NUI." />
+                        <LineBreak />
+                        <Run
+                            Text = "If Unchecked, the selected Country in this editor will not be affected changes to NUI, aslong as a country is selected in it." />
+                    </TextBlock>
+                </ToggleButton.ToolTip>
+            </ToggleButton>
         </Grid>
 
         <!-- Location: <Selector for location> -->
@@ -68,11 +89,12 @@
 
             <TextBlock Text = "Location:" FontWeight = "Bold" Margin = "0,0,10,0" />
 
-            <autoCompleteBox:AutoCompleteComboBox Grid.Column = "1" FullItemsSource = "{Binding Locations}"
+            <autoCompleteBox:AutoCompleteComboBox x:Name = "SpecificLocationBox" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding Locations}"
                                                   DisplayMemberPath = "UniqueId" />
         </Grid>
 
-        <Grid Grid.Row = "2" Margin = "0, 2, 0, 0" x:Name = "SelectorsGrid">
+        <Grid Grid.Row = "2" Margin = "0, 2, 0, 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height = "Auto" />
                 <RowDefinition Height = "Auto" />
@@ -87,61 +109,49 @@
                 <RowDefinition Height = "Auto" />
             </Grid.RowDefinitions>
 
-            <!-- own_control_core -->
-            <!-- own_control_integrated -->
-            <!-- own_control_conquered -->
-            <!-- own_control_colony -->
-            <!-- own_core -->
-            <!-- own_conquered -->
-            <!-- own_integrated -->
-            <!-- own_colony -->
-            <!-- control_core -->
-            <!-- control -->
-            <!-- our_cores_conquered_by_others -->
-
             <baseControls:EntitySelector Grid.Row = "0" Grid.Column = "0" Title = "Owned Cores"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlCores}"
-                                         AddedItems = "{Binding ViewModel.OwnControlCoreLocations}" />
+                                         AddedItems = "{Binding OwnControlCoreLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "1" Grid.Column = "0" Title = "Owned, Controled, Integrated"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlIntegrated}"
-                                         AddedItems = "{Binding ViewModel.OwnControlIntegratedLocations}" />
+                                         AddedItems = "{Binding OwnControlIntegratedLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "2" Grid.Column = "0" Title = "Owned, Controled, Conquered"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlConquered}"
-                                         AddedItems = "{Binding ViewModel.OwnControlConqueredLocations}" />
+                                         AddedItems = "{Binding OwnControlConqueredLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "3" Grid.Column = "0" Title = "Owned, Controled, Colony"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlColony}"
-                                         AddedItems = "{Binding ViewModel.OwnControlColonyLocations}" />
+                                         AddedItems = "{Binding OwnControlColonyLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "4" Grid.Column = "0" Title = "Owned Cores"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnCores}"
-                                         AddedItems = "{Binding ViewModel.OwnCoreLocations}" />
+                                         AddedItems = "{Binding OwnCoreLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "5" Grid.Column = "0" Title = "Owned, Conquered"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnConquered}"
-                                         AddedItems = "{Binding ViewModel.OwnConqueredLocations}" />
+                                         AddedItems = "{Binding OwnConqueredLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "6" Grid.Column = "0" Title = "Owned, Integrated"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnIntegrated}"
-                                         AddedItems = "{Binding ViewModel.OwnIntegratedLocations}" />
+                                         AddedItems = "{Binding OwnIntegratedLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "7" Grid.Column = "0" Title = "Owned, Colony"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnColony}"
-                                         AddedItems = "{Binding ViewModel.OwnColonyLocations}" />
+                                         AddedItems = "{Binding OwnColonyLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "8" Grid.Column = "0" Title = "Controled Cores"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.ControlCores}"
-                                         AddedItems = "{Binding ViewModel.ControlCoreLocations}" />
+                                         AddedItems = "{Binding ControlCoreLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "9" Grid.Column = "0" Title = "Controled"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.Control}"
-                                         AddedItems = "{Binding ViewModel.ControlLocations}" />
+                                         AddedItems = "{Binding ControlLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "10" Grid.Column = "0" Title = "Our Cores Conquered by Others"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OurCoresConqueredByOthers}"
-                                         AddedItems = "{Binding ViewModel.OurCoresConqueredByOthersLocations}" />
+                                         AddedItems = "{Binding OurCoresConqueredByOthersLocations}" />
         </Grid>
     </Grid>
 

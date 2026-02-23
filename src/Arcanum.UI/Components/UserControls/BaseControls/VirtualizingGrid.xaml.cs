@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -25,16 +26,41 @@ public partial class VirtualizingGrid
    public static readonly DependencyProperty ChunkedItemsProperty =
       DependencyProperty.Register(nameof(ChunkedItems), typeof(IEnumerable<CellItem[]>), typeof(VirtualizingGrid), new(null));
 
+   public static readonly DependencyProperty CellBackgroundBrushProperty =
+      DependencyProperty.Register(nameof(CellBackgroundBrush), typeof(Brush), typeof(VirtualizingGrid), new(default(Brush)));
+
+   public static readonly DependencyProperty HoverCommandProperty =
+      DependencyProperty.Register(nameof(HoverCommand), typeof(ICommand), typeof(VirtualizingGrid), new(default(ICommand)));
+
+   public static readonly DependencyProperty HoverLeaveCommandProperty =
+      DependencyProperty.Register(nameof(HoverLeaveCommand), typeof(ICommand), typeof(VirtualizingGrid), new(default(ICommand)));
+
    private List<CellItem> _allCells = [];
 
    public VirtualizingGrid() => InitializeComponent();
 
+   public ICommand HoverLeaveCommand
+   {
+      get => (ICommand)GetValue(HoverLeaveCommandProperty);
+      set => SetValue(HoverLeaveCommandProperty, value);
+   }
+
+   public Brush CellBackgroundBrush
+   {
+      get => (Brush)GetValue(CellBackgroundBrushProperty);
+      set => SetValue(CellBackgroundBrushProperty, value);
+   }
    public IEnumerable ItemsSource
    {
       get => (IEnumerable)GetValue(ItemsSourceProperty);
       set => SetValue(ItemsSourceProperty, value);
    }
 
+   public ICommand HoverCommand
+   {
+      get => (ICommand)GetValue(HoverCommandProperty);
+      set => SetValue(HoverCommandProperty, value);
+   }
    public int Columns
    {
       get => (int)GetValue(ColumnsProperty);

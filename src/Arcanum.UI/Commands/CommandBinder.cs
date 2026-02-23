@@ -3,7 +3,10 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Arcanum.UI.Commands.KeyMap;
+using Arcanum.UI.Components.Converters;
 
 namespace Arcanum.UI.Commands;
 
@@ -24,6 +27,11 @@ public static class CommandBinder
                                           typeof(IAppCommand),
                                           typeof(CommandBinder),
                                           new(null, OnAssignChanged));
+
+   private static readonly DependencyProperty OriginalToolTipProperty =
+      DependencyProperty.RegisterAttached("OriginalToolTip", typeof(object), typeof(CommandBinder), new(null));
+
+   private static readonly CommandToolTipConverter ToolTipConverter = new();
 
    public static void SetScopes(DependencyObject obj, string value) => obj.SetValue(ScopesProperty, value);
    public static string GetScopes(DependencyObject obj) => (string)obj.GetValue(ScopesProperty);
@@ -113,7 +121,7 @@ public static class CommandBinder
 
       if (singleCommand != null)
       {
-         singleCommand.Execute(null);
+         ExecuteCommand(singleCommand, element);
          e.Handled = true;
       }
    }
@@ -178,10 +186,39 @@ public static class CommandBinder
 
    private static void ExecuteCommand(IAppCommand command, FrameworkElement element)
    {
-      // Try to find a Window for Dialog scopes, otherwise null
-      object? parameter = element as Window ?? Window.GetWindow(element);
+      var sourceElement = FindElementBoundToCommand(element, command);
+
+      object? parameter = null;
+
+      if (sourceElement is ICommandSource commandSource)
+         parameter = commandSource.CommandParameter;
+
+      if (parameter == null &&
+          command.Scope.Contains(CommandScopes.DIALOG, StringComparison.OrdinalIgnoreCase))
+         parameter = element as Window ?? Window.GetWindow(element);
+
       if (command.CanExecute(parameter))
          command.Execute(parameter);
+   }
+
+   private static FrameworkElement? FindElementBoundToCommand(DependencyObject root, IAppCommand cmd)
+   {
+      if (root == null!)
+         return null;
+
+      if (root is FrameworkElement fe and ICommandSource source && ReferenceEquals(source.Command, cmd))
+         return fe;
+
+      var count = VisualTreeHelper.GetChildrenCount(root);
+      for (var i = 0; i < count; i++)
+      {
+         var child = VisualTreeHelper.GetChild(root, i);
+         var result = FindElementBoundToCommand(child, cmd);
+         if (result != null)
+            return result;
+      }
+
+      return null;
    }
 
    public static void SynchronizeScopedBindings(FrameworkElement element, string? scopeString)
@@ -216,44 +253,56 @@ public static class CommandBinder
 
    private static void OnAssignChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
-      if (d is ButtonBase button && e.NewValue is IAppCommand cmd)
+      if (d is not FrameworkElement element || e.NewValue is not IAppCommand cmd)
+         return;
+
+      // We must wait for the XAML parser to finish processing nested elements 
+      element.Dispatcher.BeginInvoke(DispatcherPriority.Loaded,
+                                     new Action(() =>
+                                     {
+                                        if (element.ReadLocalValue(OriginalToolTipProperty) == DependencyProperty.UnsetValue)
+                                           if (element.ToolTip != null)
+                                              element.SetValue(OriginalToolTipProperty, element.ToolTip);
+
+                                        switch (d)
+                                        {
+                                           case ButtonBase btn:
+                                              btn.Command = cmd;
+                                              break;
+                                           case MenuItem mi:
+                                              mi.Command = cmd;
+                                              break;
+                                        }
+
+                                        var ttBinding = new MultiBinding { Converter = ToolTipConverter };
+                                        ttBinding.Bindings.Add(new Binding { Source = cmd });
+                                        ttBinding.Bindings.Add(new Binding { Source = element, Path = new(OriginalToolTipProperty) });
+
+                                        BindingOperations.SetBinding(element, FrameworkElement.ToolTipProperty, ttBinding);
+
+                                        ApplyContentBindings(element, cmd);
+                                        ApplySmartCommandParameter(element, cmd);
+                                     }));
+   }
+
+   private static void ApplySmartCommandParameter(FrameworkElement element, IAppCommand cmd)
+   {
+      if (cmd.Scope.Contains(CommandScopes.DIALOG, StringComparison.OrdinalIgnoreCase))
       {
-         // Set the Command
-         button.Command = cmd;
-
-         // Bind Content to DisplayName
-         if (button is ContentControl cc && cc.Content is null)
-         {
-            BindingOperations.SetBinding(button,
-                                         ContentControl.ContentProperty,
-                                         new Binding(nameof(IAppCommand.DisplayName)) { Source = cmd, Mode = BindingMode.OneWay });
-         }
-
-         // Bind ToolTip to Tooltip
-         BindingOperations.SetBinding(button,
-                                      FrameworkElement.ToolTipProperty,
-                                      new Binding(nameof(IAppCommand.Tooltip)) { Source = cmd, Mode = BindingMode.OneWay });
-
-         // Handle CommandParameter automatically for Dialogs
-         if (cmd.Scope.Contains(CommandScopes.DIALOG, StringComparison.OrdinalIgnoreCase))
-            BindingOperations.SetBinding(button,
+         var currentParam = element.ReadLocalValue(ButtonBase.CommandParameterProperty);
+         if (currentParam == DependencyProperty.UnsetValue)
+            BindingOperations.SetBinding(element,
                                          ButtonBase.CommandParameterProperty,
                                          new Binding { RelativeSource = new(RelativeSourceMode.FindAncestor, typeof(Window), 1) });
       }
-      else if (d is MenuItem menuItem && e.NewValue is IAppCommand menuCmd)
-      {
-         // Set the Command
-         menuItem.Command = menuCmd;
+   }
 
-         // Bind Header to DisplayName
-         BindingOperations.SetBinding(menuItem,
-                                      HeaderedItemsControl.HeaderProperty,
-                                      new Binding(nameof(IAppCommand.DisplayName)) { Source = menuCmd, Mode = BindingMode.OneWay });
+   private static void ApplyContentBindings(FrameworkElement element, IAppCommand cmd)
+   {
+      if (element is ButtonBase { Content: null } btn)
+         BindingOperations.SetBinding(btn, ContentControl.ContentProperty, new Binding(nameof(IAppCommand.DisplayName)) { Source = cmd });
 
-         // Bind ToolTip to Tooltip
-         BindingOperations.SetBinding(menuItem,
-                                      FrameworkElement.ToolTipProperty,
-                                      new Binding(nameof(IAppCommand.Tooltip)) { Source = menuCmd, Mode = BindingMode.OneWay });
-      }
+      else if (element is MenuItem { Header: null } mi)
+         BindingOperations.SetBinding(mi, HeaderedItemsControl.HeaderProperty, new Binding(nameof(IAppCommand.DisplayName)) { Source = cmd });
    }
 }

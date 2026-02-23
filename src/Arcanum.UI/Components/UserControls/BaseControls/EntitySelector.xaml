@@ -96,7 +96,9 @@
             <baseControls:VirtualizingGrid Grid.Row = "1" ItemsSource = "{Binding FilteredItems, ElementName=Root}"
                                            Columns = "{Binding GridColumns, ElementName=Root}" Height = "60"
                                            SelectedItem = "{Binding SelectedAddedItem, ElementName=Root}"
-                                           ItemTemplate = "{Binding GridItemTemplate, ElementName=Root}">
+                                           ItemTemplate = "{Binding GridItemTemplate, ElementName=Root}"
+                                           HoverCommand = "{Binding LocationHover, ElementName=Root}"
+                                           HoverLeaveCommand = "{Binding LocationUnhover, ElementName=Root}">
 
                 <baseControls:VirtualizingGrid.Style>
                     <Style TargetType = "baseControls:VirtualizingGrid">

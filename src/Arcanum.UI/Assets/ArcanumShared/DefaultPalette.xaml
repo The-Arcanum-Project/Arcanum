@@ -94,6 +94,7 @@
     <Color x:Key = "GreyedOutForeColor"> #676e70 </Color>
     <Color x:Key = "DisabledForeColor"> #595959 </Color>
     <Color x:Key = "LightForeColor"> #cccccc </Color>
+    <Color x:Key = "LightContrastForeColor"> #747474 </Color>
     <Color x:Key = "DefaultForeColor"> #dfdfdf </Color>
 
     <SolidColorBrush x:Key = "GreenForeColorBrush" Color = "{StaticResource GreenForeColor}" />
@@ -101,6 +102,7 @@
     <SolidColorBrush x:Key = "DisabledForeColorBrush" Color = "{StaticResource DisabledForeColor}" />
     <SolidColorBrush x:Key = "LightForeColorBrush" Color = "{StaticResource LightForeColor}" />
     <SolidColorBrush x:Key = "DefaultForeColorBrush" Color = "{StaticResource DefaultForeColor}" />
+    <SolidColorBrush x:Key = "LightContrastForeColorBrush" Color = "{StaticResource LightContrastForeColor}" />
 
     <!-- Border colors and their brushes -->
     <Color x:Key = "DefaultBorderColor"> #454545 </Color>
