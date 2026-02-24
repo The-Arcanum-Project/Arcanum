@@ -9,18 +9,26 @@
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
                          xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
-                         xmlns:map = "clr-namespace:Arcanum.UI.Components.UserControls.Map" Height = "1080"
-                         Width = "1920" FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
+                         xmlns:map = "clr-namespace:Arcanum.UI.Components.UserControls.Map"
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands" Height = "1080" Width = "1920"
+                         FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
                          WindowStartupLocation = "CenterScreen" Background = "{DynamicResource DefaultBackColorBrush}"
                          HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}" HeaderBorder = "0, 0, 0, 2"
                          HeaderMargin = "0, 0, 0, 3">
+
+    <commands:CommandBinder.Scopes>
+        <x:Array Type = "{x:Type sys:String}">
+            <x:Static Member = "commands:CommandScopes.EDITOR" />
+        </x:Array>
+    </commands:CommandBinder.Scopes>
 
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseToggleSwitch.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -33,16 +41,11 @@
             <Style x:Key = "HeaderButtonStyle" TargetType = "styleClasses:BaseButton"
                    BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
                 <Style.Setters>
-                    <Setter Property = "Background" Value = "Transparent">
-                    </Setter>
-                    <Setter Property = "Height" Value = "20">
-                    </Setter>
-                    <Setter Property = "Width" Value = "20">
-                    </Setter>
-                    <Setter Property = "VerticalAlignment" Value = "Center">
-                    </Setter>
-                    <Setter Property = "BorderThickness" Value = "0">
-                    </Setter>
+                    <Setter Property = "Background" Value = "Transparent" />
+                    <Setter Property = "Height" Value = "20" />
+                    <Setter Property = "Width" Value = "20" />
+                    <Setter Property = "VerticalAlignment" Value = "Center" />
+                    <Setter Property = "BorderThickness" Value = "0" />
                 </Style.Setters>
             </Style>
             <converters:Vector2ToStringConverter x:Key = "Vector2ToStringConverter" />
@@ -225,11 +228,9 @@
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Console" Command = "mainWindow:MwCommands.OpenConsoleCommand">
-                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Console" Command = "mainWindow:MwCommands.OpenConsoleCommand" />
                     <Separator />
-                    <uc:SearchableMenuItem Header = "Exit" Command = "mainWindow:MwCommands.ExitArcanumCommand">
-                    </uc:SearchableMenuItem>
+                    <uc:SearchableMenuItem Header = "Exit" Command = "mainWindow:MwCommands.ExitArcanumCommand" />
                 </uc:SearchableMenuItem>
 
                 <uc:SearchableMenuItem Header = "Edit">
@@ -317,6 +318,15 @@
                     <uc:SearchableMenuItem Header = "Parser Test" Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
             </Menu>
+
+
+            <!-- Help Button -->
+            <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}" Margin = "0" Padding = "0"
+                                     DockPanel.Dock = "Right"
+                                     commands:CommandBinder.Assign = "{Binding OpenHelpCommand, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
+                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Help20x20.png" Stretch = "UniformToFill" />
+            </styleClasses:BaseButton>
+
             <!-- Action indicator panel -->
             <StackPanel Width = "300" Orientation = "Horizontal" DockPanel.Dock = "Right">
                 <!-- Image to indicate the type of action that was last performed -->
@@ -327,7 +337,6 @@
                            HorizontalAlignment = "Stretch" TextAlignment = "Left"
                            Text = "{Binding CurrentActionText, RelativeSource={RelativeSource AncestorType= styleClasses:BaseWindow}}" />
             </StackPanel>
-            <!-- Filler to allow dragging the window -->
             <Border />
         </DockPanel>
     </styleClasses:BaseWindow.HeaderContent>
@@ -385,122 +394,121 @@
             </DockPanel>
         </Border>
     </styleClasses:BaseWindow.FooterContent>
+    <AdornerDecorator>
+        <Grid x:Name = "MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
 
-    <Grid x:Name = "MainGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height = "*" />
-        </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "30*" MinWidth = "200" />
+                <ColumnDefinition Width = "Auto" />
+                <ColumnDefinition Width = "50*" MinWidth = "400" />
+                <ColumnDefinition Width = "Auto" />
+                <ColumnDefinition Width = "30*" MinWidth = "200" />
+                <ColumnDefinition Width = "Auto" />
+                <ColumnDefinition Width = "150" />
+            </Grid.ColumnDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "30*" MinWidth = "200" />
-            <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "50*" MinWidth = "400" />
-            <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "30*" MinWidth = "200" />
-            <ColumnDefinition Width = "Auto" />
-            <ColumnDefinition Width = "150" />
-        </Grid.ColumnDefinitions>
+            <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
+                    CornerRadius = "8" Margin = "0, 0, 2, 0">
+                <ScrollViewer>
+                    <ContentPresenter x:Name = "UiPresenter" />
+                </ScrollViewer>
 
-        <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
-                CornerRadius = "8" Margin = "0, 0, 2, 0">
-            <ScrollViewer>
-                <ContentPresenter x:Name = "UiPresenter" />
-            </ScrollViewer>
+            </Border>
 
-        </Border>
+            <GridSplitter Grid.Column = "1" Width = "4" ResizeBehavior = "PreviousAndNext" />
 
-        <GridSplitter Grid.Column = "1" Width = "4" ResizeBehavior = "PreviousAndNext">
+            <DockPanel Grid.Column = "2" LastChildFill = "True">
+                <Grid x:Name = "MapModeButtonGrid" DockPanel.Dock = "Bottom" />
 
-        </GridSplitter>
+                <Grid x:Name = "SelectionTopBar" DockPanel.Dock = "Top" Height = "30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "Auto" />
+                        <ColumnDefinition Width = "*" />
+                    </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Column = "2" LastChildFill = "True">
-            <Grid x:Name = "MapModeButtonGrid" DockPanel.Dock = "Bottom" />
-
-            <Grid x:Name = "SelectionTopBar" DockPanel.Dock = "Top" Height = "30">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width = "Auto" />
-                    <ColumnDefinition Width = "*" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column = "0" Orientation = "Horizontal">
-                    <TextBlock Text = "Selection Mode: " VerticalAlignment = "Center" Margin = "5,0" />
-                    <ComboBox x:Name = "SelectionModeBox" IsReadOnly = "True" Margin = "5,0" Height = "25"
-                              Width = "180" ItemsSource = "{Binding Source={StaticResource SelectionModeEnumValues}}"
-                              SelectedItem = "{Binding Path=(local:SelectionManager.ObjectSelectionMode), Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <ComboBox.ToolTip>
-                            <ToolTip>
+                    <StackPanel Grid.Column = "0" Orientation = "Horizontal">
+                        <TextBlock Text = "Selection Mode: " VerticalAlignment = "Center" Margin = "5,0" />
+                        <ComboBox x:Name = "SelectionModeBox" IsReadOnly = "True" Margin = "5,0" Height = "25"
+                                  Width = "180"
+                                  ItemsSource = "{Binding Source={StaticResource SelectionModeEnumValues}}"
+                                  SelectedItem = "{Binding Path=(local:SelectionManager.ObjectSelectionMode), Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ComboBox.ToolTip>
+                                <ToolTip>
+                                    <TextBlock>
+                                        <Run Text = "Infer Selection Mode" FontWeight = "Bold" />
+                                        <LineBreak />
+                                        <Run Text = "Selects an object base on the map mode currently active." />
+                                        <LineBreak />
+                                        <Run Text = "   -> Culture map mode -> Cultures are selected"
+                                             FontStyle = "Italic" />
+                                        <LineBreak />
+                                        <LineBreak />
+                                        <Run Text = "Normal Selection Mode" FontWeight = "Bold" />
+                                        <LineBreak />
+                                        <Run Text = "Selects clicked locations, regardless of map mode." />
+                                        <LineBreak />
+                                        <Run Text = "Search Result Mode" FontWeight = "Bold" />
+                                        <LineBreak />
+                                        <Run
+                                            Text = "Searched objects will be shown in UI until a new search is queried or the mode changed." />
+                                    </TextBlock>
+                                </ToolTip>
+                            </ComboBox.ToolTip>
+                        </ComboBox>
+                        <styleClasses:BaseButton Content = "Freeze Selection" Margin = "5,0"
+                                                 VerticalAlignment = "Center" BorderThickness = "1" Height = "23"
+                                                 Command = "mainWindow:MwCommands.FreezeSelectionCommand">
+                            <styleClasses:BaseButton.ToolTip>
                                 <TextBlock>
-                                    <Run Text = "Infer Selection Mode" FontWeight = "Bold" />
+                                    <Run> Freeze the current selection, preventing it from changing until unfrozen. </Run>
                                     <LineBreak />
-                                    <Run Text = "Selects an object base on the map mode currently active." />
-                                    <LineBreak />
-                                    <Run Text = "   -> Culture map mode -> Cultures are selected" FontStyle = "Italic" />
-                                    <LineBreak />
-                                    <LineBreak />
-                                    <Run Text = "Normal Selection Mode" FontWeight = "Bold" />
-                                    <LineBreak />
-                                    <Run Text = "Selects clicked locations, regardless of map mode." />
-                                    <LineBreak />
-                                    <Run Text = "Search Result Mode" FontWeight = "Bold" />
-                                    <LineBreak />
-                                    <Run
-                                        Text = "Searched objects will be shown in UI until a new search is queried or the mode changed." />
+                                    <Run>
+                                        This can be used the lock an object in selection, select e.g. locations on the
+                                        map
+                                        to
+                                        add to it then.
+                                    </Run>
                                 </TextBlock>
-                            </ToolTip>
-                        </ComboBox.ToolTip>
-                    </ComboBox>
-                    <styleClasses:BaseButton Content = "Freeze Selection" Margin = "5,0" VerticalAlignment = "Center"
-                                             BorderThickness = "1" Height = "23"
-                                             Command = "mainWindow:MwCommands.FreezeSelectionCommand">
-                        <styleClasses:BaseButton.ToolTip>
-                            <TextBlock>
-                                <Run> Freeze the current selection, preventing it from changing until unfrozen. </Run>
-                                <LineBreak />
-                                <Run>
-                                    This can be used the lock an object in selection, select e.g. locations on the map
-                                    to
-                                    add to it then.
-                                </Run>
-                            </TextBlock>
-                        </styleClasses:BaseButton.ToolTip>
-                    </styleClasses:BaseButton>
+                            </styleClasses:BaseButton.ToolTip>
+                        </styleClasses:BaseButton>
 
-                    <CheckBox VerticalAlignment = "Center" Margin = "0, 0, 4, 0" Checked = "SelectWater_CheckChanged"
-                              Unchecked = "SelectWater_CheckChanged" IsChecked = "True">
-                        Select Water
-                    </CheckBox>
-                    <CheckBox VerticalAlignment = "Center" Checked = "SelectWastelands_CheckChanged" IsChecked = "True"
-                              Unchecked = "SelectWastelands_CheckChanged">
-                        Select Wastelands
-                    </CheckBox>
-                </StackPanel>
-            </Grid>
+                        <CheckBox VerticalAlignment = "Center" Margin = "0, 0, 4, 0"
+                                  Checked = "SelectWater_CheckChanged" Unchecked = "SelectWater_CheckChanged"
+                                  IsChecked = "True">
+                            Select Water
+                        </CheckBox>
+                        <CheckBox VerticalAlignment = "Center" Checked = "SelectWastelands_CheckChanged"
+                                  IsChecked = "True" Unchecked = "SelectWastelands_CheckChanged">
+                            Select Wastelands
+                        </CheckBox>
+                    </StackPanel>
+                </Grid>
 
-            <map:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
-                            BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
-                            HorizontalAlignment = "Stretch">
-            </map:MapControl>
-        </DockPanel>
+                <map:MapControl x:Name = "MainMap" Margin = "5" BorderThickness = "2"
+                                BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Stretch"
+                                HorizontalAlignment = "Stretch" />
+            </DockPanel>
 
-        <GridSplitter Grid.Column = "3" Width = "4" ResizeBehavior = "PreviousAndNext">
+            <GridSplitter Grid.Column = "3" Width = "4" ResizeBehavior = "PreviousAndNext" />
 
-        </GridSplitter>
+            <Border Grid.Column = "4" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
+                    CornerRadius = "8" Margin = "2, 0">
 
-        <Border Grid.Column = "4" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
-                CornerRadius = "8" Margin = "2, 0">
-
-            <ContentPresenter x:Name = "SpecializedEditorPresenter" />
+                <ContentPresenter x:Name = "SpecializedEditorPresenter" />
 
 
-        </Border>
+            </Border>
 
-        <GridSplitter Grid.Column = "5" Width = "4" ResizeBehavior = "PreviousAndNext"
-                      x:Name = "DebugPanelGridSplitter">
-        </GridSplitter>
+            <GridSplitter Grid.Column = "5" Width = "4" ResizeBehavior = "PreviousAndNext"
+                          x:Name = "DebugPanelGridSplitter" />
 
-        <debugPanel:DebugPanelGrid Grid.Column = "6" x:Name = "DebugPanel" VerticalAlignment = "Stretch"
-                                   HorizontalAlignment = "Stretch" />
-    </Grid>
+            <debugPanel:DebugPanelGrid Grid.Column = "6" x:Name = "DebugPanel" VerticalAlignment = "Stretch"
+                                       HorizontalAlignment = "Stretch" />
+        </Grid>
+    </AdornerDecorator>
 
 
 </styleClasses:BaseWindow>

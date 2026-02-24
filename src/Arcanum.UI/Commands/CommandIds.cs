@@ -2,6 +2,20 @@
 
 public static class CommandIds
 {
+   public static class Global
+   {
+      private const string PATH = nameof(Global);
+
+      // "global.open_context_explorer_window"
+      public static readonly CommandId OpenContextExplorerWindow = CommandId.Create(PATH);
+
+      // "global.open_context_explorer_control"
+      public static readonly CommandId OpenControlExplorer = CommandId.Create(PATH);
+
+      // "global.open_help"
+      public static readonly CommandId OpenHelp = CommandId.Create(PATH);
+   }
+
    // "ui"
    public static class UI
    {

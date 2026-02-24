@@ -10,7 +10,7 @@
              xmlns:autoCompleteBox = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
              xmlns:viewModels = "clr-namespace:Arcanum.UI.SpecializedEditors.EditorControls.ViewModels"
              mc:Ignorable = "d" d:DesignWidth = "300"
-             commands:CommandBinder.Scopes = "{x:Static commands:CommandScopes.POLITICAL_EDITOR}"
+             commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.POLITICAL_EDITOR}"
              commands:ContextBinder.ObserveContext = "True"
              d:DataContext = "{d:DesignInstance Type=viewModels:PoliticalEditorViewModel, IsDesignTimeCreatable=True}">
 

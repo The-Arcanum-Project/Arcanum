@@ -13,5 +13,13 @@ public static class ArcAppContext
       ContextUpdated?.Invoke(null, instance);
    }
 
+   public static void RemoveContext(Type interfaceType)
+   {
+      if (ActiveContexts.Remove(interfaceType, out var instance))
+         ContextUpdated?.Invoke(null, instance);
+   }
+
    public static T? Get<T>() where T : class => ActiveContexts.TryGetValue(typeof(T), out var instance) ? (T)instance : null;
+
+   public static bool Has<T>() where T : class => ActiveContexts.ContainsKey(typeof(T));
 }

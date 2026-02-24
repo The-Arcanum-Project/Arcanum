@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
 using Arcanum.UI.Util.WindowManagement;
@@ -217,5 +221,26 @@ public partial class DebugPanelGrid
    private void BindingTest_OnClick(object sender, RoutedEventArgs e)
    {
       new CommandBindingTest().ShowDialog();
+   }
+
+   private void ExportAllCommands_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.md"), CommandDocEngine.ExportMarkdown());
+   }
+
+   private void ExportSelectedCommands_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.json"), CommandDocEngine.ExportJson());
+   }
+
+   private void ExportToHtml_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.html"), CommandDocEngine.ExportHtml());
+   }
+
+   private void ContextExplorer_OnClick(object sender, RoutedEventArgs e)
+   {
+      var ownerWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+      new ContextExplorerWindow(ownerWindow!).Show();
    }
 }

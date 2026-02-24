@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Input;
+using Arcanum.UI.Components.Converters;
 
 namespace Arcanum.UI.Commands;
 
@@ -63,8 +64,10 @@ public sealed class ManagedCommand : IAppCommand
          Gestures.Add(g);
    }
 
+   public string FullShortcutText => Gestures.Count > 0 ? string.Join(", ", Gestures.Select(GestureToTextConverter.DefaultConvert)) : "NONE";
    public bool IsHiddenInPalette { get; }
    public Predicate<object?>? PaletteVisibilityPredicate { get; set; }
+   public bool CouldExecute => CanExecute(null);
 
    public ObservableCollection<InputGesture> Gestures { get; }
    public ReadOnlyObservableCollection<InputGesture> DefaultGestures { get; }

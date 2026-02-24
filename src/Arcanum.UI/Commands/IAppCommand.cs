@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
+using Arcanum.UI.Commands.KeyMap;
 
 namespace Arcanum.UI.Commands;
 
@@ -14,12 +15,10 @@ public interface IAppCommand : ICommand, INotifyPropertyChanged
    public string Tooltip { get; }
    public string Scope { get; }
    public void ResetToDefault();
-   public bool HasUserDefinedGestures
-   {
-      get { return !(Gestures.Count == DefaultGestures.Count && Gestures.SequenceEqual(DefaultGestures, new KeyGestureComparer())); }
-   }
-
+   public bool HasUserDefinedGestures => !(Gestures.Count == DefaultGestures.Count && Gestures.SequenceEqual(DefaultGestures, new KeyGestureComparer()));
+   public string FullShortcutText { get; }
    public bool IsHiddenInPalette { get; }
    public Predicate<object?>? PaletteVisibilityPredicate { get; set; }
    public bool ShouldShowInPalette(object? context) => !IsHiddenInPalette && (PaletteVisibilityPredicate?.Invoke(context) ?? true);
+   public bool CouldExecute { get; }
 }

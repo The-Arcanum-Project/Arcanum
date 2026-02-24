@@ -6,6 +6,11 @@ namespace Arcanum.UI.Components.Converters;
 
 public class GestureToTextConverter : IValueConverter
 {
+   public static GestureToTextConverter Instance { get; } = new();
+
+   public static string DefaultConvert(InputGesture gesture)
+      => Instance.Convert(gesture, typeof(string), null, CultureInfo.CurrentCulture)?.ToString() ?? string.Empty;
+
    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {
       if (value is KeyGesture kg)

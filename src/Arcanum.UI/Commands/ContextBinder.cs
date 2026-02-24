@@ -15,12 +15,24 @@ public static class ContextBinder
 
    private static void OnObserveContextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
-      if (d is FrameworkElement element && (bool)e.NewValue)
-         element.IsKeyboardFocusWithinChanged += (_, _) =>
-         {
-            if (element.IsKeyboardFocusWithin)
-               RegisterContext(element.DataContext);
-         };
+      if (d is not FrameworkElement element || !(bool)e.NewValue)
+         return;
+
+      element.Loaded += (_, _) =>
+      {
+         if (element.IsVisible)
+            RegisterContext(element.DataContext);
+      };
+
+      element.Unloaded += (_, _) => { UnregisterContext(element.DataContext); };
+
+      element.IsVisibleChanged += (_, args) =>
+      {
+         if ((bool)args.NewValue)
+            RegisterContext(element.DataContext);
+         else
+            UnregisterContext(element.DataContext);
+      };
    }
 
    private static void RegisterContext(object? dc)
@@ -28,11 +40,30 @@ public static class ContextBinder
       if (dc == null)
          return;
 
-      var moduleInterfaces = dc.GetType()
-                               .GetInterfaces()
-                               .Where(i => typeof(IAppContext).IsAssignableFrom(i));
+      List<Type> interfaces =
+      [
+         ..dc.GetType()
+             .GetInterfaces()
+             .Where(i => typeof(IAppContext).IsAssignableFrom(i)),
+      ];
 
-      foreach (var @interface in moduleInterfaces)
-         ArcAppContext.UpdateContext(@interface, dc);
+      foreach (var i in interfaces)
+         ArcAppContext.UpdateContext(i, dc);
+   }
+
+   private static void UnregisterContext(object? dc)
+   {
+      if (dc == null)
+         return;
+
+      List<Type> interfaces =
+      [
+         ..dc.GetType()
+             .GetInterfaces()
+             .Where(i => typeof(IAppContext).IsAssignableFrom(i)),
+      ];
+
+      foreach (var i in interfaces)
+         ArcAppContext.RemoveContext(i);
    }
 }

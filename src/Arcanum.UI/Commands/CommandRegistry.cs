@@ -131,7 +131,21 @@ public static class CommandRegistry
          KeyMapProfile.Serialize();
       }
 
+      RunQualityAudit();
+
       ArcLog.Write("CRS", LogLevel.INF, "CommandRegistry initialized with {0} commands.", Commands.Count);
       IsInitialized = true;
+   }
+
+   private static void RunQualityAudit()
+   {
+      foreach (var cmd in Commands.Values)
+      {
+         if (string.IsNullOrWhiteSpace(cmd.Description) || cmd.Description == "undefined")
+            ArcLog.Write("AUDIT", LogLevel.WRN, "Command '{0}' is missing a description.", cmd.Id.Value);
+
+         if (cmd.DisplayName.Length > 30)
+            ArcLog.Write("AUDIT", LogLevel.WRN, "Command '{0}' has a very long DisplayName.", cmd.Id.Value);
+      }
    }
 }

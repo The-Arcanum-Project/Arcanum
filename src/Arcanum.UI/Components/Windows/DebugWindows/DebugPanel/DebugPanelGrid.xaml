@@ -79,6 +79,18 @@
             <styleClasses:BaseButton Content = "Command Window Test" Margin = "2" Padding = "4"
                                      Click = "BindingTest_OnClick" />
 
+            <styleClasses:BaseButton Content = "Command export ContextMenu" Margin = "2" Padding = "4">
+                <styleClasses:BaseButton.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header = "Export To Markdown" Click = "ExportAllCommands_OnClick" />
+                        <MenuItem Header = "Export To Json" Click = "ExportSelectedCommands_OnClick" />
+                        <MenuItem Header = "Export To Html" Click = "ExportToHtml_OnClick" />
+                    </ContextMenu>
+                </styleClasses:BaseButton.ContextMenu>
+            </styleClasses:BaseButton>
+
+            <styleClasses:BaseButton Content = "ContextExplorer" Margin = "2" Padding = "2"
+                                     Click = "ContextExplorer_OnClick" />
 
         </StackPanel>
 

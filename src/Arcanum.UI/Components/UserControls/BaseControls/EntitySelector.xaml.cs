@@ -159,7 +159,6 @@ public partial class EntitySelector
       if (obj is not CellItem { Value: Location location })
          return;
 
-      Console.WriteLine($"Hovering over {location}");
       SelectionManager.Preview([location]);
    });
 

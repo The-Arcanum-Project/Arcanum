@@ -3,6 +3,9 @@ using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
 using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
 using Arcanum.UI.Commands.KeyMap;
+using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer;
 
 namespace Arcanum.UI.Commands;
 
@@ -64,7 +67,15 @@ public static class CommandLibrary
                          "Open Queastor",
                          "Opens the Queastor editor.",
                          CommandScopes.EDITOR,
-                         _ => MessageBox.Show("Open Queastor command executed!")).WithDefaultGesture(Key.F, ModifierKeys.Control);
+                         _ =>
+                         {
+                            var mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                            if (mw == null)
+                               return;
+
+                            mw.BringIntoView();
+                            SearchWindow.ShowSearchWindow(mw.MainMap);
+                         }).WithDefaultGesture(Key.F, ModifierKeys.Control);
 
       // Map Commands
       new ManagedCommand(CommandIds.Editor.Map.RectangleSelectModifier,
@@ -74,14 +85,51 @@ public static class CommandLibrary
                          _ =>
                          {
                             /* This command is meant to be used as a modifier, so it doesn't execute an action on its own. */
-                         }).WithDefaultGesture(Key.LeftShift);
+                         },
+                         canExecute: _ => false).WithDefaultGesture(Key.LeftShift);
 
       // Specialized Editors Commands
       new ManagedCommand(CommandIds.Editor.SpecializedEditors.PoliticalEditor.SyncWithSelection,
                          "Sync with Selection",
                          "Toggles whether the Political Editor should sync with the current selection.",
                          CommandScopes.POLITICAL_EDITOR,
-                         _ => { ArcAppContext.Get<IPoliticalEditor>()?.ToggleSyncState(); }).WithDefaultGesture(Key.S, ModifierKeys.Control | ModifierKeys.Alt);
+                         _ => { ArcAppContext.Get<IPoliticalEditor>()?.ToggleSyncState(); },
+                         canExecute: _ => ArcAppContext.Has<IPoliticalEditor>()).WithDefaultGesture(Key.S, ModifierKeys.Control | ModifierKeys.Alt);
+
+      #region Global Commands
+
+      // Open Context Explorer
+      new ManagedCommand(CommandIds.Global.OpenContextExplorerWindow,
+                         "Open Context Explorer",
+                         "Opens the Context Explorer for the currently active window, allowing you to see available commands based on the current UI context.",
+                         CommandScopes.GLOBAL,
+                         _ =>
+                         {
+                            var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                            if (activeWindow == null)
+                               return;
+
+                            new ContextExplorerWindow(activeWindow).Show();
+                         }).WithDefaultGesture(Key.K, ModifierKeys.Control | ModifierKeys.Shift);
+
+      // Open Control Explorer (TODO)
+      new ManagedCommand(CommandIds.Global.OpenControlExplorer,
+                         "Open Context Explorer Control",
+                         "Opens the Context Explorer for the currently active control, allowing you to see available commands based on the current UI context.",
+                         CommandScopes.GLOBAL,
+                         _ =>
+                         {
+                            // TODO: Implement control-focused context explorer
+                         }).WithDefaultGesture(Key.K, ModifierKeys.Control);
+
+      // Open Help
+      new ManagedCommand(CommandIds.Global.OpenHelp,
+                         "Open Help",
+                         "Opens the help documentation.",
+                         CommandScopes.GLOBAL,
+                         _ => { new HelpWindow().ShowDialog(); }).WithDefaultGesture(Key.F12);
+
+      #endregion
    }
 
    extension(ManagedCommand cmd)
@@ -109,27 +157,4 @@ public static class CommandLibrary
          return cmd;
       }
    }
-}
-
-public class KeyGestureComparer : IEqualityComparer<InputGesture>
-{
-   public bool Equals(InputGesture? x, InputGesture? y)
-   {
-      if (x == null || y == null)
-         return false;
-
-      if (x is KeyGesture kgX && y is KeyGesture kgY)
-         return kgX.Key == kgY.Key && kgX.Modifiers == kgY.Modifiers;
-      if (x is MultiKeyGesture mkX && y is MultiKeyGesture mkY)
-         return mkX.Equals(mkY);
-
-      return false;
-   }
-
-   public int GetHashCode(InputGesture obj) => obj switch
-   {
-      KeyGesture kg => HashCode.Combine(kg.Key, kg.Modifiers),
-      MultiKeyGesture mk => HashCode.Combine(mk.FirstGesture.Key, mk.FirstGesture.Modifiers, mk.SecondGesture.Key, mk.SecondGesture.Modifiers),
-      _ => obj.GetHashCode(),
-   };
 }

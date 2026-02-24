@@ -22,6 +22,7 @@ using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.Core.Utils.ScreenManagement;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
@@ -177,6 +178,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          OnPropertyChanged();
       }
    } = null!;
+   public IAppCommand OpenHelpCommand { get; } = CommandRegistry.Get(CommandIds.Global.OpenHelp);
 
    #endregion
 

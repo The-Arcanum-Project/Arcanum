@@ -7,8 +7,15 @@
                          xmlns:debugWindows = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
                          Title = "CommandBindingTest" Height = "450" Width = "800"
-                         commands:CommandBinder.Scopes = "Dialog"
+                         commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
                          d:DataContext = "{d:DesignInstance debugWindows:PopupViewModel}">
+
+    <!-- <commands:CommandBinder.Scopes> -->
+    <!--     <x:Array Type="{x:Type sys:String}"> -->
+    <!--         <x:Static Member="commands:CommandScopes.DIALOG"/> -->
+    <!--     </x:Array> -->
+    <!-- </commands:CommandBinder.Scopes> -->
+
     <Grid Margin = "20">
         <StackPanel VerticalAlignment = "Center">
             <TextBlock Text = "Press Escape or click the button below to close." TextWrapping = "Wrap"

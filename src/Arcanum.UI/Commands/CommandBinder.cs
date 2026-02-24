@@ -16,9 +16,15 @@ public static class CommandBinder
    private static KeyGesture? _pendingFirstStroke;
    private static DateTime _lastStrokeTime;
 
+   public static readonly DependencyProperty ScopeProperty =
+      DependencyProperty.RegisterAttached("Scope",
+                                          typeof(string),
+                                          typeof(CommandBinder),
+                                          new(null, OnScopeChanged));
+
    public static readonly DependencyProperty ScopesProperty =
       DependencyProperty.RegisterAttached("Scopes",
-                                          typeof(string),
+                                          typeof(string[]),
                                           typeof(CommandBinder),
                                           new(null, OnScopesChanged));
 
@@ -33,8 +39,21 @@ public static class CommandBinder
 
    private static readonly CommandToolTipConverter ToolTipConverter = new();
 
-   public static void SetScopes(DependencyObject obj, string value) => obj.SetValue(ScopesProperty, value);
-   public static string GetScopes(DependencyObject obj) => (string)obj.GetValue(ScopesProperty);
+   public static void SetScope(DependencyObject obj, string value) => obj.SetValue(ScopeProperty, value);
+   public static string? GetScope(DependencyObject obj) => (string?)obj.GetValue(ScopeProperty);
+   public static void SetScopes(DependencyObject obj, string[] value) => obj.SetValue(ScopesProperty, value);
+   public static string[] GetScopes(DependencyObject obj) => (string[])obj.GetValue(ScopesProperty);
+
+   private static void OnScopeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+   {
+      if (d is not FrameworkElement element)
+         return;
+
+      if (e.NewValue is string scope && !string.IsNullOrWhiteSpace(scope))
+         SetScopes(element, [scope]);
+      else
+         SetScopes(element, null!);
+   }
 
    private static void OnScopesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
@@ -75,11 +94,11 @@ public static class CommandBinder
 
       var currentStroke = new KeyGesture(key, Keyboard.Modifiers);
 
-      var scopeString = GetScopes(element);
-      if (string.IsNullOrEmpty(scopeString))
+      var scopes = GetScopes(element);
+      if (scopes == null! || scopes.Length == 0)
          return;
 
-      var activeScopes = scopeString.Split(',').Select(s => s.Trim()).ToList();
+      var activeScopes = !scopes.Contains(CommandScopes.GLOBAL) ? [..scopes, CommandScopes.GLOBAL] : scopes;
       var commands = CommandRegistry.AllCommands
                                     .Where(c => activeScopes.Contains(c.Scope, StringComparer.OrdinalIgnoreCase))
                                     .ToList();
@@ -221,13 +240,13 @@ public static class CommandBinder
       return null;
    }
 
-   public static void SynchronizeScopedBindings(FrameworkElement element, string? scopeString)
+   public static void SynchronizeScopedBindings(FrameworkElement element, string[]? scopes)
    {
       element.InputBindings.Clear();
-      if (string.IsNullOrWhiteSpace(scopeString))
+      if (scopes == null || scopes.Length == 0)
          return;
 
-      var activeScopes = scopeString.Split(',').Select(s => s.Trim()).ToList();
+      var activeScopes = !scopes.Contains(CommandScopes.GLOBAL) ? [..scopes, CommandScopes.GLOBAL] : scopes;
 
       // Filter for standard KeyGestures (WPF handles these)
       var filteredCommands = CommandRegistry.AllCommands

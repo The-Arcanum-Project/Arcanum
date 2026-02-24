@@ -24,6 +24,7 @@ public static class ControlFactory
    public static readonly Brush LightContrastForeColorBrush = (Brush)Application.Current.FindResource("LightContrastForeColorBrush")!;
    public static readonly Brush MarkedBrush = (Brush)Application.Current.FindResource("MarkedColorBrush")!;
    public static readonly Brush BackColorBrush = (Brush)Application.Current.FindResource("DefaultBackColorBrush")!;
+   public static readonly Brush RedAccentColorBrush = (Brush)Application.Current.FindResource("AggressiveRedBackColorBrush")!;
 
    public static readonly FontFamily MonoFontFamily = (FontFamily)Application.Current.FindResource("DefaultMonospacedFont")!;
 
