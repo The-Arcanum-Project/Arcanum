@@ -13,7 +13,8 @@
                          xmlns:commands = "clr-namespace:Arcanum.UI.Commands" Height = "1080" Width = "1920"
                          FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
-                         WindowStartupLocation = "CenterScreen" Background = "{DynamicResource DefaultBackColorBrush}"
+                         commands:ContextBinder.ObserveContext = "True" WindowStartupLocation = "CenterScreen"
+                         Background = "{DynamicResource DefaultBackColorBrush}"
                          HeaderBackGroundBrush = "{StaticResource AccentGradientBrush}" HeaderBorder = "0, 0, 0, 2"
                          HeaderMargin = "0, 0, 0, 3">
 

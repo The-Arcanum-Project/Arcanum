@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Arcanum.Core.ApplicationContext;
+using Arcanum.UI.AppFeatures;
 
 namespace Arcanum.UI.Commands;
 
@@ -18,21 +19,49 @@ public static class ContextBinder
       if (d is not FrameworkElement element || !(bool)e.NewValue)
          return;
 
-      element.Loaded += (_, _) =>
+      element.Loaded -= OnElementOnLoaded;
+      element.Unloaded -= OnElementOnUnloaded;
+      element.IsVisibleChanged -= OnElementOnIsVisibleChanged;
+      element.DataContextChanged -= OnElementOnDataContextChanged;
+
+      element.Loaded += OnElementOnLoaded;
+      element.Unloaded += OnElementOnUnloaded;
+      element.IsVisibleChanged += OnElementOnIsVisibleChanged;
+      element.DataContextChanged += OnElementOnDataContextChanged;
+      return;
+
+      void OnElementOnLoaded(object o, RoutedEventArgs routedEventArgs)
       {
          if (element.IsVisible)
             RegisterContext(element.DataContext);
-      };
+      }
 
-      element.Unloaded += (_, _) => { UnregisterContext(element.DataContext); };
+      void OnElementOnUnloaded(object o, RoutedEventArgs routedEventArgs)
+      {
+         UnregisterContext(element.DataContext);
+         element.Loaded -= OnElementOnLoaded;
+         element.IsVisibleChanged -= OnElementOnIsVisibleChanged;
+         element.DataContextChanged -= OnElementOnDataContextChanged;
+         element.Unloaded -= OnElementOnUnloaded;
+      }
 
-      element.IsVisibleChanged += (_, args) =>
+      void OnElementOnIsVisibleChanged(object _, DependencyPropertyChangedEventArgs args)
       {
          if ((bool)args.NewValue)
             RegisterContext(element.DataContext);
          else
             UnregisterContext(element.DataContext);
-      };
+      }
+
+      void OnElementOnDataContextChanged(object _, DependencyPropertyChangedEventArgs args)
+      {
+         if (args.NewValue is IAppFeature feature)
+            FeatureRegistry.Register(feature);
+
+         // If the element is already loaded and visible, update active status immediately
+         if (element is { IsLoaded: true, IsVisible: true })
+            RegisterContext(args.NewValue);
+      }
    }
 
    private static void RegisterContext(object? dc)
@@ -49,6 +78,9 @@ public static class ContextBinder
 
       foreach (var i in interfaces)
          ArcAppContext.UpdateContext(i, dc);
+
+      if (dc is IAppFeature feature)
+         FeatureRegistry.AddActiveFeature(feature);
    }
 
    private static void UnregisterContext(object? dc)
@@ -65,5 +97,8 @@ public static class ContextBinder
 
       foreach (var i in interfaces)
          ArcAppContext.RemoveContext(i);
+
+      if (dc is IAppFeature feature)
+         FeatureRegistry.RemoveActiveFeature(feature);
    }
 }
