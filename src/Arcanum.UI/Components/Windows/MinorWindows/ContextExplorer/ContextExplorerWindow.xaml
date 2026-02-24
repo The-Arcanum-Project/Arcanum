@@ -8,8 +8,8 @@
         xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
-        commands:CommandBinder.Scopes = "Dialog" Title = "Command Explorer" Height = "500" Width = "400"
-        WindowStyle = "None" AllowsTransparency = "True" Background = "Transparent"
+        commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}" Title = "Command Explorer"
+        Height = "500" Width = "400" WindowStyle = "None" AllowsTransparency = "True" Background = "Transparent"
         WindowStartupLocation = "CenterScreen" ShowInTaskbar = "False"
         d:DataContext = "{d:DesignInstance contextExplorer:ContextExplorerViewModel}">
 
