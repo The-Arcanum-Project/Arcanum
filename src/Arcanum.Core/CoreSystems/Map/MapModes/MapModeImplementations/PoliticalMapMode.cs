@@ -56,14 +56,10 @@ public class PoliticalMapMode : IMapMode
 #endif
 
       for (var i = 0; i < colorBuffer.Length; i++)
-      {
          if (Math.Abs(colorBuffer[i].R - 242) < 0.1 &&
              Math.Abs(colorBuffer[i].G - 55) < 0.1 &&
              Math.Abs(colorBuffer[i].B - 48) < 0.1)
-         {
             Debug.WriteLine(i);
-         }
-      }
 
       if (!Config.Settings.MapSettings.UseShadeOfColorOnWater)
          return;
@@ -75,18 +71,11 @@ public class PoliticalMapMode : IMapMode
          colorBuffer[location.ColorIndex] = MapModeManager.GetWaterColorForLocation(location);
    }
 
-   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private static void PaintCollections(Color4[] buffer, Color4 color, params IEnumerable<Location>[] locationLists)
-   {
-      for (var i = 0; i < locationLists.Length; i++)
-         foreach (var loc in locationLists[i])
-            if (loc.ColorIndex < buffer.Length)
-               buffer[loc.ColorIndex] = color;
-   }
-
    public string[] GetTooltip(Location location)
    {
-      return [$"{location.UniqueId}: Not implemented"];
+      var owner = GetLocationOwner(location);
+      var str = owner != Country.Empty ? owner.UniqueId : "Unassigned";
+      return [$"{location.UniqueId}: {str}"];
    }
 
    public string? GetLocationText(Location location) => null;
@@ -99,5 +88,30 @@ public class PoliticalMapMode : IMapMode
 
    public void OnDeactivateMode()
    {
+   }
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private static void PaintCollections(Color4[] buffer, Color4 color, params IEnumerable<Location>[] locationLists)
+   {
+      for (var i = 0; i < locationLists.Length; i++)
+         foreach (var loc in locationLists[i])
+            if (loc.ColorIndex < buffer.Length)
+               buffer[loc.ColorIndex] = color;
+   }
+
+   public static Country GetLocationOwner(Location location)
+   {
+      foreach (var country in Globals.Countries.Values)
+         if (country.OwnControlCores.Contains(location) ||
+             country.OwnColony.Contains(location) ||
+             country.OwnConquered.Contains(location) ||
+             country.OwnCores.Contains(location) ||
+             country.OwnIntegrated.Contains(location) ||
+             country.OwnControlConquered.Contains(location) ||
+             country.OwnControlColony.Contains(location) ||
+             country.OwnControlIntegrated.Contains(location))
+            return country;
+
+      return Country.Empty;
    }
 }

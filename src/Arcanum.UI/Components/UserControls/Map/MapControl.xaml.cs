@@ -10,9 +10,11 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
@@ -62,6 +64,8 @@ public partial class MapControl
 
    private int _mapWidth = -1;
    private int _mapHeight = -1;
+
+   private Vector2? _contextMenuClickLocation;
 
    // Get to pass this into the color generation
    public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
@@ -453,7 +457,7 @@ public partial class MapControl
 
    private void SelectProvince_Click(object sender, RoutedEventArgs e)
    {
-      var location = Selection.GetLocation(CurrentPos);
+      var location = Selection.GetLocation(_contextMenuClickLocation);
       if (location == Location.Empty)
          return;
 
@@ -462,7 +466,7 @@ public partial class MapControl
 
    private void SelectArea_Click(object sender, RoutedEventArgs e)
    {
-      var location = Selection.GetLocation(CurrentPos);
+      var location = Selection.GetLocation(_contextMenuClickLocation);
       if (location == Location.Empty)
          return;
 
@@ -472,7 +476,7 @@ public partial class MapControl
 
    private void SelectRegion_Click(object sender, RoutedEventArgs e)
    {
-      var location = Selection.GetLocation(CurrentPos);
+      var location = Selection.GetLocation(_contextMenuClickLocation);
       if (location == Location.Empty)
          return;
 
@@ -485,7 +489,7 @@ public partial class MapControl
 
    private void SelectSuperRegion_Click(object sender, RoutedEventArgs e)
    {
-      var location = Selection.GetLocation(CurrentPos);
+      var location = Selection.GetLocation(_contextMenuClickLocation);
       if (location == Location.Empty)
          return;
 
@@ -498,7 +502,7 @@ public partial class MapControl
 
    private void SelectContinent_Click(object sender, RoutedEventArgs e)
    {
-      var location = Selection.GetLocation(CurrentPos);
+      var location = Selection.GetLocation(_contextMenuClickLocation);
       if (location == Location.Empty)
          return;
 
@@ -517,5 +521,25 @@ public partial class MapControl
 
       var idList = string.Join(" ", selectedLocations.Select(loc => loc.UniqueId));
       Clipboard.SetText(idList);
+   }
+
+   private void SelectOwner_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      var owner = PoliticalMapMode.GetLocationOwner(location);
+      if (owner == Country.Empty)
+         return;
+
+      SelectionManager.Eu5ObjectSelectedInSearch(owner);
+   }
+
+   public bool HasLocationOwner => Selection.GetLocation(_contextMenuClickLocation) is { } loc && PoliticalMapMode.GetLocationOwner(loc) != Country.Empty;
+
+   private void MapContextMenu_Opened(object sender, RoutedEventArgs e)
+   {
+      _contextMenuClickLocation = CurrentPos;
    }
 }

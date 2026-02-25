@@ -20,7 +20,7 @@
                 ContextMenuOpening = "Border_ContextMenuOpening">
             <!-- D3D11HwndHost will be added here from code-behind -->
             <Border.ContextMenu>
-                <ContextMenu>
+                <ContextMenu x:Name = "MapContextMenu" Opened = "MapContextMenu_Opened">
                     <MenuItem Header = "Export MapMode" Click = "MenuItem_OnClick" />
                     <Separator />
                     <MenuItem Header = "Select Province" Click = "SelectProvince_Click" />
@@ -28,6 +28,9 @@
                     <MenuItem Header = "Select Region" Click = "SelectRegion_Click" />
                     <MenuItem Header = "Select Super Region" Click = "SelectSuperRegion_Click" />
                     <MenuItem Header = "Select Continent" Click = "SelectContinent_Click" />
+                    <MenuItem Header = "Select Owner" Click = "SelectOwner_Click"
+                              IsEnabled = "{Binding HasLocationOwner}">
+                    </MenuItem>
                     <Separator />
                     <MenuItem Header = "Copy Selected Location Ids" Click = "CopySelectedLocationIds_Click" />
                 </ContextMenu>
