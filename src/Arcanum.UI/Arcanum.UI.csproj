@@ -43,4 +43,17 @@
         <PackageReference Include="Vortice.Direct3D11" Version="3.6.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Page Update="Components\Windows\HelpWindow\HelpWindow.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Update="Components\Windows\HelpWindow\Views\DashboardView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+    </ItemGroup>
+
 </Project>

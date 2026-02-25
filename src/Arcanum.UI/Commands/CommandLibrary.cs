@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
 using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
 using Arcanum.UI.Commands.KeyMap;
+using Arcanum.UI.Components.Windows.HelpWindow;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer;

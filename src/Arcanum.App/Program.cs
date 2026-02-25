@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI;
+using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
@@ -57,6 +58,7 @@ internal static class Program
       UiHandlesInjector.InjectUiHandles();
       LifecycleManager.Instance.DebugInit();
       CommandRegistry.Initialize();
+      FeatureLibrary.Initialize();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
       var clean = false;
 
@@ -126,7 +128,8 @@ internal static class Program
       var resources = new[]
       {
          $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultPalette.xaml", $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultFonts.xaml",
-         $"/{uiAssemblyName};component/Components/Styles/Base/BaseButton.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseTextBoxStyle.xaml",
+         $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultGeometry.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseButton.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Base/BaseTextBoxStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseComboboxStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Specific/BorderlessComboBox.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseCheckBox.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseScrollbar.xaml",

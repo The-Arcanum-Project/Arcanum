@@ -55,8 +55,15 @@ public static class ContextBinder
 
       void OnElementOnDataContextChanged(object _, DependencyPropertyChangedEventArgs args)
       {
-         if (args.NewValue is IAppFeature feature)
-            FeatureRegistry.Register(feature);
+         switch (args.NewValue)
+         {
+            case IAppFeature feature:
+               FeatureRegistry.Register(feature);
+               break;
+            case IAppFeatureProvider provider:
+               FeatureRegistry.Register(provider.FeatureMetadata);
+               break;
+         }
 
          // If the element is already loaded and visible, update active status immediately
          if (element is { IsLoaded: true, IsVisible: true })
@@ -79,8 +86,15 @@ public static class ContextBinder
       foreach (var i in interfaces)
          ArcAppContext.UpdateContext(i, dc);
 
-      if (dc is IAppFeature feature)
-         FeatureRegistry.AddActiveFeature(feature);
+      switch (dc)
+      {
+         case IAppFeature feature:
+            FeatureRegistry.AddActiveFeature(feature);
+            break;
+         case IAppFeatureProvider provider:
+            FeatureRegistry.AddActiveFeature(provider.FeatureMetadata);
+            break;
+      }
    }
 
    private static void UnregisterContext(object? dc)

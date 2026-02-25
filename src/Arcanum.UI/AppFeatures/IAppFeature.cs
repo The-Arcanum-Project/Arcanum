@@ -1,4 +1,6 @@
-﻿namespace Arcanum.UI.AppFeatures;
+﻿using Arcanum.Core.Utils;
+
+namespace Arcanum.UI.AppFeatures;
 
 public interface IAppFeature
 {
@@ -59,12 +61,17 @@ public interface IAppFeature
    /// <summary>
    /// The version of the application in which this feature was first introduced.
    /// </summary>
-   string IntroducedIn { get; }
+   VersionNumber IntroducedIn { get; }
 
    /// <summary>
    /// The current status of this feature, such as whether it's stable, experimental, in beta, or legacy.
    /// </summary>
    FeatureStatus Status { get; }
+
+   /// <summary>
+   /// An optional path to an icon representing this feature. 
+   /// </summary>
+   string? IconPath { get; }
 }
 
 public record ExternalReference(string Label, string Url, ReferenceType Type);
