@@ -65,6 +65,8 @@ public partial class MapControl
    private int _mapWidth = -1;
    private int _mapHeight = -1;
 
+   private bool _isMapReady = false;
+
    private Vector2? _contextMenuClickLocation;
 
    // Get to pass this into the color generation
@@ -184,6 +186,8 @@ public partial class MapControl
       OnMapLoaded?.Invoke();
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
+
+      _isMapReady = true;
    }
 
    private void LocationSelectedAddHandler(List<Location> locations)
@@ -540,6 +544,12 @@ public partial class MapControl
 
    private void MapContextMenu_Opened(object sender, RoutedEventArgs e)
    {
+      if (!_isMapReady)
+      {
+         e.Handled = true;
+         return;
+      }
+
       _contextMenuClickLocation = CurrentPos;
    }
 }
