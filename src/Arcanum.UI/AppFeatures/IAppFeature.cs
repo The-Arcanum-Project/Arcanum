@@ -129,7 +129,6 @@ public enum FeatureLevel
 
 public enum FeatureScale
 {
-   Nano,     // Occupies a tiny corner
    Compact,  // Small sidebar component
    Standard, // Normal panel size
    Major,    // Takes up 50%+ of screen

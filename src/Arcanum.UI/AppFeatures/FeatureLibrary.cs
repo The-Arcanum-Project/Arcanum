@@ -10,6 +10,12 @@ public static class FeatureLibrary
       // All Features from ../FeatureInitializers should be initialized here
       EditorFeatures.Initialize();
 
-      ArcLog.Write("DOC", LogLevel.INF, "Self-Documentation Engine loaded {0} features.", FeatureRegistry.GetActiveFeatures().Count);
+      ArcLog.Write("DOC", LogLevel.INF, "Self-Documentation Engine loaded {0} features.", FeatureRegistry.GetAllFeatures().Count);
+   }
+
+   public static AppFeature AddToRegistry(this AppFeature feature)
+   {
+      FeatureRegistry.Register(feature);
+      return feature;
    }
 }

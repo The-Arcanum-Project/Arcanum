@@ -12,8 +12,6 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:GestureToTextConverter x:Key = "GestureConverter" />
-            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
-            <converters:IsTopLevelConverter x:Key = "IsTopLevelConverter" />
             <converters:StringToVisibilityConverter x:Key = "StringToVisibilityConverter" />
 
             <ContextMenu x:Key = "ShortcutContextMenu">
@@ -45,112 +43,6 @@
                 <Setter Property = "VerticalAlignment" Value = "Stretch" />
             </Style>
 
-            <Style x:Key = "RiderTreeViewItemStyle" TargetType = "TreeViewItem">
-                <Setter Property = "HorizontalContentAlignment" Value = "Stretch" />
-                <Setter Property = "IsExpanded" Value = "{Binding IsExpanded, Mode=TwoWay}" />
-                <Setter Property = "Visibility"
-                        Value = "{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <Setter Property = "Padding" Value = "0" />
-                <Setter Property = "BorderThickness" Value = "1" />
-                <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
-
-                <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
-
-                <Setter Property = "Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType = "TreeViewItem">
-                            <Grid Background = "Transparent">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition MinWidth = "12" Width = "Auto" />
-                                    <ColumnDefinition Width = "*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height = "Auto" /> <!-- Header Row -->
-                                    <RowDefinition Height = "Auto" /> <!-- Children Row -->
-                                    <RowDefinition Height = "Auto" /> <!-- Separator Row -->
-                                </Grid.RowDefinitions>
-
-                                <Border x:Name = "Bd" Grid.Row = "0" Grid.Column = "0" Grid.ColumnSpan = "2"
-                                        Background = "{TemplateBinding Background}"
-                                        BorderBrush = "{TemplateBinding BorderBrush}"
-                                        BorderThickness = "{TemplateBinding BorderThickness}" CornerRadius = "3"
-                                        Padding = "{TemplateBinding Padding}" SnapsToDevicePixels = "True">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition MinWidth = "12" Width = "Auto" />
-                                            <ColumnDefinition Width = "*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <ToggleButton x:Name = "Expander" Grid.Column = "0"
-                                                      Style = "{StaticResource ExpandCollapseToggleStyle}"
-                                                      ClickMode = "Press"
-                                                      IsChecked = "{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
-
-                                        <ContentPresenter x:Name = "PART_Header" Grid.Column = "1"
-                                                          ContentSource = "Header" HorizontalAlignment = "Stretch" />
-                                    </Grid>
-                                </Border>
-                                <ItemsPresenter x:Name = "ItemsHost" Grid.Row = "1" Grid.Column = "1"
-                                                Visibility = "Collapsed" />
-
-                                <!-- SEPARATOR -->
-                                <Border x:Name = "SectionLine" Grid.Row = "2" Grid.Column = "0" Grid.ColumnSpan = "2"
-                                        Height = "1" Background = "{StaticResource DefaultBorderColorBrush}"
-                                        Margin = "3, 5" Visibility = "Collapsed" SnapsToDevicePixels = "True" />
-
-                                <!-- Visual States for Expansion -->
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name = "ExpansionStates">
-                                        <VisualState x:Name = "Expanded">
-                                            <Storyboard>
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName = "ItemsHost"
-                                                                               Storyboard.TargetProperty = "(UIElement.Visibility)">
-                                                    <DiscreteObjectKeyFrame KeyTime = "0"
-                                                                            Value = "{x:Static Visibility.Visible}" />
-                                                </ObjectAnimationUsingKeyFrames>
-                                            </Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name = "Collapsed" />
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                            </Grid>
-
-                            <ControlTemplate.Triggers>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition
-                                            Binding = "{Binding IsExpanded, RelativeSource={RelativeSource Self}}"
-                                            Value = "True" />
-                                        <Condition Binding = "{Binding HasItems, RelativeSource={RelativeSource Self}}"
-                                                   Value = "True" />
-                                        <Condition
-                                            Binding = "{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource IsTopLevelConverter}}"
-                                            Value = "True" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter TargetName = "SectionLine" Property = "Visibility" Value = "Visible" />
-                                </MultiDataTrigger>
-
-                                <Trigger Property = "HasItems" Value = "false">
-                                    <Setter TargetName = "Expander" Property = "Visibility" Value = "Hidden" />
-                                </Trigger>
-                                <Trigger Property = "IsExpanded" Value = "false">
-                                    <Setter TargetName = "ItemsHost" Property = "Visibility" Value = "Collapsed" />
-                                </Trigger>
-
-                                <Trigger SourceName = "Bd" Property = "IsMouseOver" Value = "True">
-                                    <Setter TargetName = "Bd" Property = "Background"
-                                            Value = "{StaticResource LightBackColorBrush}" />
-                                </Trigger>
-
-                                <Trigger Property = "IsSelected" Value = "True">
-                                    <Setter TargetName = "Bd" Property = "Background"
-                                            Value = "{StaticResource BlueSelectionBackColorBrush}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
             <HierarchicalDataTemplate DataType = "{x:Type local:ShortcutTreeItem}" ItemsSource = "{Binding Children}">
                 <Grid HorizontalAlignment = "Stretch" Background = "Transparent" Margin = "0,0,10,0"
                       ContextMenu = "{StaticResource ShortcutContextMenu}">
@@ -344,12 +236,16 @@
             </styleClasses:BaseButton>
 
         </Grid>
-
-
-        <!-- The Tree -->
         <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
                   Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
-                  ItemContainerStyle = "{StaticResource RiderTreeViewItemStyle}"
-                  ScrollViewer.HorizontalScrollBarVisibility = "Disabled" />
+                  ScrollViewer.HorizontalScrollBarVisibility = "Disabled">
+
+            <TreeView.ItemContainerStyle>
+                <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
+                    <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+        </TreeView>
     </Grid>
 </UserControl>

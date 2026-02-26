@@ -38,6 +38,8 @@ public class VersionNumber
 
    public SnapShotVersion? SnapShotVersion { get; }
 
+   public string WithVPrefix => $"v{this}";
+
    private bool Equals(VersionNumber other) => Major == other.Major &&
                                                Minor == other.Minor &&
                                                Patch == other.Patch &&

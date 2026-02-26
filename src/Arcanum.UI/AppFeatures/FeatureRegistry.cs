@@ -17,6 +17,7 @@ public static class FeatureRegistry
       ActiveFeatures.Remove(feature.Id);
    }
 
+   public static IReadOnlyCollection<IAppFeature> GetAllFeatures() => Features.Values;
    public static IAppFeature? GetFeature(string id) => Features.GetValueOrDefault(id);
    public static IReadOnlyCollection<IAppFeature> GetActiveFeatures() => ActiveFeatures.Values;
 }

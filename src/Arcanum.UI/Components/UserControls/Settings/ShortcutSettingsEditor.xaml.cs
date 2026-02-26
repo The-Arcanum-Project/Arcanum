@@ -26,6 +26,9 @@ public partial class ShortcutSettingsEditor
       DataContext = this;
       BuildTree();
 
+      foreach (var item in RootItems)
+         SetExpansion(item, true);
+
       // Initialize Command Bindings
       CommandBindings.Add(new(AddShortcutCommand, ExecuteAddShortcut));
       CommandBindings.Add(new(ResetCommand, ExecuteReset));

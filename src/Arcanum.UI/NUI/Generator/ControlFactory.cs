@@ -18,6 +18,7 @@ public static class ControlFactory
    public static readonly Brush BlueBrush = (Brush)Application.Current.FindResource("BlueAccentColorBrush")!;
    public static readonly Brush ForegroundBrush = (Brush)Application.Current.FindResource("DefaultForeColorBrush")!;
    public static readonly Brush DisabledForegroundBrush = (Brush)Application.Current.FindResource("DisabledForeColorBrush")!;
+   public static readonly Brush BlueSelectionBackBrush = (Brush)Application.Current.FindResource("BlueSelectionBackColorBrush")!;
    public static readonly Brush AccentBrush = (Brush)Application.Current.FindResource("LightAccentBackColorBrush")!;
    public static readonly Brush LightForeColorBrush = (Brush)Application.Current.FindResource("LightForeColorBrush")!;
    public static readonly Brush DefaultBorderColorBrush = (Brush)Application.Current.FindResource("DefaultBorderColorBrush")!;
