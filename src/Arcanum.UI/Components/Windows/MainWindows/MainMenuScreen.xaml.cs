@@ -99,25 +99,28 @@ public partial class MainMenuScreen
       else
       {
          MainMenuScreenDescriptor.SaveData();
-         
+
          var path = MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text;
-         if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
+         if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase))
+         {
             MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
             var combine = Path.Combine(path, "game");
-            if (path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) && Path.Exists(combine))
+            if (path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) &&
+                Path.Exists(combine))
                MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text = combine;
             else
                return;
          }
-         
+
          if (!MainMenuViewModel.GetDescriptorFromInput(out descriptor))
          {
             MBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
-                            "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
-                            "If you are using base mods make sure that they are valid, too.",
-               "Invalid Project Data",
-               MBoxButton.OK,
-               MessageBoxImage.Error);
+                      "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
+                      "If you are using base mods make sure that they are valid, too.",
+                      "Invalid Project Data",
+                      MBoxButton.OK,
+                      MessageBoxImage.Error);
             return;
          }
       }
@@ -164,14 +167,17 @@ public partial class MainMenuScreen
          Hide();
          loadingScreen.Show();
 
-         // 2. Await the loading logic directly.
-         //    Because we are awaiting, the UI thread is NOW FREE. It can process
-         //    the Dispatcher messages from the loading task and update the text.
-         var value = await loadingScreen.StartLoading();
-         if (value == false)
+         if (!DebugConfig.Settings.SkipLoading)
          {
-            loadingScreen.Close();
-            return;
+            // 2. Await the loading logic directly.
+            //    Because we are awaiting, the UI thread is NOW FREE. It can process
+            //    the Dispatcher messages from the loading task and update the text.
+            var value = await loadingScreen.StartLoading();
+            if (value == false)
+            {
+               loadingScreen.Close();
+               return;
+            }
          }
 
          // 3. Once loading is done, create and show the new MainWindow.
