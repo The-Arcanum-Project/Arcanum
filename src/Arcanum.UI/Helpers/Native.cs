@@ -11,6 +11,11 @@ public static class NativeMethods
    public const int WM_GETMINMAXINFO = 0x0024;
    private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
 
+   /// <summary>
+   /// A lightweight record to replace System.Windows.Forms.Screen
+   /// </summary>
+   public record ScreenInfo(Rect WorkingArea, Rect MonitorArea);
+   
    [StructLayout(LayoutKind.Sequential)]
    public struct Rect
    {
@@ -18,6 +23,27 @@ public static class NativeMethods
       public int Top;
       public int Right;
       public int Bottom;
+      
+      public int Width => Right - Left;
+      public int Height => Bottom - Top;
+   }
+   
+   [DllImport("user32.dll")]
+   public static extern bool GetCursorPos(out Point cursorPoint);
+   
+   [DllImport("user32.dll")]
+   private static extern IntPtr MonitorFromPoint(Point pt, int dwFlags);
+   
+   private static ScreenInfo GetScreenInfoFromMonitor(IntPtr monitor)
+   {
+      var monitorInfo = new MonitorInfoEx();
+      return GetMonitorInfo(new(null, monitor), monitorInfo) ? new ScreenInfo(monitorInfo.rcWork, monitorInfo.rcMonitor) : new(new(), new());
+   }
+   
+   public static ScreenInfo GetCurrentMonitorRect(Point point)
+   {
+      var monitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
+      return  GetScreenInfoFromMonitor(monitor);
    }
 
    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 4)]
@@ -45,14 +71,14 @@ public static class NativeMethods
    [DllImport("user32.dll")]
    public static extern uint GetDoubleClickTime();
 
-   public static Rect GetCurrentMonitorRect(Window window)
+   public static Rect GetCurrentMonitorRect(Window window, bool workingArea = false)
    {
       var hwnd = new WindowInteropHelper(window).Handle;
       var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
 
       var monitorInfo = new MonitorInfoEx();
       if (GetMonitorInfo(new(null, monitor), monitorInfo))
-         return monitorInfo.rcMonitor;
+         return workingArea ? monitorInfo.rcMonitor : monitorInfo.rcWork;
 
       return new();
    }

@@ -9,8 +9,10 @@ using Arcanum.UI;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.Logger;
+using Common.UI;
 #if !DEBUG
 using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 #endif
@@ -56,6 +58,7 @@ internal static class Program
       // Initialize Plugin Host and Lifecycle Manager
       var pluginHost = new PluginHost.PluginHost();
       UiHandlesInjector.InjectUiHandles();
+      UIHandle.Instance.UIUtils.SetStartupScreen(true);
       LifecycleManager.Instance.DebugInit();
       CommandRegistry.Initialize();
       FeatureLibrary.Initialize();

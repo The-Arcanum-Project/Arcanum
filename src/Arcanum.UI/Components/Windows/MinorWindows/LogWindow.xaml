@@ -7,18 +7,17 @@
                          xmlns:helpers = "clr-namespace:Arcanum.UI.Components.Helpers"
                          xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
                          xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors" mc:Ignorable = "d"
-                         Title = "LogWindow" Height = "300" Width = "1200" WindowStartupLocation = "Manual" Top = "0"
-                         Left = "0">
+                         Title = "LogWindow" Height = "300" Width = "1200" WindowStartupLocation = "Manual">
     <Window.DataContext>
         <helpers:LogViewModel />
     </Window.DataContext>
 
-    <b:Interaction.Behaviors>
-        <behaviors:WindowDataBehavior />
-    </b:Interaction.Behaviors>
-
-    <ScrollViewer Margin = "10" VerticalScrollBarVisibility = "Auto" ScrollChanged = "OnScrollChanged">
-        <TextBlock Text = "{Binding LogText}" TextWrapping = "Wrap" FontFamily = "Consolas" />
+    <ScrollViewer Margin = "10"
+                  VerticalScrollBarVisibility = "Auto"
+                  ScrollChanged = "OnScrollChanged">
+        <TextBlock Text = "{Binding LogText}"
+                   TextWrapping = "Wrap"
+                   FontFamily = "Consolas" />
     </ScrollViewer>
 
 </styleClasses:BaseWindow>

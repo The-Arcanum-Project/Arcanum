@@ -5,10 +5,10 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.Views.MainMenuScreen;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Arcanum.UI.Helpers;
 using Common.UI.MBox;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
@@ -47,7 +47,9 @@ public partial class MainMenuScreen
          if (args.PropertyName == nameof(Views.MainMenuScreen.MainMenuViewModel.IsWindowVisible))
             Visibility = MainMenuViewModel.IsWindowVisible;
       };
-
+      
+      this.SetScreen();
+      
       Debug.Assert(MainMenuViewModel != null, "MainMenuViewModel should not be null");
 
 #if DEBUG
@@ -60,7 +62,6 @@ public partial class MainMenuScreen
          }
       };
 #endif
-      ScreenManager.GetScreenFrom(this);
    }
 
    private void OnClosed(object? sender, EventArgs? e)

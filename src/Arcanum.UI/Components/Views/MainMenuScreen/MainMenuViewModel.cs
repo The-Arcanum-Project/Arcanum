@@ -10,6 +10,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Windows.PopUp;
 using Common.UI.MBox;
 using Arcanum.Core.Utils.vdfParser;
+using Arcanum.UI.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using static Arcanum.UI.Components.Windows.MainWindows.MainMenuScreen;
@@ -179,7 +180,10 @@ public class MainMenuViewModel : ObservableObject
                          MessageBoxImage.Error);
          return;
       }
-
+      
+      // Set the new main screen
+      ScreenManager.SetMainScreen();
+      
       descriptor.LoadToApplication();
       // Save the paths to the MainMenuScreenDescriptor
       AppData.MainMenuScreenDescriptor.LastVanillaPath = descriptor.VanillaPath;

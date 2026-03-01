@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Data;
 using Arcanum.Core.GlobalStates.BackingClasses;
+using Arcanum.UI.Helpers;
 using Microsoft.Xaml.Behaviors;
 
 namespace Arcanum.UI.Components.Behaviors;
@@ -46,9 +47,10 @@ public class WindowDataBehavior : Behavior<Window>
 
    private static void WindowDataChanged(Window sender)
    {
+      var relativePos = sender.GetRelativePosition();
       var newData = new WindowStateData(sender.GetType().Name,
-                                        sender.Left,
-                                        sender.Top,
+                                    relativePos.Item1,
+                                    relativePos.Item2,
                                         sender.Width,
                                         sender.Height,
                                         (int)sender.WindowState);

@@ -1,4 +1,5 @@
 ﻿using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Helpers;
 using Common.UI.Interfaces;
 
 namespace Arcanum.UI.Components.UIHandles;
@@ -16,6 +17,12 @@ public class LogWindowHandleImpl : ILogWindowHandle
       if (_logWindow == null)
       {
          _logWindow = new();
+         if (ScreenManager.MainScreen is not null)
+         {
+            _logWindow.Top = ScreenManager.MainScreen.WorkingArea.Top;
+            _logWindow.Left = ScreenManager.MainScreen.WorkingArea.Left;
+         }
+
          _logWindow.Show();
       }
       else

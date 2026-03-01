@@ -17,11 +17,11 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
-using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.Map;
@@ -30,6 +30,7 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MainWindows.MainWindowsHelpers;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Arcanum.UI.Helpers;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
@@ -226,15 +227,19 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
-      var screen = ScreenManager.MainScreen;
-      if (screen.Bounds.Height <= DEFAULT_HEIGHT || screen.Bounds.Width <= DEFAULT_WIDTH)
+
+      var data = WindowData.GetWindowStateData(typeof(MainWindow));
+      if (data != null)
       {
-         Height = screen.WorkingArea.Height * 0.8;
-         Width = screen.WorkingArea.Width * 0.8;
-         WindowState = WindowState.Maximized;
+         this.SetScreenOffset((int)data.Left, (int)data.Top, (int)data.Width, (int)data.Height);
+         if (Enum.IsDefined(typeof(WindowState), data.WindowState)) WindowState = (WindowState)data.WindowState;
+      }
+      else
+      {
+         ArcLog.WriteLine("MW", LogLevel.WRN, "Could not load window data for main window, using defaults.");
+         this.SetScreen(DEFAULT_WIDTH,DEFAULT_HEIGHT);
       }
 
-      this.SetScreen(screen);
 
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
