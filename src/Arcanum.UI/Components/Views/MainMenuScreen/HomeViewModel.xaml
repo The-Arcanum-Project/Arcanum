@@ -95,7 +95,7 @@
                     </StackPanel>
                     <Image Width = "120"
                            Height = "120"
-                           Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
+                           Source = "/Arcanum_UI;component/Assets/Logo/ArcanumWhite.png"
                            RenderOptions.BitmapScalingMode = "HighQuality"
                            Margin = "251,37,23,37" />
                 </Grid>

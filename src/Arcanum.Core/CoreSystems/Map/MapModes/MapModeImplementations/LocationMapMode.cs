@@ -30,4 +30,6 @@ public class LocationMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location;
 }

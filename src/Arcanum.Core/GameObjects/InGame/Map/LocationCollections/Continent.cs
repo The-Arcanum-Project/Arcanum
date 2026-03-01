@@ -40,11 +40,11 @@ public partial class Continent
    [Description("The SuperRegions that are part of this Continent.")]
    [ParseAs("-", ignore: true)]
    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Continent_SuperRegion", isRequired: true)]
-   public AggregateLink<SuperRegion> SuperRegions { get; set; }
+   public AggregateLink<SubContinent> SuperRegions { get; set; }
 
-   private AggregateLink<SuperRegion> GetEmptyAggregateLink_Continent_SuperRegion()
+   private AggregateLink<SubContinent> GetEmptyAggregateLink_Continent_SuperRegion()
    {
-      return new(SuperRegion.Field.Continent, Field.SuperRegions, this);
+      return new(SubContinent.Field.Continent, Field.SuperRegions, this);
    }
 
    public List<Location> GetRelevantLocations(IEu5Object[] items)

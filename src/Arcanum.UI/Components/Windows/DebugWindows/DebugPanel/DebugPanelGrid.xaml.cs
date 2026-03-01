@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
 using Arcanum.UI.Components.Windows.DebugWindows.DebugPanel.VMs;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.Saving.Window;
 using Arcanum.UI.Util.WindowManagement;
@@ -52,11 +56,6 @@ public partial class DebugPanelGrid
    private void OpenSavingWindowButton_Click(object sender, RoutedEventArgs e)
    {
       WindowManager.OpenWindow<SaveWindow>(true);
-   }
-
-   private void OpenSavingWindowExporterButton_Click(object sender, RoutedEventArgs e)
-   {
-      WindowManager.OpenWindow<AgsWindow>(true);
    }
 
    private void OpenTestWindowButton_Click(object sender, RoutedEventArgs e)
@@ -201,5 +200,47 @@ public partial class DebugPanelGrid
    {
       var cmdGen = new CommandGenerator();
       cmdGen.Show();
+   }
+
+   private void WordGenerator_OnClick(object sender, RoutedEventArgs e)
+   {
+      var wordGen = new NameGenerator();
+      wordGen.Show();
+   }
+
+   private void ASTBuilderViewer_OnClick(object sender, RoutedEventArgs e)
+   {
+      new ASTBuilderTest().Show();
+   }
+
+   private void ImageTagDecode_OnClick(object sender, RoutedEventArgs e)
+   {
+      new WatermarkCheckerWindow().Show();
+   }
+
+   private void BindingTest_OnClick(object sender, RoutedEventArgs e)
+   {
+      new CommandBindingTest().ShowDialog();
+   }
+
+   private void ExportAllCommands_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.md"), CommandDocEngine.ExportMarkdown());
+   }
+
+   private void ExportSelectedCommands_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.json"), CommandDocEngine.ExportJson());
+   }
+
+   private void ExportToHtml_OnClick(object sender, RoutedEventArgs e)
+   {
+      IO.WriteAllTextUtf8(Path.Combine(IO.GetArcanumDataPath, "CMD_docs.html"), CommandDocEngine.ExportHtml());
+   }
+
+   private void ContextExplorer_OnClick(object sender, RoutedEventArgs e)
+   {
+      var ownerWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+      new ContextExplorerWindow(ownerWindow!).Show();
    }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Common.Logger;
 
@@ -33,126 +34,178 @@ public enum CommonLogSource
 public static class ArcLog
 {
    private static readonly DateTime StartTime = DateTime.Now;
-   private static readonly BlockingCollection<string> LogQueue = new();
-   public static LogLevel LogLevel { get; set; } = LogLevel.INF;
 
-   public static bool IsLevelEnabled(LogLevel level) => level >= LogLevel;
-
-   // We want to log messages but in this format: [<Source>] [<Level>] <Message> 
-   // The Source should be either a 3-letter or a word which will be converted to 3-letter
-   // The Level should be one of the following: INF, WRN, ERR, DBG, CRT
-   // The Message is the actual log message
+   private static readonly BlockingCollection<LogEntry> LogQueue = new();
+   private static readonly ConcurrentDictionary<string, string> SourceCache = new();
 
    static ArcLog()
    {
-      var loggingThread = new Thread(() =>
+      var loggingThread = new Thread(ProcessLogQueue)
       {
-         // This loop will run for the entire lifetime of the application.
-         // GetConsumingEnumerable() will block until an item is available in the queue.
-         // When .CompleteAdding() is called, the loop will finish.
-         foreach (var message in LogQueue.GetConsumingEnumerable())
-            try
-            {
-               Console.WriteLine(message);
-            }
-            catch (Exception)
-            {
-               // In case logging fails, we don't want to crash the application. B
-               // So we silently ignore logging errors.
-            }
-      })
-      {
-         IsBackground = true, Name = "ArcLog Worker",
+         IsBackground = true,
+         Name = "ArcLog Worker",
+         Priority = ThreadPriority.BelowNormal,
       };
       loggingThread.Start();
    }
 
-   // TODO: Add to lifecycle shutdown
+   public static LogLevel LogLevel { get; set; } = LogLevel.INF;
+
+   public static bool IsLevelEnabled(LogLevel level) => level >= LogLevel;
+
    public static void Shutdown()
    {
       LogQueue.CompleteAdding();
    }
 
-   public static void Error(string source, string message) => Log($"[{GetSourceString(source)}] [ERR] {message}");
+   public static void Error(string source, string message) => Enqueue(source, LogLevel.ERR, message);
 
-   public static void Error(string source, string message, Exception ex) => Log($"[{GetSourceString(source)}] [ERR] {message} | Exception: {ex}");
+   public static void Error(string source, string message, Exception ex) => Enqueue(source, LogLevel.ERR, message, ex);
 
-   public static void Warning(string source, string message) => Log($"[{GetSourceString(source)}] [WRN] {message}");
+   public static void Warning(string source, string message) => Enqueue(source, LogLevel.WRN, message);
 
-   public static void Warning(string source, string message, Exception ex) => Log($"[{GetSourceString(source)}] [WRN] {message} | Exception: {ex}");
+   public static void Warning(string source, string message, Exception ex) => Enqueue(source, LogLevel.WRN, message, ex);
 
-   public static void Write(string source, LogLevel level, string message) => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
+   public static void Write(string source, LogLevel level, string message) => Enqueue(source, level, message);
 
-   public static void Write(string source, LogLevel level, string message, Exception ex)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message} | Exception: {ex}");
+   public static void Write(string source, LogLevel level, string message, Exception ex) => Enqueue(source, level, message, ex);
 
    public static void Write(string source, LogLevel level, string message, params object[] args)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {string.Format(message, args)}");
+   {
+      if (IsLevelEnabled(level))
+         Enqueue(source, level, message, null, args);
+   }
 
-   public static void WriteLine(string source, LogLevel level, string message) => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message}");
+   public static void WriteLine(string source, LogLevel level, string message) => Enqueue(source, level, message);
 
-   public static void WriteLine(string source, LogLevel level, string message, Exception ex)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {message} | Exception: {ex}");
+   public static void WriteLine(string source, LogLevel level, string message, Exception ex) => Enqueue(source, level, message, ex);
 
    public static void WriteLine(string source, LogLevel level, string message, params object[] args)
-      => Log($"[{GetSourceString(source)}] [{level.ToString()}] {string.Format(message, args)}");
-
-   public static void WriteLine(CommonLogSource source, LogLevel level, string message)
-      => Log($"[{GetSourceString(source.ToString())}] [{level.ToString()}] {message}");
-
-   public static void WriteLine(CommonLogSource source, LogLevel level, string message, Exception ex)
-      => Log($"[{GetSourceString(source.ToString())}] [{level.ToString()}] {message} | Exception: {ex}");
-
-   private static void Log(string str)
    {
-      LogQueue.Add($"{GetTimestamp()} - {str}");
+      if (IsLevelEnabled(level))
+         Enqueue(source, level, message, null, args);
    }
 
-   private static string GetTimestamp()
+   public static void WriteLine(CommonLogSource source, LogLevel level, string message) => Enqueue(source.ToString(), level, message);
+
+   public static void WriteLine(CommonLogSource source, LogLevel level, string message, Exception ex) => Enqueue(source.ToString(), level, message, ex);
+
+   public static void WritePure(string message)
    {
-      return (DateTime.Now - StartTime).ToString(@"mm\:ss\.ff");
+      LogQueue.Add(new(string.Empty, LogLevel.INF, message, null, null, DateTime.Now));
    }
 
-   private static string GetSourceString(string source)
+   private static void Enqueue(string source, LogLevel level, string message, Exception? ex = null, object[]? args = null)
    {
-      // if it is 3 chars we just return it uppercased
-      // else we take the first 3 uppercased chars
-      // if it has less than 3 uppercased chars we take all uppercased and concat 1-2 chars after the first uppercased char
+      if (!IsLevelEnabled(level))
+         return;
 
-      switch (source.Length)
+      LogQueue.Add(new(source, level, message, ex, args, DateTime.Now));
+   }
+
+   private static void ProcessLogQueue()
+   {
+      var batchBuffer = new StringBuilder(4096);
+
+      foreach (var entry in LogQueue.GetConsumingEnumerable())
+         try
+         {
+            FormatEntryToBuffer(batchBuffer, entry);
+
+            while (LogQueue.TryTake(out var nextEntry))
+            {
+               FormatEntryToBuffer(batchBuffer, nextEntry);
+
+               if (batchBuffer.Length > 8000)
+                  break;
+            }
+
+            Console.Write(batchBuffer.ToString());
+            batchBuffer.Clear();
+         }
+         catch
+         {
+            batchBuffer.Clear();
+         }
+   }
+
+   private static void FormatEntryToBuffer(StringBuilder sb, LogEntry entry)
+   {
+      if (entry.SourceRaw == string.Empty && entry.Timestamp != default)
       {
-         case 3:
-            return source.ToUpper();
-         case < 3:
-            return source.ToUpper().PadRight(3);
+         sb.AppendLine(entry.Message);
+         return;
       }
 
-      var result = "";
+      var timeSpan = entry.Timestamp - StartTime;
+
+      sb.Append(timeSpan.ToString(@"mm\:ss\.ff"));
+      sb.Append(" - ");
+
+      var processedSource = SourceCache.GetOrAdd(entry.SourceRaw, GenerateSourceString);
+      sb.Append('[').Append(processedSource).Append("] ");
+
+      sb.Append('[').Append(entry.Level).Append("] ");
+
+      if (entry.Args != null && entry.Args.Length > 0)
+         sb.AppendFormat(entry.Message, entry.Args);
+      else
+         sb.Append(entry.Message);
+
+      if (entry.Exception != null)
+
+         sb.Append(" | Exception: ").Append(entry.Exception);
+
+      sb.AppendLine();
+   }
+
+   private static string GenerateSourceString(string source)
+   {
+      if (string.IsNullOrEmpty(source))
+         return "UNK";
+
+      if (source.Length == 3)
+         return source.ToUpper();
+
+      if (source.Length < 3)
+         return source.ToUpper().PadRight(3);
+
+      var sb = new StringBuilder();
       var upperCount = 0;
-      foreach (var c in source.Where(char.IsUpper))
+
+      foreach (var c in source)
       {
-         result += c;
+         if (!char.IsUpper(c))
+            continue;
+
+         sb.Append(c);
          upperCount++;
          if (upperCount == 3)
             break;
       }
 
       if (upperCount >= 3)
-         return result.PadRight(3).ToUpper();
+         return sb.ToString().PadRight(3).ToUpper();
 
-      foreach (var c in source.Where(c => !char.IsUpper(c)))
+      foreach (var c in source)
       {
-         result += c;
+         if (char.IsUpper(c))
+            continue;
+
+         sb.Append(c);
          upperCount++;
          if (upperCount == 3)
             break;
       }
 
-      return result.PadRight(3).ToUpper();
+      return sb.ToString().PadRight(3).ToUpper();
    }
 
-   public static void WritePure(string message)
-   {
-      LogQueue.Add(message);
-   }
+   private readonly record struct LogEntry(
+      string SourceRaw,
+      LogLevel Level,
+      string Message,
+      Exception? Exception,
+      object[]? Args,
+      DateTime Timestamp);
 }

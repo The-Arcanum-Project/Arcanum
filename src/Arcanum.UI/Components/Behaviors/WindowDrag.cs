@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.UI.Helpers;
+using Common.Logger;
 using Microsoft.Xaml.Behaviors;
 
 namespace Arcanum.UI.Components.Behaviors;
@@ -152,10 +153,17 @@ public class WindowDrag : Behavior<FrameworkElement>
 
             // Calculate the desired left offset so that the mouse remains at the same
             // relative position on the window after restoring
-            var monitor = NativeMethods.GetCurrentMonitorRect(_window);
-
+            if (!NativeMethods.GetCurrentScreen(_window, out var screen))
+            {
+               // Should never happen, but if it does, just restore without repositioning
+               ArcLog.Error("WIN", "Failed to get current screen info. Restoring without repositioning.");
+               _window.WindowState = WindowState.Normal;
+               _lastMousePosition = null;
+               return;
+            }
+            var monitor = screen.MonitorArea; // Not quite sure why MonitorArea is needed instead of WorkingArea
+            
             // Get percentage of distance to monitor left from total monitor width
-
             var targetLeft = mousePosition.X -
                              _window.RestoreBounds.Width *
                              (mousePosition.X - monitor.Left) /
@@ -163,7 +171,7 @@ public class WindowDrag : Behavior<FrameworkElement>
 
             _window.WindowState = WindowState.Normal;
 
-            // Set windows left, so center is under mouse
+            // Set windows left, so the center is under the mouse
             _window.Left = targetLeft;
             _window.Top = mousePosition.Y - position.Y; // preserve Y coordinate
 

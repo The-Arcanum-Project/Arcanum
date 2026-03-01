@@ -173,4 +173,44 @@ public interface INexus : INotifyPropertyChanged
    /// Gets the AggregateLinkType of a property.
    /// </summary>
    public AggregateLinkType GetNxPropAggregateLinkType(Enum property);
+
+   /// <summary>
+   /// Gets the inline comment for a property, if any.
+   /// </summary>
+   public string? GetInlineComment(Enum property);
+
+   /// <summary>
+   /// Sets the inline comment for a property.
+   /// </summary>
+   public void SetInlineComment(Enum property, string? val);
+
+   /// <summary>
+   /// Gets the leading comment for a property.
+   /// </summary>
+   public string? GetLeadingComment(Enum property);
+
+   /// <summary>
+   /// Sets the leading comment for a property.
+   /// </summary>
+   public void SetLeadingComment(Enum property, string? val);
+
+   /// <summary>
+   /// Gets the closing comment for a property.
+   /// </summary>
+   public string? GetClosingComment(Enum property);
+
+   /// <summary>
+   /// Sets the closing comment for a property.
+   /// </summary>
+   public void SetClosingComment(Enum property, string? val);
+
+   /// <summary>
+   /// Gets the standalone block comments.
+   /// </summary>
+   public string[]? GetStandaloneComments();
+
+   /// <summary>
+   /// Add a standalone block comment.
+   /// </summary>
+   public void AddStandaloneComment(string comment);
 }

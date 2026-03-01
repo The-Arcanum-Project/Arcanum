@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using Arcanum.API.Attributes;
-using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 /// <summary>
 /// Automatic Generated Saving settings.
 /// </summary>
-public class AgsSettings
+public partial class AgsSettings
 {
    /// <summary>
    /// If true, the saving order will follow the order specified in SaveOrder. <br/>
@@ -65,14 +65,17 @@ public class AgsSettings
    [DefaultValue(SavingFormat.Default)]
    public SavingFormat Format { get; set; } = SavingFormat.Default;
 
-   [Description("A custom default name to use when saving objects of this type. If empty, the object's ToString() method will be used.")]
-   [DefaultValue("")]
-   public string CustomDefaultName { get; set; } = string.Empty;
+   [Description("Whether the entire object will be saved on a single line. This is broken by comments which will cause a line break.")]
+   [DefaultValue(false)]
+   public bool AsOneLine { get; set; }
 
-   public string GetDefaultOrCustomFileName(IEu5Object obj)
+   public AgsSettings()
    {
-      return string.IsNullOrWhiteSpace(CustomDefaultName) ? obj.GetType().Name : CustomDefaultName;
+      InitializeDefaults();
    }
+
+   public virtual CollectionFormatProfile GetCollectionProfile(Enum prop)
+      => throw new ArgumentException($"No collection format profile found for property '{{prop}}'.", nameof(prop));
 
    #region Reset Methods
 
@@ -87,6 +90,8 @@ public class AgsSettings
       var enumValues = (List<Enum>)Activator.CreateInstance(typeof(List<>).MakeGenericType(enumType))!;
       return enumValues;
    }
+
+   partial void InitializeDefaults();
 
    #endregion
 }

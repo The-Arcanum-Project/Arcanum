@@ -42,4 +42,6 @@ public class LanguageMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location.TemplateData.Culture.Language;
 }

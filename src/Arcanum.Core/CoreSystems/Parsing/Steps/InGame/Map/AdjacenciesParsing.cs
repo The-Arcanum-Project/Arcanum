@@ -29,10 +29,10 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
    {
       if (!IO.IO.CreateStreamReader(fileObj.Path.FullPath, Encoding.UTF8, out var sr))
       {
-         DiagnosticException.CreateAndHandle(new(0, 0, fileObj.Path.FullPath),
+         DiagnosticException.CreateAndHandle(new(0, 0, fileObj),
                                              IOError.Instance.FileReadingError,
                                              GetActionName(),
-                                             args: [fileObj.Path.FullPath]);
+                                             args: [fileObj]);
          return false;
       }
 
@@ -52,7 +52,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
          var parts = line.Split(';');
          if (parts.Length != 9)
          {
-            DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+            DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                            ParsingError.Instance.InvalidAdjacencyLine,
                                            GetActionName(),
                                            lineNumber,
@@ -64,7 +64,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
             var isValid = true;
             if (!Globals.Locations.TryGetValue(parts[0], out var from))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidLocationKey,
                                               GetActionName(),
                                               parts[0]);
@@ -73,7 +73,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!Globals.Locations.TryGetValue(parts[1], out var to))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidLocationKey,
                                               GetActionName(),
                                               parts[1]);
@@ -82,7 +82,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!Enum.TryParse<AdjacencyType>(parts[2], true, out var type))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidAdjacencyType,
                                               GetActionName(),
                                               parts[2]);
@@ -91,7 +91,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!int.TryParse(parts[4], out var startX))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidIntMarkup,
                                               GetActionName(),
                                               parts[4]);
@@ -100,7 +100,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!int.TryParse(parts[5], out var startY))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidIntMarkup,
                                               GetActionName(),
                                               parts[5]);
@@ -109,7 +109,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!int.TryParse(parts[6], out var endX))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidIntMarkup,
                                               GetActionName(),
                                               parts[6]);
@@ -118,7 +118,7 @@ public class AdjacencyFileLoading(IEnumerable<IDependencyNode<string>> dependenc
 
             if (!int.TryParse(parts[7], out var endY))
             {
-               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj.Path.FullPath),
+               DiagnosticException.LogWarning(new(lineNumber, 0, fileObj),
                                               ParsingError.Instance.InvalidIntMarkup,
                                               GetActionName(),
                                               parts[7]);

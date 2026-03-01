@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Dynasty = Arcanum.Core.GameObjects.InGame.Court.Dynasty;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
@@ -16,7 +16,7 @@ public class DynastyWriter() : SetupFileWriter([typeof(Dynasty)], "04_dynasties.
 
       using (isb.BlockWithName("dynasty_manager"))
          foreach (var dynasty in Globals.Dynasties.Values)
-            ((IEu5Object)dynasty).ToAgsContext().BuildContext(isb);
+            TreeBuilder.ConstructAndWrite(dynasty, isb, false, false, null, false, false);
       return isb;
    }
 }

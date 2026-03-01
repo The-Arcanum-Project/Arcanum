@@ -1,0 +1,132 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.Windows.HelpWindow.Views.DashboardView"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+             xmlns:viewModels = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.ViewModels" mc:Ignorable = "d"
+             d:DataContext = "{d:DesignInstance viewModels:DashboardViewModel}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTreeView.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:NullToVisibilityConverter x:Key = "NullToVisibilityConverter" />
+            <converters:InvertedNullToVisibilityConverter x:Key = "InvertedNullToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <ScrollViewer VerticalScrollBarVisibility = "Auto">
+        <StackPanel Margin = "20">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "2*" /> <!-- Dynamic Info -->
+                    <ColumnDefinition Width = "1*" /> <!-- Resources -->
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT COLUMN -->
+                <StackPanel Grid.Column = "0" Margin = "0,0,20,0">
+
+                    <!-- ACTIVE CONTEXT CARD -->
+                    <Border Background = "{StaticResource LightBackColorBrush}" CornerRadius = "8" Padding = "20"
+                            Margin = "0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text = "CURRENT WORKSPACE" Foreground = "{StaticResource BlueAccentColorBrush}"
+                                       FontSize = "10" FontWeight = "Bold" Margin = "0,0,0,10" />
+
+                            <Grid
+                                Visibility = "{Binding ActiveFeature, Converter={StaticResource NullToVisibilityConverter}}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Text = "{Binding ActiveFeature.DisplayName, FallbackValue=No-DisplayName}"
+                                        FontSize = "20" FontWeight = "Bold" />
+                                    <TextBlock
+                                        Text = "{Binding ActiveFeature.Description, FallbackValue=No-Description}"
+                                        Margin = "0,5,0,15" TextWrapping = "Wrap" />
+
+                                    <TextBlock Text = "Common Shortcuts:"
+                                               Foreground = "{StaticResource LightContrastForeColorBrush}"
+                                               FontSize = "10" Margin = "0,0,0,5" />
+                                    <ItemsControl ItemsSource = "{Binding ContextCommands}">
+                                        <!-- Mini list of commands with shortcut pills -->
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text = "No active module detected. Click an editor to see context help."
+                                       Visibility = "{Binding ActiveFeature, Converter={StaticResource InvertedNullToVisibilityConverter}}"
+                                       FontStyle = "Italic" Foreground = "{StaticResource LightContrastForeColorBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- RECENT UPDATES -->
+                    <TextBlock Text = "LATEST UPDATES" Foreground = "Gray" FontSize = "10" FontWeight = "Bold"
+                               Margin = "0,10,0,10" />
+                    <ItemsControl ItemsSource = "{Binding LatestFeatures}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background = "#2D2D2D" Margin = "0,0,0,8" Padding = "12" CornerRadius = "4">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock = "Right" Text = "{Binding IntroducedIn}"
+                                                   Foreground = "#555" VerticalAlignment = "Center" />
+                                        <TextBlock Text = "{Binding DisplayName}" FontWeight = "Bold"
+                                                   VerticalAlignment = "Center" />
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- RIGHT COLUMN -->
+                <StackPanel Grid.Column = "1">
+                    <!-- RESOURCE BUTTONS -->
+                    <TextBlock Text = "RESOURCES" Foreground = "Gray" FontSize = "10" FontWeight = "Bold"
+                               Margin = "0,0,0,10" />
+
+                    <styleClasses:BaseButton Margin = "0,0,0,10" Height = "60" Command = "{Binding OpenUrlCommand}"
+                                             CommandParameter = "https://arcanum.github.io">
+                        <StackPanel Orientation = "Horizontal">
+                            <Path Data = "{StaticResource Icon.Book}" Fill = "#4A86E8" Width = "20" Margin = "0,0,15,0"
+                                  Stretch = "Uniform" />
+                            <TextBlock Text = "User Manual" VerticalAlignment = "Center" FontWeight = "Bold" />
+                        </StackPanel>
+                    </styleClasses:BaseButton>
+
+                    <styleClasses:BaseButton Margin = "0,0,0,10" Height = "60" Command = "{Binding OpenUrlCommand}"
+                                             CommandParameter = "https://discord.gg/arcanum">
+                        <StackPanel Orientation = "Horizontal">
+                            <Path Data = "{StaticResource Icon.Discord}" Fill = "#5865F2" Width = "20"
+                                  Margin = "0,0,15,0" Stretch = "Uniform" />
+                            <TextBlock Text = "Join Discord" VerticalAlignment = "Center" FontWeight = "Bold" />
+                        </StackPanel>
+                    </styleClasses:BaseButton>
+
+                    <!-- TIP OF THE DAY -->
+                    <Border Background = "#232a35" BorderBrush = "#4A86E8" BorderThickness = "1" CornerRadius = "8"
+                            Padding = "15" Margin = "0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text = "DID YOU KNOW?" Foreground = "#4A86E8" FontSize = "9" FontWeight = "Bold"
+                                       Margin = "0,0,0,8" />
+                            <TextBlock Text = "{Binding RandomTip.DisplayName}" FontWeight = "Bold" FontSize = "14" />
+                            <TextBlock Text = "{Binding RandomTip.Description}" TextWrapping = "Wrap" FontSize = "11"
+                                       Margin = "0,4,0,10" />
+                            <Border Background = "#1E1E1E" HorizontalAlignment = "Left" Padding = "6,2"
+                                    CornerRadius = "3">
+                                <TextBlock Text = "{Binding RandomTip.Gestures[0]}" FontFamily = "Consolas"
+                                           Foreground = "#A9B7C6" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,11 +1,13 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
-using Arcanum.Core.CoreSystems.History;
 using Arcanum.Core.CoreSystems.History.Commands;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Registry;
+using Arcanum.UI.Components.Windows.Input;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.NUI.Generator;
 using Arcanum.UI.NUI.UserControls.BaseControls;
@@ -38,21 +40,54 @@ public partial class Eu5ObjectCreator
       get => (BaseView)GetValue(ObjectUIProperty);
       set => SetValue(ObjectUIProperty, value);
    }
+   public bool IsUniqueIdBase { get; set; }
 
    private IEu5Object? CreatedObject { get; set; }
+   private NavH? _navH;
+   private List<Enum> _requiredProps = [];
 
    public Eu5ObjectCreator()
    {
       InitializeComponent();
    }
 
+   // Catch Ctrl+Z and Ctrl+Y for undo/redo
+   protected override void OnPreviewKeyDown(KeyEventArgs e)
+   {
+      if (Keyboard.Modifiers == ModifierKeys.Control)
+      {
+         if (e.Key == Key.Z)
+         {
+            AppData.HistoryManager.Undo(false);
+            if (_navH != null)
+               ObjectUI = Eu5UiGen.GenerateView(_navH, _requiredProps, false);
+            e.Handled = true;
+         }
+         else if (e.Key == Key.Y)
+         {
+            AppData.HistoryManager.Redo(false);
+            if (_navH != null)
+               ObjectUI = Eu5UiGen.GenerateView(_navH, _requiredProps, false);
+            e.Handled = true;
+         }
+         else if (e.Key == Key.Enter)
+         {
+            CreateButtonBase_OnClick(this, new());
+            e.Handled = true;
+         }
+      }
+
+      base.OnPreviewKeyDown(e);
+   }
+
    private void CreateButtonBase_OnClick(object sender, RoutedEventArgs e)
    {
       if (!AreRequiredFieldsFilled(out var missingFields))
       {
+         var createOrConfirm = IsUniqueIdBase ? "confirm" : "create";
          var fieldNames = string.Join(", ", missingFields.Select(f => f.ToString()));
          var result =
-            MBox.Show($"Please fill in all required fields before creating the object. Missing fields: {fieldNames}\n\nObject will not be created.",
+            MBox.Show($"Please fill in all required fields before {createOrConfirm}ing the object. Missing fields: {fieldNames}\n\nObject will not be {createOrConfirm}ed.",
                       "Missing Required Fields",
                       MBoxButton.OKCancel,
                       MessageBoxImage.Warning);
@@ -61,14 +96,6 @@ public partial class Eu5ObjectCreator
             CreatedObject = null;
             Close();
          }
-      }
-      // Check if we would create a duplicate Unique ID
-      else if (CreatedObject?.GetGlobalItemsNonGeneric().Contains(CreatedObject.UniqueId) ?? false)
-      {
-         MBox.Show("An object with the same Unique ID already exists in the global items. Please change the Unique ID to a different value.",
-                   "Duplicate Unique ID",
-                   MBoxButton.OK,
-                   MessageBoxImage.Error);
       }
       else
       {
@@ -84,19 +111,18 @@ public partial class Eu5ObjectCreator
 
    public static bool ShowDialog(Type eu5ObjectType, bool addToGlobals = false)
    {
+      if (!CreateAndPromptForUniqueIdInput(eu5ObjectType, addToGlobals, out var hasUniqueIdBasedGlobalItems, out var newObject))
+         return false;
+
       var window = new Eu5ObjectCreator
       {
          Owner = Application.Current.MainWindow,
          ObjectTitle = $"Create New {eu5ObjectType.Name}",
-         CreatedObject = (IEu5Object?)Activator.CreateInstance(eu5ObjectType),
+         CreatedObject = newObject,
+         IsUniqueIdBase = hasUniqueIdBasedGlobalItems,
       };
       window.MarkRequiredFields();
 
-      var newObject = window.CreatedObject;
-      if (addToGlobals)
-         newObject?.GetGlobalItemsNonGeneric().Add(newObject.UniqueId, newObject);
-      if (newObject is IIndexRandomColor irc)
-         irc.Index = newObject.GetGlobalItemsNonGeneric().Count - 1;
       return window.ShowDialog() == true;
    }
 
@@ -105,12 +131,13 @@ public partial class Eu5ObjectCreator
       if (CreatedObject == null)
          throw new InvalidOperationException("CreatedObject is null but has to be initialized before generating UI.");
 
-      List<Enum> requiredProps = [];
+      _requiredProps.Clear();
       foreach (var prop in CreatedObject.GetAllProperties())
          if (CreatedObject.IsRequired(prop))
-            requiredProps.Add(prop);
+            _requiredProps.Add(prop);
 
-      ObjectUI = Eu5UiGen.GenerateView(new(CreatedObject, true, ContentPresenter, false), requiredProps, false, true);
+      _navH = new(CreatedObject, true, ContentPresenter, false);
+      ObjectUI = Eu5UiGen.GenerateView(_navH, _requiredProps, false);
    }
 
    private bool AreRequiredFieldsFilled(out List<Enum> missingFields)
@@ -134,12 +161,15 @@ public partial class Eu5ObjectCreator
 
    public static IEu5Object? ShowPopUp(Type type, Action<IEu5Object> postCreationAction, bool addToGlobals = true)
    {
-      var newObj = (IEu5Object)Activator.CreateInstance(type)!;
+      if (!CreateAndPromptForUniqueIdInput(type, addToGlobals, out var hasUniqueIdBasedGlobalItems, out var newObj))
+         return null;
+
       var window = new Eu5ObjectCreator
       {
          Owner = Application.Current.MainWindow,
          ObjectTitle = $"Create New {type.Name}",
          CreatedObject = newObj,
+         IsUniqueIdBase = hasUniqueIdBasedGlobalItems,
       };
       window.MarkRequiredFields();
       window.WindowStyle = WindowStyle.ToolWindow;
@@ -147,20 +177,67 @@ public partial class Eu5ObjectCreator
       window.BorderThickness = new(2);
       window.BorderBrush = Brushes.Gray;
 
-      using (CommandManager.DisableCommands())
-         window.ShowDialog();
+      postCreationAction(newObj);
+      window.ShowDialog();
 
-      if (window.CreatedObject == null)
-         return null;
+      return window.CreatedObject;
+   }
 
-      var newObject = window.CreatedObject!;
-      if (newObject is IIndexRandomColor irc)
-         irc.Index = newObject.GetGlobalItemsNonGeneric().Count - 1;
-      var createCommand = new CreateObjectCommand(newObject, true, addToGlobals);
+   private static bool CreateAndPromptForUniqueIdInput(Type type, bool addToGlobals, out bool hasUniqueIdBasedGlobalItems, out IEu5Object newObj)
+   {
+      var globals1 = ((IEu5Object)EmptyRegistry.Empties[type]).GetGlobalItemsNonGeneric();
+      var globals2 = ((IEu5Object)EmptyRegistry.Empties[type]).GetGlobalItemsNonGeneric();
+
+      // if they are not the same instance we have a non UniqueId based global items dictionary
+      hasUniqueIdBasedGlobalItems = ReferenceEquals(globals1, globals2);
+
+      newObj = (IEu5Object)Activator.CreateInstance(type)!;
+
+      if (hasUniqueIdBasedGlobalItems)
+      {
+         // we open the UniqueId input popup to get it first
+         var inputPopup =
+            new InputDialog("Unique ID", $"Enter a unique ID for the new {type.Name} object:", InputKind.String)
+            {
+               WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            };
+         if (inputPopup.ShowDialog() != true)
+            return false;
+
+         var isValidUniqueId = inputPopup.Value is string uniqueId &&
+                               !string.IsNullOrWhiteSpace(uniqueId) &&
+                               !globals1.Contains(uniqueId);
+         while (!isValidUniqueId)
+         {
+            var errorMessage = string.IsNullOrWhiteSpace(inputPopup.Value as string)
+                                  ? "Unique ID cannot be empty. Please enter a valid unique ID."
+                                  : $"An object with the Unique ID '{inputPopup.Value}' already exists. Please enter a different unique ID.";
+            var retry = MBox.Show(errorMessage, "Invalid Unique ID", MBoxButton.OKCancel, MessageBoxImage.Error);
+            if (retry == MBoxResult.Cancel)
+               return true;
+
+            inputPopup = new("Unique ID", $"Enter a unique ID for the new {type.Name} object:", InputKind.String)
+            {
+               WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            };
+            if (inputPopup.ShowDialog() != true)
+               return false;
+
+            isValidUniqueId = inputPopup.Value is string uid &&
+                              !string.IsNullOrWhiteSpace(uid) &&
+                              !globals1.Contains(uid);
+         }
+
+         newObj.UniqueId = (string)inputPopup.Value!;
+      }
+
+      if (newObj is IIndexRandomColor irc)
+         irc.Index = newObj.GetGlobalItemsNonGeneric().Count - 1;
+
+      var createCommand = new CreateObjectCommand(newObj, true, addToGlobals);
       createCommand.Execute();
       AppData.HistoryManager.AddCommand(createCommand);
 
-      postCreationAction(newObject);
-      return newObject;
+      return true;
    }
 }

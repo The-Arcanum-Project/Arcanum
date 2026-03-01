@@ -5,6 +5,7 @@ using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -78,36 +79,42 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
    [Description("List of pairs of locations that are connected by sound tolls.")]
    public ObservableRangeCollection<SoundToll> SoundTolls { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("volcanoes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that contain volcanoes.")]
    public ObservableHashSet<Location> Volcanoes { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("earthquakes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are prone to earthquakes.")]
    public ObservableHashSet<Location> Earthquakes { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("sea_zones", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are sea zones.")]
    public ObservableHashSet<Location> SeaZones { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("lakes", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that are lakes.")]
    public ObservableHashSet<Location> Lakes { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("non_ownable", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]
    [Description("List of locations that cannot be owned by any country.")]
    public ObservableHashSet<Location> NotOwnable { get; set; } = [];
 
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
    [ParseAs("impassable_mountains", itemNodeType: AstNodeType.KeyOnlyNode)]
    [DefaultValue(null)]

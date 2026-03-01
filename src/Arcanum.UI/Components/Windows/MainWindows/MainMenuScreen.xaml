@@ -12,7 +12,7 @@
         Width = "900"
         WindowStyle = "None"
         ResizeMode = "NoResize"
-        WindowStartupLocation = "CenterScreen"
+        WindowStartupLocation="Manual"
         Title="Arcanum Main Menu"
         Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
         Activated = "MainMenuScreen_OnActivated">

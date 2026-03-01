@@ -1,0 +1,149 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.SearchAndFilterBar"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+             d:DesignHeight = "300" d:DesignWidth = "300" x:Name = "Root">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Geometries for the main Mode Icon -->
+
+            <Style x:Key = "SearchToggleButtonStyle" TargetType = "ToggleButton"
+                   BasedOn = "{StaticResource BlueToggleButtonStyle}">
+
+                <Setter Property = "Width" Value = "24" />
+                <Setter Property = "Height" Value = "24" />
+                <Setter Property = "BorderBrush" Value = "Transparent" />
+                <Setter Property = "Margin" Value = "2,0,0,0" />
+
+                <Style.Triggers>
+                    <Trigger Property = "IsChecked" Value = "True">
+                        <Setter Property = "Foreground" Value = "{StaticResource GreyedOutForeColorBrush}" />
+                    </Trigger>
+                    <Trigger Property = "IsChecked" Value = "False">
+                        <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <BooleanToVisibilityConverter x:Key = "BoolToVisConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border Background = "{StaticResource DefaultBackColorBrush}"
+            BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1" CornerRadius = "3">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "22" /> <!-- Icon Area -->
+                <ColumnDefinition Width = "*" />  <!-- Input Area -->
+                <ColumnDefinition Width = "Auto" /> <!-- Toggles Area -->
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Mode Icon -->
+            <!-- The Data is set via DataTriggers in the UserControl Style below -->
+            <Path Grid.Column = "0" Width = "14" Height = "14" Fill = "{StaticResource DefaultForeColorBrush}"
+                  Stretch = "Uniform" HorizontalAlignment = "Center" VerticalAlignment = "Center" Opacity = "0.7">
+                <Path.Style>
+                    <Style TargetType = "Path">
+                        <!-- Default to Search -->
+                        <Setter Property = "Data" Value = "{StaticResource Icon.Search}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding = "{Binding Mode, ElementName=Root}" Value = "Filter">
+                                <Setter Property = "Data" Value = "{StaticResource Icon.Filter}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Path.Style>
+            </Path>
+
+            <!-- MIDDLE: Text Box with Placeholder -->
+            <Grid Grid.Column = "1" VerticalAlignment = "Center" Margin = "2,0">
+                <TextBlock Foreground = "{StaticResource DisabledForeColorBrush}" IsHitTestVisible = "False"
+                           VerticalAlignment = "Center" HorizontalAlignment = "Left" Margin = "2,0,0,0"
+                           FontStyle = "Italic">
+                    <TextBlock.Style>
+                        <Style TargetType = "TextBlock">
+                            <!-- Default Text -->
+                            <Setter Property = "Text" Value = "Search..." />
+                            <Setter Property = "Visibility" Value = "Collapsed" />
+
+                            <Style.Triggers>
+                                <!-- Switch Text based on Mode -->
+                                <DataTrigger Binding = "{Binding Mode, ElementName=Root}" Value = "Filter">
+                                    <Setter Property = "Text" Value = "Filter..." />
+                                </DataTrigger>
+
+                                <!-- Visibility Logic (Show if Text is Empty) -->
+                                <DataTrigger Binding = "{Binding Text, ElementName=Root}" Value = "">
+                                    <Setter Property = "Visibility" Value = "Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding = "{Binding Text, ElementName=Root}" Value = "{x:Null}">
+                                    <Setter Property = "Visibility" Value = "Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <styleClasses:CorneredTextBox Margin = "-2, 0, 0,0"
+                                              Text = "{Binding Text, ElementName=Root, UpdateSourceTrigger=PropertyChanged}"
+                                              Background = "Transparent" BorderThickness = "0"
+                                              VerticalContentAlignment = "Center"
+                                              PreviewMouseRightButtonUp = "OnSearchInputPreviewMouseRightButtonUp" />
+            </Grid>
+            <!-- Filter Toggles -->
+            <StackPanel Grid.Column = "2" Orientation = "Horizontal" Margin = "2"
+                        Visibility = "{Binding ShowOptions, ElementName=Root, Converter={StaticResource BoolToVisConverter}}">
+
+                <!-- Case Sensitive -->
+                <ToggleButton Style = "{StaticResource SearchToggleButtonStyle}"
+                              IsChecked = "{Binding IsCaseSensitive, ElementName=Root}" ToolTip = "Match Case">
+                    <TextBlock Text = "Aa" FontWeight = "SemiBold" FontSize = "11" />
+                </ToggleButton>
+
+                <!-- Whole Word -->
+                <ToggleButton Style = "{StaticResource SearchToggleButtonStyle}"
+                              IsChecked = "{Binding IsWholeWord, ElementName=Root}" ToolTip = "Match Whole Word">
+                    <Grid>
+                        <TextBlock Text = "Ab" FontWeight = "SemiBold" FontSize = "11" />
+                        <Rectangle VerticalAlignment = "Bottom" Height = "1.5"
+                                   Fill = "{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                                   Margin = "0,0,0,2" />
+                    </Grid>
+                </ToggleButton>
+
+                <!-- Regex -->
+                <ToggleButton Style = "{StaticResource SearchToggleButtonStyle}"
+                              IsChecked = "{Binding IsRegex, ElementName=Root}" ToolTip = "Use Regular Expression">
+                    <TextBlock Text = ".*" FontWeight = "Bold" FontSize = "12" Margin = "0,-3,0,0" />
+                </ToggleButton>
+
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <UserControl.Style>
+        <Style TargetType = "{x:Type UserControl}">
+            <Style.Triggers>
+                <DataTrigger Binding = "{Binding Mode, ElementName=Root}" Value = "Search">
+                    <Setter Property = "Tag" Value = "{StaticResource Icon.Search}" />
+                </DataTrigger>
+                <DataTrigger Binding = "{Binding Mode, ElementName=Root}" Value = "Filter">
+                    <Setter Property = "Tag" Value = "{StaticResource Icon.Filter}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent = "Loaded" />
+    </UserControl.Triggers>
+</UserControl>

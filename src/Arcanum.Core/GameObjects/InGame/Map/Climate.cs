@@ -8,6 +8,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -93,7 +94,7 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    [Description("The location modifier applied to provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
 
-   [SaveAs]
+   [SaveAs, AgsCollectionFormat(ItemsPerRow = 1)]
    [DefaultValue(null)]
    [ParseAs("audio_tags", itemNodeType: AstNodeType.ContentNode)]
    [Description("The audio tags associated with this climate.")]

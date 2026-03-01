@@ -33,7 +33,8 @@
         <ProjectReference Include="..\..\src_gen\DiagnosticArgsAnalyzer\DiagnosticArgsAnalyzer.csproj"/>
         <ProjectReference Include="..\..\src_gen\Nexus.Analyzer\Nexus.Analyzer.csproj"
                           OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+                          ReferenceOutputAssembly="false"
+                          GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers"/>
         <ProjectReference Include="..\..\src_gen\Nexus.Core\Nexus.Core.csproj"/>
     </ItemGroup>
 

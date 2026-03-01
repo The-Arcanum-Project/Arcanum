@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
@@ -21,7 +21,7 @@ public class PopsWriter() : SetupFileWriter([typeof(Location), typeof(PopDefinit
                   foreach (var pop in location.Pops)
                   {
                      sb.Append("define_pop");
-                     ((IEu5Object)pop).ToAgsContext().BuildContext(sb);
+                     TreeBuilder.ConstructAndWrite(pop, sb, true, false, null, false, false);
                   }
 
       return sb;

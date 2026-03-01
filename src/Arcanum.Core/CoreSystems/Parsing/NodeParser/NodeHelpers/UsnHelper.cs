@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
+﻿using System.Globalization;
+using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
@@ -17,7 +18,10 @@ public static class UsnHelper
          return pc.Fail();
       }
 
-      if (float.TryParse(lexeme, out value))
+      if (float.TryParse(lexeme,
+                         NumberStyles.Float | NumberStyles.AllowLeadingSign,
+                         CultureInfo.InvariantCulture,
+                         out value))
          return true;
 
       pc.SetContext(node);

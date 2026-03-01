@@ -10,38 +10,22 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- 1. Make sure your base ComboBox style has a key -->
-    <Style x:Key = "BaseComboBoxStyle"
-           TargetType = "ComboBox">
-        <Setter Property = "FontSize"
-                Value = "11" />
-        <Setter Property = "FontFamily"
-                Value = "{StaticResource DefaultFont}" />
-        <Setter Property = "FontWeight"
-                Value = "{StaticResource DefaultFontWeight}" />
-        <Setter Property = "ItemContainerStyle"
-                Value = "{StaticResource BaseComboBoxItemStyle}" />
-        <Setter Property = "HorizontalAlignment"
-                Value = "Stretch" />
-        <Setter Property = "IsEditable"
-                Value = "True" />
-        <Setter Property = "IsTextSearchEnabled"
-                Value = "False" />
-        <Setter Property = "SnapsToDevicePixels"
-                Value = "True" />
-        <Setter Property = "OverridesDefaultStyle"
-                Value = "True" />
-        <Setter Property = "ScrollViewer.HorizontalScrollBarVisibility"
-                Value = "Auto" />
-        <Setter Property = "ScrollViewer.VerticalScrollBarVisibility"
-                Value = "Auto" />
-        <Setter Property = "ScrollViewer.CanContentScroll"
-                Value = "True" />
-        <Setter Property = "ScrollViewer.IsDeferredScrollingEnabled"
-                Value = "True" />
-        <Setter Property = "TextElement.Foreground"
-                Value = "{StaticResource DefaultForeColorBrush}" />
-        <Setter Property = "FocusVisualStyle"
-                Value = "{x:Null}" />
+    <Style x:Key = "BaseComboBoxStyle" TargetType = "ComboBox">
+        <Setter Property = "FontSize" Value = "11" />
+        <Setter Property = "FontFamily" Value = "{StaticResource DefaultFont}" />
+        <Setter Property = "FontWeight" Value = "{StaticResource DefaultFontWeight}" />
+        <Setter Property = "ItemContainerStyle" Value = "{StaticResource BaseComboBoxItemStyle}" />
+        <Setter Property = "HorizontalAlignment" Value = "Stretch" />
+        <Setter Property = "IsEditable" Value = "True" />
+        <Setter Property = "IsTextSearchEnabled" Value = "False" />
+        <Setter Property = "SnapsToDevicePixels" Value = "True" />
+        <Setter Property = "OverridesDefaultStyle" Value = "True" />
+        <Setter Property = "ScrollViewer.HorizontalScrollBarVisibility" Value = "Auto" />
+        <Setter Property = "ScrollViewer.VerticalScrollBarVisibility" Value = "Auto" />
+        <Setter Property = "ScrollViewer.CanContentScroll" Value = "True" />
+        <Setter Property = "ScrollViewer.IsDeferredScrollingEnabled" Value = "True" />
+        <Setter Property = "TextElement.Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+        <Setter Property = "FocusVisualStyle" Value = "{x:Null}" />
         <Setter Property = "ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
@@ -56,83 +40,64 @@
                     <Grid Background = "Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width = "*" />
-                            <ColumnDefinition Width = "Auto"
-                                              MinWidth = "20" /> <!-- Column for the arrow -->
+                            <ColumnDefinition Width = "Auto" MinWidth = "20" /> <!-- Column for the arrow -->
                         </Grid.ColumnDefinitions>
 
                         <!-- The ToggleButton still provides the main border and background -->
-                        <ToggleButton x:Name = "ToggleButton"
-                                      Grid.ColumnSpan = "2"
+                        <ToggleButton x:Name = "ToggleButton" Grid.ColumnSpan = "2"
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                                      Focusable = "False"
-                                      ClickMode = "Press"
-                                      Background = "Transparent">
+                                      Focusable = "False" ClickMode = "Press" Background = "Transparent">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType = "ToggleButton">
-                                    <Border x:Name = "templateRoot"
-                                            Background = "{TemplateBinding Background}"
+                                    <Border x:Name = "templateRoot" Background = "{TemplateBinding Background}"
                                             BorderBrush = "{TemplateBinding BorderBrush}"
-                                            BorderThickness = "{TemplateBinding BorderThickness}"
-                                            CornerRadius = "2"
+                                            BorderThickness = "{TemplateBinding BorderThickness}" CornerRadius = "2"
                                             SnapsToDevicePixels = "True" />
                                 </ControlTemplate>
                             </ToggleButton.Template>
                         </ToggleButton>
 
+                        <TextBlock x:Name = "Placeholder" Grid.Column = "0" Margin = "4,1,1,1"
+                                   Padding = "{TemplateBinding Padding}" HorizontalAlignment = "Stretch"
+                                   VerticalAlignment = "{TemplateBinding VerticalContentAlignment}"
+                                   IsHitTestVisible = "False" Opacity = "0.5"
+                                   Text = "{Binding (local:AutoCompleteComboBox.PlaceholderText), RelativeSource={RelativeSource TemplatedParent}}"
+                                   Visibility = "Collapsed" />
+
                         <!-- The TextBox sits in the first column, leaving space for the arrow -->
-                        <TextBox x:Name = "PART_EditableTextBox"
-                                                      Grid.Column = "0"
-                                                      HorizontalAlignment = "Stretch"
-                                                      VerticalAlignment = "Center"
-                                                      Margin = "2, 1, 1, 1"
-                                                      IsReadOnly = "{TemplateBinding IsReadOnly}"
-                                                      Visibility = "Visible"
-                                                      Focusable = "True"
-                                                      Background = "Transparent"
-                                                      BorderThickness = "0"
-                                                      Foreground = "{TemplateBinding Foreground}"
-                                                      CaretBrush = "{TemplateBinding Foreground}"
-                                                      Padding = "{TemplateBinding Padding}"
-                                                      VerticalContentAlignment = "{TemplateBinding VerticalContentAlignment}"
-                                                      VerticalScrollBarVisibility = "Disabled"
-                                                      TextWrapping = "NoWrap" IsUndoEnabled="False" />
+                        <TextBox x:Name = "PART_EditableTextBox" Grid.Column = "0" HorizontalAlignment = "Stretch"
+                                 VerticalAlignment = "Center" Margin = "2, 1, 1, 1"
+                                 IsReadOnly = "{TemplateBinding IsReadOnly}" Visibility = "Visible" Focusable = "True"
+                                 Background = "Transparent" BorderThickness = "0"
+                                 Foreground = "{TemplateBinding Foreground}"
+                                 CaretBrush = "{TemplateBinding Foreground}" Padding = "{TemplateBinding Padding}"
+                                 VerticalContentAlignment = "{TemplateBinding VerticalContentAlignment}"
+                                 VerticalScrollBarVisibility = "Disabled" TextWrapping = "NoWrap"
+                                 IsUndoEnabled = "False" />
+
 
                         <!-- ADDED BACK: The arrow Path, now in the second column -->
-                        <Path Name = "Arrow"
-                              Grid.Column = "1"
-                              Data = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
-                              HorizontalAlignment = "Center"
-                              Fill = "{StaticResource DefaultForeColorBrush}"
-                              VerticalAlignment = "Center"
-                              IsHitTestVisible = "False">
+                        <Path Name = "Arrow" Grid.Column = "1" Data = "M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+                              HorizontalAlignment = "Center" Fill = "{StaticResource DefaultForeColorBrush}"
+                              VerticalAlignment = "Center" IsHitTestVisible = "False">
                             <Path.LayoutTransform>
-                                <RotateTransform Angle = "0"> </RotateTransform>
+                                <RotateTransform Angle = "0" />
                             </Path.LayoutTransform>
                         </Path>
 
                         <!-- Popup showing items -->
-                        <Popup Grid.Column = "0"
-                               Grid.ColumnSpan = "2"
-                               Name = "Popup"
-                               Placement = "Bottom"
+                        <Popup Grid.Column = "0" Grid.ColumnSpan = "2" Name = "Popup" Placement = "Bottom"
                                PlacementTarget = "{Binding ElementName=ToggleButton}"
                                IsOpen = "{Binding Path=IsChecked, ElementName=ToggleButton}"
-                               AllowsTransparency = "True"
-                               Focusable = "False"
-                               PopupAnimation = "Slide">
-                            <Grid Name = "DropDown"
-                                  SnapsToDevicePixels = "True"
+                               AllowsTransparency = "True" Focusable = "False" PopupAnimation = "Slide">
+                            <Grid Name = "DropDown" SnapsToDevicePixels = "True"
                                   MinWidth = "{TemplateBinding FrameworkElement.ActualWidth}"
                                   MaxHeight = "{TemplateBinding ComboBox.MaxDropDownHeight}">
-                                <Border Name = "DropDownBorder"
-                                        Background = "{StaticResource DefaultBackColorBrush}"
-                                        Margin = "0, 1, 0, 0"
-                                        CornerRadius = "2"
-                                        BorderThickness = "1"
+                                <Border Name = "DropDownBorder" Background = "{StaticResource DefaultBackColorBrush}"
+                                        Margin = "0, 1, 0, 0" CornerRadius = "2" BorderThickness = "1"
                                         BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                                         HorizontalAlignment = "Stretch">
-                                    <ScrollViewer Margin = "3, 3, 2, 3"
-                                                  SnapsToDevicePixels = "True"
+                                    <ScrollViewer Margin = "3, 3, 2, 3" SnapsToDevicePixels = "True"
                                                   CanContentScroll = "{TemplateBinding ScrollViewer.CanContentScroll}"
                                                   HorizontalScrollBarVisibility = "{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
                                                   VerticalScrollBarVisibility = "{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
@@ -144,15 +109,29 @@
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <DataTrigger Binding = "{Binding Path=IsChecked, ElementName=ToggleButton}"
-                                     Value = "False">
+                        <!-- Hide the placeholder when there is text or when the TextBox is focused -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition SourceName = "PART_EditableTextBox" Property = "IsFocused" Value = "True" />
+                                <Condition SourceName = "PART_EditableTextBox" Property = "Text" Value = "" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName = "Placeholder" Property = "Visibility" Value = "Collapsed" />
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition SourceName = "PART_EditableTextBox" Property = "IsFocused" Value = "True" />
+                                <Condition SourceName = "PART_EditableTextBox" Property = "Text" Value = "{x:Null}" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName = "Placeholder" Property = "Visibility" Value = "Collapsed" />
+                        </MultiTrigger>
+
+                        <DataTrigger Binding = "{Binding Path=IsChecked, ElementName=ToggleButton}" Value = "False">
                             <DataTrigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName = "Arrow"
                                                          Storyboard.TargetProperty = "(LayoutTransform).(RotateTransform.Angle)"
-                                                         To = "90"
-                                                         Duration = "0:0:0.2" />
+                                                         To = "90" Duration = "0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.EnterActions>
@@ -161,34 +140,25 @@
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName = "Arrow"
                                                          Storyboard.TargetProperty = "(LayoutTransform).(RotateTransform.Angle)"
-                                                         To = "0"
-                                                         Duration = "0:0:0.2" />
+                                                         To = "0" Duration = "0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.ExitActions>
                         </DataTrigger>
 
-                        <Trigger Property = "IsKeyboardFocusWithin"
-                                 Value = "True">
-                            <Setter TargetName = "ToggleButton"
-                                    Property = "BorderBrush"
+                        <Trigger Property = "IsKeyboardFocusWithin" Value = "True">
+                            <Setter TargetName = "ToggleButton" Property = "BorderBrush"
                                     Value = "{StaticResource BlueAccentColorBrush}" />
                         </Trigger>
-                        <Trigger Property = "ItemsControl.HasItems"
-                                 Value = "False">
-                            <Setter Property = "FrameworkElement.MinHeight"
-                                    TargetName = "DropDownBorder"
-                                    Value = "95" />
+                        <Trigger Property = "ItemsControl.HasItems" Value = "False">
+                            <Setter Property = "FrameworkElement.MinHeight" TargetName = "DropDownBorder" Value = "95" />
                         </Trigger>
-                        <Trigger Property = "UIElement.IsEnabled"
-                                 Value = "False">
+                        <Trigger Property = "UIElement.IsEnabled" Value = "False">
                             <Setter Property = "TextElement.Foreground"
                                     Value = "{StaticResource DefaultForeColorBrush}" />
                         </Trigger>
-                        <Trigger Property = "ItemsControl.IsGrouping"
-                                 Value = "True">
-                            <Setter Property = "ScrollViewer.CanContentScroll"
-                                    Value = "False" />
+                        <Trigger Property = "ItemsControl.IsGrouping" Value = "True">
+                            <Setter Property = "ScrollViewer.CanContentScroll" Value = "False" />
                         </Trigger>
 
                     </ControlTemplate.Triggers>
@@ -198,8 +168,7 @@
     </Style>
 
     <!-- 2. Create the new style for your custom control -->
-    <Style TargetType = "{x:Type local:AutoCompleteComboBox}"
-           BasedOn = "{StaticResource BaseComboBoxStyle}">
+    <Style TargetType = "{x:Type local:AutoCompleteComboBox}" BasedOn = "{StaticResource BaseComboBoxStyle}">
         <Style.Resources>
             <!-- 3. THIS IS THE MAGIC: Inside the style, retarget the CorneredTextBox style -->
             <!-- This tells any CorneredTextBox inside our control's template to use its default style. -->

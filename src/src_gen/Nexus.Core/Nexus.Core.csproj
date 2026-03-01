@@ -5,5 +5,10 @@
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
     </PropertyGroup>
+    <PropertyGroup>
+        <Deterministic>true</Deterministic>
+        <RunAnalyzers>false</RunAnalyzers>
+        <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    </PropertyGroup>
 
 </Project>

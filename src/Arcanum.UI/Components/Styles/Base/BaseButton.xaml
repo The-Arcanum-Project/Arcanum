@@ -3,57 +3,45 @@
                     xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                     xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters">
 
-
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml"> </ResourceDictionary>
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+        <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <converters:BorderPresentConverter x:Key = "BorderPresentConverter" />
 
     <Style TargetType = "styleClasses:BaseButton">
-        <Setter Property = "Background"
-                Value = "{StaticResource DefaultBackColorBrush}" />
-        <Setter Property = "Foreground"
-                Value = "{StaticResource DefaultForeColorBrush}" />
-        <Setter Property = "BorderBrush"
-                Value = "{StaticResource DefaultBorderColorBrush}" />
-        <Setter Property = "BorderThickness"
-                Value = "2" />
-        <Setter Property = "Padding"
-                Value = "1" />
-        <Setter Property = "Cursor"
-                Value = "Arrow" />
-        <Setter Property = "MinHeight"
-                Value = "10">
-        </Setter>
-        <Setter Property = "HoverBackground"
-                Value = "{StaticResource DarkerSelectedBackColorBrush}">
-        </Setter>
+        <Setter Property = "Background" Value = "{StaticResource DefaultBackColorBrush}" />
+        <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
+        <Setter Property = "BorderBrush" Value = "{StaticResource DefaultBorderColorBrush}" />
+        <Setter Property = "BorderThickness" Value = "1" />
+        <Setter Property = "Padding" Value = "1" />
+        <Setter Property = "Cursor" Value = "Arrow" />
+        <Setter Property = "MinHeight" Value = "10" />
+        <Setter Property = "HoverBackground" Value = "{StaticResource DarkerSelectedBackColorBrush}" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "styleClasses:BaseButton">
-                    <Border x:Name = "border"
-                            Background = "{TemplateBinding Background}"
+                    <Border x:Name = "border" Background = "{TemplateBinding Background}"
                             BorderBrush = "{TemplateBinding BorderBrush}"
                             BorderThickness = "{TemplateBinding BorderThickness}"
                             CornerRadius = "{Binding Path=CornerRadius, RelativeSource={RelativeSource TemplatedParent}}"
-                            Padding = "{TemplateBinding Padding}"
-                            HorizontalAlignment = "Stretch"
+                            Padding = "{TemplateBinding Padding}" HorizontalAlignment = "Stretch"
                             VerticalAlignment = "Stretch">
-                        <ContentPresenter HorizontalAlignment = "Center"
-                                          VerticalAlignment = "Center" />
+                        <ContentPresenter HorizontalAlignment = "Center" VerticalAlignment = "Center"
+                                          Content = "{TemplateBinding Content}"
+                                          ContentTemplate = "{TemplateBinding ContentTemplate}"
+                                          ContentTemplateSelector = "{TemplateBinding ContentTemplateSelector}"
+                                          ContentStringFormat = "{TemplateBinding ContentStringFormat}" />
                     </Border>
+
                     <ControlTemplate.Triggers>
-                        <Trigger Property = "IsMouseOver"
-                                 Value = "True">
-                            <Setter TargetName = "border"
-                                    Property = "Background"
+                        <Trigger Property = "IsMouseOver" Value = "True">
+                            <Setter TargetName = "border" Property = "Background"
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <Setter TargetName = "border"
-                                    Property = "BorderBrush"
+                            <Setter TargetName = "border" Property = "BorderBrush"
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
 
-                        <!-- Focused + Mouse NOT over + Border > 0 -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition
@@ -65,11 +53,9 @@
                                     Binding = "{Binding RelativeSource={RelativeSource Self}, Path=BorderThickness, Converter={StaticResource BorderPresentConverter}}"
                                     Value = "True" />
                             </MultiDataTrigger.Conditions>
-                            <Setter Property = "BorderBrush"
-                                    Value = "{StaticResource SelectedControlBorderColorBrush}" />
+                            <Setter Property = "BorderBrush" Value = "{StaticResource SelectedControlBorderColorBrush}" />
                         </MultiDataTrigger>
 
-                        <!-- Focused + Mouse NOT over + Border = 0 -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition
@@ -85,10 +71,8 @@
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource Self}}" />
                         </MultiDataTrigger>
 
-                        <Trigger Property = "IsEnabled"
-                                 Value = "False">
-                            <Setter Property = "Foreground"
-                                    Value = "{StaticResource DisabledForeColorBrush}" />
+                        <Trigger Property = "IsEnabled" Value = "False">
+                            <Setter Property = "Foreground" Value = "{StaticResource DisabledForeColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -96,8 +80,29 @@
         </Setter>
     </Style>
 
-    <Style TargetType = "styleClasses:MapModeButton"
-           BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+    <Style TargetType = "styleClasses:MapModeButton" BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+        <Setter Property = "ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <styleClasses:SmartTextControl Text = "{Binding}" VerticalAlignment = "Center"
+                                                   HorizontalAlignment = "Stretch"
+                                                   FontFamily = "{StaticResource DefaultFont}"
+                                                   FontSize = "{StaticResource DefaultFontSize}"
+                                                   TextOptions.TextFormattingMode = "Display">
+
+                        <styleClasses:SmartTextControl.Template>
+                            <ControlTemplate TargetType = "styleClasses:SmartTextControl">
+                                <TextBlock Padding = "1, 0"
+                                           Text = "{Binding DisplayedText, RelativeSource={RelativeSource TemplatedParent}}"
+                                           TextAlignment = "Center" HorizontalAlignment = "Stretch"
+                                           VerticalAlignment = "Center" />
+                            </ControlTemplate>
+                        </styleClasses:SmartTextControl.Template>
+
+                    </styleClasses:SmartTextControl>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

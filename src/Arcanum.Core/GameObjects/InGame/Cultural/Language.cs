@@ -7,6 +7,7 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -165,48 +166,56 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    [DefaultValue(false)]
    [Description(Globals.REPLACE_DESCRIPTION)]
    [ParseAs("location_prefix_elision", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> LocationPrefixElision { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available male names for this language")]
    [ParseAs("male_names", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> MaleNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available female names for this language")]
    [ParseAs("female_names", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> FemaleNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available dynasty names for this language")]
    [ParseAs("dynasty_names", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> DynastyNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available lowborn names for this language")]
    [ParseAs("lowborn", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> LowbornNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available ship names for this language")]
    [ParseAs("ship_names", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> ShipNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of dynasty templates that can be used by this language")]
    [ParseAs("dynasty_template_keys", AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<string> DynastyTemplateKeys { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(false)]
    [Description("A list of dialects that are part of this language")]
    [ParseAs("dialects", isEmbedded: true, itemNodeType: AstNodeType.BlockNode)]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    public ObservableRangeCollection<Language> Dialects { get; set; } = [];
 
    [SaveAs]

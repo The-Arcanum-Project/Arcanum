@@ -49,10 +49,10 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    public ObservableRangeCollection<SocientalValueEntry> SocietalValues { get; set; } = [];
 
    [SaveAs(alwaysWrite: true)]
-   [DefaultValue(GovernmentType.Monarchy)]
+   [DefaultValue(GovernmentType.None)]
    [Description("The type of government this state represents.")]
    [ParseAs("type")]
-   public GovernmentType Type { get; set; } = GovernmentType.Monarchy;
+   public GovernmentType Type { get; set; } = GovernmentType.None;
 
    [SaveAs]
    [DefaultValue("")]
@@ -116,7 +116,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [DefaultValue("")]
    [Description("How the heir is selected in this government state.")]
    [ParseAs("heir_selection")]
-   public string HeirSelection { get; set; } = "";
+   public string HeirSelection { get; set; } = string.Empty;
 
    [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [DefaultValue(null)]
@@ -136,7 +136,7 @@ public partial class GovernmentState : IEu5Object<GovernmentState>
    [ParseAs("laws", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    public ObservableRangeCollection<EnactedLaw> EnactedLaws { get; set; } = [];
 
-   [SaveAs(isShattered: true, isEmbeddedObject: true)]
+   [SaveAs(isShattered: true, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [DefaultValue(null)]
    [Description("All rulers that have ruled in this government state.")]
    [ParseAs("ruler_term", isEmbedded: true, isShatteredList: true, itemNodeType: AstNodeType.BlockNode)]

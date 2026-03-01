@@ -27,4 +27,5 @@ public abstract class LocationBasedMapMode : IMapMode
    public abstract object?[]? GetVisualObject(Location location);
    public abstract void OnActivateMode();
    public abstract void OnDeactivateMode();
+   public abstract object GetLocationRelatedData(Location location);
 }

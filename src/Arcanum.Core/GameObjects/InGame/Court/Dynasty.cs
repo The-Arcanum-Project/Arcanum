@@ -38,6 +38,12 @@ public partial class Dynasty : IEu5Object<Dynasty>
    #region Nexus Properties
 
    [SaveAs]
+   [DefaultValue(false)]
+   [ParseAs("important")]
+   [Description("Whether this dynasty is important.")]
+   public bool Important { get; set; }
+
+   [SaveAs]
    [DefaultValue(null)]
    [ParseAs("name", AstNodeType.StatementNode)]
    [Description("The naming conventions for members of this dynasty.")]

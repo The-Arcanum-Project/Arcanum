@@ -60,46 +60,83 @@ public abstract record JominiColor : IEmpty<JominiColor>
       public override JominiColorType Type => JominiColorType.Key;
       public override string ToString() => $"{Key}";
 
+      public override Color4 ToColor4() => ColorResolver.Instance.Resolve(Key).ToColor4();
+   }
+
+   public sealed record Rgb(byte R, byte G, byte B, byte A = 255) : JominiColor
+   {
+      public override Color ToMediaColor() => Color.FromArgb(A, R, G, B);
+      public override JominiColorType Type => JominiColorType.Rgb;
+
+      public override string ToString() => A == 255
+                                              ? $"rgb {{ {R} {G} {B} }}"
+                                              : $"rgb {{ {R} {G} {B} {A} }}";
+
+      public override Color4 ToColor4() => new(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f);
+   }
+
+   public sealed record Hex(int Value) : JominiColor
+   {
+      public override Color ToMediaColor()
+      {
+         var r = (byte)((Value >> 16) & 0xFF);
+         var g = (byte)((Value >> 8) & 0xFF);
+         var b = (byte)(Value & 0xFF);
+         return Color.FromRgb(r, g, b);
+      }
+
+      public override JominiColorType Type => JominiColorType.Hex;
+      public override string ToString() => $"hex {{ {Value:X6} }}";
+
       public override Color4 ToColor4()
       {
-         var key = Key;
-         return ColorResolver.Instance.Resolve(key).ToColor4();
+         var r = (byte)((Value >> 16) & 0xFF);
+         var g = (byte)((Value >> 8) & 0xFF);
+         var b = (byte)(Value & 0xFF);
+         return new(r / 255.0f, g / 255.0f, b / 255.0f);
       }
    }
 
-   public sealed record Rgb(byte R, byte G, byte B) : JominiColor
-   {
-      public override Color ToMediaColor() => Color.FromRgb(R, G, B);
-      public override JominiColorType Type => JominiColorType.Rgb;
-      public override string ToString() => $"rgb {{ {R} {G} {B} }}";
-      public override Color4 ToColor4() => new(R / 255.0f, G / 255.0f, B / 255.0f);
-   }
-
    // Standard HSV where H is [0, 360], S and V are [0, 1]
-   public sealed record Hsv(double H, double S, double V) : JominiColor
+   public sealed record Hsv(double H, double S, double V, double A = 1.0) : JominiColor
    {
-      public override Color ToMediaColor() => HsvConverter.Hsv360ToRgb(H * 360, S, V);
+      public override Color ToMediaColor()
+      {
+         var c = HsvConverter.Hsv360ToRgb(H * 360, S, V);
+         return Color.FromArgb((byte)(A * 255), c.R, c.G, c.B);
+      }
+
       public override JominiColorType Type => JominiColorType.Hsv;
-      public override string ToString() => $"hsv {{ {H:F2} {S:F2} {V:F2} }}";
+
+      public override string ToString() => A >= 0.999
+                                              ? $"hsv {{ {H:F2} {S:F2} {V:F2} }}"
+                                              : $"hsv {{ {H:F2} {S:F2} {V:F2} {A:F2} }}";
 
       public override Color4 ToColor4()
       {
          var color = HsvConverter.Hsv360ToRgb(H * 360, S, V);
-         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, (float)A);
       }
    }
 
-   public sealed record Hsv360(double H, double S, double V) : JominiColor
+   public sealed record Hsv360(double H, double S, double V, double A = 1.0) : JominiColor
    {
-      public override Color ToMediaColor() => HsvConverter.Hsv360ToRgb(H, S, V);
+      public override Color ToMediaColor()
+      {
+         var c = HsvConverter.Hsv360ToRgb(H, S, V);
+         return Color.FromArgb((byte)(A * 255), c.R, c.G, c.B);
+      }
 
       public override JominiColorType Type => JominiColorType.Hsv360;
-      public override string ToString() => $"hsv360 {{ {H:F0} {S:F0} {V:F0} }}";
+
+      public override string ToString() => A >= 0.999
+                                              ? $"hsv360 {{ {H:F0} {S:F0} {V:F0} }}"
+                                              : $"hsv360 {{ {H:F0} {S:F0} {V:F0} {A:F2} }}";
 
       public override Color4 ToColor4()
       {
          var color = HsvConverter.Hsv360ToRgb(H, S, V);
-         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+         return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, (float)A);
       }
    }
 

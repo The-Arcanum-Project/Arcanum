@@ -629,9 +629,12 @@ public static class Selection
       return location != null;
    }
 
-   public static Location GetLocation(Vector2 vec2)
+   public static Location GetLocation(Vector2? vec2)
    {
-      return GetLocation(vec2, out var location) ? location : Location.Empty;
+      if (vec2 == null)
+         return Location.Empty;
+
+      return GetLocation(vec2.Value, out var location) ? location : Location.Empty;
    }
 
    public static List<Location> GetLocations(RectangleF rect)

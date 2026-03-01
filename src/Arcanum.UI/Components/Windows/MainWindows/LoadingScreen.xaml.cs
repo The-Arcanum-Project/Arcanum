@@ -28,7 +28,7 @@ public partial class LoadingScreen : INotifyPropertyChanged
       "Are you missing a feature? Open an issue on GitHub or join the Discord server to see if a member of the community created a plugin for it!",
       "You can customize which properties of each element are shown in the settings.",
       "Backing up your mod files before making changes is always a good idea!",
-      "Are teh popups of errors annoying? You can disable them in the settings individually or all at once.",
+      "Are the popups of errors annoying? You can disable them in the settings individually or all at once.",
       "Press `C` to toggle the brush tool to paint a selection on the map.",
       "You can edit as many objects as you want at once! Just select them all and edit their properties in the sidebar.",
       "With `RMB` on a map mode button you can change the mapmode assigned to it.",

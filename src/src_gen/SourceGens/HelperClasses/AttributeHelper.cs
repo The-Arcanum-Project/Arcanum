@@ -1,17 +1,17 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace ParserGenerator.HelperClasses;
 
 public static class AttributeHelper
 {
    /// <summary>
-   /// Safely retrieves an argument's value from an AttributeData instance.
-   /// It checks for named arguments first, then positional arguments, and finally falls back to the parameter's default value.
+   ///    Safely retrieves an argument's value from an AttributeData instance.
+   ///    It checks for named arguments first, then positional arguments, and finally falls back to the parameter's default
+   ///    value.
    /// </summary>
-   /// <param name="attribute">The Roslyn AttributeData to inspect.</param>
-   /// <param name="position">The zero-based positional index of the argument in the attribute's constructor.</param>
-   /// <param name="name">The name of the argument (corresponds to the constructor parameter name).</param>
+   /// <param name = "attribute" >The Roslyn AttributeData to inspect.</param>
+   /// <param name = "position" >The zero-based positional index of the argument in the attribute's constructor.</param>
+   /// <param name = "name" >The name of the argument (corresponds to the constructor parameter name).</param>
    /// <returns>The argument's value as an object, or null if not found and no default exists.</returns>
    public static object? GetAttributeArgumentValue(AttributeData attribute, int position, string name)
    {
@@ -39,20 +39,20 @@ public static class AttributeHelper
    }
 
    /// <summary>
-   /// Safely retrieves and casts an argument's value from an AttributeData instance.
+   ///    Safely retrieves and casts an argument's value from an AttributeData instance.
    /// </summary>
-   /// <typeparam name="T">The expected type of the argument.</typeparam>
-   /// <param name="name"></param>
-   /// <param name="defaultValue">The value to return if the argument is not found.</param>
-   /// <param name="attribute"></param>
-   /// <param name="position"></param>
+   /// <typeparam name = "T" >The expected type of the argument.</typeparam>
+   /// <param name = "name" ></param>
+   /// <param name = "defaultValue" >The value to return if the argument is not found.</param>
+   /// <param name = "attribute" ></param>
+   /// <param name = "position" ></param>
    /// <returns>The argument's value cast to T, or the provided default value.</returns>
    public static T? SimpleGetAttrArgValue<T>(AttributeData attribute,
                                              int position,
                                              string name,
                                              T? defaultValue = default)
    {
-      object? rawValue = GetAttributeArgumentValue(attribute, position, name);
+      var rawValue = GetAttributeArgumentValue(attribute, position, name);
 
       if (rawValue is null)
          return defaultValue;
@@ -61,14 +61,14 @@ public static class AttributeHelper
    }
 
    /// <summary>
-   /// Safely retrieves and casts an argument's value from an AttributeData instance.
-   /// This method correctly handles both single values and array values.
+   ///    Safely retrieves and casts an argument's value from an AttributeData instance.
+   ///    This method correctly handles both single values and array values.
    /// </summary>
-   /// <typeparam name="T">The expected type of the argument (e.g., bool, string, or string[]).</typeparam>
-   /// <param name="attribute">The AttributeData to inspect.</param>
-   /// <param name="position">The zero-based index for a positional constructor argument.</param>
-   /// <param name="name">The name for a named argument (property). Ignored if position is used.</param>
-   /// <param name="defaultValue">The value to return if the argument is not found or is null.</param>
+   /// <typeparam name = "T" >The expected type of the argument (e.g., bool, string, or string[]).</typeparam>
+   /// <param name = "attribute" >The AttributeData to inspect.</param>
+   /// <param name = "position" >The zero-based index for a positional constructor argument.</param>
+   /// <param name = "name" >The name for a named argument (property). Ignored if position is used.</param>
+   /// <param name = "defaultValue" >The value to return if the argument is not found or is null.</param>
    /// <returns>The argument's value cast to T, or the provided default value.</returns>
    public static T? GetAttributeArgumentValue<T>(
       AttributeData attribute,
@@ -103,10 +103,8 @@ public static class AttributeHelper
             return defaultValue;
       }
       else
-      {
          // Invalid use of the helper
          return defaultValue;
-      }
 
       // --- Step 2: Safely extract the value based on its Kind ---
 
@@ -118,17 +116,17 @@ public static class AttributeHelper
             // Type mismatch: attribute provided an array, but caller wants a single value.
             return defaultValue;
 
-         ImmutableArray<TypedConstant> arrayValues = argumentConstant.Values;
+         var arrayValues = argumentConstant.Values;
          if (arrayValues.IsDefaultOrEmpty)
             // Return an empty array of the correct type, or the default.
             return defaultValue ?? (T)(object)Array.CreateInstance(typeof(T).GetElementType()!, 0);
 
-         Type? elementType = typeof(T).GetElementType();
+         var elementType = typeof(T).GetElementType();
          if (elementType == null)
             return defaultValue;
 
          var resultArray = Array.CreateInstance(elementType, arrayValues.Length);
-         for (int i = 0; i < arrayValues.Length; i++)
+         for (var i = 0; i < arrayValues.Length; i++)
             resultArray.SetValue(arrayValues[i].Value, i);
 
          return (T)(object)resultArray;

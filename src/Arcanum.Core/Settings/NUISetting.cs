@@ -7,6 +7,8 @@ using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
+using Arcanum.Core.GameObjects.InGame.gfx.map;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.MainMenu.States;
 using Adjacency = Arcanum.Core.GameObjects.InGame.Map.Adjacency;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
@@ -71,7 +73,6 @@ using SocientalValue = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.So
 using SocientalValueEntry = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValueEntry;
 using SoundToll = Arcanum.Core.GameObjects.InGame.Map.SoundToll;
 using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
 using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using VariableDataBlock = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDataBlock;
@@ -82,14 +83,19 @@ namespace Arcanum.Core.Settings;
 
 public class NUISettings
 {
-   // public NUISetting NudgeDataSettings { get; set; } = new(NudgeData.Field.UniqueId,
-   //                                                         Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),
-   //                                                         Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),
-   //                                                         Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray());
-   // public NUISetting GameObjectLocatorSettings { get; set; } = new(GameObjectLocator.Field.UniqueId,
-   //                                                                 Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray(),
-   //                                                                 Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray(),
-   //                                                                 Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray());
+   public NUISetting CountryTemplateSettings { get; set; } = new(CountryTemplate.Field.UniqueId,
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray(),
+                                                                 Enum.GetValues<CountryTemplate.Field>().Cast<Enum>().ToArray());
+   public NUISetting NudgeDataSettings { get; set; } = new(NudgeData.Field.UniqueId,
+                                                           Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray(),
+                                                           Enum.GetValues<NudgeData.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting GameObjectLocatorSettings { get; set; } = new(GameObjectLocator.Field.UniqueId,
+                                                                   Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<GameObjectLocator.Field>().Cast<Enum>().ToArray());
    public NUISetting WealthImpactDataSettings { get; set; } = new(WealthImpactData.Field.UniqueId,
                                                                   Enum.GetValues<WealthImpactData.Field>().Cast<Enum>().ToArray(),
                                                                   Enum.GetValues<WealthImpactData.Field>().Cast<Enum>().ToArray(),
@@ -184,10 +190,10 @@ public class NUISettings
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting SuperRegionSettings { get; set; } = new(SuperRegion.Field.UniqueId,
-                                                             Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
-                                                             Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
-                                                             Enum.GetValues<SuperRegion.Field>()
+   public NUISetting SuperRegionSettings { get; set; } = new(SubContinent.Field.UniqueId,
+                                                             Enum.GetValues<SubContinent.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<SubContinent.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<SubContinent.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 

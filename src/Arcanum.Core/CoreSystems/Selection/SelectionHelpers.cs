@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DataStructures;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
@@ -8,7 +9,6 @@ using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Contin
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Selection;
 
@@ -72,7 +72,7 @@ public static class SelectionHelpers
          return 2;
       if (obj is Region)
          return 3;
-      if (obj is SuperRegion)
+      if (obj is SubContinent)
          return 4;
       if (obj is Continent)
          return 5;
@@ -88,7 +88,7 @@ public static class SelectionHelpers
                    type == typeof(Province) ||
                    type == typeof(Area) ||
                    type == typeof(Region) ||
-                   type == typeof(SuperRegion) ||
+                   type == typeof(SubContinent) ||
                    type == typeof(Continent));
 #endif
       if (eu5Object is Location loc)
@@ -98,8 +98,8 @@ public static class SelectionHelpers
       if (eu5Object is Area area)
          return area.Region;
       if (eu5Object is Region region)
-         return region.SuperRegion;
-      if (eu5Object is SuperRegion sRegion)
+         return region.SubContinent;
+      if (eu5Object is SubContinent sRegion)
          return sRegion.Continent;
 
       throw new ArgumentException("current is not a valid parent type");
@@ -112,8 +112,8 @@ public static class SelectionHelpers
          Province.Field.Locations => Location.Field.Province,
          Area.Field.Provinces => Province.Field.Area,
          Region.Field.Areas => Area.Field.Region,
-         SuperRegion.Field.Regions => Region.Field.SuperRegion,
-         Continent.Field.SuperRegions => SuperRegion.Field.Continent,
+         SubContinent.Field.Regions => Region.Field.SubContinent,
+         Continent.Field.SuperRegions => SubContinent.Field.Continent,
          _ => throw new ArgumentException("children is not a valid children enum"),
       };
    }
@@ -128,8 +128,8 @@ public static class SelectionHelpers
             return Area.Field.Provinces;
          case Region:
             return Region.Field.Areas;
-         case SuperRegion:
-            return SuperRegion.Field.Regions;
+         case SubContinent:
+            return SubContinent.Field.Regions;
          case Continent:
             return Continent.Field.SuperRegions;
          default:
@@ -145,7 +145,7 @@ public static class SelectionHelpers
       Debug.Assert(type == typeof(Province) ||
                    type == typeof(Area) ||
                    type == typeof(Region) ||
-                   type == typeof(SuperRegion) ||
+                   type == typeof(SubContinent) ||
                    type == typeof(Continent));
 #endif
 
@@ -155,7 +155,7 @@ public static class SelectionHelpers
          return (area.Provinces as AggregateLink<T>)!;
       if (eu5Object is Region region)
          return (region.Areas as AggregateLink<T>)!;
-      if (eu5Object is SuperRegion sRegion)
+      if (eu5Object is SubContinent sRegion)
          return (sRegion.Regions as AggregateLink<T>)!;
       if (eu5Object is Continent continent)
          return (continent.SuperRegions as AggregateLink<T>)!;
@@ -184,7 +184,7 @@ public static class SelectionHelpers
             if (((IMapInferable)areaa).GetRelevantLocations([areaa]).All(x => selection.Contains(x)))
                return areaa;
 
-      if (bp is SuperRegion sRegion)
+      if (bp is SubContinent sRegion)
          foreach (var regionn in sRegion.Regions)
             if (((IMapInferable)regionn).GetRelevantLocations([regionn]).All(x => selection.Contains(x)))
                return regionn;

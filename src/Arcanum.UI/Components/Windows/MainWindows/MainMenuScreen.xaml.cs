@@ -5,10 +5,10 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Mod;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.ScreenManagement;
 using Arcanum.UI.Components.Views.MainMenuScreen;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
+using Arcanum.UI.Helpers;
 using Common.UI.MBox;
 using ArcanumViewModel = Arcanum.UI.Components.Views.MainMenuScreen.ArcanumViewModel;
 
@@ -47,7 +47,9 @@ public partial class MainMenuScreen
          if (args.PropertyName == nameof(Views.MainMenuScreen.MainMenuViewModel.IsWindowVisible))
             Visibility = MainMenuViewModel.IsWindowVisible;
       };
-
+      
+      this.SetScreen();
+      
       Debug.Assert(MainMenuViewModel != null, "MainMenuViewModel should not be null");
 
 #if DEBUG
@@ -60,7 +62,6 @@ public partial class MainMenuScreen
          }
       };
 #endif
-      ScreenManager.GetScreenFrom(this);
    }
 
    private void OnClosed(object? sender, EventArgs? e)
@@ -99,25 +100,28 @@ public partial class MainMenuScreen
       else
       {
          MainMenuScreenDescriptor.SaveData();
-         
+
          var path = MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text;
-         if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase)){
+         if (!path.EndsWith("game", StringComparison.InvariantCultureIgnoreCase))
+         {
             MBox.Show("The selected folder must be the game folder. (./Europa Universalis V/game)", "Invalid folder");
             var combine = Path.Combine(path, "game");
-            if (path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) && Path.Exists(combine))
+            if (path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .EndsWith("common\\Europa Universalis V", StringComparison.InvariantCultureIgnoreCase) &&
+                Path.Exists(combine))
                MainMenuViewModel.ArcanumVm.VanillaFolderTextBox.Text = combine;
             else
                return;
          }
-         
+
          if (!MainMenuViewModel.GetDescriptorFromInput(out descriptor))
          {
             MBox.Show("Could not create a valid 'ProjectDescriptor'.\n" +
-                            "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
-                            "If you are using base mods make sure that they are valid, too.",
-               "Invalid Project Data",
-               MBoxButton.OK,
-               MessageBoxImage.Error);
+                      "Please make sure to have valid paths for the mod- and the vanilla folder.\n\n " +
+                      "If you are using base mods make sure that they are valid, too.",
+                      "Invalid Project Data",
+                      MBoxButton.OK,
+                      MessageBoxImage.Error);
             return;
          }
       }
@@ -163,16 +167,22 @@ public partial class MainMenuScreen
          //    Both Show() and Hide() are non-blocking.
          Hide();
          loadingScreen.Show();
-
-         // 2. Await the loading logic directly.
-         //    Because we are awaiting, the UI thread is NOW FREE. It can process
-         //    the Dispatcher messages from the loading task and update the text.
-         var value = await loadingScreen.StartLoading();
-         if (value == false)
+#if DEBUG
+         if (!DebugConfig.Settings.SkipLoading)
          {
-            loadingScreen.Close();
-            return;
+#endif
+            // 2. Await the loading logic directly.
+            //    Because we are awaiting, the UI thread is NOW FREE. It can process
+            //    the Dispatcher messages from the loading task and update the text.
+            var value = await loadingScreen.StartLoading();
+            if (value == false)
+            {
+               loadingScreen.Close();
+               return;
+            }
+#if DEBUG
          }
+#endif
 
          // 3. Once loading is done, create and show the new MainWindow.
          var mw = new MainWindow();

@@ -6,9 +6,13 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI;
+using Arcanum.UI.AppFeatures;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
+using Arcanum.UI.Components.UIHandles;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.Logger;
+using Common.UI;
 #if !DEBUG
 using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 #endif
@@ -54,6 +58,10 @@ internal static class Program
       // Initialize Plugin Host and Lifecycle Manager
       var pluginHost = new PluginHost.PluginHost();
       UiHandlesInjector.InjectUiHandles();
+      UIHandle.Instance.UIUtils.SetStartupScreen(true);
+      LifecycleManager.Instance.DebugInit();
+      CommandRegistry.Initialize();
+      FeatureLibrary.Initialize();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
       var clean = false;
 
@@ -123,7 +131,8 @@ internal static class Program
       var resources = new[]
       {
          $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultPalette.xaml", $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultFonts.xaml",
-         $"/{uiAssemblyName};component/Components/Styles/Base/BaseButton.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseTextBoxStyle.xaml",
+         $"/{uiAssemblyName};component/Assets/ArcanumShared/DefaultGeometry.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseButton.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Base/BaseTextBoxStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseComboboxStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Specific/BorderlessComboBox.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseCheckBox.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseScrollbar.xaml",
@@ -135,6 +144,7 @@ internal static class Program
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseGridSplitter.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseContextMenu.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseDataGrid.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseToggleButton.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Specific/CenteredTabControlStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseTreeView.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseListView.xaml",
          $"/{uiAssemblyName};component/Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
       };

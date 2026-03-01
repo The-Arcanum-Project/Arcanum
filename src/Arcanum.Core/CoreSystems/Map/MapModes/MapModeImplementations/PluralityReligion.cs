@@ -57,4 +57,6 @@ public class PluralityReligion : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => CalculatePluralityCulture(location);
 }

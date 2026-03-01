@@ -1,0 +1,43 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.WatermarkCheckerWindow"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+                         Title = "WatermarkCheckerWindow" Width = "800" WindowStartupLocation = "CenterScreen"
+                         SizeToContent = "Height">
+    <Grid Margin = "15">
+        <StackPanel>
+            <TextBlock Text = "Inspect Image for Watermark" FontWeight = "SemiBold" FontSize = "16" Margin = "0,0,0,15" />
+
+            <!-- File Selection Row -->
+            <Grid Margin = "0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "80" />
+                </Grid.ColumnDefinitions>
+
+                <styleClasses:CorneredTextBox x:Name = "FilePathTxt" Height = "28" VerticalContentAlignment = "Center"
+                                              Margin = "0,0,10,0" IsReadOnly = "True" />
+                <styleClasses:BaseButton Grid.Column = "1" Content = "Browse..." Height = "28" Click = "OnBrowseClick"
+                                         Cursor = "Hand" />
+            </Grid>
+
+            <!-- Action Button -->
+            <styleClasses:BaseButton Content = "Check Image" Height = "35" FontWeight = "Bold" Background = "#2D2D30"
+                                     Click = "OnCheckClick" Cursor = "Hand" Margin = "0,0,0,15" />
+
+            <!-- Result Area -->
+            <Border Background = "#252526" BorderBrush = "#333" BorderThickness = "1" CornerRadius = "3" Height = "40"
+                    Padding = "10,0">
+                <Grid>
+                    <StackPanel Orientation = "Horizontal" VerticalAlignment = "Center">
+                        <TextBlock Text = "Result: " Foreground = "#888" />
+                        <TextBlock x:Name = "ResultTxt" Text = "Waiting for input..." Foreground = "#AAA"
+                                   FontWeight = "Bold" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</styleClasses:BaseWindow>
