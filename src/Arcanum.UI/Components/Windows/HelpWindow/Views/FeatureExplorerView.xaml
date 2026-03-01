@@ -5,12 +5,13 @@
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModels = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.ViewModels"
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-             xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures" mc:Ignorable = "d"
+             xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
              d:DataContext = "{d:DesignInstance viewModels:FeatureExplorerViewModel}">
 
     <UserControl.Resources>
         <ResourceDictionary>
-
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
@@ -18,6 +19,8 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTreeView.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+
+            <converters:InvertedStringToVisibilityConverter x:Key = "InvertedStringToVisibilityConverter" />
             <!-- status chip border style -->
             <Style x:Key = "StatusChipBorderStyle" TargetType = "Border">
                 <Setter Property = "BorderThickness" Value = "1" />
@@ -28,6 +31,7 @@
                 <Setter Property = "HorizontalAlignment" Value = "Left" />
                 <Setter Property = "Margin" Value = "2" />
                 <Setter Property = "VerticalAlignment" Value = "Center" />
+                <Setter Property = "SnapsToDevicePixels" Value = "True" />
             </Style>
 
             <Style x:Key = "StatusChipTextStyle" TargetType = "TextBlock">
@@ -68,23 +72,62 @@
         </Grid.ColumnDefinitions>
 
         <!-- LEFT: Explorer Pane -->
-        <DockPanel Grid.Column = "0" Margin = "10">
-            <Border DockPanel.Dock = "Top" CornerRadius = "3" Padding = "5,2" Margin = "0,0,0,10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width = "Auto" />
-                        <ColumnDefinition Width = "*" />
-                    </Grid.ColumnDefinitions>
-                    <Path Grid.Column = "0" Data = "{StaticResource Icon.Search}" />
-                    <TextBox Grid.Column = "1" Background = "Transparent" BorderThickness = "0"
-                             VerticalContentAlignment = "Center"
-                             Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
-                </Grid>
-            </Border>
-            <TreeView ItemsSource = "{Binding FeatureTree}" Background = "Transparent" BorderThickness = "0"
-                      ItemContainerStyle = "{StaticResource RiderTreeViewItemStyle}"
-                      DisplayMemberPath = "Feature.DisplayName" />
-        </DockPanel>
+        <Border Grid.Column = "0" DockPanel.Dock = "Top" CornerRadius = "3" Padding = "5,2" Margin = "4,4,4,0"
+                BorderThickness = "1" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                Background = "{StaticResource DefaultBackColorBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "Auto" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "Auto" />
+                    <RowDefinition Height = "*" />
+                </Grid.RowDefinitions>
+
+                <Path Grid.Row = "0" Grid.Column = "0" Data = "{StaticResource Icon.Search}" Height = "15" Width = "15"
+                      Style = "{StaticResource BaseIconPathStyle}" Margin = "0, 4, 4, 4" />
+                <styleClasses:CorneredTextBox Grid.Row = "0" Grid.Column = "1"
+                                              Background = "{StaticResource LightBackColorBrush}" BorderThickness = "2"
+                                              VerticalContentAlignment = "Center"
+                                              BorderBrush = "{StaticResource LightBackColorBrush}"
+                                              HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
+                                              Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Grid.Row = "0" Grid.Column = "1" Text = "Filter..." HorizontalAlignment = "Stretch"
+                           IsHitTestVisible = "False" Margin = "5, 0, 0, 0" VerticalAlignment = "Center"
+                           Visibility = "{Binding SearchQuery, Converter={StaticResource InvertedStringToVisibilityConverter} }">
+                </TextBlock>
+
+
+                <TreeView Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2" ItemsSource = "{Binding FeatureTree}"
+                          Background = "{StaticResource DarkBackColorBrush}" BorderThickness = "0"
+                          Margin = "0, 8, 0, 4" SelectedItemChanged = "TreeView_OnSelectedItemChanged">
+
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"
+                                                  ItemsSource = "{Binding Children}">
+                            <TextBlock Text = "{Binding Feature.DisplayName}" VerticalAlignment = "Center" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"
+                                                  ItemsSource = "{Binding Children}">
+                            <TextBlock Text = "{Binding Feature.DisplayName}" VerticalAlignment = "Center" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+
+                    <!-- Update the ItemContainerStyle to handle Visibility -->
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
+                            <Setter Property = "Visibility"
+                                    Value = "{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </Grid>
+        </Border>
 
         <Border Grid.Column = "1" Background = "{StaticResource LightBackColorBrush}" Margin = "3, 3, 6, 3" />
 

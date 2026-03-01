@@ -21,7 +21,7 @@ public static class VersionNumbers
    public static string CurrentVersionString => $"{AppData.ProductName} v{Current}";
 }
 
-public class VersionNumber
+public class VersionNumber : IComparable<VersionNumber>
 {
    public VersionNumber(int major, int minor, int patch)
    {
@@ -86,10 +86,31 @@ public class VersionNumber
       => v1.Major == v2.Major && v1.Minor == v2.Minor && v1.Patch == v2.Patch && v1.SnapShotVersion == v2.SnapShotVersion;
 
    public static bool operator !=(VersionNumber v1, VersionNumber v2) => !(v1 == v2);
+
+   public int CompareTo(VersionNumber? other)
+   {
+      if (other is null)
+         return 1;
+      if (Major != other.Major)
+         return Major.CompareTo(other.Major);
+      if (Minor != other.Minor)
+         return Minor.CompareTo(other.Minor);
+      if (Patch != other.Patch)
+         return Patch.CompareTo(other.Patch);
+
+      if (SnapShotVersion == null && other.SnapShotVersion == null)
+         return 0;
+      if (SnapShotVersion == null)
+         return 1; // Non-snapshot versions are considered greater than snapshot versions
+      if (other.SnapShotVersion == null)
+         return -1;
+
+      return SnapShotVersion.CompareTo(other.SnapShotVersion);
+   }
 }
 
 // YYwWWn format, where YY is the year, w is marking weeks with WW being the number of week in the year, and n is the number of snapshot in that week.
-public class SnapShotVersion
+public class SnapShotVersion : IComparable<SnapShotVersion>
 {
    public SnapShotVersion(int year, int week, int snapshotNumber)
    {
@@ -160,4 +181,16 @@ public class SnapShotVersion
    }
 
    public static bool operator !=(SnapShotVersion? s1, SnapShotVersion? s2) => !(s1 == s2);
+
+   public int CompareTo(SnapShotVersion? other)
+   {
+      if (other is null)
+         return 1;
+      if (Year != other.Year)
+         return Year.CompareTo(other.Year);
+      if (Week != other.Week)
+         return Week.CompareTo(other.Week);
+
+      return SnapshotNumber.CompareTo(other.SnapshotNumber);
+   }
 }

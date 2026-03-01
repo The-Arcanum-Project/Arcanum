@@ -30,4 +30,10 @@ public partial class FeatureExplorerView
 
       e.Handled = true;
    }
+
+   private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+   {
+      if (e.NewValue is FeatureTreeItem item)
+         _viewModel.SelectedItem = item;
+   }
 }

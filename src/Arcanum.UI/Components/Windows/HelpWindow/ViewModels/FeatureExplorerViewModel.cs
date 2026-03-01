@@ -181,18 +181,20 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
       var cells = new List<LocationGridCell>();
       for (var i = 0; i < 9; i++)
-         cells.Add(new LocationGridCell(primaries.Contains(i), secondaries.Contains(i)));
+         cells.Add(new(primaries.Contains(i), secondaries.Contains(i)));
       LocationGridCells = cells;
    }
 
    private void ApplyFilter()
    {
+      // Disable selection updates temporarily if needed for performance
       foreach (var item in FeatureTree)
          FilterRecursive(item, SearchQuery);
    }
 
    private bool FilterRecursive(FeatureTreeItem item, string query)
    {
+      // Case 1: Empty Query - Show Everything
       if (string.IsNullOrWhiteSpace(query))
       {
          item.IsVisible = true;
@@ -201,17 +203,22 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
          return true;
       }
 
-      // Search in Name, Description, Tags, and Synonyms
+      // Case 2: Check for matches in this specific node
       var matches = item.Feature.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                     item.Feature.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    item.Feature.SearchSynonyms.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase));
+                    item.Feature.SearchSynonyms.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                    item.Feature.Id.Value.Contains(query, StringComparison.OrdinalIgnoreCase);
 
+      // Case 3: Check children recursively
       var anyChildMatches = false;
       foreach (var child in item.Children)
          if (FilterRecursive(child, query))
             anyChildMatches = true;
 
+      // A node is visible if IT matches OR any of its CHILDREN match
       item.IsVisible = matches || anyChildMatches;
+
+      // Auto-expand if a child is a match so the user sees the result
       if (anyChildMatches)
          item.IsExpanded = true;
 

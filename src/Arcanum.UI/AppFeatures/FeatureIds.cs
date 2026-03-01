@@ -11,5 +11,6 @@ public static class FeatureIds
       public static readonly FeatureId MainWindow = Create(PATH);
 
       public static readonly FeatureId Queastor = Create(PATH);
+      public static readonly FeatureId Map = Create(PATH);
    }
 }

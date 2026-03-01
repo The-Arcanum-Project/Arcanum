@@ -166,9 +166,10 @@ public partial class MainMenuScreen
          //    Both Show() and Hide() are non-blocking.
          Hide();
          loadingScreen.Show();
-
+#if DEBUG
          if (!DebugConfig.Settings.SkipLoading)
          {
+#endif
             // 2. Await the loading logic directly.
             //    Because we are awaiting, the UI thread is NOW FREE. It can process
             //    the Dispatcher messages from the loading task and update the text.
@@ -178,7 +179,9 @@ public partial class MainMenuScreen
                loadingScreen.Close();
                return;
             }
+#if DEBUG
          }
+#endif
 
          // 3. Once loading is done, create and show the new MainWindow.
          var mw = new MainWindow();
