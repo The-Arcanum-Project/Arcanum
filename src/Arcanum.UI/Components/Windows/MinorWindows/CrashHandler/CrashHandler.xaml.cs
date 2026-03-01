@@ -14,6 +14,15 @@ public partial class CrashHandler
    {
       _exception = null!;
       InitializeComponent();
+      CloseAllOtherWindows();
+   }
+
+   private void CloseAllOtherWindows()
+   {
+      Application.Current.MainWindow = this;
+      foreach (var window in Application.Current.Windows)
+         if (window is not CrashHandler && window is Window w)
+            w.Close();
    }
 
    public static void Show(Exception exception)
