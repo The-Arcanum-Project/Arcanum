@@ -327,11 +327,11 @@
 
 
             <!-- Help Button -->
-            <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}" Margin = "0" Padding = "0"
-                                     DockPanel.Dock = "Right"
-                                     commands:CommandBinder.Assign = "{Binding OpenHelpCommand, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}">
-                <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Help20x20.png" Stretch = "UniformToFill" />
-            </styleClasses:BaseButton>
+            <!-- <styleClasses:BaseButton Style = "{StaticResource HeaderButtonStyle}" Margin = "0" Padding = "0" -->
+            <!--                          DockPanel.Dock = "Right" -->
+            <!--                          commands:CommandBinder.Assign = "{Binding OpenHelpCommand, RelativeSource={RelativeSource AncestorType=styleClasses:BaseWindow}}"> -->
+            <!--     <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Help20x20.png" Stretch = "UniformToFill" /> -->
+            <!-- </styleClasses:BaseButton> -->
 
             <!-- Action indicator panel -->
             <StackPanel Width = "300" Orientation = "Horizontal" DockPanel.Dock = "Right">
