@@ -18,6 +18,8 @@ namespace Arcanum.Core.GameObjects.InGame.Pops;
 [ObjectSaveAs]
 public partial class PopDefinition : IEu5Object<PopDefinition>
 {
+   public bool IsValid() => PopType != PopType.Empty && Culture != Culture.Empty && Religion != Religion.Empty;
+
    #region Nexus Properties
 
    [SaveAs]

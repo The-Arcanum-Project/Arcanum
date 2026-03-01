@@ -22,8 +22,15 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
    {
       Dictionary<JominiColor, Location> colorToLocation = new(30_000);
       var cIndex = 0;
+      CommentNode? lastComment = null;
       foreach (var sn in rn.Statements)
       {
+         if (sn is CommentNode comNode)
+         {
+            lastComment = comNode;
+            continue;
+         }
+
          if (!sn.IsContentNode(ref pc, out var cn))
             continue;
 
@@ -47,6 +54,12 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
          var loc = Eu5Activator.CreateInstance<Location>(key, fileObj, cn);
          var color = new JominiColor.Int(hex);
          loc.Color = color;
+
+         if (lastComment is not null)
+         {
+            loc.AddStandaloneComment(lastComment.CommentText);
+            lastComment = null;
+         }
 
          if (colorToLocation.TryGetValue(color, out var existingLoc))
          {

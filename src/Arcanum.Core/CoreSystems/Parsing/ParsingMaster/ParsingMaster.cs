@@ -80,9 +80,9 @@ public partial class ParsingMaster
    {
       var (s1, _) = PartitionStepsByPriority(DescriptorDefinitions.LoadingStepsList);
 
-      var sortedPrioritySteps = TopologicalSort.Sort<string, FileLoadingService>(s1);
+      var sortedPrioritySteps = TopologicalSort.SortGeneral<string, FileLoadingService>(s1);
       var sortedRemainingSteps =
-         TopologicalSort.Sort<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList);
+         TopologicalSort.SortGeneral<string, FileLoadingService>(DescriptorDefinitions.LoadingStepsList);
       sortedRemainingSteps = sortedRemainingSteps.Except(sortedPrioritySteps).ToList();
 
       var finalList = sortedPrioritySteps.Concat(sortedRemainingSteps);

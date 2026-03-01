@@ -9,35 +9,27 @@ using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.InjectReplaceLogic;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Registry;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
 public static class SaveMaster
 {
-   private static Dictionary<IEu5Object, List<Eu5ObjectCommand>> NeedsToBeSaved { get; } = [];
-   private static Dictionary<Type, List<IEu5Object>> NewObjects { get; } = [];
    private static readonly Dictionary<Type, int> ModificationCache = [];
    private static readonly List<Eu5ObjectCommand> ChangesSinceLastSave = [];
 
    public static HistoryNode? LastSavedHistoryNode;
 
    public static readonly FrozenDictionary<Type, List<SetupFileWriter>> SetupFileWritersByType;
-
-   public static Enum[] GetChangesForObject(IEu5Object obj)
-   {
-      return !NeedsToBeSaved.TryGetValue(obj, out var list)
-                ? []
-                : list.Select(c => c.Attribute).OfType<Enum>().Distinct().ToArray();
-   }
 
    static SaveMaster()
    {
@@ -68,8 +60,18 @@ public static class SaveMaster
       SetupFileWritersByType = dict.ToFrozenDictionary();
    }
 
+   private static Dictionary<IEu5Object, List<Eu5ObjectCommand>> NeedsToBeSaved { get; } = [];
+   private static Dictionary<Type, List<IEu5Object>> NewObjects { get; } = [];
+
    public static int GetModifiedCount => ModificationCache.Values.Sum();
    public static int GetNeedsToBeSaveCount => NeedsToBeSaved.Count;
+
+   public static Enum[] GetChangesForObject(IEu5Object obj)
+   {
+      return !NeedsToBeSaved.TryGetValue(obj, out var list)
+                ? []
+                : list.Select(c => c.Attribute).OfType<Enum>().Distinct().ToArray();
+   }
 
    public static ICollection<IEu5Object> GetAllModifiedObjects() => NeedsToBeSaved.Keys;
    public static Dictionary<Type, List<IEu5Object>> GetNewSaveables() => NewObjects;
@@ -271,8 +273,8 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Sorts the given objects by their source file and saves each file with the modified objects. <br/>
-   /// DOES NOT USE INJECT / REPLACE LOGIC!
+   ///    Sorts the given objects by their source file and saves each file with the modified objects. <br />
+   ///    DOES NOT USE INJECT / REPLACE LOGIC!
    /// </summary>
    public static void SaveObjects(List<IEu5Object> objectsToSave, Action<string> updateProgress)
    {
@@ -292,8 +294,8 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// A list of any modified objects and the file they belong to.
-   /// This list can contain nested objects.
+   ///    A list of any modified objects and the file they belong to.
+   ///    This list can contain nested objects.
    /// </summary>
    private static void SaveFile(List<IEu5Object> modifiedObjects)
    {
@@ -325,7 +327,7 @@ public static class SaveMaster
       for (var i = objectsToSave.Count - 1; i >= 0; i--)
       {
          var obj = objectsToSave[i];
-         if (obj is Continent or SuperRegion or Region or Area or Province)
+         if (obj is Continent or SubContinent or Region or Area or Province)
          {
             definitionObjects.Add(obj);
             objectsToSave.RemoveAt(i);
@@ -336,8 +338,8 @@ public static class SaveMaster
          return false;
 
       var sb = new IndentedStringBuilder();
-      foreach (IEu5Object obj in Globals.Continents.Values)
-         obj.ToAgsContext().BuildContext(sb);
+      foreach (var obj in Globals.Continents.Values)
+         TreeBuilder.ConstructAndWrite(obj, sb, obj.AgsSettings.AsOneLine, false, null, false, false);
 
       WriteFile(sb.InnerBuilder, DescriptorDefinitions.DefinitionsDescriptor.Files[0], true);
 
@@ -348,7 +350,7 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Extracts all setup objects from the list and removes them as they are already handled.
+   ///    Extracts all setup objects from the list and removes them as they are already handled.
    /// </summary>
    public static bool SaveSetupFolder(List<IEu5Object> modifiedObjects, Action<string> updateHandle)
    {
@@ -378,14 +380,20 @@ public static class SaveMaster
                    "All types must have a corresponding SetupFileWriter.");
       Debug.Assert(types.Length == types.Distinct().Count(), "Types list must not contain duplicates.");
 
+      HashSet<SetupFileWriter> toWrite = [];
+
       foreach (var type in types)
       {
          var writers = SetupFileWritersByType[type];
          foreach (var writer in writers)
-         {
-            updateHandle.Invoke($"Saving setup file: {writer.FileName}");
-            IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
-         }
+            toWrite.Add(writer);
+      }
+
+      // Now save all files.
+      foreach (var writer in toWrite)
+      {
+         updateHandle.Invoke($"Saving setup file: {writer.FileName}");
+         IO.IO.WriteAllText(writer.FullPath, writer.WriteFile().InnerBuilder.ToString(), writer.FileEncoding);
       }
    }
 
@@ -400,7 +408,7 @@ public static class SaveMaster
       {
          var writers = SetupFileWritersByType[t];
          foreach (var writer in writers)
-            WriteFile(emptySb, writer.FullPath);
+            WriteInternal(writer.FullPath, emptySb, Encoding.UTF8);
       }
 
       // Now save all objects into a single new file.
@@ -409,8 +417,8 @@ public static class SaveMaster
          var empty = (IEu5Object)EmptyRegistry.Empties[type];
          updateHandle.Invoke($"Saving compacted setup file for type: {empty.Source.Path.RelativePath}");
          var isb = new IndentedStringBuilder();
-         foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
-            ((IEu5Object)obj).ToAgsContext().BuildContext(isb);
+         foreach (IEu5Object obj in empty.GetGlobalItemsNonGeneric().Values)
+            TreeBuilder.ConstructAndWrite(obj, isb, obj.AgsSettings.AsOneLine, false, null, false, false);
          var newfo = FileStateManager.CreateEu5FileObject(empty);
          WriteFile(isb.InnerBuilder, newfo, true);
       }
@@ -487,8 +495,10 @@ public static class SaveMaster
          {
             objSb.Clear();
 
-            csso.Target.ToAgsContext()
-                .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
+            TreeBuilder.ConstructAndWriteInjRep(csso.Target, objSb, csso.Target.AgsSettings.AsOneLine, false, csso.GetPropertiesToSave());
+
+            // csso.Target.ToAgsContext()
+            //     .BuildContext(objSb, csso.GetPropertiesToSave(), csso.SavingCategory.ToInjRepStrategy(), true);
             var cssoInj = csso.InjectedObj;
 
             Debug.Assert(cssoInj != InjectObj.Empty,
@@ -516,14 +526,10 @@ public static class SaveMaster
 
       // If we have a newly created object it's Source property is still Empty so we need to set it here
       foreach (var csso in value)
-      {
          if (csso.Target.Source == Eu5FileObj.Empty)
-         {
             // Set the source to the file we are saving to
             // We do NOT add it to the file's object list as this is done in the saving itself to not have it interfere with the rewrite logic
             csso.Target.Source = fo;
-         }
-      }
 
       Debug.Assert(value.All(csso => csso.Target.Source != Eu5FileObj.Empty && csso.Target.Source == fo),
                    "All objects must have a valid file location matching the file they are being saved to.");
@@ -535,9 +541,9 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Saves the given file.
-   /// If onlyModifiedObjects is true, only the objects that have been modified will be saved.
-   /// Otherwise the entire file will be reformatted and saved.
+   ///    Saves the given file.
+   ///    If onlyModifiedObjects is true, only the objects that have been modified will be saved.
+   ///    Otherwise the entire file will be reformatted and saved.
    /// </summary>
    /// <returns></returns>
    public static bool SaveFile(Eu5FileObj fileObj, bool onlyModifiedObjects = false)
@@ -619,7 +625,7 @@ public static class SaveMaster
          }
          else
          {
-            obj.ToAgsContext().BuildContext(objBuilder);
+            TreeBuilder.ConstructAndWrite(obj, sb, obj.AgsSettings.AsOneLine, false, null, false, false);
             if (obj.FileLocation == Eu5ObjectLocation.Empty)
                obj.FileLocation = new(0,
                                       CountNewLinesInStringBuilder(sb.InnerBuilder),
@@ -638,10 +644,10 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Handles the writing of the given StringBuilder to the file represented by the given Eu5FileObj. <br/>
-   /// Moves the file to the modded data space if it is not there yet. <br/>
-   /// Updates the checksum of the file after writing. <br/>
-   /// Registers the file path with the FileStateManager if register is true and the file is not yet registered.
+   ///    Handles the writing of the given StringBuilder to the file represented by the given Eu5FileObj. <br />
+   ///    Moves the file to the modded data space if it is not there yet. <br />
+   ///    Updates the checksum of the file after writing. <br />
+   ///    Registers the file path with the FileStateManager if register is true and the file is not yet registered.
    /// </summary>
    public static void WriteFile(StringBuilder sb, Eu5FileObj fileObj, bool register)
    {
@@ -649,14 +655,20 @@ public static class SaveMaster
       if (!fileObj.IsModded && Config.Settings.SavingConfig.MoveFilesToModdedDataSpaceOnSaving)
          fileObj.Path.MoveToMod();
 
-      WriteFile(sb, fileObj.Path.FullPath);
+      WriteInternal(fileObj.Path.FullPath, sb, fileObj.Descriptor.FileEncoding);
+
       if (register)
          FileStateManager.RegisterPath(fileObj.Path);
    }
 
-   private static void WriteFile(StringBuilder sb, string path)
+   private static void WriteInternal(string path, StringBuilder content, Encoding encoding)
    {
-      IO.IO.WriteAllTextUtf8WithBom(path, sb.ToString());
+      if (Equals(encoding, Encoding.UTF8))
+         IO.IO.WriteAllTextUtf8WithBom(path, content.ToString());
+      else if (Equals(encoding, IO.IO.Windows1250Encoding))
+         IO.IO.WriteAllTextAnsi(path, content.ToString());
+      else
+         throw new NotSupportedException("Encoding not supported for saving: " + encoding.WebName);
    }
 
    public static void RemoveObjectsFromFiles(List<IEu5Object> objs)
@@ -683,10 +695,11 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Removes the given objects from their source file and updates the FileLocation of the remaining objects. <br/>
-   /// Returns the modified file as a StringBuilder. <br/>
-   /// Fails if the objects do not belong to the same source file or if any of the objects do not have a valid FileLocation. <br/>
-   /// Returns null if no objects were provided or if the file could not be read. 
+   ///    Removes the given objects from their source file and updates the FileLocation of the remaining objects. <br />
+   ///    Returns the modified file as a StringBuilder. <br />
+   ///    Fails if the objects do not belong to the same source file or if any of the objects do not have a valid
+   ///    FileLocation. <br />
+   ///    Returns null if no objects were provided or if the file could not be read.
    /// </summary>
    private static StringBuilder? RemoveEu5ObjectFromFile(List<IEu5Object> obj)
    {
@@ -800,7 +813,7 @@ public static class SaveMaster
    }
 
    /// <summary>
-   /// Counts the number of newline characters ('\n') in a specific region of a StringBuilder.
+   ///    Counts the number of newline characters ('\n') in a specific region of a StringBuilder.
    /// </summary>
    public static int CountNewlinesInRegion(StringBuilder sb, int startIndex, int count)
    {

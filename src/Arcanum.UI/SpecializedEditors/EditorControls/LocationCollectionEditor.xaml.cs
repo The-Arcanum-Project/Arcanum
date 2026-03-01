@@ -150,7 +150,7 @@ public partial class LocationCollectionEditor
          case Region r:
             SetLocationCollection(r, r.Areas, _editor);
             break;
-         case SuperRegion s:
+         case SubContinent s:
             SetLocationCollection(s, s.Regions, _editor);
             break;
          case Continent c:
@@ -175,11 +175,11 @@ public partial class LocationCollectionEditor
          case Region r:
             Nx.AddRangeToCollection(r, Region.Field.Areas, ((IMapInferable)Area.Empty).GetInferredList(Selection.GetSelectedLocations));
             break;
-         case SuperRegion s:
-            Nx.AddRangeToCollection(s, SuperRegion.Field.Regions, ((IMapInferable)Region.Empty).GetInferredList(Selection.GetSelectedLocations));
+         case SubContinent s:
+            Nx.AddRangeToCollection(s, SubContinent.Field.Regions, ((IMapInferable)Region.Empty).GetInferredList(Selection.GetSelectedLocations));
             break;
          case Continent c:
-            Nx.AddRangeToCollection(c, Continent.Field.SuperRegions, ((IMapInferable)SuperRegion.Empty).GetInferredList(Selection.GetSelectedLocations));
+            Nx.AddRangeToCollection(c, Continent.Field.SuperRegions, ((IMapInferable)SubContinent.Empty).GetInferredList(Selection.GetSelectedLocations));
             break;
       }
    }

@@ -7,6 +7,8 @@ using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.MainMenu.Setup.SubObjects;
 using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.InGame.AbstractMechanics;
+using Arcanum.Core.GameObjects.InGame.Court.State;
 using Arcanum.Core.Utils.Sorting;
 using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 using VariableDeclaration = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDeclaration;
@@ -18,7 +20,10 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
    : SetupFileLoadingService(dependencies)
 {
    public override bool IsHeavyStep => true;
-   public override List<Type> ParsedObjects { get; } = SetupParsingManager.NestedSubTypes(Country.Empty).ToList();
+   public override List<Type> ParsedObjects { get; } =
+   [
+      .. SetupParsingManager.NestedSubTypes(Country.Empty), .. SetupParsingManager.NestedSubTypes(GovernmentState.Empty), typeof(Age),
+   ];
 
    public override void ReloadSingleFile(Eu5FileObj fileObj, object? lockObject)
    {
@@ -58,6 +63,14 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
       }
    }
 
+   private static partial bool ArcParse_GovernmentState(BlockNode node, Country target, ref ParsingContext pc)
+   {
+      if (target.GovernmentState == GovernmentState.Empty)
+         target.GovernmentState = new();
+      GovernmentsStateParsing.ParseProperties(node, target.GovernmentState, ref pc, false);
+      return true;
+   }
+
    public static bool ArcParse_Variables(BlockNode node, Country country, ref ParsingContext pc)
    {
       if (!node.Children[0].IsBlockNode(ref pc, out var dataContainer))
@@ -92,6 +105,7 @@ public partial class CountryParsing(IEnumerable<IDependencyNode<string>> depende
          foreach (var sn in varBlock.Children)
             VariableDeclarationParsing.Dispatch(sn, vard, ref pc);
 
+         vard.Source = pc.Context.FileObj;
          country.Variables.Add(vard);
       }
 

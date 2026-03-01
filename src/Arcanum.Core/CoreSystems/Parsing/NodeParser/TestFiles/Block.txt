@@ -1,11 +1,50 @@
-﻿INJECT|TRY_INJECT|INJECT_OR_CREATE:arid = {
-	location_modifier = {
-		free_capacity_attracts_pops = yes
-	}
+﻿# ==========================================
+# FILE HEADER: TEST CASE
+# This represents a standalone comment block
+# ==========================================
+
+# Leading comment for the first object
+test_climate_01 = { # Inline comment on opening brace
+    # Leading comment for a simple property
+    winter = severe # Inline comment for a simple property
+
+    # Leading comment for a color block
+    color = { 
+        10 20 30 
+    } # Closing comment for color block
+
+    # Leading comment for a modifier block
+    modifier = {
+        # Leading comment inside a nested block
+        attrition = 2.0
+        
+        supply_limit = 0.5 # Inline comment nested deep
+    }
+
+    # Leading comment for a list
+    allowed_units = {
+        infantry # Inline comment on list item
+        cavalry
+        # Leading comment on list item
+        artillery
+    }
+} # Closing comment for the main object
+
+# Standalone comment between objects
+
+empty_placeholder_block = {
+    # This block has no functional data
+    # It only contains comments
+    # TODO: Implement this later
 }
 
-REPLACE|TRY_REPLACE|REPLACE_OR_CREATE:arid = {
-	location_modifier = {
-		free_capacity_attracts_pops = yes
-	}
+compact_block = { val = 1 } # Comment after a compact block
+
+# Edge case: Comment immediately touching value (no space)
+fast_typing_check = yes#This should be parsed as value 'yes' and an inline comment
+
+weird_formatting = {
+    key
+    =
+    value # Inline comment on a multi-line assignment
 }

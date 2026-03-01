@@ -70,6 +70,14 @@ public static class DispatchGenerator
       sb.AppendLine("            foreach (var node in blockNode.Children)");
       sb.AppendLine("            {");
 
+      sb.AppendLine("                // Handle standalone comments");
+      sb.AppendLine("                if (node is CommentNode comNode)");
+      sb.AppendLine("                {");
+      sb.AppendLine("                    target.AddStandaloneComment(comNode.CommentText);");
+      sb.AppendLine("                    continue;");
+      sb.AppendLine("                }");
+      sb.AppendLine();
+
       // Static Parsers (Dispatch)
       sb.AppendLine("                // Dispatch the node to the appropriate parser");
       sb.AppendLine("                if (Dispatch(node, target, ref pc, rawSource))");
@@ -87,10 +95,15 @@ public static class DispatchGenerator
          sb.AppendLine("                {");
          for (var i = 0; i < dynamicContentParsers.Count; i++)
          {
-            var methodName = PropCustomParserMethodName(dynamicContentParsers[i]);
+            var p = dynamicContentParsers[i];
+            var methodName = PropCustomParserMethodName(p);
             sb.AppendLine(i == 0
-                             ? $"                    if ({methodName}(cNode, target, ref pc)) wasHandled = true;"
-                             : $"                    else if ({methodName}(cNode, target, ref pc)) wasHandled = true;");
+                             ? $"                    if ({methodName}(cNode, target, ref pc))"
+                             : $"                    else if ({methodName}(cNode, target, ref pc))");
+            sb.AppendLine("                        {");
+            sb.AppendLine("                            wasHandled = true;");
+            sb.AppendLine($"                            target._assignComments({p.FullEnumString}, node, {(!p.IsCollection).ToString().ToLower()});");
+            sb.AppendLine("                        }");
          }
 
          sb.AppendLine("                }");
@@ -105,10 +118,15 @@ public static class DispatchGenerator
          sb.AppendLine("                {");
          for (var i = 0; i < dynamicBlockParsers.Count; i++)
          {
-            var methodName = PropCustomParserMethodName(dynamicBlockParsers[i]);
+            var p = dynamicBlockParsers[i];
+            var methodName = PropCustomParserMethodName(p);
             sb.AppendLine(i == 0
-                             ? $"                    if ({methodName}(bNode, target, ref pc)) wasHandled = true;"
-                             : $"                    else if ({methodName}(bNode, target, ref pc)) wasHandled = true;");
+                             ? $"                    if ({methodName}(bNode, target, ref pc))"
+                             : $"                    else if ({methodName}(bNode, target, ref pc))");
+            sb.AppendLine("                    {");
+            sb.AppendLine("                        wasHandled = true;");
+            sb.AppendLine($"                        target._assignComments({p.FullEnumString}, node, {(!p.IsCollection).ToString().ToLower()});");
+            sb.AppendLine("                    }");
          }
 
          sb.AppendLine("                }");
@@ -148,9 +166,6 @@ public static class DispatchGenerator
          return prop.CustomParserMethodName;
 
       // Assuming standard naming convention used in your project
-      // Note: You might need to pass this logic in or duplicate the helper methods 
-      // (IsFlagsEnum, IsContentNodeListSuffix, etc.) into this class if they aren't accessible.
-      // For now, I'll use the basic format consistent with your output.
       var suffix = prop.IsShatteredList ? "_PartList" : "";
       var prefix = IsFlagsEnum(prop) ? "Flags" : "";
       return $"ArcParse_{prefix}{prop.PropertyName}{suffix}";
@@ -257,6 +272,9 @@ public static class DispatchGenerator
             sb.AppendLine($"                // {md.Keyword}");
             sb.AppendLine($"                if ({integerCheck})");
             sb.AppendLine("                {");
+            // Comment handling
+            sb.AppendLine($"                    target._assignComments({prop.PropertyMetadata.FullEnumString}, node, {(!prop.PropertyMetadata.IsCollection).ToString().ToLower()});");
+            sb.AppendLine();
             sb.AppendLine($"                    if (node is {md.AstNodeType} {md.Keyword}_node)");
             sb.AppendLine($"                        return {prop.MethodCall}({md.Keyword}_node, target, ref pc);");
             sb.AppendLine("                }");

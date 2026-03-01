@@ -1,0 +1,148 @@
+﻿<Window x:Class = "Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer.ContextExplorerWindow"
+        xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:contextExplorer = "clr-namespace:Arcanum.UI.Components.Windows.MinorWindows.ContextExplorer"
+        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+        xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+        xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+        xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
+        commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}" Title = "Command Explorer"
+        Height = "500" Width = "400" WindowStyle = "None" AllowsTransparency = "True" Background = "Transparent"
+        WindowStartupLocation = "CenterScreen" ShowInTaskbar = "False"
+        d:DataContext = "{d:DesignInstance contextExplorer:ContextExplorerViewModel}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:InvertedStringToVisibilityConverter x:Key = "InvertedStringToVisibilityConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Background = "{StaticResource DefaultBackColorBrush}"
+            BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1" CornerRadius = "8">
+
+        <Grid Margin = "15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" /> <!-- Search -->
+                <RowDefinition Height = "*" />    <!-- Results -->
+                <RowDefinition Height = "Auto" /> <!-- Legend -->
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row = "0" Background = "#3C3F41" CornerRadius = "4" Padding = "8,4" Margin = "0,0,0,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width = "Auto" />
+                        <ColumnDefinition Width = "*" />
+                    </Grid.ColumnDefinitions>
+                    <Path Grid.Column = "0" Data = "{StaticResource Icon.Search}"
+                          Fill = "{StaticResource DefaultForeColorBrush}" />
+                    <styleClasses:CorneredTextBox Grid.Column = "1" x:Name = "PartSearchBox"
+                                                  Text = "{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                                  Background = "Transparent" BorderThickness = "0"
+                                                  VerticalContentAlignment = "Center" Margin = "8, 0, 0, 0" />
+
+                    <!-- Search PlaceHolder Text -->
+                    <TextBlock Grid.Column = "1" Text = "Search commands..." IsHitTestVisible = "False"
+                               Foreground = "{StaticResource LightContrastForeColorBrush}" VerticalAlignment = "Center"
+                               Margin = "11,0,0,0"
+                               Visibility = "{Binding Text, ElementName=PartSearchBox, Converter={StaticResource InvertedStringToVisibilityConverter}}">
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- Grouped Command List -->
+            <ScrollViewer Grid.Row = "1" VerticalScrollBarVisibility = "Auto">
+                <ItemsControl ItemsSource = "{Binding FilteredGroupedcommands}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin = "0,0,0,15">
+                                <!-- Scope Header -->
+                                <Border BorderThickness = "0,0,0,1"
+                                        BorderBrush = "{StaticResource BlueSelectionBackColorBrush}" Margin = "0,0,0,5">
+                                    <TextBlock Text = "{Binding ScopeName}"
+                                               Foreground = "{StaticResource BlueAccentColorBrush}" FontSize = "10"
+                                               FontWeight = "Bold" TextAlignment = "Right" />
+                                </Border>
+
+                                <ItemsControl ItemsSource = "{Binding Commands}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border x:Name = "PART_ItemBorder" MouseEnter = "CommandItem_MouseEnter"
+                                                    MouseLeave = "CommandItem_MouseLeave" CornerRadius = "3"
+                                                    MouseLeftButtonDown = "Border_MouseLeftButtonDown" Margin = "4"
+                                                    Background = "{StaticResource DefaultBackColorBrush}"
+                                                    ToolTip = "{Binding Description}">
+
+                                                <Grid x:Name = "PART_ItemGrid" Margin = "4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width = "*" />
+                                                        <ColumnDefinition Width = "Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height = "Auto" />
+                                                        <RowDefinition Height = "Auto" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <StackPanel Grid.Row = "0" Grid.Column = "0"
+                                                                Orientation = "Horizontal">
+                                                        <baseControls:ToggleIcon Width = "16" Height = "16"
+                                                                IsChecked = "{Binding CouldExecute}"
+                                                                UncheckedIcon = "{StaticResource Icon.Disabled}"
+                                                                CheckedIcon = "{StaticResource Icon.Enabled}"
+                                                                Padding = "4" />
+                                                        <TextBlock Text = "{Binding DisplayName}"
+                                                                   FontWeight = "SemiBold" />
+                                                    </StackPanel>
+
+                                                    <!-- Shortcut Pill -->
+                                                    <Border Grid.Row = "0" Grid.Column = "1" x:Name = "PART_PillBorder"
+                                                            Background = "{StaticResource LightBackColorBrush}"
+                                                            CornerRadius = "3" Padding = "4,1">
+                                                        <TextBlock
+                                                            Text = "{Binding FullShortcutText, FallbackValue=NONE}"
+                                                            FontFamily = "{StaticResource DefaultMonospacedFont}"
+                                                            FontSize = "11" />
+                                                    </Border>
+
+                                                    <TextBlock Grid.Column = "0" Grid.Row = "1" Grid.ColumnSpan = "2"
+                                                               Text = "{Binding Description}"
+                                                               Foreground = "{StaticResource LightContrastForeColorBrush}"
+                                                               FontSize = "11" TextWrapping = "Wrap" Margin = "0,2,0,0" />
+
+                                                </Grid>
+                                            </Border>
+
+                                            <DataTemplate.Triggers>
+                                                <Trigger SourceName = "PART_ItemBorder" Property = "IsMouseOver"
+                                                         Value = "True">
+
+                                                    <Setter TargetName = "PART_ItemBorder" Property = "Background"
+                                                            Value = "{StaticResource LightBackColorBrush}" />
+
+                                                    <Setter TargetName = "PART_PillBorder" Property = "Background"
+                                                            Value = "{StaticResource DefaultBackColorBrush}" />
+
+                                                </Trigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <TextBlock Grid.Row = "2" Text = "ESC to close • Double click to execute if possible"
+                       Foreground = "{StaticResource LightContrastForeColorBrush}" FontSize = "10"
+                       HorizontalAlignment = "Center" Margin = "0,10,0,0" />
+        </Grid>
+    </Border>
+</Window>

@@ -62,4 +62,10 @@ public interface ISpecializedEditor
    /// This can be just some shortcuts or presets for the specialized editor. 
    /// </summary>
    public IEnumerable<MenuItem> GetContextMenuActions();
+
+   /// <summary>
+   /// Called when the Enabled property changes. This allows the editor to perform any necessary actions when it is enabled or disabled, such as refreshing its content or updating its state.
+   /// </summary>
+   /// <param name="value"></param>
+   public void OnEnabledChanged(bool value);
 }

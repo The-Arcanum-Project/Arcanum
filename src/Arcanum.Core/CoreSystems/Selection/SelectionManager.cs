@@ -31,6 +31,7 @@ public static class SelectionManager
    public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
 
    public static event Action? PreviewChanged;
+   public static event Action? EditableObjectsChanged;
 
    public static bool SelectWater { get; set; } = true;
    public static bool SelectWasteland { get; set; } = true;
@@ -58,6 +59,7 @@ public static class SelectionManager
    static SelectionManager()
    {
       Selection.SelectionModified += InvalidateSelection;
+      EditableObjects.CollectionChanged += (s, e) => EditableObjectsChanged?.Invoke();
    }
 
    public static void Preview(List<IEu5Object> eu5Objects)

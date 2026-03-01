@@ -10,10 +10,14 @@ using System.Windows.Input;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
@@ -61,6 +65,10 @@ public partial class MapControl
 
    private int _mapWidth = -1;
    private int _mapHeight = -1;
+
+   private bool _isMapReady = false;
+
+   private Vector2? _contextMenuClickLocation;
 
    // Get to pass this into the color generation
    public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
@@ -179,6 +187,8 @@ public partial class MapControl
       OnMapLoaded?.Invoke();
       Selection.LocationSelected += LocationSelectedAddHandler;
       Selection.LocationDeselected += LocationDeselectedAddHandler;
+
+      _isMapReady = true;
    }
 
    private void LocationSelectedAddHandler(List<Location> locations)
@@ -423,7 +433,7 @@ public partial class MapControl
       }
 
       bmp.UnlockBits(bmpData);
-      IO.SaveBitmap(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
+      ImageTagger.ExportTaggedTexture(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
    }
 
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
@@ -447,6 +457,139 @@ public partial class MapControl
          pixelPtr[0] = b;
          pixelPtr[1] = g;
          pixelPtr[2] = r;
+      }
+   }
+
+   private void SelectProvince_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, location.Province.Locations, true, false);
+   }
+
+   private void SelectArea_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      var locs = location.Province.Area.GetRelevantLocations([location.Province.Area]);
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, locs, true, false);
+   }
+
+   private void SelectRegion_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.GetRelevantLocations([location.Province.Area.Region]),
+                       true,
+                       false);
+   }
+
+   private void SelectSuperRegion_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.SubContinent.GetRelevantLocations([location.Province.Area.Region.SubContinent]),
+                       true,
+                       false);
+   }
+
+   private void SelectContinent_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      Selection.Modify(SelectionTarget.Selection,
+                       SelectionMethod.Expand,
+                       location.Province.Area.Region.SubContinent.Continent.GetRelevantLocations([location.Province.Area.Region.SubContinent.Continent]),
+                       true,
+                       false);
+   }
+
+   private void CopySelectedLocationIds_Click(object sender, RoutedEventArgs e)
+   {
+      var selectedLocations = Selection.GetSelectedLocations;
+      if (selectedLocations.Count == 0)
+         return;
+
+      var idList = string.Join(" ", selectedLocations.Select(loc => loc.UniqueId));
+      Clipboard.SetText(idList);
+   }
+
+   private void SelectOwner_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      var owner = PoliticalMapMode.GetLocationOwner(location);
+      if (owner == Country.Empty)
+         return;
+
+      SelectionManager.Eu5ObjectSelectedInSearch(owner);
+   }
+
+   public bool HasLocationOwner => Selection.GetLocation(_contextMenuClickLocation) is { } loc && PoliticalMapMode.GetLocationOwner(loc) != Country.Empty;
+
+   private void MapContextMenu_Opened(object sender, RoutedEventArgs e)
+   {
+      if (!_isMapReady)
+      {
+         e.Handled = true;
+         return;
+      }
+
+      _contextMenuClickLocation = CurrentPos;
+   }
+
+   private void CopyMapCoordinates_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (!_contextMenuClickLocation.HasValue)
+         return;
+
+      var subPixelPresicision = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+      var format = subPixelPresicision ? "{0:0.##}" : "{0:0}";
+
+      Clipboard.SetText(Keyboard.Modifiers != ModifierKeys.Control
+                           ? $"X:{_contextMenuClickLocation.Value.X.ToString(format)}, Y:{_contextMenuClickLocation.Value.Y.ToString(format)}"
+                           : $"{_contextMenuClickLocation.Value.X.ToString(format)} {_contextMenuClickLocation.Value.Y.ToString(format)}");
+   }
+
+   private void MapModeDataCopy_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (!_contextMenuClickLocation.HasValue)
+         return;
+
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      var mapMode = MapModeManager.GetCurrent();
+      var relatedData = mapMode.GetLocationRelatedData(location);
+      if (relatedData == null!)
+         return;
+
+      if (relatedData is IEu5Object eu5Object)
+         Clipboard.SetText(eu5Object.UniqueId);
+      else
+      {
+         var str = relatedData.ToString();
+         if (string.IsNullOrEmpty(str))
+            return;
+
+         Clipboard.SetText(str);
       }
    }
 }

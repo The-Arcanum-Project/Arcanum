@@ -29,14 +29,21 @@ public class CurrentAgeParsing(IEnumerable<IDependencyNode<string>> dependencies
       if (!sn.IsContentNode(ref pc, out var cn))
          return;
 
-      var ageKey = pc.SliceString(cn);
+      if (!pc.IsSliceEqual(cn, "current_age"))
+         return;
+
+      if (!cn.Value.IsLiteralValueNode(ref pc, out var lvn))
+         return;
+
+      var ageKey = pc.SliceString(lvn);
+
       if (!Globals.Ages.TryGetValue(ageKey, out var age))
       {
          pc.SetContext(cn);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UnknownKey,
                                         ageKey,
-                                        cn);
+                                        lvn);
          return;
       }
 

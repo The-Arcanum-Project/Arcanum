@@ -1,0 +1,122 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.EntitySelector"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls" x:Name = "Root"
+             Focusable = "True">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border BorderThickness = "0, 1, 0, 0" BorderBrush = "{StaticResource DefaultBorderColorBrush}">
+        <Grid Margin = "0, 2, 0, 0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row = "0" LastChildFill = "True">
+                <styleClasses:BaseButton DockPanel.Dock = "Right" Width = "21" Height = "21" Margin = "2,0"
+                                         CommandParameter = "{Binding AddCommandParameter, ElementName=Root}"
+                                         Command = "{Binding AddCommand, ElementName=Root}">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Add20x20.png" />
+                </styleClasses:BaseButton>
+
+                <styleClasses:BaseButton DockPanel.Dock = "Right" Width = "21" Height = "21" Margin = "2,0"
+                                         CommandParameter = "{Binding RemoveCommandParameter, ElementName=Root}"
+                                         Command = "{Binding RemoveCommand, ElementName=Root}">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Minimize20x20.png" />
+                </styleClasses:BaseButton>
+
+                <ToggleButton DockPanel.Dock = "Right" IsChecked = "{Binding IsUniqueInProperty, ElementName=Root}"
+                              Margin = "2,0" Width = "21" Height = "21"
+                              Style = "{StaticResource BlueToggleButtonStyle}">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Stars20x20.png" />
+                    <ToggleButton.ToolTip>
+                        <TextBlock>
+                            <Run
+                                Text = "If Checked, any Location added will be removed in all other countries for this collection." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run FontStyle = "Italic"
+                                 Text = "E.g.: FRA has Calais as OwnedCore and ENG as OwnedColony." />
+                            <LineBreak />
+                            <Run FontStyle = "Italic"
+                                 Text = "If Calais is added to the cores of BRA then it will be removed from FRAs OwnedCores but remain in ENGs OwnedColony." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run
+                                Text = "If Unchecked, Locations can be present in a collection of this type in any number of countries." />
+                        </TextBlock>
+                    </ToggleButton.ToolTip>
+                </ToggleButton>
+
+                <ToggleButton DockPanel.Dock = "Right" IsChecked = "{Binding IsUniqueInAll, ElementName=Root}"
+                              Margin = "2,0" Width = "21" Height = "21"
+                              Style = "{StaticResource BlueToggleButtonStyle}">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/Star20x20.png" />
+
+                    <ToggleButton.ToolTip>
+                        <TextBlock>
+                            <Run
+                                Text = "If Checked Locations will be removed from all other collections in any country and will only be present here." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run FontStyle = "Italic"
+                                 Text = "E.g.: Calais exists in OwnedCores of FRA and in OwnedColony of ENG." />
+                            <LineBreak />
+                            <Run FontStyle = "Italic"
+                                 Text = "If we add Calais to OwnedCores of BRA it will be removed from both OwnedCores in FRA and OwnedColony in ENG" />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run
+                                Text = "If Unchecked, Locations can be present in multiple collections across different countries." />
+                        </TextBlock>
+                    </ToggleButton.ToolTip>
+                </ToggleButton>
+
+                <baseControls:SearchAndFilterBar DockPanel.Dock = "Right" Width = "120" Height = "21"
+                                                 Margin = "10,0,2,0" Mode = "Filter" ShowOptions = "False"
+                                                 SearchPath = "UniqueId"
+                                                 ItemsSource = "{Binding AddedItems, ElementName=Root}"
+                                                 FilteredItemsSource = "{Binding FilteredItems, Mode=OneWayToSource, ElementName=Root}" />
+
+                <TextBlock Text = "{Binding Title, ElementName=Root}" TextAlignment = "Left"
+                           HorizontalAlignment = "Left" VerticalAlignment = "Center" />
+            </DockPanel>
+
+            <baseControls:VirtualizingGrid Grid.Row = "1" ItemsSource = "{Binding FilteredItems, ElementName=Root}"
+                                           Columns = "{Binding GridColumns, ElementName=Root}" Height = "60"
+                                           SelectedItem = "{Binding SelectedAddedItem, ElementName=Root}"
+                                           ItemTemplate = "{Binding GridItemTemplate, ElementName=Root}"
+                                           HoverCommand = "{Binding LocationHover, ElementName=Root}"
+                                           HoverLeaveCommand = "{Binding LocationUnhover, ElementName=Root}">
+
+                <baseControls:VirtualizingGrid.Style>
+                    <Style TargetType = "baseControls:VirtualizingGrid">
+                        <!-- Default to Visible -->
+                        <Setter Property = "Visibility" Value = "Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding = "{Binding FilteredItems, ElementName=Root}" Value = "{x:Null}">
+                                <Setter Property = "Visibility" Value = "Collapsed" />
+                            </DataTrigger>
+
+                            <DataTrigger Binding = "{Binding FilteredItems.Count, ElementName=Root, FallbackValue=0}"
+                                         Value = "0">
+                                <Setter Property = "Visibility" Value = "Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </baseControls:VirtualizingGrid.Style>
+            </baseControls:VirtualizingGrid>
+        </Grid>
+    </Border>
+</UserControl>

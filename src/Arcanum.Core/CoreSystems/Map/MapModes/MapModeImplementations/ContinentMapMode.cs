@@ -3,7 +3,6 @@ using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
@@ -12,7 +11,7 @@ public class ContinentMapMode : LocationBasedMapMode
    public override string Name => "Continents";
    public override string Description => "Displays the Continents the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
-   public override Type[] DisplayTypes => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
+   public override Type[] DisplayTypes => [typeof(Continent), typeof(SubContinent), typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
    public override bool IsLandOnly => false;
 
    public override int GetColorForLocation(Location location)
@@ -37,4 +36,6 @@ public class ContinentMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location.Province.Area.Region.SubContinent.Continent;
 }

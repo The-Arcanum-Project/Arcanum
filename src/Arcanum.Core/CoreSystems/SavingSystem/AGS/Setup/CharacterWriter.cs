@@ -1,13 +1,13 @@
 ﻿using System.Text;
 using Arcanum.Core.CoreSystems.Common;
-using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.CoreSystems.Parsing.Steps.Setup;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.Utils.Sorting;
 using Character = Arcanum.Core.GameObjects.InGame.Court.Character;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS.Setup;
 
-public class CharacterWriter() : SetupFileWriter([], "") // SetupFileWriter(SetupParsingManager.NestedSubTypes(Character.Empty),
-//                "05_characters.txt")
+public class CharacterWriter() : SetupFileWriter(SetupParsingManager.NestedSubTypes(Character.Empty), "05_characters.txt")
 {
    // windows-1252 encoding
    public override Encoding FileEncoding { get; } = Encoding.GetEncoding(1252);
@@ -19,7 +19,7 @@ public class CharacterWriter() : SetupFileWriter([], "") // SetupFileWriter(Setu
       var sb = new IndentedStringBuilder();
       using (sb.BlockWithName("character_db"))
          foreach (var character in sorted)
-            ((IEu5Object)character).ToAgsContext().BuildContext(sb);
+            TreeBuilder.ConstructAndWrite(character, sb, false, false, null, false, false);
 
       return sb;
    }

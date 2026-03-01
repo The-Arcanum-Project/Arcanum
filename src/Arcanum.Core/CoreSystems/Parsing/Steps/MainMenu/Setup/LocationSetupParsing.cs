@@ -41,8 +41,15 @@ public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> d
       if (!sn.IsBlockNode(ref pc, out var bn))
          return;
 
+      CommentNode? lastComment = null;
       foreach (var cn in bn.Children)
       {
+         if (cn is CommentNode comNode)
+         {
+            lastComment = comNode;
+            continue;
+         }
+
          if (!cn.IsBlockNode(ref pc, out var objBn))
             continue;
 
@@ -54,6 +61,12 @@ public partial class LocationSetupParsing(IEnumerable<IDependencyNode<string>> d
                        locName);
             pc.Fail();
             continue;
+         }
+
+         if (lastComment is not null)
+         {
+            loc.AddStandaloneComment(lastComment.CommentText);
+            lastComment = null;
          }
 
          ParseProperties(objBn, loc, ref pc, false);

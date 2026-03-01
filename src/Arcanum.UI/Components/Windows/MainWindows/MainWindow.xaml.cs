@@ -21,7 +21,7 @@ using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
-using Arcanum.Core.Utils.ScreenManagement;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.Map;
 using Arcanum.UI.Components.Views.MainWindow;
@@ -177,6 +177,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          OnPropertyChanged();
       }
    } = null!;
+   public IAppCommand OpenHelpCommand { get; } = CommandRegistry.Get(CommandIds.Global.OpenHelp);
 
    #endregion
 
@@ -224,16 +225,6 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
-      var screen = ScreenManager.MainScreen;
-      if (screen.Bounds.Height <= DEFAULT_HEIGHT || screen.Bounds.Width <= DEFAULT_WIDTH)
-      {
-         Height = screen.WorkingArea.Height * 0.8;
-         Width = screen.WorkingArea.Width * 0.8;
-         WindowState = WindowState.Maximized;
-      }
-
-      this.SetScreen(screen);
-
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");
@@ -539,7 +530,10 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void UndoCommand_Executed(object sender, ExecutedRoutedEventArgs e)
    {
+      var sw = Stopwatch.StartNew();
       AppData.HistoryManager.Undo(false);
+      sw.Stop();
+      ArcLog.WriteLine("MW", LogLevel.INF, $"Undo executed in {sw.ElapsedMilliseconds} ms");
    }
 
    private void CommandCanStrepRedoExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -646,7 +640,9 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             VerticalAlignment = VerticalAlignment.Bottom,
             Height = 30,
             ToolTip = mapMode != null
-                         ? mapMode.Description +
+                         ? mapMode.Name +
+                           '\n' +
+                           mapMode.Description +
                            "\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
                            (i != 9 ? i + 1 : 0)
                          : "No map mode assigned to this button.\nRMB to assign a new map mode.\nShortcut: Ctrl + " +
@@ -654,7 +650,9 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
             MapModeType = mapMode?.Type ?? MapModeManager.MapModeType.Locations,
             BorderThickness = new(1),
             FontSize = 7,
+            ButtonIndex = i,
          };
+         MapModeButton.QuickMapModeButtons[i] = button;
          button.SetValue(Grid.ColumnProperty, i);
          MapModeButtonGrid.Children.Add(button);
       }

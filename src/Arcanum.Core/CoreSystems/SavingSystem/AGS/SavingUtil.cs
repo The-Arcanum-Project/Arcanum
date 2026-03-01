@@ -2,12 +2,15 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
+using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
@@ -25,7 +28,7 @@ public static class SavingUtil
       {
          var sb = new IndentedStringBuilder();
          foreach (var item in items)
-            item.ToAgsContext().BuildContext(sb);
+            TreeBuilder.ConstructAndWrite(item, sb, item.AgsSettings.AsOneLine, false, null, false, false);
          return sb;
       }
 
@@ -39,7 +42,10 @@ public static class SavingUtil
                           var localSb = new IndentedStringBuilder();
 
                           for (var i = range.Item1; i < range.Item2; i++)
-                             items[i].ToAgsContext().BuildContext(localSb);
+                          {
+                             var item = items[i];
+                             TreeBuilder.ConstructAndWrite(item, localSb, item.AgsSettings.AsOneLine, false, null, false, false);
+                          }
 
                           chunkResults.TryAdd(partitionIndex, localSb);
                        });
@@ -69,6 +75,7 @@ public static class SavingUtil
          InjRepType.REPLACE => "REPLACE",
          InjRepType.TRY_REPLACE => "TRY_REPLACE",
          InjRepType.REPLACE_OR_CREATE => "REPLACE_OR_CREATE",
+         InjRepType.None => string.Empty,
          _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
       };
    }
@@ -146,10 +153,22 @@ public static class SavingUtil
          case SavingValueType.Color:
             return ((JominiColor)value).ToString();
          case SavingValueType.Auto:
-            throw new InvalidOperationException("SavingValueType cannot be Auto at this point.");
+            if (value is Vector2 vec2)
+               return FormatVec2ToCode(vec2);
+            if (value is Vector3 vec3)
+               return FormatVec3ToCode(vec3);
+            if (value is Vector4 vec4)
+               return FormatVec4ToCode(vec4);
+            if (value is Quaternion quat)
+               return FormatQuaternionToCode(quat);
+
+            throw new InvalidOperationException("Auto type could not be resolved to a known complex type.");
          case SavingValueType.Enum:
             return value.ToString()!;
          case SavingValueType.IAgs:
+            if (value is JominiDate date)
+               return date.ToString();
+
             throw new InvalidOperationException("IAgs type needs to be handled in advance");
          case SavingValueType.Modifier:
             if (value is ModValInstance mvi)
@@ -161,6 +180,18 @@ public static class SavingUtil
             throw new ArgumentOutOfRangeException(nameof(svl), svl, null);
       }
    }
+
+   public static string FormatVec2ToCode(Vector2 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)}";
+
+   public static string FormatVec3ToCode(Vector3 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)} {vec.Z.ToString("F6", CultureInfo.InvariantCulture)}";
+
+   public static string FormatVec4ToCode(Vector4 vec)
+      => $"{{ {vec.X.ToString("F6", CultureInfo.InvariantCulture)} {vec.Y.ToString("F6", CultureInfo.InvariantCulture)} {vec.Z.ToString("F6", CultureInfo.InvariantCulture)} {vec.W.ToString("F6", CultureInfo.InvariantCulture)} }}";
+
+   public static string FormatQuaternionToCode(Quaternion quat)
+      => $"{{ {quat.X.ToString("F6", CultureInfo.InvariantCulture)} {quat.Y.ToString("F6", CultureInfo.InvariantCulture)} {quat.Z.ToString("F6", CultureInfo.InvariantCulture)} {quat.W.ToString("F6", CultureInfo.InvariantCulture)} }}";
 
    /// <summary>
    /// Formats a property value from a Nexus object according to the specified SavingValueType.
@@ -184,6 +215,7 @@ public static class SavingUtil
    /// <param name="separator"></param>
    /// <returns></returns>
    /// <exception cref="ArgumentOutOfRangeException"></exception>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public static string GetSeparator(TokenType separator)
    {
       return separator switch
@@ -262,7 +294,7 @@ public static class SavingUtil
       if (item is IModifierPattern)
          return SavingValueType.Modifier;
 
-      return SavingValueType.String;
+      return SavingValueType.Auto;
       //throw new NotSupportedException($"Type {type} is not supported as item key type. Is it not defined as an IAgs?");
    }
 

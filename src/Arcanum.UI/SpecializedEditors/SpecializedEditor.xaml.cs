@@ -88,12 +88,6 @@ public partial class SpecializedEditor
       EnabledToggleButton.IsChecked = _specializedEditor.Enabled;
       _ignoreEnableChange = false;
 
-      if (!_specializedEditor.Enabled)
-      {
-         EditorContent = null;
-         return;
-      }
-
       Debug.Assert(_specializedEditor != null, "Specialized editor instance must be provided.");
       Debug.Assert(props.Count > 0, "At least one targetable property must be provided.");
       Debug.Assert(!_specializedEditor.SupportsMultipleTargets,
@@ -104,6 +98,13 @@ public partial class SpecializedEditor
       TargetableProperties = props.Select(p => p?.ToString() ?? _targets[0].GetType().Name).ToArray();
       _specializedEditor.ResetFor(_targets);
       UpdateRequirementsStatus();
+
+      if (!_specializedEditor.Enabled)
+      {
+         EditorContent = null;
+         return;
+      }
+
       SetEditorContent();
       PropertySelector.SelectedIndex = 0;
    }
@@ -151,5 +152,8 @@ public partial class SpecializedEditor
 
       _specializedEditor.Enabled = tb.IsChecked == true;
       MainWindowGen.UpdateSpecializedEditors();
+      UpdateRequirementsStatus();
+
+      _specializedEditor.OnEnabledChanged(_specializedEditor.Enabled);
    }
 }

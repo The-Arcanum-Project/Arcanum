@@ -82,36 +82,9 @@ public interface IEu5Object : ISearchable, INUI, IAgs
    /// </summary>
    public IDictionary GetGlobalItemsNonGeneric();
 
-   /// <summary>
-   /// Returns an array of all properties that have non-default values.
-   /// </summary>
-   /// <returns></returns>
-   public KeyValuePair<Enum, object>[] GetNonDefaultProperties()
-   {
-      // Is not as bad as it looks as GetAllProperties() is cached.
-      var nonDefaultProps = new KeyValuePair<Enum, object>[GetAllProperties().Length];
-
-      var index = 0;
-      foreach (var prop in GetAllProperties())
-      {
-         var currentValue = _getValue(prop);
-         var defaultValue = GetDefaultValue(prop);
-
-         if (IsCollection(prop) && InjectManager.AreCollectionsLogicallyEqual(currentValue, defaultValue))
-            continue;
-
-         if (currentValue.Equals(defaultValue))
-            continue;
-
-         // Skip UniqueId property
-         if (prop.ToString() == "UniqueId")
-            continue;
-
-         nonDefaultProps[index++] = new(prop, currentValue);
-      }
-
-      return nonDefaultProps[..index];
-   }
+   public string? LeadingComment { get; set; }
+   public string? InlineComment { get; set; }
+   public string? ClosingComment { get; set; }
 
    public static bool IsEmpty(IEu5Object obj)
    {

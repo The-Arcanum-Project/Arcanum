@@ -15,7 +15,7 @@ public static class RnHelpers
       if (rn.Statements.Count == 0)
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.EmptyRootNode,
-                                        pc.Context.FilePath);
+                                        pc.Context.FileObj);
 
       return rn.Statements.Count == 0;
    }

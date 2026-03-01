@@ -4,6 +4,9 @@ namespace Arcanum.Core.GameObjects.InGame.Court.State;
 
 public enum GovernmentType
 {
+   [EnumAgsData("none", isIgnoredInSerialization: true)]
+   None,
+
    [EnumAgsData("monarchy")]
    Monarchy,
 
@@ -17,5 +20,5 @@ public enum GovernmentType
    Tribal,
 
    [EnumAgsData("steppe_horde")]
-   SteppeHorde
+   SteppeHorde,
 }

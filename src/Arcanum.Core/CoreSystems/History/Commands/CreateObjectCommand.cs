@@ -1,4 +1,5 @@
-﻿using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+﻿using Arcanum.Core.CoreSystems.EventDistribution;
+using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 namespace Arcanum.Core.CoreSystems.History.Commands;
@@ -34,14 +35,15 @@ public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlo
       }
 
       SaveMaster.RemoveNewObject(eu5Object);
+      EventDistributor.UpdateNUI?.Invoke();
    }
 
    public override void Redo()
    {
       Execute();
+      EventDistributor.UpdateNUI?.Invoke();
    }
 
-   public override string GetDescription
-      => isAdd ? "Create Object" : "Delete Object" + $": {eu5Object.UniqueId} ({eu5Object.GetType().Name})";
+   public override string GetDescription => isAdd ? "Create Object" : "Delete Object" + $": {eu5Object.UniqueId} ({eu5Object.GetType().Name})";
    public override IEu5Object[] GetTargets() => [eu5Object];
 }

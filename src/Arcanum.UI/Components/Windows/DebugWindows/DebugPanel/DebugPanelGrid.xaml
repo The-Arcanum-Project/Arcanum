@@ -22,9 +22,6 @@
             <styleClasses:BaseButton Content = "Saving Window" Margin = "2" Padding = "4"
                                      Click = "OpenSavingWindowButton_Click" />
 
-            <styleClasses:BaseButton Content = "Saving Exporter Window" Margin = "2" Padding = "4"
-                                     Click = "OpenSavingWindowExporterButton_Click" />
-
             <styleClasses:BaseButton Content = "Open File Exporter" Margin = "2" Padding = "4"
                                      Click = "OpenTestWindowButton_Click" />
 
@@ -70,8 +67,34 @@
             <styleClasses:BaseButton Content = "Command Generator" Margin = "2" Padding = "4"
                                      Click = "CommandGenerator_OnClick" />
 
+            <styleClasses:BaseButton Content = "Word Generator" Margin = "2" Padding = "4"
+                                     Click = "WordGenerator_OnClick" />
+
+            <styleClasses:BaseButton Content = "AST Builder Viewer" Margin = "2" Padding = "4"
+                                     Click = "ASTBuilderViewer_OnClick" />
+
+            <styleClasses:BaseButton Content = "Check for Arcanum Watermark" Margin = "2" Padding = "4"
+                                     Click = "ImageTagDecode_OnClick" />
+
+            <styleClasses:BaseButton Content = "Command Window Test" Margin = "2" Padding = "4"
+                                     Click = "BindingTest_OnClick" />
+
+            <styleClasses:BaseButton Content = "Command export ContextMenu" Margin = "2" Padding = "4">
+                <styleClasses:BaseButton.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header = "Export To Markdown" Click = "ExportAllCommands_OnClick" />
+                        <MenuItem Header = "Export To Json" Click = "ExportSelectedCommands_OnClick" />
+                        <MenuItem Header = "Export To Html" Click = "ExportToHtml_OnClick" />
+                    </ContextMenu>
+                </styleClasses:BaseButton.ContextMenu>
+            </styleClasses:BaseButton>
+
+            <styleClasses:BaseButton Content = "ContextExplorer" Margin = "2" Padding = "2"
+                                     Click = "ContextExplorer_OnClick" />
+            
             <styleClasses:BaseButton Content = "Write Template to pops" Margin = "2" Padding = "4"
                                      Click = "TemplateToPops_OnClick" />
+
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

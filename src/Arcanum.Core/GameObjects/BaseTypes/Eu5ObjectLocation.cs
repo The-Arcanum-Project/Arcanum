@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
@@ -50,7 +49,7 @@ public class Eu5ObjectLocation(int colum, int line, int length, int charPos)
 
    public LocationContext ToLocationContext(Eu5FileObj source)
    {
-      return new(Line, Column, source.Path.FullPath);
+      return new(Line, Column, source);
    }
 
    public int End => CharPos + Length;

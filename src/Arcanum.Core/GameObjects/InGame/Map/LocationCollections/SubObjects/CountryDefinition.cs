@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
+using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -75,6 +76,7 @@ public partial class CountryDefinition : IEu5Object<CountryDefinition>
 
    [SaveAs]
    [ParseAs("difficulty")]
+   [PropertyConfig(minValue: 0, maxValue: 5)]
    [DefaultValue(0)]
    [Description("The difficulty level of this country, between 0 and 5")]
    public int Difficulty { get; set; }

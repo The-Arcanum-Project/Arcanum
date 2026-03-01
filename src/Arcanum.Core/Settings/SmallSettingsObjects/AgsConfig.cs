@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 
 namespace Arcanum.Core.Settings.SmallSettingsObjects;
@@ -17,9 +18,13 @@ public class AgsConfig
    [DefaultValue(3)]
    public int SpacesPerIndent { get; set; } = 3;
 
+   [Description("Number of spaces to use for each spacing between e.g. '=' or items in collections.")]
+   [DefaultValue(1)]
+   public int SpacesPerSpacing { get; set; } = 1;
+
    [Description("Whether to use INJECT/REPLACE calls when saving objects.")]
-   [DefaultValue(true)]
-   public bool UseInjectReplaceCalls { get; set; } = true;
+   [DefaultValue(false)]
+   public bool UseInjectReplaceCalls { get; set; } = false;
 
    [Description("Maximum percentage of properties to INJECT into an object before an REPLACE is used instead.")]
    [DefaultValue(0.5f)]
@@ -44,4 +49,24 @@ public class AgsConfig
    [Description("If true, the setup folder will save all e.g. location specific data into a single file. If false, separate files will be used as in vanilla.")]
    [DefaultValue(true)]
    public bool CompactSetupFolder { get; set; } = false;
+
+   [Description("The number of new lines to insert between properties when saving.")]
+   [DefaultValue(1)]
+   public int NewLinesBetweenProperties { get; set; } = 1;
+
+   [Description("The number of new lines to insert before a block when saving.")]
+   [DefaultValue(2)]
+   public int NewLinesBeforeBlock { get; set; } = 2;
+
+   [Description("The number of new lines to insert between objects when saving.")]
+   [DefaultValue(3)]
+   public int NewLinesBetweenObjects { get; set; } = 3;
+
+   [Description("Where the opening brace for blocks should be located when saving. Only applied if the block is not set to be on one line.")]
+   [DefaultValue(BraceLocation.SameLine)]
+   public BraceLocation OpeningBraceLocation { get; set; } = BraceLocation.SameLine;
+
+   [Description("When exporting an image via Arcanum, we can write an invisible watermark into the image to identify it as exported by Arcanum. We do this to see where Arcanum is used and to be able to track issues better.")]
+   [DefaultValue(true)]
+   public bool WriteInvisibleWaterMarkInImages { get; set; } = true;
 }

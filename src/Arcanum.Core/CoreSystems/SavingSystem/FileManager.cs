@@ -300,8 +300,9 @@ public static class FileManager
       {
          // We have a vanilla file, so we return the vanilla file information
          Debug.Assert(fileName != null, nameof(fileName) + " != null");
-         return new(new(descriptor.LocalPath, fileName, VanillaDataSpace),
-                    descriptor);
+         var newObj = new Eu5FileObj(new(descriptor.LocalPath, fileName, VanillaDataSpace),
+                                     descriptor);
+         return newObj;
       }
 
       throw new
@@ -350,16 +351,9 @@ public static class FileManager
          return false;
 
       // if we have a file ending we need to remove it and only check the path
-      try
-      {
-         return CoreData.ModMetadata.ReplacePaths.Any(replacePath
-                                                         => replacePath.Equals(subPaths));
-      }
-      catch (Exception e)
-      {
-         ArcLog.Error("FMN", "Failed to load mod metadata", e);
-         return false;
-      }
+      return CoreData.ModMetadata.ReplacePaths.Any(replacePath
+                                                      => replacePath.Equals(RemoveFileNameEntryFromPath(subPaths,
+                                                                                                        out _)));
    }
 
    private static string[] RemoveFileNameEntryFromPath(string[] subPaths, out string? fileName)

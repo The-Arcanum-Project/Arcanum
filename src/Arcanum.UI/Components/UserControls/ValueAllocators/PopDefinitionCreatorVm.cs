@@ -14,8 +14,41 @@ namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
 public class PopDefinitionCreatorVm : ViewModelBase
 {
-   public RelayCommand CreatePopDefCommand { get; } = null!;
-   public RelayCommand CreatePopDefFromSampeCommand { get; } = null!;
+   private readonly AllocatorViewModel _avm;
+
+   private readonly Location _targetLocation;
+
+   public PopDefinitionCreatorVm(Location targetLocation, AllocatorViewModel avm)
+   {
+      _targetLocation = targetLocation;
+      _avm = avm;
+
+      PopType = CalculateItemWithMaxPop<PopType>(_targetLocation.Pops, PopDefinition.Field.PopType) ?? PopType.Empty;
+      Religion = CalculateItemWithMaxPop<Religion>(_targetLocation.Pops, PopDefinition.Field.Religion) ?? Religion.Empty;
+      Culture = CalculateItemWithMaxPop<Culture>(_targetLocation.Pops, PopDefinition.Field.Culture) ?? Culture.Empty;
+
+      var allOfType = _targetLocation.Pops.Where(p => p.PopType == PopType).ToList();
+
+      var num = allOfType.Sum(p => p.Size) /
+                allOfType.Count *
+                1000d *
+                Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage;
+      Value = (int)num;
+
+      CreatePopDefCommand = new(CreateNewPops);
+      CreatePopDefFromSampeCommand = new(CreatePopDefFromSample);
+
+      UpdateCondition1();
+      UpdateCondition2();
+
+      if (allOfType.Count == 0)
+         Value = Config.Settings.SpecializedEditorSettings.PopEditorSettings.DefaultPopSize;
+
+      PropertyChanged += OnPropertyChanged;
+   }
+
+   public RelayCommand CreatePopDefCommand { get; }
+   public RelayCommand CreatePopDefFromSampeCommand { get; }
 
    public PopType PopType
    {
@@ -162,38 +195,6 @@ public class PopDefinitionCreatorVm : ViewModelBase
 
    public static PopDefinition.Field[] SamplePopDefinitionSources => [PopDefinition.Field.PopType, PopDefinition.Field.Culture, PopDefinition.Field.Religion];
 
-   private readonly Location _targetLocation;
-   private readonly AllocatorViewModel _avm;
-
-   public PopDefinitionCreatorVm(Location targetLocation, AllocatorViewModel avm)
-   {
-      _targetLocation = targetLocation;
-      _avm = avm;
-
-      PopType = CalculateItemWithMaxPop<PopType>(_targetLocation.Pops, PopDefinition.Field.PopType) ?? PopType.Empty;
-      Religion = CalculateItemWithMaxPop<Religion>(_targetLocation.Pops, PopDefinition.Field.Religion) ?? Religion.Empty;
-      Culture = CalculateItemWithMaxPop<Culture>(_targetLocation.Pops, PopDefinition.Field.Culture) ?? Culture.Empty;
-
-      var allOfType = _targetLocation.Pops.Where(p => p.PopType == PopType).ToList();
-      if (allOfType.Count == 0)
-      {
-         Value = Config.Settings.SpecializedEditorSettings.PopEditorSettings.DefaultPopSize;
-         return;
-      }
-
-      var num = (allOfType.Sum(p => p.Size) / allOfType.Count * 1000d) *
-                Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage;
-      Value = (int)num;
-
-      CreatePopDefCommand = new(CreateNewPops);
-      CreatePopDefFromSampeCommand = new(CreatePopDefFromSample);
-
-      UpdateCondition1();
-      UpdateCondition2();
-
-      PropertyChanged += OnPropertyChanged;
-   }
-
    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
    {
       if (e.PropertyName is nameof(Condition1))
@@ -257,7 +258,7 @@ public class PopDefinitionCreatorVm : ViewModelBase
 
       var totalSize = samplePops.Sum(p => p.Size) * 1000;
       var avgSize = totalSize / samplePops.Count;
-      var offset = (int)(avgSize * (RandomOffsetPercentage));
+      var offset = (int)(avgSize * RandomOffsetPercentage);
       var randomizedSize = avgSize + Random.Shared.Next(Math.Min(-offset, 0), Math.Max(0, offset + 1));
 
       var popDef = new PopDefinition();
@@ -332,7 +333,7 @@ public class PopDefinitionCreatorVm : ViewModelBase
 
    private void CreateNewPops()
    {
-      var popDef = new PopDefinition()
+      var popDef = new PopDefinition
       {
          PopType = PopType,
          Religion = Religion,
@@ -344,6 +345,12 @@ public class PopDefinitionCreatorVm : ViewModelBase
 
    private void AddPopToVms(PopDefinition popDef)
    {
+      if (!popDef.IsValid())
+      {
+         MBox.Show("Please ensure all fields are set before creating the PopDefinition.", "Invalid PopDefinition");
+         return;
+      }
+
       _targetLocation.Pops.Add(popDef); // TODO call the global EventDispatcher
       _avm.AddAllocationItemForPopDefinition(popDef);
    }

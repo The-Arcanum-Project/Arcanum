@@ -49,4 +49,8 @@ public partial class PopsEditor : ISpecializedEditor
    public FrameworkElement GetEditorControl() => this;
 
    public IEnumerable<MenuItem> GetContextMenuActions() => [];
+
+   public void OnEnabledChanged(bool value)
+   {
+   }
 }

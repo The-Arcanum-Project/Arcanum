@@ -9,6 +9,7 @@ using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS.Attributes;
+using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -124,84 +125,97 @@ public partial class Country : IEu5Object<Country>
    public string CountryName { get; set; } = string.Empty;
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlCores { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_control_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and controlled locations that are integrated of this country.")]
    public ObservableRangeCollection<Location> OwnControlIntegrated { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_control_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but controlled by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnControlConquered { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_control_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnControlColony { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned core locations of this country.")]
    public ObservableRangeCollection<Location> OwnCores { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_conquered", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations conquered but owned by someone else than this country.")]
    public ObservableRangeCollection<Location> OwnConquered { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_integrated", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned and integrated locations of this country.")]
    public ObservableRangeCollection<Location> OwnIntegrated { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("own_colony", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The owned colony locations of this country.")]
    public ObservableRangeCollection<Location> OwnColony { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("control_core", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled core locations of this country.")]
    public ObservableRangeCollection<Location> ControlCores { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("control", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("The controlled locations of this country.")]
    public ObservableRangeCollection<Location> Control { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
+   [AgsCollectionFormat(ItemsPerRow = 10)]
    [ParseAs("our_cores_conquered_by_others", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("All Locations that are our cores but conquered by other countries.")]
    public ObservableRangeCollection<Location> OurCoresConqueredByOthers { get; set; } = [];
 
-   [SaveAs(isShattered: true)]
-   [ParseAs("include", isShatteredList: true)]
+   [SaveAs(SavingValueType.String, isShattered: true)]
+   [ParseAs("include", isShatteredList: true, itemNodeType: AstNodeType.ContentNode)]
    [DefaultValue(null)]
    [Description("A list of included ??? for this country.")]
-   public ObservableRangeCollection<string> Includes { get; set; } = [];
+   public ObservableRangeCollection<CountryTemplate> Includes { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [AgsCollectionFormat(ItemsPerRow = 7)]
    [ParseAs("accepted_cultures", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A list of accepted cultures for this country.")]
    public ObservableRangeCollection<Culture> AcceptedCultures { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [AgsCollectionFormat(ItemsPerRow = 7)]
    [ParseAs("tolerated_cultures", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("A list of tolerated cultures for this country.")]
@@ -213,7 +227,7 @@ public partial class Country : IEu5Object<Country>
    [Description("A list of currency data effects for this country before game start.")]
    public ObservableRangeCollection<CurrencyData> CurrencyData { get; set; } = [];
 
-   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false)]
+   [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "IsPopsCountry")]
    [ParseAs("add_pops_from_locations", AstNodeType.BlockNode)]
    [DefaultValue(null)]
    [Description("When starting the game, add pops from these locations to this country.")]
@@ -304,6 +318,17 @@ public partial class Country : IEu5Object<Country>
          return false;
       }
 
-      return country.CountryType == CountryType.Building;
+      return country.CountryType is CountryType.Building or CountryType.Pop;
+   }
+
+   private static bool IsPopsCountry(object obj)
+   {
+      if (obj is not Country country)
+      {
+         Debug.Fail("IsPopsCountry called with non-Country object.");
+         return false;
+      }
+
+      return country.CountryType != CountryType.Pop;
    }
 }

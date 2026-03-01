@@ -88,4 +88,10 @@ public interface IMapMode
    /// Is called when this map mode is deactivated.
    /// </summary>
    public void OnDeactivateMode();
+
+   /// <summary>
+   /// Returns data related to the given location that is relevant for this map mode.
+   /// </summary>
+   /// <param name="location"></param>
+   public object GetLocationRelatedData(Location location);
 }

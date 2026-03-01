@@ -484,15 +484,16 @@
                         <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "PopType" HorizontalAlignment = "Left"
                                    VerticalAlignment = "Center" />
                         <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
-                                                  ItemsSource = "{Binding Source={x:Static g:Globals.PopTypes}, Path=Values}"
+                                                  FullItemsSource = "{Binding Source={x:Static g:Globals.PopTypes}, Path=Values}"
                                                   SelectedItem = "{Binding PopDefinitionCreatorVm.PopType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   HorizontalAlignment = "Stretch" Margin = "0,2" />
 
 
                         <TextBlock Grid.Row = "1" Grid.Column = "3" Text = "Culture" HorizontalAlignment = "Left"
                                    VerticalAlignment = "Center" />
+
                         <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "4"
-                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Cultures}, Path=Values}"
+                                                  FullItemsSource = "{Binding Source={x:Static g:Globals.Cultures}, Path=Values}"
                                                   SelectedItem = "{Binding PopDefinitionCreatorVm.Culture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   HorizontalAlignment = "Stretch" Margin = "0,2" />
 
@@ -503,7 +504,7 @@
                         <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Religion" HorizontalAlignment = "Left"
                                    VerticalAlignment = "Center" />
                         <acb:AutoCompleteComboBox Grid.Row = "2" Grid.Column = "1"
-                                                  ItemsSource = "{Binding Source={x:Static g:Globals.Religions}, Path=Values}"
+                                                  FullItemsSource = "{Binding Source={x:Static g:Globals.Religions}, Path=Values}"
                                                   SelectedItem = "{Binding PopDefinitionCreatorVm.Religion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   HorizontalAlignment = "Stretch" Margin = "0,2" />
 

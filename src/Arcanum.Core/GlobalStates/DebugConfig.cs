@@ -23,5 +23,6 @@ public class DebugConfigSettings() : InternalSearchableSetting(Config.Settings)
    public bool SuppressAllErrors { get; set; } = false;
    public bool OnlyHandleSpecifiedErrors { get; set; } = false;
    public List<string> ErrorsToHandle { get; set; } = [];
+   public bool SkipLoading { get; set; } = false;
 }
 #endif

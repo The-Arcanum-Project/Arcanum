@@ -1,0 +1,28 @@
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.CommandBindingTest"
+                         xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+                         xmlns:debugWindows = "clr-namespace:Arcanum.UI.Components.Windows.DebugWindows"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+                         Title = "CommandBindingTest" Height = "450" Width = "800"
+                         commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
+                         d:DataContext = "{d:DesignInstance debugWindows:PopupViewModel}">
+
+    <!-- <commands:CommandBinder.Scopes> -->
+    <!--     <x:Array Type="{x:Type sys:String}"> -->
+    <!--         <x:Static Member="commands:CommandScopes.DIALOG"/> -->
+    <!--     </x:Array> -->
+    <!-- </commands:CommandBinder.Scopes> -->
+
+    <Grid Margin = "20">
+        <StackPanel VerticalAlignment = "Center">
+            <TextBlock Text = "Press Escape or click the button below to close." TextWrapping = "Wrap"
+                       TextAlignment = "Center" Margin = "0,0,0,20" />
+
+            <styleClasses:BaseButton commands:CommandBinder.Assign = "{Binding CloseCommand}" Width = "80"
+                                     Height = "25" HorizontalAlignment = "Center" />
+        </StackPanel>
+    </Grid>
+</styleClasses:BaseWindow>

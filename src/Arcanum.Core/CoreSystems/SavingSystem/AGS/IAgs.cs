@@ -17,13 +17,6 @@ public interface IAgs : INexus
    public IReadOnlyList<PropertySavingMetadata> SaveableProps { get; }
 
    /// <summary>
-   /// Returns a new AgsObjectSavingContext initialized for this IAgs instance.
-   /// </summary>
-   /// <returns></returns>
-   public AgsObjectSavingContext ToAgsContext(string commentChar = "#")
-      => new(this, commentChar); //TODO fix this by using FileInformation
-
-   /// <summary>
    /// Returns the metadata for the class implementing this IAgs instance. <br/>
    /// This includes information such as the class name, namespace, and any relevant attributes.
    /// </summary>

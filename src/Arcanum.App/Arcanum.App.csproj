@@ -8,7 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
         <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
     </PropertyGroup>
 
@@ -19,14 +19,8 @@
         <!-- DISPLAY NAMES: Used for UI and Window Titles -->
         <Product>Arcanum Aer</Product>
         <!-- VERSIONING: The single place to change the number -->
-        <Version>1.0.6</Version>
+        <Version>1.0.7</Version>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico">
-            <Link>ArcanumSimplified.ico</Link>
-        </None>
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj"/>

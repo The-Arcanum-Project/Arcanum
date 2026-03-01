@@ -1,0 +1,158 @@
+﻿<UserControl x:Class = "Arcanum.UI.SpecializedEditors.EditorControls.PoliticalEditor"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local = "clr-namespace:Arcanum.UI.SpecializedEditors.EditorControls"
+             xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+             xmlns:locationCollections = "clr-namespace:Arcanum.Core.GameObjects.InGame.Map.LocationCollections;assembly=Arcanum.Core"
+             xmlns:autoCompleteBox = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
+             xmlns:viewModels = "clr-namespace:Arcanum.UI.SpecializedEditors.EditorControls.ViewModels"
+             mc:Ignorable = "d" d:DesignWidth = "300"
+             commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.POLITICAL_EDITOR}"
+             commands:ContextBinder.ObserveContext = "True"
+             d:DataContext = "{d:DesignInstance Type=viewModels:PoliticalEditorViewModel, IsDesignTimeCreatable=True}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType = "baseControls:EntitySelector">
+                <Setter Property = "Margin" Value = "0, 2"> </Setter>
+                <Setter Property = "GridColumns" Value = "3" />
+                <Setter Property = "AddCommandParameter"
+                        Value = "{Binding RelativeSource={RelativeSource AncestorType=local:PoliticalEditor}}" />
+                <Setter Property = "RemoveCommandParameter"
+                        Value = "{Binding RelativeSource={RelativeSource AncestorType=local:PoliticalEditor}}" />
+                <Setter Property = "GridItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType = "{x:Type locationCollections:Location}">
+                            <TextBlock Text = "{Binding UniqueId}" HorizontalAlignment = "Left"
+                                       FontFamily = "{StaticResource DefaultMonospacedFont}" />
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "22" />
+            <RowDefinition Height = "32" />
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+
+        <!-- Country: <Selector for country> -->
+        <Grid Grid.Row = "0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "90" />
+                <ColumnDefinition Width = "*" />
+                <ColumnDefinition Width = "Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text = "Country:" FontWeight = "Bold" Margin = "0,0,10,0" />
+
+            <autoCompleteBox:AutoCompleteComboBox Grid.Column = "1" FullItemsSource = "{Binding Countries}"
+                                                  SelectedItem = "{Binding SelectedCountry}"
+                                                  SelectionChanged = "CountrySelector_SelectionChanged" />
+
+            <!-- SyncWithSearch ToggleButton -->
+            <ToggleButton Grid.Column = "2" Margin = "4,0,0,0" Width = "22" Height = "22"
+                          IsChecked = "{Binding SyncWithSearch, Mode=OneWay}"
+                          Style = "{StaticResource BlueToggleButtonStyle}"
+                          commands:CommandBinder.Assign = "{Binding SyncWithSearchCommand}">
+                <Path Data = "{StaticResource Icon.Sync}" Fill = "{StaticResource DefaultForeColorBrush}"
+                      Stretch = "Uniform" />
+                <ToggleButton.ToolTip>
+                    <TextBlock>
+                        <Run Text = "If Checked, the selected Country in this editor will automatically sync with NUI." />
+                        <LineBreak />
+                        <Run
+                            Text = "If Unchecked, the selected Country in this editor will not be affected changes to NUI, aslong as a country is selected in it." />
+                    </TextBlock>
+                </ToggleButton.ToolTip>
+            </ToggleButton>
+        </Grid>
+
+        <!-- Location: <Selector for location> -->
+        <Grid Grid.Row = "1" Margin = "0,5,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "90" />
+                <ColumnDefinition Width = "*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text = "Location:" FontWeight = "Bold" Margin = "0,0,10,0" />
+
+            <autoCompleteBox:AutoCompleteComboBox x:Name = "SpecificLocationBox" Grid.Column = "1"
+                                                  FullItemsSource = "{Binding Locations}"
+                                                  DisplayMemberPath = "UniqueId" />
+        </Grid>
+
+        <Grid Grid.Row = "2" Margin = "0, 2, 0, 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+            </Grid.RowDefinitions>
+
+            <baseControls:EntitySelector Grid.Row = "0" Grid.Column = "0" Title = "Owned Cores"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlCores}"
+                                         AddedItems = "{Binding OwnControlCoreLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "1" Grid.Column = "0" Title = "Owned, Controled, Integrated"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlIntegrated}"
+                                         AddedItems = "{Binding OwnControlIntegratedLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "2" Grid.Column = "0" Title = "Owned, Controled, Conquered"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlConquered}"
+                                         AddedItems = "{Binding OwnControlConqueredLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "3" Grid.Column = "0" Title = "Owned, Controled, Colony"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlColony}"
+                                         AddedItems = "{Binding OwnControlColonyLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "4" Grid.Column = "0" Title = "Owned Cores"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnCores}"
+                                         AddedItems = "{Binding OwnCoreLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "5" Grid.Column = "0" Title = "Owned, Conquered"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnConquered}"
+                                         AddedItems = "{Binding OwnConqueredLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "6" Grid.Column = "0" Title = "Owned, Integrated"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnIntegrated}"
+                                         AddedItems = "{Binding OwnIntegratedLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "7" Grid.Column = "0" Title = "Owned, Colony"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OwnColony}"
+                                         AddedItems = "{Binding OwnColonyLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "8" Grid.Column = "0" Title = "Controled Cores"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.ControlCores}"
+                                         AddedItems = "{Binding ControlCoreLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "9" Grid.Column = "0" Title = "Controled"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.Control}"
+                                         AddedItems = "{Binding ControlLocations}" />
+
+            <baseControls:EntitySelector Grid.Row = "10" Grid.Column = "0" Title = "Our Cores Conquered by Others"
+                                         TargetProperty = "{x:Static locationCollections:Country+Field.OurCoresConqueredByOthers}"
+                                         AddedItems = "{Binding OurCoresConqueredByOthersLocations}" />
+        </Grid>
+    </Grid>
+
+</UserControl>

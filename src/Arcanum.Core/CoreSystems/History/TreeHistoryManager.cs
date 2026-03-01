@@ -1,5 +1,4 @@
-﻿using Arcanum.Core.CoreSystems.EventDistribution;
-using Arcanum.Core.CoreSystems.History.Commands;
+﻿using Arcanum.Core.CoreSystems.History.Commands;
 using Timer = System.Threading.Timer;
 
 namespace Arcanum.Core.CoreSystems.History;
@@ -128,7 +127,7 @@ public class TreeHistoryManager : IHistoryManager
       }
 
       UndoEvent?.Invoke(undoCommand);
-      EventDistributor.UpdateNUI?.Invoke();
+      //EventDistributor.UpdateNUI?.Invoke();
       return undoCommand;
    }
 
@@ -174,9 +173,9 @@ public class TreeHistoryManager : IHistoryManager
             redoCommand = Current.Command;
       }
 
-      end:
+   end:
       redoCommand?.Redo();
-      EventDistributor.UpdateNUI?.Invoke();
+      //EventDistributor.UpdateNUI?.Invoke();
       RedoEvent?.Invoke(redoCommand);
       return redoCommand;
    }
