@@ -13,12 +13,12 @@ using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Registry;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -327,7 +327,7 @@ public static class SaveMaster
       for (var i = objectsToSave.Count - 1; i >= 0; i--)
       {
          var obj = objectsToSave[i];
-         if (obj is Continent or SuperRegion or Region or Area or Province)
+         if (obj is Continent or SubContinent or Region or Area or Province)
          {
             definitionObjects.Add(obj);
             objectsToSave.RemoveAt(i);

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Registry;
 using Arcanum.UI.Components.Windows.PopUp;
@@ -11,7 +12,6 @@ using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Contin
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
@@ -33,7 +33,7 @@ public partial class Renamer
       ObjectsOfTargetType = [];
    }
 
-   public static Type[] AvailableTypes => [typeof(Location), typeof(Province), typeof(Area), typeof(Region), typeof(SuperRegion), typeof(Continent)];
+   public static Type[] AvailableTypes => [typeof(Location), typeof(Province), typeof(Area), typeof(Region), typeof(SubContinent), typeof(Continent)];
 
    public ObservableCollection<IEu5Object> ObjectsOfTargetType
    {

@@ -27,4 +27,6 @@ public class TopographyMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location.TemplateData.Topography;
 }

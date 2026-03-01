@@ -42,7 +42,6 @@ using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Provinc
 using RawMaterial = Arcanum.Core.GameObjects.InGame.Economy.RawMaterial;
 using SocientalValue = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValue;
 using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
 using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
@@ -106,7 +105,7 @@ public static class Globals
    public static Dictionary<string, Province> Provinces { get; } = [];
    public static Dictionary<string, Area> Areas { get; } = [];
    public static Dictionary<string, Region> Regions { get; } = [];
-   public static Dictionary<string, SuperRegion> SuperRegions { get; } = [];
+   public static Dictionary<string, SubContinent> SuperRegions { get; } = [];
    public static Dictionary<string, Continent> Continents { get; } = [];
    public static Dictionary<string, Adjacency> Adjacencies { get; } = [];
 

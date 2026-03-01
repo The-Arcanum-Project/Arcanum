@@ -32,10 +32,14 @@
                 <MenuItem Header = "Select Region" Click = "SelectRegion_Click" />
                 <MenuItem Header = "Select Super Region" Click = "SelectSuperRegion_Click" />
                 <MenuItem Header = "Select Continent" Click = "SelectContinent_Click" />
-                <MenuItem Header = "Select Owner" Click = "SelectOwner_Click" IsEnabled = "{Binding HasLocationOwner}">
+                <MenuItem Header = "Select Owner" Click = "SelectOwner_Click" IsEnabled = "{Binding HasLocationOwner}"
+                          d:DataContext = "{d:DesignInstance map:MapControl}">
                 </MenuItem>
                 <Separator />
                 <MenuItem Header = "Copy Selected Location Ids" Click = "CopySelectedLocationIds_Click" />
+                <MenuItem Header = "Copy Map Coordinates" Click = "CopyMapCoordinates_OnClick"
+                          ToolTip = "Copies coordinates in the format: &lt;X&gt; &lt;Y&gt;&#10;Hold CTRL during click to use format: X:&lt;X&gt;, Y:&lt;Y&gt;&#10;Hold SHIFT for subpixel precision" />
+                <MenuItem Header = "Copy data from MapMode" Click = "MapModeDataCopy_OnClick" />
             </ContextMenu>
         </Grid.Resources>
 
@@ -48,9 +52,8 @@
         <StackPanel x:Name = "LoadingPanel" HorizontalAlignment = "Center" VerticalAlignment = "Center">
             <TextBlock Text = "Loading map..." Foreground = "{StaticResource GreyedOutForeColorBrush}" FontSize = "26"
                        FontWeight = "SemiBold" HorizontalAlignment = "Center" />
-            <Path Stroke = "{StaticResource LightAccentBackColorBrush}" StrokeThickness = "5"
-                  HorizontalAlignment = "Center" VerticalAlignment = "Center" Margin = "40"
-                  RenderTransformOrigin = "0,0">
+            <Path Stroke = "{StaticResource BlueAccentColorBrush}" StrokeThickness = "5" HorizontalAlignment = "Center"
+                  VerticalAlignment = "Center" Margin = "40" RenderTransformOrigin = "0,0">
                 <Path.Data>
                     <PathGeometry>
                         <!-- Start the arc at the top-center point -->

@@ -113,4 +113,6 @@ public class PopulationMapMode : LocationBasedMapMode
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private static float GetPopulation(Location location) => GetPopInternal(location);
+
+   public override object GetLocationRelatedData(Location location) => GetPopulation(location).ToString("####,###");
 }

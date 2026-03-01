@@ -14,6 +14,7 @@ using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils.Imagery;
@@ -499,7 +500,7 @@ public partial class MapControl
 
       Selection.Modify(SelectionTarget.Selection,
                        SelectionMethod.Expand,
-                       location.Province.Area.Region.SuperRegion.GetRelevantLocations([location.Province.Area.Region.SuperRegion]),
+                       location.Province.Area.Region.SubContinent.GetRelevantLocations([location.Province.Area.Region.SubContinent]),
                        true,
                        false);
    }
@@ -512,7 +513,7 @@ public partial class MapControl
 
       Selection.Modify(SelectionTarget.Selection,
                        SelectionMethod.Expand,
-                       location.Province.Area.Region.SuperRegion.Continent.GetRelevantLocations([location.Province.Area.Region.SuperRegion.Continent]),
+                       location.Province.Area.Region.SubContinent.Continent.GetRelevantLocations([location.Province.Area.Region.SubContinent.Continent]),
                        true,
                        false);
    }
@@ -551,5 +552,44 @@ public partial class MapControl
       }
 
       _contextMenuClickLocation = CurrentPos;
+   }
+
+   private void CopyMapCoordinates_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (!_contextMenuClickLocation.HasValue)
+         return;
+
+      var subPixelPresicision = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+      var format = subPixelPresicision ? "{0:0.##}" : "{0:0}";
+
+      Clipboard.SetText(Keyboard.Modifiers != ModifierKeys.Control
+                           ? $"X:{_contextMenuClickLocation.Value.X.ToString(format)}, Y:{_contextMenuClickLocation.Value.Y.ToString(format)}"
+                           : $"{_contextMenuClickLocation.Value.X.ToString(format)} {_contextMenuClickLocation.Value.Y.ToString(format)}");
+   }
+
+   private void MapModeDataCopy_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (!_contextMenuClickLocation.HasValue)
+         return;
+
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
+
+      var mapMode = MapModeManager.GetCurrent();
+      var relatedData = mapMode.GetLocationRelatedData(location);
+      if (relatedData == null!)
+         return;
+
+      if (relatedData is IEu5Object eu5Object)
+         Clipboard.SetText(eu5Object.UniqueId);
+      else
+      {
+         var str = relatedData.ToString();
+         if (string.IsNullOrEmpty(str))
+            return;
+
+         Clipboard.SetText(str);
+      }
    }
 }

@@ -26,4 +26,6 @@ public class ReligionMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location.TemplateData.Religion;
 }

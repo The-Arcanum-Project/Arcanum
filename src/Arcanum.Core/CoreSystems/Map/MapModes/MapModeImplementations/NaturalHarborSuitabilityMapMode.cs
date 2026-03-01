@@ -32,4 +32,6 @@ public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
    public override void OnDeactivateMode()
    {
    }
+
+   public override object GetLocationRelatedData(Location location) => location.TemplateData.NaturalHarborSuitability.ToString("####.###");
 }

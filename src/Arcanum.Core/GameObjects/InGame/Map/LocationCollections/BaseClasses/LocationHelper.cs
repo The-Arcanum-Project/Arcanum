@@ -12,8 +12,8 @@ public static class LocationHelper
          LocationCollectionType.Province => location.Province,
          LocationCollectionType.Area => location.Province.Area,
          LocationCollectionType.Region => location.Province.Area.Region,
-         LocationCollectionType.SuperRegion => location.Province.Area.Region.SuperRegion,
-         LocationCollectionType.Continent => location.Province.Area.Region.SuperRegion.Continent,
+         LocationCollectionType.SuperRegion => location.Province.Area.Region.SubContinent,
+         LocationCollectionType.Continent => location.Province.Area.Region.SubContinent.Continent,
          _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
       };
    }

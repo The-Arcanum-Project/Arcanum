@@ -2,12 +2,12 @@
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics.Helpers;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using LocationTemplateData = Arcanum.Core.GameObjects.InGame.Map.LocationTemplateData;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Validators;
 
@@ -43,18 +43,18 @@ public class LocationValidator : IValidator
                        ACTION_NAME,
                        location.UniqueId,
                        location.Province.Area.UniqueId);
-         else if (location.Province.Area.Region.SuperRegion == SuperRegion.Empty)
+         else if (location.Province.Area.Region.SubContinent == SubContinent.Empty)
             De.Warning(BuildContextFromObject(location.Province.Area.Region),
                        ParsingError.Instance.MissingPartInLocationHierarchy,
                        ACTION_NAME,
                        location.UniqueId,
                        location.Province.Area.Region.UniqueId);
-         else if (location.Province.Area.Region.SuperRegion.Continent == Continent.Empty)
-            De.Warning(BuildContextFromObject(location.Province.Area.Region.SuperRegion),
+         else if (location.Province.Area.Region.SubContinent.Continent == Continent.Empty)
+            De.Warning(BuildContextFromObject(location.Province.Area.Region.SubContinent),
                        ParsingError.Instance.MissingPartInLocationHierarchy,
                        ACTION_NAME,
                        location.UniqueId,
-                       location.Province.Area.Region.SuperRegion.UniqueId);
+                       location.Province.Area.Region.SubContinent.UniqueId);
 
          if (location.TemplateData == LocationTemplateData.Empty)
             De.Warning(BuildContextFromObject(location),

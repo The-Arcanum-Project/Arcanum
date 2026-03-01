@@ -114,4 +114,6 @@ public class PoliticalMapMode : IMapMode
 
       return Country.Empty;
    }
+
+   public object GetLocationRelatedData(Location location) => GetLocationOwner(location);
 }

@@ -73,7 +73,6 @@ using SocientalValue = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.So
 using SocientalValueEntry = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValueEntry;
 using SoundToll = Arcanum.Core.GameObjects.InGame.Map.SoundToll;
 using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
 using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using VariableDataBlock = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDataBlock;
@@ -191,10 +190,10 @@ public class NUISettings
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray(),
                                                         Enum.GetValues<Region.Field>().Cast<Enum>().ToArray());
 
-   public NUISetting SuperRegionSettings { get; set; } = new(SuperRegion.Field.UniqueId,
-                                                             Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
-                                                             Enum.GetValues<SuperRegion.Field>().Cast<Enum>().ToArray(),
-                                                             Enum.GetValues<SuperRegion.Field>()
+   public NUISetting SuperRegionSettings { get; set; } = new(SubContinent.Field.UniqueId,
+                                                             Enum.GetValues<SubContinent.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<SubContinent.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<SubContinent.Field>()
                                                                  .Cast<Enum>()
                                                                  .ToArray());
 

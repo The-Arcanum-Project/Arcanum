@@ -20,10 +20,10 @@ namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 
 [NexusConfig]
 [ObjectSaveAs]
-public partial class SuperRegion
-   : IMapInferable, IEu5Object<SuperRegion>, IIndexRandomColor
+public partial class SubContinent
+   : IMapInferable, IEu5Object<SubContinent>, IIndexRandomColor
 {
-   public SuperRegion()
+   public SubContinent()
    {
       Regions = GetEmptyAggregateLink_SuperRegion_Region();
    }
@@ -31,7 +31,7 @@ public partial class SuperRegion
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Dictionary<string, SuperRegion> GetGlobalItems() => Globals.SuperRegions;
+   public static Dictionary<string, SubContinent> GetGlobalItems() => Globals.SuperRegions;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
@@ -48,7 +48,7 @@ public partial class SuperRegion
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.MapObjects |
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SuperRegion;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.SubContinent;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
 
    [Description("Unique key of this SuperRegion. Must be unique among all objects of this type.")]
@@ -56,7 +56,7 @@ public partial class SuperRegion
    public string UniqueId { get; set; } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public static SuperRegion Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
+   public static SubContinent Empty { get; } = new() { UniqueId = "Arcanum_Empty_SuperRegion" };
    public LocationCollectionType LcType => LocationCollectionType.SuperRegion;
 
    [SaveAs(isEmbeddedObject: true)]
@@ -77,7 +77,7 @@ public partial class SuperRegion
 
    protected AggregateLink<Region> GetEmptyAggregateLink_SuperRegion_Region()
    {
-      return new(Region.Field.SuperRegion, Field.Regions, this);
+      return new(Region.Field.SubContinent, Field.Regions, this);
    }
 
    public List<Location> GetRelevantLocations(IEu5Object[] items)
@@ -85,7 +85,7 @@ public partial class SuperRegion
       List<Location> locations = [];
 
       foreach (var item in items)
-         if (item is SuperRegion { Regions.Count: > 0 } cn)
+         if (item is SubContinent { Regions.Count: > 0 } cn)
             locations.AddRange(cn.Regions[0].GetRelevantLocations(cn.Regions.Cast<IEu5Object>().ToArray()));
       return locations;
    }

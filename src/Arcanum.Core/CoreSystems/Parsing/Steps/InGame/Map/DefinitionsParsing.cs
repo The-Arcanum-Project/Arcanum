@@ -4,12 +4,12 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.Utils.Sorting;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
-using SuperRegion = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SuperRegion;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
@@ -17,7 +17,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Continent>(dependencies)
 {
-   public override List<Type> ParsedObjects => [typeof(Continent), typeof(SuperRegion), typeof(Region), typeof(Area), typeof(Province)];
+   public override List<Type> ParsedObjects => [typeof(Continent), typeof(SubContinent), typeof(Region), typeof(Area), typeof(Province)];
 
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
@@ -75,7 +75,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                        object? lockObject)
    {
       var continentGlobals = Continent.GetGlobalItems();
-      var superRegionGlobals = SuperRegion.GetGlobalItems();
+      var superRegionGlobals = SubContinent.GetGlobalItems();
       var regionGlobals = Region.GetGlobalItems();
       var areaGlobals = Area.GetGlobalItems();
       var provinceGlobals = Province.GetGlobalItems();
@@ -125,7 +125,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                continue;
 
             var superRegionKey = pc.SliceString(srBn);
-            var superRegion = IEu5Object<SuperRegion>.CreateInstance(superRegionKey, fileObj);
+            var superRegion = IEu5Object<SubContinent>.CreateInstance(superRegionKey, fileObj);
             if (!contBn.KeyNode.IsSimpleKeyNode(ref pc, out _))
                continue;
 
