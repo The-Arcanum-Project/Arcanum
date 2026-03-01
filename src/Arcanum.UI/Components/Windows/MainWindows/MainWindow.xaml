@@ -10,7 +10,8 @@
                          xmlns:local = "clr-namespace:Arcanum.Core.CoreSystems.Selection;assembly=Arcanum.Core"
                          xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
                          xmlns:map = "clr-namespace:Arcanum.UI.Components.UserControls.Map"
-                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands" Height = "1080" Width = "1920"
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+                         xmlns:b = "http://schemas.microsoft.com/xaml/behaviors" Height = "1080" Width = "1920"
                          FooterHeight = "26" HeaderHeight = "35" Loaded = "MainWindow_OnLoaded"
                          PreviewMouseDown = "Window_PreviewMouseDown" Closing = "MainWindow_OnClosing"
                          commands:ContextBinder.ObserveContext = "True" WindowStartupLocation = "CenterScreen"
@@ -56,6 +57,10 @@
     <styleClasses:BaseWindow.DataContext>
         <mainWindow:MainWindowView />
     </styleClasses:BaseWindow.DataContext>
+
+    <b:Interaction.Behaviors>
+        <behaviors:WindowDataBehavior />
+    </b:Interaction.Behaviors>
 
     <Window.CommandBindings>
         <!-- Command Bindings for File MenuItem -->

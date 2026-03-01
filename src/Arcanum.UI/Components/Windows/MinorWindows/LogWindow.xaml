@@ -5,24 +5,20 @@
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:helpers = "clr-namespace:Arcanum.UI.Components.Helpers"
-                         mc:Ignorable = "d"
-                         Title = "LogWindow"
-                         Height = "300"
-                         Width = "1200"
-                         WindowStartupLocation = "Manual"
-                         Top = "0"
+                         xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
+                         xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors" mc:Ignorable = "d"
+                         Title = "LogWindow" Height = "300" Width = "1200" WindowStartupLocation = "Manual" Top = "0"
                          Left = "0">
-
     <Window.DataContext>
         <helpers:LogViewModel />
     </Window.DataContext>
 
-    <ScrollViewer Margin = "10"
-                  VerticalScrollBarVisibility = "Auto"
-                  ScrollChanged = "OnScrollChanged">
-        <TextBlock Text = "{Binding LogText}"
-                   TextWrapping = "Wrap"
-                   FontFamily = "Consolas" />
+    <b:Interaction.Behaviors>
+        <behaviors:WindowDataBehavior />
+    </b:Interaction.Behaviors>
+
+    <ScrollViewer Margin = "10" VerticalScrollBarVisibility = "Auto" ScrollChanged = "OnScrollChanged">
+        <TextBlock Text = "{Binding LogText}" TextWrapping = "Wrap" FontFamily = "Consolas" />
     </ScrollViewer>
 
 </styleClasses:BaseWindow>

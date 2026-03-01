@@ -6,6 +6,7 @@ using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.ProjectFileUtil.Arcanum;
 using Arcanum.Core.CoreSystems.Queastor;
+using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
 using Common.UI;
@@ -118,17 +119,19 @@ public class LifecycleManager
       OnApplicationShutDownCompleted?.Invoke(this, EventArgs.Empty);
    }
 
-   private void LoadConfig()
+   private static void LoadConfig()
    {
       try
       {
-         var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath,
-                                                                                        Config.CONFIG_FILE_NAME));
+         var parsedObj = JsonProcessor.DefaultDeserialize<MainSettingsObj>(Path.Combine(IO.GetConfigPath, Config.CONFIG_FILE_NAME));
+         var windowData = JsonProcessor.DefaultDeserialize<WindowData>(Path.Combine(IO.GetConfigPath, Config.WINDOW_DATA_CONFIG_FILE_NAME));
          Config.Settings = parsedObj ?? new();
+         Config.WindowData = windowData ?? new();
       }
       catch (Exception)
       {
          Config.Settings = new();
+         Config.WindowData = new();
       }
 
       var edcs =
