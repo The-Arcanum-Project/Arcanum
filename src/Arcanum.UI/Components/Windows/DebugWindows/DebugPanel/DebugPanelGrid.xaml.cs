@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Commands;
@@ -200,13 +202,12 @@ public partial class DebugPanelGrid
       cmdGen.Show();
    }
 
-   
    private void TemplateToPops_OnClick(object sender, RoutedEventArgs e)
    {
       var templateToPops = new TemplateToPopsWindow();
       templateToPops.Show();
    }
-   
+
    private void WordGenerator_OnClick(object sender, RoutedEventArgs e)
    {
       var wordGen = new NameGenerator();

@@ -3,7 +3,9 @@ name: Discord Beta Push Webhook
 on:
   push:
     branches:
-      - '1.0.7-[Dd]ev'
+      - '1.0.8-[Dd]ev'
+      - '1.1.0-[Dd]ev'
+      - '2.0.0-[Dd]ev'
 
 jobs:
   send-to-discord:
