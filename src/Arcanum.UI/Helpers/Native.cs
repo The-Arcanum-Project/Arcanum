@@ -7,128 +7,139 @@ namespace Arcanum.UI.Helpers;
 
 public static class NativeMethods
 {
-   // Constants
-   public const int WM_GETMINMAXINFO = 0x0024;
-   private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
+    #region Constants
 
-   /// <summary>
-   /// A lightweight record to replace System.Windows.Forms.Screen
-   /// </summary>
-   public record ScreenInfo(Rect WorkingArea, Rect MonitorArea);
-   
-   [StructLayout(LayoutKind.Sequential)]
-   public struct Rect
-   {
-      public int Left;
-      public int Top;
-      public int Right;
-      public int Bottom;
-      
-      public int Width => Right - Left;
-      public int Height => Bottom - Top;
-   }
-   
-   [DllImport("user32.dll")]
-   public static extern bool GetCursorPos(out Point cursorPoint);
-   
-   [DllImport("user32.dll")]
-   private static extern IntPtr MonitorFromPoint(Point pt, int dwFlags);
-   
-   private static ScreenInfo GetScreenInfoFromMonitor(IntPtr monitor)
-   {
-      var monitorInfo = new MonitorInfoEx();
-      return GetMonitorInfo(new(null, monitor), monitorInfo) ? new ScreenInfo(monitorInfo.rcWork, monitorInfo.rcMonitor) : new(new(), new());
-   }
-   
-   public static ScreenInfo GetCurrentMonitorRect(Point point)
-   {
-      var monitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
-      return  GetScreenInfoFromMonitor(monitor);
-   }
+    public const int WM_GETMINMAXINFO = 0x0024;
+    private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
 
-   [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 4)]
-   [SuppressMessage("ReSharper", "UnusedMember.Local")]
-   private class MonitorInfoEx
-   {
-      public int cbSize = Marshal.SizeOf(typeof(MonitorInfoEx));
+    #endregion
 
-      public readonly Rect rcMonitor = new();
-      public readonly Rect rcWork = new();
+    #region Structs
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+
+        public int Width => Right - Left;
+        public int Height => Bottom - Top;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Point
+    {
+        public int x;
+        public int y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MinMaxInfo
+    {
+        public Point ptReserved;
+        public Point ptMaxSize;
+        public Point ptMaxPosition;
+        public Point ptMinTrackSize;
+        public Point ptMaxTrackSize;
+    }
+
+    public record ScreenInfo(Rect WorkingArea, Rect MonitorArea);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 4)]
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    private class MonitorInfoEx
+    {
+        public int cbSize = Marshal.SizeOf(typeof(MonitorInfoEx));
+
+        public readonly Rect rcMonitor = new();
+        public readonly Rect rcWork = new();
 #pragma warning disable CS0414 // Field is assigned but its value is never used
-      public int dwFlags = 0;
+        public int dwFlags = 0;
 #pragma warning restore CS0414 // Field is assigned but its value is never used
 
-      [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-      public char[] szDevice = new char[32];
-   }
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public char[] szDevice = new char[32];
+    }
 
-   [DllImport("user32.dll")]
-   private static extern IntPtr MonitorFromWindow(IntPtr hwnd, int dwFlags);
+    #endregion
 
-   [DllImport("User32.dll", CharSet = CharSet.Auto)]
-   private static extern bool GetMonitorInfo(HandleRef hmonitor, [In, Out] MonitorInfoEx info);
+    #region private methods
 
-   [DllImport("user32.dll")]
-   public static extern uint GetDoubleClickTime();
+    private static bool GetScreenInfoFromMonitor(IntPtr monitor, out ScreenInfo screenInfo)
+    {
+        var monitorInfo = new MonitorInfoEx();
 
-   public static Rect GetCurrentMonitorRect(Window window, bool workingArea = false)
-   {
-      var hwnd = new WindowInteropHelper(window).Handle;
-      var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        if (GetMonitorInfo(new(null, monitor), monitorInfo))
+        {
+            screenInfo = new(monitorInfo.rcMonitor, monitorInfo.rcMonitor);
+            return true;
+        }
 
-      var monitorInfo = new MonitorInfoEx();
-      if (GetMonitorInfo(new(null, monitor), monitorInfo))
-         return workingArea ? monitorInfo.rcMonitor : monitorInfo.rcWork;
+        screenInfo = new(new(), new());
+        return false;
+    }
 
-      return new();
-   }
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromPoint(Point pt, int dwFlags);
 
-   public static MinMaxInfo GetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
-   {
-      var mmi =
-         (MinMaxInfo)(Marshal.PtrToStructure(lParam, typeof(MinMaxInfo)) ?? throw new InvalidOperationException());
-      var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hwnd, int dwFlags);
 
-      if (monitor == IntPtr.Zero)
-         return mmi;
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern bool GetMonitorInfo(HandleRef hmonitor, [In, Out] MonitorInfoEx info);
 
-      var monitorInfo = new MonitorInfoEx();
-      GetMonitorInfo(new(null, monitor), monitorInfo);
-      var rcWorkArea = monitorInfo.rcWork;
-      var rcMonitorArea = monitorInfo.rcMonitor;
-      mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.Left - rcMonitorArea.Left);
-      mmi.ptMaxPosition.y = Math.Abs(rcWorkArea.Top - rcMonitorArea.Top);
-      mmi.ptMaxSize.x = Math.Abs(rcWorkArea.Right - rcWorkArea.Left);
-      mmi.ptMaxSize.y = Math.Abs(rcWorkArea.Bottom - rcWorkArea.Top);
+    #endregion
 
-      var source = HwndSource.FromHwnd(hwnd);
-      if (source is not { RootVisual: Window window, CompositionTarget: not null })
-         return mmi;
+    [DllImport("user32.dll")]
+    public static extern uint GetDoubleClickTime();
 
-      var matrix = source.CompositionTarget.TransformToDevice;
-      var minWidth = (int)(window.MinWidth * matrix.M11);
-      var minHeight = (int)(window.MinHeight * matrix.M22);
+    [DllImport("user32.dll")]
+    public static extern bool GetCursorPos(out Point cursorPoint);
 
-      mmi.ptMinTrackSize.x = minWidth;
-      mmi.ptMinTrackSize.y = minHeight;
+    public static bool GetCurrentScreen(Point point, out ScreenInfo screenInfo)
+    {
+        var monitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
+        return GetScreenInfoFromMonitor(monitor, out screenInfo);
+    }
 
-      return mmi;
-   }
+    public static bool GetCurrentScreen(Window window, out ScreenInfo screenInfo)
+    {
+        var hwnd = new WindowInteropHelper(window).Handle;
+        var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        return GetScreenInfoFromMonitor(monitor, out screenInfo);
+    }
 
-   [StructLayout(LayoutKind.Sequential)]
-   public struct Point
-   {
-      public int x;
-      public int y;
-   }
+    public static MinMaxInfo GetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
+    {
+        var mmi =
+            (MinMaxInfo)(Marshal.PtrToStructure(lParam, typeof(MinMaxInfo)) ?? throw new InvalidOperationException());
+        var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
 
-   [StructLayout(LayoutKind.Sequential)]
-   public struct MinMaxInfo
-   {
-      public Point ptReserved;
-      public Point ptMaxSize;
-      public Point ptMaxPosition;
-      public Point ptMinTrackSize;
-      public Point ptMaxTrackSize;
-   }
+        if (monitor == IntPtr.Zero)
+            return mmi;
+
+        var monitorInfo = new MonitorInfoEx();
+        GetMonitorInfo(new(null, monitor), monitorInfo);
+        var rcWorkArea = monitorInfo.rcWork;
+        var rcMonitorArea = monitorInfo.rcMonitor;
+        mmi.ptMaxPosition.x = Math.Abs(rcWorkArea.Left - rcMonitorArea.Left);
+        mmi.ptMaxPosition.y = Math.Abs(rcWorkArea.Top - rcMonitorArea.Top);
+        mmi.ptMaxSize.x = Math.Abs(rcWorkArea.Right - rcWorkArea.Left);
+        mmi.ptMaxSize.y = Math.Abs(rcWorkArea.Bottom - rcWorkArea.Top);
+
+        var source = HwndSource.FromHwnd(hwnd);
+        if (source is not { RootVisual: Window window, CompositionTarget: not null })
+            return mmi;
+
+        var matrix = source.CompositionTarget.TransformToDevice;
+        var minWidth = (int)(window.MinWidth * matrix.M11);
+        var minHeight = (int)(window.MinHeight * matrix.M22);
+
+        mmi.ptMinTrackSize.x = minWidth;
+        mmi.ptMinTrackSize.y = minHeight;
+
+        return mmi;
+    }
 }

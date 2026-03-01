@@ -1,10 +1,11 @@
 ﻿using System.Windows;
+using Common.Logger;
 
 namespace Arcanum.UI.Helpers;
 
 public static class ScreenManager
 {
-    public static NativeMethods.ScreenInfo? MainScreen { get; set; }
+    public static NativeMethods.ScreenInfo? MainScreen { get; private set; }
     
     public static void SetMainScreen(bool force = false)
     {
@@ -17,9 +18,11 @@ public static class ScreenManager
                 y = 0
             };
         }
-
-        MainScreen = NativeMethods.GetCurrentMonitorRect(point);
-
+        
+        if(NativeMethods.GetCurrentScreen(point, out var screen))
+            MainScreen = screen;
+        else
+            ArcLog.Error("WIN", "Failed to get current screen information.");
     }
     
     extension(Window window)
@@ -41,7 +44,7 @@ public static class ScreenManager
                 workingArea.Bottom < workingArea.Top + offsetY + height)
             {
                 // The window would go off the screen, so we need to adjust the offset
-                // If width or height is larger than working area limit them to the working area
+                // If width or height is larger than the working area limit them to the working area
                 if (width > workingArea.Width)
                     width = workingArea.Width;
                 if (height > workingArea.Height)
@@ -74,9 +77,10 @@ public static class ScreenManager
         public (int, int) GetRelativePosition()
         {
             // Get the position of the window relative to the screen of the window
-            var rect = NativeMethods.GetCurrentMonitorRect(window, true);
+            if (!NativeMethods.GetCurrentScreen(window, out var screen))
+                return (0,0);
             
-            return ((int, int))(window.Left - rect.Left, window.Top - rect.Top);
+            return ((int, int))(window.Left - screen.WorkingArea.Left, window.Top - screen.WorkingArea.Top);
         }
     }
 }
