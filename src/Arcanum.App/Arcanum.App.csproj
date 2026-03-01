@@ -23,12 +23,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico">
-            <Link>ArcanumSimplified.ico</Link>
-        </None>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\Arcanum.Core\Arcanum.Core.csproj"/>
         <ProjectReference Include="..\Arcanum.UI\Arcanum.UI.csproj"/>
     </ItemGroup>
