@@ -17,7 +17,6 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.Core.Utils;
@@ -30,7 +29,6 @@ using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MainWindows.MainWindowsHelpers;
 using Arcanum.UI.Components.Windows.MinorWindows;
 using Arcanum.UI.Components.Windows.PopUp;
-using Arcanum.UI.Helpers;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
 using Arcanum.UI.Themes;
@@ -227,20 +225,6 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
-
-      var data = WindowData.GetWindowStateData(typeof(MainWindow));
-      if (data != null)
-      {
-         this.SetScreenOffset((int)data.Left, (int)data.Top, (int)data.Width, (int)data.Height);
-         if (Enum.IsDefined(typeof(WindowState), data.WindowState)) WindowState = (WindowState)data.WindowState;
-      }
-      else
-      {
-         ArcLog.WriteLine("MW", LogLevel.WRN, "Could not load window data for main window, using defaults.");
-         this.SetScreen(DEFAULT_WIDTH,DEFAULT_HEIGHT);
-      }
-
-
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");

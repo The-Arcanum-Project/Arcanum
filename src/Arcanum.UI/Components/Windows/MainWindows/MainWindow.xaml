@@ -59,7 +59,7 @@
     </styleClasses:BaseWindow.DataContext>
 
     <b:Interaction.Behaviors>
-        <behaviors:WindowDataBehavior />
+        <behaviors:WindowDataBehavior DefaultHeight = "1080" DefaultWidth = "1920" />
     </b:Interaction.Behaviors>
 
     <Window.CommandBindings>
