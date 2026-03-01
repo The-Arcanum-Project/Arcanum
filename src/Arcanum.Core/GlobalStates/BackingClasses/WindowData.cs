@@ -1,4 +1,7 @@
-﻿namespace Arcanum.Core.GlobalStates.BackingClasses;
+﻿using System.Text;
+using Arcanum.Core.CoreSystems.IO;
+
+namespace Arcanum.Core.GlobalStates.BackingClasses;
 
 public class WindowData
 {
@@ -17,6 +20,9 @@ public class WindowData
       }
       else
          Config.WindowData.WindowStateData.Add(data);
+
+      var str = JsonProcessor.Serialize(Config.WindowData);
+      IO.WriteAllText(Path.Combine(IO.GetConfigPath, Config.WINDOW_DATA_CONFIG_FILE_NAME), str, Encoding.UTF8);
    }
 
    public static WindowStateData? GetWindowStateData(Type windowType)
