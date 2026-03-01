@@ -540,7 +540,7 @@ public static class Eu5UiGen
 
       SetUpPropertyContextMenu(primary, nxProp, tb, propertyViewModel);
 
-      GetCollectionEditorButton(navh, primary, nxProp, itemType, headerPanel);
+      GetCollectionEditorButton(navh, propertyViewModel, primary, nxProp, itemType, headerPanel);
       GetInferActionButtons(propertyViewModel, nxProp, primary.GetNxPropType(nxProp), itemType, headerPanel, navh);
 
       var marker = GetPropertyMarker(propertyViewModel);
@@ -753,7 +753,8 @@ public static class Eu5UiGen
       }
    }
 
-   private static void GetCollectionEditorButton(NavH navh,
+   private static void GetCollectionEditorButton(NavH navH,
+                                                 MultiSelectPropertyViewModel mspvm,
                                                  IEu5Object parent,
                                                  Enum property,
                                                  Type nxItemType,
@@ -778,8 +779,8 @@ public static class Eu5UiGen
 
       RoutedEventHandler clickHandler = (_, _) =>
       {
-         var owner = Window.GetWindow(navh.Root)!;
-         var lists = navh.Targets.Select(x => (IList)x._getValue(property));
+         var owner = Window.GetWindow(navH.Root)!;
+         var lists = mspvm.Targets.Select(x => (IList)x._getValue(property));
          var result =
             MultiCollectionEditor.ShowDialogN(owner,
                                               $"Edit {property} - {parent.UniqueId}",
@@ -795,16 +796,16 @@ public static class Eu5UiGen
          Array toAddPerCollection = dynamicResult.ToAddPerCollection;
          Array toRemovePerCollection = dynamicResult.ToRemovePerCollection;
 
-         for (var i = 0; i < navh.Targets.Count; i++)
+         for (var i = 0; i < mspvm.Targets.Length; i++)
          {
             var itemsToAdd = (Array)toAddPerCollection.GetValue(i)!;
             var itemsToRemove = (Array)toRemovePerCollection.GetValue(i)!;
 
             foreach (var item in itemsToAdd)
-               Nx.AddToCollection(navh.Targets[i], property, item);
+               Nx.AddToCollection(mspvm.Targets[i], property, item);
 
             foreach (var item in itemsToRemove)
-               Nx.RemoveFromCollection(navh.Targets[i], property, item);
+               Nx.RemoveFromCollection(mspvm.Targets[i], property, item);
          }
       };
 
