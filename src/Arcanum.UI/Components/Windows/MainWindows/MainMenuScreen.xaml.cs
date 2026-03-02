@@ -47,9 +47,9 @@ public partial class MainMenuScreen
          if (args.PropertyName == nameof(Views.MainMenuScreen.MainMenuViewModel.IsWindowVisible))
             Visibility = MainMenuViewModel.IsWindowVisible;
       };
-      
+
       this.SetScreen();
-      
+
       Debug.Assert(MainMenuViewModel != null, "MainMenuViewModel should not be null");
 
 #if DEBUG
@@ -195,11 +195,10 @@ public partial class MainMenuScreen
       }
       catch (Exception ex)
       {
-         MBox.Show($"An error occurred while loading: {ex.Message}",
+         MBox.Show($"An error occurred while loading: {ex.Message}\n{ex.StackTrace}",
                    "Error",
                    MBoxButton.OK,
                    MessageBoxImage.Error);
-
          // On error, close the loading screen and show this window again
          if (loadingScreen.IsLoaded)
             loadingScreen.Close();

@@ -29,11 +29,18 @@ public class PopDefinitionCreatorVm : ViewModelBase
 
       var allOfType = _targetLocation.Pops.Where(p => p.PopType == PopType).ToList();
 
-      var num = allOfType.Sum(p => p.Size) /
-                allOfType.Count *
-                1000d *
-                Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage;
-      Value = (int)num;
+      if (Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage == 0)
+         Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage = 0.1f;
+
+      if (allOfType.Count != 0)
+      {
+         var num = allOfType.Sum(p => p.Size) /
+                   allOfType.Count *
+                   1000d;
+         Value = (int)num;
+      }
+      else
+         Value = (int)(Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage * 1000);
 
       CreatePopDefCommand = new(CreateNewPops);
       CreatePopDefFromSampeCommand = new(CreatePopDefFromSample);
