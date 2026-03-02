@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using System.Windows.Media;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.Git;
 using Common;
 
@@ -28,25 +29,20 @@ public partial class HomeViewModel
          LatestReleaseVersion.Text = latestRelease.Data.TagName;
          
          LatestReleaseName.ToolTip = $"Release notes:\n{latestRelease.Data.Body}";
-         
-         var releaseVersion = latestRelease.Data.TagName.StartsWith('v')
-            ? latestRelease.Data.TagName[1..]
-            : latestRelease.Data.TagName;
 
-         var split = releaseVersion.Split("-");
-         
-         if (split.Length > 1)
-            releaseVersion = split[0];
-         
-         var isCurrent = releaseVersion.Equals(AppData.AppVersion);
-         
-         LatestReleaseStatus.Text = isCurrent ? "Up to date" : "Update now!";
-         if (!isCurrent)
+         var number = latestRelease.Data.GetVersionNumber();
+
+         if (VersionNumbers.Current < number)
          {
+            LatestReleaseStatus.Text = "Update now!";
+        
             LatestReleaseStatus.Foreground = Brushes.White;
             ColorA.Color = Colors.MediumOrchid;
             ColorB.Color = Colors.OrangeRed;
+            
          }
+         else
+            LatestReleaseStatus.Text = "Up to date";
       }
    }
    

@@ -21,6 +21,11 @@ public abstract class GitDataObjectBase
 
 public class ReleaseData
 {
+   public VersionNumber GetVersionNumber()
+   {
+      return !VersionNumber.FromTag(TagName, out var version) ? VersionNumbers.Current : version;
+   }
+
    public string Name { get; set; } = string.Empty;
    public string TagName { get; set; } = string.Empty;
    public string Body { get; set; } = string.Empty;

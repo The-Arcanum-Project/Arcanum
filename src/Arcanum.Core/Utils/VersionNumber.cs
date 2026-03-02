@@ -1,48 +1,66 @@
-﻿namespace Arcanum.Core.Utils;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Arcanum.Core.Utils;
 
 public static class VersionNumbers
 {
-   public static VersionNumber V107 => new(1, 0, 7);
+   public static readonly VersionNumber V107 = new(1, 0, 7);
 
-   public static VersionNumber Current
-   {
-      get
-      {
-         var asm = AppData.AppVersion;
-         // Parse the version from the assembly version to a VersionNumber
-         var parts = asm.Split('.');
-         if (parts.Length < 3 || !int.TryParse(parts[0], out var major) || !int.TryParse(parts[1], out var minor) || !int.TryParse(parts[2], out var patch))
-            throw new FormatException($"Invalid version format: {asm}");
-
-         return new(major, minor, patch);
-      }
-   }
+   public static VersionNumber Current => AppData.AppVersion;
 
    public static string CurrentVersionString => $"{AppData.ProductName} v{Current}";
 }
 
 public class VersionNumber : IComparable<VersionNumber>
 {
-   public VersionNumber(int major, int minor, int patch)
+   public VersionNumber(int major, int minor, int patch, int hotfix = 0)
    {
       Major = major;
       Minor = minor;
       Patch = patch;
+      Hotfix = hotfix;
    }
 
-   public VersionNumber(int major, int minor, int patch, SnapShotVersion snapShotVersion) : this(major, minor, patch) => SnapShotVersion = snapShotVersion;
+   public VersionNumber(int major, int minor, int patch, int hotfix, SnapShotVersion snapShotVersion) : this(major,
+      minor, patch, hotfix) => SnapShotVersion = snapShotVersion;
+
+   public static bool FromTag(string releaseTag, [MaybeNullWhen(false)] out VersionNumber version)
+   {
+      var versionPart = releaseTag.StartsWith('v') ? releaseTag[1..] : releaseTag;
+      var split = versionPart.Split('-');
+      version = null;
+
+      if (split.Length == 0)
+         return false;
+      var versionNumbers = split[0].Split('.');
+
+      // Sequentially parse the version numbers, allowing for missing numbers (e.g., "1.0" would be parsed as major=1, minor=0, patch=0)
+      if (!int.TryParse(versionNumbers[0], out var major))
+         return false;
+      var minor = versionNumbers.Length > 1 && int.TryParse(versionNumbers[1], out var minorParsed) ? minorParsed : 0;
+      var patch = versionNumbers.Length > 2 && int.TryParse(versionNumbers[2], out var patchParsed) ? patchParsed : 0;
+      var hotfix = versionNumbers.Length > 3 && int.TryParse(versionNumbers[3], out var hotfixParsed)
+         ? hotfixParsed
+         : 0;
+
+      version = new(major, minor, patch, hotfix);
+
+      return true;
+   }
 
    public int Major { get; }
    public int Minor { get; }
    public int Patch { get; }
+   public int Hotfix { get; }
 
    public SnapShotVersion? SnapShotVersion { get; }
 
-   public string WithVPrefix => $"v{this}";
+   public string WithVPrefix => $"{this}";
 
    private bool Equals(VersionNumber other) => Major == other.Major &&
                                                Minor == other.Minor &&
                                                Patch == other.Patch &&
+                                               Hotfix == other.Hotfix &&
                                                Equals(SnapShotVersion, other.SnapShotVersion);
 
    public override bool Equals(object? obj)
@@ -57,11 +75,12 @@ public class VersionNumber : IComparable<VersionNumber>
       return Equals((VersionNumber)obj);
    }
 
-   public override int GetHashCode() => HashCode.Combine(Major, Minor, Patch, SnapShotVersion);
+   public override int GetHashCode() => HashCode.Combine(Major, Minor, Patch, Hotfix, SnapShotVersion);
 
    public override string ToString()
    {
-      var version = $"{Major}.{Minor}.{Patch}";
+      var hotfixPart = Hotfix > 0 ? $".{Hotfix}" : string.Empty;
+      var version = $"v{Major}.{Minor}.{Patch}{hotfixPart}";
       if (SnapShotVersion != null)
          version += $"-{SnapShotVersion}";
       return version;
@@ -76,6 +95,8 @@ public class VersionNumber : IComparable<VersionNumber>
          return v1.Minor > v2.Minor;
       if (v1.Patch != v2.Patch)
          return v1.Patch > v2.Patch;
+      if (v1.Hotfix != v2.Hotfix)
+         return v1.Hotfix > v2.Hotfix;
 
       return v1.SnapShotVersion < v2.SnapShotVersion;
    }
@@ -83,7 +104,8 @@ public class VersionNumber : IComparable<VersionNumber>
    public static bool operator <(VersionNumber v1, VersionNumber v2) => !(v1 > v2) && v1 != v2;
 
    public static bool operator ==(VersionNumber v1, VersionNumber v2)
-      => v1.Major == v2.Major && v1.Minor == v2.Minor && v1.Patch == v2.Patch && v1.SnapShotVersion == v2.SnapShotVersion;
+      => v1.Major == v2.Major && v1.Minor == v2.Minor && v1.Patch == v2.Patch && v1.Hotfix == v2.Hotfix &&
+         v1.SnapShotVersion == v2.SnapShotVersion;
 
    public static bool operator !=(VersionNumber v1, VersionNumber v2) => !(v1 == v2);
 
@@ -97,6 +119,8 @@ public class VersionNumber : IComparable<VersionNumber>
          return Minor.CompareTo(other.Minor);
       if (Patch != other.Patch)
          return Patch.CompareTo(other.Patch);
+      if (Hotfix != other.Hotfix)
+         return Hotfix.CompareTo(other.Hotfix);
 
       if (SnapShotVersion == null && other.SnapShotVersion == null)
          return 0;

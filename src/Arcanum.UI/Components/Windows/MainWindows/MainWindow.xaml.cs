@@ -206,7 +206,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       UIHandle.Instance.MapInterface = new MapInterfaceImpl { MapControl = MainMap };
 
       Title = AppData.ProductName;
-      VersionNumber = $"v{AppData.AppVersion}";
+      VersionNumber = AppData.AppVersion.ToString();
       _cav = new(this);
    }
 
