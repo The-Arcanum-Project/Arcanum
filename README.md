@@ -11,7 +11,7 @@ This tool is in active development and will continue to become more feature-rich
 Our documentation is a work in progress. You can access the currently available parts [here](https://the-arcanum-project.github.io/Arcanum/user/about-arcanum.html)
 
 ## Overview
-- Desktop application for Windows built with .NET and WPF.
+- Desktop application for Windows built with .NET and WPF. Also works with Wine/Proton when adjusting the compatibility settings.
 - Provides specialized editors (NUI) and an interactive map to edit a wide range of EU5 objects.
 - Features include an undo/redo history, hot-reloading of game/mod files, error detection with precise locations, and editing support for 40+ game object types.
 
