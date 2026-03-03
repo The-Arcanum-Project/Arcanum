@@ -25,7 +25,7 @@ public static class NameGenerator
 
          var syllables = file.StartsWith("ls_");
          var languageName = file[(syllables ? 3 : 2)..];
-
+         //TODO use ArcResources.GetResource here instead of reading the stream directly
          using var stream = Assembly.GetManifestResourceStream(resource)!;
          using var reader = new StreamReader(stream);
          var lines = reader.ReadToEnd()
