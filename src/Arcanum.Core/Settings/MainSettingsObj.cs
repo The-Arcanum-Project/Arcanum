@@ -41,6 +41,8 @@ public class MainSettingsObj
 #if DEBUG
    public DebugConfigSettings DebugConfigSettings { get; set; } = DebugConfig.Settings;
 #endif
+
+   public CompatilitySettings CompatilitySettings { get; set; } = new();
 }
 
 [AttributeUsage(AttributeTargets.Property)]

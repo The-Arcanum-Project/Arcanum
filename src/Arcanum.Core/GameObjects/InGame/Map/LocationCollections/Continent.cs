@@ -24,7 +24,7 @@ public partial class Continent
 {
    public Continent()
    {
-      SuperRegions = GetEmptyAggregateLink_Continent_SuperRegion();
+      SubContinents = GetEmptyAggregateLink_Continent_SuperRegion();
    }
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
@@ -37,14 +37,14 @@ public partial class Continent
    [DefaultValue(null)]
    [SuppressAgs]
    [SaveAs(isEmbeddedObject: true)]
-   [Description("The SuperRegions that are part of this Continent.")]
+   [Description("The SubContinents that are part of this Continent.")]
    [ParseAs("-", ignore: true)]
    [PropertyConfig(defaultValueMethod: "GetEmptyAggregateLink_Continent_SuperRegion", isRequired: true)]
-   public AggregateLink<SubContinent> SuperRegions { get; set; }
+   public AggregateLink<SubContinent> SubContinents { get; set; }
 
    private AggregateLink<SubContinent> GetEmptyAggregateLink_Continent_SuperRegion()
    {
-      return new(SubContinent.Field.Continent, Field.SuperRegions, this);
+      return new(SubContinent.Field.Continent, Field.SubContinents, this);
    }
 
    public List<Location> GetRelevantLocations(IEu5Object[] items)
@@ -52,8 +52,8 @@ public partial class Continent
       List<Location> locations = [];
 
       foreach (var item in items)
-         if (item is Continent { SuperRegions.Count: > 0 } cn)
-            locations.AddRange(cn.SuperRegions[0].GetRelevantLocations(cn.SuperRegions.Cast<IEu5Object>().ToArray()));
+         if (item is Continent { SubContinents.Count: > 0 } cn)
+            locations.AddRange(cn.SubContinents[0].GetRelevantLocations(cn.SubContinents.Cast<IEu5Object>().ToArray()));
       return locations;
    }
 

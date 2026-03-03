@@ -105,7 +105,7 @@ public static class Globals
    public static Dictionary<string, Province> Provinces { get; } = [];
    public static Dictionary<string, Area> Areas { get; } = [];
    public static Dictionary<string, Region> Regions { get; } = [];
-   public static Dictionary<string, SubContinent> SuperRegions { get; } = [];
+   public static Dictionary<string, SubContinent> SubContinents { get; } = [];
    public static Dictionary<string, Continent> Continents { get; } = [];
    public static Dictionary<string, Adjacency> Adjacencies { get; } = [];
 

@@ -31,7 +31,7 @@ public partial class SubContinent
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Dictionary<string, SubContinent> GetGlobalItems() => Globals.SuperRegions;
+   public static Dictionary<string, SubContinent> GetGlobalItems() => Globals.SubContinents;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
@@ -40,7 +40,7 @@ public partial class SubContinent
                                                                           .Distinct()
                                                                           .ToList();
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.SuperRegions;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.SubContinents;
    public string GetNamespace => "Map.Superregion";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
@@ -64,7 +64,7 @@ public partial class SubContinent
    [Description("The Continent this SuperRegion belongs to.")]
    [DefaultValue(null)]
    [SuppressAgs]
-   [PropertyConfig(aggregateLinktParent: "SuperRegions", aggreateLinkType: AggregateLinkType.Child, isRequired: true)]
+   [PropertyConfig(aggregateLinktParent: "SubContinents", aggreateLinkType: AggregateLinkType.Child, isRequired: true)]
    public Continent Continent { get; set; } = Continent.Empty;
 
    [DefaultValue(null)]

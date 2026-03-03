@@ -7,9 +7,9 @@ namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
 public class SuperRegionMapMode : LocationBasedMapMode
 {
-   public override string Name => "SuperRegions";
-   public override string Description => "Displays the SuperRegions the locations are situated in.";
-   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.SuperRegions;
+   public override string Name => "SubContinents";
+   public override string Description => "Displays the SubContinents the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.SubContinents;
    public override Type[] DisplayTypes => [typeof(SubContinent), typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
 
    public override int GetColorForLocation(Location location)
@@ -23,7 +23,7 @@ public class SuperRegionMapMode : LocationBasedMapMode
 
    public override bool IsLandOnly => false;
 
-   public override string[] GetTooltip(Location location) => ["SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId),];
+   public override string[] GetTooltip(Location location) => ["SubContinent: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId),];
 
    public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId;
 

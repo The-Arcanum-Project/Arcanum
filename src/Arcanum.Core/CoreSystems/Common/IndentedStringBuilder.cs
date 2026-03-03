@@ -553,6 +553,8 @@ public class IndentedStringBuilder
 
    public void AppendInjRepType(InjRepType agsInjRepType)
    {
-      _builder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
+      _builder.Append(SavingUtil.FormatInjectionType(agsInjRepType));
+      if (agsInjRepType != InjRepType.None)
+         _builder.Append(':');
    }
 }

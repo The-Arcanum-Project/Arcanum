@@ -113,7 +113,7 @@ public static class SelectionHelpers
          Area.Field.Provinces => Province.Field.Area,
          Region.Field.Areas => Area.Field.Region,
          SubContinent.Field.Regions => Region.Field.SubContinent,
-         Continent.Field.SuperRegions => SubContinent.Field.Continent,
+         Continent.Field.SubContinents => SubContinent.Field.Continent,
          _ => throw new ArgumentException("children is not a valid children enum"),
       };
    }
@@ -131,7 +131,7 @@ public static class SelectionHelpers
          case SubContinent:
             return SubContinent.Field.Regions;
          case Continent:
-            return Continent.Field.SuperRegions;
+            return Continent.Field.SubContinents;
          default:
             Debug.Fail("GetChildEnum called with invalid type");
             throw new ArgumentException("obj is not a valid type in the hierarchy");
@@ -158,7 +158,7 @@ public static class SelectionHelpers
       if (eu5Object is SubContinent sRegion)
          return (sRegion.Regions as AggregateLink<T>)!;
       if (eu5Object is Continent continent)
-         return (continent.SuperRegions as AggregateLink<T>)!;
+         return (continent.SubContinents as AggregateLink<T>)!;
 
       throw new ArgumentException("eu5Object is not a valid type in the hierarchy");
    }
