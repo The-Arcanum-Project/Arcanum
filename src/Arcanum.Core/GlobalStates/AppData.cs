@@ -11,9 +11,9 @@ public static class AppData
 {
    static AppData()
    {
-      AppVersion = VersionNumber.FromTag(Assembly.GetName().Version?.ToString()[..^2] ?? "0.0.0", out var version)
-         ? version
-         : new(0, 0, 0);
+      AppVersion = VersionNumber.FromTag(Assembly.GetName().Version?.ToString() ?? "0.0.0", out var version)
+                      ? version
+                      : new(0, 0, 0);
    }
 
    public static bool IsHeadless { get; set; } = false;
@@ -25,11 +25,11 @@ public static class AppData
 
    public static string FullTitle { get; } = $"{ProductName} {AppVersion}";
 
-   public static GitDataDescriptor ModforgeDataDescriptor { get; } = new (GitDataService.MOD_FORGE_GIT_REPOSITORY);
-   public static GitDataDescriptor ArcanumDataDescriptor { get; } = new (GitDataService.ARCANUM_GIT_REPOSITORY);
+   public static GitDataDescriptor ModforgeDataDescriptor { get; } = new(GitDataService.MOD_FORGE_GIT_REPOSITORY);
+   public static GitDataDescriptor ArcanumDataDescriptor { get; } = new(GitDataService.ARCANUM_GIT_REPOSITORY);
    public static MainMenuScreenDescriptor MainMenuScreenDescriptor { get; set; } = null!;
 
-   public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new ();
+   public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new();
 
    #region State of the application
 
@@ -37,5 +37,5 @@ public static class AppData
 
    #endregion
 
-   public static TreeHistoryManager HistoryManager { get; set; } = new (new ());
+   public static TreeHistoryManager HistoryManager { get; set; } = new(new());
 }
