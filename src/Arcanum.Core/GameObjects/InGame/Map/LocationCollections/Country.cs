@@ -4,6 +4,8 @@ using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.Map.MapModes;
+using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -26,7 +28,7 @@ namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 
 [NexusConfig]
 [ObjectSaveAs]
-public partial class Country : IEu5Object<Country>
+public partial class Country : IEu5Object<Country>, IMapInferable
 {
    public Country(string uniqueId)
    {
@@ -331,4 +333,46 @@ public partial class Country : IEu5Object<Country>
 
       return country.CountryType != CountryType.Pop;
    }
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      List<IEu5Object> countries = [];
+      foreach (var loc in sLocs)
+      {
+         var owner = PoliticalMapMode.GetLocationOwner(loc);
+         if (owner != Empty && !countries.Contains(owner))
+            countries.Add(owner);
+      }
+
+      return countries;
+   }
+
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
+   {
+      HashSet<Location> locations = [];
+      foreach (var item in items)
+      {
+         if (item is not Country country)
+         {
+            Debug.Fail("GetRelevantLocations called with non-Country object.");
+            continue;
+         }
+
+         locations.UnionWith(country.OwnControlCores);
+         locations.UnionWith(country.OwnControlIntegrated);
+         locations.UnionWith(country.OwnControlConquered);
+         locations.UnionWith(country.OwnControlColony);
+         locations.UnionWith(country.OwnCores);
+         locations.UnionWith(country.OwnConquered);
+         locations.UnionWith(country.OwnIntegrated);
+         locations.UnionWith(country.OwnColony);
+         locations.UnionWith(country.ControlCores);
+         locations.UnionWith(country.Control);
+         locations.UnionWith(country.OurCoresConqueredByOthers);
+      }
+
+      return locations.ToList();
+   }
+
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Political;
 }
