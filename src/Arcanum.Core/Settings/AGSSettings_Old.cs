@@ -31,7 +31,7 @@ public class AGSSettings_Old
    public AgsSettings Province { get; set; } = new();
    public AgsSettings Area { get; set; } = new();
    public AgsSettings Region { get; set; } = new();
-   public AgsSettings SuperRegion { get; set; } = new();
+   public AgsSettings SubContinent { get; set; } = new();
    public AgsSettings Continent { get; set; } = new();
    public AgsSettings Country { get; set; } = new()
    {

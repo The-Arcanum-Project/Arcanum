@@ -22,7 +22,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Continents.Clear();
-      Globals.SuperRegions.Clear();
+      Globals.SubContinents.Clear();
       Globals.Regions.Clear();
       Globals.Areas.Clear();
       Globals.Provinces.Clear();
@@ -52,7 +52,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
          region.Index = i;
       }
 
-      var superRegions = Globals.SuperRegions.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      var superRegions = Globals.SubContinents.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
       for (var i = 0; i < superRegions.Count; i++)
       {
          var superRegion = superRegions[i];
@@ -141,7 +141,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
                                   ref pc,
                                   superRegion,
                                   superRegionGlobals);
-            continent.SuperRegions.Add(superRegion);
+            continent.SubContinents.Add(superRegion);
 
             CommentNode? regionComment = null;
             foreach (var regionSn in srBn.Children)

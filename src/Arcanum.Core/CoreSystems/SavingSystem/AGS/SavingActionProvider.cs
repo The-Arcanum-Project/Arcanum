@@ -414,9 +414,9 @@ public static class SavingActionProvider
             InvalidOperationException("DefinitionSaving can only be used with LocationCollectionDefinition instances.");
 
       using (sb.BlockWithName(c.UniqueId, addNewLineBeforeClosing: true))
-         foreach (var sr in c.SuperRegions)
-            using (sb.BlockWithName(sr.UniqueId, addNewLineBeforeClosing: true))
-               foreach (var r in sr.Regions)
+         foreach (var sc in c.SubContinents)
+            using (sb.BlockWithName(sc.UniqueId, addNewLineBeforeClosing: true))
+               foreach (var r in sc.Regions)
                   using (sb.BlockWithName(r.UniqueId, addNewLineBeforeClosing: true))
                      foreach (var a in r.Areas)
                         using (sb.BlockWithName(a.UniqueId, addNewLineBeforeClosing: true))
