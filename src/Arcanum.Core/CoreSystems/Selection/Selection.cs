@@ -4,6 +4,7 @@ using System.Numerics;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.Utils.Geometry;
+using Common.UI.Map;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Timer = System.Threading.Timer;
 

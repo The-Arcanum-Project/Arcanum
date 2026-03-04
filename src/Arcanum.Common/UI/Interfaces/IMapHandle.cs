@@ -1,6 +1,8 @@
-﻿namespace Common.UI.Interfaces;
+﻿using Common.UI.Map;
+
+namespace Common.UI.Interfaces;
 
 public interface IMapHandle
 {
-   public void NotifyMapLoaded();
+   public bool NotifyMapLoaded(MapParsingData data);
 }

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Arcanum.Core.Utils.Geometry;
+using Common.UI.Map;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 // Assumes the existence of the PolygonReference struct defined above.

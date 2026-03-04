@@ -1,26 +1,21 @@
-﻿using System.Collections.Concurrent;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
-using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
+using Common.UI.Map;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
@@ -63,8 +58,8 @@ public partial class MapControl
 
    public static event Action? OnMapLoaded;
 
-   private int _mapWidth = -1;
-   private int _mapHeight = -1;
+   public int MapWidth { get; private set; } = -1;
+   public int MapHeight { get; private set; } = -1;
 
    private bool _isMapReady = false;
 
@@ -167,8 +162,8 @@ public partial class MapControl
       DataContext = _d3dHost;
       LoadingPanel.Visibility = Visibility.Collapsed;
 
-      _mapWidth = imageSize.Item1;
-      _mapHeight = imageSize.Item2;
+      MapWidth = imageSize.Item1;
+      MapHeight = imageSize.Item2;
    }
 
    private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -256,11 +251,11 @@ public partial class MapControl
 
    public void PanToCoords(float x, float y)
    {
-      if (_mapWidth <= 0 || _mapHeight <= 0)
+      if (MapWidth <= 0 || MapHeight <= 0)
          return;
 
-      var coordX = x / _mapWidth;
-      var coordY = y / _mapHeight;
+      var coordX = x / MapWidth;
+      var coordY = y / MapHeight;
       PanTo(coordX, coordY);
    }
 
@@ -357,19 +352,21 @@ public partial class MapControl
 
    private void ExportBackColorsToBitmap()
    {
-      if (_mapWidth <= 0 || _mapHeight <= 0)
+      // TODO - Reimplement this. How to get polygons they no longer exist?
+      /*
+      if (MapWidth <= 0 || MapHeight <= 0)
          return;
 
-      using var bmp = new Bitmap(_mapWidth, _mapHeight, PixelFormat.Format24bppRgb);
-      var bmpData = bmp.LockBits(new(0, 0, _mapWidth, _mapHeight),
+      using var bmp = new Bitmap(MapWidth, MapHeight, PixelFormat.Format24bppRgb);
+      var bmpData = bmp.LockBits(new(0, 0, MapWidth, MapHeight),
                                  ImageLockMode.WriteOnly,
                                  bmp.PixelFormat);
 
       var colors = _currentBackgroundColor;
-      var width = _mapWidth;
-      var height = _mapHeight;
+      var width = MapWidth;
+      var height = MapHeight;
       var stride = bmpData.Stride;
-
+      
       var sourcePolygons = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!;
 
       const int sliceHeight = 32;
@@ -434,6 +431,7 @@ public partial class MapControl
 
       bmp.UnlockBits(bmpData);
       ImageTagger.ExportTaggedTexture(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
+      */
    }
 
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);

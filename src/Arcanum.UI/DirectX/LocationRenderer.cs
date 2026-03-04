@@ -2,8 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
-using Arcanum.Core.CoreSystems.Map;
 using Common.Logger;
+using Common.UI.Map;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;

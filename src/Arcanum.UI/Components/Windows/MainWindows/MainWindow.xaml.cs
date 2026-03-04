@@ -228,15 +228,17 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");
-
-      lock (mapDataParser)
-         if (mapDataParser.FinishedTesselation)
-         {
-            Debug.Assert(mapDataParser.Polygons != null,
-                         "Map data parser has finished tesselation but polygons are null.");
-            _ = MainMap.SetupRenderer(mapDataParser.Polygons!, mapDataParser.MapSize);
-            MapModeManager.IsMapReady = true;
-         }
+      
+      // If tessellation is faster than loading, we can load the map directly
+      if (mapDataParser.TryGetMapData(out var data))
+      {
+         _ = MainMap.SetupRenderer(data.Polygons, data.MapSize);
+         MapModeManager.IsMapReady = true;
+         mapDataParser.DisposeMapData();
+      }
+      else
+         ArcLog.WriteLine("MAP", LogLevel.INF, "Map data not ready at UI load, will load map once ready.");
+      
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
@@ -245,9 +247,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
       MapControl.OnMapLoaded += () =>
       {
-         var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
-                                                              .LoadingService[0]).MapSize;
-         Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
+         Selection.MapManager.InitializeMapData(new(0, 0, MainMap.MapWidth, MainMap.MapWidth));
 
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.FrozenSelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.SelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());

@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using Arcanum.Core.CoreSystems.Map;
+using Common.UI.Map;
 using LibTessDotNet;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;

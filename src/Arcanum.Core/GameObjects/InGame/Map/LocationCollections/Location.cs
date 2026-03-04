@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
-using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -17,6 +16,7 @@ using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.InGame.Pops;
+using Common.UI.Map;
 using Nexus.Core;
 using Nexus.Core.Attributes;
 

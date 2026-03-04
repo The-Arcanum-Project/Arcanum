@@ -1,30 +1,28 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Map.MapModes;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.UI.Interfaces;
+using Common.UI.Map;
 
 namespace Arcanum.UI.Components.UIHandles;
 
 public class MapHandleImpl : IMapHandle
 {
-   private static void NotifyMapLoadedInternal()
+   private static bool NotifyMapLoadedInternal(MapParsingData data)
    {
       if (Application.Current.MainWindow is not MainWindow mainWindow || MapModeManager.IsMapReady)
-         return;
+         return false;
 
-      if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing tracing)
-         throw new ApplicationException("MapHandleImpl.NotifyMapLoaded");
-
-      Debug.Assert(tracing.Polygons is not null);
-      _ = mainWindow.MainMap.SetupRenderer(tracing.Polygons!, tracing.MapSize);
+      Debug.Assert(data.Polygons is not null);
+      _ = mainWindow.MainMap.SetupRenderer(data.Polygons, data.MapSize);
       MapModeManager.IsMapReady = true;
+      
+      return true;
    }
 
-   public void NotifyMapLoaded()
+   public bool NotifyMapLoaded(MapParsingData data)
    {
-      Application.Current.Dispatcher.BeginInvoke(NotifyMapLoadedInternal);
+      return Application.Current.Dispatcher.Invoke(() => NotifyMapLoadedInternal(data));
    }
 }
