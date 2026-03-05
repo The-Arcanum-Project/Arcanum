@@ -127,18 +127,17 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       }
       
       var data = new MapParsingData(mapSize, polygons);
-      
-      lock (this)
+
+      // Notify UI asynchronously outside the lock to prevent deadlocks
+
+      lock(this)
       {
          FinishedTesselation = true;
+         _data = data;
       }
       
-      if (!UIHandle.Instance.MapHandle.NotifyMapLoaded(data))
-         // Map not loaded in UI -> Save data
-         lock(this)
-            _data = data;
-         
-
+      UIHandle.Instance.MapHandle.NotifyMapLoaded();
+      
       // End todo
    }
    
@@ -150,8 +149,6 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
    /// <returns></returns>
    public bool TryGetMapData([MaybeNullWhen(false)] out MapParsingData data)
    {
-      lock (this)
-      {
          if (FinishedTesselation && _data != null)
          {
             data = _data;
@@ -160,12 +157,10 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          data = null;
          return false;
-      }
    }
    
    public void DisposeMapData()
    {
-      lock (this)
          _data = null;
    }
    

@@ -1,28 +1,19 @@
-﻿using System.Diagnostics;
-using System.Windows;
-using Arcanum.Core.CoreSystems.Map.MapModes;
+﻿using System.Windows;
 using Arcanum.UI.Components.Windows.MainWindows;
 using Common.UI.Interfaces;
-using Common.UI.Map;
 
 namespace Arcanum.UI.Components.UIHandles;
 
 public class MapHandleImpl : IMapHandle
 {
-   private static bool NotifyMapLoadedInternal(MapParsingData data)
+   private static void NotifyMapLoadedInternal()
    {
-      if (Application.Current.MainWindow is not MainWindow mainWindow || MapModeManager.IsMapReady)
-         return false;
-
-      Debug.Assert(data.Polygons is not null);
-      _ = mainWindow.MainMap.SetupRenderer(data.Polygons, data.MapSize);
-      MapModeManager.IsMapReady = true;
-      
-      return true;
+      if (Application.Current.MainWindow is MainWindow mainWindow)
+         mainWindow.TryLoadMapData();
    }
 
-   public bool NotifyMapLoaded(MapParsingData data)
+   public void NotifyMapLoaded()
    {
-      return Application.Current.Dispatcher.Invoke(() => NotifyMapLoadedInternal(data));
+      Application.Current.Dispatcher.BeginInvoke(NotifyMapLoadedInternal);
    }
 }

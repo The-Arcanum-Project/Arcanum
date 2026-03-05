@@ -222,7 +222,27 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       LifecycleManager.Instance.RunShutdownSequence();
       Application.Current.Shutdown();
    }
+   
+   public void TryLoadMapData()
+   {
+      // Don't do anything if it's already loaded
+      if (MapModeManager.IsMapReady)
+         return;
 
+      if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
+         throw new ApplicationException("Could not load location map tracing descriptor.");
+      
+      lock (mapDataParser)
+         if (mapDataParser.TryGetMapData(out var data))
+         {
+            _ = MainMap.SetupRenderer(data.Polygons, data.MapSize);
+            MapModeManager.IsMapReady = true;
+            mapDataParser.DisposeMapData();
+         }
+         else
+            ArcLog.WriteLine("MAP", LogLevel.INF, "Map data not ready at UI load, will load map once ready.");
+   }
+   
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
       // Load map if data ready
@@ -230,15 +250,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          throw new ApplicationException("Could not load location map tracing descriptor.");
       
       // If tessellation is faster than loading, we can load the map directly
-      if (mapDataParser.TryGetMapData(out var data))
-      {
-         _ = MainMap.SetupRenderer(data.Polygons, data.MapSize);
-         MapModeManager.IsMapReady = true;
-         mapDataParser.DisposeMapData();
-      }
-      else
-         ArcLog.WriteLine("MAP", LogLevel.INF, "Map data not ready at UI load, will load map once ready.");
-      
+      TryLoadMapData();
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
@@ -277,9 +289,8 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
                break;
          }
       };
-
-      lock (mapDataParser)
-         SetUpToolTip(MainMap);
+      
+      SetUpToolTip(MainMap);
 
       SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
 
