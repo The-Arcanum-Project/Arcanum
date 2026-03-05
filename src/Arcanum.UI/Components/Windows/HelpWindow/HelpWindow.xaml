@@ -8,8 +8,9 @@
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:viewModels = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.ViewModels"
                          xmlns:views = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.Views"
-                         xmlns:utils = "clr-namespace:Arcanum.Core.Utils;assembly=Arcanum.Core" mc:Ignorable = "d"
-                         Title = "Help / Documentation" Height = "700" Width = "1200"
+                         xmlns:utils = "clr-namespace:Arcanum.Core.Utils;assembly=Arcanum.Core"
+                         xmlns:globalStates = "clr-namespace:Arcanum.Core.GlobalStates;assembly=Arcanum.Core"
+                         mc:Ignorable = "d" Title = "Help / Documentation" Height = "700" Width = "1200"
                          WindowStartupLocation = "CenterScreen" Background = "{StaticResource AccentGradientBrush}"
                          commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
                          d:DataContext = "{d:DesignInstance viewModels:HelpWindowViewModel}">
@@ -90,8 +91,10 @@
                 <RowDefinition Height = "Auto" /> <!-- Settings/Version -->
             </Grid.RowDefinitions>
 
-            <TextBlock Text = "A R C A N U M" Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "25"
-                       FontWeight = "Bold" Margin = "0,20,0,20" HorizontalAlignment = "Center" />
+            <TextBlock Text = "A R C A N U M" FontSize = "25" FontWeight = "Bold" Margin = "0,0,0,20"
+                       HorizontalAlignment = "Center" />
+            <TextBlock Grid.Row = "0" FontSize = "18" Text = "{x:Static globalStates:AppData.ModName}"
+                       HorizontalAlignment = "Center" Margin = "30" />
 
             <ListBox Grid.Row = "1" ItemsSource = "{Binding MenuItems}" SelectedItem = "{Binding SelectedMenuItem}"
                      ItemContainerStyle = "{StaticResource NavButtonStyle}" Background = "Transparent"

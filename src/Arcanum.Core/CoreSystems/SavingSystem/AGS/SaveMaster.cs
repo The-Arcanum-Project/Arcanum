@@ -317,6 +317,19 @@ public static class SaveMaster
       if (sb == null)
          return;
 
+      if (fileObj == Eu5FileObj.Empty)
+      {
+         fileObj = modifiedObjects[0].Source;
+         if (fileObj == Eu5FileObj.Empty)
+         {
+            ArcLog.WriteLine(CommonLogSource.FSM,
+                             LogLevel.ERR,
+                             "File object is empty for modified objects. This should not happen.");
+            Debug.Fail("File object is empty for modified objects. This should not happen.");
+            return;
+         }
+      }
+
       WriteFile(sb.InnerBuilder, fileObj, true);
    }
 
@@ -839,9 +852,20 @@ public static class SaveMaster
          return allMods;
 
       var topLevel = new List<IEu5Object>();
-      var modSpans = allMods.Select(m => (Start: m.FileLocation.CharPos,
-                                          End: m.FileLocation.CharPos + m.FileLocation.Length, Obj: m))
-                            .ToList();
+      var toFilter = new List<IEu5Object>();
+      for (var i = allMods.Count - 1; i >= 0; i--)
+      {
+         var obj = allMods[i];
+         if (obj.FileLocation == Eu5ObjectLocation.Empty)
+            // If we don't have a valid FileLocation we can not determine if we are nested or not, so we just assume it's top level
+            topLevel.Add(obj);
+         else
+            toFilter.Add(obj);
+      }
+
+      var modSpans = toFilter.Select(m => (Start: m.FileLocation.CharPos,
+                                           End: m.FileLocation.CharPos + m.FileLocation.Length, Obj: m))
+                             .ToList();
 
       for (var i = 0; i < modSpans.Count; i++)
       {

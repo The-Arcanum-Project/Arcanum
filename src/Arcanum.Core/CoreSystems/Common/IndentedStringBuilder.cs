@@ -352,9 +352,6 @@ public class IndentedStringBuilder
    // Removes or adds new lines to ensure the specified count of consecutive new lines at the end of the builder.
    public IndentedStringBuilder EnforceNewLineCount(int count, bool applllyFallback = true)
    {
-      if (Length == 0)
-         return this;
-
       if (count < 0)
          count = 0;
 

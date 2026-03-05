@@ -5,7 +5,7 @@ using Arcanum.Core.GameObjects.BaseTypes;
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
 /// <summary>
-/// All <see cref="IEu5Object"/> schould be activated here to ensure all properties are set correctly.
+///    All <see cref = "IEu5Object" /> schould be activated here to ensure all properties are set correctly.
 /// </summary>
 public static class Eu5Activator
 {
@@ -15,7 +15,7 @@ public static class Eu5Activator
 
    public static T CreateEmbeddedInstance<T>(string? uniqueId, StatementNode node) where T : IEu5Object<T>, new()
    {
-      var t = new T()
+      var t = new T
       {
          UniqueId = uniqueId ?? GenerateUniqueIdForUnnamedObject<T>(),
          Source = Eu5FileObj.Embedded,
