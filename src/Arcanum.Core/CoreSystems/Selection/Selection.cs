@@ -187,6 +187,23 @@ public static class Selection
    public static int HighlightedLocationCount => HighlightedLocations.Count;
    public static int SelectionPreviewCount => SelectionPreview.Count;
 
+   extension(Location location)
+   {
+      public bool IsSelected() => SelectedLocations.Contains(location);
+
+      public bool IsSelectedSpecific(SelectionTarget target)
+      {
+         return target switch
+         {
+            SelectionTarget.Selection => SelectedLocations.Contains(location),
+            SelectionTarget.Hover => HoveredLocations.Contains(location),
+            SelectionTarget.Highlight => HighlightedLocations.Contains(location),
+            SelectionTarget.SelectionPreview => SelectionPreview.Contains(location),
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target, null),
+         };
+      }
+   }
+
    #endregion
 
    #region General Modify Methods
