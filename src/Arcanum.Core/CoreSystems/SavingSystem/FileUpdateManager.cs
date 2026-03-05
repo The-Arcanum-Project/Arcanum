@@ -3,7 +3,9 @@ using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
+using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Common.UI;
@@ -33,11 +35,30 @@ public static class FileUpdateManager
             existingToUpdate.Add(obj);
 
       // get the original file content depending on whether we have existing or new objects
-      var original = existingToUpdate.Count > 0
-                        ? IO.IO.ReadAllTextUtf8(objectsToUpdate[0].Source.Path.FullPath)!
-                        : newObjects.Count > 0
-                           ? IO.IO.ReadAllTextUtf8(newObjects[0].Source.Path.FullPath)!
-                           : string.Empty;
+      Eu5FileObj? originalSource;
+      if (existingToUpdate.Count > 0)
+         originalSource = objectsToUpdate[0].Source;
+      else if (newObjects.Count > 0)
+      {
+         originalSource = FileStateManager.CreateEu5FileObject(newObjects[0]);
+         foreach (var obj in newObjects)
+            if (obj.Source == Eu5FileObj.Empty)
+            {
+               if (existingToUpdate.Count == 0)
+                  obj.Source = originalSource;
+               else
+                  obj.Source = existingToUpdate.First().Source;
+            }
+      }
+      else
+         originalSource = null;
+
+      string original;
+
+      if (originalSource == null || originalSource == Eu5FileObj.Empty)
+         original = string.Empty;
+      else
+         original = IO.IO.ReadAllLinesWithEncoding(originalSource) ?? string.Empty;
 
       Debug.Assert(original != null, nameof(original) + " != null");
 
@@ -133,6 +154,7 @@ public static class FileUpdateManager
                                 CountNewLinesInStringBuilder(sb.InnerBuilder),
                                 isb.InnerBuilder.Length,
                                 sb.InnerBuilder.Length);
+
          obj.Source.ObjectsInFile.Add(obj);
          isb.Merge(sb);
       }

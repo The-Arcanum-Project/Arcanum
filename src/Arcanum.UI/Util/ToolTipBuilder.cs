@@ -3,20 +3,23 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.ToolTip;
+using Arcanum.Core.CoreSystems.Selection;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
 namespace Arcanum.UI.Util;
 
 /// <summary>
-/// A manager class that uses a fluent builder pattern to construct a complex tooltip UI element.
+///    A manager class that uses a fluent builder pattern to construct a complex tooltip UI element.
 /// </summary>
 public static class ToolTipBuilder
 {
    private static ToolTipLineSegment GetDefaultLineSegment(Location location) => new($"Location: {location.UniqueId}",
                                                                                      ToolTipObjectType.Text)
    {
-      IsBold = true
+      IsBold = true,
    }; // TODO: Add loc once we support it:  (<MISSING_LOC>)
+
+   private static ToolTipLineSegment GetSelectedSegment() => new("Selected", ToolTipObjectType.Text) { IsItalic = true };
 
    private static ToolTipLineSegment GetDefaultMapModeLineSegment(string text) => new(text, ToolTipObjectType.Text);
 
@@ -24,7 +27,10 @@ public static class ToolTipBuilder
 
    public static List<ToolTipLineSegment> CreateToolTipSegments(Location location)
    {
-      var segments = new List<ToolTipLineSegment> { GetDefaultLineSegment(location), GetSeparatorLine() };
+      var segments = new List<ToolTipLineSegment> { GetDefaultLineSegment(location) };
+      if (location.IsSelected())
+         segments.Add(GetSelectedSegment());
+      segments.Add(GetSeparatorLine());
       foreach (var mmttl in MapModeManager.GetCurrent().GetTooltip(location))
          segments.Add(GetDefaultMapModeLineSegment(mmttl));
       return segments;
@@ -66,10 +72,7 @@ public static class ToolTipBuilder
       return textBlock;
    }
 
-   private static Separator CreateSeparator()
-   {
-      return new() { Margin = new(0, 4, 0, 4) };
-   }
+   private static Separator CreateSeparator() => new() { Margin = new(0, 4, 0, 4) };
 
    private static StackPanel CreateIconTextLine(ToolTipLineSegment segment)
    {

@@ -281,7 +281,7 @@ public static class DescriptorDefinitions
                 RawMaterialDescriptor.LoadingService[0], StaticModifiersDescriptor.LoadingService[0],
              ]),
           ],
-          false);
+          false) { AllowMultipleFiles = false, };
 
    public static readonly FileDescriptor TownSetupDescriptor =
       new(["in_game", "common", "town_setups"],

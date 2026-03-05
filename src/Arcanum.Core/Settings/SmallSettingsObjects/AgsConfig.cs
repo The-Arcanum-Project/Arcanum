@@ -59,8 +59,8 @@ public class AgsConfig
    public int NewLinesBeforeBlock { get; set; } = 2;
 
    [Description("The number of new lines to insert between objects when saving.")]
-   [DefaultValue(3)]
-   public int NewLinesBetweenObjects { get; set; } = 3;
+   [DefaultValue(1)]
+   public int NewLinesBetweenObjects { get; set; } = 1;
 
    [Description("Where the opening brace for blocks should be located when saving. Only applied if the block is not set to be on one line.")]
    [DefaultValue(BraceLocation.SameLine)]

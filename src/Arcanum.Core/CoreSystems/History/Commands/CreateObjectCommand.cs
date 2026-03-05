@@ -9,7 +9,7 @@ public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlo
 {
    public override void Execute()
    {
-      base.Execute();
+      // base.Execute();
       if (addToGlobals)
       {
          var globals = eu5Object.GetGlobalItemsNonGeneric();

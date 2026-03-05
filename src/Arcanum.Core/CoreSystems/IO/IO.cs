@@ -1,7 +1,7 @@
 ﻿using System.Drawing.Imaging;
-using System.IO;
 using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
+using Arcanum.Core.CoreSystems.SavingSystem.Util;
 
 namespace Arcanum.Core.CoreSystems.IO;
 
@@ -159,6 +159,9 @@ public static class IO
    public static string[]? ReadAllLinesUtf8(string path) => ReadAllLines(path, NoBomUtf8Encoding);
    public static string? ReadAllTextUtf8WithBom(string path) => ReadAllText(path, BomUtf8Encoding);
    public static string[]? ReadAllLinesUtf8WithBom(string path) => ReadAllLines(path, BomUtf8Encoding);
+
+   public static string? ReadAllLinesWithEncoding(Eu5FileObj eu5Fo) => ReadAllText(eu5Fo.GetFullPath(), eu5Fo.Descriptor.FileEncoding);
+   public static string[]? ReadAllLinesWithEncodingAsLines(Eu5FileObj eu5Fo) => ReadAllLines(eu5Fo.GetFullPath(), eu5Fo.Descriptor.FileEncoding);
 
    // --- Generic File Write Operations ---
    public static bool WriteAllText(string path, string data, Encoding encoding, bool append = false)

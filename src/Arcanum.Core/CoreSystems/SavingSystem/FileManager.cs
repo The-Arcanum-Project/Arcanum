@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -15,20 +14,18 @@ using Common.UI;
 namespace Arcanum.Core.CoreSystems.SavingSystem;
 
 /// <summary>
-/// The FileManager class is responsible for managing file paths for both vanilla and modded content.
+///    The FileManager class is responsible for managing file paths for both vanilla and modded content.
 /// </summary>
 public static class FileManager
 {
+   public const string ARCANUM_FILE_NAME_WATERMARK = "_ARC";
    public static DataSpace ModDataSpace = DataSpace.Empty;
    public static DataSpace[] DependentDataSpaces;
-   public static DataSpace VanillaDataSpace => DependentDataSpaces[0];
 
    public static readonly DataSpace DocumentsEUV;
 
    private static readonly char DefaultSeparationChar = Path.DirectorySeparatorChar;
    private static readonly char AlternativeSeparationChar = Path.AltDirectorySeparatorChar;
-
-   private static readonly Dictionary<Type, FileDescriptor> FileDescriptorCache = new();
 
    static FileManager()
    {
@@ -46,14 +43,9 @@ public static class FileManager
              eu5Path.Split(Path.DirectorySeparatorChar),
              DataSpace.AccessType.ReadOnly),
       ];
-
-      foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
-      {
-         foreach (var type in descriptor.LoadingService[0]
-                                        .ParsedObjects.Where(type => !FileDescriptorCache.TryAdd(type, descriptor)))
-            Debug.Fail($"FileDescriptorCache already contains a descriptor for type {type.FullName}");
-      }
    }
+
+   public static DataSpace VanillaDataSpace => DependentDataSpaces[0];
 
    public static void InitHeadlessMode(string modPath, List<string> dependencies)
    {
@@ -69,14 +61,6 @@ public static class FileManager
       ];
 
       CoreData.ModMetadata = ExistingModsLoader.ParseModMetadata(modPath)!;
-
-      FileDescriptorCache.Clear();
-      foreach (var descriptor in DescriptorDefinitions.FileDescriptors)
-      {
-         foreach (var type in descriptor.LoadingService[0]
-                                        .ParsedObjects.Where(type => !FileDescriptorCache.TryAdd(type, descriptor)))
-            Debug.Fail($"FileDescriptorCache already contains a descriptor for type {type.FullName}");
-      }
    }
 
    public static string SanitizePath(string path, char separationChar = '.')
@@ -122,10 +106,10 @@ public static class FileManager
    public static string Normalize(string path) => path.Replace(AlternativeSeparationChar, DefaultSeparationChar);
 
    /// <summary>
-   /// Loads the project file descriptor into the application.
-   /// This will set the ModDataSpace and DependentDataSpaces to the values from the descriptor.
+   ///    Loads the project file descriptor into the application.
+   ///    This will set the ModDataSpace and DependentDataSpaces to the values from the descriptor.
    /// </summary>
-   /// <param name="descriptor"></param>
+   /// <param name = "descriptor" ></param>
    public static void LoadToApplication(this ProjectFileDescriptor descriptor)
    {
       DependentDataSpaces = [descriptor.VanillaPath, .. descriptor.RequiredMods];
@@ -154,9 +138,9 @@ public static class FileManager
    }
 
    /// <summary>
-   /// Combines the subPaths with the vanilla path but does NOT check if the path should be replaced.
+   ///    Combines the subPaths with the vanilla path but does NOT check if the path should be replaced.
    /// </summary>
-   /// <param name="subPaths"></param>
+   /// <param name = "subPaths" ></param>
    /// <returns></returns>
    public static string GetVanillaPath(params string[]? subPaths)
    {
@@ -179,13 +163,13 @@ public static class FileManager
    public static bool ExistsInVanilla(string[] internalPath, bool isDirectory = false) => ExistsInVanilla(Path.Combine(internalPath), isDirectory);
 
    /// <summary>
-   /// Returns true if the given path exists in the mod data space.
-   /// This will check the mod data space only, not the vanilla data space.
+   ///    Returns true if the given path exists in the mod data space.
+   ///    This will check the mod data space only, not the vanilla data space.
    /// </summary>
-   /// <param name="path"></param>
-   /// <param name="isDirectory"></param>
+   /// <param name = "path" ></param>
+   /// <param name = "isDirectory" ></param>
    /// <returns></returns>
-   /// <exception cref="ArgumentException"></exception>
+   /// <exception cref = "ArgumentException" ></exception>
    public static bool ExistsInMod(string path, bool isDirectory = false)
    {
       if (string.IsNullOrEmpty(path))
@@ -196,13 +180,13 @@ public static class FileManager
    }
 
    /// <summary>
-   /// Returns true if the given path exists in the vanilla data space.
-   /// This will check the vanilla data space only, not the mod data space.
+   ///    Returns true if the given path exists in the vanilla data space.
+   ///    This will check the vanilla data space only, not the mod data space.
    /// </summary>
-   /// <param name="path"></param>
-   /// <param name="isDirectory"></param>
+   /// <param name = "path" ></param>
+   /// <param name = "isDirectory" ></param>
    /// <returns></returns>
-   /// <exception cref="ArgumentException"></exception>
+   /// <exception cref = "ArgumentException" ></exception>
    public static bool ExistsInVanilla(string path, bool isDirectory = false)
    {
       if (string.IsNullOrEmpty(path))
@@ -214,8 +198,8 @@ public static class FileManager
    }
 
    /// <summary>
-   /// Returns all files in the given subdirectory path from either the mod or vanilla data space.
-   /// Handles <c>replaced paths</c> and also invalid paths.
+   ///    Returns all files in the given subdirectory path from either the mod or vanilla data space.
+   ///    Handles <c>replaced paths</c> and also invalid paths.
    /// </summary>
    public static ICollection<PathObj> GetAllFilesForDirectory(
       string[] subPath,
@@ -277,11 +261,9 @@ public static class FileManager
       return DataSpace.Empty;
    }
 
-   private static DataSpace GetDataSpace(string path)
-   {
+   private static DataSpace GetDataSpace(string path) =>
       //TODO: @Minnator make this also take base mods into account
-      return ExistsInMod(path) ? ModDataSpace : VanillaDataSpace;
-   }
+      ExistsInMod(path) ? ModDataSpace : VanillaDataSpace;
 
    public static Eu5FileObj GetGameOrModFileObj(string? fileName, FileDescriptor descriptor)
    {
@@ -310,11 +292,12 @@ public static class FileManager
    }
 
    /// <summary>
-   /// Returns a <see cref="FileInformation"/> for each file in the given directory boxed in a <see cref="List{FileInformation}"/>.
+   ///    Returns a <see cref = "FileInformation" /> for each file in the given directory boxed in a
+   ///    <see cref = "List{FileInformation}" />.
    /// </summary>
-   /// <param name="descriptor"></param>
+   /// <param name = "descriptor" ></param>
    /// <returns></returns>
-   /// <exception cref="ArgumentException"></exception>
+   /// <exception cref = "ArgumentException" ></exception>
    public static List<Eu5FileObj> GetAllFileInfosForDirectory(FileDescriptor descriptor)
    {
       List<Eu5FileObj> fileInfos = [];
@@ -381,11 +364,15 @@ public static class FileManager
       IEu5Object no,
       bool allowReuseOfExistingArcFile)
    {
-      if (!FileDescriptorCache.TryGetValue(no.GetType(), out var descriptor))
+      if (!DescriptorDefinitions.TypeToDescriptor.TryGetValue(no.GetType(), out var descriptor))
          throw new
             OhShitHereWeGoAgainException($"No FileDescriptor found for type {no.GetType().FullName}. Cannot generate path for new object.");
 
       var folderPath = descriptor.LocalPath.Aggregate(ModDataSpace.FullPath, Path.Combine);
+
+      if (!descriptor.AllowMultipleFiles)
+         return (descriptor.LocalPath, descriptor);
+
       return ([
                  ..descriptor.LocalPath, GetDefaultFileNameForFolder(folderPath,
                                                                      no.GetType(),
@@ -394,8 +381,6 @@ public static class FileManager
               ],
               descriptor);
    }
-
-   public const string ARCANUM_FILE_NAME_WATERMARK = "_ARC";
    // TODO: Create a hidden settings option to disable this watermark in generated file names for contributors and Patreon Members
 
    public static string GetDefaultFileNameForFolder(string folder,

@@ -28,6 +28,7 @@ public static class AppData
    public static GitDataDescriptor ModforgeDataDescriptor { get; } = new(GitDataService.MOD_FORGE_GIT_REPOSITORY);
    public static GitDataDescriptor ArcanumDataDescriptor { get; } = new(GitDataService.ARCANUM_GIT_REPOSITORY);
    public static MainMenuScreenDescriptor MainMenuScreenDescriptor { get; set; } = null!;
+   public static string ModName => MainMenuScreenDescriptor.GetLastDescriptor()?.ModName ?? "Unknown Mod";
 
    public static QueastorSearchSettings QueastorSearchSettings { get; set; } = new();
 
