@@ -1,8 +1,6 @@
-﻿using System.Windows.Controls;
+﻿namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
 
-namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
-
-public partial class CommandMapView : UserControl
+public partial class CommandMapView
 {
    public CommandMapView()
    {

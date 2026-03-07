@@ -18,7 +18,7 @@ public static class HelpWindowCommands
                             if (param is IAppFeature feature)
                                ArcAppContext.Get<IHelpPageViewModelWrapper>()?.ActivateFeatureTabFor(feature);
                          },
-                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures();
+                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures([]);
 
       // "help_window.dashboard_view.next_tip"
       new ManagedCommand(CommandIds.HelpWindow.DashBoardView.NextRandomTip,
@@ -26,7 +26,7 @@ public static class HelpWindowCommands
                          "Shows the next tip in the dashboard view.",
                          CommandScopes.HELP_DASHBOARD,
                          _ => ArcAppContext.Get<IHelpPageViewModelWrapper>()?.ShowNextTip(),
-                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures((Key.Right, ModifierKeys.Alt));
+                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures([(Key.Right, ModifierKeys.Alt)]);
 
       // "help_window.dashboard_view.previous_tip"
       new ManagedCommand(CommandIds.HelpWindow.DashBoardView.PreviousRandomTip,
@@ -34,6 +34,6 @@ public static class HelpWindowCommands
                          "Shows the previous tip in the dashboard view.",
                          CommandScopes.HELP_DASHBOARD,
                          _ => ArcAppContext.Get<IHelpPageViewModelWrapper>()?.ShowPreviousTip(),
-                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures((Key.Left, ModifierKeys.Alt));
+                         canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures([(Key.Left, ModifierKeys.Alt)]);
    }
 }

@@ -30,7 +30,7 @@ public static class TreeBuilder
                                               bool isArray,
                                               HashSet<PropertySavingMetadata> psms)
    {
-      var node = Construct(target, isArray, null, false);
+      var node = Construct(target, isArray, null);
       var commentChar = target.Source.Descriptor.FileType.CommentPrefix;
       if (node is not BlockSerializationNode blockNode)
          throw new InvalidOperationException("InjRep serialization requires a BlockSerializationNode at the root.");
@@ -88,7 +88,7 @@ public static class TreeBuilder
                   // Serialize Item Logic
                   // If item is IEu5Object -> Recursive BuildTree
                   // If item is Simple -> ValueSerializationNode
-                  var childNode = CreateNodeForItem(item, meta, gameObj);
+                  var childNode = CreateNodeForItem(item, meta);
                   block.Children.Add(childNode);
                }
             else
@@ -118,7 +118,7 @@ public static class TreeBuilder
       return root;
    }
 
-   private static SerializationNode CreateNodeForItem(object item, PropertySavingMetadata parentMeta, IEu5Object target)
+   private static SerializationNode CreateNodeForItem(object item, PropertySavingMetadata parentMeta)
    {
       if (item is IEu5Object nestedObj)
          // Recursion for complex objects
@@ -139,11 +139,6 @@ public static class TreeBuilder
 
       return val.Equals(def);
    }
-
-   private static string SerializeValue(object val, PropertySavingMetadata meta) =>
-      // Your existing value serialization logic goes here.
-      // Handling Enums (EnumAgsData), Colors, Quotes, Decimals.
-      val.ToString()!;
 
    public static string PrintTreeStructure(SerializationNode node)
    {
@@ -199,25 +194,25 @@ public static class TreeBuilder
 #else
             var shouldSkip = FormattingService.ShouldSkipCheck(prop.Psm, prop.Target, prop.Value, false, false);
             var sss = shouldSkip ? "[Skipped]" : "";
-            sb.AppendLine($"{indent}🔑 {sss}{typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value?.GetType().Name ?? "null"}{flagsStr}");
+            sb.AppendLine($"{indent}🔑 {sss}{typeName} -> Key: '{prop.Psm.Keyword}' Type: {prop.Value.GetType().Name}{flagsStr}");
 #endif
             break;
          }
 
          case ValueSerializationNode val:
          {
-            sb.AppendLine($"{indent}📄 {typeName} -> Value: {val.Value?.ToString() ?? "null"}{flagsStr}");
+            sb.AppendLine($"{indent}📄 {typeName} -> Value: {val.Value.ToString() ?? "null"}{flagsStr}");
             break;
          }
 
-         case BulkValueSerializationNode bulk:
+         case BulkValueSerializationNode:
          {
             // We iterate just to check if empty, usually safe for collections
             sb.AppendLine($"{indent}📚 {typeName} -> (Delegate to FormattingService){flagsStr}");
             break;
          }
 
-         case ManualSerializationNode manual:
+         case ManualSerializationNode:
          {
             sb.AppendLine($"{indent}⚠️ {typeName} -> (Black Box / Custom Delegate){flagsStr}");
             break;

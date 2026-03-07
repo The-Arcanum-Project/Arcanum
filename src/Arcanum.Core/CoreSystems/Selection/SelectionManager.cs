@@ -59,7 +59,7 @@ public static class SelectionManager
    static SelectionManager()
    {
       Selection.SelectionModified += InvalidateSelection;
-      EditableObjects.CollectionChanged += (s, e) => EditableObjectsChanged?.Invoke();
+      EditableObjects.CollectionChanged += (_, _) => EditableObjectsChanged?.Invoke();
    }
 
    public static void Preview(List<IEu5Object> eu5Objects)

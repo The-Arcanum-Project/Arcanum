@@ -216,7 +216,7 @@ public partial class DebugPanelGrid
 
    private void ASTBuilderViewer_OnClick(object sender, RoutedEventArgs e)
    {
-      new ASTBuilderTest().Show();
+      new AstBuilderTest().Show();
    }
 
    private void ImageTagDecode_OnClick(object sender, RoutedEventArgs e)

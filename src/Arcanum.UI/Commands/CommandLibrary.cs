@@ -50,7 +50,7 @@ public static class CommandLibrary
                          {
                             if (param is Window window)
                                window.WindowState = WindowState.Minimized;
-                         }).WithDefaultGestures((Key.F9, ModifierKeys.None), (Key.B, ModifierKeys.Control));
+                         }).WithDefaultGestures([(Key.F9, ModifierKeys.None), (Key.B, ModifierKeys.Control)]);
 
       new ManagedCommand(CommandIds.UI.Window.Layout.Load,
                          "Load Layout",
@@ -145,7 +145,7 @@ public static class CommandLibrary
          cmd.AddDefaultGesture(gesture);
       }
 
-      public void WithDefaultGestures(params (Key key, ModifierKeys modifiers)[] gestures)
+      public void WithDefaultGestures((Key key, ModifierKeys modifiers)[] gestures)
       {
          foreach (var (key, modifiers) in gestures)
          {

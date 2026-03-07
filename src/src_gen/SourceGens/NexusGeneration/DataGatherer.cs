@@ -23,7 +23,7 @@ public static class DataGatherer
          if (member is not IPropertySymbol propertySymbol)
             continue;
 
-         npds.Add(new(member, propertySymbol, cs, context, ieu5ObjectSymbol));
+         npds.Add(new(propertySymbol, cs, context, ieu5ObjectSymbol));
       }
 
       return npds;

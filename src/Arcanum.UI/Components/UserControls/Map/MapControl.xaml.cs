@@ -66,7 +66,7 @@ public partial class MapControl
    private int _mapWidth = -1;
    private int _mapHeight = -1;
 
-   private bool _isMapReady = false;
+   private bool _isMapReady;
 
    private Vector2? _contextMenuClickLocation;
 

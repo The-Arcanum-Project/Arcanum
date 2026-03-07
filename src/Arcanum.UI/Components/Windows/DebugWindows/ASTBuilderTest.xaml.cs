@@ -1,11 +1,8 @@
-﻿#region
-
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
@@ -15,18 +12,16 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 using Arcanum.Core.Utils.DevHelper;
 
-#endregion
-
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
-public partial class ASTBuilderTest
+public partial class AstBuilderTest
 {
    // Store the full, unfiltered lists
    private readonly List<Type> _allAgsTypes;
    private List<IEu5Object> _allAgsItems = [];
-   private List<Eu5FileObj> _allFileObjs = [];
+   private readonly List<Eu5FileObj> _allFileObjs = [];
 
-   public ASTBuilderTest()
+   public AstBuilderTest()
    {
       InitializeComponent();
 
@@ -60,28 +55,6 @@ public partial class ASTBuilderTest
          AgsItemsView.SelectedIndex = 0;
    }
 
-   private void SetComplexity(IAgs ags)
-   {
-      var complexity = ags.EstimateObjectComplexity();
-      Complexity = $"Complexity: {complexity}";
-   }
-
-   private void Eu5FileObjSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-   {
-      if (sender is not ListView { SelectedItem: Eu5FileObj fileObj })
-      {
-         // Clear preview if selection is lost
-         FormattedText = string.Empty;
-         return;
-      }
-
-      FormatFile(fileObj);
-   }
-
-   private void FormatFile(Eu5FileObj fileObj)
-   {
-   }
-
    private void ObjectSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
    {
       _allFileObjs.Clear(); // Clear previous selection's data
@@ -103,22 +76,6 @@ public partial class ASTBuilderTest
       }
 
       FilterAndDisplayFiles(FileSearchBox.Text);
-   }
-
-   private void ExportButton_Click(object sender, RoutedEventArgs e)
-   {
-      // Not implemented
-   }
-
-   private void CopyButton_Click(object sender, RoutedEventArgs e)
-   {
-      Clipboard.SetText(FormattedText);
-   }
-
-   private void Eu5FileObjSelector_OnMouseDown(object sender, MouseButtonEventArgs e)
-   {
-      if (e.ClickCount == 2 && sender is ListView { SelectedItem: Eu5FileObj clickedItem })
-         FormatFile(clickedItem);
    }
 
    #region Filtering Logic
@@ -193,7 +150,7 @@ public partial class ASTBuilderTest
    public static readonly DependencyProperty AgsTypesProperty =
       DependencyProperty.Register(nameof(AgsTypes),
                                   typeof(List<Type>),
-                                  typeof(ASTBuilderTest),
+                                  typeof(AstBuilderTest),
                                   new(new List<Type>()));
 
    public List<IEu5Object> AgsItems
@@ -205,11 +162,11 @@ public partial class ASTBuilderTest
    public static readonly DependencyProperty AgsItemsProperty =
       DependencyProperty.Register(nameof(AgsItems),
                                   typeof(List<IEu5Object>),
-                                  typeof(ASTBuilderTest),
+                                  typeof(AstBuilderTest),
                                   new(new List<IEu5Object>()));
 
    public static readonly DependencyProperty FormattedTextProperty =
-      DependencyProperty.Register(nameof(FormattedText), typeof(string), typeof(ASTBuilderTest), new(default(string)));
+      DependencyProperty.Register(nameof(FormattedText), typeof(string), typeof(AstBuilderTest), new(default(string)));
 
    public string FormattedText
    {
@@ -218,7 +175,7 @@ public partial class ASTBuilderTest
    }
 
    public static readonly DependencyProperty AstTextProperty =
-      DependencyProperty.Register(nameof(AstText), typeof(string), typeof(ASTBuilderTest), new(default(string)));
+      DependencyProperty.Register(nameof(AstText), typeof(string), typeof(AstBuilderTest), new(default(string)));
 
    public string AstText
    {
@@ -227,7 +184,7 @@ public partial class ASTBuilderTest
    }
 
    public static readonly DependencyProperty ComplexityProperty =
-      DependencyProperty.Register(nameof(Complexity), typeof(string), typeof(ASTBuilderTest), new(default(string)));
+      DependencyProperty.Register(nameof(Complexity), typeof(string), typeof(AstBuilderTest), new(default(string)));
 
    public string Complexity
    {
@@ -236,7 +193,7 @@ public partial class ASTBuilderTest
    }
 
    public static readonly DependencyProperty SavingTimeProperty =
-      DependencyProperty.Register(nameof(SavingTime), typeof(int), typeof(ASTBuilderTest), new(0));
+      DependencyProperty.Register(nameof(SavingTime), typeof(int), typeof(AstBuilderTest), new(0));
 
    public int SavingTime
    {
@@ -247,7 +204,7 @@ public partial class ASTBuilderTest
    public static readonly DependencyProperty FileObjsProperty =
       DependencyProperty.Register(nameof(FileObjs),
                                   typeof(List<Eu5FileObj>),
-                                  typeof(ASTBuilderTest),
+                                  typeof(AstBuilderTest),
                                   new(new List<Eu5FileObj>()));
 
    public List<Eu5FileObj> FileObjs

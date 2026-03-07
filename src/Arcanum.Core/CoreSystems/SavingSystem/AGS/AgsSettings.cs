@@ -8,7 +8,7 @@ namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 /// <summary>
 /// Automatic Generated Saving settings.
 /// </summary>
-public partial class AgsSettings
+public class AgsSettings
 {
    /// <summary>
    /// If true, the saving order will follow the order specified in SaveOrder. <br/>
@@ -91,7 +91,9 @@ public partial class AgsSettings
       return enumValues;
    }
 
-   partial void InitializeDefaults();
+   private void InitializeDefaults()
+   {
+   }
 
    #endregion
 }

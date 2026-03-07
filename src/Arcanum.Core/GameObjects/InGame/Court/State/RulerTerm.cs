@@ -74,7 +74,7 @@ public partial class RulerTerm : IEu5Object<RulerTerm>
       get => "";
 #pragma warning restore CS9266 // The '{0}' accessor of property '{1}' should use 'field' because the other accessor is using it.
       set;
-   }
+   } = string.Empty;
    public Eu5FileObj Source { get; set; } = Eu5FileObj.Empty;
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public static Dictionary<string, RulerTerm> GetGlobalItems() => [];

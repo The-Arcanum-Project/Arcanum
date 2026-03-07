@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -38,8 +38,8 @@ public class PathObj(string[] localPath, string filename, DataSpace dataSpace)
       UnregisterWatcher();
    }
 
-   public void RegisterWatcher() => FileWatcher.FileStateManager.RegisterPath(this);
-   public void UnregisterWatcher() => FileWatcher.FileStateManager.UnregisterPath(this);
+   public void RegisterWatcher() => FileStateManager.RegisterPath(this);
+   public void UnregisterWatcher() => FileStateManager.UnregisterPath(this);
 
    public string FilenameWithoutExtension => Path.GetFileNameWithoutExtension(Filename);
 

@@ -235,10 +235,7 @@ public partial class SearchWindow : INotifyPropertyChanged
             }),
          };
          if (!addedSeparator)
-         {
             contextMenu.Items.Add(new Separator());
-            addedSeparator = true;
-         }
 
          contextMenu.Items.Add(openInIntelliJItem);
       }

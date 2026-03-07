@@ -1,5 +1,4 @@
 ﻿using System.Drawing.Imaging;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;

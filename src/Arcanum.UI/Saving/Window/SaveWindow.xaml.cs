@@ -496,7 +496,9 @@ public partial class SaveWindow
       if (_currentDescriptor == null)
          return;
       if (sender is not UIElement element ||
+#pragma warning disable CS0618 // Type or member is obsolete
           TreeTraversal.FindVisualParent<ListViewItem>(element) is not { } selectedItem)
+#pragma warning restore CS0618 // Type or member is obsolete
          return;
 
       e.Handled = true;

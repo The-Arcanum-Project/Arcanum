@@ -260,7 +260,6 @@ public static class DispatchGenerator
 
       foreach (var group in groups)
       {
-         var propertyKeys = group.Properties.Select(p => p.PropertyMetadata.Keyword);
          sb.AppendLine($"            case {group.Length}: // [{group.Properties.Count,2}]");
          sb.AppendLine("            {");
 

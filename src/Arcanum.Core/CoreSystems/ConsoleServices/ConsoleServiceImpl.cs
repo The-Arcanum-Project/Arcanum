@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;

@@ -63,9 +63,11 @@ public partial class GameObjectLocator : IEu5Object<GameObjectLocator>
    [DefaultValue("null")]
    public string UniqueId
    {
+#pragma warning disable CS9266 // The '{0}' accessor of property '{1}' should use 'field' because the other accessor is using it.
       get => Name;
+#pragma warning restore CS9266 // The '{0}' accessor of property '{1}' should use 'field' because the other accessor is using it.
       set;
-   }
+   } = string.Empty;
 
    [SuppressAgs]
    public Eu5FileObj Source { get; set; } = null!;

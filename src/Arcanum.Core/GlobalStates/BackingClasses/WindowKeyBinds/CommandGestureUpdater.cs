@@ -19,7 +19,9 @@ public static class CommandGestureUpdater
 
       var gestureText = gesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
 
+#pragma warning disable CS0618 // Type or member is obsolete
       foreach (var menuItem in TreeTraversal.FindVisualChildren<MenuItem>(window))
+#pragma warning restore CS0618 // Type or member is obsolete
          if (menuItem.Command == command)
             menuItem.InputGestureText = gestureText;
    }

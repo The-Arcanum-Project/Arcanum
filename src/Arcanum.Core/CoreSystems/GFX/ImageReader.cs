@@ -1,5 +1,4 @@
 ﻿using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using Pfim;
 using ImageFormat = Pfim.ImageFormat;

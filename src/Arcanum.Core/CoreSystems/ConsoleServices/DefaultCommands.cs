@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Common.UI;

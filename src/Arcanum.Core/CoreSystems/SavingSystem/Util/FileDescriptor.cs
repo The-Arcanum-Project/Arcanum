@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util.InformationStructs;
@@ -16,7 +15,7 @@ public class FileDescriptor : IEmpty<FileDescriptor>, ISearchable
    private List<Eu5FileObj> _files = [];
    public bool AllowMultipleFiles { get; init; } = true;
    public Encoding FileEncoding { get; }
-   private readonly string[]? _definedPaths = null;
+   private readonly string[]? _definedPaths;
 
    public List<Eu5FileObj> Files
    {

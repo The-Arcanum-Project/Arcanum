@@ -8,7 +8,7 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Gets the value of a property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
-   /// Use <see cref="Nx.Get{T}(INexus, Enum)"/> to get values from outside!
+   /// Use NX  to get values from outside!
    /// </summary>
    /// <param name="property"></param>
    /// <returns></returns>
@@ -17,7 +17,7 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Sets the value of a property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
-   /// Use <see cref="Nx.Set{T}(INexus, Enum, T)"/> to set values from outside!
+   /// Use NX  to set values from outside!
    /// </summary>
    /// <param name="property"></param>
    /// <param name="value"></param>
@@ -28,7 +28,7 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Adds a value to a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
-   /// Use <see cref="Nx.AddToCollection{T}(INexus, Enum, T)"/> to add values from outside!
+   /// Use NX to add values from outside!
    /// </summary>
    void _addToCollection(Enum property, object item);
 
@@ -47,7 +47,7 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Removes a value from a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
-   /// Use <see cref="Nx.RemoveFromCollection{T}(INexus, Enum, T)"/> to remove values from outside!
+   /// Use NX  to remove values from outside!
    /// </summary>
    void _removeFromCollection(Enum property, object item);
 
@@ -66,7 +66,7 @@ public interface INexus : INotifyPropertyChanged
    /// <summary>
    /// Clears all values from a collection property by its enum key. <br/>
    /// Only to be used internally by Nexus only! <br/>
-   /// Use <see cref="Nx.ClearCollection(INexus, Enum)"/> to clear collections from outside!
+   /// Use NX  to clear collections from outside!
    /// </summary>
    void _clearCollection(Enum property);
 

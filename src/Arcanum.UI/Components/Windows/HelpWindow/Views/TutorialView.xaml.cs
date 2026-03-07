@@ -1,8 +1,6 @@
-﻿using System.Windows.Controls;
+﻿namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
 
-namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
-
-public partial class TutorialView : UserControl
+public partial class TutorialView
 {
    public TutorialView()
    {

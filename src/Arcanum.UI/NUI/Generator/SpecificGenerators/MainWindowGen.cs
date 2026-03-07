@@ -20,7 +20,7 @@ public static class MainWindowGen
    public static void Initialize(ContentPresenter specialEditorsHost)
    {
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
-      SpecialEditorMngr._editorsTabControl.Style = (Style)Application.Current.FindResource("CenteredTabControlStyle")!;
+      SpecialEditorMngr.EditorsTabControl.Style = (Style)Application.Current.FindResource("CenteredTabControlStyle")!;
       // TODO: Initialize all the Editors to the manager
       SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new LocationCollectionSpecializedEditor<Location, Province>(Province.Field.Locations));
       SpecialEditorMngr.RegisterTypeEditor(typeof(Area), new LocationCollectionSpecializedEditor<Province, Area>(Area.Field.Provinces));

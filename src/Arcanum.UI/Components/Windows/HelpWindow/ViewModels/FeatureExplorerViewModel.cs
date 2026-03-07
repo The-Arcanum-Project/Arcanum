@@ -257,11 +257,5 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
    private void ExecuteSpotlight()
    {
-      if (SelectedFeature == null || AssociatedCommands.Count == 0)
-         return;
-
-      // Logic to trigger the Spotlight Adorner on the Main Window
-      // Use the first associated command as the visual anchor
-      // CommandVisualTracker.Instance.ShowHighlights(AssociatedCommands[0]);
    }
 }
