@@ -74,7 +74,7 @@
         <!-- LEFT: Explorer Pane -->
         <Border Grid.Column = "0" DockPanel.Dock = "Top" CornerRadius = "3" Padding = "5,2" Margin = "4,4,4,0"
                 BorderThickness = "1" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                Background = "{StaticResource DefaultBackColorBrush}">
+                SnapsToDevicePixels = "True" Background = "{StaticResource DefaultBackColorBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "Auto" />
@@ -89,7 +89,7 @@
                 <Path Grid.Row = "0" Grid.Column = "0" Data = "{StaticResource Icon.Search}" Height = "15" Width = "15"
                       Style = "{StaticResource BaseIconPathStyle}" Margin = "0, 4, 4, 4" />
                 <styleClasses:CorneredTextBox Grid.Row = "0" Grid.Column = "1"
-                                              Background = "{StaticResource LightBackColorBrush}" BorderThickness = "2"
+                                              Background = "{StaticResource LightBackColorBrush}" BorderThickness = "1"
                                               VerticalContentAlignment = "Center"
                                               BorderBrush = "{StaticResource LightBackColorBrush}"
                                               HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
@@ -103,7 +103,7 @@
                 <TreeView x:Name = "FeatureTreeView" Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2"
                           ItemsSource = "{Binding FeatureTree}" Background = "{StaticResource DarkBackColorBrush}"
                           BorderThickness = "0" Margin = "0, 8, 0, 4"
-                          SelectedItemChanged = "TreeView_OnSelectedItemChanged">
+                          SelectedItemChanged = "TreeView_OnSelectedItemChanged" Padding = "2">
 
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"

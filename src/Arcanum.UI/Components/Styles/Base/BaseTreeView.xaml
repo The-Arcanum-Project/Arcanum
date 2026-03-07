@@ -219,7 +219,7 @@
                             <RowDefinition Height = "Auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <Border x:Name = "HitTestZone" Background = "Transparent" Grid.Row = "0">
+                        <Border x:Name = "HitTestZone" Background = "Transparent" Grid.Row = "0" Margin = "2, 0">
 
                             <Border x:Name = "Bd" Margin = "0, 2" Background = "{TemplateBinding Background}"
                                     BorderBrush = "{TemplateBinding BorderBrush}"

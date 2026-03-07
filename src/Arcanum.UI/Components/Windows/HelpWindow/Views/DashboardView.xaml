@@ -197,7 +197,7 @@
                             <TextBlock Text = "{Binding RandomTip.Description}" TextWrapping = "Wrap" FontSize = "11"
                                        Margin = "0,4,0,10" />
 
-                            <baseControls:CommandPill Gesture = "{Binding RandomTip.Gestures[0], Mode=OneTime}"
+                            <baseControls:CommandPill Gesture = "{Binding RandomTip.Gestures[0]}"
                                                       HorizontalAlignment = "Left" />
                         </StackPanel>
                     </Border>

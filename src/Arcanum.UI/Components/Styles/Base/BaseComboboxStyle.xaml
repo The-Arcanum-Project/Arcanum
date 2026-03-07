@@ -26,7 +26,7 @@
                   HorizontalAlignment = "Center" Fill = "{StaticResource DefaultForeColorBrush}"
                   VerticalAlignment = "Center">
                 <Path.LayoutTransform>
-                    <RotateTransform Angle = "0"> </RotateTransform>
+                    <RotateTransform Angle = "0" />
                 </Path.LayoutTransform>
             </Path>
         </Grid>
@@ -74,8 +74,7 @@
         <Setter Property = "FontFamily" Value = "{StaticResource DefaultFont}" />
         <Setter Property = "FontWeight" Value = "{StaticResource DefaultFontWeight}" />
         <Setter Property = "ItemContainerStyle" Value = "{StaticResource BaseComboBoxItemStyle}" />
-        <Setter Property = "HorizontalAlignment" Value = "Stretch">
-        </Setter>
+        <Setter Property = "HorizontalAlignment" Value = "Stretch" />
         <Setter Property = "SnapsToDevicePixels" Value = "True" />
         <Setter Property = "OverridesDefaultStyle" Value = "True" />
         <Setter Property = "ScrollViewer.HorizontalScrollBarVisibility" Value = "Auto" />
@@ -90,15 +89,13 @@
                         <ToggleButton Name = "ToggleButton" ClickMode = "Press" Focusable = "False"
                                       IsChecked = "{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Template = "{StaticResource ComboBoxToggleButtonTemplate}"
-                                      Background = "{TemplateBinding Background}">
-                        </ToggleButton>
+                                      Background = "{TemplateBinding Background}" />
 
                         <ContentPresenter Name = "ContentSite" Margin = "5, 1, 23, 3" IsHitTestVisible = "False"
                                           HorizontalAlignment = "Left" VerticalAlignment = "Center"
                                           Content = "{TemplateBinding ComboBox.SelectionBoxItem}"
                                           ContentTemplate = "{TemplateBinding ComboBox.SelectionBoxItemTemplate}"
-                                          ContentTemplateSelector = "{TemplateBinding ItemTemplateSelector}">
-                        </ContentPresenter>
+                                          ContentTemplateSelector = "{TemplateBinding ItemTemplateSelector}" />
                         <styleClasses:CorneredTextBox Name = "PART_EditableTextBox" Margin = "3, 3, 2, 3"
                                                       IsReadOnly = "{TemplateBinding IsReadOnly}" Visibility = "Hidden"
                                                       HorizontalAlignment = "Left" VerticalAlignment = "Center"
@@ -117,20 +114,20 @@
                         </styleClasses:CorneredTextBox>
                         <!-- Popup showing items -->
                         <Popup Name = "Popup" Placement = "Bottom" Focusable = "False" AllowsTransparency = "True"
-                               IsOpen = "{TemplateBinding ComboBox.IsDropDownOpen}" PopupAnimation = "Slide">
+                               IsOpen = "{TemplateBinding IsDropDownOpen}" PopupAnimation = "Slide">
                             <Grid Name = "DropDown" SnapsToDevicePixels = "True"
-                                  MinWidth = "{TemplateBinding FrameworkElement.ActualWidth}"
-                                  MaxHeight = "{TemplateBinding ComboBox.MaxDropDownHeight}">
+                                  MinWidth = "{TemplateBinding ActualWidth}"
+                                  MaxHeight = "{TemplateBinding MaxDropDownHeight}">
+
                                 <Border Name = "DropDownBorder" Background = "{StaticResource DefaultBackColorBrush}"
-                                        Padding = "0, 1, 0, 0" CornerRadius = "2" BorderThickness = "1"
-                                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                                        HorizontalAlignment = "Stretch">
-                                    <ScrollViewer Margin = "3, 3, 2, 3" SnapsToDevicePixels = "True">
-                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation = "Contained"
-                                                        HorizontalAlignment = "Stretch" />
+                                        BorderThickness = "1" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                        CornerRadius = "2">
+
+                                    <ScrollViewer Margin = "0" SnapsToDevicePixels = "True" Padding = "1">
+                                        <StackPanel IsItemsHost = "True"
+                                                    KeyboardNavigation.DirectionalNavigation = "Contained" />
                                     </ScrollViewer>
                                 </Border>
-
                             </Grid>
                         </Popup>
                     </Grid>
