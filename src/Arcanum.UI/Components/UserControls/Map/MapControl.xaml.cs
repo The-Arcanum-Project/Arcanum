@@ -520,7 +520,7 @@ public partial class MapControl
 
    private void CopySelectedLocationIds_Click(object sender, RoutedEventArgs e)
    {
-      var selectedLocations = Selection.GetSelectedLocations;
+      var selectedLocations = SelectionManager.GetActiveSelectionLocations();
       if (selectedLocations.Count == 0)
          return;
 
