@@ -16,10 +16,12 @@ public class HelpWindowViewModel : INotifyPropertyChanged, IHelpPageViewModelWra
       Dashboard = new();
       Explorer = new();
       Shortcuts = new();
+      Tutorial = new();
 
       MenuItems.Add(new("Dashboard", "Icon.Home", Dashboard));
       MenuItems.Add(new("Features", "Icon.Explorer", Explorer));
       MenuItems.Add(new("Shortcuts", "Icon.Keyboard", Shortcuts));
+      MenuItems.Add(new("Tutorial", "Icon.Tutorial", Tutorial));
 
       // Set default
       _selectedMenuItem = MenuItems[0];
@@ -29,6 +31,7 @@ public class HelpWindowViewModel : INotifyPropertyChanged, IHelpPageViewModelWra
    public DashboardViewModel Dashboard { get; }
    public FeatureExplorerViewModel Explorer { get; }
    public CommandMapViewModel Shortcuts { get; }
+   public TutorialViewModel Tutorial { get; }
 
    public ObservableCollection<NavMenuItem> MenuItems { get; } = [];
 

@@ -13,14 +13,13 @@
                          mc:Ignorable = "d" Title = "Help / Documentation" Height = "700" Width = "1200"
                          WindowStartupLocation = "CenterScreen" Background = "{StaticResource AccentGradientBrush}"
                          commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
-                         commands:ContextBinder.ObserveContext = "True"
+                         commands:ContextBinder.ObserveContext = "True" Closing = "HelpWindow_OnClosing"
                          d:DataContext = "{d:DesignInstance viewModels:HelpWindowViewModel}">
 
     <styleClasses:BaseWindow.Resources>
         <ResourceDictionary>
             <converters:ResourceToGeometryConverter x:Key = "ResourceToGeometryConverter" />
 
-            <!-- THE ENGINE: Mapping ViewModels to Views -->
             <DataTemplate DataType = "{x:Type viewModels:DashboardViewModel}">
                 <views:DashboardView />
             </DataTemplate>
@@ -31,6 +30,10 @@
 
             <DataTemplate DataType = "{x:Type viewModels:CommandMapViewModel}">
                 <views:CommandMapView />
+            </DataTemplate>
+
+            <DataTemplate DataType = "{x:Type viewModels:TutorialViewModel}">
+                <views:TutorialView />
             </DataTemplate>
 
             <!-- Sidebar Item Style -->
