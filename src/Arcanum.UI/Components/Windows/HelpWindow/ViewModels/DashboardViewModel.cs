@@ -14,9 +14,25 @@ public class DashboardViewModel : HelpPageViewModelBase
    // 1. Live Context
    public IAppFeature? ActiveFeature => FeatureRegistry.GetActiveFeatures().LastOrDefault();
    public IEnumerable<IAppCommand> ContextCommands => GetContextCommands();
+   public IAppCommand OpenFeatureCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.OpenFeatureExplorerForFeature);
 
    // 2. Discoverability
-   public IAppCommand RandomTip { get; private set; }
+   public IAppCommand RandomTip
+   {
+      get;
+      set
+      {
+         if (Equals(value, field))
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+   private readonly IAppCommand[] _featureCommands;
+   private int _currentTipIndex;
+   public IAppCommand NextTipCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.DashBoardView.NextRandomTip);
+   public IAppCommand PreviousTipCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.DashBoardView.PreviousRandomTip);
    public ObservableCollection<IAppFeature> LatestFeatures { get; } = [];
 
    public DashboardViewModel()
@@ -28,9 +44,8 @@ public class DashboardViewModel : HelpPageViewModelBase
       foreach (var f in latest)
          LatestFeatures.Add(f);
 
-      // Pick a random command to teach the user something new
-      var allCmds = CommandRegistry.AllCommands.ToList();
-      RandomTip = allCmds[new Random().Next(allCmds.Count)];
+      _featureCommands = CommandRegistry.AllCommands.Shuffle().ToArray();
+      RandomTip = _featureCommands[_currentTipIndex = new Random().Next(_featureCommands.Length)];
    }
 
    private IEnumerable<IAppCommand> GetContextCommands()
@@ -42,5 +57,31 @@ public class DashboardViewModel : HelpPageViewModelBase
    }
 
    // Command to open URLs
-   public ICommand OpenUrlCommand => new RelayCommand(url => ProcessHelper.OpenLink(url?.ToString() ?? string.Empty));
+   public static ICommand OpenUrlCommand => new RelayCommand(url => ProcessHelper.OpenLink(url?.ToString() ?? string.Empty));
+
+   public void ShowPreviousTip()
+   {
+      if (_featureCommands.Length == 0)
+         return;
+
+      if (--_currentTipIndex < 0)
+         _currentTipIndex = _featureCommands.Length - 1;
+      else if (_currentTipIndex >= _featureCommands.Length)
+         _currentTipIndex = 0;
+
+      RandomTip = _featureCommands[_currentTipIndex];
+   }
+
+   public void ShowNextTip()
+   {
+      if (_featureCommands.Length == 0)
+         return;
+
+      if (++_currentTipIndex >= _featureCommands.Length)
+         _currentTipIndex = 0;
+      else if (_currentTipIndex < 0)
+         _currentTipIndex = _featureCommands.Length - 1;
+
+      RandomTip = _featureCommands[_currentTipIndex];
+   }
 }

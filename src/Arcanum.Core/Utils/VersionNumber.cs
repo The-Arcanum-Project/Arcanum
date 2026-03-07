@@ -5,10 +5,11 @@ namespace Arcanum.Core.Utils;
 public static class VersionNumbers
 {
    public static readonly VersionNumber V107 = new(1, 0, 7);
+   public static readonly VersionNumber V1072 = new(1, 0, 7, 2);
 
    public static VersionNumber Current => AppData.AppVersion;
 
-   public static string CurrentVersionString => $"{AppData.ProductName} v{Current}";
+   public static string CurrentVersionString => $"{AppData.ProductName} {Current}";
 }
 
 public class VersionNumber : IComparable<VersionNumber>
@@ -22,7 +23,9 @@ public class VersionNumber : IComparable<VersionNumber>
    }
 
    public VersionNumber(int major, int minor, int patch, int hotfix, SnapShotVersion snapShotVersion) : this(major,
-      minor, patch, hotfix) => SnapShotVersion = snapShotVersion;
+      minor,
+      patch,
+      hotfix) => SnapShotVersion = snapShotVersion;
 
    public static bool FromTag(string releaseTag, [MaybeNullWhen(false)] out VersionNumber version)
    {
@@ -32,16 +35,18 @@ public class VersionNumber : IComparable<VersionNumber>
 
       if (split.Length == 0)
          return false;
+
       var versionNumbers = split[0].Split('.');
 
       // Sequentially parse the version numbers, allowing for missing numbers (e.g., "1.0" would be parsed as major=1, minor=0, patch=0)
       if (!int.TryParse(versionNumbers[0], out var major))
          return false;
+
       var minor = versionNumbers.Length > 1 && int.TryParse(versionNumbers[1], out var minorParsed) ? minorParsed : 0;
       var patch = versionNumbers.Length > 2 && int.TryParse(versionNumbers[2], out var patchParsed) ? patchParsed : 0;
       var hotfix = versionNumbers.Length > 3 && int.TryParse(versionNumbers[3], out var hotfixParsed)
-         ? hotfixParsed
-         : 0;
+                      ? hotfixParsed
+                      : 0;
 
       version = new(major, minor, patch, hotfix);
 
@@ -103,9 +108,11 @@ public class VersionNumber : IComparable<VersionNumber>
 
    public static bool operator <(VersionNumber v1, VersionNumber v2) => !(v1 > v2) && v1 != v2;
 
-   public static bool operator ==(VersionNumber v1, VersionNumber v2)
-      => v1.Major == v2.Major && v1.Minor == v2.Minor && v1.Patch == v2.Patch && v1.Hotfix == v2.Hotfix &&
-         v1.SnapShotVersion == v2.SnapShotVersion;
+   public static bool operator ==(VersionNumber v1, VersionNumber v2) => v1.Major == v2.Major &&
+                                                                         v1.Minor == v2.Minor &&
+                                                                         v1.Patch == v2.Patch &&
+                                                                         v1.Hotfix == v2.Hotfix &&
+                                                                         v1.SnapShotVersion == v2.SnapShotVersion;
 
    public static bool operator !=(VersionNumber v1, VersionNumber v2) => !(v1 == v2);
 

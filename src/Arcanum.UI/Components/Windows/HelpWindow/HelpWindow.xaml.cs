@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
 namespace Arcanum.UI.Components.Windows.HelpWindow;
@@ -17,6 +16,4 @@ public partial class HelpWindow
       if (DataContext is HelpWindowViewModel vm && e.AddedItems.Count > 0)
          vm.Navigate((NavMenuItem)e.AddedItems[0]!);
    }
-
-   private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }

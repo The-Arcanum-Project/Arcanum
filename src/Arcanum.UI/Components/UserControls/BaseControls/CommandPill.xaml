@@ -1,0 +1,25 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.CommandPill"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
+             d:DesignHeight = "20" d:DesignWidth = "30">
+
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:GestureToTextConverter x:Key = "GestureToTextConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border Background = "{StaticResource DarkBackColorBrush}" CornerRadius = "3" Padding = "3,2">
+        <TextBlock
+            Text = "{Binding Gesture, RelativeSource={RelativeSource AncestorType=local:CommandPill}, Converter={StaticResource GestureToTextConverter}}"
+            FontFamily = "Consolas" />
+    </Border>
+</UserControl>

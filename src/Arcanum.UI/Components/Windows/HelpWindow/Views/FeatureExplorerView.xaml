@@ -100,9 +100,10 @@
                 </TextBlock>
 
 
-                <TreeView Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2" ItemsSource = "{Binding FeatureTree}"
-                          Background = "{StaticResource DarkBackColorBrush}" BorderThickness = "0"
-                          Margin = "0, 8, 0, 4" SelectedItemChanged = "TreeView_OnSelectedItemChanged">
+                <TreeView x:Name = "FeatureTreeView" Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2"
+                          ItemsSource = "{Binding FeatureTree}" Background = "{StaticResource DarkBackColorBrush}"
+                          BorderThickness = "0" Margin = "0, 8, 0, 4"
+                          SelectedItemChanged = "TreeView_OnSelectedItemChanged">
 
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"

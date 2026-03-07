@@ -15,6 +15,7 @@
     <Color x:Key = "DiwWarningYellowColor"> #a3850e </Color>
     <Color x:Key = "DimInformationBlueColor"> #2373b8 </Color>
     <Color x:Key = "BlueAccentColor"> #3574f0 </Color>
+    <Color x:Key = "BlueComplementaryBackColor"> #232a35 </Color>
     <Color x:Key = "LightGrayAccentColor"> #A9B7C6 </Color>
     <Color x:Key = "GreenColor"> #528d57 </Color>
     <Color x:Key = "EmbeddedBorderColor"> #800080 </Color>
@@ -30,6 +31,7 @@
     <SolidColorBrush x:Key = "SelectedBackColorBrush" Color = "{StaticResource SelectedBackColor}" />
     <SolidColorBrush x:Key = "BlueSelectionBackColorBrush" Color = "{StaticResource BlueSelectionBackColor}" />
     <SolidColorBrush x:Key = "BlueAccentColorBrush" Color = "{StaticResource BlueAccentColor}" />
+    <SolidColorBrush x:Key = "BlueComplementaryBackColorBrush" Color = "{StaticResource BlueComplementaryBackColor}" />
     <SolidColorBrush x:Key = "DarkerSelectedBackColorBrush" Color = "{StaticResource DarkerSelectedBackColor}" />
     <SolidColorBrush x:Key = "RowAlternatingColorColorBrush" Color = "{StaticResource DarkerSelectedBackColor}" />
     <SolidColorBrush x:Key = "AggressiveRedBackColorBrush" Color = "{StaticResource AggressiveRedBackColor}" />

@@ -84,6 +84,26 @@ public static class CommandIds
       }
    }
 
+   // "help_window"
+   public static class HelpWindow
+   {
+      private const string PATH = nameof(HelpWindow);
+
+      // "help_window.open_feature_explorer_for_feature"
+      public static readonly CommandId OpenFeatureExplorerForFeature = CommandId.Create(PATH);
+
+      public static class DashBoardView
+      {
+         private const string DASHBOARD_PATH = $"{PATH}.{nameof(DashBoardView)}";
+
+         // "help_window.dashboard_view.next_tip"
+         public static readonly CommandId NextRandomTip = CommandId.Create(DASHBOARD_PATH);
+
+         // "help_window.dashboard_view.previous_tip"
+         public static readonly CommandId PreviousRandomTip = CommandId.Create(DASHBOARD_PATH);
+      }
+   }
+
    // "file"
    public static class File
    {

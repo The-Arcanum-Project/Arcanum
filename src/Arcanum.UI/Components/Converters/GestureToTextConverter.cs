@@ -6,6 +6,8 @@ namespace Arcanum.UI.Components.Converters;
 
 public class GestureToTextConverter : IValueConverter
 {
+   private const string NONE_STRING = "None";
+
    public static GestureToTextConverter Instance { get; } = new();
 
    public static string DefaultConvert(InputGesture gesture)
@@ -20,7 +22,7 @@ public class GestureToTextConverter : IValueConverter
       if (s is not null && s.StartsWith("None+"))
          return s[5..];
 
-      return s ?? string.Empty;
+      return s ?? NONE_STRING;
    }
 
    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();

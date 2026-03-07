@@ -13,6 +13,7 @@
                          mc:Ignorable = "d" Title = "Help / Documentation" Height = "700" Width = "1200"
                          WindowStartupLocation = "CenterScreen" Background = "{StaticResource AccentGradientBrush}"
                          commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
+                         commands:ContextBinder.ObserveContext = "True"
                          d:DataContext = "{d:DesignInstance viewModels:HelpWindowViewModel}">
 
     <styleClasses:BaseWindow.Resources>
@@ -40,7 +41,7 @@
                             <Border x:Name = "Bd" Padding = "15,10" BorderThickness = "1"
                                     BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                                     Background = "{StaticResource DefaultBackColorBrush}" SnapsToDevicePixels = "True"
-                                    CornerRadius = "5" Margin = "4"
+                                    CornerRadius = "5" Margin = "4" Cursor = "Hand"
                                     d:DataContext = "{d:DesignInstance viewModels:NavMenuItem}">
                                 <StackPanel Orientation = "Horizontal">
                                     <!-- Placeholder for your Geometry Icons -->
@@ -57,12 +58,18 @@
                                 <Trigger Property = "IsMouseOver" Value = "True">
                                     <Setter TargetName = "Bd" Property = "Background"
                                             Value = "{StaticResource BlueSelectionBackColorBrush}" />
+                                    <Setter TargetName = "Bd" Property = "BorderBrush"
+                                            Value = "{StaticResource SelectedControlBorderColorBrush}" />
                                 </Trigger>
                                 <Trigger Property = "IsSelected" Value = "True">
                                     <Setter TargetName = "Bd" Property = "Background"
                                             Value = "{StaticResource BlueAccentColorBrush}" />
                                     <Setter TargetName = "Bd" Property = "BorderBrush"
                                             Value = "{StaticResource BlueAccentColorBrush}" />
+                                </Trigger>
+                                <Trigger Property = "IsKeyboardFocusWithin" Value = "True">
+                                    <Setter TargetName = "Bd" Property = "BorderBrush"
+                                            Value = "{StaticResource SelectedControlBorderColorBrush}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>

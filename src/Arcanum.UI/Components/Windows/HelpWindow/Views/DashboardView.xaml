@@ -5,7 +5,11 @@
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
-             xmlns:viewModels = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.ViewModels" mc:Ignorable = "d"
+             xmlns:viewModels = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.ViewModels"
+             xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+             xmlns:git = "clr-namespace:Arcanum.Core.Utils.Git;assembly=Arcanum.Core"
+             xmlns:commands = "clr-namespace:Arcanum.UI.Commands" mc:Ignorable = "d"
+             commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.HELP_DASHBOARD}"
              d:DataContext = "{d:DesignInstance viewModels:DashboardViewModel}">
 
     <UserControl.Resources>
@@ -24,11 +28,10 @@
 
     <ScrollViewer VerticalScrollBarVisibility = "Auto">
         <StackPanel Margin = "20">
-
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width = "2*" /> <!-- Dynamic Info -->
-                    <ColumnDefinition Width = "1*" /> <!-- Resources -->
+                    <ColumnDefinition Width = "5*" /> <!-- Dynamic Info -->
+                    <ColumnDefinition Width = "2*" /> <!-- Resources -->
                 </Grid.ColumnDefinitions>
 
                 <!-- LEFT COLUMN -->
@@ -50,12 +53,41 @@
                                     <TextBlock
                                         Text = "{Binding ActiveFeature.Description, FallbackValue=No-Description}"
                                         Margin = "0,5,0,15" TextWrapping = "Wrap" />
-
-                                    <TextBlock Text = "Common Shortcuts:"
-                                               Foreground = "{StaticResource LightContrastForeColorBrush}"
-                                               FontSize = "10" Margin = "0,0,0,5" />
+                                    <Border Margin = "0, 2" Height = "1" BorderThickness = "0, 1, 0, 0"
+                                            SnapsToDevicePixels = "True"
+                                            BorderBrush = "{StaticResource DefaultBorderColorBrush}" />
+                                    <TextBlock Text = "COMMON SHORTCUTS"
+                                               Foreground = "{StaticResource BlueAccentColorBrush}" FontSize = "10"
+                                               FontWeight = "Bold" Margin = "0,0,0,5" />
                                     <ItemsControl ItemsSource = "{Binding ContextCommands}">
-                                        <!-- Mini list of commands with shortcut pills -->
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background = "Transparent" Padding = "0, 0, 0, 5">
+
+                                                    <Border BorderThickness = "0, 0, 0, 1" Margin = "0">
+                                                        <baseControls:CommandWithPills AppCommand = "{Binding}"
+                                                                Margin = "0,3,0,1" />
+
+                                                        <Border.Style>
+                                                            <Style TargetType = "Border">
+                                                                <Setter Property = "BorderBrush"
+                                                                        Value = "{StaticResource LightBackColorBrush}" />
+                                                                <Setter Property = "SnapsToDevicePixels" Value = "True" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger
+                                                                        Binding = "{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Border}}"
+                                                                        Value = "True">
+                                                                        <Setter Property = "BorderBrush"
+                                                                                Value = "{StaticResource SelectedControlBorderColorBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
                             </Grid>
@@ -72,13 +104,35 @@
                     <ItemsControl ItemsSource = "{Binding LatestFeatures}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background = "#2D2D2D" Margin = "0,0,0,8" Padding = "12" CornerRadius = "4">
+                                <Border Background = "{StaticResource DarkBackColorBrush}" Margin = "0,0,0,8"
+                                        Padding = "12" CornerRadius = "4" BorderThickness = "1">
                                     <DockPanel>
                                         <TextBlock DockPanel.Dock = "Right" Text = "{Binding IntroducedIn}"
-                                                   Foreground = "#555" VerticalAlignment = "Center" />
-                                        <TextBlock Text = "{Binding DisplayName}" FontWeight = "Bold"
+                                                   Foreground = "{StaticResource LightContrastForeColorBrush}"
                                                    VerticalAlignment = "Center" />
+                                        <styleClasses:CommandTextBlock Text = "{Binding DisplayName}"
+                                                                       FontWeight = "Bold" FontSize = "14"
+                                                                       VerticalAlignment = "Center" Cursor = "Hand"
+                                                                       HorizontalAlignment = "Left"
+                                                                       Command = "{Binding DataContext.OpenFeatureCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                       CommandParameter = "{Binding}"
+                                                                       Background = "Transparent"
+                                                                       ToolTip = "{Binding Description}" />
                                     </DockPanel>
+
+                                    <Border.Style>
+                                        <Style TargetType = "Border">
+                                            <Setter Property = "BorderBrush"
+                                                    Value = "{StaticResource DarkBackColorBrush}" />
+                                            <Setter Property = "SnapsToDevicePixels" Value = "True" />
+                                            <Style.Triggers>
+                                                <Trigger Property = "IsMouseOver" Value = "True">
+                                                    <Setter Property = "BorderBrush"
+                                                            Value = "{StaticResource SelectedControlBorderColorBrush}" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -92,39 +146,62 @@
                                Margin = "0,0,0,10" />
 
                     <styleClasses:BaseButton Margin = "0,0,0,10" Height = "60" Command = "{Binding OpenUrlCommand}"
-                                             CommandParameter = "https://arcanum.github.io">
+                                             CommandParameter = "https://the-arcanum-project.github.io/Arcanum/user/starting-page.html"
+                                             Cursor = "Hand">
                         <StackPanel Orientation = "Horizontal">
-                            <Path Data = "{StaticResource Icon.Book}" Fill = "#4A86E8" Width = "20" Margin = "0,0,15,0"
-                                  Stretch = "Uniform" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Icons/Huge/Book110x110.png"
+                                   Margin = "5, 5, 20, 5" RenderOptions.BitmapScalingMode = "HighQuality" Width = "40" />
                             <TextBlock Text = "User Manual" VerticalAlignment = "Center" FontWeight = "Bold" />
                         </StackPanel>
                     </styleClasses:BaseButton>
 
                     <styleClasses:BaseButton Margin = "0,0,0,10" Height = "60" Command = "{Binding OpenUrlCommand}"
-                                             CommandParameter = "https://discord.gg/arcanum">
+                                             CommandParameter = "{x:Static git:GitDataService.MODFORGE_DISCORD_URL}"
+                                             Cursor = "Hand">
                         <StackPanel Orientation = "Horizontal">
-                            <Path Data = "{StaticResource Icon.Discord}" Fill = "#5865F2" Width = "20"
-                                  Margin = "0,0,15,0" Stretch = "Uniform" />
+                            <Image Source = "/Arcanum_UI;component/Assets/Images/Discord-Symbol-White.png" Width = "40"
+                                   RenderOptions.BitmapScalingMode = "HighQuality" Margin = "5, 5, 20, 5" />
                             <TextBlock Text = "Join Discord" VerticalAlignment = "Center" FontWeight = "Bold" />
                         </StackPanel>
                     </styleClasses:BaseButton>
 
                     <!-- TIP OF THE DAY -->
-                    <Border Background = "#232a35" BorderBrush = "#4A86E8" BorderThickness = "1" CornerRadius = "8"
-                            Padding = "15" Margin = "0,20,0,0">
+                    <Border Background = "{StaticResource BlueComplementaryBackColorBrush}"
+                            BorderBrush = "{StaticResource BlueAccentColorBrush}" BorderThickness = "1"
+                            CornerRadius = "8" Padding = "15" Margin = "0,10,0,0">
                         <StackPanel>
-                            <TextBlock Text = "DID YOU KNOW?" Foreground = "#4A86E8" FontSize = "9" FontWeight = "Bold"
-                                       Margin = "0,0,0,8" />
+
+                            <!-- Dockpanel for next and previous tip buttons -->
+
+                            <DockPanel Margin = "0,0,0,8" HorizontalAlignment = "Stretch" LastChildFill = "True">
+                                <styleClasses:BaseButton DockPanel.Dock = "Right" Width = "40" Height = "20"
+                                                         Margin = "2, 0" VerticalAlignment = "Center"
+                                                         CornerRadius = "4" Background = "Transparent"
+                                                         Command = "{Binding NextTipCommand}" Cursor = "Hand">
+                                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ArrowRight20x20.png"
+                                           RenderOptions.BitmapScalingMode = "HighQuality" />
+                                </styleClasses:BaseButton>
+                                <styleClasses:BaseButton DockPanel.Dock = "Right" Width = "40" Height = "20"
+                                                         Margin = "2, 0" VerticalAlignment = "Center"
+                                                         CornerRadius = "4" Background = "Transparent"
+                                                         Command = "{Binding PreviousTipCommand}" Cursor = "Hand">
+                                    <Image Source = "/Arcanum_UI;component/Assets/Icons/20x20/ArrowLeft20x20.png"
+                                           RenderOptions.BitmapScalingMode = "HighQuality" />
+                                </styleClasses:BaseButton>
+
+                                <TextBlock Text = "DID YOU KNOW?" Foreground = "{StaticResource BlueAccentColorBrush}"
+                                           FontSize = "11" FontWeight = "Bold" Margin = "0"
+                                           VerticalAlignment = "Center" />
+                            </DockPanel>
                             <TextBlock Text = "{Binding RandomTip.DisplayName}" FontWeight = "Bold" FontSize = "14" />
                             <TextBlock Text = "{Binding RandomTip.Description}" TextWrapping = "Wrap" FontSize = "11"
                                        Margin = "0,4,0,10" />
-                            <Border Background = "#1E1E1E" HorizontalAlignment = "Left" Padding = "6,2"
-                                    CornerRadius = "3">
-                                <TextBlock Text = "{Binding RandomTip.Gestures[0]}" FontFamily = "Consolas"
-                                           Foreground = "#A9B7C6" />
-                            </Border>
+
+                            <baseControls:CommandPill Gesture = "{Binding RandomTip.Gestures[0], Mode=OneTime}"
+                                                      HorizontalAlignment = "Left" />
                         </StackPanel>
                     </Border>
+
                 </StackPanel>
             </Grid>
         </StackPanel>

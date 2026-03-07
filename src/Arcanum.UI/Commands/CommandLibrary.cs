@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
 using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
+using Arcanum.UI.Commands.Command_Definitions;
 using Arcanum.UI.Commands.KeyMap;
 using Arcanum.UI.Components.Windows.HelpWindow;
 using Arcanum.UI.Components.Windows.MainWindows;
@@ -131,18 +132,20 @@ public static class CommandLibrary
                          _ => { new HelpWindow().ShowDialog(); }).WithDefaultGesture(Key.F12);
 
       #endregion
+
+      HelpWindowCommands.Initialize();
    }
 
    extension(ManagedCommand cmd)
    {
-      private void WithDefaultGesture(Key key, ModifierKeys modifiers = ModifierKeys.None)
+      public void WithDefaultGesture(Key key, ModifierKeys modifiers = ModifierKeys.None)
       {
          var gesture = new KeyGesture(key, modifiers);
          cmd.Gestures.Add(gesture);
          cmd.AddDefaultGesture(gesture);
       }
 
-      private void WithDefaultGestures(params (Key key, ModifierKeys modifiers)[] gestures)
+      public void WithDefaultGestures(params (Key key, ModifierKeys modifiers)[] gestures)
       {
          foreach (var (key, modifiers) in gestures)
          {
