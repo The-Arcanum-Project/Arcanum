@@ -3,8 +3,7 @@
              xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-             xmlns:collections = "clr-namespace:System.Collections;assembly=System.Runtime" x:Name = "Root"
-             Focusable = "True">
+             xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" x:Name = "Root" Focusable = "True">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -13,6 +12,7 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:CollectionToVisibilityConverter x:Key = "CollectionToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -99,25 +99,9 @@
                                            SelectedItem = "{Binding SelectedAddedItem, ElementName=Root}"
                                            ItemTemplate = "{Binding GridItemTemplate, ElementName=Root}"
                                            HoverCommand = "{Binding LocationHover, ElementName=Root}"
-                                           HoverLeaveCommand = "{Binding LocationUnhover, ElementName=Root}">
+                                           HoverLeaveCommand = "{Binding LocationUnhover, ElementName=Root}"
+                                           Visibility = "{Binding FilteredItems, ElementName=Root, Converter={StaticResource CollectionToVisibilityConverter}}">
 
-                <baseControls:VirtualizingGrid.Style>
-                    <Style TargetType = "baseControls:VirtualizingGrid">
-                        <!-- Default to Visible -->
-                        <Setter Property = "Visibility" Value = "Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding = "{Binding FilteredItems, ElementName=Root}" Value = "{x:Null}">
-                                <Setter Property = "Visibility" Value = "Collapsed" />
-                            </DataTrigger>
-
-                            <DataTrigger
-                                Binding = "{Binding FilteredItems.(collections:IList.Count), ElementName=Root, FallbackValue=0}"
-                                Value = "0">
-                                <Setter Property = "Visibility" Value = "Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </baseControls:VirtualizingGrid.Style>
             </baseControls:VirtualizingGrid>
         </Grid>
     </Border>
