@@ -26,4 +26,10 @@ public class GestureToTextConverter : IValueConverter
    }
 
    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+
+   public static string MultiGestureConvert(IEnumerable<InputGesture> gestures)
+   {
+      var gestureTexts = gestures.Select(DefaultConvert).Where(s => !string.IsNullOrEmpty(s));
+      return string.Join(", ", gestureTexts);
+   }
 }

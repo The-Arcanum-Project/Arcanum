@@ -7,6 +7,7 @@ public static class CommandScopes
    public const string DIALOG = "Dialog";
    public const string EDITOR = "Editor";
    public const string POLITICAL_EDITOR = "PoliticalEditor";
+   public const string INSTITUTION_EDITOR = "InstitutionEditor";
 
    public const string QUEASTOR = "Queastor";
 

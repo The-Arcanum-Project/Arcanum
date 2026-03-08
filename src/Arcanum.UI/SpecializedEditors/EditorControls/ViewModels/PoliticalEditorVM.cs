@@ -1,15 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.UI.AppFeatures.Contexts.SpecializedEditors;
 using Arcanum.UI.Commands;
 
 namespace Arcanum.UI.SpecializedEditors.EditorControls.ViewModels;
 
-public class PoliticalEditorViewModel : IPoliticalEditor, INotifyPropertyChanged
+public sealed class PoliticalEditorViewModel : IPoliticalEditor, INotifyPropertyChanged
 {
    public PoliticalEditorViewModel()
    {
@@ -216,12 +216,12 @@ public class PoliticalEditorViewModel : IPoliticalEditor, INotifyPropertyChanged
       OurCoresConqueredByOthersLocations = country.OurCoresConqueredByOthers;
    }
 
-   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
    }
 
-   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+   private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
    {
       if (EqualityComparer<T>.Default.Equals(field, value))
          return false;

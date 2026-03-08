@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
-using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
+using Arcanum.UI.AppFeatures.Contexts.SpecializedEditors;
 using Arcanum.UI.Commands.Command_Definitions;
 using Arcanum.UI.Commands.KeyMap;
 using Arcanum.UI.Components.Windows.HelpWindow;

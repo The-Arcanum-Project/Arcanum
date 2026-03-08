@@ -9,6 +9,7 @@ public static class FeatureLibrary
    {
       // All Features from ../FeatureInitializers should be initialized here
       EditorFeatures.Initialize();
+      SpecializedEditorFeatures.Initialize();
 
       ArcLog.Write("DOC", LogLevel.INF, "Self-Documentation Engine loaded {0} features.", FeatureRegistry.GetAllFeatures().Count);
    }

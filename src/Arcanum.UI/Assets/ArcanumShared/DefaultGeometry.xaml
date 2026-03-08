@@ -74,4 +74,9 @@
         M10,1 L1,6 L10,11 L19,6 L10,1 z M19,8 L19,14 C19,14 17,16 10,16 C3,16 1,14 1,14 L1,8 M17,7 L17,11 C17,11 18,12
         19,12
     </Geometry>
+    <StreamGeometry x:Key = "Institution.AllState"> M6,12 L10,16 L18,6 </StreamGeometry>
+
+    <EllipseGeometry x:Key = "Institution.MixedState" Center = "12,12" RadiusX = "7" RadiusY = "7" />
+
+    <StreamGeometry x:Key = "Institution.NoneState"> M6,6 L18,18 M18,6 L6,18 </StreamGeometry>
 </ResourceDictionary>

@@ -14,6 +14,18 @@ public static class CommandIds
 
       // "global.open_help"
       public static readonly CommandId OpenHelp = CommandId.Create(PATH);
+
+      // "global.undo"
+      public static readonly CommandId Undo = CommandId.Create(PATH);
+
+      // "global.step_undo"
+      public static readonly CommandId StepUndo = CommandId.Create(PATH);
+
+      // "global.redo"
+      public static readonly CommandId Redo = CommandId.Create(PATH);
+
+      // "global.step_redo"
+      public static readonly CommandId StepRedo = CommandId.Create(PATH);
    }
 
    // "ui"

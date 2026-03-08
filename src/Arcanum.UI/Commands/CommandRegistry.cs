@@ -1,18 +1,24 @@
-﻿using System.Windows;
+﻿using System.Globalization;
+using System.Windows;
+using System.Windows.Input;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.UI.Commands.KeyMap;
+using Arcanum.UI.Components.Converters;
 using Common.Logger;
 
 namespace Arcanum.UI.Commands;
 
 public static class CommandRegistry
 {
+   private const string NA_TEXT = "N/A";
    private static readonly Dictionary<CommandId, IAppCommand> Commands = new();
+   private static readonly GestureToTextConverter GestureConverter = new();
+   private static readonly InputGesture NoneGesture = new KeyGesture(Key.None);
 
    public static IEnumerable<IAppCommand> AllCommands => Commands.Values;
-   public static event Action? BindingsChanged;
    public static bool IsInitialized { get; private set; }
+   public static event Action? BindingsChanged;
 
    /// <summary>
    ///    Extension method to help sync a Window's InputBindings to the Registry
@@ -147,5 +153,30 @@ public static class CommandRegistry
          if (cmd.DisplayName.Length > 30)
             ArcLog.Write("AUDIT", LogLevel.WRN, "Command '{0}' has a very long DisplayName.", cmd.Id.Value);
       }
+   }
+
+   public static InputGesture? GetGestureForCommand(CommandId id)
+   {
+      var cmd = Get(id);
+      if (cmd == null!)
+         return null!;
+
+      return cmd.Gestures.FirstOrDefault();
+   }
+
+   public static string GetDisplayStringForGesture(InputGesture gesture)
+      => GestureConverter.Convert(gesture, typeof(string), null, CultureInfo.CurrentCulture) as string ?? NA_TEXT;
+
+   public static string GetDisplayStringForCommand(CommandId id, bool withQuotes = true)
+   {
+      var cmd = Get(id);
+      if (cmd == null!)
+         return NA_TEXT;
+
+      var gestures = cmd.Gestures.Count > 0 ? cmd.Gestures : [NoneGesture];
+      if (!withQuotes)
+         return $"'{GestureToTextConverter.MultiGestureConvert(gestures)}'";
+
+      return GestureToTextConverter.MultiGestureConvert(gestures);
    }
 }
