@@ -82,6 +82,12 @@ public static partial class MapModeManager
       OnMapModeChanged?.Invoke(type);
    }
 
+   public static void RerenderCurrent()
+   {
+      // This triggers the redraw pipeline which will provide the required Color4[] to the Render method
+      OnMapModeChanged?.Invoke(CurrentMode);
+   }
+
    public static void RenderCurrent(Color4[] colors)
    {
 #if DEBUG
