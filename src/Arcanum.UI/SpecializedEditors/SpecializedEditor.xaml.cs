@@ -126,7 +126,7 @@ public partial class SpecializedEditor
       PropertySelector.SelectedIndex = 0;
    }
 
-   private void SetEditorContent()
+   internal void SetEditorContent()
    {
       if (!_specializedEditor.Enabled)
       {

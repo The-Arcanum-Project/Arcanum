@@ -139,15 +139,17 @@ public class SpecializedEditorsManager
       // Check if current tabs are still valid for the new targets
       foreach (var (editor, props) in editors)
       {
-         if (!editor.Enabled)
-            continue;
-
          if (EditorsTabControl.Items.OfType<TabItem>().FirstOrDefault(ti => (string)ti.Header == editor.DisplayName) is not { } tabItem)
             continue;
 
-         var existingEditorView = tabItem.Content as SpecializedEditor;
-         if (existingEditorView == null)
+         if (tabItem.Content is not SpecializedEditor existingEditorView)
             continue;
+
+         if (!editor.Enabled)
+         {
+            existingEditorView.SetEditorContent();
+            continue;
+         }
 
          // Check if the existing editor view can handle the new targets
          if (editor.SupportsMultipleTargets)
