@@ -54,8 +54,9 @@
                                                       HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}"
                                                       VerticalAlignment = "{TemplateBinding VerticalContentAlignment}"
                                                       RecognizesAccessKey = "True" Margin = "{TemplateBinding Padding}" />
-                                    <Border x:Name = "selectionIndicator" BorderBrush = "Transparent"
-                                            BorderThickness = "2,2,2,0" Visibility = "Collapsed" Margin = "0"
+                                    <Border x:Name = "selectionIndicator"
+                                            BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                            BorderThickness = "2,2,2,0" Visibility = "Visible" Margin = "0"
                                             CornerRadius = "2,2, 0, 0" />
                                 </Grid>
                                 <ControlTemplate.Triggers>
@@ -66,8 +67,6 @@
                                     <Trigger Property = "IsSelected" Value = "True">
                                         <Setter TargetName = "selectionIndicator" Property = "BorderBrush"
                                                 Value = "{StaticResource BlueAccentColorBrush}" />
-                                        <Setter TargetName = "selectionIndicator" Property = "Visibility"
-                                                Value = "Visible" />
                                     </Trigger>
                                     <Trigger Property = "IsEnabled" Value = "False">
                                         <Setter TargetName = "selectionIndicator" Property = "Opacity" Value = "0.5" />
