@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,7 +14,7 @@ using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.UserControls.Settings;
 
-public partial class ShortcutSettingsEditor
+public partial class ShortcutSettingsEditor : INotifyPropertyChanged
 {
    public static readonly DependencyProperty RootItemsProperty =
       DependencyProperty.Register(nameof(RootItems), typeof(ObservableCollection<ShortcutTreeItem>), typeof(ShortcutSettingsEditor));
@@ -48,6 +50,21 @@ public partial class ShortcutSettingsEditor
    public static RoutedCommand ResetCommand { get; } = new("Reset", typeof(ShortcutSettingsEditor));
    public static RoutedCommand RemoveShortcutCommand { get; } = new("RemoveShortcut", typeof(ShortcutSettingsEditor));
    public static RoutedCommand ReplaceShortcutCommand { get; } = new("ReplaceShortcut", typeof(ShortcutSettingsEditor));
+
+   public bool IsReady
+   {
+      get;
+      set
+      {
+         if (value == field)
+            return;
+
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public event PropertyChangedEventHandler? PropertyChanged;
 
    private async Task InitializeTreeAsync()
    {
@@ -86,8 +103,7 @@ public partial class ShortcutSettingsEditor
       });
 
       RootItems = rootItems;
-      LoadingSpinner.Visibility = Visibility.Collapsed;
-      TreeViewDisplay.Visibility = Visibility.Visible;
+      IsReady = true;
    }
 
    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -308,5 +324,10 @@ public partial class ShortcutSettingsEditor
                     MessageBoxImage.Warning) ==
           MBoxResult.OK)
          CommandRegistry.ResetAllToDefault();
+   }
+
+   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   {
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 }

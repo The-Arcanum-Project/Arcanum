@@ -143,6 +143,7 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTreeView.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseLoadingSpinner.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -237,48 +238,23 @@
 
         </Grid>
 
-        <Path x:Name = "LoadingSpinner" Grid.Row = "1" Stroke = "{StaticResource BlueAccentColorBrush}"
-              StrokeThickness = "5" HorizontalAlignment = "Center" VerticalAlignment = "Center" Margin = "40"
-              RenderTransformOrigin = "0,0">
-            <Path.Data>
-                <PathGeometry>
-                    <!-- Start the arc at the top-center point -->
-                    <PathFigure StartPoint = "22.5,22.5">
-                        <!-- The ArcSegment defines the curve -->
-                        <ArcSegment Point = "42.5,2.5" Size = "20,20" IsLargeArc = "True" SweepDirection = "Clockwise" />
-                    </PathFigure>
-                </PathGeometry>
-            </Path.Data>
+        <ContentControl Grid.Row = "1" Style = "{StaticResource BaseLoadingSpinner}"
+                        Tag = "{Binding IsReady, TargetNullValue=False, FallbackValue=False, RelativeSource={RelativeSource AncestorType=UserControl}}">
 
-            <!-- This transform will be animated to create the rotation -->
-            <Path.RenderTransform>
-                <RotateTransform x:Name = "Rotation" Angle = "0" CenterX = "22.5" CenterY = "2.5" />
-            </Path.RenderTransform>
+            <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
+                      Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
+                      ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                      VirtualizingStackPanel.IsVirtualizing = "True"
+                      VirtualizingStackPanel.VirtualizationMode = "Recycling" ScrollViewer.CanContentScroll = "True">
 
-            <Path.Triggers>
-                <EventTrigger RoutedEvent = "Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation Storyboard.TargetName = "Rotation" Storyboard.TargetProperty = "Angle"
-                                             From = "0" To = "360" Duration = "0:0:2" RepeatBehavior = "Forever" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Path.Triggers>
-        </Path>
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
+                        <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
 
-        <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
-                  Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
-                  ScrollViewer.HorizontalScrollBarVisibility = "Disabled" Visibility = "Collapsed"
-                  VirtualizingStackPanel.IsVirtualizing = "True"
-                  VirtualizingStackPanel.VirtualizationMode = "Recycling" ScrollViewer.CanContentScroll = "True">
+            </TreeView>
+        </ContentControl>
 
-            <TreeView.ItemContainerStyle>
-                <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
-                    <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
-                </Style>
-            </TreeView.ItemContainerStyle>
-
-        </TreeView>
     </Grid>
 </UserControl>
