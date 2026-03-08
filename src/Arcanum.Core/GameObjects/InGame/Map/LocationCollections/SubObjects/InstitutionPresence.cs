@@ -32,4 +32,9 @@ public partial class InstitutionPresence : IEmbeddedEu5Object<InstitutionPresenc
    public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public static InstitutionPresence Empty => new() { UniqueId = "Arcanum_Empty_InstitutionPresence" };
+
+   public override bool Equals(object? obj) => obj is InstitutionPresence other && Institution == other.Institution && IsPresent == other.IsPresent;
+
+   // ReSharper disable twice NonReadonlyMemberInGetHashCode
+   public override int GetHashCode() => HashCode.Combine(Institution, IsPresent);
 }

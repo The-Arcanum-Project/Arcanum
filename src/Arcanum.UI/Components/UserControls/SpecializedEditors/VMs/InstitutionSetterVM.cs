@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
@@ -45,14 +46,17 @@ public class InstitutionSetterVm : INotifyPropertyChanged
    private void SetInAllAction(object? _)
    {
       var locations = SelectionManager.GetActiveSelectionLocations();
+      var objects = new object[locations.Count];
 
-      foreach (var loc in locations)
-         Nx.AddToCollection(loc,
-                            Location.Field.InstitutionPresences,
-                            new InstitutionPresence
-                            {
-                               Institution = Institution, IsPresent = true,
-                            });
+      for (var i = 0; i < locations.Count; i++)
+         objects[i] = new InstitutionPresence()
+         {
+            Institution = Institution, IsPresent = true,
+         };
+
+      Nx.BulkAddToCollection(locations.Cast<IEu5Object>().ToArray(),
+                             Location.Field.InstitutionPresences,
+                             objects);
 
       StateChanged?.Invoke(this, EventArgs.Empty);
    }
@@ -60,6 +64,8 @@ public class InstitutionSetterVm : INotifyPropertyChanged
    private void SetInNoneAction(object? _)
    {
       var locations = SelectionManager.GetActiveSelectionLocations();
+      List<object> objects = [];
+      List<IEu5Object> locationsToUpdate = [];
 
       foreach (var loc in locations)
       {
@@ -68,8 +74,11 @@ public class InstitutionSetterVm : INotifyPropertyChanged
          if (presence is null)
             continue;
 
-         Nx.RemoveFromCollection(loc, Location.Field.InstitutionPresences, presence);
+         objects.Add(presence);
+         locationsToUpdate.Add(loc);
       }
+
+      Nx.BulkRemoveFromCollection(locationsToUpdate.ToArray(), Location.Field.InstitutionPresences, objects.ToArray());
 
       StateChanged?.Invoke(this, EventArgs.Empty);
    }

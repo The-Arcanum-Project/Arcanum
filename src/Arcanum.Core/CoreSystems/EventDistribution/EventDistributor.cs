@@ -10,8 +10,17 @@ public static class EventDistributor
    /// </summary>
    public static Action? UpdateNUI;
 
+   // ReSharper disable thrice InvalidXmlDocComment
    /// <summary>
    /// Is invoked for any objects changing a property
+   /// Parameters:
+   ///     <param name="Type">The concrete Type of the affected objects</param>
+   ///     <param name="Enum">
+   ///         The affected property of the Type
+   ///     </param>
+   ///     <param name="IEu5Object[]">
+   ///         All nested objects of the affected property that are of type IEu5Object.
+   ///     </param>
    /// </summary>
    public static Action<Type, Enum, IEu5Object[]>? ObjectOfTypeModified;
 

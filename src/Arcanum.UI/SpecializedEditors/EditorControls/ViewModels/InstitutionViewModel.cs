@@ -1,9 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.AppFeatures.Contexts.SpecializedEditors;
 using Arcanum.UI.Components.UserControls.SpecializedEditors.VMs;
@@ -48,8 +51,23 @@ public sealed class InstitutionViewModel : IInstitutionEditor, INotifyPropertyCh
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   public void SubscribeToSelectionChanges() => SelectionManager.EditableObjectsChanged += UpdateHeaderText;
-   public void UnsubscribeFromSelectionChanges() => SelectionManager.EditableObjectsChanged -= UpdateHeaderText;
+   public void SubscribeToSelectionChanges()
+   {
+      SelectionManager.EditableObjectsChanged += UpdateHeaderText;
+      EventDistributor.ObjectOfTypeModified += OnObjectModified;
+   }
+
+   public void UnsubscribeFromSelectionChanges()
+   {
+      SelectionManager.EditableObjectsChanged -= UpdateHeaderText;
+      EventDistributor.ObjectOfTypeModified -= OnObjectModified;
+   }
+
+   private void OnObjectModified(Type changedType, Enum nxProp, IEu5Object[] nestedEu5Objects)
+   {
+      if (changedType == typeof(InstitutionPresence) && nxProp.Equals(Location.Field.InstitutionPresences))
+         InternalUpdate();
+   }
 
    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {

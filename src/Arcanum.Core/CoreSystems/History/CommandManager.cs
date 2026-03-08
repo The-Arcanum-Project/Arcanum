@@ -127,6 +127,22 @@ public static class CommandManager
       return true;
    }
 
+   public static void HandleCommand(ICommand command)
+   {
+      if (IgnoreCommands)
+         return;
+
+      var manager = AppData.HistoryManager;
+      var currentCommand = manager.CurrentCommand;
+
+      if (!DidFinalizeCurrentCommand && currentCommand is Eu5ObjectCommand eu5Command)
+         // If the current command is an Eu5ObjectCommand, finalize it before adding the new command.
+         eu5Command.FinalizeSetup();
+
+      manager.AddCommand(command);
+      DidFinalizeCurrentCommand = false;
+   }
+
    public static void FinalizeCurrentCommand()
    {
       if (IgnoreCommands || DidFinalizeCurrentCommand)
