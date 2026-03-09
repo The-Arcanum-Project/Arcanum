@@ -28,5 +28,5 @@ public abstract class LocationBasedMapMode : IMapMode
    public abstract void OnActivateMode();
    public abstract void OnDeactivateMode();
    public abstract object GetLocationRelatedData(Location location);
-   public virtual MapContexMenuConfig[]? GetContextMenuOptions() => [];
+   public virtual MapContexMenuConfig[]? GetContextMenuOptions() => null;
 }
