@@ -17,6 +17,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
@@ -46,35 +47,33 @@ public partial class MapControl
    private static readonly Color4 FreezeSelectionColor = new(0, 0, 0.5f, 0);
    private static readonly Color4 PreviewColor = new(0.5f, 0.5f, 0, 0);
 
-   private D3D11HwndHost _d3dHost = null!;
-   public LocationRenderer LocationRenderer { get; private set; } = null!;
+   public static readonly DependencyProperty CurrentPosProperty =
+      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
 
    public readonly MapInteractionManager MapInteractionManager;
 
-   public MapCoordinateConverter Coords { get; private set; } = null!;
-
-   private Color4[] _currentBackgroundColor = null!;
-   private Color4[] _selectionColor = null!;
-   public event Action<Vector2>? OnAbsolutePositionChanged;
-
-   public event Action<Location, Vector2>? OnAbsoluteLocationChangedLocation;
-
-   public event Action<MapClickEventArgs>? OnMapClick;
-
-   public static event Action? OnMapLoaded;
-
-   private int _mapWidth = -1;
-   private int _mapHeight = -1;
-
-   private bool _isMapReady;
-
    private Vector2? _contextMenuClickLocation;
 
-   // Get to pass this into the color generation
-   public Color4[] CurrentBackgroundColors => _currentBackgroundColor;
+   private D3D11HwndHost _d3dHost = null!;
 
-   public static readonly DependencyProperty CurrentPosProperty =
-      DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
+   private bool _isMapReady;
+   private int _mapHeight = -1;
+
+   private int _mapWidth = -1;
+   private Color4[] _selectionColor = null!;
+
+   public MapControl()
+   {
+      MapInteractionManager = new(this);
+      InitializeComponent();
+   }
+
+   public LocationRenderer LocationRenderer { get; private set; } = null!;
+
+   public MapCoordinateConverter Coords { get; private set; } = null!;
+
+   // Get to pass this into the color generation
+   public Color4[] CurrentBackgroundColors { get; private set; } = null!;
 
    public Vector2 CurrentPos
    {
@@ -85,11 +84,14 @@ public partial class MapControl
    // Command to load the project in the Arcanum view
    public ICommand DoubleClickCommand => new RelayCommand<MouseButtonEventArgs>(_ => { });
 
-   public MapControl()
-   {
-      MapInteractionManager = new(this);
-      InitializeComponent();
-   }
+   public bool HasLocationOwner => Selection.GetLocation(_contextMenuClickLocation) is { } loc && PoliticalMapMode.GetLocationOwner(loc) != Country.Empty;
+   public event Action<Vector2>? OnAbsolutePositionChanged;
+
+   public event Action<Location, Vector2>? OnAbsoluteLocationChangedLocation;
+
+   public event Action<MapClickEventArgs>? OnMapClick;
+
+   public static event Action? OnMapLoaded;
 
    private void SetupEvents()
    {
@@ -122,9 +124,9 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
-      if (_selectionColor.Length != _currentBackgroundColor.Length)
-         _selectionColor = new Color4[_currentBackgroundColor.Length];
-      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
+      if (_selectionColor.Length != CurrentBackgroundColors.Length)
+         _selectionColor = new Color4[CurrentBackgroundColors.Length];
+      Array.Copy(CurrentBackgroundColors, _selectionColor, CurrentBackgroundColors.Length);
 
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
@@ -156,8 +158,8 @@ public partial class MapControl
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
       var startColor = CreateColors();
       LocationRenderer = new(vertices, startColor, Coords.ImageAspectRatio);
-      _currentBackgroundColor = startColor;
-      _selectionColor = (Color4[])_currentBackgroundColor.Clone();
+      CurrentBackgroundColors = startColor;
+      _selectionColor = (Color4[])CurrentBackgroundColors.Clone();
       _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
 
@@ -201,7 +203,7 @@ public partial class MapControl
 
    public void RefreshAndRenderSelectionColors()
    {
-      Array.Copy(_currentBackgroundColor, _selectionColor, _currentBackgroundColor.Length);
+      Array.Copy(CurrentBackgroundColors, _selectionColor, CurrentBackgroundColors.Length);
       RefreshSelectionColors();
       LocationRenderer.UpdateColors(_selectionColor);
       _d3dHost.Invalidate();
@@ -219,20 +221,20 @@ public partial class MapControl
             if (loc == Location.Empty)
                continue;
 
-            _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * frozenFactor + FreezeSelectionColor;
+            _selectionColor[loc.ColorIndex] = CurrentBackgroundColors[loc.ColorIndex] * frozenFactor + FreezeSelectionColor;
          }
 
       foreach (var loc in Selection.GetSelectedLocations)
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * selectionFactor + SelectionColor;
+         _selectionColor[loc.ColorIndex] = CurrentBackgroundColors[loc.ColorIndex] * selectionFactor + SelectionColor;
 
       foreach (var loc in SelectionManager.PreviewedLocations)
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex] * previewFactor + PreviewColor;
+         _selectionColor[loc.ColorIndex] = CurrentBackgroundColors[loc.ColorIndex] * previewFactor + PreviewColor;
    }
 
    private void LocationDeselectedAddHandler(List<Location> locations)
    {
       foreach (var loc in locations)
-         _selectionColor[loc.ColorIndex] = _currentBackgroundColor[loc.ColorIndex];
+         _selectionColor[loc.ColorIndex] = CurrentBackgroundColors[loc.ColorIndex];
 
       RefreshSelectionColors();
 
@@ -315,40 +317,6 @@ public partial class MapControl
       EnsureVisible(expandedArea);
    }
 
-   #region Events
-
-   private void OnMouseWheel(object sender, MouseWheelEventArgs e)
-   {
-      MapInteractionManager.HandleMouseWheel(e);
-   }
-
-   private void OnMouseMove(object sender, MouseEventArgs e)
-   {
-      UpdateCursorLocation(e.GetPosition(HwndHostContainer));
-      MapInteractionManager.HandleMouseMove(e);
-   }
-
-   private void UpdateCursorLocation(Point position)
-   {
-      Coords.InvalidateCache(position);
-      OnAbsolutePositionChanged?.Invoke(CurrentPos);
-      var location = Selection.GetLocation(CurrentPos);
-      OnAbsoluteLocationChangedLocation?.Invoke(location, CurrentPos);
-   }
-
-   private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)
-   {
-      MapInteractionManager.HandleMouseDown(e);
-   }
-
-   private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
-   {
-      MapInteractionManager.HandleMouseUp(e);
-      OnMapClick?.Invoke(new(CurrentPos, e.ChangedButton));
-   }
-
-   #endregion
-
    private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
    {
       if (Keyboard.Modifiers != ModifierKeys.None)
@@ -365,7 +333,7 @@ public partial class MapControl
                                  ImageLockMode.WriteOnly,
                                  bmp.PixelFormat);
 
-      var colors = _currentBackgroundColor;
+      var colors = CurrentBackgroundColors;
       var width = _mapWidth;
       var height = _mapHeight;
       var stride = bmpData.Stride;
@@ -399,7 +367,6 @@ public partial class MapControl
             workItems.Add(new(poly, polyTop, polyBottom, cost));
          }
          else
-         {
             for (var y = polyTop; y <= polyBottom; y += sliceHeight)
             {
                var sliceEnd = Math.Min(y + sliceHeight - 1, polyBottom);
@@ -407,7 +374,6 @@ public partial class MapControl
                var cost = (long)complexity * sliceH;
                workItems.Add(new(poly, y, sliceEnd, cost));
             }
-         }
       }
 
       workItems.Sort((a, b) => b.EstimatedCost.CompareTo(a.EstimatedCost));
@@ -436,28 +402,9 @@ public partial class MapControl
       ImageTagger.ExportTaggedTexture(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
    }
 
-   private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
-
    private void MenuItem_OnClick(object sender, RoutedEventArgs e)
    {
       ExportBackColorsToBitmap();
-   }
-
-   private readonly unsafe struct BitmapPixelDrawer(byte* scan0, int stride, int width, int height, byte r, byte g, byte b)
-      : IPixelAction
-   {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      public void Invoke(int x, int y)
-      {
-         if (x < 0 || x >= width || y < 0 || y >= height)
-            return;
-
-         var pixelPtr = scan0 + y * stride + x * 3;
-
-         pixelPtr[0] = b;
-         pixelPtr[1] = g;
-         pixelPtr[2] = r;
-      }
    }
 
    private void SelectProvince_Click(object sender, RoutedEventArgs e)
@@ -541,8 +488,6 @@ public partial class MapControl
       SelectionManager.Eu5ObjectSelectedInSearch(owner);
    }
 
-   public bool HasLocationOwner => Selection.GetLocation(_contextMenuClickLocation) is { } loc && PoliticalMapMode.GetLocationOwner(loc) != Country.Empty;
-
    private void MapContextMenu_Opened(object sender, RoutedEventArgs e)
    {
       if (!_isMapReady)
@@ -560,11 +505,20 @@ public partial class MapControl
          return;
 
       var subPixelPresicision = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-      var format = subPixelPresicision ? "{0:0.##}" : "{0:0}";
+      var format = subPixelPresicision ? "0:0.##" : "0:0";
 
-      Clipboard.SetText(Keyboard.Modifiers != ModifierKeys.Control
-                           ? $"X:{_contextMenuClickLocation.Value.X.ToString(format)}, Y:{_contextMenuClickLocation.Value.Y.ToString(format)}"
-                           : $"{_contextMenuClickLocation.Value.X.ToString(format)} {_contextMenuClickLocation.Value.Y.ToString(format)}");
+      if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+      {
+         var values = new Dictionary<string, double>
+         {
+            ["x"] = _contextMenuClickLocation.Value.X, ["y"] = _contextMenuClickLocation.Value.Y,
+         };
+         Clipboard.SetText(CustomNumberParser.Format(Config.Settings.MiscSettings.CustomCoordinatesFormat, values));
+      }
+      else if (Keyboard.Modifiers != ModifierKeys.Control)
+         Clipboard.SetText($"X:{_contextMenuClickLocation.Value.X.ToString(format)}, Y:{_contextMenuClickLocation.Value.Y.ToString(format)}");
+      else
+         Clipboard.SetText($"{_contextMenuClickLocation.Value.X.ToString(format)} {_contextMenuClickLocation.Value.Y.ToString(format)}");
    }
 
    private void MapModeDataCopy_OnClick(object sender, RoutedEventArgs e)
@@ -592,4 +546,57 @@ public partial class MapControl
          Clipboard.SetText(str);
       }
    }
+
+   private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
+
+   private readonly unsafe struct BitmapPixelDrawer(byte* scan0, int stride, int width, int height, byte r, byte g, byte b)
+      : IPixelAction
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      public void Invoke(int x, int y)
+      {
+         if (x < 0 || x >= width || y < 0 || y >= height)
+            return;
+
+         var pixelPtr = scan0 + y * stride + x * 3;
+
+         pixelPtr[0] = b;
+         pixelPtr[1] = g;
+         pixelPtr[2] = r;
+      }
+   }
+
+   #region Events
+
+   private void OnMouseWheel(object sender, MouseWheelEventArgs e)
+   {
+      MapInteractionManager.HandleMouseWheel(e);
+   }
+
+   private void OnMouseMove(object sender, MouseEventArgs e)
+   {
+      UpdateCursorLocation(e.GetPosition(HwndHostContainer));
+      MapInteractionManager.HandleMouseMove(e);
+   }
+
+   private void UpdateCursorLocation(Point position)
+   {
+      Coords.InvalidateCache(position);
+      OnAbsolutePositionChanged?.Invoke(CurrentPos);
+      var location = Selection.GetLocation(CurrentPos);
+      OnAbsoluteLocationChangedLocation?.Invoke(location, CurrentPos);
+   }
+
+   private void OnMouseMiddleButtonDown(object sender, MouseButtonEventArgs e)
+   {
+      MapInteractionManager.HandleMouseDown(e);
+   }
+
+   private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
+   {
+      MapInteractionManager.HandleMouseUp(e);
+      OnMapClick?.Invoke(new(CurrentPos, e.ChangedButton));
+   }
+
+   #endregion
 }

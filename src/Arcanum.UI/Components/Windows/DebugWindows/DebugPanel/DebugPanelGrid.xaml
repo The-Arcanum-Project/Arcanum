@@ -91,9 +91,12 @@
 
             <styleClasses:BaseButton Content = "ContextExplorer" Margin = "2" Padding = "2"
                                      Click = "ContextExplorer_OnClick" />
-            
+
             <styleClasses:BaseButton Content = "Write Template to pops" Margin = "2" Padding = "4"
                                      Click = "TemplateToPops_OnClick" />
+
+            <styleClasses:BaseButton Content = "Custom Number Parser" Margin = "2" Padding = "2"
+                                     Click = "CustomNumberParser_OnClick" />
 
         </StackPanel>
 

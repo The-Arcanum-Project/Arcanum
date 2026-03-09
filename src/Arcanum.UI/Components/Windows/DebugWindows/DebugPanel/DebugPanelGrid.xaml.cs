@@ -4,6 +4,7 @@ using System.Windows;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.UserControls.ValueAllocators;
@@ -39,7 +40,6 @@ public partial class DebugPanelGrid
    {
       var foundAny = false;
       foreach (var country in Globals.Countries.Values)
-      {
          if (country.GovernmentState.SocietalValues.Count > 0)
          {
             Debug.WriteLine($"Country {country.UniqueId} has societal values:");
@@ -47,7 +47,6 @@ public partial class DebugPanelGrid
                Debug.WriteLine($" - {svEntry.SocientalValue} with intensity {svEntry.Value}");
             foundAny = true;
          }
-      }
 
       if (!foundAny)
          Debug.WriteLine("No countries with societal values found.");
@@ -248,5 +247,36 @@ public partial class DebugPanelGrid
    {
       var ownerWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
       new ContextExplorerWindow(ownerWindow!).Show();
+   }
+
+   private void CustomNumberParser_OnClick(object sender, RoutedEventArgs e)
+   {
+      var data = new Dictionary<string, double> { { "x", 123.456 }, { "y", 123.456 } };
+
+      // @formatter:off
+      var tests = new List<string>
+      {
+         "{x}",                  // Default
+         "{x#.#}",               // Rounding Up
+         "{x#.##}",              // Rounding Down
+         "{x#.###}",             // Exact
+         "{x#.#####}",           // Trailing Zeros
+         "{y:F}",                // .NET Standard
+         "{y:F0}",               // .NET No Decimals
+         "{y:P}",                // .NET Percent
+         "{z}",                  // Missing Variable
+         "Value: {x#.##} units", // Mixed String
+         "{x#.#.#}",             // Invalid Syntax
+      };
+      // @formatter:on
+
+      ArcLog.WritePure($"{"Input Pattern",-20} | Result");
+      ArcLog.WritePure(new('-', 40));
+
+      foreach (var t in tests)
+      {
+         var result = CustomNumberParser.Format(t, data);
+         ArcLog.WritePure($"{t,-20} | {result}");
+      }
    }
 }
