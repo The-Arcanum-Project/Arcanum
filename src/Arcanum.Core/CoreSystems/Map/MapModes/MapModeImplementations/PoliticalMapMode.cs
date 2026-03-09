@@ -116,4 +116,5 @@ public class PoliticalMapMode : IMapMode
    }
 
    public object GetLocationRelatedData(Location location) => GetLocationOwner(location);
+   public MapContexMenuConfig[]? GetContextMenuOptions() => null;
 }

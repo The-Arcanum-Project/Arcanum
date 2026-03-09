@@ -490,13 +490,57 @@ public partial class MapControl
 
    private void MapContextMenu_Opened(object sender, RoutedEventArgs e)
    {
-      if (!_isMapReady)
+      const string dynamicTag = "dynamic";
+      if (!_isMapReady || sender is not ContextMenu contextMenu)
       {
          e.Handled = true;
          return;
       }
 
+      for (int i = contextMenu.Items.Count - 1; i >= 0; i--)
+      {
+         if (contextMenu.Items[i] is FrameworkElement { Tag: dynamicTag })
+         {
+            contextMenu.Items.RemoveAt(i);
+         }
+      }
+
       _contextMenuClickLocation = CurrentPos;
+
+      // Check if we have options from the currenty map mode we want to add
+      var mapModeOptions = MapModeManager.GetCurrent().GetContextMenuOptions();
+      if (mapModeOptions != null)
+      {
+         contextMenu.Items.Add(new Separator() { Tag = dynamicTag, });
+
+         foreach (var option in mapModeOptions)
+         {
+            var menuItem = new MenuItem
+            {
+               Header = option.OptionName,
+               IsEnabled = option.IsEnabled,
+               ToolTip = option.Tooltip,
+               Tag = dynamicTag,
+            };
+
+            menuItem.Click += OnMenuItemOnClick;
+            contextMenu.Unloaded += OnUnloaded;
+            contextMenu.Items.Add(menuItem);
+            continue;
+
+            void OnMenuItemOnClick(object o, RoutedEventArgs routedEventArgs)
+            {
+               var clickPos = _contextMenuClickLocation ?? Vector2.Zero;
+               option.OptionAction(clickPos);
+            }
+
+            void OnUnloaded(object o, RoutedEventArgs routedEventArgs)
+            {
+               menuItem.Click -= OnMenuItemOnClick;
+               contextMenu.Unloaded -= OnUnloaded;
+            }
+         }
+      }
    }
 
    private void CopyMapCoordinates_OnClick(object sender, RoutedEventArgs e)

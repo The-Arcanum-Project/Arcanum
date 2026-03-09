@@ -150,4 +150,9 @@ public partial class DefaultMapDefinition : IEu5Object<DefaultMapDefinition>
    public static DefaultMapDefinition Empty { get; } = new() { UniqueId = "Arcanum_Empty_DefaultMapDefinition" };
 
    #endregion
+
+   public bool IsLand(Location location) => !SeaZones.Contains(location) &&
+                                            !Lakes.Contains(location) &&
+                                            !ImpassableMountains.Contains(location) &&
+                                            !NotOwnable.Contains(location);
 }
