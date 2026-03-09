@@ -5,7 +5,9 @@
              xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModels = "clr-namespace:Arcanum.UI.SpecializedEditors.EditorControls.ViewModels"
              xmlns:specializedEditors = "clr-namespace:Arcanum.UI.Components.UserControls.SpecializedEditors"
-             mc:Ignorable = "d" d:DesignHeight = "300" d:DesignWidth = "300"
+             xmlns:commands = "clr-namespace:Arcanum.UI.Commands" commands:ContextBinder.ObserveContext = "True"
+             commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.INSTITUTION_EDITOR}" mc:Ignorable = "d"
+             d:DesignHeight = "300" d:DesignWidth = "300"
              d:DataContext = "{d:DesignInstance viewModels:InstitutionViewModel}">
 
     <StackPanel>
