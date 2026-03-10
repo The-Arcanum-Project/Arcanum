@@ -8,7 +8,6 @@ namespace Arcanum.Core.Settings.SmallSettingsObjects;
 
 public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
 {
-   
    [Description("Will render map with fast border smoothing and without a pixel perfect result. (Applies on restart)")]
    [DefaultValue(false)]
    public bool UseFastBorderSmoothing
@@ -16,7 +15,7 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = false;
-   
+
    [Description("If animations are used on map borders.")]
    [DefaultValue(true)]
    public bool AllowAnimatedBorders
@@ -104,6 +103,14 @@ public class MapSettingsObj() : InternalSearchableSetting(Config.Settings)
       get;
       set => SetNotifyProperty(ref field, value);
    } = Colors.Yellow;
+
+   [Description("The factor by which the color of wasteland locations is darkened when rendering the map.")]
+   [DefaultValue(0.8f)]
+   public float WasteLandShadeFactor
+   {
+      get;
+      set => SetNotifyProperty(ref field, value);
+   } = 0.8f;
 
    [Description("The color of the border when selecting a map element.")]
    [DefaultValue(typeof(Color), "Red")]

@@ -11,6 +11,7 @@ public class AreaMapMode : LocationBasedMapMode
    public override string Description => "Displays the Areas the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Areas;
    public override Type[] DisplayTypes => [typeof(Area), typeof(Province), typeof(Location)];
+   public override bool DarkenWastelands => false;
 
    public override int GetColorForLocation(Location location)
    {

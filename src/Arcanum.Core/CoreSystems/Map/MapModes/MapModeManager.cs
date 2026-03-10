@@ -60,7 +60,7 @@ public static partial class MapModeManager
 
    public static IMapMode GetCurrent() => Get(CurrentMode);
    // This is set once the map is ready
-   public static bool IsMapReady { get; set; } = false;
+   public static bool IsMapReady { get; set; }
 
    // Event to notify that the mapmode has been changed.
    public static event Action<MapModeType>? OnMapModeChanged;
@@ -126,10 +126,9 @@ public static partial class MapModeManager
          return;
 
       var mode = Get(type);
-      var count = LocationsArray.Length;
 
       if (mode is LocationBasedMapMode lbm)
-         GenerateLocationbaseMapMode(colors, lbm, count);
+         GenerateLocationbaseMapMode(colors, lbm);
       else
          mode.Render(colors);
    }
@@ -146,43 +145,38 @@ public static partial class MapModeManager
       return min + (int)(x % range);
    }
 
-   private static void GenerateLocationbaseMapMode(Color4[] colors, LocationBasedMapMode mode, int count)
+   private static void GenerateLocationbaseMapMode(Color4[] colors, LocationBasedMapMode mode)
    {
       if (!IsMapReady)
          return;
 
-      if (((IMapMode)mode).IsLandOnly)
-      {
-         var waterProvinces = new HashSet<Location>(Globals.DefaultMapDefinition.SeaZones);
-         waterProvinces.UnionWith(Globals.DefaultMapDefinition.Lakes);
-         var useLocWater = Config.Settings.MapSettings.UseShadeOfColorOnWater;
-         Parallel.For(0, count, ProcessLocation);
-         waterProvinces.Clear();
-
-         void ProcessLocation(int i)
-         {
-            var location = LocationsArray[i];
-            if (waterProvinces.Contains(location))
-            {
-               if (useLocWater)
-                  colors[i] = new(_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
-               else
-                  colors[i] = new(location.Color.AsInt());
-            }
-            else
-               colors[i] = new(mode.GetColorForLocation(location));
-         }
-      }
-      else
-      {
-         Parallel.For(0,
-                      count,
-                      i => { colors[i] = new(mode.GetColorForLocation(LocationsArray[i])); });
-      }
+      mode.Render(colors);
    }
 
    public static Color4 GetWaterColorForLocation(Location location)
       => new(_blueColors[DeterministicRandom(location.ColorIndex, 0, _blueColors.Length)].AsAbgrInt());
+
+   public static void SetWaterColors(Color4[] buffer)
+   {
+      foreach (var location in Globals.DefaultMapDefinition.SeaZones)
+         buffer[location.ColorIndex] = GetWaterColorForLocation(location);
+
+      foreach (var location in Globals.DefaultMapDefinition.Lakes)
+         buffer[location.ColorIndex] = GetWaterColorForLocation(location);
+   }
+
+   public static void DarkenWastelandColors(Color4[] buffer)
+   {
+      var factor = Config.Settings.MapSettings.WasteLandShadeFactor;
+      var dmd = Globals.DefaultMapDefinition;
+      foreach (var location in dmd.ImpassableMountains)
+         if (!dmd.SeaZones.Contains(location) && !dmd.Lakes.Contains(location))
+         {
+            var color = buffer[location.ColorIndex];
+            var newColor = new Color4(color.R * factor, color.G * factor, color.B * factor, color.A);
+            buffer[location.ColorIndex] = newColor;
+         }
+   }
 
    public static void SetQuickMapModeSetting(int buttonIndex, MapModeType enumValue)
    {
