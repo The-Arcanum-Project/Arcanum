@@ -17,19 +17,24 @@ namespace Arcanum.Core.CoreSystems.Common;
 /// </summary>
 public class IndentedStringBuilder
 {
-   private readonly StringBuilder _builder = new();
    private readonly StringBuilder _indentCacheBuilder = new();
    private string _indentString = new(' ', Config.Settings.SavingConfig.SpacesPerIndent);
-   private string _spacerString = new(' ', Config.Settings.SavingConfig.SpacesPerSpacing);
    private bool _isAtStartOfLine = true;
+   private string _spacerString = new(' ', Config.Settings.SavingConfig.SpacesPerSpacing);
 
    public IndentedStringBuilder(int initialCapacity = 256)
    {
-      _builder.EnsureCapacity(initialCapacity);
+      InnerBuilder.EnsureCapacity(initialCapacity);
       _indentCacheBuilder.EnsureCapacity(32); // Preallocate some space for indentation levels
    }
 
-   public StringBuilder InnerBuilder => _builder;
+   public StringBuilder InnerBuilder { get; } = new();
+
+   public int this[Index index]
+   {
+      get => InnerBuilder[index];
+      set => InnerBuilder[index] = (char)value;
+   }
 
    public void SetIndent(int spaceCount) => _indentString = new(' ', spaceCount);
 
@@ -88,35 +93,35 @@ public class IndentedStringBuilder
 
       var lineItemCount = 0;
       PrependIndentIfNecessary();
-      var currentLineStartPos = _builder.Length;
+      var currentLineStartPos = InnerBuilder.Length;
 
       for (var i = 0; i < items.Count; i++)
       {
          var item = items[i];
 
          var needsLineBreak = (lineItemCount > 0 &&
-                               _builder.Length - currentLineStartPos + item.Length + separator.Length >
+                               InnerBuilder.Length - currentLineStartPos + item.Length + separator.Length >
                                MaxCollectionLineLength) ||
                               lineItemCount >= MaxItemsInCollectionLine;
 
          if (needsLineBreak)
          {
-            _builder.AppendLine();
+            InnerBuilder.AppendLine();
             _isAtStartOfLine = true;
             PrependIndentIfNecessary();
-            currentLineStartPos = _builder.Length;
+            currentLineStartPos = InnerBuilder.Length;
             lineItemCount = 0;
          }
 
          if (lineItemCount > 0)
-            _builder.Append(separator);
+            InnerBuilder.Append(separator);
 
-         _builder.Append(item);
+         InnerBuilder.Append(item);
          if (PadCollectionItems)
          {
             var padCount = padding - item.Length;
             if (padCount > 0)
-               _builder.Append(' ', padCount);
+               InnerBuilder.Append(' ', padCount);
          }
 
          lineItemCount++;
@@ -152,12 +157,71 @@ public class IndentedStringBuilder
 
    public void Clear()
    {
-      _builder.Clear();
+      InnerBuilder.Clear();
       _indentCacheBuilder.Clear();
       _isAtStartOfLine = true;
    }
 
-   public override string ToString() => _builder.ToString();
+   public override string ToString() => InnerBuilder.ToString();
+
+   private void AppendIfNotInComment(string text)
+   {
+      var hasComment = false;
+
+      for (var i = InnerBuilder.Length - 1; i >= 0; i--)
+      {
+         var c = InnerBuilder[i];
+
+         if (c == '#')
+         {
+            hasComment = true;
+            break;
+         }
+
+         // We reached the start of the line without finding a #
+         if (c == '\n')
+            break;
+      }
+
+      // Line has a comment, start a new line to keep 'text' clean
+      if (hasComment)
+         InnerBuilder.AppendLine().Append(text);
+      // Line is "clean", append directly to the current line
+      else
+         InnerBuilder.Append(text);
+   }
+
+   private void AppendLineIfNotInComment(string text)
+   {
+      var hasComment = false;
+
+      for (var i = InnerBuilder.Length - 1; i >= 0; i--)
+      {
+         var c = InnerBuilder[i];
+
+         if (c == '#')
+         {
+            hasComment = true;
+            break;
+         }
+
+         // We reached the start of the line without finding a #
+         if (c == '\n')
+            break;
+      }
+
+      // Line has a comment, start a new line to keep 'text' clean
+      if (hasComment)
+         InnerBuilder.AppendLine().AppendLine(text);
+      // Line is "clean", append directly to the current line
+      else
+         InnerBuilder.AppendLine(text);
+   }
+
+   public void AppendInjRepType(InjRepType agsInjRepType)
+   {
+      InnerBuilder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
+   }
 
    public readonly ref struct IndentScope
    {
@@ -194,9 +258,9 @@ public class IndentedStringBuilder
          if (_addNewLineBeforeClosing && !_asOneLine)
             _builder.AppendLine();
          if (_asOneLine)
-            _builder.Append(_closingBrace);
+            _builder.AppendIfNotInComment(_closingBrace);
          else
-            _builder.AppendLine(_closingBrace);
+            _builder.AppendLineIfNotInComment(_closingBrace);
       }
    }
 
@@ -205,7 +269,7 @@ public class IndentedStringBuilder
    public void Merge(StringBuilder sb)
    {
       // Using ReadOnlySpan<char> is the most direct way to copy chunks.
-      foreach (var chunk in _builder.GetChunks())
+      foreach (var chunk in InnerBuilder.GetChunks())
          sb.Append(chunk.Span);
    }
 
@@ -217,7 +281,7 @@ public class IndentedStringBuilder
 
    public void Merge(IndentedStringBuilder sb)
    {
-      foreach (var chunk in _builder.GetChunks())
+      foreach (var chunk in InnerBuilder.GetChunks())
          sb.InnerBuilder.Append(chunk.Span);
    }
 
@@ -243,7 +307,7 @@ public class IndentedStringBuilder
          return this;
 
       PrependIndentIfNecessary();
-      _builder.Append(text);
+      InnerBuilder.Append(text);
       return this;
    }
 
@@ -254,7 +318,7 @@ public class IndentedStringBuilder
          return this;
 
       PrependIndentIfNecessary();
-      _builder.Append(text);
+      InnerBuilder.Append(text);
       return this;
    }
 
@@ -262,14 +326,14 @@ public class IndentedStringBuilder
    public IndentedStringBuilder Append(char c)
    {
       PrependIndentIfNecessary();
-      _builder.Append(c);
+      InnerBuilder.Append(c);
       return this;
    }
 
    /// <summary> Appends a newline, moving to the next indented line. </summary>
    public IndentedStringBuilder AppendLine()
    {
-      _builder.AppendLine();
+      InnerBuilder.AppendLine();
       _isAtStartOfLine = true;
       return this;
    }
@@ -278,7 +342,7 @@ public class IndentedStringBuilder
    public IndentedStringBuilder AppendLine(string text)
    {
       PrependIndentIfNecessary();
-      _builder.AppendLine(text);
+      InnerBuilder.AppendLine(text);
       _isAtStartOfLine = true;
       return this;
    }
@@ -287,9 +351,9 @@ public class IndentedStringBuilder
    {
       PrependIndentIfNecessary();
       if (!comment.StartsWith(commentChar))
-         _builder.Append(commentChar);
-      _builder.Append(' ').Append(comment);
-      _builder.AppendLine();
+         InnerBuilder.Append(commentChar);
+      InnerBuilder.Append(' ').Append(comment);
+      InnerBuilder.AppendLine();
       _isAtStartOfLine = true;
       return this;
    }
@@ -298,8 +362,8 @@ public class IndentedStringBuilder
    public IndentedStringBuilder AppendLine(ReadOnlySpan<char> text)
    {
       PrependIndentIfNecessary();
-      _builder.Append(text);
-      _builder.AppendLine();
+      InnerBuilder.Append(text);
+      InnerBuilder.AppendLine();
       _isAtStartOfLine = true;
       return this;
    }
@@ -308,8 +372,8 @@ public class IndentedStringBuilder
    public IndentedStringBuilder AppendComment(string commentChar, string comment)
    {
       PrependIndentIfNecessary();
-      _builder.Append(commentChar).Append(' ').Append(comment);
-      _builder.AppendLine();
+      InnerBuilder.Append(commentChar).Append(' ').Append(comment);
+      InnerBuilder.AppendLine();
       _isAtStartOfLine = true;
       return this;
    }
@@ -319,7 +383,7 @@ public class IndentedStringBuilder
       if (_isAtStartOfLine)
       {
          if (_indentCacheBuilder.Length > 0)
-            _builder.Append(_indentCacheBuilder);
+            InnerBuilder.Append(_indentCacheBuilder);
          _isAtStartOfLine = false;
       }
    }
@@ -357,40 +421,40 @@ public class IndentedStringBuilder
          count = 0;
 
       var existingNewLines = 0;
-      for (var i = _builder.Length - 1; i >= 0; i--)
-         if (_builder[i] == '\n')
+      for (var i = InnerBuilder.Length - 1; i >= 0; i--)
+         if (InnerBuilder[i] == '\n')
             existingNewLines++;
-         else if (_builder[i] != '\r')
+         else if (InnerBuilder[i] != '\r')
             break;
 
       if (existingNewLines < count)
       {
          var toAdd = count - existingNewLines;
          for (var i = 0; i < toAdd; i++)
-            _builder.AppendLine();
+            InnerBuilder.AppendLine();
          _isAtStartOfLine = true;
       }
       else if (existingNewLines > count)
       {
          var toRemove = existingNewLines - count;
-         var newLength = _builder.Length;
+         var newLength = InnerBuilder.Length;
 
-         for (var i = _builder.Length - 1; i >= 0 && toRemove > 0; i--)
-            if (_builder[i] == '\n')
+         for (var i = InnerBuilder.Length - 1; i >= 0 && toRemove > 0; i--)
+            if (InnerBuilder[i] == '\n')
             {
                newLength--;
                toRemove--;
             }
-            else if (_builder[i] == '\r')
+            else if (InnerBuilder[i] == '\r')
                newLength--;
             else
                break;
 
-         _builder.Length = newLength;
+         InnerBuilder.Length = newLength;
          _isAtStartOfLine = true;
       }
 
-      if (applllyFallback && _builder.Length > 0 && _builder[^1] != '\n')
+      if (applllyFallback && InnerBuilder.Length > 0 && InnerBuilder[^1] != '\n')
          AppendSpacer();
 
       return this;
@@ -429,7 +493,7 @@ public class IndentedStringBuilder
       Append(blockName).Append(' ').Append(separator).Append(' ').Append(openingBrace);
       if (!asOneLine)
       {
-         _builder.AppendLine();
+         InnerBuilder.AppendLine();
          _isAtStartOfLine = true;
       }
 
@@ -448,10 +512,10 @@ public class IndentedStringBuilder
       var closingBrace = SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken);
 
       PrependIndentIfNecessary();
-      _builder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
+      InnerBuilder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
       if (!asOneLine)
       {
-         _builder.AppendLine();
+         InnerBuilder.AppendLine();
          _isAtStartOfLine = true;
       }
       else
@@ -475,9 +539,9 @@ public class IndentedStringBuilder
       var closingBrace = SavingUtil.GetBrace(ags.ClassMetadata.ClosingToken);
 
       PrependIndentIfNecessary();
-      _builder.AppendInjectionType(injRepType).Append(':');
-      _builder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
-      _builder.AppendLine();
+      InnerBuilder.AppendInjectionType(injRepType).Append(':');
+      InnerBuilder.Append(key).Append(' ').Append(separator).Append(' ').Append(openingBrace);
+      InnerBuilder.AppendLine();
       _isAtStartOfLine = true;
 
       return new(this, closingBrace, addNewLine, asOneLine);
@@ -491,7 +555,7 @@ public class IndentedStringBuilder
    public IndentedStringBuilder Append(int value)
    {
       PrependIndentIfNecessary();
-      _builder.Append(value);
+      InnerBuilder.Append(value);
       return this;
    }
 
@@ -499,7 +563,7 @@ public class IndentedStringBuilder
    public IndentedStringBuilder Append(bool value)
    {
       PrependIndentIfNecessary();
-      _builder.Append(value); // Appends "True" or "False" by default
+      InnerBuilder.Append(value); // Appends "True" or "False" by default
       return this;
    }
 
@@ -508,7 +572,7 @@ public class IndentedStringBuilder
    {
       PrependIndentIfNecessary();
       // Use invariant culture to ensure dot separator (not comma) for serialization
-      _builder.Append(value.ToString(CultureInfo.InvariantCulture));
+      InnerBuilder.Append(value.ToString(CultureInfo.InvariantCulture));
       return this;
    }
 
@@ -516,7 +580,7 @@ public class IndentedStringBuilder
    public IndentedStringBuilder Append(long value)
    {
       PrependIndentIfNecessary();
-      _builder.Append(value);
+      InnerBuilder.Append(value);
       return this;
    }
 
@@ -527,7 +591,7 @@ public class IndentedStringBuilder
          return this;
 
       PrependIndentIfNecessary();
-      _builder.Append(value);
+      InnerBuilder.Append(value);
       return this;
    }
 
@@ -535,22 +599,11 @@ public class IndentedStringBuilder
    public IndentedStringBuilder AppendYesNo(bool value)
    {
       PrependIndentIfNecessary();
-      _builder.Append(value ? "yes" : "no");
+      InnerBuilder.Append(value ? "yes" : "no");
       return this;
    }
 
-   public int Length => _builder.Length;
+   public int Length => InnerBuilder.Length;
 
    #endregion
-
-   public int this[Index index]
-   {
-      get => _builder[index];
-      set => _builder[index] = (char)value;
-   }
-
-   public void AppendInjRepType(InjRepType agsInjRepType)
-   {
-      _builder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
-   }
 }

@@ -12,26 +12,30 @@ using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Locatio
 namespace Arcanum.Core.CoreSystems.Selection;
 
 /// <summary>
-/// Handles what selection is currently going to the pipeline for processing. <br/>
-/// Either we are in location selection or infer selection mode <br/>
-/// While we still only listen to the map click events and then decide what to do with them here.
-/// And change the variables the UI listens to.
+///    Handles what selection is currently going to the pipeline for processing. <br />
+///    Either we are in location selection or infer selection mode <br />
+///    While we still only listen to the map click events and then decide what to do with them here.
+///    And change the variables the UI listens to.
 /// </summary>
 public static class SelectionManager
 {
    private static CancellationTokenSource? _previewCts;
    private static ObjectSelectionMode _previousObjectSelectionMode = ObjectSelectionMode.LocationSelection;
+   private static readonly ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
+
+   static SelectionManager()
+   {
+      Selection.SelectionModified += InvalidateSelection;
+      EditableObjects.CollectionChanged += (_, _) => EditableObjectsChanged?.Invoke();
+   }
+
    /// <summary>
-   /// This is the collection of objects that are currently editable in the UI. <br/>
-   /// This is what the UI listens to.
+   ///    This is the collection of objects that are currently editable in the UI. <br />
+   ///    This is what the UI listens to.
    /// </summary>
    public static ObservableRangeCollection<IEu5Object> EditableObjects { get; } = new() { IsDistinct = true };
-   private static ObservableRangeCollection<IEu5Object> _searchSelectedObjects = new() { IsDistinct = true };
 
    public static ObservableRangeCollection<Location> PreviewedLocations { get; } = new() { IsDistinct = true };
-
-   public static event Action? PreviewChanged;
-   public static event Action? EditableObjectsChanged;
 
    public static bool SelectWater { get; set; } = true;
    public static bool SelectWasteland { get; set; } = true;
@@ -50,17 +54,14 @@ public static class SelectionManager
       }
    } = ObjectSelectionMode.LocationSelection;
 
+   public static event Action? PreviewChanged;
+   public static event Action? EditableObjectsChanged;
+
    /// <summary>
-   /// Is Called after the selection has already updated the editable objects
+   ///    Is Called after the selection has already updated the editable objects
    /// </summary>
    public static event PropertyChangedEventHandler? PropertyChanged;
    public static void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(null, new(propertyName));
-
-   static SelectionManager()
-   {
-      Selection.SelectionModified += InvalidateSelection;
-      EditableObjects.CollectionChanged += (_, _) => EditableObjectsChanged?.Invoke();
-   }
 
    public static void Preview(List<IEu5Object> eu5Objects)
    {
@@ -156,7 +157,6 @@ public static class SelectionManager
    {
       List<Location> locs = [];
       foreach (var obj in EditableObjects)
-      {
          switch (obj)
          {
             case Location loc:
@@ -167,7 +167,6 @@ public static class SelectionManager
                locs.AddRange(inferable.GetRelevantLocations([obj]));
                break;
          }
-      }
 
       return locs;
    }
@@ -184,7 +183,7 @@ public static class SelectionManager
    }
 
    /// <summary>
-   /// Updates the current selection based on the current selection mode
+   ///    Updates the current selection based on the current selection mode
    /// </summary>
    private static void InvalidateSelection()
    {
@@ -199,7 +198,7 @@ public static class SelectionManager
    }
 
    /// <summary>
-   /// Only updates the selection for the given locations
+   ///    Only updates the selection for the given locations
    /// </summary>
    private static void IncrementalInvalidateSelection(List<Location> cLocs)
    {
@@ -208,10 +207,8 @@ public static class SelectionManager
          case ObjectSelectionMode.LocationSelection:
          {
             for (var i = cLocs.Count - 1; i >= 0; i--)
-            {
                if (!IsAllowedByFilters(cLocs[i]))
                   cLocs.RemoveAt(i);
-            }
 
             EditableObjects.ClearAndAdd(cLocs);
             _searchSelectedObjects.Clear();
@@ -335,14 +332,35 @@ public static class SelectionManager
       }
    }
 
-   private static bool IsPrimitiveType(this Type type)
+   private static bool IsPrimitiveType(this Type type) => type.IsPrimitive ||
+                                                          type == typeof(string) ||
+                                                          type == typeof(decimal) ||
+                                                          type == typeof(DateTime) ||
+                                                          type == typeof(DateTimeOffset) ||
+                                                          type == typeof(TimeSpan) ||
+                                                          type == typeof(Guid);
+
+   public static void FilterSelection(List<Location> locations, LocationType allowedTypes)
    {
-      return type.IsPrimitive ||
-             type == typeof(string) ||
-             type == typeof(decimal) ||
-             type == typeof(DateTime) ||
-             type == typeof(DateTimeOffset) ||
-             type == typeof(TimeSpan) ||
-             type == typeof(Guid);
+      if (allowedTypes == LocationType.All || locations.Count == 0)
+         return;
+
+      var dmd = Globals.DefaultMapDefinition;
+      var seaZoneCheck = !allowedTypes.HasFlag(LocationType.Sea);
+      var lakeCheck = !allowedTypes.HasFlag(LocationType.Lake);
+      var wastelandCheck = !allowedTypes.HasFlag(LocationType.Wasteland);
+      var notOwnableCheck = !allowedTypes.HasFlag(LocationType.NotOwnable);
+
+      for (var i = locations.Count - 1; i >= 0; i--)
+      {
+         var loc = locations[i];
+         var shouldRemove = (dmd.SeaZones.Contains(loc) && seaZoneCheck) ||
+                            (dmd.Lakes.Contains(loc) && lakeCheck) ||
+                            (dmd.ImpassableMountains.Contains(loc) && wastelandCheck) ||
+                            (dmd.NotOwnable.Contains(loc) && notOwnableCheck);
+
+         if (shouldRemove)
+            locations.RemoveAt(i);
+      }
    }
 }

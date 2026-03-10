@@ -48,6 +48,7 @@ public class ConsoleServiceImpl : IConsoleService
       ErrorLogCommands.RegisterCommands(this);
       ValidatorCommands.RegisterCommands(this);
       DataReturnCommands.RegisterCommands(this);
+      DuplicateOwnerCheckCommand.RegisterCommands(this);
 
       Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
       _outputReceiver = outputReceiver;

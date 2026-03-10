@@ -110,34 +110,42 @@
             </Grid.RowDefinitions>
 
             <baseControls:EntitySelector Grid.Row = "0" Grid.Column = "0" Title = "Owned Cores"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlCores}"
                                          AddedItems = "{Binding OwnControlCoreLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "1" Grid.Column = "0" Title = "Owned, Controled, Integrated"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlIntegrated}"
                                          AddedItems = "{Binding OwnControlIntegratedLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "2" Grid.Column = "0" Title = "Owned, Controled, Conquered"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlConquered}"
                                          AddedItems = "{Binding OwnControlConqueredLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "3" Grid.Column = "0" Title = "Owned, Controled, Colony"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnControlColony}"
                                          AddedItems = "{Binding OwnControlColonyLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "4" Grid.Column = "0" Title = "Owned Cores"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnCores}"
                                          AddedItems = "{Binding OwnCoreLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "5" Grid.Column = "0" Title = "Owned, Conquered"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnConquered}"
                                          AddedItems = "{Binding OwnConqueredLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "6" Grid.Column = "0" Title = "Owned, Integrated"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnIntegrated}"
                                          AddedItems = "{Binding OwnIntegratedLocations}" />
 
             <baseControls:EntitySelector Grid.Row = "7" Grid.Column = "0" Title = "Owned, Colony"
+                                         IsUniqueInProperty = "True"
                                          TargetProperty = "{x:Static locationCollections:Country+Field.OwnColony}"
                                          AddedItems = "{Binding OwnColonyLocations}" />
 

@@ -200,7 +200,7 @@ public sealed class Parser(LexerResult lexerResult)
    private BlockNode ParseBlockStatement(KeyNodeBase key)
    {
       Match(TokenType.Equals);
-      Expect(TokenType.LeftBrace, "...");
+      Expect(TokenType.LeftBrace, "Expected '{' to start block.");
       var block = new BlockNode(key) { InlineComment = ConsumeInlineComment() };
 
       // Parse Children (and standalone comments inside)
@@ -211,7 +211,7 @@ public sealed class Parser(LexerResult lexerResult)
          // ParseStatement needs to handle returning a CommentNode.
          block.Children.Add(ParseStatement());
 
-      Expect(TokenType.RightBrace, "...");
+      Expect(TokenType.RightBrace, "Expected '}' to close block.");
       block.ClosingToken = Previous();
 
       // Capture Closing Comment
