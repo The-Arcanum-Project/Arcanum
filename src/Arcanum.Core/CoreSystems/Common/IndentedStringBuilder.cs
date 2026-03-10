@@ -329,7 +329,8 @@ public class IndentedStringBuilder
       if (meta == null)
       {
          // no metadata => between objects
-         EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBetweenObjects);
+         if (!asOneLine)
+            EnforceNewLineCount(Config.Settings.SavingConfig.NewLinesBetweenObjects);
          return this;
       }
 

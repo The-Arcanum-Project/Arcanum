@@ -18,11 +18,18 @@ public class PopsWriter() : SetupFileWriter([typeof(Location), typeof(PopDefinit
          foreach (var location in Globals.Locations.Values)
             if (location.Pops.Count > 0)
                using (sb.BlockWithName(location.UniqueId))
-                  foreach (var pop in location.Pops)
+               {
+                  for (var i = 0; i < location.Pops.Count; i++)
                   {
+                     var pop = location.Pops[i];
                      sb.Append("define_pop");
                      TreeBuilder.ConstructAndWrite(pop, sb, true, false, null, false, false);
+                     if (i < location.Pops.Count - 1)
+                        sb.AppendLine();
                   }
+
+                  sb.AppendLine();
+               }
 
       return sb;
    }

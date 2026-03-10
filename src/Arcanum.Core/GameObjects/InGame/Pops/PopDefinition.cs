@@ -15,7 +15,7 @@ using Nexus.Core.Attributes;
 namespace Arcanum.Core.GameObjects.InGame.Pops;
 
 [NexusConfig]
-[ObjectSaveAs]
+[ObjectSaveAs(asOneLine: true)]
 public partial class PopDefinition : IEu5Object<PopDefinition>
 {
    public bool IsValid() => PopType != PopType.Empty && Culture != Culture.Empty && Religion != Religion.Empty;
