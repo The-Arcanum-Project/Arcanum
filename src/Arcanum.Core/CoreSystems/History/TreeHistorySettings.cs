@@ -19,7 +19,7 @@ public class TreeHistorySettings
    /// <summary>
    /// The minimum required undo depth to trigger an automatic compaction when the auto-compacting strategy is set to <see cref="AutoCompactingStrategy.AfterXSize"/>.
    /// </summary>
-   public int AutoCompactingMinSize { get; set; } = 100;
+   public int AutoCompactingMinSize { get; set; } = 10;
    /// <summary>
    /// The delay, in milliseconds, before the auto-compaction process is triggered  when the auto-compacting strategy is set to <see cref="AutoCompactingStrategy.EveryXMinutes"/>.
    /// </summary>

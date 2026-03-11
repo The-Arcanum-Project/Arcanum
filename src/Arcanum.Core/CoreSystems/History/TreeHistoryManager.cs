@@ -207,7 +207,10 @@ public class TreeHistoryManager : IHistoryManager
          else
             node.Command.Redo(); // Cant use Redo() because it would change the current node
 
-      Current = redo[^1];
+      if (redo.Count > 0)
+         Current = redo[^1];
+      else if (undo.Count > 0)
+         Current = undo[^1].Parent;
    }
 
    public List<Eu5ObjectCommand> GetCommandsSinceLastSave(HistoryNode lastSaveNode)
@@ -519,20 +522,22 @@ public class TreeHistoryManager : IHistoryManager
       return compGroups;
    }
 
-   private Dictionary<List<int>, List<HistoryNode>> FindGroups(HistoryNode root)
+   private static Dictionary<List<int>, List<HistoryNode>> FindGroups(HistoryNode root)
    {
       var groups = new Dictionary<List<int>, List<HistoryNode>>(new ListComparer<int>());
+      var visited = new HashSet<int>(); // Track IDs to prevent double-counting
+
       TraverseTree(root,
                    node =>
                    {
-                      if (node.IsCompacted)
+                      if (node.IsCompacted || !visited.Add(node.Id))
                          return;
 
-                      // Add the node to the dictionary based on its targets
-                      if (!groups.TryGetValue(node.Command.GetTargetHash(), out var nodeList))
+                      var hash = node.Command.GetTargetHash();
+                      if (!groups.TryGetValue(hash, out var nodeList))
                       {
                          nodeList = [];
-                         groups[node.Command.GetTargetHash()] = nodeList;
+                         groups[hash] = nodeList;
                       }
 
                       nodeList.Add(node);
