@@ -126,8 +126,14 @@ public partial class SpecializedEditor
       PropertySelector.SelectedIndex = 0;
    }
 
-   private void SetEditorContent()
+   internal void SetEditorContent()
    {
+      if (!_specializedEditor.Enabled)
+      {
+         EditorContent = null;
+         return;
+      }
+
       var newContent = _specializedEditor.GetEditorControl();
 
       // Force re-evaluation of the binding in case we have some new object with the same control instance.

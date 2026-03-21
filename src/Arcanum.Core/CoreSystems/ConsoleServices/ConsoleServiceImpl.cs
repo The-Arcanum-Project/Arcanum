@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
@@ -49,6 +48,7 @@ public class ConsoleServiceImpl : IConsoleService
       ErrorLogCommands.RegisterCommands(this);
       ValidatorCommands.RegisterCommands(this);
       DataReturnCommands.RegisterCommands(this);
+      DuplicateOwnerCheckCommand.RegisterCommands(this);
 
       Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
       _outputReceiver = outputReceiver;

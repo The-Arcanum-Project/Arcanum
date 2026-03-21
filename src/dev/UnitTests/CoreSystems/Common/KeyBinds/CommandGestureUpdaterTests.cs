@@ -103,7 +103,9 @@ public class CommandGestureUpdaterTests
       parent.Children.Add(new Grid { Children = { child1 } });
       parent.Children.Add(child2);
 
+#pragma warning disable CS0618 // Type or member is obsolete
       var results = TreeTraversal.FindVisualChildren<MenuItem>(parent).ToList();
+#pragma warning restore CS0618 // Type or member is obsolete
 
       Assert.That(results, Has.Count.EqualTo(2));
       Assert.That(results, Does.Contain(child1));
@@ -114,7 +116,9 @@ public class CommandGestureUpdaterTests
    [Test]
    public void FindVisualChildren_NullInput_YieldsNothing()
    {
+#pragma warning disable CS0618 // Type or member is obsolete
       var results = TreeTraversal.FindVisualChildren<MenuItem>(null!);
+#pragma warning restore CS0618 // Type or member is obsolete
       Assert.That(results, Is.Empty);
    }
 }

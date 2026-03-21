@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.History;
+using Arcanum.Core.CoreSystems.History.Commands;
 using Arcanum.Core.CoreSystems.Nexus.AggregateLinkHandling;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
@@ -50,11 +51,12 @@ public static class Nx
    /// <param name="e"></param>
    /// <typeparam name="T"></typeparam>
    public static void ForceSet<T>(T value,
-      INexus target,
-      Enum e)
+                                  INexus target,
+                                  Enum e)
    {
       if (target.IsAggregateLink(e) && NxAggregateLinkManager.ForceSet((IEu5Object)value!, (IEu5Object)target, e))
          return;
+
       if (!target.IgnoreCommand(e))
          CommandManager.SetValueCommand((IEu5Object)target, e, value!);
       else
@@ -66,6 +68,7 @@ public static class Nx
       Debug.Assert(targets.Length > 0, nameof(targets) + " == 0");
       if (targets[0].IsAggregateLink(e) && NxAggregateLinkManager.ForceSet((IEu5Object)value!, targets, e))
          return;
+
       if (targets.Length == 1)
          ForceSet(value, targets[0], e);
       else if (!targets[0].IgnoreCommand(e))
@@ -160,6 +163,38 @@ public static class Nx
       }
       else
          target._addToCollection(e, value);
+   }
+
+   /// <summary>
+   /// Does NOT support AggregateLink properties, use AddRangeToCollection for that. <br/>
+   /// Only use if you want to add <code>values[i]</code> to <code>targets[i]</code> for each i and trigger only one UI update at the end. 
+   /// </summary>
+   public static void BulkAddToCollection(IEu5Object[] targets, [LinkedPropertyEnum(nameof(targets))] Enum e, object[] values)
+   {
+      Debug.Assert(values != null, nameof(values) + " != null");
+      Debug.Assert(targets.Length == values.Length, "Targets and values arrays must have the same length");
+      if (targets.Length == 0)
+         return;
+
+      Debug.Assert(targets[0].GetAllProperties().Contains(e), $"Property {e} not found in target type {targets[0].GetType().Name}");
+
+      CommandManager.HandleCommand(new BulkCollectionModificationCommand(targets, e, values, true));
+   }
+
+   /// <summary>
+   /// Does NOT support AggregateLink properties, use RemoveRangeFromCollection for that. <br/>
+   /// Only use if you want to remove <code>values[i]</code> from <code>targets[i]</code> for each i and trigger only one UI update at the end.
+   /// </summary>
+   public static void BulkRemoveFromCollection(IEu5Object[] targets, [LinkedPropertyEnum(nameof(targets))] Enum e, object[] values)
+   {
+      Debug.Assert(values != null, nameof(values) + " != null");
+      Debug.Assert(targets.Length == values.Length, "Targets and values arrays must have the same length");
+      if (targets.Length == 0)
+         return;
+
+      Debug.Assert(targets[0].GetAllProperties().Contains(e), $"Property {e} not found in target type {targets[0].GetType().Name}");
+
+      CommandManager.HandleCommand(new BulkCollectionModificationCommand(targets, e, values, false));
    }
 
    public static void AddRangeToCollection<T>(

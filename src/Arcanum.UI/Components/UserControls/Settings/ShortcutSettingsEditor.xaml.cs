@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,28 +14,27 @@ using Common.UI.MBox;
 
 namespace Arcanum.UI.Components.UserControls.Settings;
 
-public partial class ShortcutSettingsEditor
+public partial class ShortcutSettingsEditor : INotifyPropertyChanged
 {
    public static readonly DependencyProperty RootItemsProperty =
       DependencyProperty.Register(nameof(RootItems), typeof(ObservableCollection<ShortcutTreeItem>), typeof(ShortcutSettingsEditor));
 
    private readonly GestureToTextConverter _gestureToTextConverter = new();
+   private CancellationTokenSource? _searchCts;
 
    public ShortcutSettingsEditor()
    {
       InitializeComponent();
       // Set the DataContext to itself so the TreeView can find RootItems
       DataContext = this;
-      BuildTree();
-
-      foreach (var item in RootItems)
-         SetExpansion(item, true);
 
       // Initialize Command Bindings
       CommandBindings.Add(new(AddShortcutCommand, ExecuteAddShortcut));
       CommandBindings.Add(new(ResetCommand, ExecuteReset));
-      CommandBindings.Add(new(RemoveShortcutCommand, ExecuteRemoveShortcut, (s, e) => e.CanExecute = e.Parameter is InputGesture));
-      CommandBindings.Add(new(ReplaceShortcutCommand, ExecuteReplaceShortcut, (s, e) => e.CanExecute = e.Parameter is InputGesture));
+      CommandBindings.Add(new(RemoveShortcutCommand, ExecuteRemoveShortcut, (_, e) => e.CanExecute = e.Parameter is InputGesture));
+      CommandBindings.Add(new(ReplaceShortcutCommand, ExecuteReplaceShortcut, (_, e) => e.CanExecute = e.Parameter is InputGesture));
+
+      Loaded += async (_, _) => await InitializeTreeAsync();
    }
 
    public ObservableCollection<ShortcutTreeItem> RootItems
@@ -50,48 +51,102 @@ public partial class ShortcutSettingsEditor
    public static RoutedCommand RemoveShortcutCommand { get; } = new("RemoveShortcut", typeof(ShortcutSettingsEditor));
    public static RoutedCommand ReplaceShortcutCommand { get; } = new("ReplaceShortcut", typeof(ShortcutSettingsEditor));
 
-   private void BuildTree()
+   public bool IsReady
    {
-      var root = new ShortcutTreeItem { Name = "Root" };
-      var textInfo = CultureInfo.CurrentCulture.TextInfo;
-
-      foreach (var cmd in CommandRegistry.AllCommands)
+      get;
+      set
       {
-         var parts = cmd.Id.Value.Split('.');
-         var folderHierarchy = parts.Take(parts.Length - 1);
-         var currentFolder = root;
+         if (value == field)
+            return;
 
-         foreach (var part in folderHierarchy)
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public event PropertyChangedEventHandler? PropertyChanged;
+
+   private async Task InitializeTreeAsync()
+   {
+      var rootItems = await Task.Run(() =>
+      {
+         var root = new ShortcutTreeItem { Name = "Root" };
+         var textInfo = CultureInfo.CurrentCulture.TextInfo;
+
+         foreach (var cmd in CommandRegistry.AllCommands)
          {
-            var folderName = textInfo.ToTitleCase(part);
-            var folder = currentFolder.Children.FirstOrDefault(c => c.Name == folderName);
+            var parts = cmd.Id.Value.Split('.');
+            var folderHierarchy = parts.Take(parts.Length - 1);
+            var currentFolder = root;
 
-            if (folder == null)
+            foreach (var part in folderHierarchy)
             {
-               folder = new() { Name = folderName };
-               currentFolder.Children.Add(folder);
+               var folderName = textInfo.ToTitleCase(part);
+               var folder = currentFolder.Children.FirstOrDefault(c => c.Name == folderName);
+
+               if (folder == null)
+               {
+                  folder = new() { Name = folderName };
+                  currentFolder.Children.Add(folder);
+               }
+
+               currentFolder = folder;
             }
 
-            currentFolder = folder;
+            currentFolder.Children.Add(new()
+            {
+               Name = cmd.DisplayName, Command = cmd,
+            });
          }
 
-         currentFolder.Children.Add(new()
-         {
-            Name = cmd.DisplayName, Command = cmd,
-         });
-      }
+         return new ObservableCollection<ShortcutTreeItem>(root.Children);
+      });
 
-      RootItems = new(root.Children);
+      RootItems = rootItems;
+      IsReady = true;
    }
 
    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
    {
-      var query = SearchBox.Text;
-      if (RootItems == null!)
-         return;
+      const int debounceDelayMs = 250;
+      _searchCts?.Cancel();
+      _searchCts = new();
+      var token = _searchCts.Token;
 
-      foreach (var item in RootItems)
-         FilterItem(item, query);
+      var query = SearchBox.Text;
+
+      Task.Delay(debounceDelayMs, token)
+          .ContinueWith(t =>
+                        {
+                           if (t.IsCanceled)
+                              return;
+
+                           Dispatcher.Invoke(() =>
+                           {
+                              if (RootItems == null!)
+                                 return;
+
+                              if (string.IsNullOrWhiteSpace(query))
+                              {
+                                 foreach (var item in RootItems)
+                                    ResetTreeStateRecursive(item);
+                                 return;
+                              }
+
+                              foreach (var item in RootItems)
+                                 FilterItem(item, query);
+                           });
+                        },
+                        TaskScheduler.FromCurrentSynchronizationContext());
+   }
+
+   private static void ResetTreeStateRecursive(ShortcutTreeItem item)
+   {
+      item.IsVisible = true;
+      item.IsExpanded = false;
+
+      foreach (var child in item.Children)
+         ResetTreeStateRecursive(child);
    }
 
    private void SearchMode_Click(object sender, RoutedEventArgs e)
@@ -106,6 +161,7 @@ public partial class ShortcutSettingsEditor
       if (string.IsNullOrWhiteSpace(query))
       {
          item.IsVisible = true;
+         item.IsExpanded = false;
          foreach (var child in item.Children)
             FilterItem(child, query);
          return true;
@@ -143,8 +199,8 @@ public partial class ShortcutSettingsEditor
       item.IsVisible = finalVisibility;
 
       // Expand folders automatically if they contain a search match
-      if (!item.IsCommand && finalVisibility)
-         item.IsExpanded = true;
+      if (!item.IsCommand)
+         item.IsExpanded = finalVisibility && anyChildMatches;
 
       return finalVisibility;
    }
@@ -214,6 +270,9 @@ public partial class ShortcutSettingsEditor
                else
                   newGesture = new KeyGesture(k1, m1);
 
+               if (SelectedItem == null)
+                  return;
+
                var index = SelectedItem.Command.Gestures.IndexOf(oldGesture);
                if (index != -1)
                {
@@ -265,5 +324,10 @@ public partial class ShortcutSettingsEditor
                     MessageBoxImage.Warning) ==
           MBoxResult.OK)
          CommandRegistry.ResetAllToDefault();
+   }
+
+   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   {
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 }

@@ -1,4 +1,4 @@
-﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.ASTBuilderTest"
+﻿<styleClasses:BaseWindow x:Class = "Arcanum.UI.Components.Windows.DebugWindows.AstBuilderTest"
                          xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"

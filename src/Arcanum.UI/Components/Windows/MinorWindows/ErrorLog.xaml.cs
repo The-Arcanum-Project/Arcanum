@@ -22,7 +22,7 @@ using Path = System.IO.Path;
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
-public partial class ErrorLog : INotifyPropertyChanged
+public sealed partial class ErrorLog : INotifyPropertyChanged
 {
    public enum FilterType
    {
@@ -369,19 +369,9 @@ public partial class ErrorLog : INotifyPropertyChanged
 
    public event PropertyChangedEventHandler? PropertyChanged;
 
-   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+   private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
       PropertyChanged?.Invoke(this, new(propertyName));
-   }
-
-   protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-   {
-      if (EqualityComparer<T>.Default.Equals(field, value))
-         return false;
-
-      field = value;
-      OnPropertyChanged(propertyName);
-      return true;
    }
 
    private void CheckBox_OnClick(object sender, RoutedEventArgs e)
@@ -565,7 +555,7 @@ public partial class ErrorLog : INotifyPropertyChanged
             lines[i] = lines[i].Trim();
          return $"At [{diag.Context.LineNumber,6},{diag.Context.ColumnNumber,3}]:" + lines[2];
       }
-      catch (Exception e)
+      catch (Exception)
       {
          return "Could not probe file.";
       }

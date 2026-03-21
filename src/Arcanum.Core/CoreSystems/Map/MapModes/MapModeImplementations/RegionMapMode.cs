@@ -12,6 +12,7 @@ public class RegionMapMode : LocationBasedMapMode
    public override string Description => "Displays the Regions the locations are situated in.";
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Regions;
    public override Type[] DisplayTypes => [typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
+   public override bool DarkenWastelands => false;
 
    public override int GetColorForLocation(Location location)
    {

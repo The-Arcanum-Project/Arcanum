@@ -102,11 +102,11 @@ public static class NameGenerator
       private readonly Dictionary<string, int> _lastLetterFrequency = new();
       private readonly Dictionary<string, Dictionary<string, int>> _nextLetterFrequency = new();
 
-      private readonly Dictionary<string, int>[] _parts = new Dictionary<string, int>[3] { new(10000), new(10000), new(10000) };
+      private readonly Dictionary<string, int>[] _parts = [new(10000), new(10000), new(10000)];
 
       private readonly Dictionary<string, Dictionary<string, int>> _secondLetterFrequency = new();
 
-      private readonly List<string> _simpleSyllables = new();
+      private readonly List<string> _simpleSyllables = [];
       private readonly Dictionary<string, Dictionary<string, int>> _thirdLetterFrequency = new();
       private readonly Dictionary<string, int> _wordBeginnings = new(1000);
       private readonly Dictionary<string, int> _wordEndings = new(1000);
@@ -121,7 +121,6 @@ public static class NameGenerator
 
       public string GenerateWord(int approximateDesiredLength)
       {
-         var random = new Random();
          var word = "";
          var partsUsed = new List<string>(10);
          {
@@ -131,7 +130,7 @@ public static class NameGenerator
                if (word.Length > approximateDesiredLength - 3)
                   ending = true;
                var part = GetPart(word, ending, partsUsed);
-               if (part == "" || part == null)
+               if (part == "" || part == null!)
                   break;
 
                word += part;

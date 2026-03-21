@@ -38,7 +38,7 @@
                 <Separator />
                 <MenuItem Header = "Copy Selected Location Ids" Click = "CopySelectedLocationIds_Click" />
                 <MenuItem Header = "Copy Map Coordinates" Click = "CopyMapCoordinates_OnClick"
-                          ToolTip = "Copies coordinates in the format: &lt;X&gt; &lt;Y&gt;&#10;Hold CTRL during click to use format: X:&lt;X&gt;, Y:&lt;Y&gt;&#10;Hold SHIFT for subpixel precision" />
+                          ToolTip = "Copies coordinates in the format: &lt;X&gt; &lt;Y&gt;&#10;Hold CTRL during click to use format: X:&lt;X&gt;, Y:&lt;Y&gt;&#10;Hold SHIFT for subpixel precision&#10;Hold SHIFT+CTRL for custom format as defined in Misc-Settings." />
                 <MenuItem Header = "Copy data from MapMode" Click = "MapModeDataCopy_OnClick" />
             </ContextMenu>
         </Grid.Resources>

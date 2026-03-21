@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.Utils.Git;
 
@@ -28,14 +27,16 @@ public static class ArcanumDataHandler
          AppData.ModforgeDataDescriptor.LatestVersion =
             GitDataService.GetLatestVersion(GitDataService.MOD_FORGE_GIT_REPOSITORY,
                                             GitDataService.GIT_OWNER,
-                                            GitDataService.MOD_FORGE_LATEST_VERSION_KEY, null);
+                                            GitDataService.MOD_FORGE_LATEST_VERSION_KEY,
+                                            null);
       else
       {
          var gdo = JsonProcessor.Deserialize<GitReleaseObject>(latestModForgeRelease);
          gdo?.FetchInterval = TimeSpan.FromDays(7);
          AppData.ModforgeDataDescriptor.LatestVersion = GitDataService.GetLatestVersion(GitDataService.MOD_FORGE_GIT_REPOSITORY,
-            GitDataService.GIT_OWNER,
-            GitDataService.MOD_FORGE_LATEST_VERSION_KEY, gdo);
+                                                                                        GitDataService.GIT_OWNER,
+                                                                                        GitDataService.MOD_FORGE_LATEST_VERSION_KEY,
+                                                                                        gdo);
       }
 
       GetFromAppData(AppData.ArcanumDataDescriptor.InternalPathLatestRelease, out var latestArcanumRelease);
@@ -44,14 +45,16 @@ public static class ArcanumDataHandler
          AppData.ArcanumDataDescriptor.LatestVersion =
             GitDataService.GetLatestVersion(GitDataService.ARCANUM_GIT_REPOSITORY,
                                             GitDataService.ARCANUM_GIT_OWNER,
-                                            GitDataService.ARCANUM_LATEST_VERSION_KEY, null);
+                                            GitDataService.ARCANUM_LATEST_VERSION_KEY,
+                                            null);
       else
       {
          var gdo = JsonProcessor.Deserialize<GitReleaseObject>(latestArcanumRelease);
          gdo?.FetchInterval = TimeSpan.FromHours(2);
          AppData.ArcanumDataDescriptor.LatestVersion = GitDataService.GetLatestVersion(GitDataService.ARCANUM_GIT_REPOSITORY,
-            GitDataService.ARCANUM_GIT_OWNER,
-            GitDataService.ARCANUM_LATEST_VERSION_KEY, gdo);
+                                                                                       GitDataService.ARCANUM_GIT_OWNER,
+                                                                                       GitDataService.ARCANUM_LATEST_VERSION_KEY,
+                                                                                       gdo);
       }
 
       SaveAllGitData();

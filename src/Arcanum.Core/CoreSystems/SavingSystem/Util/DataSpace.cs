@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System.Text.Json.Serialization;
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.Util;
 
@@ -42,10 +42,10 @@ public class DataSpace
       Name = name;
    }
 
-   [System.Text.Json.Serialization.JsonIgnore]
+   [JsonIgnore]
    public string FullPath => System.IO.Path.Combine(Path);
 
-   [System.Text.Json.Serialization.JsonIgnore]
+   [JsonIgnore]
    public bool IsValid => Path.Length != 0 &&
                           !Path.Any(string.IsNullOrEmpty) &&
                           Directory.Exists(System.IO.Path.Combine(Path));

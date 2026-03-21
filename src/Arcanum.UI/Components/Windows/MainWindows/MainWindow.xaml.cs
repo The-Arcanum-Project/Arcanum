@@ -47,8 +47,6 @@ namespace Arcanum.UI.Components.Windows.MainWindows;
 public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyChanged
 {
    private const string HTTPS_EU5_PARADOXWIKIS_COM_ARCANUM = "https://eu5.paradoxwikis.com/Arcanum";
-   private const int DEFAULT_WIDTH = 1920;
-   private const int DEFAULT_HEIGHT = 1080;
 
    private readonly ToolTipManager _toolTipManager = new();
 

@@ -143,7 +143,7 @@ public class BlockSerializationNode(string? key, bool writeEmpty, IEu5Object? ta
       if (!string.IsNullOrEmpty(Key))
       {
 #if DEBUG
-         if (key == Globals.DO_NOT_PARSE_ME)
+         if (Key == Globals.DO_NOT_PARSE_ME)
             Debugger.Break();
 #endif
          sb.Append(Key);

@@ -18,6 +18,7 @@
         <Setter Property = "Cursor" Value = "Arrow" />
         <Setter Property = "MinHeight" Value = "10" />
         <Setter Property = "HoverBackground" Value = "{StaticResource DarkerSelectedBackColorBrush}" />
+        <Setter Property = "SnapsToDevicePixels" Value = "True" />
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "styleClasses:BaseButton">
@@ -39,7 +40,7 @@
                             <Setter TargetName = "border" Property = "Background"
                                     Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Setter TargetName = "border" Property = "BorderBrush"
-                                    Value = "{Binding Path=HoverBackground, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    Value = "{StaticResource SelectedControlBorderColorBrush}" />
                         </Trigger>
 
                         <MultiDataTrigger>

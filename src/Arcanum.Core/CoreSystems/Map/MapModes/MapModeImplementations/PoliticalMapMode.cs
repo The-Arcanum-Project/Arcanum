@@ -61,14 +61,10 @@ public class PoliticalMapMode : IMapMode
              Math.Abs(colorBuffer[i].B - 48) < 0.1)
             Debug.WriteLine(i);
 
-      if (!Config.Settings.MapSettings.UseShadeOfColorOnWater)
-         return;
+      if (Config.Settings.MapSettings.UseShadeOfColorOnWater)
+         MapModeManager.SetWaterColors(colorBuffer);
 
-      foreach (var location in Globals.DefaultMapDefinition.SeaZones)
-         colorBuffer[location.ColorIndex] = MapModeManager.GetWaterColorForLocation(location);
-
-      foreach (var location in Globals.DefaultMapDefinition.Lakes)
-         colorBuffer[location.ColorIndex] = MapModeManager.GetWaterColorForLocation(location);
+      MapModeManager.DarkenWastelandColors(colorBuffer);
    }
 
    public string[] GetTooltip(Location location)
@@ -116,4 +112,5 @@ public class PoliticalMapMode : IMapMode
    }
 
    public object GetLocationRelatedData(Location location) => GetLocationOwner(location);
+   public MapContexMenuConfig[]? GetContextMenuOptions() => null;
 }

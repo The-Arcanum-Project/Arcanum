@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 
 public enum FilesToTest
 {

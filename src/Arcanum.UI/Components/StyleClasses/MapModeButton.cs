@@ -50,6 +50,9 @@ public class MapModeButton : BaseButton
          contextMenu.Items.Add(menuItem);
       }
 
+      // Section for VariableMapModes
+      AppendVariableMapModePresets(contextMenu);
+
       if (Config.Settings.MapModeConfig.MapModePresets.Count > 0)
          contextMenu.Items.Add(new Separator());
 
@@ -84,6 +87,40 @@ public class MapModeButton : BaseButton
 
       contextMenu.IsOpen = true;
       contextMenu.PlacementTarget = this;
+   }
+
+   private void AppendVariableMapModePresets(ContextMenu contextMenu)
+   {
+      var mapMode = MapModeManager.Get(MapModeType);
+      if (mapMode is not IVariableSelectionMapMode variableMapMode)
+         return;
+
+      var possibelValues = variableMapMode.AvailableTargets.GetEnumerator();
+      using var possibelValues1 = possibelValues as IDisposable;
+      if (!possibelValues.MoveNext())
+         return;
+
+      contextMenu.Items.Add(new Separator());
+
+      var variableMapModeMenu = new MenuItem { Header = "Variable Map Mode Options" };
+      do
+      {
+         var target = possibelValues.Current;
+         var targetMenuItem = new MenuItem
+         {
+            Header = target?.ToString(),
+            FontSize = 12,
+            Command = new RelayCommand(() =>
+            {
+               variableMapMode.SelectedTarget = target;
+               SetMapModeCommand(MapModeType, true);
+            }),
+         };
+         variableMapModeMenu.Items.Add(targetMenuItem);
+      }
+      while (possibelValues.MoveNext());
+
+      contextMenu.Items.Add(variableMapModeMenu);
    }
 
    public void SetMapModeCommand(MapModeManager.MapModeType enumValue, bool render)

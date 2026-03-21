@@ -39,7 +39,7 @@ public class SpecializedEditorsManager
    private readonly Dictionary<Type, SpecializedEditor> _createdPropertyEditors = new();
 
    // Reused TabControl for displaying specialized editors
-   internal readonly TabControl _editorsTabControl = new();
+   internal readonly TabControl EditorsTabControl = new();
 
    private readonly TextBlock _noEditorsTextBlock = new()
    {
@@ -139,12 +139,17 @@ public class SpecializedEditorsManager
       // Check if current tabs are still valid for the new targets
       foreach (var (editor, props) in editors)
       {
-         if (_editorsTabControl.Items.OfType<TabItem>().FirstOrDefault(ti => (string)ti.Header == editor.DisplayName) is not { } tabItem)
+         if (EditorsTabControl.Items.OfType<TabItem>().FirstOrDefault(ti => (string)ti.Header == editor.DisplayName) is not { } tabItem)
             continue;
 
-         var existingEditorView = tabItem.Content as SpecializedEditor;
-         if (existingEditorView == null)
+         if (tabItem.Content is not SpecializedEditor existingEditorView)
             continue;
+
+         if (!editor.Enabled)
+         {
+            existingEditorView.SetEditorContent();
+            continue;
+         }
 
          // Check if the existing editor view can handle the new targets
          if (editor.SupportsMultipleTargets)
@@ -153,7 +158,7 @@ public class SpecializedEditorsManager
             existingEditorView.UpdateForNewTarget(props, targets[0]);
       }
 
-      if (_editorsTabControl.Items.Count == editors.Count)
+      if (EditorsTabControl.Items.Count == editors.Count)
       {
          var allMatch = true;
 
@@ -161,7 +166,7 @@ public class SpecializedEditorsManager
          {
             var (editor, _) = editors[i];
 
-            if (_editorsTabControl.Items[i] is TabItem tabItem &&
+            if (EditorsTabControl.Items[i] is TabItem tabItem &&
                 Equals(tabItem.Header, editor.DisplayName))
                continue;
 
@@ -170,10 +175,10 @@ public class SpecializedEditorsManager
          }
 
          if (allMatch)
-            return _editorsTabControl;
+            return EditorsTabControl;
       }
 
-      _editorsTabControl.Items.Clear();
+      EditorsTabControl.Items.Clear();
       foreach (var (editor, props) in editors)
       {
          var editorView = GetEditorView(editor, props, targets);
@@ -181,10 +186,10 @@ public class SpecializedEditorsManager
          {
             Header = editor.DisplayName, Content = editorView,
          };
-         _editorsTabControl.Items.Add(tabItem);
+         EditorsTabControl.Items.Add(tabItem);
       }
 
-      return _editorsTabControl;
+      return EditorsTabControl;
    }
 
    private SpecializedEditor GetEditorView(ISpecializedEditor editor, List<Enum?> props, List<IEu5Object> targets)

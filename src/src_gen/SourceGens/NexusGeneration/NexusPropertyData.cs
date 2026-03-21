@@ -20,8 +20,7 @@ public struct NexusPropertyData
    public ITypeSymbol? CollectionItemType;
    public INamedTypeSymbol? CollectionType;
 
-   public NexusPropertyData(ISymbol symbol,
-                            IPropertySymbol propertySymbol,
+   public NexusPropertyData(IPropertySymbol propertySymbol,
                             INamedTypeSymbol classSymbol,
                             SourceProductionContext context,
                             INamedTypeSymbol ieu5ObjectSymbol)

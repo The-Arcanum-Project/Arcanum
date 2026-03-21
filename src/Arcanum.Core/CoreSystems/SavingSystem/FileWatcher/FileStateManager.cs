@@ -1,7 +1,6 @@
 ﻿#define IS_DEBUG
 
 using System.Collections.Concurrent;
-using System.IO;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;

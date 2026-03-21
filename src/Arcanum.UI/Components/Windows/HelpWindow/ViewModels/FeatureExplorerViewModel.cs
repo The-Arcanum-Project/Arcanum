@@ -18,6 +18,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
    public override string Title => "Feature Explorer";
 
    public ObservableCollection<FeatureTreeItem> FeatureTree { get; } = [];
+   public event Action<FeatureTreeItem?>? RequestSelectionUpdate;
 
    public string SearchQuery
    {
@@ -82,7 +83,36 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
-   private void AddChildrenRecursive(FeatureTreeItem parent, List<IAppFeature> all)
+   public void SelectFeature(IAppFeature feature)
+   {
+      // Find the corresponding tree item and select it
+      var item = FindTreeItem(FeatureTree, feature);
+      if (item != null)
+      {
+         SelectedItem = item;
+         RequestSelectionUpdate?.Invoke(item);
+      }
+   }
+
+   private static FeatureTreeItem? FindTreeItem(ObservableCollection<FeatureTreeItem> featureTree, IAppFeature feature)
+   {
+      foreach (var item in featureTree)
+      {
+         if (item.Feature.Id.Value == feature.Id.Value)
+            return item;
+
+         var foundInChildren = FindTreeItem(item.Children, feature);
+         if (foundInChildren != null)
+         {
+            item.IsExpanded = true;
+            return foundInChildren;
+         }
+      }
+
+      return null;
+   }
+
+   private static void AddChildrenRecursive(FeatureTreeItem parent, List<IAppFeature> all)
    {
       var children = all.Where(f => f.ParentFeatureId?.Value == parent.Feature.Id.Value);
       foreach (var childFeature in children)
@@ -227,11 +257,5 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
    private void ExecuteSpotlight()
    {
-      if (SelectedFeature == null || AssociatedCommands.Count == 0)
-         return;
-
-      // Logic to trigger the Spotlight Adorner on the Main Window
-      // Use the first associated command as the visual anchor
-      // CommandVisualTracker.Instance.ShowHighlights(AssociatedCommands[0]);
    }
 }

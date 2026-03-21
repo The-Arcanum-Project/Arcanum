@@ -81,42 +81,6 @@ public static class SavingUtil
    }
 
    /// <summary>
-   /// Estimates the depth of the <see cref="IAgs"/> object graph for this object type.
-   /// This method is safe against cyclical references.
-   /// The depth is determined by the maximum depth of any unique <see cref="IAgs"/> properties it contains.
-   /// </summary>
-   /// <param name="ags">The root object to start the estimation from.</param>
-   /// <returns>The calculated complexity depth.</returns>
-   public static int EstimateObjectComplexity(this IAgs ags)
-   {
-      if (ags == null!)
-         return 0;
-
-      // Use a HashSet with a reference comparer to track visited *instances* in the current path.
-      var visited = new HashSet<IAgs>(ReferenceEqualityComparer.Instance);
-      return EstimateObjectComplexityRecursive(ags, visited);
-   }
-
-   /// <summary>
-   /// The recursive helper method that performs the depth calculation.
-   /// </summary>
-   /// <param name="ags">The current object being evaluated.</param>
-   /// <param name="visited">The set of objects already visited in this recursion path.</param>
-   /// <returns>The complexity depth from this node downwards.</returns>
-   private static int EstimateObjectComplexityRecursive(IAgs ags, HashSet<IAgs> visited)
-   {
-      return 1;
-   }
-
-   public static void AsOneLine(bool asOneLine, IndentedStringBuilder sb, string str)
-   {
-      if (asOneLine)
-         sb.Append($"{str} ");
-      else
-         sb.AppendLine(str);
-   }
-
-   /// <summary>
    /// Formats a value according to the specified SavingValueType.
    /// </summary>
    public static string FormatValue(SavingValueType svl, object value, PropertySavingMetadata? psm)

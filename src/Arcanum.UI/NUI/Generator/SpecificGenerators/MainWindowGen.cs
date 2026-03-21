@@ -20,7 +20,7 @@ public static class MainWindowGen
    public static void Initialize(ContentPresenter specialEditorsHost)
    {
       Debug.Assert(!_isInitialized, "MainWindowGen is already initialized.");
-      SpecialEditorMngr._editorsTabControl.Style = (Style)Application.Current.FindResource("CenteredTabControlStyle")!;
+      SpecialEditorMngr.EditorsTabControl.Style = (Style)Application.Current.FindResource("CenteredTabControlStyle")!;
       // TODO: Initialize all the Editors to the manager
       SpecialEditorMngr.RegisterTypeEditor(typeof(Province), new LocationCollectionSpecializedEditor<Location, Province>(Province.Field.Locations));
       SpecialEditorMngr.RegisterTypeEditor(typeof(Area), new LocationCollectionSpecializedEditor<Province, Area>(Area.Field.Provinces));
@@ -29,6 +29,7 @@ public static class MainWindowGen
       SpecialEditorMngr.RegisterTypeEditor(typeof(Continent), new LocationCollectionSpecializedEditor<SubContinent, Continent>(Continent.Field.SuperRegions));
       SpecialEditorMngr.RegisterTypeEditor(typeof(Country), new PoliticalEditor());
 
+      SpecialEditorMngr.RegisterTypeEditor(typeof(Location), new InstitutionEditor());
       SpecialEditorMngr.RegisterPropertyEditor(typeof(PopDefinition), new PopsEditor());
 
       _specialEditorsHost = specialEditorsHost;
@@ -36,9 +37,9 @@ public static class MainWindowGen
    }
 
    /// <summary>
-   /// Sets the Main Editing Panel of Arcanum Main Window.
-   /// <br/>
-   /// Also sets the Specialized Editors if there are any
+   ///    Sets the Main Editing Panel of Arcanum Main Window.
+   ///    <br />
+   ///    Also sets the Specialized Editors if there are any
    /// </summary>
    public static void GenerateAndSetView(NavH navh, List<Enum>? markedProps = null!, bool hasHeader = true)
    {
@@ -64,11 +65,19 @@ public static class MainWindowGen
 
    private static void SetSpecializedEditors(NavH navh)
    {
+      var selectedIndex = SpecialEditorMngr.EditorsTabControl.SelectedIndex;
+      var tabHash = SpecialEditorMngr.EditorsTabControl.Items.Cast<TabItem>().Select(ti => ti.Header).Aggregate(0, (acc, header) => acc ^ header.GetHashCode());
       var content = SpecialEditorMngr.ConstructEditorViewForObject(navh.Targets);
       if (!Equals(_specialEditorsHost.Content, content))
          _specialEditorsHost.Content = content;
+
+      var newHash = SpecialEditorMngr.EditorsTabControl.Items.Cast<TabItem>().Select(ti => ti.Header).Aggregate(0, (acc, header) => acc ^ header.GetHashCode());
+
       if (content is TabControl tc)
-         tc.SelectedIndex = 0;
+         if (tabHash == newHash)
+            SpecialEditorMngr.EditorsTabControl.SelectedIndex = selectedIndex;
+         else
+            tc.SelectedIndex = 0;
    }
 
    public static void UpdateSpecializedEditors()

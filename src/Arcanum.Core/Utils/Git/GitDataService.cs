@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using Octokit;
+﻿using Octokit;
 
 namespace Arcanum.Core.Utils.Git;
 
@@ -59,9 +58,9 @@ public static class GitDataService
       // We still have data and it is not outdated, return it
       if (latestVersion.IsDataAvailable() && !latestVersion.IsDataOutdated)
          return latestVersion;
-      
+
       latestVersion.LastFetch = DateTime.Now;
-      
+
       var client = CreateClient(repoOwner);
 
       try
@@ -69,7 +68,7 @@ public static class GitDataService
          var latestRelease = client.Repository.Release.GetLatest(repoOwner, repoName).Result;
 
          ArcLog.WriteLine("GDS", LogLevel.INF, "GitDataService: Fetched latest release from GitHub");
-         
+
          latestVersion.Data = new()
          {
             Name = latestRelease.Name,

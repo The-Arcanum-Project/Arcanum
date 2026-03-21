@@ -11,6 +11,7 @@ public class ProvinceMapMode : LocationBasedMapMode
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Provinces;
    public override Type[] DisplayTypes => [typeof(Province), typeof(Location)];
    public override bool IsLandOnly => false;
+   public override bool DarkenWastelands => false;
 
    public override int GetColorForLocation(Location location)
    {

@@ -1095,7 +1095,7 @@ public static class Generator
          builder.AppendLine();
 
          builder.AppendLine("if (isShatteredOrCollection)");
-         builder.Block(__ =>
+         builder.Block(_ =>
          {
             builder.AppendLine("var existingLead = GetLeadingComment(property);");
             builder.AppendLine("if (!string.IsNullOrEmpty(existingLead) && !string.IsNullOrEmpty(lead))");

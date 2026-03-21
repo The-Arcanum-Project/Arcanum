@@ -145,6 +145,7 @@ public static class SavingActionProvider
 
    public static void JominiDate(IEu5Object target, HashSet<PropertySavingMetadata> metadata, IndentedStringBuilder sb, bool asOneLine, bool writeDefaults)
    {
+      // ReSharper disable once SuspiciousTypeConversion.Global
       if (target is not JominiDate date)
          throw new InvalidOperationException("JominiDate can only be used with JominiDate instances.");
 

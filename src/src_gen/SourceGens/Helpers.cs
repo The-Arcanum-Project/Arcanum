@@ -38,15 +38,12 @@ public static class Helpers
       {
          var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
 
-         if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol
-             {
-                TypeKind: TypeKind.Class,
-             } classSymbol ||
+         if (ModelExtensions.GetDeclaredSymbol(semanticModel, classSyntax) is not INamedTypeSymbol { TypeKind: TypeKind.Class, } classSymbol ||
              classSymbol.IsAbstract)
             continue;
 
          if (classSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition,
-                                            emptySymbol)))
+                                                                                      emptySymbol)))
             foundTypesByInterface.Add(classSymbol);
       }
 
@@ -336,20 +333,6 @@ public static class Helpers
          }
 
       return (ignoreAttr, addAttr);
-   }
-
-   // You will also need this helper from a previous answer
-   private static ISymbol FindOriginalDefinition(ISymbol symbol)
-   {
-      if (symbol is IPropertySymbol propertySymbol)
-      {
-         while (propertySymbol.OverriddenProperty != null)
-            propertySymbol = propertySymbol.OverriddenProperty;
-
-         return propertySymbol;
-      }
-
-      return symbol;
    }
 
    private static bool IsAccessibleFrom(ISymbol member, INamedTypeSymbol accessingType)

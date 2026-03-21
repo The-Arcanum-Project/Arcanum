@@ -6,15 +6,9 @@
         xmlns:b = "http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors = "clr-namespace:Arcanum.UI.Components.Behaviors"
         xmlns:mainMenuScreen = "clr-namespace:Arcanum.UI.Components.Views.MainMenuScreen"
-        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-        mc:Ignorable = "d"
-        Height = "550"
-        Width = "900"
-        WindowStyle = "None"
-        ResizeMode = "NoResize"
-        WindowStartupLocation="Manual"
-        Title="Arcanum Main Menu"
-        Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
+        xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d" Height = "550"
+        Width = "900" WindowStyle = "None" ResizeMode = "NoResize" WindowStartupLocation = "CenterScreen"
+        Title = "Arcanum Main Menu" Icon = "/Arcanum_UI;component/Assets/Logo/ArcanumSimplified.ico"
         Activated = "MainMenuScreen_OnActivated">
 
     <Window.Resources>
@@ -31,8 +25,7 @@
         <mainMenuScreen:MainMenuViewModel />
     </Window.DataContext>
     <!-- #272537 -->
-    <Border Background = "{StaticResource AccentGradientBrush}"
-            CornerRadius = "0">
+    <Border Background = "{StaticResource AccentGradientBrush}" CornerRadius = "0">
         <b:Interaction.Behaviors>
             <behaviors:WindowDrag EnableDoubleClickMaximize = "False" />
         </b:Interaction.Behaviors>
@@ -47,65 +40,30 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <TextBlock Text = "Arcanum"
-                       VerticalAlignment = "Center"
-                       HorizontalAlignment = "Center"
-                       Foreground = "{StaticResource DefaultForeColorBrush}"
-                       FontSize = "30"
-                       FontWeight = "Bold">
+            <TextBlock Text = "Arcanum" VerticalAlignment = "Center" HorizontalAlignment = "Center"
+                       Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "30" FontWeight = "Bold">
             </TextBlock>
 
-            <StackPanel x:Name = "MenuBarStackPanel"
-                        Grid.Row = "1"
-                        Grid.Column = "0">
-                <RadioButton IsChecked = "True"
-                             Margin = "40,0,40,10"
-                             Content = "Home"
-                             Height = "30"
-                             FontSize = "14"
-                             Command = "{Binding HomeVc}"
+            <StackPanel x:Name = "MenuBarStackPanel" Grid.Row = "1" Grid.Column = "0">
+                <RadioButton IsChecked = "True" Margin = "40,0,40,10" Content = "Home" Height = "30" FontSize = "14"
+                             Command = "{Binding HomeVc}" Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton x:Name = "ArcanumTabButton" Margin = "40,0,40,10" Content = "Configure" Height = "30"
+                             FontSize = "14" Command = "{Binding ArcanumVc}" Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton Margin = "40,0,40,10" Content = "Resources" Height = "30"
+                             Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "14"
+                             Command = "{Binding FeatureVc}" Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton IsChecked = "False" Margin = "40,0,40,10" Content = "Modforge" Height = "30"
+                             FontSize = "14" Command = "{Binding ModforgeVc}"
                              Style = "{StaticResource MenuButtonTheme}" />
-                <RadioButton x:Name = "ArcanumTabButton"
-                             Margin = "40,0,40,10"
-                             Content = "Configure"
-                             Height = "30"
-                             FontSize = "14"
-                             Command = "{Binding ArcanumVc}"
-                             Style = "{StaticResource MenuButtonTheme}" />
-                <RadioButton Margin = "40,0,40,10"
-                             Content = "Resources"
-                             Height = "30"
-                             Foreground = "{StaticResource DefaultForeColorBrush}"
-                             FontSize = "14"
-                             Command = "{Binding FeatureVc}"
-                             Style = "{StaticResource MenuButtonTheme}" />
-                <RadioButton IsChecked = "False"
-                             Margin = "40,0,40,10"
-                             Content = "Modforge"
-                             Height = "30"
-                             FontSize = "14"
-                             Command = "{Binding ModforgeVc}"
-                             Style = "{StaticResource MenuButtonTheme}" />
-                <RadioButton Margin = "40,0,40,10"
-                             Content = "About Us"
-                             Height = "30"
-                             FontSize = "14"
-                             Command = "{Binding AboutUsVc}"
-                             Style = "{StaticResource MenuButtonTheme}" />
-                <RadioButton Margin = "40,0,40,10"
-                             Content = "Attributions"
-                             Height = "30"
-                             FontSize = "14"
-                             Command = "{Binding AttributionsVc}"
-                             Style = "{StaticResource MenuButtonTheme}" />
-                <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png"
-                       Stretch = "Uniform"
-                       RenderOptions.BitmapScalingMode = "HighQuality"
-                       Margin = "40, 73, 40, 40" />
+                <RadioButton Margin = "40,0,40,10" Content = "About Us" Height = "30" FontSize = "14"
+                             Command = "{Binding AboutUsVc}" Style = "{StaticResource MenuButtonTheme}" />
+                <RadioButton Margin = "40,0,40,10" Content = "Attributions" Height = "30" FontSize = "14"
+                             Command = "{Binding AttributionsVc}" Style = "{StaticResource MenuButtonTheme}" />
+                <Image Source = "/Arcanum_UI;component/Assets/Logo/ArcanumForeColor.png" Stretch = "Uniform"
+                       RenderOptions.BitmapScalingMode = "HighQuality" Margin = "40, 73, 40, 40" />
             </StackPanel>
 
-            <Grid Row = "0"
-                  Column = "1">
+            <Grid Row = "0" Column = "1">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width = "*" />
@@ -113,54 +71,32 @@
                     <ColumnDefinition Width = "100" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column = "0"
-                        Grid.Row = "0"
-                        CornerRadius = "10"
-                        BorderThickness = "2"
-                        BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                        VerticalAlignment = "Center"
-                        HorizontalAlignment = "Center"
-                        Padding = "5"
-                        Margin = "0, 5, 0, 0">
-                    <StackPanel Orientation = "Horizontal"
-                                VerticalAlignment = "Center"
-                                HorizontalAlignment = "Center">
-                        
-                        <StackPanel Orientation = "Horizontal"
-                                    VerticalAlignment = "Center"
-                                    HorizontalAlignment = "Center" 
-                                    Visibility="{Binding IsNewProjectButtonVisible}">
-                            <TextBlock VerticalAlignment = "Center"
-                                       Margin = "4"
-                                       FontSize = "14">
+                <Border Grid.Column = "0" Grid.Row = "0" CornerRadius = "10" BorderThickness = "2"
+                        BorderBrush = "{StaticResource DefaultBorderColorBrush}" VerticalAlignment = "Center"
+                        HorizontalAlignment = "Center" Padding = "5" Margin = "0, 5, 0, 0">
+                    <StackPanel Orientation = "Horizontal" VerticalAlignment = "Center" HorizontalAlignment = "Center">
+
+                        <StackPanel Orientation = "Horizontal" VerticalAlignment = "Center"
+                                    HorizontalAlignment = "Center" Visibility = "{Binding IsNewProjectButtonVisible}">
+                            <TextBlock VerticalAlignment = "Center" Margin = "4" FontSize = "14">
                                 New Project:
                             </TextBlock>
 
-                            <styleClasses:BaseButton x:Name = "CreatNewProjectButton"
-                                                     VerticalAlignment = "Center"
-                                                     Margin = "0,0,10,0"
-                                                     CornerRadius = "7"
-                                                     Height = "25"
-                                                     Width = "25"
+                            <styleClasses:BaseButton x:Name = "CreatNewProjectButton" VerticalAlignment = "Center"
+                                                     Margin = "0,0,10,0" CornerRadius = "7" Height = "25" Width = "25"
                                                      Click = "CreateNewProjectButton_Click"
                                                      Background = "{StaticResource GreenColorBrush}"
                                                      ToolTip = "Create a new Arcanum configuration for a mod">
                                 <Image Source = "/Arcanum_UI;component/Assets/Icons/30x30/AddBordered30x30.png" />
                             </styleClasses:BaseButton>
                         </StackPanel>
-                        
-                        <TextBlock Text = "{Binding LaunchButtonText}"
-                                   VerticalAlignment = "Center"
-                                   Margin = "0, 4, 4,4"
-                                   FontSize = "14">
+
+                        <TextBlock Text = "{Binding LaunchButtonText}" VerticalAlignment = "Center"
+                                   Margin = "0, 4, 4,4" FontSize = "14">
                         </TextBlock>
 
-                        <styleClasses:BaseButton x:Name = "LoadLastConfigButton"
-                                                 VerticalAlignment = "Center"
-                                                 Margin = "0"
-                                                 CornerRadius = "7"
-                                                 Height = "25"
-                                                 Width = "25"
+                        <styleClasses:BaseButton x:Name = "LoadLastConfigButton" VerticalAlignment = "Center"
+                                                 Margin = "0" CornerRadius = "7" Height = "25" Width = "25"
                                                  Click = "LoadLastConfigButton_Click"
                                                  MouseEnter = "LoadLastConfigButton_MouseEnter"
                                                  Background = "{StaticResource GreenColorBrush}">
@@ -168,45 +104,26 @@
                         </styleClasses:BaseButton>
                     </StackPanel>
                 </Border>
-                
-                <styleClasses:BaseButton Grid.Column = "1"
-                                         x:Name = "SettingsButton"
-                                         VerticalAlignment = "Top"
-                                         HorizontalAlignment = "Right"
-                                         Margin = "0"
-                                         Padding = "20"
-                                         Background = "Transparent"
-                                         Click = "SettingsButton_OnClickButton_Click"
+
+                <styleClasses:BaseButton Grid.Column = "1" x:Name = "SettingsButton" VerticalAlignment = "Top"
+                                         HorizontalAlignment = "Right" Margin = "0" Padding = "20"
+                                         Background = "Transparent" Click = "SettingsButton_OnClickButton_Click"
                                          BorderThickness = "0">
-                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Settings40x40.png"
-                           Stretch = "None"
-                           Margin = "0"
-                           VerticalAlignment = "Center"
-                           HorizontalAlignment = "Center">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Settings40x40.png" Stretch = "None"
+                           Margin = "0" VerticalAlignment = "Center" HorizontalAlignment = "Center">
                     </Image>
                 </styleClasses:BaseButton>
-                
-                <styleClasses:BaseButton Grid.Column = "2"
-                                         x:Name = "CloseButton"
-                                         VerticalAlignment = "Top"
-                                         HorizontalAlignment = "Right"
-                                         Padding = "20"
-                                         Background = "Transparent"
-                                         Click = "CloseButton_Click"
-                                         BorderThickness = "0">
-                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Close40x40.png"
-                           Stretch = "None"
-                           Margin = "0"
-                           VerticalAlignment = "Center"
-                           HorizontalAlignment = "Center">
+
+                <styleClasses:BaseButton Grid.Column = "2" x:Name = "CloseButton" VerticalAlignment = "Top"
+                                         HorizontalAlignment = "Right" Padding = "20" Background = "Transparent"
+                                         Click = "CloseButton_Click" BorderThickness = "0">
+                    <Image Source = "/Arcanum_UI;component/Assets/Icons/40x40/Close40x40.png" Stretch = "None"
+                           Margin = "0" VerticalAlignment = "Center" HorizontalAlignment = "Center">
                     </Image>
                 </styleClasses:BaseButton>
             </Grid>
 
-            <ContentControl Grid.Row = "1"
-                            Grid.Column = "1"
-                            Margin = "10"
-                            Content = "{Binding CurrentView}" />
+            <ContentControl Grid.Row = "1" Grid.Column = "1" Margin = "10" Content = "{Binding CurrentView}" />
 
         </Grid>
 

@@ -339,6 +339,9 @@
 
 
     <Style x:Key = "BaseMenuItemStyle" TargetType = "MenuItem">
+        <Setter Property = "FontSize" Value = "{StaticResource DefaultFontSize}" />
+        <Setter Property = "FontFamily" Value = "{StaticResource DefaultFont}" />
+        <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
         <Setter Property = "HorizontalContentAlignment"
                 Value = "{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
         <Setter Property = "VerticalContentAlignment"

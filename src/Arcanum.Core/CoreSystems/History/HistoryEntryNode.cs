@@ -74,7 +74,7 @@ public class HistoryNode(int id, ICommand command, HistoryEntryType entryType, H
    /// have been merged into a single entity for optimization or simplification purposes.
    /// </remarks>
    public bool IsCompacted { get; set; } = false;
-   
+
    /// <summary>
    /// Retrieves a child node with the specified identifier from the list of children.
    /// </summary>
@@ -173,6 +173,7 @@ public class CompactHistoryNode : HistoryNode
       CompactedNodes[^1].Children.Clear();
 
       // insert the node into the tree
+      Debug.Assert(Parent != null, "Parent must never be null when inserting a compacted node into the tree");
       Parent.Children.Add(this);
    }
 

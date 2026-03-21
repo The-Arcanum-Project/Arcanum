@@ -50,7 +50,9 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
       AssociatedObject.DragOver += OnDragOver;
       AssociatedObject.QueryContinueDrag += OnQueryContinueDrag;
       AssociatedObject.Loaded +=
+#pragma warning disable CS0618 // Type or member is obsolete
          (_, _) => _scrollViewer = TreeTraversal.FindVisualChild<ScrollViewer>(AssociatedObject);
+#pragma warning restore CS0618 // Type or member is obsolete
    }
 
    protected override void OnDetaching()
@@ -70,7 +72,9 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
       if (DragHandleExclusionType != null!)
       {
          var element = e.OriginalSource as DependencyObject;
+#pragma warning disable CS0618 // Type or member is obsolete
          if (TreeTraversal.FindVisualParent(element, DragHandleExclusionType) != null)
+#pragma warning restore CS0618 // Type or member is obsolete
          {
             // Click was on an excluded control, so do nothing.
             _draggedItem = null;
@@ -141,7 +145,9 @@ public class ListBoxDragDropBehavior : Behavior<ListBox>
    private object? GetItemUnderMouse(Point position)
    {
       var element = AssociatedObject.InputHitTest(position) as DependencyObject;
+#pragma warning disable CS0618 // Type or member is obsolete
       var listBoxItem = TreeTraversal.FindVisualParent<ListBoxItem>(element);
+#pragma warning restore CS0618 // Type or member is obsolete
       return (listBoxItem != null) ? AssociatedObject.ItemContainerGenerator.ItemFromContainer(listBoxItem) : null;
    }
 }

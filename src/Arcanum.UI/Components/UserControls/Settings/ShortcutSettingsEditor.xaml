@@ -143,6 +143,7 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTreeView.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseLoadingSpinner.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -236,16 +237,24 @@
             </styleClasses:BaseButton>
 
         </Grid>
-        <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
-                  Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
-                  ScrollViewer.HorizontalScrollBarVisibility = "Disabled">
 
-            <TreeView.ItemContainerStyle>
-                <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
-                    <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
-                </Style>
-            </TreeView.ItemContainerStyle>
+        <ContentControl Grid.Row = "1" Style = "{StaticResource BaseLoadingSpinner}"
+                        Tag = "{Binding IsReady, TargetNullValue=False, FallbackValue=False, RelativeSource={RelativeSource AncestorType=UserControl}}">
 
-        </TreeView>
+            <TreeView x:Name = "TreeViewDisplay" Grid.Row = "1" ItemsSource = "{Binding RootItems}" Margin = "5"
+                      Background = "Transparent" BorderThickness = "0" HorizontalContentAlignment = "Stretch"
+                      ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                      VirtualizingStackPanel.IsVirtualizing = "True"
+                      VirtualizingStackPanel.VirtualizationMode = "Recycling" ScrollViewer.CanContentScroll = "True">
+
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
+                        <EventSetter Event = "MouseRightButtonDown" Handler = "OnTreeViewItemMouseRightButtonDown" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+
+            </TreeView>
+        </ContentControl>
+
     </Grid>
 </UserControl>

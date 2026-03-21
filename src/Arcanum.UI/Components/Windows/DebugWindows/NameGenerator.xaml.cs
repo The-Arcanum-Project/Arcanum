@@ -12,8 +12,8 @@ public partial class NameGenerator : INotifyPropertyChanged
                                                                                              typeof(ObservableRangeCollection<
                                                                                                 Core.Utils.NameGenerator.NameGenerator.Language>),
                                                                                              typeof(NameGenerator),
-                                                                                             new PropertyMetadata(default(ObservableRangeCollection<
-                                                                                                       Core.Utils.NameGenerator.NameGenerator.Language>)));
+                                                                                             new(default(ObservableRangeCollection<
+                                                                                                    Core.Utils.NameGenerator.NameGenerator.Language>)));
 
    public NameGenerator()
    {
@@ -23,7 +23,7 @@ public partial class NameGenerator : INotifyPropertyChanged
       Languages = new(Core.Utils.NameGenerator.NameGenerator.Languages);
       SelectedLanguage = Languages.FirstOrDefault()!;
 
-      GenerateNameCommand = new RelayCommand(_ =>
+      GenerateNameCommand = new(_ =>
       {
          var sb = new StringBuilder();
          for (var i = 0; i < 20; i++)
@@ -31,8 +31,6 @@ public partial class NameGenerator : INotifyPropertyChanged
          GenerationOutput = sb.ToString();
       });
    }
-
-   private static double RandomDouble(double min, double max) => Random.Shared.NextDouble() * (max - min) + min;
 
    public RelayCommand GenerateNameCommand { get; }
    public string GenerationOutput
@@ -68,7 +66,7 @@ public partial class NameGenerator : INotifyPropertyChanged
 
    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new(propertyName));
    }
 
    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Arcanum.Core.CoreSystems.Parsing.DocumentsLoading;
@@ -92,18 +91,13 @@ public class ProjectFileDescriptor : IComparable<ProjectFileDescriptor>
       // For now, we will return a placeholder instance.
       return new("DefaultMod",
                  new("example", [], DataSpace.AccessType.ReadOnly),
-                 [
-                    new("example", [], DataSpace.AccessType.ReadOnly),
-                    new("example", [], DataSpace.AccessType.ReadOnly),
-                 ],
+                 [new("example", [], DataSpace.AccessType.ReadOnly), new("example", [], DataSpace.AccessType.ReadOnly),],
                  new("example", [], DataSpace.AccessType.ReadOnly));
    }
 
-   public static bool operator <(ProjectFileDescriptor left, ProjectFileDescriptor right)
-      => left.LastModified < right.LastModified;
+   public static bool operator <(ProjectFileDescriptor left, ProjectFileDescriptor right) => left.LastModified < right.LastModified;
 
-   public static bool operator >(ProjectFileDescriptor left, ProjectFileDescriptor right)
-      => left.LastModified > right.LastModified;
+   public static bool operator >(ProjectFileDescriptor left, ProjectFileDescriptor right) => left.LastModified > right.LastModified;
 
    public bool IsValid()
    {

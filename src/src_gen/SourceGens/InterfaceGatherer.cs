@@ -68,15 +68,14 @@ public class InterfaceGatherer : IIncrementalGenerator
       sb.AppendLine();
 
       if (InterfacesToRegister[results.Key].generateEnum)
-         GenerateEnumSource(context, results, sb);
+         GenerateEnumSource(results, sb);
       else
          sb.AppendLine("}");
 
       context.AddSource($"{InterfacesToRegister[results.Key].name}Registry.g.cs", sb.ToString());
    }
 
-   private static void GenerateEnumSource(SourceProductionContext context,
-                                          KeyValuePair<string, List<INamedTypeSymbol>> results,
+   private static void GenerateEnumSource(KeyValuePair<string, List<INamedTypeSymbol>> results,
                                           StringBuilder sb)
    {
       sb.AppendLine($"    public static Type ToType(this {InterfacesToRegister[results.Key].name}Enum enumValue)");
@@ -151,10 +150,7 @@ public class InterfaceGatherer : IIncrementalGenerator
       {
          var semanticModel = compilation.GetSemanticModel(classSyntax.SyntaxTree);
 
-         if (semanticModel.GetDeclaredSymbol(classSyntax) is not INamedTypeSymbol
-             {
-                TypeKind: TypeKind.Class,
-             } classSymbol ||
+         if (semanticModel.GetDeclaredSymbol(classSyntax) is not INamedTypeSymbol { TypeKind: TypeKind.Class, } classSymbol ||
              classSymbol.IsAbstract)
             continue;
 

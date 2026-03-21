@@ -7,42 +7,40 @@
         <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <converters:WidthMinusConverter x:Key = "DropdownWidthMinusConverter"
-                                    Subtract = "28" />
+    <converters:WidthMinusConverter x:Key = "DropdownWidthMinusConverter" Subtract = "28" />
 
-    <Style TargetType = "ComboBoxItem"
-           x:Key = "BaseComboBoxItemStyle">
-        <Setter Property = "HorizontalContentAlignment"
-                Value = "Stretch" />
+    <Style TargetType = "ComboBoxItem" x:Key = "BaseComboBoxItemStyle">
+        <Setter Property = "HorizontalContentAlignment" Value = "Stretch" />
+        <Setter Property = "Background" Value = "Transparent" />
+        <Setter Property = "BorderThickness" Value = "0" />
+
         <Setter Property = "Template">
             <Setter.Value>
                 <ControlTemplate TargetType = "ComboBoxItem">
-                    <Border x:Name = "Bd"
-                            HorizontalAlignment = "Stretch"
-                            SnapsToDevicePixels = "True"
-                            MinWidth = "{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}, Converter={StaticResource DropdownWidthMinusConverter}}"
-                            Padding = "4,2, 0, 2"
-                            Margin = "0, 0, 1, 0"
-                            CornerRadius = "2">
-                        <ContentPresenter HorizontalAlignment = "Stretch" />
+                    <Border x:Name = "HitTestZone" Background = "Transparent" SnapsToDevicePixels = "True"
+                            HorizontalAlignment = "Stretch">
+
+                        <Border x:Name = "Bd" HorizontalAlignment = "Stretch" SnapsToDevicePixels = "True"
+                                MinWidth = "{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}, Converter={StaticResource DropdownWidthMinusConverter}}"
+                                Padding = "4, 2, 0, 2" Margin = "1, 0, 1, 1" CornerRadius = "2">
+
+                            <ContentPresenter HorizontalAlignment = "{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
                     </Border>
+
                     <ControlTemplate.Triggers>
-                        <Trigger Property = "IsMouseOver"
-                                 Value = "True">
-                            <Setter TargetName = "Bd"
-                                    Property = "Background"
+                        <Trigger SourceName = "HitTestZone" Property = "IsMouseOver" Value = "True">
+                            <Setter TargetName = "Bd" Property = "Background"
                                     Value = "{StaticResource LightBackColorBrush}" />
                         </Trigger>
-                        <Trigger Property = "IsSelected"
-                                 Value = "True">
-                            <Setter TargetName = "Bd"
-                                    Property = "Background"
+
+                        <Trigger Property = "IsSelected" Value = "True">
+                            <Setter TargetName = "Bd" Property = "Background"
                                     Value = "{StaticResource BlueSelectionBackColorBrush}" />
                         </Trigger>
-                        <Trigger Property = "IsEnabled"
-                                 Value = "False">
-                            <Setter Property = "Foreground"
-                                    Value = "{StaticResource DisabledForeColorBrush}" />
+
+                        <Trigger Property = "IsEnabled" Value = "False">
+                            <Setter Property = "Foreground" Value = "{StaticResource DisabledForeColorBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

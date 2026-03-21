@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Arcanum.Core.CoreSystems.IO;
 
 namespace Arcanum.Core.Utils.vdfParser;

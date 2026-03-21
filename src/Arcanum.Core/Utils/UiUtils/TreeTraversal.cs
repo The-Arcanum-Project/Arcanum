@@ -3,6 +3,8 @@ using System.Windows.Media;
 
 namespace Arcanum.Core.Utils.UiUtils;
 
+// TODO: THIS HAS TO BE REMOVED. HAS TO BE PART OF UI!
+[Obsolete("This class should be part of the UI project, not the Core project.")]
 public static class TreeTraversal
 {
    public static T? FindVisualChild<T>(DependencyObject? parent) where T : DependencyObject

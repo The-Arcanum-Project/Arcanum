@@ -27,6 +27,13 @@ public class PopDefinitionCreatorVm : ViewModelBase
       Religion = CalculateItemWithMaxPop<Religion>(_targetLocation.Pops, PopDefinition.Field.Religion) ?? Religion.Empty;
       Culture = CalculateItemWithMaxPop<Culture>(_targetLocation.Pops, PopDefinition.Field.Culture) ?? Culture.Empty;
 
+      if (PopType == PopType.Empty)
+         PopType = Globals.PopTypes.Values.FirstOrDefault() ?? PopType.Empty;
+      if (Religion == Religion.Empty)
+         Religion = Globals.Religions.Values.FirstOrDefault() ?? Religion.Empty;
+      if (Culture == Culture.Empty)
+         Culture = Globals.Cultures.Values.FirstOrDefault() ?? Culture.Empty;
+
       var allOfType = _targetLocation.Pops.Where(p => p.PopType == PopType).ToList();
 
       if (Config.Settings.SpecializedEditorSettings.PopEditorSettings.PopCreationRandomOffsetPercentage == 0)

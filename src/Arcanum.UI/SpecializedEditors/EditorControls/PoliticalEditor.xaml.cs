@@ -35,6 +35,7 @@ public partial class PoliticalEditor
          return;
 
       var locations = Selection.GetSelectedLocations;
+      SelectionManager.FilterSelection(locations, LocationType.Land);
 
       if (SpecificLocationBox.SelectedItem is Location specificLocation && !locations.Contains(specificLocation))
          locations.Add(specificLocation);
@@ -54,6 +55,8 @@ public partial class PoliticalEditor
          return;
 
       var locations = Selection.GetSelectedLocations;
+      SelectionManager.FilterSelection(locations, LocationType.Land);
+
       if (SpecificLocationBox.SelectedItem is Location specificLocation && !locations.Contains(specificLocation))
          locations.Add(specificLocation);
 

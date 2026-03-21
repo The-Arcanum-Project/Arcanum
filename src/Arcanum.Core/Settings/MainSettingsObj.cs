@@ -38,6 +38,8 @@ public class MainSettingsObj
    [JsonIgnore]
    public KeyMapState KeyMapState { get; set; } = new();
 
+   public MiscSettings MiscSettings { get; set; } = new();
+
 #if DEBUG
    public DebugConfigSettings DebugConfigSettings { get; set; } = DebugConfig.Settings;
 #endif

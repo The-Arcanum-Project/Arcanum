@@ -251,18 +251,19 @@ public static class FormattingService
                                                 IEnumerable collection,
                                                 bool writeDefaults)
    {
-      if (!collection.HasItems())
+      var enumerable = collection as object[] ?? collection.Cast<object>().ToArray();
+      if (!enumerable.HasItems())
          return;
 
       if (meta.CollectionAsPureIdentifierList)
       {
          var maxItemsPerLine = sb.MaxItemsInCollectionLine;
          sb.MaxItemsInCollectionLine = 1;
-         FormatAsIdentifierList(sb, collection, collectionSeparator, ags.AgsSettings.GetCollectionProfile(meta.NxProp));
+         FormatAsIdentifierList(sb, enumerable, collectionSeparator, ags.AgsSettings.GetCollectionProfile(meta.NxProp));
          sb.MaxItemsInCollectionLine = maxItemsPerLine;
       }
       else if (meta.IsEmbeddedObject)
-         foreach (var item in collection)
+         foreach (var item in enumerable)
             if (item is IEu5Object ia)
             {
                if (meta.SaveEmbeddedAsIdentifier)
@@ -280,7 +281,7 @@ public static class FormattingService
             sb.AppendLine();
 
          var startLength = sb.InnerBuilder.Length;
-         foreach (var item in collection)
+         foreach (var item in enumerable)
          {
             if (startLength != sb.InnerBuilder.Length)
                sb.AppendLine();

@@ -94,4 +94,9 @@ public interface IMapMode
    /// </summary>
    /// <param name="location"></param>
    public object GetLocationRelatedData(Location location);
+
+   /// <summary>
+   /// Returns an array of context menu options for the given location on the map. 
+   /// </summary>
+   public MapContexMenuConfig[]? GetContextMenuOptions();
 }

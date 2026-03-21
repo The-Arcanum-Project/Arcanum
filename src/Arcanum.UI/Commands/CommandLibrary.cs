@@ -1,7 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
-using Arcanum.Core.ApplicationContext.Contexts.SpecializedEditors;
+using Arcanum.UI.AppFeatures.Contexts.SpecializedEditors;
+using Arcanum.UI.Commands.Command_Definitions;
 using Arcanum.UI.Commands.KeyMap;
 using Arcanum.UI.Components.Windows.HelpWindow;
 using Arcanum.UI.Components.Windows.MainWindows;
@@ -49,7 +50,7 @@ public static class CommandLibrary
                          {
                             if (param is Window window)
                                window.WindowState = WindowState.Minimized;
-                         }).WithDefaultGestures((Key.F9, ModifierKeys.None), (Key.B, ModifierKeys.Control));
+                         }).WithDefaultGestures([(Key.F9, ModifierKeys.None), (Key.B, ModifierKeys.Control)]);
 
       new ManagedCommand(CommandIds.UI.Window.Layout.Load,
                          "Load Layout",
@@ -131,18 +132,20 @@ public static class CommandLibrary
                          _ => { new HelpWindow().ShowDialog(); }).WithDefaultGesture(Key.F12);
 
       #endregion
+
+      HelpWindowCommands.Initialize();
    }
 
    extension(ManagedCommand cmd)
    {
-      private void WithDefaultGesture(Key key, ModifierKeys modifiers = ModifierKeys.None)
+      public void WithDefaultGesture(Key key, ModifierKeys modifiers = ModifierKeys.None)
       {
          var gesture = new KeyGesture(key, modifiers);
          cmd.Gestures.Add(gesture);
          cmd.AddDefaultGesture(gesture);
       }
 
-      private void WithDefaultGestures(params (Key key, ModifierKeys modifiers)[] gestures)
+      public void WithDefaultGestures((Key key, ModifierKeys modifiers)[] gestures)
       {
          foreach (var (key, modifiers) in gestures)
          {

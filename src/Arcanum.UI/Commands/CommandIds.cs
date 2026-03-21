@@ -14,6 +14,18 @@ public static class CommandIds
 
       // "global.open_help"
       public static readonly CommandId OpenHelp = CommandId.Create(PATH);
+
+      // "global.undo"
+      public static readonly CommandId Undo = CommandId.Create(PATH);
+
+      // "global.step_undo"
+      public static readonly CommandId StepUndo = CommandId.Create(PATH);
+
+      // "global.redo"
+      public static readonly CommandId Redo = CommandId.Create(PATH);
+
+      // "global.step_redo"
+      public static readonly CommandId StepRedo = CommandId.Create(PATH);
    }
 
    // "ui"
@@ -81,6 +93,26 @@ public static class CommandIds
             // "editor.specialized_editors.political_editor.sync_with_search"
             public static readonly CommandId SyncWithSelection = CommandId.Create(PE_PATH);
          }
+      }
+   }
+
+   // "help_window"
+   public static class HelpWindow
+   {
+      private const string PATH = nameof(HelpWindow);
+
+      // "help_window.open_feature_explorer_for_feature"
+      public static readonly CommandId OpenFeatureExplorerForFeature = CommandId.Create(PATH);
+
+      public static class DashBoardView
+      {
+         private const string DASHBOARD_PATH = $"{PATH}.{nameof(DashBoardView)}";
+
+         // "help_window.dashboard_view.next_tip"
+         public static readonly CommandId NextRandomTip = CommandId.Create(DASHBOARD_PATH);
+
+         // "help_window.dashboard_view.previous_tip"
+         public static readonly CommandId PreviousRandomTip = CommandId.Create(DASHBOARD_PATH);
       }
    }
 

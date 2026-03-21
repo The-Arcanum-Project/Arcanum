@@ -13,6 +13,7 @@ public class ContinentMapMode : LocationBasedMapMode
    public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Continents;
    public override Type[] DisplayTypes => [typeof(Continent), typeof(SubContinent), typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
    public override bool IsLandOnly => false;
+   public override bool DarkenWastelands => false;
 
    public override int GetColorForLocation(Location location)
    {
@@ -23,7 +24,7 @@ public class ContinentMapMode : LocationBasedMapMode
       return ((IIndexRandomColor)parent).Color;
    }
 
-   public override string[] GetTooltip(Location location) => ["Continent: " + (location.GetFirstParentOfType(LocationCollectionType.Continent).UniqueId),];
+   public override string[] GetTooltip(Location location) => ["Continent: " + location.GetFirstParentOfType(LocationCollectionType.Continent).UniqueId];
 
    public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.Continent).UniqueId;
 

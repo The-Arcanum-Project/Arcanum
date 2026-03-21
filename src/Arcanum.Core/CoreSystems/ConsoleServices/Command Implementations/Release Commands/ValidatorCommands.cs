@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Arcanum.API.Console;
+﻿using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;

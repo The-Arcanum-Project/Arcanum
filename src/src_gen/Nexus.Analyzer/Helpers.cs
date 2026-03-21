@@ -30,7 +30,7 @@ public static class Helpers
       if (operation is IConversionOperation conv)
          return conv.Operand.Type;
 
-      return operation?.Type;
+      return operation.Type;
    }
 
    public static bool TryGetTargetType(IInvocationOperation invocation,

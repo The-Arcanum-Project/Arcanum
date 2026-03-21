@@ -19,11 +19,6 @@ public class DispatcherConfig
    /// </summary>
    public string ClassName { get; set; } = "MISSING_GeneratedClass";
 
-   /// <summary>
-   /// The C# code that defines the internal delegate for the dictionary.
-   /// E.g., "private delegate object Accessor();"
-   /// E.g., "private delegate IEnumerable Accessor(IEnumerable<Location> sLocs);"
-   /// </summary>
    public string DelegateDefinition { get; set; } = "MISSING_DelegateDefinition";
 
    /// <summary>
@@ -54,10 +49,6 @@ public class DispatcherConfig
    /// </summary>
    public string RuntimeMethodName { get; set; } = "MISSING_RuntimeMethodName";
 
-   /// <summary>
-   /// The full C# source code for all the public "getter" methods.
-   /// This gives you full control over the public API (e.g., creating TryGet and TryGet<T>).
-   /// </summary>
    public string PublicApiMethods { get; set; } = "MISSING_PublicApiMethods";
 
    /// <summary>
