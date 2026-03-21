@@ -38,7 +38,7 @@ public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
       {
          IsEnabled = HasValidSelectionForContextMenu(out _, out _),
          OptionName = "Copy ports.csv Data or Cursor Position",
-         Tooltip = "Copy valid port data of the selected sea and land location to the clipboard in the format: LandLocationId;SeaLocationId;X;Y;x",
+         Tooltip = _ => "Copy valid port data of the selected sea and land location to the clipboard in the format: LandLocationId;SeaLocationId;X;Y;x",
          OptionAction = ContextCopyAction,
       },
    ];
@@ -75,6 +75,6 @@ public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
       if (!HasValidSelectionForContextMenu(out var sea, out var land))
          return;
 
-      System.Windows.Forms.Clipboard.SetText($"{land.UniqueId};{sea.UniqueId};{position.X:#};{position.Y:#};x");
+      System.Windows.Clipboard.SetText($"{land.UniqueId};{sea.UniqueId};{position.X:#};{position.Y:#};x");
    }
 }

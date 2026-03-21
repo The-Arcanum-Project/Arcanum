@@ -226,13 +226,13 @@ public partial class ParsingMaster
             }
          }
       }
-      catch (OperationCanceledException)
+      catch (OperationCanceledException e)
       {
-         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "Parsing steps execution was canceled.");
+         ArcLog.WriteLine(CommonLogSource.PMT, LogLevel.ERR, "Parsing steps execution was canceled.\n" + e.Message + e.InnerException?.Message);
          completionTcs.TrySetResult(false);
          SaveLog();
 
-         throw new ParsingCanceledException("Parsing steps execution was canceled.");
+         throw new ParsingCanceledException("Parsing steps execution was canceled.", e);
       }
 
       if (!await completionTcs.Task)
@@ -305,7 +305,7 @@ public partial class ParsingMaster
       catch (Exception e)
       {
          HandleStepException(step, e);
-         throw new OperationCanceledException();
+         throw new OperationCanceledException($"Parsing steps execution was canceled: '{step.Name}'.\n" + e.Message, e);
       }
 
       if (result)

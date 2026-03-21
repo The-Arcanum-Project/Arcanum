@@ -519,7 +519,7 @@ public partial class MapControl
             {
                Header = option.OptionName,
                IsEnabled = option.IsEnabled,
-               ToolTip = option.Tooltip,
+               ToolTip = option.Tooltip(_contextMenuClickLocation ?? Vector2.Zero),
                Tag = dynamicTag,
             };
 
@@ -549,7 +549,7 @@ public partial class MapControl
          return;
 
       var subPixelPresicision = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-      var format = subPixelPresicision ? "0:0.##" : "0:0";
+      var format = subPixelPresicision ? "0.##" : "###";
 
       if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
       {
@@ -559,7 +559,7 @@ public partial class MapControl
          };
          Clipboard.SetText(CustomNumberParser.Format(Config.Settings.MiscSettings.CustomCoordinatesFormat, values));
       }
-      else if (Keyboard.Modifiers != ModifierKeys.Control)
+      else if (Keyboard.Modifiers == ModifierKeys.Control)
          Clipboard.SetText($"X:{_contextMenuClickLocation.Value.X.ToString(format)}, Y:{_contextMenuClickLocation.Value.Y.ToString(format)}");
       else
          Clipboard.SetText($"{_contextMenuClickLocation.Value.X.ToString(format)} {_contextMenuClickLocation.Value.Y.ToString(format)}");

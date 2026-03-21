@@ -9,6 +9,6 @@ public struct MapContexMenuConfig
 {
    public bool IsEnabled { get; set; }
    public string OptionName { get; set; }
-   public string Tooltip { get; set; }
+   public Func<Vector2, string> Tooltip { get; set; }
    public Action<Vector2> OptionAction { get; set; }
 }

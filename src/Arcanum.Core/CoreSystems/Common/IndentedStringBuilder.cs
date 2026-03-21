@@ -212,15 +212,17 @@ public class IndentedStringBuilder
 
       // Line has a comment, start a new line to keep 'text' clean
       if (hasComment)
-         InnerBuilder.AppendLine().AppendLine(text);
+         InnerBuilder.AppendLine();
       // Line is "clean", append directly to the current line
-      else
-         InnerBuilder.AppendLine(text);
+      PrependIndentIfNecessary();
+      InnerBuilder.AppendLine(text);
+      _isAtStartOfLine = true;
    }
 
    public void AppendInjRepType(InjRepType agsInjRepType)
    {
-      InnerBuilder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
+      if (agsInjRepType != InjRepType.None)
+         InnerBuilder.Append(SavingUtil.FormatInjectionType(agsInjRepType)).Append(':');
    }
 
    public readonly ref struct IndentScope
@@ -386,6 +388,18 @@ public class IndentedStringBuilder
             InnerBuilder.Append(_indentCacheBuilder);
          _isAtStartOfLine = false;
       }
+   }
+
+   internal IndentedStringBuilder PrependIndentIfNeeded()
+   {
+      if (_isAtStartOfLine)
+      {
+         if (_indentCacheBuilder.Length > 0)
+            InnerBuilder.Append(_indentCacheBuilder);
+         _isAtStartOfLine = false;
+      }
+
+      return this;
    }
 
    public IndentedStringBuilder AppendLineFormat(PropertySavingMetadata? meta, bool asOneLine)

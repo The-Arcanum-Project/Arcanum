@@ -160,38 +160,40 @@ public partial class MainMenuScreen
    public async Task LoadAndTransferAsync()
    {
       var loadingScreen = new LoadingScreen();
-
+#if !DEBUG
       try
       {
-         // 1. Hide this window and show the loading screen.
-         //    Both Show() and Hide() are non-blocking.
-         Hide();
-         loadingScreen.Show();
+#endif
+      // 1. Hide this window and show the loading screen.
+      //    Both Show() and Hide() are non-blocking.
+      Hide();
+      loadingScreen.Show();
 #if DEBUG
-         if (!DebugConfig.Settings.SkipLoading)
+      if (!DebugConfig.Settings.SkipLoading)
+      {
+#endif
+         // 2. Await the loading logic directly.
+         //    Because we are awaiting, the UI thread is NOW FREE. It can process
+         //    the Dispatcher messages from the loading task and update the text.
+         var value = await loadingScreen.StartLoading();
+         if (value == false)
          {
-#endif
-            // 2. Await the loading logic directly.
-            //    Because we are awaiting, the UI thread is NOW FREE. It can process
-            //    the Dispatcher messages from the loading task and update the text.
-            var value = await loadingScreen.StartLoading();
-            if (value == false)
-            {
-               loadingScreen.Close();
-               return;
-            }
-#if DEBUG
+            loadingScreen.Close();
+            return;
          }
+#if DEBUG
+      }
 #endif
 
-         // 3. Once loading is done, create and show the new MainWindow.
-         var mw = new MainWindow();
-         Application.Current.MainWindow = mw; // Set the new main window
-         mw.Show();
+      // 3. Once loading is done, create and show the new MainWindow.
+      var mw = new MainWindow();
+      Application.Current.MainWindow = mw; // Set the new main window
+      mw.Show();
 
-         // 4. Close the loading screen and this initial window.
-         loadingScreen.Close();
-         Close(); // 'this' refers to the now-hidden LoginWindow
+      // 4. Close the loading screen and this initial window.
+      loadingScreen.Close();
+      Close(); // 'this' refers to the now-hidden LoginWindow
+#if !DEBUG
       }
       catch (Exception ex)
       {
@@ -204,6 +206,7 @@ public partial class MainMenuScreen
             loadingScreen.Close();
          Show();
       }
+#endif
    }
 
    private void SettingsButton_OnClickButton_Click(object sender, RoutedEventArgs e)
