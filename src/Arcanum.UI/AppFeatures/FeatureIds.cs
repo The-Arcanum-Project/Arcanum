@@ -4,6 +4,8 @@ namespace Arcanum.UI.AppFeatures;
 
 public static class FeatureIds
 {
+   public static readonly FeatureId Empty = Create("Empty");
+
    public static class Editor
    {
       private const string PATH = nameof(Editor);

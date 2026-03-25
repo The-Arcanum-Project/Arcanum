@@ -98,6 +98,9 @@
             <styleClasses:BaseButton Content = "Custom Number Parser" Margin = "2" Padding = "2"
                                      Click = "CustomNumberParser_OnClick" />
 
+            <styleClasses:BaseButton Content = "Docu Page Test" Margin = "2" Padding = "2"
+                                     Click = "DocuPageTest_OnClick" />
+
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

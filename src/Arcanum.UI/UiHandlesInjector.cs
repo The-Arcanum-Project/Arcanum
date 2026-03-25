@@ -15,5 +15,6 @@ public static class UiHandlesInjector
       UIHandle.Instance.MainWindowsHandle = new MainWindowHandleImpl();
       UIHandle.Instance.MapHandle = new MapHandleImpl();
       UIHandle.Instance.LogWindowHandle = new LogWindowHandleImpl();
+      UIHandle.Instance.StateHandle = new StateHandleImpl();
    }
 }

@@ -145,6 +145,7 @@ internal static class Program
          $"/{uiAssemblyName};component/Components/Styles/Specific/CenteredTabControlStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseTreeView.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseListView.xaml",
          $"/{uiAssemblyName};component/Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Base/MarkdownStyles.xaml",
       };
 
       foreach (var path in resources)
