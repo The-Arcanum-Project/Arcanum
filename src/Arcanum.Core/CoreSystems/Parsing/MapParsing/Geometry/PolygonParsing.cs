@@ -6,6 +6,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
 public class PolygonParsing(int color)
 {
+   // TODO Color can be determined via segments
    public readonly int Color = color;
    public List<ICoordinateAdder> Segments { get; } = [];
    public List<PolygonParsing> Holes { get; } = [];

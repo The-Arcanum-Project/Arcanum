@@ -84,6 +84,7 @@ public partial class Location
    public LocationTemplateData TemplateData { get; set; } = LocationTemplateData.Empty;
 
    #endregion
+   public CoreSystems.Map.Adjacency[] Adjacencies = [];
 
    public List<Location> GetLocations() => throw new NotImplementedException();
 

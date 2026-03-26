@@ -1,10 +1,13 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
@@ -12,6 +15,7 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GlobalStates;
+using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
@@ -44,6 +48,8 @@ public partial class MapControl
    private D3D11HwndHost _d3dHost = null!;
    public LocationRenderer LocationRenderer { get; private set; } = null!;
 
+   public Polygon[] Polygons = [];
+   
    public readonly MapInteractionManager MapInteractionManager;
 
    public MapCoordinateConverter Coords { get; private set; } = null!;
@@ -155,7 +161,7 @@ public partial class MapControl
       _selectionColor = (Color4[])_currentBackgroundColor.Clone();
       _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
-
+      Polygons = polygons;
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
       SelectionManager.PreviewChanged += RefreshAndRenderSelectionColors;
 
@@ -352,8 +358,6 @@ public partial class MapControl
 
    private void ExportBackColorsToBitmap()
    {
-      // TODO - Reimplement this. How to get polygons they no longer exist?
-      /*
       if (MapWidth <= 0 || MapHeight <= 0)
          return;
 
@@ -367,15 +371,14 @@ public partial class MapControl
       var height = MapHeight;
       var stride = bmpData.Stride;
       
-      var sourcePolygons = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!;
 
       const int sliceHeight = 32;
 
-      var workItems = new List<RenderTask>(sourcePolygons.Length * 2);
+      var workItems = new List<RenderTask>(Polygons.Length * 2);
 
-      for (var i = 0; i < sourcePolygons.Length; i++)
+      for (var i = 0; i < Polygons.Length; i++)
       {
-         var poly = sourcePolygons[i];
+         var poly = Polygons[i];
 
          var complexity = poly.TriangleIndices.Length;
          var polyTop = (int)poly.Bounds.Top;
@@ -431,7 +434,6 @@ public partial class MapControl
 
       bmp.UnlockBits(bmpData);
       ImageTagger.ExportTaggedTexture(IO.GetNextAvailableFilePath($"{MapModeManager.GetCurrent().Name}.png", IO.GetMapExportPath), bmp, ImageFormat.Png);
-      */
    }
 
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
