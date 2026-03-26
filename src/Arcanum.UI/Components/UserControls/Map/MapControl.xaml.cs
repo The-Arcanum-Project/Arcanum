@@ -56,6 +56,8 @@ public partial class MapControl
 
    private D3D11HwndHost _d3dHost = null!;
 
+   private float rot = 0;
+   
    private bool _isMapReady;
    private int _mapHeight = -1;
 
@@ -124,6 +126,14 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
+      for (var index = 0; index < CurrentBackgroundColors.Length; index++)
+      {
+         var color = CurrentBackgroundColors[index];
+         CurrentBackgroundColors[index] =  new Color4(color.R, color.G, color.B, rot);
+      }
+      rot += float.Pi / 180f;
+      rot %= float.Pi * 2;
+
       if (_selectionColor.Length != CurrentBackgroundColors.Length)
          _selectionColor = new Color4[CurrentBackgroundColors.Length];
       Array.Copy(CurrentBackgroundColors, _selectionColor, CurrentBackgroundColors.Length);
@@ -141,7 +151,11 @@ public partial class MapControl
 
       foreach (var location in locations)
       {
-         var color = new Color4(location.Color.AsInt());
+         // Make alpha always 0
+         var preColor = location.Color.AsInt();
+         preColor &= 0x00FFFFFF;
+         var color = new Color4(preColor);
+         
          colors[location.ColorIndex] = color;
       }
 

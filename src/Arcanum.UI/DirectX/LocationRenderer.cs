@@ -11,13 +11,15 @@ using Vortice.Mathematics;
 using Color = System.Windows.Media.Color;
 
 namespace Arcanum.UI.DirectX;
-public readonly struct VertexPositionId2D(in Vector2 position, uint polygonId)
+public readonly struct VertexPositionId2D(in Vector2 position, in Vector2 center, uint polygonId)
 {
    public static readonly unsafe uint SizeInBytes = (uint)sizeof(VertexPositionId2D);
 
    // ReSharper disable once UnusedMember.Global
    public readonly Vector2 Position = position;
-
+   
+   public readonly Vector2 Center = center;
+   
    // ReSharper disable once UnusedMember.Global
    public readonly uint PolygonId = polygonId;
 }
@@ -88,6 +90,10 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       for (var i = 0; i < polygons.Length; i++)
       {
          var polygon = polygons[i];
+         // get center of polygon
+         Vector2 center = new (polygon.Bounds.Left + polygon.Bounds.Width / 2f, polygon.Bounds.Top + polygon.Bounds.Height / 2f);
+         center.X = center.X / imageSize.Item1;
+         center.Y = imageAspectRatio * (1 - center.Y / imageSize.Item2);
          var indices = polygon.TriangleIndices; // TODO @Melco crashes with polygon = null
          var triangleVertices = polygon.Vertices;
          for (var j = 0; j < indices.Length; j += 3)
@@ -96,11 +102,11 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
             var v1 = triangleVertices[indices[j + 1]];
             var v2 = triangleVertices[indices[j + 2]];
             vertices.Add(new (new (v0.X / imageSize.Item1, imageAspectRatio * (1 - v0.Y / imageSize.Item2)),
-                              (uint)polygon.ColorIndex));
+               center,(uint)polygon.ColorIndex));
             vertices.Add(new (new (v1.X / imageSize.Item1, imageAspectRatio * (1 - v1.Y / imageSize.Item2)),
-                              (uint)polygon.ColorIndex));
+               center,(uint)polygon.ColorIndex));
             vertices.Add(new (new (v2.X / imageSize.Item1, imageAspectRatio * (1 - v2.Y / imageSize.Item2)),
-                              (uint)polygon.ColorIndex));
+               center,(uint)polygon.ColorIndex));
          }
       }
       
@@ -144,7 +150,10 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       using (var backBuffer = _swapChain.GetBuffer<ID3D11Texture2D>(0))
          _renderTargetView = _device.CreateRenderTargetView(backBuffer);
 
-      InputElementDescription[] inputElementDescs = [new ("POSITION", 0, Format.R32G32_Float, 0, 0), new ("POLYGON_ID", 0, Format.R32_UInt, 8, 0)];
+      InputElementDescription[] inputElementDescs = [
+         new ("POSITION", 0, Format.R32G32_Float, 0, 0),
+         new("CENTER", 0, Format.R32G32_Float, 8, 0),
+         new ("POLYGON_ID", 0, Format.R32_UInt, 16, 0)];
 
       var vertexShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "VSMain", "vs_5_0");
       var pixelShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "PSMain", "ps_5_0");
@@ -182,7 +191,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _context.VSSetShader(_vertexShader);
       _context.VSSetConstantBuffer(0, _constantBuffer);
       _context.PSSetShader(_pixelShader);
-      _context.PSSetShaderResource(0, _colorLookupView);
+      _context.VSSetShaderResource(0, _colorLookupView);
       _context.IASetInputLayout(_inputLayout);
       _context.IASetVertexBuffer(0, _vertexBuffer, VertexPositionId2D.SizeInBytes);
       _context.OMSetBlendState(null);
@@ -233,7 +242,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
       _context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
       _context.VSSetShader(_vertexShader);
       _context.PSSetShader(_pixelShader);
-      _context.PSSetShaderResource(0, _colorLookupView!);
+      _context.VSSetShaderResource(0, _colorLookupView!);
       _context.IASetInputLayout(_inputLayout);
       _context.IASetVertexBuffer(0, _vertexBuffer!, VertexPositionId2D.SizeInBytes);
       _context.OMSetBlendState(null); // Default blend state
