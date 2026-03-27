@@ -12,6 +12,11 @@
         <ApplicationIcon>..\Arcanum.UI\Assets\Logo\ArcanumSimplified.ico</ApplicationIcon>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <RetainVM>false</RetainVM>
+        <ServerGarbageCollection>false</ServerGarbageCollection>
+        <GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
+    </PropertyGroup>
 
     <PropertyGroup>
         <!-- STABLE IDENTIFIER: Used for Pack URIs and filename (Arcanum.exe) -->

@@ -19,7 +19,6 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
-using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
@@ -257,8 +256,6 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          var rect = Selection.DragArea;
          RectangleBounds = $"Rect: [X:{rect.X}, Y:{rect.Y}, W:{rect.Width}, H:{rect.Height}]";
       };
-
-      GcWizard.ForceGc();
 
       Selection.LocationHovered += locations =>
       {

@@ -134,6 +134,7 @@ public class LocationMapMode : LocationBasedMapMode
       if (!HasValidSelectionForContextMenu(out var land1, out var land2))
          return;
 
-      System.Windows.Forms.Clipboard.SetText($"{land2.UniqueId};{land1.UniqueId};{position.X:#};{position.Y:#};x");
+      // Set text to clipboard
+      System.Windows.Clipboard.SetText($"{land2.UniqueId};{land1.UniqueId};{position.X:#};{position.Y:#};x");
    }
 }

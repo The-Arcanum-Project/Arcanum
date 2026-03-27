@@ -120,7 +120,7 @@ public static class Generator
       {
          builder.AppendLine($"if ({NX}_allProps == null)");
          using (builder.Indent())
-            builder.AppendLine($"{NX}_allProps = Enum.GetValues(typeof({NX}Field)).Cast<Enum>().ToArray();");
+            builder.AppendLine($"{NX}_allProps = Enum.GetValues<{NX}Field>().Cast<Enum>().ToArray();");
          builder.AppendLine($"return {NX}_allProps!;");
       }
 

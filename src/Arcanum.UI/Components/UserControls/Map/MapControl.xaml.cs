@@ -153,6 +153,12 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
+      if (LocationRenderer != null!)
+      {
+         LocationRenderer.Dispose();
+         _d3dHost.Dispose();
+      }
+
       Coords = new(this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));

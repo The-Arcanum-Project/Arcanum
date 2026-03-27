@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.Serialization;
 using System.Text;
 using Arcanum.Core.CoreSystems.IO;

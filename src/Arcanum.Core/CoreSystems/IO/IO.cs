@@ -1,7 +1,9 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.FileWatcher;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Microsoft.Win32;
 
 namespace Arcanum.Core.CoreSystems.IO;
 
@@ -58,14 +60,16 @@ public static class IO
    {
       EnsureDirectoryExists(startPath);
 
-      using var dialog = new OpenFileDialog();
-      dialog.InitialDirectory = startPath;
-      dialog.CheckFileExists = false; // 
-      dialog.CheckPathExists = true;
-      dialog.FileName = defaultFileName;
-      dialog.Title = "Select Folder";
+      var dialog = new OpenFileDialog
+      {
+         InitialDirectory = startPath,
+         CheckFileExists = false, // 
+         CheckPathExists = true,
+         FileName = defaultFileName,
+         Title = "Select Folder",
+      };
 
-      if (dialog.ShowDialog() == DialogResult.OK)
+      if (dialog.ShowDialog() == true)
          return Path.GetDirectoryName(dialog.FileName);
 
       return null;
@@ -75,14 +79,14 @@ public static class IO
    {
       EnsureDirectoryExists(startFolder);
 
-      using var dialog = new OpenFileDialog();
+      var dialog = new OpenFileDialog();
       dialog.InitialDirectory = startFolder;
       dialog.CheckFileExists = true;
       dialog.CheckPathExists = true;
       dialog.Filter = filterText;
       dialog.Title = "Select File";
 
-      if (dialog.ShowDialog() == DialogResult.OK)
+      if (dialog.ShowDialog() == true)
          return dialog.FileName;
 
       return null;

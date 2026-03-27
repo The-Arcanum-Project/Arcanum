@@ -1,4 +1,5 @@
-﻿using Arcanum.API.Console;
+﻿using System.Drawing;
+using Arcanum.API.Console;
 using Arcanum.Core.CoreSystems.ErrorSystem;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;

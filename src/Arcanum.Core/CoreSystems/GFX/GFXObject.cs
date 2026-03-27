@@ -1,4 +1,6 @@
-﻿namespace Arcanum.Core.CoreSystems.GFX;
+﻿using System.Drawing;
+
+namespace Arcanum.Core.CoreSystems.GFX;
 
 public class GFXObject(IconType iconType, string filePath)
 {
