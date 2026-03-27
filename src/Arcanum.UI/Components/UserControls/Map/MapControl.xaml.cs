@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -26,6 +27,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
 
 namespace Arcanum.UI.Components.UserControls.Map;
@@ -57,12 +59,14 @@ public partial class MapControl
    private D3D11HwndHost _d3dHost = null!;
 
    private float rot = 0;
-   
+
    private bool _isMapReady;
    private int _mapHeight = -1;
 
    private int _mapWidth = -1;
    private Color4[] _selectionColor = null!;
+
+   private bool _isRenderingLoopActive = false;
 
    public MapControl()
    {
@@ -126,13 +130,14 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
-      for (var index = 0; index < CurrentBackgroundColors.Length; index++)
-      {
-         var color = CurrentBackgroundColors[index];
-         CurrentBackgroundColors[index] =  new Color4(color.R, color.G, color.B, rot);
-      }
-      rot += float.Pi / 180f;
-      rot %= float.Pi * 2;
+      // for (var index = 0; index < CurrentBackgroundColors.Length; index++)
+      // {
+      //    var color = CurrentBackgroundColors[index];
+      //    CurrentBackgroundColors[index] =  new Color4(color.R, color.G, color.B, rot);
+      // }
+      // rot = Random.Shared.NextSingle() * 2 * float.Pi;
+      // rot += float.Pi / 180f;
+      // rot %= float.Pi * 2;
 
       if (_selectionColor.Length != CurrentBackgroundColors.Length)
          _selectionColor = new Color4[CurrentBackgroundColors.Length];
@@ -155,7 +160,7 @@ public partial class MapControl
          var preColor = location.Color.AsInt();
          preColor &= 0x00FFFFFF;
          var color = new Color4(preColor);
-         
+
          colors[location.ColorIndex] = color;
       }
 
@@ -185,6 +190,8 @@ public partial class MapControl
 
       _mapWidth = imageSize.Item1;
       _mapHeight = imageSize.Item2;
+
+      SetMapEffect(2);
    }
 
    private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -258,6 +265,7 @@ public partial class MapControl
 
    private void UpdateRenderer()
    {
+      LocationRenderer.SetMousePosition(CurrentPos.X / _mapWidth, Coords.ImageAspectRatio * (1.0f - CurrentPos.Y / _mapHeight));
       LocationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
                                                  (float)HwndHostContainer.ActualHeight);
       _d3dHost.Invalidate();
@@ -657,4 +665,38 @@ public partial class MapControl
    }
 
    #endregion
+
+   public void SetMapEffect(int mode)
+   {
+      LocationRenderer.CurrentEffectMode = mode;
+
+      // Effect mode 0 is "Standard/Off". If mode > 0, we need the loop.
+      if (mode > 0)
+      {
+         if (!_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = true;
+            CompositionTarget.Rendering += OnRenderingTick;
+         }
+      }
+      else
+      {
+         // If mode is 0, stop the loop to save CPU/GPU resources
+         if (_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = false;
+            CompositionTarget.Rendering -= OnRenderingTick;
+         }
+
+         // Force one last update to reset to standard view
+         UpdateRenderer();
+      }
+   }
+
+   private void OnRenderingTick(object? sender, EventArgs e)
+   {
+      // This ensures that even if the mouse is still, 
+      // the shader gets updated Time and Mouse coordinates every frame.
+      UpdateRenderer();
+   }
 }
