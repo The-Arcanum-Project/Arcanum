@@ -3,8 +3,7 @@ id: "editor.map" # The id of the feature the documentaiton is about. Ids can be 
 title: "Preferences and Settings" # Title of the page.
 summary: "Manage your app preferences, themes, and account data here." # Short summary of what this page is about.
 links: ["security.md", "profile.md"] # Links to e.g. the wiki page for this page.
-searchKeywords: ["preferences", "settings", "account", "themes", "privacy"] # Any number of keywords that are associated
-with this page for search purposes.
+searchKeywords: ["preferences", "settings", "account", "themes", "privacy"] # Any number of keywords that are associated with this page for search purposes.
 category: "SpecializedEditor" # Possible options: SpecializedEditor, Editor, Debug, Configuration, EditorMap
 level: "Module" # Possible options: System, Module, Panel, Widget, Action
 scale: "Standard" # Possible options: Compact, Standard, Major, Full

@@ -3,8 +3,7 @@ id: "editor.queastor" # The id of the feature the documentaiton is about. Ids ca
 title: "Some search and rescue" # Title of the page.
 summary: "Be ambitious" # Short summary of what this page is about.
 links: ["security.md", "profile.md"] # Links to e.g. the wiki page for this page.
-searchKeywords: ["preferences", "settings", "account", "themes", "privacy"] # Any number of keywords that are associated
-with this page for search purposes.
+searchKeywords: ["preferences", "settings", "account", "themes", "privacy"] # Any number of keywords that are associated with this page for search purposes.
 category: "Editor" # Possible options: SpecializedEditor, Editor, Debug, Configuration, EditorMap
 level: "System" # Possible options: System, Module, Panel, Widget, Action
 scale: "Full" # Possible options: Compact, Standard, Major, Full
