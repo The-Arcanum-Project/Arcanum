@@ -1,3 +1,5 @@
+#region
+
 using System.Diagnostics;
 using System.Windows;
 using Arcanum.Core.CoreSystems.ErrorSystem;
@@ -10,11 +12,11 @@ using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 using Common.Logger;
 using Common.UI;
-#if !DEBUG
-using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
-#endif
+
+#endregion
 
 namespace Arcanum.App;
 
@@ -26,13 +28,16 @@ internal static class Program
    [STAThread]
    private static void Main(string[] args) // CHANGED: Added args
    {
-#if !DEBUG
       try
       {
          InternalApplicationRun(args);
       }
       catch (Exception e)
       {
+#if DEBUG
+         if (!DebugConfig.Settings.ProduceCrashLogs)
+            throw;
+#endif
          // In headless mode, write to console too
          if (args.Contains("--headless") || args.Contains("-batch"))
          {
@@ -43,9 +48,6 @@ internal static class Program
          CrashHandler.Show(e);
          Application.Current?.Shutdown(1);
       }
-#else
-      InternalApplicationRun(args);
-#endif
    }
 
    private static void InternalApplicationRun(string[] args)

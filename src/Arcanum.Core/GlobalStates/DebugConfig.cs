@@ -1,4 +1,8 @@
-﻿using Arcanum.Core.Settings.BaseClasses;
+﻿#region
+
+using Arcanum.Core.Settings.BaseClasses;
+
+#endregion
 
 #if DEBUG
 namespace Arcanum.Core.GlobalStates;
@@ -22,9 +26,11 @@ public class DebugConfigSettings() : InternalSearchableSetting(Config.Settings)
    public bool SkipMainMenu { get; set; } = false;
    public bool SuppressAllErrors { get; set; } = false;
    public bool OnlyHandleSpecifiedErrors { get; set; } = false;
+   // ReSharper disable once CollectionNeverUpdated.Global
    public List<string> ErrorsToHandle { get; set; } = [];
    public bool SkipLoading { get; set; } = false;
    public string ExternalDocumentationPath { get; set; } = string.Empty;
    public bool UseExternalDocumentation { get; set; } = false;
+   public bool ProduceCrashLogs { get; set; } = false;
 }
 #endif

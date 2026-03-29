@@ -1,6 +1,10 @@
-﻿using Arcanum.Core.GlobalStates;
+﻿#region
+
+using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Documentation;
 using Common.UI.State;
+
+#endregion
 
 namespace Arcanum.UI.Components.UIHandles;
 
@@ -8,8 +12,18 @@ public class StateHandleImpl : IStateHandle
 {
    public void ApplicationLoadResources()
    {
-      DocuPathResolver.LoadDocumentation(DebugConfig.Settings.UseExternalDocumentation,
+      DocuPathResolver.LoadDocumentation(
+#if DEBUG
+                                         DebugConfig.Settings.UseExternalDocumentation,
+#else
+                                         false
+#endif
                                          true,
-                                         DebugConfig.Settings.ExternalDocumentationPath);
+#if DEBUG
+                                         DebugConfig.Settings.ExternalDocumentationPath
+#else
+                                         null
+#endif
+                                        );
    }
 }

@@ -1,15 +1,19 @@
-﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
+﻿#region
+
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class SuperRegionMapMode : LocationBasedMapMode
+public class SubcontinentMapMode : LocationBasedMapMode
 {
-   public override string Name => "SuperRegions";
-   public override string Description => "Displays the SuperRegions the locations are situated in.";
-   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.SuperRegions;
+   public override string Name => "Subcontinent";
+   public override string Description => "Displays the Subcontinents the locations are situated in.";
+   public override MapModeManager.MapModeType Type => MapModeManager.MapModeType.Subcontinent;
    public override Type[] DisplayTypes => [typeof(SubContinent), typeof(Region), typeof(Area), typeof(Province), typeof(Location)];
    public override bool DarkenWastelands => false;
 
@@ -24,7 +28,7 @@ public class SuperRegionMapMode : LocationBasedMapMode
 
    public override bool IsLandOnly => false;
 
-   public override string[] GetTooltip(Location location) => ["SuperRegion: " + (location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId),];
+   public override string[] GetTooltip(Location location) => ["Subcontinent: " + location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId];
 
    public override string GetLocationText(Location location) => location.GetFirstParentOfType(LocationCollectionType.SuperRegion).UniqueId;
 
