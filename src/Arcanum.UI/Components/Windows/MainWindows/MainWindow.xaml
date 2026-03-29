@@ -417,11 +417,10 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
-                    CornerRadius = "8" Margin = "0, 0, 2, 0">
-                <ScrollViewer>
-                    <ContentPresenter x:Name = "UiPresenter" />
+                    CornerRadius = "8" Margin = "0, 0, 2, 0" Padding = "0">
+                <ScrollViewer VerticalScrollBarVisibility = "Auto" HorizontalScrollBarVisibility = "Auto">
+                    <ContentPresenter x:Name = "UiPresenter" Margin = "0" />
                 </ScrollViewer>
-
             </Border>
 
             <GridSplitter Grid.Column = "1" Width = "4" ResizeBehavior = "PreviousAndNext" />
