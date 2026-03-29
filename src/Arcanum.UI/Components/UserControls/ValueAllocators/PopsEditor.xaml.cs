@@ -1,8 +1,14 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.SpecializedEditors.Management;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -52,5 +58,38 @@ public partial class PopsEditor : ISpecializedEditor
 
    public void OnEnabledChanged(bool value)
    {
+   }
+
+   private void Border_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+   {
+      Console.WriteLine("Right click detected!");
+   }
+
+   private void PopupContent_PreviewKeyDown(object sender, KeyEventArgs e)
+   {
+      if (e.Key != Key.Escape)
+         return;
+
+      if (sender is FrameworkElement element)
+      {
+         var parent = element.Parent;
+         while (parent != null && parent is not Popup)
+            parent = LogicalTreeHelper.GetParent(parent);
+
+         if (parent is Popup popup)
+         {
+            popup.IsOpen = false;
+            e.Handled = true;
+         }
+      }
+   }
+
+   private void Selector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+   {
+      if (sender is ComboBox selector)
+      {
+         var be = selector.GetBindingExpression(Selector.SelectedItemProperty);
+         be?.UpdateSource();
+      }
    }
 }

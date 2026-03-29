@@ -101,6 +101,9 @@
             <styleClasses:BaseButton Content = "Docu Page Test" Margin = "2" Padding = "2"
                                      Click = "DocuPageTest_OnClick" />
 
+            <styleClasses:BaseButton Content = "Throw Random Exception" Margin = "2" Padding = "2"
+                                     Click = "ThrowRandomException_OnClick" />
+
         </StackPanel>
 
         <ContentPresenter Grid.Column = "1" x:Name = "DebugView">

@@ -19,12 +19,14 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- STABLE IDENTIFIER: Used for Pack URIs and filename (Arcanum.exe) -->
-        <AssemblyName>Arcanum Aer Pre-Release</AssemblyName>
-        <!-- DISPLAY NAMES: Used for UI and Window Titles -->
+        <BaseAssemblyName>Arcanum Aer Pre-Release</BaseAssemblyName>
+        <AssemblyName>$(BaseAssemblyName)</AssemblyName>
         <Product>Arcanum Aer</Product>
-        <!-- VERSIONING: The single place to change the number -->
         <Version>1.0.7.2</Version>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <AssemblyName>Debug_$(BaseAssemblyName)</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

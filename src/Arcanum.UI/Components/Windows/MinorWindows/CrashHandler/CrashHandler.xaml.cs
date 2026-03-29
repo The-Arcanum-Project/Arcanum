@@ -1,8 +1,12 @@
-﻿using System.IO;
+﻿#region
+
+using System.IO;
 using System.Text;
 using System.Windows;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.GlobalStates;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 
@@ -14,7 +18,6 @@ public partial class CrashHandler
    {
       _exception = null!;
       InitializeComponent();
-      CloseAllOtherWindows();
    }
 
    private void CloseAllOtherWindows()
@@ -29,6 +32,7 @@ public partial class CrashHandler
    {
       var crashHandler = new CrashHandler { _exception = exception, };
       crashHandler.ShowDialog();
+      crashHandler.CloseAllOtherWindows();
    }
 
    private void CloseButton_Click(object sender, RoutedEventArgs e)

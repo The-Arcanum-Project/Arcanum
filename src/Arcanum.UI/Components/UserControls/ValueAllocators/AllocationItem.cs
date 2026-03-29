@@ -1,9 +1,16 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arcanum.Core.CoreSystems.Nexus;
+using Arcanum.Core.GameObjects.InGame.Cultural;
+using Arcanum.Core.GameObjects.InGame.Religious;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
 using CommunityToolkit.Mvvm.Input;
 using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -12,7 +19,7 @@ public class AllocationItem : ViewModelBase
 {
    private readonly AllocatorViewModel _parent;
    private int _value;
-   private string _name;
+   private string _name = null!;
    private bool _isLocked;
    private readonly Color _mediaColor;
    private int _minLimit;
@@ -166,7 +173,35 @@ public class AllocationItem : ViewModelBase
       }
    }
 
-   public PopDefinition PopDefinition { get; }
+   public PopDefinition PopDefinition
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public Culture PopCulture
+   {
+      get => PopDefinition.Culture;
+      set
+      {
+         Nx.Set(PopDefinition, PopDefinition.Field.Culture, value);
+         OnPropertyChanged();
+      }
+   }
+
+   public Religion PopReligion
+   {
+      get => PopDefinition.Religion;
+      set
+      {
+         Nx.Set(PopDefinition, PopDefinition.Field.Religion, value);
+         OnPropertyChanged();
+      }
+   }
 
    public string PercentageDisplay
    {
@@ -183,7 +218,6 @@ public class AllocationItem : ViewModelBase
    {
       PopDefinition = pop;
       _parent = parent;
-      _name = $"{pop.PopType.UniqueId}: {pop.Culture} {pop.Religion}";
       _value = (int)(pop.Size * 1_000);
       _isLocked = false;
       _minLimit = min;
@@ -196,6 +230,18 @@ public class AllocationItem : ViewModelBase
       DecrementCommand = new RelayCommand(Decrement);
 
       UpdateBrush();
+      PopDefinition.PropertyChanged += (_, e) =>
+      {
+         if (e.PropertyName is nameof(PopDefinition.Culture) or nameof(PopDefinition.Religion))
+            UpdateName();
+      };
+
+      UpdateName();
+   }
+
+   private void UpdateName()
+   {
+      Name = $"{PopDefinition.PopType.UniqueId}: {PopDefinition.Culture} {PopDefinition.Religion}";
    }
 
    private double ConvertToSliderScale(int val)

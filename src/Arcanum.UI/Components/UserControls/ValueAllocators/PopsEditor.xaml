@@ -10,7 +10,7 @@
              xmlns:acb = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls.AutoCompleteBox"
              xmlns:g = "clr-namespace:Arcanum.Core.GlobalStates;assembly=Arcanum.Core"
              xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls" mc:Ignorable = "d"
-             d:DesignHeight = "300" d:DesignWidth = "300" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
+             d:DesignHeight = "600" d:DesignWidth = "600" d:DataContext = "{d:DesignInstance local:AllocatorViewModel}">
 
     <UserControl.InputBindings>
         <!-- Alt+Z Undo -->
@@ -205,18 +205,17 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Height = "20" Background = "{Binding ColorBrush}" ToolTip = "{Binding Name}">
+                            <Border Height = "20" Background = "{StaticResource DefaultBackColorBrush}"
+                                    ToolTip = "{Binding Name}">
                                 <Border.Width>
                                     <MultiBinding Converter = "{StaticResource DistributionToWidthConverter}">
                                         <Binding Path = "Value" />
                                         <Binding Path = "DataContext.TotalLimit"
                                                  RelativeSource = "{RelativeSource AncestorType=UserControl}" />
-                                        <!-- Bind to the Container's Width -->
                                         <Binding ElementName = "CompositionBar" Path = "ActualWidth" />
                                     </MultiBinding>
                                 </Border.Width>
 
-                                <!-- Optional: Show Number inside bar if wide enough -->
                                 <TextBlock Text = "{Binding Value}"
                                            Foreground = "{StaticResource DefaultForeColorBrush}" FontSize = "10"
                                            FontWeight = "Bold" HorizontalAlignment = "Center"
@@ -225,7 +224,6 @@
                                         <Style TargetType = "TextBlock">
                                             <Setter Property = "Visibility" Value = "Visible" />
                                             <Style.Triggers>
-                                                <!-- Hide text if value is 0 -->
                                                 <DataTrigger Binding = "{Binding Value}" Value = "0">
                                                     <Setter Property = "Visibility" Value = "Collapsed" />
                                                 </DataTrigger>
@@ -358,8 +356,67 @@
                                     </Rectangle.Width>
                                 </Rectangle>
 
-                                <TextBlock Text = "{Binding Name}" IsHitTestVisible = "False" VerticalAlignment = "Top"
-                                           Margin = "2,-14,0,0" FontSize = "11" FontWeight = "Bold" Opacity = "0.8" />
+                                <TextBlock x:Name = "TriggerText" Text = "{Binding Name}" FontSize = "11"
+                                           FontWeight = "Bold" Opacity = "0.8" Background = "Transparent"
+                                           VerticalAlignment = "Top" Margin = "2,-14,0,0" IsHitTestVisible = "False" />
+
+                                <ToggleButton x:Name = "PopToggle" Opacity = "0"
+                                              Width = "{Binding ActualWidth, ElementName=TriggerText}"
+                                              Height = "{Binding ActualHeight, ElementName=TriggerText}"
+                                              Cursor = "Hand" VerticalAlignment = "Top" HorizontalAlignment = "Stretch"
+                                              Margin = "2,-14,0,0">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType = "ToggleButton">
+                                            <Border Background = "Transparent" />
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <Popup IsOpen = "{Binding IsChecked, ElementName=PopToggle, Mode=TwoWay}"
+                                       StaysOpen = "False" PlacementTarget = "{Binding ElementName=TriggerText}"
+                                       Placement = "Bottom" AllowsTransparency = "True">
+
+                                    <Border Background = "{StaticResource DefaultBackColorBrush}"
+                                            BorderBrush = "{StaticResource DefaultBorderColorBrush}"
+                                            PreviewKeyDown = "PopupContent_PreviewKeyDown" BorderThickness = "1"
+                                            CornerRadius = "4" Padding = "4" Width = "250">
+
+                                        <StackPanel Orientation = "Vertical">
+                                            <TextBlock Text = "Edit Pop" FontWeight = "Bold" FontSize = "16"
+                                                       TextDecorations = "Underline" Margin = "0,0,0,3"
+                                                       HorizontalAlignment = "Center" />
+
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height = "30" />
+                                                    <RowDefinition Height = "30" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width = "Auto" />
+                                                    <ColumnDefinition Width = "*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Label Grid.Row = "0" Grid.Column = "0" Content = "Culture:"
+                                                       VerticalAlignment = "Center" />
+                                                <acb:AutoCompleteComboBox Grid.Row = "0" Grid.Column = "1"
+                                                                          FullItemsSource = "{Binding Source={x:Static g:Globals.Cultures}, Path=Values}"
+                                                                          SelectedItem = "{Binding PopCulture, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                                          SelectionChanged = "Selector_SelectionChanged"
+                                                                          HorizontalAlignment = "Stretch"
+                                                                          Margin = "0,2" />
+
+                                                <Label Grid.Row = "1" Grid.Column = "0" Content = "Religion:"
+                                                       VerticalAlignment = "Center" />
+                                                <acb:AutoCompleteComboBox Grid.Row = "1" Grid.Column = "1"
+                                                                          FullItemsSource = "{Binding Source={x:Static g:Globals.Religions}, Path=Values}"
+                                                                          SelectedItem = "{Binding PopReligion, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                                          SelectionChanged = "Selector_SelectionChanged"
+                                                                          HorizontalAlignment = "Stretch"
+                                                                          Margin = "0,2" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
                             </Grid>
 
                             <StackPanel Grid.Column = "3" Orientation = "Horizontal">

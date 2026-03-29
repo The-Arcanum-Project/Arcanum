@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -11,12 +13,15 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+using Common.Logger;
 using CommunityToolkit.Mvvm.Input;
 using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 using PopType = Arcanum.Core.GameObjects.InGame.Pops.PopType;
 using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
@@ -245,7 +250,10 @@ public class AllocatorViewModel : ViewModelBase
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
       foreach (var pop in location.Pops)
+      {
          Items.Add(new(this, pop));
+         ArcLog.WritePure($"Added: {pop.GetHashCode()}");
+      }
 
       UpdateMasterLockState();
       UpdateCalculatedInfo(null, new(nameof(Items)));

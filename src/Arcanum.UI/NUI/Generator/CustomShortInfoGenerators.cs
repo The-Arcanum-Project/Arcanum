@@ -1,13 +1,15 @@
-﻿using System.Collections;
-using System.Text;
+﻿#region
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
-using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.UI.Components.UserControls.BaseControls;
+using Arcanum.UI.NUI.Generator.StructConverters;
+
+#endregion
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -50,27 +52,16 @@ public static class CustomShortInfoGenerators
          LastChildFill = true,
       };
 
-      var sb = new StringBuilder();
-
-      foreach (var nxProp in primary.NUISettings.ShortInfoFields)
+      var multiBinding = new MultiBinding
       {
-         var itemType = primary.GetNxItemType(nxProp);
-         object value = null!;
-         Nx.ForceGet(primary, nxProp, ref value);
+         Converter = new Eu5ShortInfoConverter(), Mode = BindingMode.OneWay,
+      };
+      multiBinding.Bindings.Add(new Binding { Source = primary });
 
-         if (itemType == null)
-            sb.Append(value);
-         else if (value is IEnumerable enumerable and not string)
-         {
-            var count = enumerable.Cast<object>().Count();
-            if (count == 0)
-               continue;
-
-            sb.Append(nxProp).Append(": ").Append(count);
-         }
-
-         sb.Append("; ");
-      }
+      multiBinding.Bindings.Add(new Binding(sNxProp.ToString())
+      {
+         Source = primary, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+      });
 
       var headerBlock =
          GridManager.GetNavigationHeader(navH,
@@ -79,13 +70,13 @@ public static class CustomShortInfoGenerators
                                          fontSize,
                                          height,
                                          true);
-      headerBlock.SetBinding(FrameworkElement.TagProperty, new Binding { Source = primary, });
+      headerBlock.SetBinding(FrameworkElement.TagProperty, new Binding { Source = primary });
       headerBlock.Margin = new(6, 0, 0, 0);
 
       var dashBlock = ControlFactory.GetDashBlock(fontSize);
 
-      var infoBlock =
-         ControlFactory.GetHeaderTextBlock(fontSize, false, sb.ToString().TrimEnd(' ', ';'), height: height);
+      var infoBlock = ControlFactory.GetHeaderTextBlock(fontSize, false, string.Empty, height: height);
+      infoBlock.SetBinding(TextBlock.TextProperty, multiBinding);
       infoBlock.TextTrimming = TextTrimming.CharacterEllipsis;
       infoBlock.TextWrapping = TextWrapping.NoWrap;
       infoBlock.HorizontalAlignment = HorizontalAlignment.Left;
