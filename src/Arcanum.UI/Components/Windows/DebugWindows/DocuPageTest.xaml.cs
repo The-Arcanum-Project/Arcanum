@@ -1,10 +1,16 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Documentation;
+using Arcanum.UI.Documentation.Renderers;
+using Markdig;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.DebugWindows;
 
@@ -17,6 +23,18 @@ public partial class DocuPageTest
       DocuPages = DocuPathResolver.GetAllDocuPages;
       DataContext = this;
       InitializeComponent();
+
+      var uiPipelineBuilder = new MarkdownPipelineBuilder()
+                             .UseAdvancedExtensions()
+                             .UseAlertBlocks()
+                             .UseAutoIdentifiers()
+                             .UseGenericAttributes()
+                             .UseCustomContainers();
+
+      uiPipelineBuilder.Extensions.Add(new WpfCustomControlsExtension());
+      uiPipelineBuilder.Extensions.Add(new WpfImageResourceExtension());
+
+      Viewer.Pipeline = uiPipelineBuilder.Build();
    }
 
    private void DocuPageListView_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -1,10 +1,20 @@
-﻿using System.IO;
+﻿#region
+
+#endregion
+
+#region
+
+using System.IO;
+using System.Text.RegularExpressions;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.UI.Documentation.Renderers;
 using Markdig;
 using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+
+#endregion
 
 namespace Arcanum.UI.Documentation;
 
@@ -16,10 +26,18 @@ public static class DocuPageParser
                                                            .WithTypeConverter(new FeatureIdYamlConverter()) // Custom converter for FeatureId
                                                            .Build();
 
-   private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
-                                                      .UseYamlFrontMatter()
-                                                      .UseAlertBlocks() // Supports [!tip]
-                                                      .Build();
+   private static readonly MarkdownPipeline Pipeline;
+
+   static DocuPageParser()
+   {
+      var builder = new MarkdownPipelineBuilder()
+                   .UseYamlFrontMatter()
+                   .UseAdvancedExtensions()
+                   .UseAlertBlocks();
+
+      builder.Extensions.Add(new WpfAlertExtension());
+      Pipeline = builder.Build();
+   }
 
    // Parse from file
    public static DocuPage? Parse(string path)
@@ -33,29 +51,33 @@ public static class DocuPageParser
 
    private static DocuPage? ParseInternal(string content)
    {
-      if (string.IsNullOrWhiteSpace(content))
-         return null;
-
-      // Parse the Markdown Document structure
       var document = Markdown.Parse(content, Pipeline);
-
-      // Extract and Deserialize YAML
       var yamlBlock = document.Descendants<YamlFrontMatterBlock>().FirstOrDefault();
       if (yamlBlock == null)
          return null;
 
-      // Get the raw YAML string from the block
-      var yamlRaw = content.Substring(yamlBlock.Span.Start, yamlBlock.Span.Length)
-                           .Trim('-', '\r', '\n'); // Remove the "---" markers
-
+      var yamlRaw = content.Substring(yamlBlock.Span.Start, yamlBlock.Span.Length).Trim('-', '\r', '\n');
       var page = YamlDeserializer.Deserialize<DocuPage>(yamlRaw);
 
-      // Handle Content and Section Splitting
-      // We calculate where the YAML ends to get the body
-      var body = content.Substring(yamlBlock.Span.End).Trim('-', '\r', '\n');
+      // Get the whole body after YAML
+      var body = content.Substring(yamlBlock.Span.End).Trim();
 
-      // TODO section parsing
-      page.Content = body;
+      // Split by the section marker: ---section:name---
+      var sectionParts = Regex.Split(body, @"---section:(\w+)---");
+
+      // The first part is always the main 'Content'
+      page.Content = sectionParts[0].Trim('-', '\r', '\n');
+
+      // The following parts come in pairs: [SectionName, SectionContent]
+      var sections = new List<DocuSection>();
+      for (var i = 1; i < sectionParts.Length; i += 2)
+         if (Enum.TryParse<FeatureSection>(sectionParts[i], true, out var sectionType))
+            sections.Add(new()
+            {
+               Section = sectionType, Content = sectionParts[i + 1].Trim('-', '\r', '\n'),
+            });
+
+      page.Sections = sections.ToArray();
 
       return page;
    }

@@ -31,6 +31,7 @@
     <ItemGroup>
         <Resource Include="Assets\**\*.png"/>
         <Resource Include="Assets\**\*.ico"/>
+        <Resource Include="Documentation\DocuPages\Images\*.png"/>
         <EmbeddedResource Include="DirectX\Shaders\ExampleTriangle.hlsl"/>
         <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl"/>
         <EmbeddedResource Include="DirectX\Shaders\Overlay.hlsl"/>

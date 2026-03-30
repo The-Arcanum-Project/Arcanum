@@ -15,6 +15,7 @@ status: "Beta" # Possible options: Stable, Beta, Experimental, Legacy
 
 This is the long-form text that shows in the main help window.
 
+[Jump to Alerts](#alerts-demonstration)
 ## Sub-Headings
 
 ### Sub-Sub-Headings
@@ -32,8 +33,18 @@ To Reference another feature reference it's id:
 To have an expanding tooltip on an element:
 [Hover over me](tt: "This is the tooltip text")
 
-To show an image:
-![A picture of a cat](cat.jpg)
+#### Showing an image
+scale Options: None, Fill, Uniform, UniformToFill
+Align Options: Left, Center, Right
+
+Centered, 200px wide 
+![Cat](cat.png){.center width=200}
+
+Right-aligned, fixed height, uniform fill
+![Cat](cat.png){.right height=150 scale=UniformToFill}
+
+Stretched to fill the page entirely
+![Cat](cat.png){.stretch scale=Fill}
 
 To have a normal link:
 [Click here](https://github.com/The-Arcanum-Project/Arcanum)
@@ -45,17 +56,53 @@ To have a gifs:
 Console.WriteLine("Code blocks are also supported!");
 ```
 
+
 Here is some simle inline code: `var x = 10;`
+
+# Alerts Demonstration
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+> [!TIP]
+> Optional information to help a user be more successful.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+> [!CAUTION]
+> Negative potential consequences of an action.
+
+# Tabs Demonstration
+
+:::: tabs
+::: tab C#
+```csharp
+var x = 10;
+Console.WriteLine(x);
+```
+:::
+::: tab VB
+```vb
+Dim x = 10
+Console.WriteLine(x)
+```
+:::
+::: tab Info
+You can put any markdown inside a tab, including images or other links!
+Click Here
+:::
+::::
 
 ---
 A separator
 
-To have a tip:
-> Double-clicking a recent project will open it directly
-> Double-clicking a recent project will open it directly
-> Double-clicking a recent project will open it directly
+Just some inline highlight
 > Double-clicking a recent project will open it directly
 
 
----section:technical---
+---section:Debug---
 This part only shows up for 'Advanced' users or in specific tech-popups.
