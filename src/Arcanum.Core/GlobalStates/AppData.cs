@@ -17,7 +17,7 @@ public static class AppData
    }
 
    public static bool IsHeadless { get; set; } = false;
-   private static readonly Assembly Assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+   public static readonly Assembly Assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 
    public static VersionNumber AppVersion { get; }
    public static string ProductName { get; } =

@@ -1,4 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿#region
+
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -41,6 +43,8 @@ using Common.UI.MBox;
 using Application = System.Windows.Application;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using NUINavigation = Arcanum.UI.NUI.NUINavigation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.MainWindows;
 
@@ -768,5 +772,13 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          return;
 
       SelectionManager.SelectWater = selectWater.IsChecked ?? true;
+   }
+
+   private void Popup_Opened(object? sender, EventArgs e)
+   {
+      if (DataContext is not MainWindowView viewModel)
+         return;
+
+      viewModel.EasterEgg2026.SetMap(MainMap);
    }
 }

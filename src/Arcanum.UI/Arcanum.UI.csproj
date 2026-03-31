@@ -38,9 +38,12 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="Markdig" Version="1.1.1"/>
+        <PackageReference Include="Markdig.Wpf" Version="0.5.0.1"/>
         <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135"/>
         <PackageReference Include="Vortice.D3DCompiler" Version="3.6.2"/>
         <PackageReference Include="Vortice.Direct3D11" Version="3.6.2"/>
+        <PackageReference Include="YamlDotNet" Version="16.3.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -54,6 +57,11 @@
             <XamlRuntime>Wpf</XamlRuntime>
             <SubType>Designer</SubType>
         </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Components\Windows\AprilFools\"/>
+        <Folder Include="Documentation\DocuPages\Images\"/>
     </ItemGroup>
 
 </Project>

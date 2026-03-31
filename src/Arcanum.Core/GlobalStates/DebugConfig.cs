@@ -24,5 +24,7 @@ public class DebugConfigSettings() : InternalSearchableSetting(Config.Settings)
    public bool OnlyHandleSpecifiedErrors { get; set; } = false;
    public List<string> ErrorsToHandle { get; set; } = [];
    public bool SkipLoading { get; set; } = false;
+   public string ExternalDocumentationPath { get; set; } = string.Empty;
+   public bool UseExternalDocumentation { get; set; } = false;
 }
 #endif

@@ -279,4 +279,9 @@ public partial class DebugPanelGrid
          ArcLog.WritePure($"{t,-20} | {result}");
       }
    }
+
+   private void DocuPageTest_OnClick(object sender, RoutedEventArgs e)
+   {
+      new DocuPageTest().Show();
+   }
 }

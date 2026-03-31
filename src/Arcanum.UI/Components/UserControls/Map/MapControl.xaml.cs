@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿#region
+
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -7,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -20,13 +23,17 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
+using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Xaml.Behaviors;
 using Vortice.Mathematics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.Map;
 
@@ -57,10 +64,20 @@ public partial class MapControl
    private D3D11HwndHost _d3dHost = null!;
 
    private bool _isMapReady;
+
+   private bool _isRenderingLoopActive;
    private int _mapHeight = -1;
 
    private int _mapWidth = -1;
    private Color4[] _selectionColor = null!;
+
+   private float _rot;
+
+   #region EasterEgg2026
+
+   private bool _easter2026IsEnabled;
+
+   #endregion
 
    public MapControl()
    {
@@ -124,6 +141,21 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
+      for (var index = 0; index < CurrentBackgroundColors.Length; index++)
+      {
+         var color = CurrentBackgroundColors[index];
+         CurrentBackgroundColors[index] = new(color.R, color.G, color.B, _rot);
+      }
+
+      if (_easter2026IsEnabled)
+      {
+         const float rotVal = float.Pi / 180f / 8f;
+         _rot += rotVal;
+         _rot %= float.Pi * 2;
+      }
+      else
+         _rot = 0;
+
       if (_selectionColor.Length != CurrentBackgroundColors.Length)
          _selectionColor = new Color4[CurrentBackgroundColors.Length];
       Array.Copy(CurrentBackgroundColors, _selectionColor, CurrentBackgroundColors.Length);
@@ -141,7 +173,11 @@ public partial class MapControl
 
       foreach (var location in locations)
       {
-         var color = new Color4(location.Color.AsInt());
+         // Make alpha always 0
+         var preColor = location.Color.AsInt();
+         preColor &= 0x00FFFFFF;
+         var color = new Color4(preColor);
+
          colors[location.ColorIndex] = color;
       }
 
@@ -171,6 +207,11 @@ public partial class MapControl
 
       _mapWidth = imageSize.Item1;
       _mapHeight = imageSize.Item2;
+
+      if (EasterEgg2026.IsAprilFoolsTimeFrame)
+         SetMapEffect(LocationRenderer.CurrentEffectMode, EasterEgg2026.IsAprilFoolsTimeFrame);
+      else
+         SetMapEffect(0, false);
    }
 
    private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -244,6 +285,7 @@ public partial class MapControl
 
    private void UpdateRenderer()
    {
+      LocationRenderer.SetMousePosition(CurrentPos.X / _mapWidth, Coords.ImageAspectRatio * (1.0f - CurrentPos.Y / _mapHeight));
       LocationRenderer.SetOrthographicProjection((float)HwndHostContainer.ActualWidth,
                                                  (float)HwndHostContainer.ActualHeight);
       _d3dHost.Invalidate();
@@ -497,13 +539,9 @@ public partial class MapControl
          return;
       }
 
-      for (int i = contextMenu.Items.Count - 1; i >= 0; i--)
-      {
+      for (var i = contextMenu.Items.Count - 1; i >= 0; i--)
          if (contextMenu.Items[i] is FrameworkElement { Tag: dynamicTag })
-         {
             contextMenu.Items.RemoveAt(i);
-         }
-      }
 
       _contextMenuClickLocation = CurrentPos;
 
@@ -511,7 +549,7 @@ public partial class MapControl
       var mapModeOptions = MapModeManager.GetCurrent().GetContextMenuOptions();
       if (mapModeOptions != null)
       {
-         contextMenu.Items.Add(new Separator() { Tag = dynamicTag, });
+         contextMenu.Items.Add(new Separator { Tag = dynamicTag });
 
          foreach (var option in mapModeOptions)
          {
@@ -589,6 +627,38 @@ public partial class MapControl
 
          Clipboard.SetText(str);
       }
+   }
+
+   public void SetMapEffect(int mode, bool enabled)
+   {
+      LocationRenderer.CurrentEffectMode = mode;
+      _easter2026IsEnabled = enabled;
+
+      if (mode > 0)
+      {
+         if (!_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = true;
+            CompositionTarget.Rendering += OnRenderingTick;
+         }
+      }
+      else
+      {
+         if (_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = false;
+            CompositionTarget.Rendering -= OnRenderingTick;
+         }
+
+         UpdateRenderer();
+      }
+   }
+
+   private void OnRenderingTick(object? sender, EventArgs e)
+   {
+      // This ensures that even if the mouse is still, 
+      // the shader gets updated Time and Mouse coordinates every frame.
+      UpdateRenderer();
    }
 
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);

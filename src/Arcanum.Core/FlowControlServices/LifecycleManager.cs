@@ -54,6 +54,7 @@ public class LifecycleManager
       LoadConfig();
       InitializeCoreServices(host);
       Queastor.GlobalInstance.IndexSettings();
+      UIHandle.Instance.StateHandle.ApplicationLoadResources();
 
       // Step 2: Initialize plugin host services
       host.RegisterDefaultServices();

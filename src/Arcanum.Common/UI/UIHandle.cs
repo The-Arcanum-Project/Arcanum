@@ -1,5 +1,6 @@
 ﻿using Common.UI.Interfaces;
 using Common.UI.Map;
+using Common.UI.State;
 
 namespace Common.UI;
 
@@ -20,4 +21,5 @@ public class UIHandle
    public IMapHandle MapHandle { get; set; } = null!;
    public ILogWindowHandle LogWindowHandle { get; set; } = null!;
    public IMapInterface MapInterface { get; set; } = null!;
+   public IStateHandle StateHandle { get; set; } = null!;
 }
