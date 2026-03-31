@@ -12,20 +12,19 @@ cbuffer Constants : register(b0)
 // 3: Magnet (Look at mouse)
 // 4: Swirl (Vortex)
 
-// The new structured buffer for our color lookup table
 StructuredBuffer<float4> ColorLookup : register(t0);
 
 struct VSInput
 {
     float2 Position : POSITION;
     float2 CenterPosition: CENTER;
-    uint PolygonId : POLYGON_ID; // Changed from Color
+    uint PolygonId : POLYGON_ID;
 };
 
 struct PSInput
 {
     float4 Position : SV_POSITION;
-    float4 Color: COLOR; // Pass the ID to the pixel shader
+    float4 Color: COLOR; 
 };
 
 PSInput VSMain(VSInput input)
@@ -39,7 +38,6 @@ PSInput VSMain(VSInput input)
     float aspect = Settings.w;
     int mode = (int)EffectMode;
 
-    // Default rotation from your Alpha channel
     float angle = color.a;
 
     // --- EFFECT LOGIC ---
@@ -77,7 +75,6 @@ PSInput VSMain(VSInput input)
     rotated.x = local_pos.x * cos_a - local_pos.y * sin_a;
     rotated.y = local_pos.x * sin_a + local_pos.y * cos_a;
 
-    // Fix alpha for rendering
     color.a = 1.0f;
 
     float4 pos = float4(rotated + input.CenterPosition, 0.0f, 1.0f);
@@ -88,6 +85,5 @@ PSInput VSMain(VSInput input)
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    // Look up the color from the buffer using the PolygonId
     return input.Color;
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿#region
+
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -21,6 +23,7 @@ using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.Imagery;
 using Arcanum.UI.Components.Behaviors;
+using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.DirectX;
 using Arcanum.UI.MapInteraction;
 using CommunityToolkit.Mvvm.Input;
@@ -29,6 +32,8 @@ using Vortice.Mathematics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.Map;
 
@@ -58,15 +63,21 @@ public partial class MapControl
 
    private D3D11HwndHost _d3dHost = null!;
 
-   private float rot = 0;
-
    private bool _isMapReady;
+
+   private bool _isRenderingLoopActive;
    private int _mapHeight = -1;
 
    private int _mapWidth = -1;
    private Color4[] _selectionColor = null!;
 
-   private bool _isRenderingLoopActive = false;
+   private float _rot;
+
+   #region EasterEgg2026
+
+   private bool _easter2026IsEnabled;
+
+   #endregion
 
    public MapControl()
    {
@@ -130,14 +141,20 @@ public partial class MapControl
       if (!MapModeManager.IsMapReady)
          return;
 
-      // for (var index = 0; index < CurrentBackgroundColors.Length; index++)
-      // {
-      //    var color = CurrentBackgroundColors[index];
-      //    CurrentBackgroundColors[index] =  new Color4(color.R, color.G, color.B, rot);
-      // }
-      // rot = Random.Shared.NextSingle() * 2 * float.Pi;
-      // rot += float.Pi / 180f;
-      // rot %= float.Pi * 2;
+      for (var index = 0; index < CurrentBackgroundColors.Length; index++)
+      {
+         var color = CurrentBackgroundColors[index];
+         CurrentBackgroundColors[index] = new(color.R, color.G, color.B, _rot);
+      }
+
+      if (_easter2026IsEnabled)
+      {
+         const float rotVal = float.Pi / 180f / 8f;
+         _rot += rotVal;
+         _rot %= float.Pi * 2;
+      }
+      else
+         _rot = 0;
 
       if (_selectionColor.Length != CurrentBackgroundColors.Length)
          _selectionColor = new Color4[CurrentBackgroundColors.Length];
@@ -191,7 +208,10 @@ public partial class MapControl
       _mapWidth = imageSize.Item1;
       _mapHeight = imageSize.Item2;
 
-      SetMapEffect(2);
+      if (EasterEgg2026.IsAprilFoolsTimeFrame)
+         SetMapEffect(LocationRenderer.CurrentEffectMode, EasterEgg2026.IsAprilFoolsTimeFrame);
+      else
+         SetMapEffect(0, false);
    }
 
    private void SelectionManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -519,13 +539,9 @@ public partial class MapControl
          return;
       }
 
-      for (int i = contextMenu.Items.Count - 1; i >= 0; i--)
-      {
+      for (var i = contextMenu.Items.Count - 1; i >= 0; i--)
          if (contextMenu.Items[i] is FrameworkElement { Tag: dynamicTag })
-         {
             contextMenu.Items.RemoveAt(i);
-         }
-      }
 
       _contextMenuClickLocation = CurrentPos;
 
@@ -533,7 +549,7 @@ public partial class MapControl
       var mapModeOptions = MapModeManager.GetCurrent().GetContextMenuOptions();
       if (mapModeOptions != null)
       {
-         contextMenu.Items.Add(new Separator() { Tag = dynamicTag, });
+         contextMenu.Items.Add(new Separator { Tag = dynamicTag });
 
          foreach (var option in mapModeOptions)
          {
@@ -613,6 +629,38 @@ public partial class MapControl
       }
    }
 
+   public void SetMapEffect(int mode, bool enabled)
+   {
+      LocationRenderer.CurrentEffectMode = mode;
+      _easter2026IsEnabled = enabled;
+
+      if (mode > 0)
+      {
+         if (!_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = true;
+            CompositionTarget.Rendering += OnRenderingTick;
+         }
+      }
+      else
+      {
+         if (_isRenderingLoopActive)
+         {
+            _isRenderingLoopActive = false;
+            CompositionTarget.Rendering -= OnRenderingTick;
+         }
+
+         UpdateRenderer();
+      }
+   }
+
+   private void OnRenderingTick(object? sender, EventArgs e)
+   {
+      // This ensures that even if the mouse is still, 
+      // the shader gets updated Time and Mouse coordinates every frame.
+      UpdateRenderer();
+   }
+
    private readonly record struct RenderTask(Polygon Polygon, int YStart, int YEnd, long EstimatedCost);
 
    private readonly unsafe struct BitmapPixelDrawer(byte* scan0, int stride, int width, int height, byte r, byte g, byte b)
@@ -665,38 +713,4 @@ public partial class MapControl
    }
 
    #endregion
-
-   public void SetMapEffect(int mode)
-   {
-      LocationRenderer.CurrentEffectMode = mode;
-
-      // Effect mode 0 is "Standard/Off". If mode > 0, we need the loop.
-      if (mode > 0)
-      {
-         if (!_isRenderingLoopActive)
-         {
-            _isRenderingLoopActive = true;
-            CompositionTarget.Rendering += OnRenderingTick;
-         }
-      }
-      else
-      {
-         // If mode is 0, stop the loop to save CPU/GPU resources
-         if (_isRenderingLoopActive)
-         {
-            _isRenderingLoopActive = false;
-            CompositionTarget.Rendering -= OnRenderingTick;
-         }
-
-         // Force one last update to reset to standard view
-         UpdateRenderer();
-      }
-   }
-
-   private void OnRenderingTick(object? sender, EventArgs e)
-   {
-      // This ensures that even if the mouse is still, 
-      // the shader gets updated Time and Mouse coordinates every frame.
-      UpdateRenderer();
-   }
 }

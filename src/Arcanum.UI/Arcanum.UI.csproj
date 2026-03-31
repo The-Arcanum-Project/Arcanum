@@ -60,6 +60,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Components\Windows\AprilFools\"/>
         <Folder Include="Documentation\DocuPages\Images\"/>
     </ItemGroup>
 

@@ -51,6 +51,7 @@
                 </Style.Setters>
             </Style>
             <converters:Vector2ToStringConverter x:Key = "Vector2ToStringConverter" />
+            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
         </ResourceDictionary>
     </styleClasses:BaseWindow.Resources>
 
@@ -490,6 +491,45 @@
                                   IsChecked = "True" Unchecked = "SelectWastelands_CheckChanged">
                             Select Wastelands
                         </CheckBox>
+                        <ToggleButton x:Name = "EasterEggPopButton" Margin = "0" Padding = "0" Height = "20"
+                                      VerticalAlignment = "Center" HorizontalAlignment = "Center" BorderThickness = "0"
+                                      Background = "Transparent" BorderBrush = "{StaticResource DefaultBackColorBrush}"
+                                      Visibility = "{Binding EasterEgg2026.IsAprilFoolsTimeFrame, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Path Data = "{StaticResource Icon.EasterEgg}"
+                                  Stroke = "{StaticResource DefaultForeColorBrush}" StrokeThickness = "1.2"
+                                  Stretch = "Uniform" Width = "18" Height = "18" HorizontalAlignment = "Center"
+                                  VerticalAlignment = "Center" StrokeLineJoin = "Round" StrokeStartLineCap = "Round"
+                                  StrokeEndLineCap = "Round" />
+                        </ToggleButton>
+
+                        <Popup IsOpen = "{Binding IsChecked, ElementName=EasterEggPopButton}"
+                               PlacementTarget = "{Binding ElementName=EasterEggPopButton}" Placement = "Bottom"
+                               StaysOpen = "False" Opened = "Popup_Opened">
+
+                            <Border Background = "{StaticResource DefaultBackColorBrush}"
+                                    BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1"
+                                    CornerRadius = "4" Padding = "5" Width = "180">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width = "*" />
+                                        <ColumnDefinition Width = "*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height = "Auto" />
+                                        <RowDefinition Height = "Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Column = "0" Grid.Row = "0" Text = "Enabled: " />
+                                    <CheckBox Grid.Column = "1" Grid.Row = "0"
+                                              IsChecked = "{Binding EasterEgg2026.Enabled}" />
+
+                                    <TextBlock Grid.Column = "0" Grid.Row = "1" Text = "Select Mode:" />
+                                    <ComboBox Grid.Column = "1" Grid.Row = "1" SelectedIndex = "0"
+                                              ItemsSource = "{Binding EasterEgg2026.EasterEggStates}"
+                                              SelectedItem = "{Binding EasterEgg2026.StateEnum, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                        </Popup>
                     </StackPanel>
                 </Grid>
 
