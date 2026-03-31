@@ -1,4 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
+
+#endregion
 
 namespace Arcanum.Core.Utils;
 
@@ -6,6 +10,7 @@ public static class VersionNumbers
 {
    public static readonly VersionNumber V107 = new(1, 0, 7);
    public static readonly VersionNumber V1072 = new(1, 0, 7, 2);
+   public static readonly VersionNumber V1073 = new(1, 0, 7, 3);
 
    public static VersionNumber Current => AppData.AppVersion;
 
