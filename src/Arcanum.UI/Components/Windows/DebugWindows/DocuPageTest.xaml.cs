@@ -1,14 +1,18 @@
 ﻿#region
 
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Navigation;
-using Arcanum.UI.AppFeatures;
+using System.Windows.Threading;
+using Arcanum.UI.Commands;
 using Arcanum.UI.Documentation;
 using Arcanum.UI.Documentation.Renderers;
 using Markdig;
+using Markdig.Extensions.AutoIdentifiers;
+using Block = System.Windows.Documents.Block;
 
 #endregion
 
@@ -16,8 +20,6 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class DocuPageTest
 {
-   public DocuPage[] DocuPages { get; }
-
    public DocuPageTest()
    {
       DocuPages = DocuPathResolver.GetAllDocuPages;
@@ -27,7 +29,7 @@ public partial class DocuPageTest
       var uiPipelineBuilder = new MarkdownPipelineBuilder()
                              .UseAdvancedExtensions()
                              .UseAlertBlocks()
-                             .UseAutoIdentifiers()
+                             .UseAutoIdentifiers(AutoIdentifierOptions.GitHub)
                              .UseGenericAttributes()
                              .UseCustomContainers();
 
@@ -36,6 +38,8 @@ public partial class DocuPageTest
 
       Viewer.Pipeline = uiPipelineBuilder.Build();
    }
+
+   public DocuPage[] DocuPages { get; }
 
    private void DocuPageListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
    {
@@ -57,44 +61,175 @@ public partial class DocuPageTest
       Viewer.Markdown = page.Content;
    }
 
-   private void OnLinkClick(object sender, RequestNavigateEventArgs e)
-   {
-   }
-
    private void OpenHyperlink(object sender, ExecutedRoutedEventArgs e)
    {
-      string uri = e.Parameter.ToString();
+      var current = e.OriginalSource as DependencyObject;
+      Hyperlink hyperlink = null!;
 
-      // 1. Cross-Reference (id:Editor.Map)
-      if (uri.StartsWith("id:"))
+      while (current != null)
       {
-         var id = new FeatureId(uri.Substring(3));
-         var page = DocuPathResolver.GetPage(id);
-         if (page != null)
-            DisplayPage(page);
+         if (current is Hyperlink hl)
+         {
+            hyperlink = hl;
+            break;
+         }
+
+         current = LogicalTreeHelper.GetParent(current);
       }
 
-      // 2. Commands (cmd:OpenCalc)
+      var uri = e.Parameter?.ToString() ?? string.Empty;
+
+      if ((string.IsNullOrEmpty(uri) || uri == "#") && hyperlink != null!)
+      {
+         var linkText = new TextRange(hyperlink.ContentStart, hyperlink.ContentEnd).Text;
+
+         if (!string.IsNullOrEmpty(linkText) && Viewer.Markdown != null)
+         {
+            var match = Regex.Match(Viewer.Markdown,
+                                    $@"\[{Regex.Escape(linkText)}\]\((.*?)\)");
+            if (match.Success)
+               uri = match.Groups[1].Value;
+         }
+      }
+
+      if (string.IsNullOrEmpty(uri) || uri == "#")
+         return;
+
+      // Internal Tag Links (#Fragment)
+      if (uri.StartsWith("#"))
+         ScrollToTag(uri.TrimStart('#'));
+
+      // Internal Page Links (id:PageId#Fragment)
+      else if (uri.StartsWith("id:"))
+      {
+         var parts = uri[3..].Split('#');
+         var pageId = parts[0];
+         var fragment = parts.Length > 1 ? parts[1] : null;
+
+         var page = DocuPathResolver.GetPage(new(pageId));
+         if (page != null)
+         {
+            DisplayPage(page);
+            if (!string.IsNullOrEmpty(fragment))
+               Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                                      () => ScrollToTag(fragment));
+         }
+      }
+
+      // Commands (cmd:OpenCalc)
       else if (uri.StartsWith("cmd:"))
       {
-         string command = uri.Substring(4);
-         // ExecuteAppCommand(command);
+         var command = uri[4..];
+         if (CommandRegistry.TryGetFromString(command, out var cmd))
+            if (cmd.CanExecute(null))
+               cmd.Execute(null);
       }
 
-      // 3. Custom Tooltip Link [Text](tooltip:"Content")
-      else if (uri.StartsWith("tooltip:"))
-      {
-         // For tooltips as links, you might want to show a Popup or a Message
-         string message = Uri.UnescapeDataString(uri.Substring(8)).Trim('"');
-         MessageBox.Show(message, "Quick Info");
-      }
-
-      // 4. Standard Web Links
+      // Standard Web Links
       else if (uri.StartsWith("http"))
-      {
          Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
+
+      e.Handled = true;
+   }
+
+   private void ScrollToTag(string tag)
+   {
+      if (string.IsNullOrEmpty(tag) || Viewer.Markdown == null || Viewer.Document == null)
+         return;
+
+      var targetText = GetTargetTextFromMarkdown(Viewer.Markdown, tag.ToLower().Trim());
+
+      if (string.IsNullOrEmpty(targetText))
+         return;
+
+      FindElementByText(Viewer.Document, targetText)?.BringIntoView();
+   }
+
+   private static string? GetTargetTextFromMarkdown(string markdown, string slug)
+   {
+      if (string.IsNullOrEmpty(markdown))
+         return null;
+
+      // Custom Anchor like `{#my-anchor}`
+      var pattern = $@"(.*)\{{#{Regex.Escape(slug)}\}}";
+      var customIdMatch = Regex.Match(markdown, pattern);
+      if (customIdMatch.Success)
+         return customIdMatch.Groups[1].Value.Trim();
+
+      // Auto-generated Heading like `# Alerts Demonstration`
+      var headingMatches = Regex.Matches(markdown, @"^(#{1,6})\s+(.*)$", RegexOptions.Multiline);
+      foreach (Match match in headingMatches)
+      {
+         var headingText = match.Groups[2].Value.Trim();
+
+         var headingSlug = headingText.ToLower().Replace(" ", "-");
+         headingSlug = Regex.Replace(headingSlug, @"[^a-z0-9\-]", "");
+
+         if (headingSlug == slug)
+            return headingText;
       }
 
-      e.Handled = true; // Prevents the system from trying to "launch" the URI
+      return null;
+   }
+
+   private static FrameworkContentElement? FindElementByText(FlowDocument doc, string targetText)
+   {
+      if (string.IsNullOrEmpty(targetText))
+         return null;
+
+      foreach (var block in doc.Blocks)
+      {
+         var result = SearchBlockForText(block, targetText);
+         if (result != null)
+            return result;
+      }
+
+      return null;
+   }
+
+   private static FrameworkContentElement? SearchBlockForText(Block block, string targetText)
+   {
+      var blockText = new TextRange(block.ContentStart, block.ContentEnd).Text.Trim();
+
+      // Prioritize an exact match (like a standalone heading)
+      if (blockText.Equals(targetText, StringComparison.OrdinalIgnoreCase))
+         return block;
+
+      // Fallback to a partial match (if it's text inside a larger paragraph)
+      if (blockText.Contains(targetText, StringComparison.OrdinalIgnoreCase))
+         return block;
+
+      switch (block)
+      {
+         // Drill down into Sections (Tabs, Alerts, Custom Containers)
+         case Section section:
+         {
+            foreach (var subBlock in section.Blocks)
+            {
+               var result = SearchBlockForText(subBlock, targetText);
+               if (result != null)
+                  return result;
+            }
+
+            break;
+         }
+         // Drill down into Lists
+         case List list:
+         {
+            foreach (var listItem in list.ListItems)
+            {
+               foreach (var subBlock in listItem.Blocks)
+               {
+                  var result = SearchBlockForText(subBlock, targetText);
+                  if (result != null)
+                     return result;
+               }
+            }
+
+            break;
+         }
+      }
+
+      return null;
    }
 }
