@@ -1,17 +1,24 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
+
+#endregion
 
 namespace Arcanum.UI.Components.Helpers;
 
 public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
 {
-   private readonly Action<string> _writeAction = writeAction ?? throw new ArgumentNullException(nameof(writeAction));
    private readonly StringBuilder _buffer = new();
    private readonly Dispatcher _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+   private readonly Action<string> _writeAction = writeAction ?? throw new ArgumentNullException(nameof(writeAction));
+
+   public override Encoding Encoding => Encoding.UTF8;
 
    public override void Write(char value)
    {
@@ -49,42 +56,37 @@ public class ViewModelTextWriter(Action<string> writeAction) : TextWriter
             });
       }
    }
-
-   public override Encoding Encoding => Encoding.UTF8;
 }
+
+public record LogEntry(string Message, Brush Color);
 
 public class LogViewModel : INotifyPropertyChanged
 {
-   private readonly StringBuilder _logContent = new();
-
-   public string LogText
-   {
-      get;
-      set
-      {
-         field = value;
-         OnPropertyChanged();
-      }
-   } = "";
-
-   public StreamWriter LogWriter { get; }
-
    public LogViewModel()
    {
       var customWriter = new ViewModelTextWriter(newLine =>
       {
-         _logContent.AppendLine(newLine);
-         LogText = _logContent.ToString();
+         var color = (Brush)Application.Current?.FindResource("DefaultForeColorBrush")!;
+         if (newLine.Contains("[ERR]"))
+            color = Brushes.Tomato;
+         else if (newLine.Contains("[WRN]"))
+            color = Brushes.Gold;
+         else if (newLine.Contains("[INF]"))
+            color = Brushes.SkyBlue;
+         else if (newLine.Contains("[DBG]"))
+            color = Brushes.LightGreen;
+
+         PendingLogs.Enqueue(new(newLine, color));
       });
 
-      LogWriter = new(new TextWriterStream(customWriter)) { AutoFlush = true, };
-
+      LogWriter = new(new TextWriterStream(customWriter)) { AutoFlush = true };
       Console.SetOut(LogWriter);
    }
 
-   public event PropertyChangedEventHandler? PropertyChanged;
+   public ConcurrentQueue<LogEntry> PendingLogs { get; } = new();
 
-   private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new(name));
+   public StreamWriter LogWriter { get; }
+   public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 // Helper class to adapt a TextWriter to a Stream for StreamWriter
@@ -94,17 +96,18 @@ public class TextWriterStream(TextWriter writer) : Stream
    public override bool CanSeek => false;
    public override bool CanWrite => true;
 
-   public override void Flush()
-   {
-      writer.Flush();
-   }
-
    public override long Length => throw new NotSupportedException();
    public override long Position
    {
       get => throw new NotSupportedException();
       set => throw new NotSupportedException();
    }
+
+   public override void Flush()
+   {
+      writer.Flush();
+   }
+
    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
    public override void SetLength(long value) => throw new NotSupportedException();

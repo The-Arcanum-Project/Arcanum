@@ -10,8 +10,22 @@
         <helpers:LogViewModel />
     </Window.DataContext>
 
-    <ScrollViewer Margin = "10" VerticalScrollBarVisibility = "Auto" ScrollChanged = "OnScrollChanged">
-        <TextBlock Text = "{Binding LogText}" TextWrapping = "Wrap" FontFamily = "Consolas" />
-    </ScrollViewer>
+    <styleClasses:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </styleClasses:BaseWindow.Resources>
+
+    <RichTextBox x:Name = "LogDisplay" Margin = "10" VerticalScrollBarVisibility = "Auto" IsReadOnly = "True"
+                 IsUndoEnabled = "False" FontFamily = "{StaticResource DefaultMonospacedFont}"
+                 Background = "Transparent" BorderThickness = "0">
+        <RichTextBox.Resources>
+            <Style TargetType = "{x:Type Paragraph}">
+                <Setter Property = "Margin" Value = "0" />
+            </Style>
+        </RichTextBox.Resources>
+    </RichTextBox>
 
 </styleClasses:BaseWindow>
