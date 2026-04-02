@@ -1,5 +1,9 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
 using Arcanum.UI.AppFeatures;
+
+#endregion
 
 namespace Arcanum.UI.Documentation;
 
@@ -17,6 +21,7 @@ public class DocuPage
    public FeatureScale Scale { get; set; }
    public FeatureLocation Location { get; set; }
    public FeatureStatus Status { get; set; }
+   public string SourcePath { get; set; } = string.Empty;
 
    // Content:
    public string Content { get; set; } = string.Empty;

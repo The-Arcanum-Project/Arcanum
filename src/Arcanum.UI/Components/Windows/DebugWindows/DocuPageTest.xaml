@@ -5,20 +5,37 @@
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:md = "clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
                          WindowStartupLocation = "CenterScreen"
-                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
                          Title = "DocuPageTest" Height = "800" Width = "1200">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:EnumerableToStringConverter x:Key = "EnumerableToStringConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "200" />
-            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "200" /> <!-- Navigation -->
+            <ColumnDefinition Width = "*" />   <!-- Content -->
+            <ColumnDefinition Width = "250" /> <!-- Dev Panel -->
         </Grid.ColumnDefinitions>
 
-        <!-- ListView for documentation pages -->
-        <ListView Grid.Column = "0" Margin = "5"
-                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}}"
+        <!-- Navigation -->
+        <ListView x:Name = "DocuPageListView" Grid.Column = "0" Margin = "5"
+                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}"
+                  SelectedItem = "{Binding SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
                   SelectionChanged = "DocuPageListView_SelectionChanged">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text = "{Binding Title}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
         </ListView>
 
         <!-- Content area for selected documentation page -->
@@ -26,8 +43,138 @@
                            TextOptions.TextRenderingMode = "ClearType" ScrollViewer.IsDeferredScrollingEnabled = "True">
             <FrameworkElement.CommandBindings>
                 <CommandBinding Command = "{x:Static md:Commands.Hyperlink}" Executed = "OpenHyperlink" />
-                <!-- <CommandBinding Command="{x:Static md:Commands.Image}" Executed="ClickOnImage" /> -->
             </FrameworkElement.CommandBindings>
         </md:MarkdownViewer>
+
+        <!-- Dev Panel -->
+        <Border Grid.Column = "2" BorderThickness = "1,0,0,0">
+            <ScrollViewer>
+                <StackPanel Margin = "10">
+                    <TextBlock Text = "Dev Tools" FontWeight = "Bold" Margin = "0,0,0,10"
+                               Foreground = "{StaticResource BlueAccentColorBrush}" />
+
+                    <Expander Header = "Page Metadata" IsExpanded = "True" Margin = "0,0,0,10">
+                        <StackPanel Background = "{StaticResource DefaultBackColorBrush}" Margin = "2">
+                            <Grid Margin = "5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width = "Auto" SharedSizeGroup = "LabelColumn" />
+                                    <ColumnDefinition Width = "*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.IsSharedSizeScope = "True">
+                                    <!-- ID & Title -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "ID" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Id.Value, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   FontWeight = "Bold" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Title" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+
+                                    <Separator Margin = "0,2" />
+
+                                    <!-- Classification -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Category" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Level" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Status" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+
+                                    <Separator Margin = "0,2" />
+
+                                    <!-- Layout -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Scale" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text = "Location" />
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                    </Grid>
+
+                                    <Separator Margin = "0,2" />
+
+                                    <!-- Collections (Tags/Links) -->
+                                    <TextBlock Text = "Keywords" Margin = "0,5,0,0" />
+                                    <TextBlock
+                                        Text = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow" />
+
+                                    <TextBlock Text = "Links" Margin = "0,5,0,0" />
+                                    <TextBlock
+                                        Text = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow" />
+
+                                    <Separator Margin = "0,2" />
+
+                                    <TextBlock Text = "Summary" Margin = "0,5,0,0" />
+                                    <TextBlock
+                                        Text = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                        TextWrapping = "WrapWithOverflow" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header = "Snippet Picker" IsExpanded = "False" Margin = "0,0,0,10">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllSnippetIds, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}" Margin = "0,2"
+                                                             Command = "{Binding CopySnippetCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                             CommandParameter = "{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Visual Debug" IsExpanded = "True">
+                        <StackPanel Margin = "4">
+                            <styleClasses:BaseButton Content = "Force Reload All" Click = "OnForceReload"
+                                                     Margin = "0,1" />
+                            <styleClasses:BaseButton Content = "Open in VS Code" Click = "OnOpenInEditor"
+                                                     Margin = "0,1" />
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </styleClasses:BaseWindow>

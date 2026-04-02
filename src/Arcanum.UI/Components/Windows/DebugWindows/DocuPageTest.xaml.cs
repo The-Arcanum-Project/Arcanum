@@ -10,6 +10,8 @@ using System.Windows.Threading;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Documentation;
 using Arcanum.UI.Documentation.Renderers;
+using Common;
+using CommunityToolkit.Mvvm.Input;
 using Markdig;
 using Markdig.Extensions.AutoIdentifiers;
 using Block = System.Windows.Documents.Block;
@@ -20,6 +22,12 @@ namespace Arcanum.UI.Components.Windows.DebugWindows;
 
 public partial class DocuPageTest
 {
+   public static readonly DependencyProperty SelectedPageProperty =
+      DependencyProperty.Register(nameof(SelectedPage), typeof(DocuPage), typeof(DocuPageTest), new(default(DocuPage)));
+
+   public static readonly DependencyProperty AllSnippetIdsProperty =
+      DependencyProperty.Register(nameof(AllSnippetIds), typeof(string[]), typeof(DocuPageTest), new(default(string[])));
+
    public DocuPageTest()
    {
       DocuPages = DocuPathResolver.GetAllDocuPages;
@@ -37,9 +45,57 @@ public partial class DocuPageTest
       uiPipelineBuilder.Extensions.Add(new WpfImageResourceExtension());
 
       Viewer.Pipeline = uiPipelineBuilder.Build();
+
+      DocuPathResolver.OnDocumentationReloaded += HandleDocumentationReloaded;
+      Closed += (_, _) => DocuPathResolver.OnDocumentationReloaded -= HandleDocumentationReloaded;
+
+      CopySnippetCommand = new RelayCommand<string>(id =>
+      {
+         if (string.IsNullOrEmpty(id))
+            return;
+
+         var clipboardText = $"{{{{snippet:{id}}}}}";
+         Clipboard.SetText(clipboardText);
+      });
+      AllSnippetIds = DocuPathResolver.GetAllSnippetIds;
    }
 
    public DocuPage[] DocuPages { get; }
+
+   public string[] AllSnippetIds
+   {
+      get => (string[])GetValue(AllSnippetIdsProperty);
+      set => SetValue(AllSnippetIdsProperty, value);
+   }
+
+   public DocuPage SelectedPage
+   {
+      get => (DocuPage)GetValue(SelectedPageProperty);
+      set => SetValue(SelectedPageProperty, value);
+   }
+   public ICommand CopySnippetCommand { get; set; }
+
+   private void HandleDocumentationReloaded()
+   {
+      Dispatcher.BeginInvoke(() =>
+      {
+         var selectedId = (DocuPageListView.SelectedItem as DocuPage)?.Id;
+
+         DocuPageListView.ItemsSource = null;
+         DocuPageListView.ItemsSource = DocuPathResolver.GetAllDocuPages;
+
+         AllSnippetIds = DocuPathResolver.GetAllSnippetIds;
+
+         if (selectedId == null)
+            return;
+
+         var updatedPage = DocuPathResolver.GetPage(selectedId);
+         if (updatedPage != null)
+            DisplayPage(updatedPage);
+
+         SelectedPage = updatedPage ?? SelectedPage;
+      });
+   }
 
    private void DocuPageListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
    {
@@ -58,7 +114,7 @@ public partial class DocuPageTest
 
    private void DisplayPage(DocuPage page)
    {
-      Viewer.Markdown = page.Content;
+      Viewer.Markdown = DocuPathResolver.ProcessSnippets(page.Content);
    }
 
    private void OpenHyperlink(object sender, ExecutedRoutedEventArgs e)
@@ -231,5 +287,16 @@ public partial class DocuPageTest
       }
 
       return null;
+   }
+
+   private void OnForceReload(object sender, RoutedEventArgs e)
+   {
+      DocuPathResolver.ReloadAll();
+   }
+
+   private void OnOpenInEditor(object sender, RoutedEventArgs e)
+   {
+      if (DocuPageListView.SelectedItem is DocuPage page)
+         ProcessHelper.OpenVsCodeAtLineOfFile(page.SourcePath, 0, 0);
    }
 }

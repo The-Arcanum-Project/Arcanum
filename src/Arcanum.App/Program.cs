@@ -42,7 +42,7 @@ internal static class Program
          if (args.Contains("--headless") || args.Contains("-batch"))
          {
             ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, $"CRITICAL ERROR: {e.Message}");
-            ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, e.StackTrace);
+            ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, e.StackTrace ?? string.Empty);
          }
 
          CrashHandler.Show(e);
@@ -147,7 +147,7 @@ internal static class Program
          $"/{uiAssemblyName};component/Components/Styles/Specific/CenteredTabControlStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseTreeView.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseListView.xaml",
          $"/{uiAssemblyName};component/Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
-         $"/{uiAssemblyName};component/Components/Styles/Base/MarkdownStyles.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Base/MarkdownStyles.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseExpander.xaml",
       };
 
       foreach (var path in resources)

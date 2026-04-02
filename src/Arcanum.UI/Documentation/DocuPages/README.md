@@ -76,6 +76,17 @@ Standard syntax works seamlessly with animated gifs.
 ![Cat Gif](cat.gif)
 
 ---
+ 
+## Reusable Snippets
+
+Arcanum includes a preprocessor that allows you to inject reusable blocks of text, warnings, or standard links across multiple files. This ensures consistency and makes updating common text trivial.
+
+### Inserting a Snippet
+Use the double-brace syntax with the `snippet:` prefix, followed by the ID of the snippet.
+
+* **Syntax:** `{{snippet:danger_zone}}`
+
+---
 
 ## Code formatting
 
@@ -140,11 +151,11 @@ Target Anchors
 This is a specific point in the text containing a hidden anchor. {#secret-anchor}
 If you clicked the "Custom Anchors" link at the top of the page, the viewer should have scrolled directly to this sentence.
 
-Contextual Sections
+Contextual Sections:
 
 You can restrict parts of the documentation to only show up in specific contexts (like Debug mode or Advanced mode) using section dividers.
 
-```
----section:Debug---
+```text
+---section/:Debug---
 Developer Note: This section is explicitly marked as Debug. It will only be rendered and visible if the documentation viewer is instantiated in a developer/debug context or an advanced tech-popup.
 ```
