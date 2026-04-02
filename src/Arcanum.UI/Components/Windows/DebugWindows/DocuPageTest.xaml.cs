@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Documentation;
@@ -14,6 +15,7 @@ using Common;
 using CommunityToolkit.Mvvm.Input;
 using Markdig;
 using Markdig.Extensions.AutoIdentifiers;
+using Markdig.Syntax;
 using Block = System.Windows.Documents.Block;
 
 #endregion
@@ -27,6 +29,8 @@ public partial class DocuPageTest
 
    public static readonly DependencyProperty AllSnippetIdsProperty =
       DependencyProperty.Register(nameof(AllSnippetIds), typeof(string[]), typeof(DocuPageTest), new(default(string[])));
+
+   private ScrollViewer? _internalScrollViewer;
 
    public DocuPageTest()
    {
@@ -193,26 +197,20 @@ public partial class DocuPageTest
       if (string.IsNullOrEmpty(tag) || Viewer.Markdown == null || Viewer.Document == null)
          return;
 
-      var targetText = GetTargetTextFromMarkdown(Viewer.Markdown, tag.ToLower().Trim());
+      var target = GetTargetInfoFromMarkdown(Viewer.Markdown, tag.ToLower().Trim());
 
-      if (string.IsNullOrEmpty(targetText))
+      if (string.IsNullOrEmpty(target.Text))
          return;
 
-      FindElementByText(Viewer.Document, targetText)?.BringIntoView();
+      FindElementByText(Viewer.Document, target.Text, target.IsHeading)?.BringIntoView();
    }
 
-   private static string? GetTargetTextFromMarkdown(string markdown, string slug)
+   private static (string? Text, bool IsHeading) GetTargetInfoFromMarkdown(string markdown, string slug)
    {
-      if (string.IsNullOrEmpty(markdown))
-         return null;
+      var customMatch = Regex.Match(markdown, $@"(.*)\{{#{Regex.Escape(slug)}\}}");
+      if (customMatch.Success)
+         return (customMatch.Groups[1].Value.Trim(), false);
 
-      // Custom Anchor like `{#my-anchor}`
-      var pattern = $@"(.*)\{{#{Regex.Escape(slug)}\}}";
-      var customIdMatch = Regex.Match(markdown, pattern);
-      if (customIdMatch.Success)
-         return customIdMatch.Groups[1].Value.Trim();
-
-      // Auto-generated Heading like `# Alerts Demonstration`
       var headingMatches = Regex.Matches(markdown, @"^(#{1,6})\s+(.*)$", RegexOptions.Multiline);
       foreach (Match match in headingMatches)
       {
@@ -220,22 +218,20 @@ public partial class DocuPageTest
 
          var headingSlug = headingText.ToLower().Replace(" ", "-");
          headingSlug = Regex.Replace(headingSlug, @"[^a-z0-9\-]", "");
+         headingSlug = headingSlug.Trim('-');
 
          if (headingSlug == slug)
-            return headingText;
+            return (headingText, true);
       }
 
-      return null;
+      return (null, false);
    }
 
-   private static FrameworkContentElement? FindElementByText(FlowDocument doc, string targetText)
+   private static FrameworkContentElement? FindElementByText(FlowDocument doc, string targetText, bool isHeading)
    {
-      if (string.IsNullOrEmpty(targetText))
-         return null;
-
       foreach (var block in doc.Blocks)
       {
-         var result = SearchBlockForText(block, targetText);
+         var result = SearchBlockForText(block, targetText, isHeading);
          if (result != null)
             return result;
       }
@@ -243,40 +239,45 @@ public partial class DocuPageTest
       return null;
    }
 
-   private static FrameworkContentElement? SearchBlockForText(Block block, string targetText)
+   private static FrameworkContentElement? SearchBlockForText(Block block, string targetText, bool isHeading)
    {
       var blockText = new TextRange(block.ContentStart, block.ContentEnd).Text.Trim();
 
-      // Prioritize an exact match (like a standalone heading)
-      if (blockText.Equals(targetText, StringComparison.OrdinalIgnoreCase))
-         return block;
+      var isHeadingLike = block.Tag is HeadingBlock ||
+                          block.FontWeight == FontWeights.Bold ||
+                          block.FontWeight == FontWeights.SemiBold;
 
-      // Fallback to a partial match (if it's text inside a larger paragraph)
-      if (blockText.Contains(targetText, StringComparison.OrdinalIgnoreCase))
-         return block;
+      if (isHeading)
+      {
+         if (isHeadingLike && blockText.Equals(targetText, StringComparison.OrdinalIgnoreCase))
+            return block;
+      }
+      else
+      {
+         if (blockText.Contains(targetText, StringComparison.OrdinalIgnoreCase))
+            return block;
+      }
 
       switch (block)
       {
-         // Drill down into Sections (Tabs, Alerts, Custom Containers)
          case Section section:
          {
             foreach (var subBlock in section.Blocks)
             {
-               var result = SearchBlockForText(subBlock, targetText);
+               var result = SearchBlockForText(subBlock, targetText, isHeading);
                if (result != null)
                   return result;
             }
 
             break;
          }
-         // Drill down into Lists
          case List list:
          {
             foreach (var listItem in list.ListItems)
             {
                foreach (var subBlock in listItem.Blocks)
                {
-                  var result = SearchBlockForText(subBlock, targetText);
+                  var result = SearchBlockForText(subBlock, targetText, isHeading);
                   if (result != null)
                      return result;
                }
@@ -298,5 +299,35 @@ public partial class DocuPageTest
    {
       if (DocuPageListView.SelectedItem is DocuPage page)
          ProcessHelper.OpenVsCodeAtLineOfFile(page.SourcePath, 0, 0);
+   }
+
+   private void Viewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+   {
+      if (_internalScrollViewer == null)
+         _internalScrollViewer = GetChildOfType<ScrollViewer>(Viewer);
+
+      if (_internalScrollViewer != null)
+      {
+         const double speedMultiplier = 2.5;
+         var newOffset = _internalScrollViewer.VerticalOffset - e.Delta * speedMultiplier / 3.0;
+         _internalScrollViewer.ScrollToVerticalOffset(newOffset);
+         e.Handled = true;
+      }
+   }
+
+   private static T? GetChildOfType<T>(DependencyObject? depObj) where T : DependencyObject
+   {
+      if (depObj == null)
+         return null;
+
+      for (var i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+      {
+         var child = VisualTreeHelper.GetChild(depObj, i);
+         var result = child as T ?? GetChildOfType<T>(child);
+         if (result != null)
+            return result;
+      }
+
+      return null;
    }
 }

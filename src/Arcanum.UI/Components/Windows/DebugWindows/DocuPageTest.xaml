@@ -22,8 +22,9 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "200" /> <!-- Navigation -->
-            <ColumnDefinition Width = "*" />   <!-- Content -->
-            <ColumnDefinition Width = "250" /> <!-- Dev Panel -->
+            <ColumnDefinition Width = "*" MinWidth = "250" />   <!-- Content -->
+            <ColumnDefinition Width = "6" />   <!-- Splitter -->
+            <ColumnDefinition Width = "250" MinWidth = "150" /> <!-- Dev Panel -->
         </Grid.ColumnDefinitions>
 
         <!-- Navigation -->
@@ -40,16 +41,20 @@
 
         <!-- Content area for selected documentation page -->
         <md:MarkdownViewer Grid.Column = "1" x:Name = "Viewer" Margin = "0" TextOptions.TextFormattingMode = "Display"
-                           TextOptions.TextRenderingMode = "ClearType" ScrollViewer.IsDeferredScrollingEnabled = "True">
+                           TextOptions.TextRenderingMode = "ClearType" ScrollViewer.IsDeferredScrollingEnabled = "True"
+                           PreviewMouseWheel = "Viewer_PreviewMouseWheel">
             <FrameworkElement.CommandBindings>
                 <CommandBinding Command = "{x:Static md:Commands.Hyperlink}" Executed = "OpenHyperlink" />
             </FrameworkElement.CommandBindings>
         </md:MarkdownViewer>
 
+        <GridSplitter Grid.Column = "2" Margin = "1, 2" Width = "4" HorizontalAlignment = "Stretch"
+                      VerticalAlignment = "Stretch" />
+
         <!-- Dev Panel -->
-        <Border Grid.Column = "2" BorderThickness = "1,0,0,0">
-            <ScrollViewer>
-                <StackPanel Margin = "10">
+        <Border Grid.Column = "3" BorderThickness = "1,0,0,0">
+            <ScrollViewer HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto">
+                <StackPanel Margin = "5" HorizontalAlignment = "Stretch">
                     <TextBlock Text = "Dev Tools" FontWeight = "Bold" Margin = "0,0,0,10"
                                Foreground = "{StaticResource BlueAccentColorBrush}" />
 
@@ -70,7 +75,8 @@
                                         <TextBlock Text = "ID" />
                                         <TextBlock Grid.Column = "1"
                                                    Text = "{Binding SelectedPage.Id.Value, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   FontWeight = "Bold" />
+                                                   FontWeight = "Bold"
+                                                   ToolTip = "{Binding SelectedPage.Id.Value, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -78,10 +84,10 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Title" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
 
-                                    <Separator Margin = "0,2" />
 
                                     <!-- Classification -->
                                     <Grid>
@@ -90,7 +96,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Category" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -98,7 +105,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Level" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -106,10 +114,9 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Status" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
-
-                                    <Separator Margin = "0,2" />
 
                                     <!-- Layout -->
                                     <Grid>
@@ -118,7 +125,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Scale" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -126,33 +134,35 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text = "Location" />
                                         <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                                                   Text = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                                   ToolTip = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                     </Grid>
-
-                                    <Separator Margin = "0,2" />
 
                                     <!-- Collections (Tags/Links) -->
                                     <TextBlock Text = "Keywords" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow" />
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow"
+                                        ToolTip = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
 
                                     <TextBlock Text = "Links" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow" />
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow"
+                                        ToolTip = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
 
                                     <Separator Margin = "0,2" />
 
                                     <TextBlock Text = "Summary" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                        TextWrapping = "WrapWithOverflow" />
+                                        TextWrapping = "WrapWithOverflow"
+                                        ToolTip = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
                     </Expander>
-                    <Expander Header = "Snippet Picker" IsExpanded = "False" Margin = "0,0,0,10">
+                    <Expander Header = "Snippet Picker" IsExpanded = "True" Margin = "0,0,0,10">
                         <ItemsControl Margin = "4"
                                       ItemsSource = "{Binding AllSnippetIds, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}">
                             <ItemsControl.ItemTemplate>

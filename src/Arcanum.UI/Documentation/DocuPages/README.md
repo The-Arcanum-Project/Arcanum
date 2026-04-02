@@ -99,7 +99,7 @@ public void HelloWorld()
     Console.WriteLine("Code blocks are fully supported!");
 }
 ```
-Alerts
+## Alerts
 
 Arcanum supports GitHub-style alert blocks to draw attention to crucial information.
 
