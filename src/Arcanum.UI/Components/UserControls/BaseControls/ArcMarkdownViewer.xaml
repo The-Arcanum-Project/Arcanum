@@ -1,0 +1,18 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.BaseControls.ArcMarkdownViewer"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf = "clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf" mc:Ignorable = "d" d:DesignHeight = "300"
+             d:DesignWidth = "300">
+    <Grid>
+        <wpf:MarkdownViewer x:Name = "InternalViewer" Margin = "0" TextOptions.TextFormattingMode = "Display"
+                            TextOptions.TextRenderingMode = "ClearType"
+                            ScrollViewer.IsDeferredScrollingEnabled = "True"
+                            PreviewMouseWheel = "Viewer_PreviewMouseWheel">
+            <FrameworkElement.CommandBindings>
+                <CommandBinding Command = "{x:Static wpf:Commands.Hyperlink}" Executed = "OpenHyperlink" />
+            </FrameworkElement.CommandBindings>
+        </wpf:MarkdownViewer>
+    </Grid>
+</UserControl>

@@ -6,7 +6,9 @@
                          xmlns:md = "clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
                          WindowStartupLocation = "CenterScreen"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
+                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         mc:Ignorable = "d"
                          Title = "DocuPageTest" Height = "800" Width = "1200">
 
     <Window.Resources>
@@ -40,13 +42,8 @@
         </ListView>
 
         <!-- Content area for selected documentation page -->
-        <md:MarkdownViewer Grid.Column = "1" x:Name = "Viewer" Margin = "0" TextOptions.TextFormattingMode = "Display"
-                           TextOptions.TextRenderingMode = "ClearType" ScrollViewer.IsDeferredScrollingEnabled = "True"
-                           PreviewMouseWheel = "Viewer_PreviewMouseWheel">
-            <FrameworkElement.CommandBindings>
-                <CommandBinding Command = "{x:Static md:Commands.Hyperlink}" Executed = "OpenHyperlink" />
-            </FrameworkElement.CommandBindings>
-        </md:MarkdownViewer>
+        <baseControls:ArcMarkdownViewer Grid.Column = "1" x:Name = "Viewer"
+                                        Markdown = "{Binding SelectedPage.Content, RelativeSource={RelativeSource AncestorType=Window}}" />
 
         <GridSplitter Grid.Column = "2" Margin = "1, 2" Width = "4" HorizontalAlignment = "Stretch"
                       VerticalAlignment = "Stretch" />
