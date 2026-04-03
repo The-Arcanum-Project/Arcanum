@@ -5,10 +5,11 @@
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          WindowStartupLocation = "CenterScreen"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
-                         xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands" mc:Ignorable = "d" Title = "DocuPageTest"
-                         Height = "800" Width = "1200">
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+                         xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures"
+                         xmlns:implementation = "clr-namespace:Arcanum.UI.Documentation.Implementation"
+                         mc:Ignorable = "d" Title = "DocuPageTest" Height = "1000" Width = "1500">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -25,16 +26,15 @@
                 <Setter Property = "FontSize" Value = "9" />
                 <Setter Property = "Margin" Value = "0, 1" />
             </Style>
-            <converters:EnumerableToStringConverter x:Key = "EnumerableToStringConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width = "200" /> <!-- Navigation -->
-            <ColumnDefinition Width = "*" MinWidth = "250" />   <!-- Content -->
+            <ColumnDefinition Width = "3*" MinWidth = "250" />   <!-- Content -->
             <ColumnDefinition Width = "6" />   <!-- Splitter -->
-            <ColumnDefinition Width = "250" MinWidth = "150" /> <!-- Dev Panel -->
+            <ColumnDefinition Width = "2*" MinWidth = "150" /> <!-- Dev Panel -->
         </Grid.ColumnDefinitions>
 
         <!-- Navigation -->
@@ -69,188 +69,15 @@
                         <styleClasses:BaseButton Content = "Open Folder" Click = "OnOpenFolder" Margin = "0,0,5,0" />
                     </StackPanel>
 
-                    <Expander Header = "Page Metadata" IsExpanded = "True" Margin = "0,0,0,5">
-                        <StackPanel Background = "{StaticResource DefaultBackColorBrush}" Margin = "2">
-                            <Grid Margin = "5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width = "Auto" SharedSizeGroup = "LabelColumn" />
-                                    <ColumnDefinition Width = "*" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.IsSharedSizeScope = "True">
-                                    <!-- ID & Title -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "ID" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Id.Value, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   FontWeight = "Bold"
-                                                   ToolTip = "{Binding SelectedPage.Id.Value, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Title" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-
-
-                                    <!-- Classification -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Category" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Category, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Level" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Level, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Status" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Status, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-
-                                    <!-- Layout -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Scale" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Scale, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition SharedSizeGroup = "LabelColumn" /><ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text = "Location" />
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                                   ToolTip = "{Binding SelectedPage.Location, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-                                    </Grid>
-
-                                    <!-- Collections (Tags/Links) -->
-                                    <TextBlock Text = "Keywords" Margin = "0,5,0,0" />
-                                    <TextBlock
-                                        Text = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
-                                        ToolTip = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
-
-                                    <TextBlock Text = "Links" Margin = "0,5,0,0" />
-                                    <TextBlock
-                                        Text = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
-                                        ToolTip = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
-
-                                    <Separator Margin = "0,2" />
-
-                                    <TextBlock Text = "Summary" Margin = "0,5,0,0" />
-                                    <TextBlock
-                                        Text = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                        TextWrapping = "NoWrap"
-                                        ToolTip = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-
-                                    <Separator Margin = "0,2" />
-                                    <!-- Icon Path & Preview -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width = "Auto" />
-                                            <ColumnDefinition Width = "*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- The Icon Presenter -->
-                                        <ContentControl Width = "16" Height = "16" VerticalAlignment = "Center">
-                                            <ContentControl.Style>
-                                                <Style TargetType = "ContentControl">
-                                                    <Setter Property = "ContentTemplate">
-                                                        <Setter.Value>
-                                                            <DataTemplate>
-                                                                <Path
-                                                                    Data = "{Binding SelectedPage.GetIconGeometry, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                    Stroke = "{StaticResource BlueAccentColorBrush}"
-                                                                    StrokeThickness = "1.5" StrokeLineJoin = "Round"
-                                                                    StrokeStartLineCap = "Round"
-                                                                    StrokeEndLineCap = "Round" Stretch = "Uniform" />
-                                                            </DataTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-
-                                                    <Style.Triggers>
-                                                        <!-- Display as PNG (Bitmap) -->
-                                                        <DataTrigger
-                                                            Binding = "{Binding SelectedPage.IconIsPng, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                            Value = "True">
-                                                            <Setter Property = "ContentTemplate">
-                                                                <Setter.Value>
-                                                                    <DataTemplate>
-                                                                        <Image
-                                                                            Source = "{Binding SelectedPage.GetIconUri, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                            Stretch = "Uniform" />
-                                                                    </DataTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </DataTrigger>
-
-                                                        <!-- Handle Empty/Null -->
-                                                        <DataTrigger
-                                                            Binding = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                            Value = "{x:Null}">
-                                                            <Setter Property = "Visibility" Value = "Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </ContentControl.Style>
-                                        </ContentControl>
-
-                                        <!-- The Text Path -->
-                                        <TextBlock Grid.Column = "1"
-                                                   Text = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                   ToolTip = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                   VerticalAlignment = "Center" HorizontalAlignment = "Left"
-                                                   Margin = "0,0,5,0" />
-
-                                    </Grid>
-
-                                    <!-- Assiciated Scopes (string[]) -->
-                                    <TextBlock Text = "Scopes" Margin = "0,5,0,0" />
-                                    <TextBlock
-                                        Text = "{Binding SelectedPage.AssociatedScopes, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
-                                        ToolTip = "{Binding SelectedPage.AssociatedScopes, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
-
-                                    <Separator Margin = "0,2" />
-
-                                    <!-- Version String -->
-                                    <TextBlock Text = "Introduced" Margin = "0, 5, 0, 0" />
-                                    <TextBlock
-                                        Text = "{Binding SelectedPage.IntroducedIn, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
-                                        ToolTip = "{Binding SelectedPage.IntroducedIn, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
-
-                                </StackPanel>
-                            </Grid>
+                    <Expander Header = "Edit Metadata" IsExpanded = "True">
+                        <StackPanel Orientation = "Vertical">
+                            <implementation:FeatureDocEditorView x:Name = "EditorControl"
+                                                                 SelectedFeature = "{Binding SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                            <styleClasses:BaseButton Content = "Write to File" Click = "OnSaveDoc" Margin = "10, 4" />
                         </StackPanel>
                     </Expander>
+
+
                     <Expander Header = "Snippet Picker" IsExpanded = "True" Margin = "0,0,0,5">
                         <ItemsControl Margin = "4"
                                       ItemsSource = "{Binding AllSnippetIds, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}">
@@ -271,6 +98,19 @@
                             <styleClasses:BaseButton Content = "Open in VS Code" Click = "OnOpenInEditor"
                                                      Margin = "0,1" />
                         </StackPanel>
+                    </Expander>
+
+                    <Expander Header = "All FeatureIds" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding Source={x:Static appFeatures:FeatureIds.All}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "CopyFeatureId_OnClick" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </Expander>
 
                     <Expander Header = "Available Scopes" IsExpanded = "False" Margin = "0,0,0,5">

@@ -12,6 +12,10 @@ namespace Arcanum.UI.Documentation.Implementation;
 
 public class FeatureDoc
 {
+   private const string BASE_DOCU_ICON_PATH = "pack://application:,,,/Arcanum_UI;component/Documentation/DocuPages/DocuPages/Icons/";
+   private const string DEFAULT_ICON_GEOMETRY = "M10,0 L20,10 L10,20 L0,10 Z"; // Default diamond shape
+
+   private readonly Geometry _defaultIconGeometry = Geometry.Parse(DEFAULT_ICON_GEOMETRY);
    // ----- YAML Metadata ----- \\
 
    /// <summary>
@@ -78,6 +82,21 @@ public class FeatureDoc
 
    // Content:
    public string Content { get; set; } = string.Empty;
+   public string GetIconUri => string.IsNullOrEmpty(IconPath)
+                                  ? "pack://application:,,,/Resources/Icons/default_feature_icon.png"
+                                  : $"{BASE_DOCU_ICON_PATH}{IconPath}";
+   public Geometry GetIconGeometry
+   {
+      get
+      {
+         if (string.IsNullOrEmpty(IconPath))
+            return _defaultIconGeometry;
+
+         // Get the geometry from $"/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" by name
+         return Application.Current.TryFindResource(IconPath) as Geometry ?? _defaultIconGeometry;
+      }
+   }
+   public bool IconIsPng => IconPath?.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ?? false;
 
    // Data Verifying
    public bool IsAllContentFilled(out string errorMessage)
@@ -100,24 +119,62 @@ public class FeatureDoc
    }
 
    public DocuSection? GetSection(FeatureSection section) => Sections.FirstOrDefault(s => s.Section == section);
-   private const string BASE_DOCU_ICON_PATH = "pack://application:,,,/Arcanum_UI;component/Documentation/DocuPages/DocuPages/Icons/";
-   private const string DEFAULT_ICON_GEOMETRY = "M10,0 L20,10 L10,20 L0,10 Z"; // Default diamond shape
-   private readonly Geometry _defaultIconGeometry = Geometry.Parse(DEFAULT_ICON_GEOMETRY);
-   public string GetIconUri => string.IsNullOrEmpty(IconPath)
-                                  ? "pack://application:,,,/Resources/Icons/default_feature_icon.png"
-                                  : $"{BASE_DOCU_ICON_PATH}{IconPath}";
-   public Geometry GetIconGeometry
-   {
-      get
-      {
-         if (string.IsNullOrEmpty(IconPath))
-            return _defaultIconGeometry;
-
-         // Get the geometry from $"/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" by name
-         return Application.Current.TryFindResource(IconPath) as Geometry ?? _defaultIconGeometry;
-      }
-   }
-   public bool IconIsPng => IconPath?.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ?? false;
 
    public override string ToString() => Id.Value;
+
+   public void WriteTo(StringBuilder sb)
+   {
+      sb.AppendLine("---");
+
+      // ID and Title
+      sb.AppendLine($"id: \"{Id.Value}\"");
+      sb.AppendLine($"title: \"{Title.Replace("\"", "\\\"")}\"");
+      sb.AppendLine($"summary: \"{Summary.Replace("\"", "\\\"")}\"");
+
+      // Collections (Arrays)
+      WriteYamlArray(sb, "links", Links);
+      WriteYamlArray(sb, "searchKeywords", SearchKeywords);
+
+      // Enums
+      sb.AppendLine($"category: \"{Category}\"");
+      sb.AppendLine($"level: \"{Level}\"");
+      sb.AppendLine($"scale: \"{Scale}\"");
+      sb.AppendLine($"location: \"{Location}\"");
+      sb.AppendLine($"status: \"{Status}\"");
+
+      // Optional Icon
+      if (!string.IsNullOrEmpty(IconPath))
+         sb.AppendLine($"iconPath: \"{IconPath}\"");
+
+      // Associated Scopes
+      WriteYamlArray(sb, "associatedScopes", AssociatedScopes);
+
+      // Version
+      sb.AppendLine($"introducedIn: \"{IntroducedIn}\"");
+
+      sb.AppendLine("---");
+      sb.AppendLine();
+
+      // The Markdown Body
+      sb.Append(Content);
+   }
+
+   private static void WriteYamlArray(StringBuilder sb, string key, string[]? items)
+   {
+      if (items == null || items.Length == 0)
+      {
+         sb.AppendLine($"{key}: []");
+         return;
+      }
+
+      sb.Append($"{key}: [");
+      for (var i = 0; i < items.Length; i++)
+      {
+         sb.Append($"\"{items[i].Replace("\"", "\\\"")}\"");
+         if (i < items.Length - 1)
+            sb.Append(", ");
+      }
+
+      sb.AppendLine("]");
+   }
 }

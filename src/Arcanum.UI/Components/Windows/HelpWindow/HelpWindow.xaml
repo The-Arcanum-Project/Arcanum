@@ -36,6 +36,10 @@
                 <views:TutorialView />
             </DataTemplate>
 
+            <DataTemplate DataType = "{x:Type viewModels:MainDocumentationViewModel}">
+                <views:MainDocumentationView />
+            </DataTemplate>
+
             <!-- Sidebar Item Style -->
             <Style x:Key = "NavButtonStyle" TargetType = "ListBoxItem">
                 <Setter Property = "Template">

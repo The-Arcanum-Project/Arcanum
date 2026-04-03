@@ -1,0 +1,148 @@
+﻿<UserControl x:Class = "Arcanum.UI.Documentation.Implementation.FeatureDocEditorView"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures"
+             xmlns:sys = "clr-namespace:System;assembly=System.Runtime"
+             xmlns:implementation = "clr-namespace:Arcanum.UI.Documentation.Implementation"
+             xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
+             d:DesignHeight = "600" d:DesignWidth = "300"
+             d:DataContext = "{d:DesignInstance implementation:FeatureDocEditorViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <ObjectDataProvider x:Key = "StatusEnum" MethodName = "GetValues" ObjectType = "{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName = "appFeatures:FeatureStatus" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider x:Key = "CategoryEnum" MethodName = "GetValues" ObjectType = "{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName = "appFeatures:FeatureCategory" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider x:Key = "LevelEnum" MethodName = "GetValues" ObjectType = "{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName = "appFeatures:FeatureLevel" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider x:Key = "LocationEnum" MethodName = "GetValues" ObjectType = "{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName = "appFeatures:FeatureLocation" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <Style TargetType = "TextBlock" x:Key = "LabelStyle">
+                <Setter Property = "VerticalAlignment" Value = "Center" />
+                <Setter Property = "Margin" Value = "0,0,10,0" />
+                <Setter Property = "FontWeight" Value = "SemiBold" />
+                <Setter Property = "Foreground" Value = "{StaticResource LightContrastForeColorBrush}" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin = "10" Grid.IsSharedSizeScope = "True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "Auto" SharedSizeGroup = "LabelCol" />
+            <ColumnDefinition Width = "*" />
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style TargetType = "styleClasses:CorneredTextBox"
+                   BasedOn = "{StaticResource {x:Type styleClasses:CorneredTextBox}}">
+                <Setter Property = "Margin" Value = "0,2" />
+                <Setter Property = "Padding" Value = "4,2" />
+            </Style>
+            <Style TargetType = "ComboBox" BasedOn = "{StaticResource {x:Type ComboBox}}">
+                <Setter Property = "Margin" Value = "0,2" />
+            </Style>
+        </Grid.Resources>
+
+        <StackPanel Grid.Column = "0" Grid.ColumnSpan = "2">
+            <!-- Basic Info -->
+            <HeaderedContentControl Header = "Identification" Margin = "0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup = "LabelCol" /><ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text = "Title" Style = "{StaticResource LabelStyle}" Grid.Row = "0" />
+                    <styleClasses:CorneredTextBox Text = "{Binding Doc.Title, UpdateSourceTrigger=PropertyChanged}"
+                                                  Grid.Row = "0" Grid.Column = "1" />
+
+                    <TextBlock Grid.Column = "0" Text = "Summary" Style = "{StaticResource LabelStyle}" Grid.Row = "1" />
+                    <styleClasses:CorneredTextBox Text = "{Binding Doc.Summary, UpdateSourceTrigger=PropertyChanged}"
+                                                  Grid.Row = "1" Grid.Column = "1" TextWrapping = "Wrap"
+                                                  AcceptsReturn = "True" Height = "50" />
+
+                    <TextBlock Grid.Column = "0" Text = "Icon Path" Style = "{StaticResource LabelStyle}"
+                               Grid.Row = "2" />
+                    <styleClasses:CorneredTextBox Text = "{Binding Doc.IconPath, UpdateSourceTrigger=PropertyChanged}"
+                                                  Grid.Row = "2" Grid.Column = "1" />
+                </Grid>
+            </HeaderedContentControl>
+
+            <!-- Enums Section -->
+            <HeaderedContentControl Header = "Classification" Margin = "0,0,0,10">
+                <UniformGrid Columns = "2">
+                    <StackPanel Margin = "5">
+                        <TextBlock Text = "Status" Style = "{StaticResource LabelStyle}" />
+                        <ComboBox ItemsSource = "{Binding Source={StaticResource StatusEnum}}"
+                                  SelectedItem = "{Binding Doc.Status}" />
+
+                        <TextBlock Text = "Category" Style = "{StaticResource LabelStyle}" Margin = "0,5,0,0" />
+                        <ComboBox ItemsSource = "{Binding Source={StaticResource CategoryEnum}}"
+                                  SelectedItem = "{Binding Doc.Category}" />
+                    </StackPanel>
+                    <StackPanel Margin = "5">
+                        <TextBlock Text = "Level" Style = "{StaticResource LabelStyle}" />
+                        <ComboBox ItemsSource = "{Binding Source={StaticResource LevelEnum}}"
+                                  SelectedItem = "{Binding Doc.Level}" />
+
+                        <TextBlock Text = "Location" Style = "{StaticResource LabelStyle}" Margin = "0,5,0,0" />
+                        <ComboBox ItemsSource = "{Binding Source={StaticResource LocationEnum}}"
+                                  SelectedItem = "{Binding Doc.Location}" />
+                    </StackPanel>
+                </UniformGrid>
+            </HeaderedContentControl>
+
+            <!-- Multi-Value Collections -->
+            <HeaderedContentControl Header = "Tags &amp; References">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup = "LabelCol" /><ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text = "Keywords" ToolTip = "Comma separated" Style = "{StaticResource LabelStyle}"
+                               Grid.Row = "0" />
+                    <styleClasses:CorneredTextBox Text = "{Binding KeywordsBuffer}" Grid.Row = "0" Grid.Column = "1" />
+
+                    <TextBlock Grid.Column = "0" Text = "Links" ToolTip = "Comma separated IDs"
+                               Style = "{StaticResource LabelStyle}" Grid.Row = "1" />
+                    <styleClasses:CorneredTextBox Text = "{Binding LinksBuffer}" Grid.Row = "1" Grid.Column = "1" />
+
+                    <TextBlock Grid.Column = "0" Text = "Scopes" ToolTip = "Comma separated Command Scopes"
+                               Style = "{StaticResource LabelStyle}" Grid.Row = "2" />
+                    <styleClasses:CorneredTextBox Grid.Row = "2" Grid.Column = "1"
+                                                  Text = "{Binding ScopesBuffer, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </HeaderedContentControl>
+
+            <!-- Full Content Editor -->
+            <TextBlock Text = "Markdown Content" Style = "{StaticResource LabelStyle}" Margin = "0,10,0,2" />
+            <styleClasses:CorneredTextBox Text = "{Binding Doc.Content, UpdateSourceTrigger=PropertyChanged}"
+                                          AcceptsReturn = "True" AcceptsTab = "True" FontFamily = "Consolas"
+                                          MinHeight = "200" VerticalContentAlignment = "Top" TextWrapping = "Wrap" />
+        </StackPanel>
+    </Grid>
+</UserControl>

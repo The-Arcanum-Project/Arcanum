@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -111,7 +112,8 @@ public partial class DocuPageTest
          return;
       }
 
-      DisplayPage(DocuPages[index]);
+      // DisplayPage(DocuPages[index]);
+      SelectedPage = DocuPages[index];
    }
 
    private void DisplayPage(FeatureDoc page)
@@ -228,5 +230,27 @@ public partial class DocuPageTest
       ProcessHelper.OpenVsCodeAtLineOfFile(path, 0, 0);
 
       DocuPages = DocuRegistry.GetAllDocuPages;
+   }
+
+   private void CopyFeatureId_OnClick(object sender, RoutedEventArgs e)
+   {
+      if (sender is not Button { Content: FeatureId id })
+         return;
+
+      Clipboard.SetText(id.ToString());
+   }
+
+   private void OnSaveDoc(object sender, RoutedEventArgs e)
+   {
+      if (EditorControl.DataContext is FeatureDocEditorViewModel { Doc: not null } vm)
+      {
+         vm.Save();
+         Viewer.Markdown = vm.Doc.Content;
+
+         var sb = new StringBuilder();
+         vm.Doc.WriteTo(sb);
+
+         IO.WriteAllTextUtf8(vm.Doc.SourcePath, sb.ToString());
+      }
    }
 }

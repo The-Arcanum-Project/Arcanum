@@ -1,9 +1,19 @@
-﻿using static Arcanum.UI.AppFeatures.FeatureId;
+﻿#region
+
+using static Arcanum.UI.AppFeatures.FeatureId;
+
+#endregion
 
 namespace Arcanum.UI.AppFeatures;
 
 public static class FeatureIds
 {
+   public static FeatureId[] All =>
+   [
+      Empty, Editor.MainWindow, Editor.Queastor, Editor.Map, Editor.SpecializedEditors.InstitutionEditor, Editor.SpecializedEditors.PoliticalEditor,
+      Documentation.Main,
+   ];
+   
    public static readonly FeatureId Empty = Create("Empty");
 
    public static class Editor
@@ -22,5 +32,12 @@ public static class FeatureIds
          public static readonly FeatureId InstitutionEditor = Create(SPECIALIZED_PATH);
          public static readonly FeatureId PoliticalEditor = Create(SPECIALIZED_PATH);
       }
+   }
+
+   public static class Documentation
+   {
+      private const string PATH = nameof(Documentation);
+
+      public static readonly FeatureId Main = Create(PATH);
    }
 }
