@@ -4,8 +4,9 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
-using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Documentation.Implementation;
+using CommunityToolkit.Mvvm.Input;
+using RelayCommand = Arcanum.UI.Components.Windows.DebugWindows.RelayCommand;
 
 #endregion
 
@@ -13,17 +14,26 @@ namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
 public class FeatureExplorerViewModel : HelpPageViewModelBase
 {
+   private readonly Dictionary<string, Type> _filterTypes = new()
+   {
+      { "Status", typeof(FeatureStatus) },
+      { "Category", typeof(FeatureCategory) },
+      { "Level", typeof(FeatureLevel) },
+      { "Scale", typeof(FeatureScale) },
+      { "Location", typeof(FeatureLocation) },
+   };
+
    public FeatureExplorerViewModel()
    {
       SetFeatures();
       SpotlightCommand = new RelayCommand(_ => ExecuteSpotlight());
+      CompleteSearchCommand = new RelayCommand<string>(CompleteSearch);
       UpdateLocationGrid(FeatureLocation.Center, FeatureScale.Standard); // Default
    }
 
    public override string Title => "Feature Explorer";
 
    public ObservableCollection<FeatureItem> Features { get; } = [];
-   public event Action<FeatureItem?>? RequestSelectionUpdate;
 
    public string SearchQuery
    {
@@ -48,6 +58,16 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
+   public int SuggestionIndex
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = -1;
+
    public FeatureDoc? SelectedFeature => SelectedItem?.Documentation;
 
    public List<IAppCommand> AssociatedCommands
@@ -69,8 +89,21 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
          OnPropertyChanged();
       }
    } = [];
+   public bool IsSuggesting
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   }
+
+   public ObservableCollection<string> SearchSuggestions { get; } = [];
 
    public ICommand SpotlightCommand { get; }
+   public ICommand CompleteSearchCommand { get; }
+   public event Action<FeatureItem?>? RequestSelectionUpdate;
 
    private void SetFeatures()
    {
@@ -194,15 +227,122 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
    private void ApplyFilter()
    {
       var query = SearchQuery.Trim();
+      UpdateSuggestions(query);
+
+      if (string.IsNullOrEmpty(query))
+      {
+         foreach (var f in Features)
+            f.IsVisible = true;
+         return;
+      }
+
+      var parts = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+      var tags = parts.Where(p => p.StartsWith("@")).ToArray();
+      var textTerms = parts.Where(p => !p.StartsWith("@")).ToArray();
+
       foreach (var item in Features)
       {
-         var matches = item.Documentation.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                       item.Documentation.Summary.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                       item.Documentation.SearchKeywords.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                       item.Documentation.Id.Value.Contains(query, StringComparison.OrdinalIgnoreCase);
+         var matchesTags = true;
 
-         item.IsVisible = matches;
+         foreach (var tag in tags)
+         {
+            // Expected format: @Type:Value
+            var kvp = tag[1..].Split(':');
+            if (kvp.Length < 2)
+               continue; // Ignore incomplete tags for filtering
+
+            var type = kvp[0];
+            var val = kvp[1];
+
+            var tagMatch = type.ToLower() switch
+            {
+               "status" => item.Documentation.Status.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "category" => item.Documentation.Category.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "level" => item.Documentation.Level.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "scale" => item.Documentation.Scale.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "location" => item.Documentation.Location.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               _ => false,
+            };
+
+            if (!tagMatch)
+            {
+               matchesTags = false;
+               break;
+            }
+         }
+
+         var matchesText = textTerms.Length == 0 ||
+                           textTerms.Any(t =>
+                                            item.Documentation.Title.Contains(t, StringComparison.OrdinalIgnoreCase) ||
+                                            item.Documentation.Summary.Contains(t, StringComparison.OrdinalIgnoreCase));
+
+         item.IsVisible = matchesTags && matchesText;
       }
+   }
+
+   private void UpdateSuggestions(string query)
+   {
+      var currentToken = query.Split(' ').LastOrDefault(s => s.StartsWith("@"));
+      if (currentToken == null)
+      {
+         IsSuggesting = false;
+         return;
+      }
+
+      SearchSuggestions.Clear();
+
+      if (!currentToken.Contains(":"))
+      {
+         // Suggesting the Type
+         var inputType = currentToken[1..].ToLower();
+         foreach (var type in _filterTypes.Keys)
+            if (type.ToLower().Contains(inputType))
+               SearchSuggestions.Add($"@{type}:");
+      }
+      else
+      {
+         // Suggesting the Value
+         var parts = currentToken[1..].Split(':');
+         var typeKey = _filterTypes.Keys.FirstOrDefault(k => k.Equals(parts[0], StringComparison.OrdinalIgnoreCase));
+
+         if (typeKey != null)
+         {
+            var inputValue = parts[1].ToLower();
+            var enumValues = Enum.GetNames(_filterTypes[typeKey]);
+            foreach (var val in enumValues)
+               if (val.ToLower().Contains(inputValue))
+                  SearchSuggestions.Add($"@{typeKey}:{val}");
+         }
+      }
+
+      if (SearchSuggestions.Count > 0)
+      {
+         if (SuggestionIndex == -1)
+            SuggestionIndex = 0;
+      }
+      else
+         SuggestionIndex = -1;
+
+      IsSuggesting = SearchSuggestions.Count > 0;
+   }
+
+   public void CompleteSearch(string suggestion)
+   {
+      if (string.IsNullOrEmpty(suggestion))
+         return;
+
+      var parts = SearchQuery.Split(' ').ToList();
+      if (parts.Count > 0)
+         parts.RemoveAt(parts.Count - 1); // Remove the partial token (e.g., "@Stat")
+
+      parts.Add(suggestion);
+
+      // Add a space if we finished a full tag, keep it tight if we just added the colon
+      var separator = suggestion.EndsWith(":") ? "" : " ";
+      SearchQuery = string.Join(" ", parts) + separator;
+
+      IsSuggesting = suggestion.EndsWith(":");
+      SuggestionIndex = -1;
    }
 
    private void ExecuteSpotlight()

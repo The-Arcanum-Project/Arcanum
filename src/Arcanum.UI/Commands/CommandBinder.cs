@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -7,6 +9,8 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Arcanum.UI.Commands.KeyMap;
 using Arcanum.UI.Components.Converters;
+
+#endregion
 
 namespace Arcanum.UI.Commands;
 
@@ -82,6 +86,22 @@ public static class CommandBinder
    {
       if (sender is not FrameworkElement element)
          return;
+
+      var focused = Keyboard.FocusedElement;
+      if (focused is TextBoxBase
+                  or PasswordBox
+                  or ComboBox { IsEditable: true }
+                  or RichTextBox)
+      {
+         var modifiers = Keyboard.Modifiers;
+         var isCommand = (modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) != 0 ||
+                         e.Key is >= Key.F1 and <= Key.F24;
+
+         if (!isCommand)
+            // Yield to the TextBox. 
+            // If the TextBox doesn't handle it, it will bubble up
+            return;
+      }
 
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
 

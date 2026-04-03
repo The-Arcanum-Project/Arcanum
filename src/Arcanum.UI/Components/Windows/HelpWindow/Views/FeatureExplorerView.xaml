@@ -8,7 +8,8 @@
              xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures"
              xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
              xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters" mc:Ignorable = "d"
-             d:DataContext = "{d:DesignInstance viewModels:FeatureExplorerViewModel}">
+             d:DataContext = "{d:DesignInstance viewModels:FeatureExplorerViewModel}"
+             PreviewKeyUp = "FeatureExplorerView_KeyUp">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -88,15 +89,50 @@
 
             <Path Grid.Row = "0" Grid.Column = "0" Data = "{StaticResource Icon.Search}" Height = "15" Width = "15"
                   Style = "{StaticResource BaseIconPathStyle}" Margin = "0, 4, 4, 4" />
-            <styleClasses:CorneredTextBox Grid.Row = "0" Grid.Column = "1"
-                                          Background = "{StaticResource LightBackColorBrush}" BorderThickness = "1"
-                                          VerticalContentAlignment = "Center" Height = "20"
-                                          BorderBrush = "{StaticResource LightBackColorBrush}"
-                                          HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
-                                          Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Grid.Row = "0" Grid.Column = "1" Text = "Filter..." HorizontalAlignment = "Stretch"
-                       IsHitTestVisible = "False" Margin = "5, 0, 0, 0" VerticalAlignment = "Center"
-                       Visibility = "{Binding SearchQuery, Converter={StaticResource InvertedStringToVisibilityConverter} }" />
+
+            <Grid Grid.Row = "0" Grid.Column = "1">
+                <styleClasses:CorneredTextBox x:Name = "SearchBox" Background = "{StaticResource LightBackColorBrush}"
+                                              BorderThickness = "1" VerticalContentAlignment = "Center" Height = "20"
+                                              BorderBrush = "{StaticResource LightBackColorBrush}"
+                                              PreviewKeyDown = "SearchBox_PreviewKeyDown" AcceptsTab = "True"
+                                              HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
+                                              Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Text = "Filter... (@ for tags)" HorizontalAlignment = "Stretch" IsHitTestVisible = "False"
+                           Margin = "5, 0, 0, 0" VerticalAlignment = "Center"
+                           Visibility = "{Binding SearchQuery, Converter={StaticResource InvertedStringToVisibilityConverter} }" />
+
+                <Popup IsOpen = "{Binding IsSuggesting}" PlacementTarget = "{Binding ElementName=SearchBox}"
+                       Focusable = "False">
+                    <Border Background = "{StaticResource DarkBackColorBrush}"
+                            BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1"
+                            MaxHeight = "200" Width = "180">
+                        <ListBox x:Name = "SuggestionList" ItemsSource = "{Binding SearchSuggestions}"
+                                 SelectedIndex = "{Binding SuggestionIndex}" Focusable = "False"
+                                 SelectionMode = "Single">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType = "ListBoxItem">
+                                    <Setter Property = "Background" Value = "Transparent" />
+                                    <Style.Triggers>
+                                        <!-- Visual feedback for arrow key navigation -->
+                                        <Trigger Property = "IsSelected" Value = "True">
+                                            <Setter Property = "Background"
+                                                    Value = "{StaticResource LightBackColorBrush}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text = "{Binding}" Padding = "5" Cursor = "Hand"
+                                               MouseLeftButtonUp = "Suggestion_MouseClick" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                </Popup>
+            </Grid>
 
             <!-- Splitter line -->
             <Border Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2" Height = "1"
